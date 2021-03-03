@@ -63,12 +63,6 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"اجازت دیں"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"‏USB ڈیبگ کرنے کی اجازت نہیں ہے"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏اس آلہ پر فی الحال سائن ان کردہ صارف USB ڈیبگنگ آن نہیں کر سکتا۔ اس خصوصیت کا استعمال کرنے کیلئے، ابتدائی صارف پر سوئچ کریں۔"</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"اس نیٹ ورک پر وائرلیس ڈیبگنگ کرنے کی اجازت دیں؟"</string>
-    <string name="wifi_debugging_message" msgid="5461204211731802995">"‏نیٹ ورک کا نام (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\n‏ Wi-Fi کا پتہ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"اس نیٹ ورک پر ہمیشہ اجازت دیں"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"اجازت دیں"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"وائرلیس ڈیبگنگ کرنے کی اجازت نہیں ہے"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"اس آلہ پر فی الحال سائن ان کردہ صارف وائرلیس ڈیبگنگ آن نہیں کر سکتا۔ اس خصوصیت کا استعمال کرنے کے ليے، ابتدائی صارف پر سوئچ کریں۔"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏USB پورٹ غیر فعال ہو گیا"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"‏آپ کے آلے کی سیال یا دھول سے حفاظت کرنے کے لیے، USB پورٹ کو غیر فعال کر دیا گیا ہے اور یہ کسی لوازم کا پتہ نہیں لگا پائے گا۔\n\nUSB پورٹ کا دوبارہ استعمال کرنا ٹھیک ہونے پر آپ کو مطلع کیا جائے گا۔"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"‏چارجرز اور لوازمات کا پتا لگانے کے لیے USB پورٹ فعال ہے"</string>
@@ -86,10 +80,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"دوبارہ اسکرین شاٹ لینے کی کوشش کریں"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"اسٹوریج کی محدود جگہ کی وجہ سے اسکرین شاٹ کو محفوظ نہیں کیا جا سکتا"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ایپ یا آپ کی تنظیم کی جانب سے اسکرین شاٹس لینے کی اجازت نہیں ہے"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"اسکرین شاٹ برخاست کریں"</string>
-    <string name="screenshot_preview_description" msgid="7606510140714080474">"اسکرین شاٹ کا پیش منظر"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"سکرین ریکارڈر"</string>
-    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"سکرین ریکارڈنگ پروسیس ہورہی ہے"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"اسکرین ریکارڈر"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اسکرین ریکارڈ سیشن کیلئے جاری اطلاع"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ریکارڈنگ شروع کریں؟"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"‏ریکارڈ کرنے کے دوران، Android سسٹم آپ کی اسکرین پر نظر آنے والی یا آپ کے آلہ پر چلنے والی کسی بھی حساس معلومات کو کیپچر کر سکتا ہے۔ اس میں پاس ورڈز، ادائیگی کی معلومات، تصاویر، پیغامات اور آڈیو شامل ہیں۔"</string>
@@ -100,7 +91,7 @@
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"آلہ کا آڈیو اور مائیکروفون"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"شروع کریں"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"ریکارڈنگ اسکرین"</string>
-    <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"اسکرین اور آڈیو کی ریکارڈنگ ہو رہی ہے"</string>
+    <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"ریکارڈنگ اسکرین اور آڈیو"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"اسکرین پر کئے گئے ٹچز دکھائیں"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"روکنے کے لیے تھپتھپائیں"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"روکیں"</string>
@@ -108,8 +99,10 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"دوبارہ شروع کریں"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"منسوخ کریں"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"اشتراک کریں"</string>
+    <string name="screenrecord_delete_label" msgid="1376347010553987058">"حذف کریں"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"اسکرین ریکارڈنگ منسوخ ہو گئی"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"اسکرین ریکارڈنگ محفوظ ہو گئی، دیکھنے کیلئے تھپتھپائیں"</string>
+    <string name="screenrecord_delete_description" msgid="1604522770162810570">"اسکرین ریکارڈنگ حذف ہو گئی"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"اسکرین ریکارڈنگ کو حذف کرنے میں خرابی"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"اجازتیں حاصل کرنے میں ناکامی"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"اسکرین ریکارڈنگ شروع کرنے میں خرابی"</string>
@@ -153,21 +146,6 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"غلط پیٹرن"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"غلط پاس ورڈ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"کافی زیادہ غلط کوششیں کی گئیں۔\n <xliff:g id="NUMBER">%d</xliff:g> سیکنڈ بعد دوبارہ کوشش کریں۔"</string>
-    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"دوبارہ کوشش کریں۔ کوشش <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> از <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>۔"</string>
-    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"آپ کا ڈیٹا حذف کر دیا جائے گا"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"اگر آپ نے اگلی کوشش میں غلط پیٹرن درج کیا تو اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"‏اگر آپ نے اگلی کوشش میں غلط PIN درج کیا تو اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"اگر آپ نے اگلی کوشش میں غلط پاس ورڈ درج کیا تو اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"اگر آپ نے اگلی کوشش میں غلط پیٹرن درج کیا تو اس صارف کو حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"‏اگر آپ نے اگلی کوشش میں غلط PIN درج کیا تو اس صارف کو حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"اگر آپ نے اگلی کوشش میں غلط پاس ورڈ درج کیا تو اس صارف کو حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"اگر آپ نے اگلی کوشش میں غلط پیٹرن درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"‏اگر آپ نے اگلی کوشش میں غلط PIN درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"اگر آپ نے اگلی کوشش میں غلط پاس ورڈ درج کیا تو آپ کی دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"بہت زیادہ غلط کوششیں۔ اس آلے کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"بہت زیادہ غلط کوششیں۔ اس صارف کو حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"بہت زیادہ غلط کوششیں۔ یہ دفتری پروفائل اور اس کا ڈیٹا حذف کر دیا جائے گا۔"</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"برخاست کریں"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"فنگر پرنٹ سینسر پر ٹچ کریں"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"فنگر پرنٹ آئیکن"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"آپ کے لیے تلاش کیا جا رہا ہے…"</string>
@@ -239,7 +217,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"بیٹری کی تفصیلات کھولیں"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"بیٹری <xliff:g id="NUMBER">%d</xliff:g> فیصد۔"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"آپ کے استعمال کی بنیاد پر بیٹری <xliff:g id="PERCENTAGE">%1$s</xliff:g> فیصد، تقریباً <xliff:g id="TIME">%2$s</xliff:g> باقی ہے"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"بیٹری چارج ہو رہی ہے، اس وقت <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> فیصد ہے۔"</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"بیٹری چارج ہو رہی ہے، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"سسٹم کی ترتیبات۔"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"اطلاعات۔"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"تمام اطلاعات دیکھیں"</string>
@@ -254,7 +232,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"اطلاع مسترد ہوگئی۔"</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"بلبلہ برخاست کر دیا گیا۔"</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"اطلاعاتی شیڈ۔"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"فوری ترتیبات۔"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"مقفل اسکرین۔"</string>
@@ -430,7 +407,6 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"اسکرین ریکارڈر کریں"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"آغاز"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"روکیں"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"آلہ"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ایپس سوئچ کرنے کیلئے اوپر سوائپ کریں"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"تیزی سے ایپس کو سوئچ کرنے کے لیے دائیں طرف گھسیٹیں"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"مجموعی جائزہ ٹوگل کریں"</string>
@@ -452,8 +428,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"کھولنے کیلئے دوبارہ تھپتھپائیں"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"کھولنے کے لیے اوپر سوائپ کريں"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"دوبارہ کوشش کرنے کے لیے اوپر سوائپ کريں"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"یہ آلہ آپ کی تنظیم کا ہے"</string>
-    <string name="do_disclosure_with_name" msgid="2091641464065004091">"یہ آلہ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> کا ہے"</string>
+    <string name="do_disclosure_generic" msgid="2388094207542706440">"یہ آلہ آپ کی تنظیم کے زیر انتظام ہے"</string>
+    <string name="do_disclosure_with_name" msgid="9113122674419739611">"یہ آلہ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> کے زیر انتظام ہے"</string>
     <string name="phone_hint" msgid="6682125338461375925">"فون کیلئے آئیکن سے سوائپ کریں"</string>
     <string name="voice_hint" msgid="7476017460191291417">"صوتی معاون کیلئے آئیکن سے سوائپ کریں"</string>
     <string name="camera_hint" msgid="4519495795000658637">"کیمرہ کیلئے آئیکن سے سوائپ کریں"</string>
@@ -474,6 +450,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"پروفائل دکھائیں"</string>
     <string name="user_add_user" msgid="4336657383006913022">"صارف کو شامل کریں"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"نیا صارف"</string>
+    <string name="guest_nickname" msgid="1863770639799615889">"مہمان"</string>
+    <string name="guest_new_guest" msgid="962155336259570156">"مہمان کو شامل کریں"</string>
+    <string name="guest_exit_guest" msgid="4030840507598850886">"مہمان کو ہٹائیں"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"مہمان کو ہٹائیں؟"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"اس سیشن میں موجود سبھی ایپس اور ڈیٹا کو حذف کر دیا جائے گا۔"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ہٹائیں"</string>
@@ -508,9 +487,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"سبھی کو صاف کریں"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"نظم کریں"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"سرگزشت"</string>
-    <string name="notification_section_header_incoming" msgid="850925217908095197">"نیا"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"خاموش"</string>
-    <string name="notification_section_header_alerting" msgid="5581175033680477651">"اطلاعات"</string>
+    <string name="notification_section_header_gentle" msgid="3044910806569985386">"اطلاعات خاموش کریں"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"گفتگوئیں"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"سبھی خاموش اطلاعات کو صاف کریں"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'ڈسٹرب نہ کریں\' کے ذریعے اطلاعات کو موقوف کیا گیا"</string>
@@ -519,21 +496,21 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"پروفائل کو مانیٹر کیا جا سکتا ہے"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"نیٹ ورک کو مانیٹر کیا جا سکتا ہے"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"نیٹ ورک کو شاید مانیٹر کیا جائے"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"آپ کی تنظیم اس آلے کی مالک ہے اور نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> اس آلے کی مالک ہے اور نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"یہ آلہ آپ کی تنظیم کا ہے اور <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے اور <xliff:g id="VPN_APP">%2$s</xliff:g> سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"یہ آلہ آپ کی تنظیم کا ہے"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"‏یہ آلہ آپ کی تنظیم کا ہے اور VPNs سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"‏یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے اور VPNs سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"آپ کی تنظیم اس آلے کا نظم کرتی ہے اور نیٹ ورک ٹریفک مانیٹر کر سکتی ہے"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> اس آلے کا نظم کرتی ہے اور وہ نیٹ ورک ٹریفک مانیٹر کر سکتی ہے"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"آلہ آپ کی تنظیم کے زیر انتظام ہے اور <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کے زیر انتظام ہے اور <xliff:g id="VPN_APP">%2$s</xliff:g> سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"آلہ آپ کی تنظیم کے زیر انتظام ہے"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کے زیر انتظام ہے"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"‏آلہ آپ کی تنظیم کے زیر انتظام ہے اور VPNs سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"‏آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کے زیر انتظام ہے اور VPNs سے منسلک ہے"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"آپ کی تنظیم آپ کے دفتری پروفائل میں نیٹ ورک ٹریفک مانیٹر کر سکتی ہے"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> آپ کے دفتری پروفائل میں نیٹ ورک ٹریفک مانیٹر کر سکتی ہے"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"نیٹ ورک کو مانیٹر کیا جا سکتا ہے"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"‏یہ آلہ VPNs سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"آپ کی دفتری پروفائل <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"آپ کی ذاتی پروفائل <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"یہ آلہ <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"‏آلہ VPNs سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"دفتری پروفائل <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"ذاتی پروفائل <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"آلہ <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"آلے کا نظم و نسق"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"پروفائل کو مانیٹر کرنا"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"نیٹ ورک کو مانیٹر کرنا"</string>
@@ -543,8 +520,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"‏VPN کو غیر فعال کریں"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"‏VPN کو غیر منسلک کریں"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"پالیسیاں دیکھیں"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"‏یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے۔\n\nآپ کا IT منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کی نگرانی اور ان کا نظم کر سکتا ہے۔\n\nمزید معلومات کے لیے اپنے IT منتظم سے رابطہ کریں۔"</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"‏یہ آلہ آپ کی تنظیم کا ہے۔\n\nآپ کا IT منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کی نگرانی اور ان کا نظم کر سکتا ہے۔\n\nمزید معلومات کے لیے اپنے IT منتظم سے رابطہ کریں۔"</string>
+    <string name="monitoring_description_named_management" msgid="7424612629468754552">"آپ کا آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کے زیر انتظام ہے۔\n\nآپ کا منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کو مانیٹر اور ان کا نظم کر سکتا ہے۔\n\nمزید معلومات کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
+    <string name="monitoring_description_management" msgid="8081910434889677718">"آپ کا آلہ آپ کی تنظیم کے زیر انتظام ہے۔\n\nآپ کا منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کو مانیٹر اور ان کا نظم کر سکتا ہے۔\n\nمزید معلومات کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"آپ کی تنظیم نے اس آلے پر ایک سرٹیفکیٹ کی اتھارٹی کو انسٹال کیا ہے۔ آپ کا محفوظ نیٹ ورک ٹریفک مانیٹر ہو سکتا ہے یا اس میں ترمیم کی جا سکتی ہے۔"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"آپ کی تنظیم نے آپ کے دفتری پروفائل میں ایک سرٹیفکیٹ کی اتھارٹی کو انسٹال کیا ہے۔ آپ کا محفوظ نیٹ ورک ٹریفک مانیٹر ہو سکتا ہے یا اس میں ترمیم کی جا سکتی ہے۔"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ایک سرٹیفکیٹ کی اتھارٹی اس آلہ پر انسٹال ہے۔ آپ کا محفوظ نیٹ ورک ٹریفک مانیٹر ہو سکتا ہے یا اس میں ترمیم کی جا سکتی ہے۔"</string>
@@ -574,7 +551,6 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"آپ کا دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر انتظام ہے۔ پروفائل <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> سے منسلک ہے جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے دفتری نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔\n\nآپ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> سے بھی منسلک ہیں، جو آپ کے ذاتی نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"ٹرسٹ ایجنٹ نے غیر مقفل رکھا ہے"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"آلہ اس وقت تک مقفل رہے گا جب تک آپ دستی طور پر اسے غیر مقفل نہ کریں"</string>
-    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"تیزی سے اطلاعات حاصل کریں"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"غیر مقفل کرنے سے پہلے انہیں دیکھیں"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"نہیں شکریہ"</string>
@@ -584,27 +560,25 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"صوتی ترتیبات"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"پھیلائیں"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"سکیڑیں"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"خودکار طور پر میڈیا پر کیپشن لگائیں"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"خودکار طور پر کیپشن میڈیا"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"کیپشنز کی تجویز بند کریں"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"کیپشنز کا اوورلے"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"فعال کریں"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"غیر فعال کریں"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"آؤٹ پٹ آلہ سوئچ کریں"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"ایپ کو پن کر دیا گیا ہے"</string>
+    <string name="screen_pinning_title" msgid="7357611095909618178">"اسکرین پن کردہ ہے"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے پیچھے اور مجموعی جائزہ بٹنز کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے \"پیچھے\" اور \"ہوم\" بٹنز کو ٹچ کریں اور دبائے رکھیں۔"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کے لیے اوپر سوائپ کریں اور پکڑ کر رکھیں۔"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کے لیے سوائپ کریں اور پکڑ کر رکھیں۔"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے مجموعی جائزہ بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے \"ہوم\" بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ذاتی ڈیٹا قابل رسائی ہو سکتا ہے (جیسے رابطے اور ای میل کا مواد)۔"</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"پن کردہ ایپ دیگر ایپس کو کھول سکتی ہے۔"</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"اس ایپ سے پن ہٹانے کے لیے، \"واپس جائیں\" اور \"مجموعی جائزہ\" بٹنز کو ٹچ کریں اور دبائے رکھیں"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"اس ایپ سے پن ہٹانے کے لیے، \"واپس جائیں\" اور \"ہوم\" بٹنز کو ٹچ کریں اور دبائے رکھیں"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"اس ایپ سے پن ہٹانے کے لیے، اوپر کی طرف سوائپ کریں اور دبائے رکھیں"</string>
+    <string name="screen_pinning_toast" msgid="2083944237147005811">"اس اسکرین سے پن ہٹانے کیلئے، \"پیچھے\" اور \"مجموعی جائزہ\" بٹنز کو ٹچ کریں اور دبائے رکھیں"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"اس اسکرین سے پن ہٹانے کیلئے، \"پیچھے\" اور \"ہوم\" بٹنز کو ٹچ کریں اور دبائے رکھیں"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"اس اسکرین سے پن ہٹانے کے لیے، اوپر کی طرف سوائپ کریں: دبائیں رکھیں"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"سمجھ آ گئی"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"نہیں شکریہ"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"ایپ کو پن کر دیا گیا"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"ایپ کا پن ہٹا دیا گیا"</string>
+    <string name="screen_pinning_start" msgid="5695091877402422575">"اسکرین کو پن کر دیا گیا"</string>
+    <string name="screen_pinning_exit" msgid="5114993350662745840">"اسکرین کا پن ہٹا دیا گیا"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> کو چھپائیں؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"اگلی بار جب آپ اسے ترتیبات میں آن کریں گے تو یہ ظاہر ہوگی۔"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"چھپائیں"</string>
@@ -707,19 +681,15 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"اطلاعات کو آف کریں"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"اس ایپ کی طرف سے اطلاعات دکھانا جاری رکھیں؟"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"خاموش"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"ڈیفالٹ"</string>
+    <string name="notification_alert_title" msgid="7629202599338071971">"الرٹ کرنا"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"بلبلہ"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"کوئی آواز یا وائبریشن نہیں"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"کوئی آواز یا وائبریشن نہیں اور گفتگو کے سیکشن میں نیچے ظاہر ہوتا ہے"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"آپ کے آلہ کی ترتیبات کے مطابق وائبریٹ یا گھنٹی بج سکتی ہے"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"فون کی ترتیبات کے مطابق وائبریٹ یا گھنٹی بج سکتی ہے۔ بذریعہ ڈیفالٹ <xliff:g id="APP_NAME">%1$s</xliff:g> بلبلہ سے گفتگوئیں۔"</string>
+    <string name="notification_channel_summary_low" msgid="7300447764759926720">"بغیر آواز یا وائبریشن کے آپ کو فوکس کرنے میں مدد کرتا ہے۔"</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"آواز اور وائبریشن کے ذریعے آپ کی توجہ حاصل کرتا ہے۔"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"اس مواد کے فلوٹنگ شارٹ کٹ کے ساتھ آپ کی توجہ دیتی ہے۔"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"گفتگو کے سیکشن کے اوپری حصے پر دکھاتا ہے، تیرتے بلبلے کی طرح ظاہر ہوتا ہے، لاک اسکرین پر پروفائل تصویر دکھاتا ہے"</string>
-    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ترتیبات"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"ترجیح"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> گفتگو کی خصوصیات کو سپورٹ نہیں کرتا ہے"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"کوئی حالیہ بلبلہ نہیں"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"حالیہ بلبلے اور برخاست شدہ بلبلے یہاں ظاہر ہوں گے"</string>
+    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
+    <skip />
+    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"اطلاعات کے اس گروپ کو یہاں کنفیگر نہیں کیا جا سکتا"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"پراکسی اطلاع"</string>
@@ -882,13 +852,12 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"اوپر %50"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"اوپر %30"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"نچلی فل اسکرین"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ٹائل ہٹائیں"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ختم کرنے کے لیے ٹائل شامل کریں"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ٹائل منتقل کریں"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ٹائل شامل کریں"</string>
-    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> میں منتقل کریں"</string>
-    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"پوزیشن <xliff:g id="POSITION">%1$d</xliff:g> میں شامل کریں"</string>
-    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"پوزیشن <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"پوزیشن <xliff:g id="POSITION">%1$d</xliff:g>، <xliff:g id="TILE_NAME">%2$s</xliff:g>۔ ترمیم کرنے کیلئے دو بار تھپتھپائیں۔"</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>۔ شامل کرنے کیلئے دو بار تھپتھپائیں۔"</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> کو منتقل کریں"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ہٹائیں"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"پوزیشن <xliff:g id="TILE_NAME">%1$s</xliff:g> میں <xliff:g id="POSITION">%2$d</xliff:g> شامل کریں"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> کو پوزیشن <xliff:g id="POSITION">%2$d</xliff:g> میں منتقل کریں"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"فوری ترتیبات کا ایڈیٹر۔"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> اطلاع: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"ممکن ہے کہ ایپ سپلٹ اسکرین کے ساتھ کام نہ کرے۔"</string>
@@ -919,15 +888,12 @@
     <string name="pip_pause" msgid="1139598607050555845">"موقوف کریں"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"نظرانداز کرکے اگلے پر جائیں"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"نظرانداز کرکے پچھلے پر جائیں"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"سائز تبدیل کریں"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"حرارت کی وجہ سے فون آف ہو گیا"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"آپ کا فون اب حسب معمول چل رہا ہے۔\nمزید معلومات کیلئے تھپتھپائیں"</string>
+    <string name="thermal_shutdown_message" msgid="7432744214105003895">"آپ کا فون اب حسب معمول کام کر رہا ہے"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"آپ کا فون کافی گرم ہو گيا تھا، اس لئے سرد ہونے کیلئے یہ آف ہو گیا۔ اب آپ کا فون حسب معمول کام کر رہا ہے۔\n\nمندرجہ ذیل چیزیں کرنے پر آپ کا فون کافی گرم ہو سکتا ہے:\n	• ماخذ کا زیادہ استعمال کرنے والی ایپس (جیسے کہ گیمنگ، ویڈیو، یا نیویگیشن ایپس) کا استعمال کرنا\n	• بڑی فائلز ڈاؤن لوڈ یا اپ لوڈ کرنا\n	• اعلی درجہ حرارت میں فون کا استعمال کرنا"</string>
-    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"نگہداشت کے اقدامات ملاحظہ کریں"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"فون گرم ہو رہا ہے"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"فون کے ٹھنڈے ہو جانے تک کچھ خصوصیات محدود ہیں۔\nمزید معلومات کیلئے تھپتھپائیں"</string>
+    <string name="high_temp_notif_message" msgid="163928048626045592">"فون کے ٹھنڈے ہو جانے تک کچھ خصوصیات محدود ہیں"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"آپ کا فون خودکار طور پر ٹھنڈا ہونے کی کوشش کرے گا۔ آپ ابھی بھی اپنا فون استعمال کر سکتے ہیں، مگر ہو سکتا ہے یہ سست چلے۔\n\nایک بار آپ کا فون ٹھنڈا ہوجائے تو یہ معمول کے مطابق چلے گا۔"</string>
-    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"نگہداشت کے اقدامات ملاحظہ کریں"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"چارجر ان پلگ کریں"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"اس آلہ کو چارج کرنے میں ایک مسئلہ ہے۔ پاور ایڈاپٹر کو ان پلگ کریں اور دھیان دیں کیونکہ تار گرم ہو سکتا ہے۔"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"نگہداشت کے اقدامات ملاحظہ کریں"</string>
@@ -989,21 +955,17 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ترتیبات"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"سمجھ آ گئی"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> آپ کی <xliff:g id="TYPES_LIST">%2$s</xliff:g> کا استعمال کر رہی ہے۔"</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ایپلیکیشنز آپ کی <xliff:g id="TYPES_LIST">%s</xliff:g> کا استعمال کر رہی ہیں۔"</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" اور "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"کیمرا"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"مقام"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"مائیکروفون"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"سینسرز آف ہیں"</string>
     <string name="device_services" msgid="1549944177856658705">"آلہ کی سروس"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"کوئی عنوان نہیں ہے"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"یہ ایپ دوبارہ شروع کرنے کے لیے تھپتھپائیں اور پوری اسکرین پر جائیں۔"</string>
+    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> کھولیں"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> بلبلوں کے لیے ترتیبات"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"اوورفلو"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"انبار میں واپس شامل کریں"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> کی جانب سے بلبلوں کو اجازت دیں؟"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"نظم کریں"</string>
+    <string name="no_bubbles" msgid="1187859094003006292">"مسترد کریں"</string>
+    <string name="yes_bubbles" msgid="3014008797151197346">"اجازت دیں"</string>
+    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"مجھ سے بعد میں پوچھیں"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> کی جانب سے <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> اور <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> مزید سے <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"منتقل کریں"</string>
@@ -1011,82 +973,26 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"اوپر دائیں جانب لے جائيں"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"نیچے بائیں جانب لے جائیں"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"نیچے دائیں جانب لے جائیں"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"بلبلہ برخاست کریں"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"گفتگو بلبلہ نہ کریں"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"بلبلے کے ذریعے چیٹ کریں"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"نئی گفتگوئیں فلوٹنگ آئیکن یا بلبلے کے طور پر ظاہر ہوں گی۔ بلبلہ کھولنے کے لیے تھپتھپائیں۔ اسے منتقل کرنے کے لیے گھسیٹیں۔"</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"کسی بھی وقت بلبلے کو کنٹرول کریں"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"اس ایپ سے بلبلوں کو آف کرنے کے لیے نظم کریں پر تھپتھپائیں"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"سمجھ آ گئی"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ترتیبات"</string>
+    <string name="bubble_dismiss_text" msgid="7071770411580452911">"برخاست کریں"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"سسٹم نیویگیشن اپ ڈیٹ کیا گیا۔ تبدیلیاں کرنے کے لیے، ترتیبات پر جائیں۔"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"سسٹم نیویگیشن اپ ڈیٹ کرنے کے لیے ترتیبات پر جائیں"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"اسٹینڈ بائی"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"گفتگو کو ترجیح پر سیٹ کیا گیا"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ترجیحی گفتگوئیں:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"گفتگو سیکشن میں سب سے اوپر نظر آئیں گی"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"مقفل سکرین پر پروفائل کی تصویر دکھائیں گی"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ایپس کے سب سے اوپر فلوٹنگ بلبلہ کے طور پر ظاہر ہوں"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ڈسٹرب نہ کریں میں مداخلت کریں"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"سمجھ آ گئی"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ترتیبات"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"میگنیفیکیشن اوورلے ونڈو"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"میگنیفکیشن ونڈو"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"میگنیفکیشن ونڈو کنٹرولز"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"آلہ کے کنٹرولز"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"اپنے منسلک آلات کے لیے کنٹرولز شامل کریں"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"آلہ کے کنٹرولز سیٹ اپ کریں"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"اپنے کنٹرول تک رسائی حاصل کرنے کے ليے پاور بٹن کو دبائیں رکھیں"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"کنٹرولز شامل کرنے کے لیے ایپ منتخب کریں"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> کنٹرولز شامل کر دیے گئے۔</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> کنٹرول شامل کر دیا گیا۔</item>
+    <string name="quick_controls_title" msgid="525285759614231333">"فوری کنٹرولز"</string>
+    <string name="controls_providers_title" msgid="8844124515157926071">"کنٹرولز شامل کریں"</string>
+    <string name="controls_providers_subtitle" msgid="8187768950110836569">"ایک ایسی ایپ کا انتخاب جس سے کنٹرول شامل کرنا چاہتے ہیں"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> موجودہ پسندیدہ ہیں۔</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> موجودہ پسندیدہ ہے۔</item>
     </plurals>
-    <string name="controls_removed" msgid="3731789252222856959">"ہٹا دیا گیا"</string>
-    <string name="accessibility_control_favorite" msgid="8694362691985545985">"پسند کردہ"</string>
-    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"پسند کردہ، پوزیشن <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ناپسند کردہ"</string>
-    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"پسندیدہ بنائیں"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"پسندیدگی ختم کریں"</string>
-    <string name="accessibility_control_move" msgid="8980344493796647792">"پوزیشن <xliff:g id="NUMBER">%d</xliff:g> میں منتقل کریں"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"کنٹرولز"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"پاور مینو سے رسائی حاصل کرنے کے لیے کنٹرولز کو منتخب کریں"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"کنٹرولز کو دوبارہ ترتیب دینے کے ليے پکڑیں اور گھسیٹیں"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"سبھی کنٹرولز ہٹا دیے گئے"</string>
-    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"تبدیلیاں محفوظ نہیں ہوئیں"</string>
-    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"دیگر ایپس دیکھیں"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"کنٹرولز کو لوڈ نہیں کیا جا سکا۔ یہ یقینی بنانے کے لیے <xliff:g id="APP">%s</xliff:g> ایپ کو چیک کریں کہ ایپ کی ترتیبات تبدیل نہیں ہوئی ہیں۔"</string>
-    <string name="controls_favorite_load_none" msgid="7687593026725357775">"موافق کنٹرولز دستیاب نہیں ہیں"</string>
-    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"دیگر"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"آلہ کے کنٹرولز میں شامل کریں"</string>
-    <string name="controls_dialog_ok" msgid="2770230012857881822">"شامل کریں"</string>
-    <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> کی طرف سے تجویز کردہ"</string>
-    <string name="controls_dialog_confirmation" msgid="586517302736263447">"کنٹرولز اپ ڈیٹ کیے گئے"</string>
-    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"‏PIN میں حروف یا علامات شامل ہیں"</string>
-    <string name="controls_pin_verify" msgid="3452778292918877662">"‫<xliff:g id="DEVICE">%s</xliff:g> کی تصدیق کریں"</string>
-    <string name="controls_pin_wrong" msgid="6162694056042164211">"‏غلط PIN"</string>
-    <string name="controls_pin_verifying" msgid="3755045989392131746">"توثیق ہو رہی ہے…"</string>
-    <string name="controls_pin_instructions" msgid="6363309783822475238">"‏‫PIN درج کریں"</string>
-    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"‏‫کوئی دوسرا PIN آزمائیں"</string>
-    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"توثیق کی جا رہی ہے…"</string>
-    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> کی تبدیلی کی توثیق کریں"</string>
-    <string name="controls_structure_tooltip" msgid="4355922222944447867">"مزید دیکھنے کیلئے سوائپ کریں"</string>
-    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"تجاویز لوڈ ہو رہی ہیں"</string>
-    <string name="controls_media_title" msgid="1746947284862928133">"میڈیا"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"موجودہ سیشن چھپائیں۔"</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"برخاست کریں"</string>
-    <string name="controls_media_resume" msgid="1933520684481586053">"دوبارہ شروع کریں"</string>
-    <string name="controls_media_settings_button" msgid="5815790345117172504">"ترتیبات"</string>
-    <string name="controls_error_timeout" msgid="794197289772728958">"غیر فعال، ایپ چیک کریں"</string>
-    <string name="controls_error_retryable" msgid="864025882878378470">"خرابی، دوبارہ کوشش کی جا رہی ہے…"</string>
-    <string name="controls_error_removed" msgid="6675638069846014366">"نہیں ملا"</string>
-    <string name="controls_error_removed_title" msgid="1207794911208047818">"کنٹرول دستیاب نہیں ہے"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"‫<xliff:g id="DEVICE">%1$s</xliff:g> تک رسائی حاصل نہیں ہو سکی۔ اس بات کو یقینی بنانے کے لیے کہ کنٹرول ابھی بھی دستیاب ہے اور ایپ کی ترتیبات تبدیل نہیں ہوئی، تو <xliff:g id="APPLICATION">%2$s</xliff:g> ایپ چیک کریں۔"</string>
-    <string name="controls_open_app" msgid="483650971094300141">"ایپ کھولیں"</string>
-    <string name="controls_error_generic" msgid="352500456918362905">"صورتحال لوڈ نہیں ہو سکتی"</string>
-    <string name="controls_error_failed" msgid="960228639198558525">"خرابی، دوبارہ کوشش کریں"</string>
-    <string name="controls_in_progress" msgid="4421080500238215939">"پیشرفت میں"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"نئے کنٹرولز دیکھنے کے لیے پاور بٹن کو دبائے رکھیں"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"کنٹرولز شامل کریں"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"کنٹرولز میں ترمیم کریں"</string>
+    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"فوری رسائی کیلئے کنٹرولز کا انتخاب کریں"</string>
+    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
+    <skip />
+    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <skip />
 </resources>

@@ -61,18 +61,18 @@
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"Ei käytössä"</item>
     <item msgid="6336372935919715515">"Suodatus käytössä"</item>
-    <item msgid="2779123106632690576">"Päällä"</item>
+    <item msgid="2779123106632690576">"Käytössä"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="6603880723315236832">"AVRCP 1.5 (oletus)"</item>
+    <item msgid="8036025277512210160">"AVRCP 1.4 (oletus)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
-    <item msgid="5896162189744596291">"AVRCP 1.4"</item>
+    <item msgid="8317734704797203949">"AVRCP 1.5"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
-    <item msgid="4041937689950033942">"avrcp15"</item>
+    <item msgid="8965800440990431014">"avrcp14"</item>
     <item msgid="1613629084012791988">"avrcp13"</item>
-    <item msgid="99467845610592181">"avrcp14"</item>
+    <item msgid="4398977131424970917">"avrcp15"</item>
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">
@@ -156,7 +156,7 @@
     <item msgid="5001852592115448348">", aktiivinen (puhelin)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="1191094707770726722">"Ei päällä"</item>
+    <item msgid="1191094707770726722">"Ei käytössä"</item>
     <item msgid="7839165897132179888">"64 kt"</item>
     <item msgid="2715700596495505626">"256 kt"</item>
     <item msgid="7099386891713159947">"1 Mt"</item>
@@ -164,13 +164,13 @@
     <item msgid="8243549501764402572">"16 Mt"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="1145807928339101085">"Ei päällä"</item>
+    <item msgid="1145807928339101085">"Ei käytössä"</item>
     <item msgid="4064786181089783077">"64 kt"</item>
     <item msgid="3052710745383602630">"256 kt"</item>
     <item msgid="3691785423374588514">"1 Mt"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="409235464399258501">"Ei päällä"</item>
+    <item msgid="409235464399258501">"Ei käytössä"</item>
     <item msgid="4195153527464162486">"64 kt / lokipuskuri"</item>
     <item msgid="7464037639415220106">"256 kt / lokipuskuri"</item>
     <item msgid="8539423820514360724">"1 Mt / lokipuskuri"</item>
@@ -178,13 +178,13 @@
     <item msgid="7892098981256010498">"16 Mt / lokipuskuri"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
-    <item msgid="704720725704372366">"Ei päällä"</item>
+    <item msgid="704720725704372366">"Ei käytössä"</item>
     <item msgid="6014837961827347618">"Kaikki"</item>
     <item msgid="7387060437894578132">"Kaikki paitsi radio"</item>
     <item msgid="7300881231043255746">"vain kernel"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="97587758561106269">"Ei päällä"</item>
+    <item msgid="97587758561106269">"Ei käytössä"</item>
     <item msgid="7126170197336963369">"Kaikki lokipuskurit"</item>
     <item msgid="7167543126036181392">"Kaikki paitsi radiolokipuskurit"</item>
     <item msgid="5135340178556563979">"vain kernel-lokipuskuri"</item>
@@ -242,12 +242,12 @@
     <item msgid="1212561935004167943">"Korosta testatut piirtokom. vihreällä"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="634406443901014984">"Pois päältä"</item>
+    <item msgid="634406443901014984">"Pois käytöstä"</item>
     <item msgid="1288760936356000927">"Ruudulla palkkeina"</item>
     <item msgid="5023908510820531131">"Kohteessa <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="1968128556747588800">"Ei päällä"</item>
+    <item msgid="1968128556747588800">"Ei käytössä"</item>
     <item msgid="3033215374382962216">"Näytä päällekkäiset alueet"</item>
     <item msgid="3474333938380896988">"Näytä alueet puna-vihersokeille näkyvinä"</item>
   </string-array>

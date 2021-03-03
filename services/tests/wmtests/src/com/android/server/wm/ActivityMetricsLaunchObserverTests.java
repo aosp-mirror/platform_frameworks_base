@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 
+import android.app.WaitResult;
 import android.content.Intent;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
@@ -163,10 +164,15 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
     @Test
     public void testOnActivityLaunchFinished() {
+        // Assume that the process is started (ActivityBuilder has mocked the returned value of
+        // ATMS#getProcessController) but the activity has not attached process.
+        mTopActivity.app = null;
         onActivityLaunched(mTopActivity);
 
         notifyTransitionStarting(mTopActivity);
-        notifyWindowsDrawn(mTopActivity);
+        final ActivityMetricsLogger.TransitionInfoSnapshot info = notifyWindowsDrawn(mTopActivity);
+        assertWithMessage("Warm launch").that(info.getLaunchState())
+                .isEqualTo(WaitResult.LAUNCH_STATE_WARM);
 
         verifyOnActivityLaunchFinished(mTopActivity);
         verifyNoMoreInteractions(mLaunchObserver);
@@ -201,7 +207,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         notifyActivityLaunching(noDrawnActivity.intent);
         notifyActivityLaunched(START_SUCCESS, noDrawnActivity);
 
-        noDrawnActivity.destroyIfPossible("test");
+        noDrawnActivity.mVisibleRequested = false;
         mActivityMetricsLogger.notifyVisibilityChanged(noDrawnActivity);
 
         verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(noDrawnActivity));
@@ -216,7 +222,9 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         mActivityMetricsLogger.logAppTransitionReportedDrawn(mTopActivity, false);
         notifyTransitionStarting(mTopActivity);
         // The pending fully drawn event should send when the actual windows drawn event occurs.
-        notifyWindowsDrawn(mTopActivity);
+        final ActivityMetricsLogger.TransitionInfoSnapshot info = notifyWindowsDrawn(mTopActivity);
+        assertWithMessage("Hot launch").that(info.getLaunchState())
+                .isEqualTo(WaitResult.LAUNCH_STATE_HOT);
 
         verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mTopActivity), anyLong());
         verifyOnActivityLaunchFinished(mTopActivity);
@@ -260,8 +268,8 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         mActivityMetricsLogger.notifyTransitionStarting(reasons);
     }
 
-    private void notifyWindowsDrawn(ActivityRecord r) {
-        mActivityMetricsLogger.notifyWindowsDrawn(r, SystemClock.elapsedRealtimeNanos());
+    private ActivityMetricsLogger.TransitionInfoSnapshot notifyWindowsDrawn(ActivityRecord r) {
+        return mActivityMetricsLogger.notifyWindowsDrawn(r, SystemClock.elapsedRealtimeNanos());
     }
 
     @Test

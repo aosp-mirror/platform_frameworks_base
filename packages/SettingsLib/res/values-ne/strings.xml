@@ -89,7 +89,7 @@
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"सम्पर्क साझेदारी"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"सम्पर्क साझेदारीका लागि प्रयोग"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"इन्टरनेट जडान साझेदारी गर्दै"</string>
-    <string name="bluetooth_profile_map" msgid="8907204701162107271">"टेक्स्ट म्यासेजहरू"</string>
+    <string name="bluetooth_profile_map" msgid="8907204701162107271">"पाठ सन्देशहरू"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM पहुँच"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD अडियो: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD अडियो"</string>
@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"फाइल ट्रान्सफरका लागि प्रयोग गर्नुहोस्"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"इनपुटको लागि प्रयोग गर्नुहोस्"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"श्रवण यन्त्रहरूका लागि प्रयोग गर्नुहोस्"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"जोडा बनाउनुहोस्"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"जोडी"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"जोडी"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"रद्द गर्नुहोस्"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"जब जडान हुन्छ जोडी अनुदानले तपाईँको सम्पर्कहरू पहुँच गर्छ र इतिहास सम्झाउँछ।"</string>
@@ -140,15 +140,15 @@
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"खुला नेटवर्क"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"सुरक्षित नेटवर्क"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"एन्ड्रोइड OS"</string>
-    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"हटाइएका एपहरू"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"एपहरू र प्रयोगकर्ताहरू हटाइयो।"</string>
+    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"हटाइएका अनुप्रयोगहरू"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"अनुप्रयोगहरू र प्रयोगकर्ताहरू हटाइयो।"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"प्रणालीसम्बन्धी अद्यावधिकहरू"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB टेदर गर्दै"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB टेथर गर्दै"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"पोर्टेबल हटस्पट"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ब्लुटुथ टेदर गर्दै"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ब्लुटुथ टेथर गर्दै"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"टेदर गर्दै"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"टेदर गर्ने र पोर्टेबल हटस्पट"</string>
-    <string name="managed_user_title" msgid="449081789742645723">"कार्य प्रोफाइलका सबै एपहरू"</string>
+    <string name="managed_user_title" msgid="449081789742645723">"कार्य प्रोफाइलका सबै अनुप्रयोगहरू"</string>
     <string name="user_guest" msgid="6939192779649870792">"अतिथि"</string>
     <string name="unknown" msgid="3544487229740637809">"अज्ञात"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"प्रयोगकर्ता: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -161,7 +161,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"संश्लेषित बोलीको टोनमा प्रभाव पार्छ"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"भाषा"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"प्रणालीको भाषा प्रयोग गर्नुहोस्"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"प्रणाली भाषा प्रयोग गर्नुहोस्"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"भाषा चयन गरिएको छैन"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"बोली पाठका लागि भाषा-विशेष आवाज सेट गर्दछ"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"एउटा उदाहरणलाई सुन्नुहोस्"</string>
@@ -198,7 +198,7 @@
     <string name="category_work" msgid="4014193632325996115">"काम"</string>
     <string name="development_settings_title" msgid="140296922921597393">"विकासकर्ताका विकल्पहरू"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"विकासकर्ता विकल्प सक्रिया गर्नुहोस्"</string>
-    <string name="development_settings_summary" msgid="8718917813868735095">"एप विकासको लागि विकल्पहरू सेट गर्नुहोस्"</string>
+    <string name="development_settings_summary" msgid="8718917813868735095">"अनुप्रयोग विकासको लागि विकल्पहरू सेट गर्नुहोस्"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"विकासकर्ताका विकल्पहरू यस प्रयोगकर्ताका लागि उपलब्ध छैन"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN सेटिङहरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"कार्यक्षेत्र सीमा सेटिङहरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
@@ -206,13 +206,13 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB डिबग गर्दै"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB जडित हुँदा डिबग मोड"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB डिबग गर्ने प्राधिकरणहरू उल्टाउनुहोस्"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"वायरलेस डिबगिङ"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"वायरलेस डिबग गर्ने प्रक्रिया"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi मा जोडिँदा डिबग मोड सक्षम पार्ने कि नपार्ने"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"त्रुटि"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"वायरलेस डिबगिङ"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"उपलब्ध यन्त्रहरू हेर्न र प्रयोग गर्न वायरलेस डिबगिङ सेवा सक्रिय गर्नुहोस्"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"वायरलेस डिबग गर्ने प्रक्रिया"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"उपलब्ध यन्त्रहरू हेर्न र प्रयोग गर्न वायरलेस डिबग गर्ने प्रक्रिया सक्रिय गर्नुहोस्"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR कोडमार्फत यन्त्रको जोडा बनाउनुहोस्"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR कोड स्क्यानर प्रयोग गरी नयाँ यन्त्रहरूको जोडा बनाउनुहोस्"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR कोड स्क्यानर प्रयोग गरी नयाँ यन्त्रहरूको जोडा बनाउनुहोस्"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"जोडा मिलाउने कोडमार्फत यन्त्रको जोडा बनाउनुहोस्"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"छ अङ्कको कोड प्रयोग गरी नयाँ यन्त्रहरूको जोडा बनाउनुहोस्"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"जोडा बनाइएका यन्त्रहरू"</string>
@@ -231,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"यन्त्रसँग जोडा बनाउन सकिएन। कि त QR कोड गलत छ कि यन्त्र उही नेटवर्कमा जोडिएको छैन।"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ठेगाना र पोर्ट"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR कोड स्क्यान गर्नुहोस्"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR कोड स्क्यान गरी Wi‑Fi मार्फत यन्त्रको जोडा बनाउनुहोस्"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"कृपया कुनै Wi-Fi मा कनेक्ट गर्नुहोस्"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR कोड स्क्यान गरेर Wi‑Fi प्रयोग गरी यन्त्रको जोडा बनाउनुहोस्"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"बग प्रतिवेदन सर्टकट"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"बग रिपोर्ट लिनका लागि पावर मेनुमा बटन देखाउनुहोस्"</string>
@@ -244,14 +243,13 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"अनलक हुन बूटलोडरलाई अनुमति दिनुहोस्"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM अनलक गर्न अनुमति दिने?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"चेतावनी: यो सेटिङ खुला हुँदा, यस उपकरणमा उपकरण सुरक्षा सुविधाहरूले काम गर्ने छैनन्।"</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"नमूना स्थान एप चयन गर्नुहोस्"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"कुनै नमूना स्थान एप सेट गरिएन"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"नमूना स्थान एप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"नमूना स्थान अनुप्रयोग चयन गर्नुहोस्"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"कुनै नमूना स्थान अनुप्रयोग सेट गरिएन"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"नमूना स्थान अनुप्रयोग: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"नेटवर्किङ"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ताररहित प्रदर्शन प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi वर्बोज लग सक्षम पार्नुहोस्"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi स्क्यान थ्रोटलिङ"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi द्वारा परिष्कृत MAC ठेगाना बदल्ने सुविधा"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा सधैँ सक्रिय राख्नुहोस्"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिङको लागि हार्डवेयरको प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू देखाउनुहोस्"</string>
@@ -283,7 +281,6 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi लग स्तर बढाउनुहोस्, Wi-Fi चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ब्याट्रीको खपत कम गरी नेटवर्कको कार्यसम्पादनमा सुधार गर्दछ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"यो मोड अन गरिएका बेला यो यन्त्र MAC ठेगाना बदल्ने सुविधा अन गरिएको कुनै इन्टरनेटसँग जति पटक कनेक्ट हुन्छ त्यति नै पटक यस यन्त्रको MAC ठेगाना पनि परिवर्तन हुन सक्छ।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"सशुल्क वाइफाइ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"मिटर नगरिएको"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लगर बफर आकारहरू"</string>
@@ -300,30 +297,29 @@
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Wi-Fi सक्रिय हुँदा पनि मोबाइल डेटा सधैँ सक्रिय राख्नुहोस् (द्रूत नेटवर्क स्विच गर्नको लागि)।"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"उपलब्ध भएमा टेदरिङको लागि हार्डवेयरको प्रवेग प्रयोग गर्नुहोस्"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB डिबग गर्न लागि अनुमति दिने हो?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"युएसबी डिबगिङ विकास प्रयोजनका लागि मात्र निर्मित हुन्छ। यसलाई तपाईँको कम्प्युटर र तपाईँको उपकरणका बीच डेटा प्रतिलिपि गर्न, बिना सूचना तपाईँको उपकरणमा एपहरू स्थापना गर्न र लग डेटा पढ्नका लागि प्रयोग गर्नुहोस्।"</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"वायरलेस डिबगिङ सेवा सक्षम पार्ने हो?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"वायरलेस डिबगिङ डिभलपमेन्ट प्रयोजनका लागि मात्रै हो। यसलाई आफ्ना कम्प्युटर र उपकरणका बिच डेटा प्रतिलिपि गर्न, सूचना नदिई आफ्नो उपकरणमा एपहरू स्थापना गर्न र लग डेटा पढ्न प्रयोग गर्नुहोस्।"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"युएसबी डिबगिङ विकास प्रयोजनका लागि मात्र निर्मित हुन्छ। यसलाई तपाईँको कम्प्युटर र तपाईँको उपकरणका बीच डेटा प्रतिलिपि गर्न, बिना सूचना तपाईँको उपकरणमा अनुप्रयोगहरू स्थापना गर्न र लग डेटा पढ्नका लागि प्रयोग गर्नुहोस्।"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"वायरलेस डिबग गर्ने प्रक्रिया सक्षम पार्ने हो?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"वायरलेस डिबग गर्ने प्रक्रिया विकास प्रयोजनका लागि मात्रै हो। यसलाई आफ्ना कम्प्युटर र उपकरणका बिच डेटा प्रतिलिपि गर्न, सूचना नदिई आफ्नो उपकरणमा अनुप्रयोगहरू स्थापना गर्न र लगसम्बन्धी डेटा रिड गर्नका लागि प्रयोग गर्नुहोस्।"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"तपाईं पहिले नै अधिकृत गर्नुभएका सबै कम्प्यूटरबाट USB डिबग गर्नको लागि पहुँच रद्द गर्ने हो?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"विकास सेटिङहरू अनुमति दिने हो?"</string>
-    <string name="dev_settings_warning_message" msgid="37741686486073668">"यी सेटिङहरू केवल विकास प्रयोगको लागि विचार गरिएको हो। तिनीहरूले तपाईंको उपकरण र एपहरूलाई विच्छेदन गर्न वा दुर्व्यवहार गर्न सक्दछ।"</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB मा एपहरू रुजु गर्नुहोस्"</string>
+    <string name="dev_settings_warning_message" msgid="37741686486073668">"यी सेटिङहरू केवल विकास प्रयोगको लागि विचार गरिएको हो। तिनीहरूले तपाईंको उपकरण र अनुप्रयोगहरूलाई विच्छेदन गर्न वा दुर्व्यवहार गर्न सक्दछ।"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB मा अनुप्रयोगहरू रुजु गर्नुहोस्"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक व्यवहारको लागि ADB/ADT को माध्यमबाट स्थापित अनुप्रयोगहरूको जाँच गर्नुहोस्।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू (MAC ठेगाना भएका मात्र) देखाइनेछ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट यन्त्रहरूमा अस्वीकार्य चर्को आवाज वा नियन्त्रणमा कमी जस्ता आवाज सम्बन्धी समस्याहरूको अवस्थामा ब्लुटुथ निरपेक्ष आवाज सुविधालाई असक्षम गराउँछ।"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लुटुथ Gabeldorsche सुविधाको स्ट्याक सक्षम पार्नुहोस्।"</string>
-    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"यसले परिष्कृत जडानको सुविधा सक्षम पार्छ।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानीय टर्मिनल"</string>
-    <string name="enable_terminal_summary" msgid="2481074834856064500">"स्थानीय सेल पहुँच प्रदान गर्ने टर्मिनल एप सक्षम गर्नुहोस्"</string>
+    <string name="enable_terminal_summary" msgid="2481074834856064500">"स्थानीय सेल पहुँच प्रदान गर्ने टर्मिनल अनुप्रयोग सक्षम गर्नुहोस्"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP जाँच गर्दै"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP जाँच व्यवहार सेट गर्नुहोस्"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"डिबग गरिँदै"</string>
-    <string name="debug_app" msgid="8903350241392391766">"डिबग एप चयन गर्नुहोस्"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"कुनै पनि डिबग एप सेट छैन"</string>
-    <string name="debug_app_set" msgid="6599535090477753651">"डिबग गर्ने एप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="select_application" msgid="2543228890535466325">"एप चयन गर्नुहोस्"</string>
+    <string name="debug_app" msgid="8903350241392391766">"डिबग अनुप्रयोग चयन गर्नुहोस्"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"कुनै पनि डिबग अनुप्रयोग सेट छैन"</string>
+    <string name="debug_app_set" msgid="6599535090477753651">"डिबग गर्ने अनुप्रयोग: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="2543228890535466325">"अनुप्रयोग चयन गर्नुहोस्"</string>
     <string name="no_application" msgid="9038334538870247690">"केही पनि होइन"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"डिबग गर्नेलाई पर्खनुहोस्"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"डिबग भएको एप कार्यन्वयन हुनु अघि संलग्न हुन डिबग गर्नेलाई पर्खन्छ"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"डिबग भएको अनुप्रयोग कार्यन्वयन हुनु अघि संलग्न हुन डिबग गर्नेलाई पर्खन्छ"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"इनपुट"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"रेखाचित्र"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"हार्डवेयर प्रतिपादन फुर्तिलो बनाइयो"</string>
@@ -358,22 +354,20 @@
     <string name="track_frame_time" msgid="522674651937771106">"प्रोफाइल HWUI रेन्डर गरिँदै छ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU का डिबग तहहरूलाई सक्षम पार्नुहोस्"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डिबगसम्बन्धी अनुप्रयोगहरूका लागि GPU का डिबग तहहरूलाई लोड गर्न दिनुहोस्"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"भर्वस भेन्डर लगिङ सक्षम पार्नु…"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"बग रिपोर्टहरूमा यन्त्र विशेष विक्रेताका अतिरिक्त लगहरू समावेश गर्नुहोस्। यी लगमा निजी जानकारी समावेश हुन सक्छन्, यिनले ब्याट्रीको खपत बढाउन र/वा थप भण्डारण प्रयोग गर्न सक्छन्।"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"विन्डो सजीविकरण स्केल"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"संक्रमण सजीविकरण मापन"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"सजीविकरण अवधि मापन"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"सहायक प्रदर्शनलाई सिमुलेट गर्नुहोस्"</string>
-    <string name="debug_applications_category" msgid="5394089406638954196">"एपहरू"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"अनुप्रयोगहरू"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"गतिविधिहरू नराख्नुहोस्"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"प्रयोगकर्ताले यसलाई छोड्ने बित्तिकै जति सक्दो चाँडो हरेक गतिविधि ध्वस्त पार्नुहोस्"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"पृष्ठभूमि प्रक्रिया सीमा"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"पृष्ठभूमिका ANR हरू देखाउनुहोस्"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"पृष्ठभूमिका एपहरूको संवादको प्रतिक्रिया नदिइरहेका एपहरू प्रदर्शन गर्नुहोस्"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"पृष्ठभूमिका अनुप्रयोगहरूको संवादको प्रतिक्रिया नदिइरहेका अनुप्रयोगहरू प्रदर्शन गर्नुहोस्"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना च्यानलका चेतावनी देखाउनुहोस्"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"अनुप्रयोगले कुनै मान्य च्यानल बिना सूचना पोस्ट गर्दा स्क्रिनमा चेतावनी देखाउँछ"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"बाह्यमा बल प्रयोगको अनुमति प्राप्त एपहरू"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"म्यानिफेेस्टका मानहरूको ख्याल नगरी कुनै पनि एपलाई बाह्य भण्डारणमा लेख्न सकिने खाले बनाउँछ"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"बाह्यमा बल प्रयोगको अनुमति प्राप्त अनुप्रयोगहरू"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"म्यानिफेेस्टका मानहरूको ख्याल नगरी कुनै पनि अनुप्रयोगलाई बाह्य भण्डारणमा लेख्न सकिने खाले बनाउँछ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"आकार बदल्न योग्य हुने बनाउन गतिविधिहरूलाई बाध्यात्मक बनाउनुहोस्।"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"म्यानिफेेस्ट मानहरूको ख्याल नगरी, बहु-विन्डोको लागि सबै रिसाइज गर्न सकिने गतिविधिहरू बनाउनुहोस्।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"फ्रिफर्म विन्डोहरू सक्रिय गर्नुहोस्"</string>
@@ -395,10 +389,10 @@
     <item msgid="4548987861791236754">"आँखाले देख्ने प्राकृतिक रङ्गहरू"</item>
     <item msgid="1282170165150762976">"डिजिटल सामग्रीको लागि अनुकूलित रङ्गहरु"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="5372523625297212320">"स्ट्यान्डबाई एपहरू"</string>
+    <string name="inactive_apps_title" msgid="5372523625297212320">"स्ट्यान्डबाई अनुप्रयोगहरू"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"निष्क्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"सक्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="standby_bucket_summary" msgid="5128193447550429600">"एपको स्ट्यान्डबाई अवस्था:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="standby_bucket_summary" msgid="5128193447550429600">"अनुप्रयोगको स्ट्यान्डबाई अवस्था:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"चलिरहेका सेवाहरू"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"हाल चालु भइरहेका सेवाहरू हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView कार्यान्वयन"</string>
@@ -418,7 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"प्रोटानेमली (रातो, हरियो)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ट्रिटानोमेली (निलो-पंहेलो)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रङ्ग सुधार"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"रंङ सच्याउने सुविधाले तपाईंलाई आफ्नो यन्त्रमा रंङहरू कसरी देखाउने भन्ने कुरा निर्धारण गर्न दिन्छ"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"रङ सुधार गर्नुले रङ छुट्याउन नसक्ने मान्छेलाई थप सटीक रूपमा रङहरू छुट्याउन मद्दत गर्दछ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारा अधिरोहित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ"</string>
@@ -427,16 +421,16 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"तपाईंको प्रयोगको आधारमा लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"ब्याट्री लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"ब्याट्री लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> सम्म"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ब्याट्री <xliff:g id="TIME">%1$s</xliff:g> बजेसम्ममा सकिन सक्छ"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी छ"</string>
-    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी छ"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"ब्याट्रीको आयु <xliff:g id="TIME">%1$s</xliff:g> पछिसम्म विस्तार गरियो"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी छ"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"फोन चाँडै बन्द हुन सक्छ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ट्याब्लेट चाँडै बन्द हुन सक्छ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"यन्त्र चाँडै बन्द हुन सक्छ"</string>
@@ -457,7 +451,7 @@
     <string name="disabled" msgid="8017887509554714950">"असक्षम पारियो"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति छ"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति छैन"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात एपहरू स्थापना गर्नुहोस्"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात अनुप्रयोगहरू स्थापना गर्नुहोस्"</string>
     <string name="home" msgid="973834627243661438">"सेटिङहरूको गृहपृष्ठ"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"०%"</item>
@@ -468,9 +462,9 @@
     <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> बाँकी"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"सानो"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"पूर्वनिर्धारित"</string>
-    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"ठुलो"</string>
-    <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"अझ ठुलो"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"सबैभन्दा ठुलो"</string>
+    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"ठूलो"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"अझ ठूलो"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"सबैभन्दा ठूलो"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"आफू अनुकूल (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"मेनु"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"डेमो मोडमा फ्याक्ट्री रिसेट गर्न पासवर्ड प्रविष्टि गर्नुहोस्"</string>
@@ -480,7 +474,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"प्रणालीका भाषाहरू प्रयोग गर्नुहोस्"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>का लागि सेटिङहरू खोल्न विफल भयो।"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"यस इनपुट विधिले तपाईँले टाइप गर्नुहुने सम्पूर्ण पाठ बटु्ल्न सक्छ, व्यक्तिगत डेटा जस्तै पासवर्ड र क्रेडिट कार्ड नम्बर लगायतका। यो <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> अनुप्रयोगबाट आउँदछ। यो इनपुट विधि प्रयोग गर्ने हो?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"टिपोट: पुनःबुट पछि तपाईँले आफ्नो फोनलाई अनलक नगरेसम्म यो एप सुरु हुन सक्दैन"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"टिपोट: पुनःबुट पछि तपाईँले आफ्नो फोनलाई अनलक नगरेसम्म यो अनुप्रयोग सुरु हुन सक्दैन"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS दर्ताको स्थिति"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"दर्ता गरिएको"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"दर्ता नगरिएको"</string>
@@ -507,50 +501,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"प्रत्येक पटक सोध्नुहोस्"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"तपाईंले निष्क्रिय नपार्दासम्म"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"अहिले भर्खरै"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"फोनको स्पिकर"</string>
+    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"यो यन्त्र"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"जोड्ने क्रममा समस्या भयो। यन्त्रलाई निष्क्रिय पारेर फेरि सक्रिय गर्नुहोस्"</string>
-    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"तारयुक्त अडियो यन्त्र"</string>
-    <string name="help_label" msgid="3528360748637781274">"मद्दत र प्रतिक्रिया"</string>
-    <string name="storage_category" msgid="2287342585424631813">"भण्डारण"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"साझा डेटा"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"साझा डेटा हेर्नुहोस् र परिमार्जन गर्नुहोस्"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"यो प्रयोगकर्तासँग कुनै पनि डेटा सेयर गरिएको छैन।"</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"सेयर गरिएको डेटा प्राप्त गर्ने क्रममा कुनै त्रुटि भयो। फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="blob_id_text" msgid="8680078988996308061">"साझा डेटाको ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"<xliff:g id="DATE">%s</xliff:g> मा म्याद सकिन्छ"</string>
-    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"सेयर गरिएको डेटा मेट्ने क्रममा त्रुटि भयो।"</string>
-    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"सेयर गरिएको यो डेटाका लागि कुनै ठेक्का पट्टा लिएको छैन। तपाईं यसलाई मेट्न चाहनुहुन्छ?"</string>
-    <string name="accessor_info_title" msgid="8289823651512477787">"साझा डेटा प्रयोग गर्ने एपहरू"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"यो अनुप्रयोगले कुनै विवरण प्रदान गरेको छैन।"</string>
-    <string name="accessor_expires_text" msgid="4625619273236786252">"लिजको म्याद <xliff:g id="DATE">%s</xliff:g> मा सकिन्छ"</string>
-    <string name="delete_blob_text" msgid="2819192607255625697">"साझा डेटा मेट्नुहोस्"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"तपाईंले यो साझा डेटा मेटाउन खोज्नुभएकै हो?"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"प्रयोगकर्ताहरूसँग आफ्नै एपहरू र सामग्री हुन्छ"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"तपाईं आफ्नो खाताबाट एपहरू र सामग्रीहरूको पहुँचलाई प्रतिबन्ध गर्न सक्नुहुन्छ"</string>
-    <string name="user_add_user_item_title" msgid="2394272381086965029">"प्रयोगकर्ता"</string>
-    <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबन्धित प्रोफाइल"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"नयाँ प्रयोगकर्ता थप्ने हो?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"तपाईं थप प्रयोगकर्ताहरू सिर्जना गरेर ती प्रयोगकर्तालाई यो यन्त्र प्रयोग गर्न दिन सक्नुहुन्छ। हरेक प्रयोगकर्ताको आफ्नै ठाउँ हुन्छ। उनीहरू यो ठाउँमा आफ्नै एप, वालपेपर आदिका लागि प्रयोग गर्न सक्छन्। उनीहरू सबैजनालाई असर पार्ने Wi-Fi जस्ता यन्त्रका सेटिङहरू पनि परिवर्तन गर्न सक्छन्।\n\nतपाईंले नयाँ प्रयोगकर्ता थप्दा उक्त व्यक्तिले आफ्नो ठाउँ सेटअप गर्नु पर्ने हुन्छ।\n\nसबै प्रयोगकर्ता अन्य सबै प्रयोगकर्ताले प्रयोग गर्ने एपहरू अद्यावधिक गर्न सक्छन्। तर पहुँचसम्बन्धी सेटिङ तथा सेवाहरू नयाँ प्रयोगकर्तामा नसर्न सक्छ।"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"जब तपाईंले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यो व्यक्तिले आफ्नो ठाउँ सेट गर्न आवश्यक छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि एपहरू अद्यावधिक गर्न सक्छन्।"</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"अहिले प्रयोगकर्ता सेटअप गर्ने हो?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"यी व्यक्ति यन्त्र यो यन्त्र चलाउन र आफ्नो ठाउँ सेट गर्न उपलब्ध छन् भन्ने कुरा सुनिश्चित गर्नुहोस्"</string>
-    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"अहिले प्रोफाइल सेटअप गर्ने हो?"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"अब सेटअप गर्नुहोस्"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"अहिले होइन"</string>
-    <string name="user_add_user_type_title" msgid="551279664052914497">"थप्नुहोस्"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"नयाँ प्रयोगकर्ता"</string>
-    <string name="user_new_profile_name" msgid="2405500423304678841">"नयाँ प्रोफाइल"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"प्रयोगकर्ता जानकारी"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफाइलको जानकारी"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"निषेधयुक्त प्रोफाइल बनाउनु अघि तपाईँको एप र व्यक्तिगत डेटा सुरक्षा गर्नाका लागि तपाईँले स्क्रिन लक सेटअप गर्नु पर्दछ ।"</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"लक सेट गर्नुहोस्"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"प्रयोगकर्ता बदलेर <xliff:g id="USER_NAME">%s</xliff:g> पार्नुहोस्"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि थप्नुहोस्"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथि हटाउनुहोस्"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"अतिथि"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"पूर्वनिर्धारित यन्त्र"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"असक्षम पारिएको छ"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"सक्षम पारिएको छ"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"यो परिवर्तन लागू गर्न तपाईंको यन्त्र अनिवार्य रूपमा रिबुट गर्नु पर्छ। अहिले रिबुट गर्नुहोस् वा रद्द गर्नुहोस्।"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"तारसहितको हेडफोन"</string>
 </resources>

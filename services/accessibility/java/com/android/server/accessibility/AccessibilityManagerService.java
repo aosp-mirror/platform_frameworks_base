@@ -1746,6 +1746,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (userState.isMultiFingerGesturesEnabledLocked()) {
                     flags |= AccessibilityInputFilter.FLAG_REQUEST_MULTI_FINGER_GESTURES;
                 }
+                if (userState.isTwoFingerPassthroughEnabledLocked()) {
+                    flags |= AccessibilityInputFilter.FLAG_REQUEST_2_FINGER_PASSTHROUGH;
+                }
             }
             if (userState.isFilterKeyEventsEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_FILTER_KEY_EVENTS;
@@ -2024,6 +2027,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         boolean touchExplorationEnabled = mUiAutomationManager.isTouchExplorationEnabledLocked();
         boolean serviceHandlesDoubleTapEnabled = false;
         boolean requestMultiFingerGestures = false;
+        boolean requestTwoFingerPassthrough = false;
         final int serviceCount = userState.mBoundServices.size();
         for (int i = 0; i < serviceCount; i++) {
             AccessibilityServiceConnection service = userState.mBoundServices.get(i);
@@ -2031,6 +2035,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 touchExplorationEnabled = true;
                 serviceHandlesDoubleTapEnabled = service.isServiceHandlesDoubleTapEnabled();
                 requestMultiFingerGestures = service.isMultiFingerGesturesEnabled();
+                requestTwoFingerPassthrough = service.isTwoFingerPassthroughEnabled();
                 break;
             }
         }
@@ -2047,6 +2052,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         userState.setServiceHandlesDoubleTapLocked(serviceHandlesDoubleTapEnabled);
         userState.setMultiFingerGesturesLocked(requestMultiFingerGestures);
+        userState.setTwoFingerPassthroughLocked(requestTwoFingerPassthrough);
     }
 
     private boolean readAccessibilityShortcutKeySettingLocked(AccessibilityUserState userState) {

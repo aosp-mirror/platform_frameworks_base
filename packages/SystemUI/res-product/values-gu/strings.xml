@@ -40,7 +40,4 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"તમે ફોનને <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. આ કાર્યાલયની પ્રોફાઇલ કાઢી નાખવામાં આવશે, જે તમામ પ્રોફાઇલ ડેટાને ડિલીટ કરી દેશે."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"તમે તમારી અનલૉક પૅટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસો પછી, તમને એક ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને તમારા ટૅબ્લેટને અનલૉક કરવાનું કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરી પ્રયાસ કરો."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"તમે તમારી અનલૉક પૅટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસો પછી, તમને ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને તમારા ફોનને અનલૉક કરવાનું કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
-    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"વધુ વિકલ્પો માટે તમારા ફોનને અનલૉક કરો"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"વધુ વિકલ્પો માટે તમારા ટૅબ્લેટને અનલૉક કરો"</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"વધુ વિકલ્પો માટે તમારા ડિવાઇસને અનલૉક કરો"</string>
 </resources>

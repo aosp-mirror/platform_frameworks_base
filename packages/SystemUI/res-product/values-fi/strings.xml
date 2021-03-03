@@ -40,7 +40,4 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Yritit avata puhelimen lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER">%d</xliff:g> kertaa. Työprofiili ja kaikki sen data poistetaan."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään avaamaan tabletin lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään avaamaan puhelimesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
-    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Avaa puhelimen lukitus, niin näet enemmän vaihtoehtoja"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Avaa tabletin lukitus, niin näet enemmän vaihtoehtoja"</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Avaa laitteen lukitus, niin näet enemmän vaihtoehtoja"</string>
 </resources>

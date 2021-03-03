@@ -7494,8 +7494,8 @@ public class AudioService extends IAudioService.Stub
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
     private static final int MUSIC_ACTIVE_POLL_PERIOD_MS = 60000;  // 1 minute polling interval
     private static final int SAFE_VOLUME_CONFIGURE_TIMEOUT_MS = 30000;  // 30s after boot completed
-    // check playback or record activity every 3 seconds for UIDs owning mode IN_COMMUNICATION
-    private static final int CHECK_MODE_FOR_UID_PERIOD_MS = 3000;
+    // check playback or record activity every 6 seconds for UIDs owning mode IN_COMMUNICATION
+    private static final int CHECK_MODE_FOR_UID_PERIOD_MS = 6000;
 
     private int safeMediaVolumeIndex(int device) {
         if (!mSafeMediaVolumeDevices.contains(device)) {

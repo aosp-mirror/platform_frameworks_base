@@ -20364,10 +20364,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int checkOperation(int code, int uid, String packageName, boolean raw,
                 QuadFunction<Integer, Integer, String, Boolean, Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, Process.SHELL_UID,
-                            "com.android.shell", raw);
+                    return superImpl.apply(code, shellUid, "com.android.shell", raw);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -20379,10 +20380,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int checkAudioOperation(int code, int usage, int uid, String packageName,
                 QuadFunction<Integer, Integer, Integer, String, Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, usage, Process.SHELL_UID,
-                            "com.android.shell");
+                    return superImpl.apply(code, usage, shellUid, "com.android.shell");
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -20397,9 +20399,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
                         Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, Process.SHELL_UID, "com.android.shell", featureId,
+                    return superImpl.apply(code, shellUid, "com.android.shell", featureId,
                             shouldCollectAsyncNotedOp, message, shouldCollectMessage);
                 } finally {
                     Binder.restoreCallingIdentity(identity);

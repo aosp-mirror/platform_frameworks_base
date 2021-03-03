@@ -43,7 +43,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
-import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;

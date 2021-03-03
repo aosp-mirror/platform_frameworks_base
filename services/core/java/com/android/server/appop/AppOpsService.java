@@ -75,6 +75,7 @@ import android.Manifest;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -89,6 +90,7 @@ import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.AsyncNotedAppOp;
 import android.app.RuntimeAppOpAccessMessage;
 import android.app.SyncNotedAppOp;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -270,6 +272,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private final AppOpsManagerInternalImpl mAppOpsManagerInternal
             = new AppOpsManagerInternalImpl();
+    @Nullable private final DevicePolicyManagerInternal dpmi =
+            LocalServices.getService(DevicePolicyManagerInternal.class);
 
     /**
      * Registered callbacks, called from {@link #collectAsyncNotedOp}.
@@ -1011,10 +1015,11 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
 
             int numInProgressEvents = mInProgressEvents.size();
+            List<IBinder> binders = new ArrayList<>(mInProgressEvents.keySet());
             for (int i = 0; i < numInProgressEvents; i++) {
-                InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
+                InProgressStartOpEvent event = mInProgressEvents.get(binders.get(i));
 
-                if (event.getUidState() != newState) {
+                if (event != null && event.getUidState() != newState) {
                     try {
                         // Remove all but one unfinished start count and then call finished() to
                         // remove start event object
@@ -1025,7 +1030,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                         // Call started() to add a new start event object and then add the
                         // previously removed unfinished start counts back
                         started(event.getClientId(), newState, false);
-                        event.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
+                        InProgressStartOpEvent newEvent = mInProgressEvents.get(binders.get(i));
+                        if (newEvent != null) {
+                            newEvent.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
+                        }
                     } catch (RemoteException e) {
                         if (DEBUG) Slog.e(TAG, "Cannot switch to new uidState " + newState);
                     }
@@ -2660,6 +2668,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                     Ops pkgOps = ent.getValue();
                     for (int j=pkgOps.size()-1; j>=0; j--) {
                         Op curOp = pkgOps.valueAt(j);
+                        if (shouldDeferResetOpToDpm(curOp.op)) {
+                            deferResetOpToDpm(curOp.op, reqPackageName, reqUserId);
+                            continue;
+                        }
                         if (AppOpsManager.opAllowsReset(curOp.op)
                                 && curOp.mode != AppOpsManager.opToDefaultMode(curOp.op)) {
                             int previousMode = curOp.mode;
@@ -2709,14 +2721,25 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        if (allChanges != null) {
-            int numChanges = allChanges.size();
-            for (int i = 0; i < numChanges; i++) {
-                ChangeRec change = allChanges.get(i);
-                notifyOpChangedSync(change.op, change.uid, change.pkg,
-                        AppOpsManager.opToDefaultMode(change.op), change.previous_mode);
-            }
+        int numChanges = allChanges.size();
+        for (int i = 0; i < numChanges; i++) {
+            ChangeRec change = allChanges.get(i);
+            notifyOpChangedSync(change.op, change.uid, change.pkg,
+                    AppOpsManager.opToDefaultMode(change.op), change.previous_mode);
         }
+    }
+
+    private boolean shouldDeferResetOpToDpm(int op) {
+        // TODO(b/174582385): avoid special-casing app-op resets by migrating app-op permission
+        //  pre-grants to a role-based mechanism or another general-purpose mechanism.
+        return dpmi != null && dpmi.supportsResetOp(op);
+    }
+
+    /** Assumes {@link #shouldDeferResetOpToDpm(int)} is true. */
+    private void deferResetOpToDpm(int op, String packageName, @UserIdInt int userId) {
+        // TODO(b/174582385): avoid special-casing app-op resets by migrating app-op permission
+        //  pre-grants to a role-based mechanism or another general-purpose mechanism.
+        dpmi.resetOp(op, packageName, userId);
     }
 
     private void evalAllForegroundOpsLocked() {
@@ -2978,9 +3001,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             return AppOpsManager.MODE_IGNORED;
         }
 
+        // This is a workaround for R QPR, new API change is not allowed. We only allow the current
+        // voice recognizer is also the voice interactor to noteproxy op.
+        final boolean isTrustVoiceServiceProxy =
+                AppOpsManager.isTrustedVoiceServiceProxy(mContext, proxyPackageName, code);
+        final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
         final boolean isProxyTrusted = mContext.checkPermission(
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
-                == PackageManager.PERMISSION_GRANTED;
+                == PackageManager.PERMISSION_GRANTED || isTrustVoiceServiceProxy || isSelfBlame;
 
         final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
                 : AppOpsManager.OP_FLAG_UNTRUSTED_PROXY;

@@ -77,6 +77,7 @@ import com.android.server.SystemService;
 import com.android.server.lights.LightsManager;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.PowerManagerService.BatteryReceiver;
+import com.android.server.power.PowerManagerService.BinderService;
 import com.android.server.power.PowerManagerService.Injector;
 import com.android.server.power.PowerManagerService.NativeWrapper;
 import com.android.server.power.PowerManagerService.UserSwitchedReceiver;
@@ -173,6 +174,7 @@ public class PowerManagerServiceTest {
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(false);
         when(mDisplayManagerInternalMock.requestPowerState(any(), anyBoolean())).thenReturn(true);
         when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), anyString())).thenReturn("");
+        when(mAmbientDisplayConfigurationMock.ambientDisplayAvailable()).thenReturn(true);
 
         mDisplayPowerRequest = new DisplayPowerRequest();
         addLocalServiceMock(LightsManager.class, mLightsManagerMock);
@@ -965,6 +967,74 @@ public class PowerManagerServiceTest {
         assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressedForToken("test1"))
             .isTrue();
         assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressedForToken("test2"))
+            .isFalse();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressedForTokenByApp_ambientDisplayUnavailable()
+            throws Exception {
+        createService();
+        when(mAmbientDisplayConfigurationMock.ambientDisplayAvailable()).thenReturn(false);
+
+        BinderService service = mService.getBinderServiceInstance();
+        assertThat(service.isAmbientDisplaySuppressedForTokenByApp("test", Binder.getCallingUid()))
+            .isFalse();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressedForTokenByApp_default()
+            throws Exception {
+        createService();
+
+        BinderService service = mService.getBinderServiceInstance();
+        assertThat(service.isAmbientDisplaySuppressedForTokenByApp("test", Binder.getCallingUid()))
+            .isFalse();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressedForTokenByApp_suppressedByCallingApp()
+            throws Exception {
+        createService();
+        BinderService service = mService.getBinderServiceInstance();
+        service.suppressAmbientDisplay("test", true);
+
+        assertThat(service.isAmbientDisplaySuppressedForTokenByApp("test", Binder.getCallingUid()))
+            .isTrue();
+        // Check that isAmbientDisplaySuppressedForTokenByApp doesn't return true for another app.
+        assertThat(service.isAmbientDisplaySuppressedForTokenByApp("test", /* appUid= */ 123))
+            .isFalse();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressedForTokenByApp_notSuppressedByCallingApp()
+            throws Exception {
+        createService();
+        BinderService service = mService.getBinderServiceInstance();
+        service.suppressAmbientDisplay("test", false);
+
+        assertThat(service.isAmbientDisplaySuppressedForTokenByApp("test", Binder.getCallingUid()))
+            .isFalse();
+        // Check that isAmbientDisplaySuppressedForTokenByApp doesn't return true for another app.
+        assertThat(service.isAmbientDisplaySuppressedForTokenByApp("test", /* appUid= */ 123))
+            .isFalse();
+    }
+
+    @Test
+    public void testIsAmbientDisplaySuppressedForTokenByApp_multipleTokensSuppressedByCallingApp()
+            throws Exception {
+        createService();
+        BinderService service = mService.getBinderServiceInstance();
+        service.suppressAmbientDisplay("test1", true);
+        service.suppressAmbientDisplay("test2", true);
+
+        assertThat(service.isAmbientDisplaySuppressedForTokenByApp("test1", Binder.getCallingUid()))
+            .isTrue();
+        assertThat(service.isAmbientDisplaySuppressedForTokenByApp("test2", Binder.getCallingUid()))
+            .isTrue();
+        // Check that isAmbientDisplaySuppressedForTokenByApp doesn't return true for another app.
+        assertThat(service.isAmbientDisplaySuppressedForTokenByApp("test1", /* appUid= */ 123))
+            .isFalse();
+        assertThat(service.isAmbientDisplaySuppressedForTokenByApp("test2", /* appUid= */ 123))
             .isFalse();
     }
 }

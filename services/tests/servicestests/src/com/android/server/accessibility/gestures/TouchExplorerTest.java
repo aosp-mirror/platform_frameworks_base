@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility.gestures;
 
+import static android.view.ViewConfiguration.getDoubleTapTimeout;
+
 import static com.android.server.accessibility.gestures.TouchState.STATE_CLEAR;
 import static com.android.server.accessibility.gestures.TouchState.STATE_DELEGATING;
 import static com.android.server.accessibility.gestures.TouchState.STATE_DRAGGING;
@@ -23,6 +25,7 @@ import static com.android.server.accessibility.gestures.TouchState.STATE_TOUCH_E
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
@@ -31,6 +34,7 @@ import android.os.SystemClock;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -52,6 +56,8 @@ import java.util.List;
 public class TouchExplorerTest {
 
     private static final String LOG_TAG = "TouchExplorerTest";
+    // The constant of mDetermineUserIntentTimeout.
+    private static final int USER_INTENT_TIMEOUT = getDoubleTapTimeout();
     private static final int FLAG_1FINGER = 0x8000;
     private static final int FLAG_2FINGERS = 0x0100;
     private static final int FLAG_3FINGERS = 0x0200;
@@ -72,6 +78,8 @@ public class TouchExplorerTest {
     private EventStreamTransformation mCaptor;
     private MotionEvent mLastEvent;
     private TouchExplorer mTouchExplorer;
+    private Context mContext;
+    private int mTouchSlop;
     private long mLastDownTime = Integer.MIN_VALUE;
 
     // mock package-private GestureManifold class
@@ -91,7 +99,9 @@ public class TouchExplorerTest {
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
             mEvents.add(0, event.copy());
             // LastEvent may not match if we're clearing the state
-            if (mLastEvent != null) {
+            // The last event becomes ACTION_UP event when sending the ACTION_CANCEL event,
+            // so ignoring the ACTION_CANCEL event checking.
+            if (mLastEvent != null && rawEvent.getActionMasked() != MotionEvent.ACTION_CANCEL) {
                 MotionEventMatcher lastEventMatcher = new MotionEventMatcher(mLastEvent);
                 assertThat(rawEvent, lastEventMatcher);
             }
@@ -109,12 +119,50 @@ public class TouchExplorerTest {
 
     @Before
     public void setUp() {
-        Context context = InstrumentationRegistry.getContext();
-        AccessibilityManagerService ams = new AccessibilityManagerService(context);
+        mContext = InstrumentationRegistry.getContext();
+        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        AccessibilityManagerService ams = new AccessibilityManagerService(mContext);
         GestureManifold detector = mock(GestureManifold.class);
         mCaptor = new EventCaptor();
-        mTouchExplorer = new TouchExplorer(context, ams, detector);
+        mTouchExplorer = new TouchExplorer(mContext, ams, detector);
         mTouchExplorer.setNext(mCaptor);
+    }
+
+    /**
+     * Test the case where the event location is correct when clicking after the following
+     * situation happened: entering the delegate state through doubleTapAndHold gesture and
+     * receiving a cancel event to return the clear state.
+     */
+    @Test
+    public void testClick_afterCanceledDoubleTapAndHold_eventLocationIsCorrect()
+            throws InterruptedException {
+        // Generates the click position by this click operation, otherwise the offset used
+        // while delegating could not be set.
+        send(downEvent(DEFAULT_X + 10, DEFAULT_Y + 10));
+        // Waits for transition to touch exploring state.
+        Thread.sleep(2 * USER_INTENT_TIMEOUT);
+        send(upEvent());
+
+        // Simulates detecting the doubleTapAndHold gesture and enters the delegate state.
+        final MotionEvent sendEvent =
+                fromTouchscreen(downEvent(DEFAULT_X + 100, DEFAULT_Y + 100));
+        mTouchExplorer.onDoubleTapAndHold(sendEvent, sendEvent, 0);
+        assertState(STATE_DELEGATING);
+
+        send(cancelEvent());
+
+        // Generates the click operation, and checks the event location of the ACTION_HOVER_ENTER
+        // event is correct.
+        send(downEvent());
+        // Waits for transition to touch exploring state.
+        Thread.sleep(2 * USER_INTENT_TIMEOUT);
+        send(upEvent());
+
+        final List<MotionEvent> events = getCapturedEvents();
+        assertTrue(events.stream().anyMatch(
+                motionEvent -> motionEvent.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER
+                        && motionEvent.getX() == DEFAULT_X
+                        && motionEvent.getY() == DEFAULT_Y));
     }
 
     @Test
@@ -158,7 +206,7 @@ public class TouchExplorerTest {
         goFromStateClearTo(STATE_DRAGGING_2FINGERS);
 
         assertState(STATE_DRAGGING);
-        assertCapturedEvents(MotionEvent.ACTION_DOWN);
+        assertCapturedEvents(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE);
         assertCapturedEventsNoHistory();
     }
 
@@ -170,6 +218,7 @@ public class TouchExplorerTest {
         assertState(STATE_DELEGATING);
         assertCapturedEvents(
                 /* goto dragging state */ MotionEvent.ACTION_DOWN,
+                MotionEvent.ACTION_MOVE,
                 /* leave dragging state */ MotionEvent.ACTION_UP,
                 MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_POINTER_DOWN);
@@ -226,13 +275,13 @@ public class TouchExplorerTest {
                 break;
                 case STATE_DRAGGING_2FINGERS: {
                     goFromStateClearTo(STATE_TOUCH_EXPLORING_2FINGER);
-                    moveEachPointers(mLastEvent, p(10, 0), p(10, 0));
+                    moveEachPointers(mLastEvent, p(mTouchSlop, 0), p(mTouchSlop, 0));
                     send(mLastEvent);
                 }
                 break;
                 case STATE_PINCH_2FINGERS: {
                     goFromStateClearTo(STATE_DRAGGING_2FINGERS);
-                    moveEachPointers(mLastEvent, p(10, 0), p(-10, 1));
+                    moveEachPointers(mLastEvent, p(mTouchSlop, 0), p(-mTouchSlop, 1));
                     send(mLastEvent);
                 }
                 break;
@@ -287,6 +336,19 @@ public class TouchExplorerTest {
 
     private List<MotionEvent> getCapturedEvents() {
         return ((EventCaptor) mCaptor).mEvents;
+    }
+
+    private MotionEvent cancelEvent() {
+        mLastDownTime = SystemClock.uptimeMillis();
+        return fromTouchscreen(
+                MotionEvent.obtain(mLastDownTime, mLastDownTime, MotionEvent.ACTION_CANCEL,
+                        DEFAULT_X, DEFAULT_Y, 0));
+    }
+
+    private MotionEvent downEvent(float x, float y) {
+        mLastDownTime = SystemClock.uptimeMillis();
+        return fromTouchscreen(
+                MotionEvent.obtain(mLastDownTime, mLastDownTime, MotionEvent.ACTION_DOWN, x, y, 0));
     }
 
     private MotionEvent downEvent() {

@@ -3268,8 +3268,8 @@ public final class ViewRootImpl implements ViewParent,
 
             // Note: must be done after the focus change callbacks,
             // so all of the view state is set up correctly.
-            mImeFocusController.onPostWindowFocus(mView.findFocus(), hasWindowFocus,
-                    mWindowAttributes);
+            mImeFocusController.onPostWindowFocus(mView != null ? mView.findFocus() : null,
+                    hasWindowFocus, mWindowAttributes);
 
             if (hasWindowFocus) {
                 // Clear the forward bit.  We can just do this directly, since

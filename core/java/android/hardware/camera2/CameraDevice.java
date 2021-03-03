@@ -234,7 +234,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see StreamConfigurationMap#getOutputFormats()
      * @see StreamConfigurationMap#getOutputSizes(int)
      * @see StreamConfigurationMap#getOutputSizes(Class)
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      */
@@ -249,7 +249,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * @see #createCaptureSession
      * @see OutputConfiguration
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      */
@@ -285,7 +285,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see StreamConfigurationMap#getOutputSizes
      * @see android.media.ImageWriter
      * @see android.media.ImageReader
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      */
@@ -302,7 +302,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * @see #createReprocessableCaptureSession
      * @see OutputConfiguration
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      */
@@ -340,7 +340,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see CameraCaptureSession#captureBurst
      * @see CameraCaptureSession#setRepeatingBurst
      * @see CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      */
@@ -413,7 +413,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see #createReprocessableCaptureSession
      * @see CameraCaptureSession
      * @see OutputConfiguration
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      * @hide

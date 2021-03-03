@@ -4263,6 +4263,9 @@ public class DevicePolicyManager {
      * This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile.
      * <p>
+     * NOTE: on {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE automotive builds}, this
+     * method doesn't turn off the screen as it would be a driving safety distraction.
+     * <p>
      * Equivalent to calling {@link #lockNow(int)} with no flags.
      *
      * @throws SecurityException if the calling application does not own an active administrator
@@ -4306,6 +4309,9 @@ public class DevicePolicyManager {
      * Calling the method twice in this order ensures that all users are locked and does not
      * stop the device admin on the managed profile from issuing a second call to lock its own
      * profile.
+     * <p>
+     * NOTE: on {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE automotive builds}, this
+     * method doesn't turn off the screen as it would be a driving safety distraction.
      *
      * @param flags May be 0 or {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
      * @throws SecurityException if the calling application does not own an active administrator
