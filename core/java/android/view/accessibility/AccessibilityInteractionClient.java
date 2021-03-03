@@ -23,7 +23,9 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -113,6 +115,8 @@ public final class AccessibilityInteractionClient
 
     private final Object mInstanceLock = new Object();
 
+    private Handler mMainHandler;
+
     private volatile int mInteractionId = -1;
 
     private AccessibilityNodeInfo mFindAccessibilityNodeInfoResult;
@@ -122,6 +126,11 @@ public final class AccessibilityInteractionClient
     private boolean mPerformAccessibilityActionResult;
 
     private Message mSameThreadMessage;
+
+    private int mInteractionIdWaitingForPrefetchResult;
+    private int mConnectionIdWaitingForPrefetchResult;
+    private String[] mPackageNamesForNextPrefetchResult;
+    private Runnable mPrefetchResultRunnable;
 
     /**
      * @return The client for the current thread.
@@ -197,6 +206,9 @@ public final class AccessibilityInteractionClient
 
     private AccessibilityInteractionClient() {
         /* reducing constructor visibility */
+        if (Looper.getMainLooper() != null) {
+            mMainHandler = new Handler(Looper.getMainLooper());
+        }
     }
 
     /**
@@ -451,16 +463,16 @@ public final class AccessibilityInteractionClient
                     Binder.restoreCallingIdentity(identityToken);
                 }
                 if (packageNames != null) {
-                    List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
-                            interactionId);
-                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId,
-                            bypassCache, packageNames);
-                    if (infos != null && !infos.isEmpty()) {
-                        for (int i = 1; i < infos.size(); i++) {
-                            infos.get(i).recycle();
-                        }
-                        return infos.get(0);
+                    AccessibilityNodeInfo info =
+                            getFindAccessibilityNodeInfoResultAndClear(interactionId);
+                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_MASK) != 0
+                            && info != null) {
+                        setInteractionWaitingForPrefetchResult(interactionId, connectionId,
+                                packageNames);
                     }
+                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId,
+                            bypassCache, packageNames);
+                    return info;
                 }
             } else {
                 if (DEBUG) {
@@ -472,6 +484,15 @@ public final class AccessibilityInteractionClient
                     + " findAccessibilityNodeInfoByAccessibilityId", re);
         }
         return null;
+    }
+
+    private void setInteractionWaitingForPrefetchResult(int interactionId, int connectionId,
+            String[] packageNames) {
+        synchronized (mInstanceLock) {
+            mInteractionIdWaitingForPrefetchResult = interactionId;
+            mConnectionIdWaitingForPrefetchResult = connectionId;
+            mPackageNamesForNextPrefetchResult = packageNames;
+        }
     }
 
     private static String idToString(int accessibilityWindowId, long accessibilityNodeId) {
@@ -825,6 +846,60 @@ public final class AccessibilityInteractionClient
                 mInteractionId = interactionId;
             }
             mInstanceLock.notifyAll();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setPrefetchAccessibilityNodeInfoResult(@NonNull List<AccessibilityNodeInfo> infos,
+                                                       int interactionId) {
+        List<AccessibilityNodeInfo> infosCopy = null;
+        int mConnectionIdWaitingForPrefetchResultCopy = -1;
+        String[] mPackageNamesForNextPrefetchResultCopy = null;
+
+        synchronized (mInstanceLock) {
+            if (!infos.isEmpty() && mInteractionIdWaitingForPrefetchResult == interactionId) {
+                if (mMainHandler != null) {
+                    if (mPrefetchResultRunnable != null) {
+                        mMainHandler.removeCallbacks(mPrefetchResultRunnable);
+                        mPrefetchResultRunnable = null;
+                    }
+                    /**
+                     * TODO(b/180957109): AccessibilityCache is prone to deadlocks
+                     * We post caching the prefetched nodes in the main thread. Using the binder
+                     * thread results in "Long monitor contention with owner main" logs where
+                     * service response times may exceed 5 seconds. This is due to the cache calling
+                     * out to the system when refreshing nodes with the lock held.
+                     */
+                    mPrefetchResultRunnable = () -> finalizeAndCacheAccessibilityNodeInfos(
+                            infos, mConnectionIdWaitingForPrefetchResult, false,
+                            mPackageNamesForNextPrefetchResult);
+                    mMainHandler.post(mPrefetchResultRunnable);
+
+                } else {
+                    for (AccessibilityNodeInfo info : infos) {
+                        infosCopy.add(new AccessibilityNodeInfo(info));
+                    }
+                    mConnectionIdWaitingForPrefetchResultCopy =
+                            mConnectionIdWaitingForPrefetchResult;
+                    mPackageNamesForNextPrefetchResultCopy =
+                            new String[mPackageNamesForNextPrefetchResult.length];
+                    for (int i = 0; i < mPackageNamesForNextPrefetchResult.length; i++) {
+                        mPackageNamesForNextPrefetchResultCopy[i] =
+                                mPackageNamesForNextPrefetchResult[i];
+
+                    }
+                }
+            }
+
+        }
+
+        if (infosCopy != null) {
+            finalizeAndCacheAccessibilityNodeInfos(
+                    infosCopy, mConnectionIdWaitingForPrefetchResultCopy, false,
+                    mPackageNamesForNextPrefetchResultCopy);
         }
     }
 

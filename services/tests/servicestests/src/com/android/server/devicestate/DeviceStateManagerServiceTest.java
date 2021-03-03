@@ -274,6 +274,87 @@ public final class DeviceStateManagerServiceTest {
     }
 
     @Test
+    public void requestState_pendingStateAtRequest() throws RemoteException {
+        TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
+        mService.getBinderService().registerCallback(callback);
+
+        mPolicy.blockConfigure();
+
+        final IBinder firstRequestToken = new Binder();
+        final IBinder secondRequestToken = new Binder();
+        assertEquals(callback.getLastNotifiedStatus(firstRequestToken),
+                TestDeviceStateManagerCallback.STATUS_UNKNOWN);
+        assertEquals(callback.getLastNotifiedStatus(secondRequestToken),
+                TestDeviceStateManagerCallback.STATUS_UNKNOWN);
+
+        mService.getBinderService().requestState(firstRequestToken,
+                OTHER_DEVICE_STATE.getIdentifier(), 0 /* flags */);
+
+        assertEquals(mService.getCommittedState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mService.getPendingState().get(), OTHER_DEVICE_STATE);
+        assertEquals(mService.getBaseState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
+                OTHER_DEVICE_STATE.getIdentifier());
+
+        mService.getBinderService().requestState(secondRequestToken,
+                DEFAULT_DEVICE_STATE.getIdentifier(), 0 /* flags */);
+
+        mPolicy.resumeConfigureOnce();
+
+        // First request status is now suspended as there is another pending request.
+        assertEquals(callback.getLastNotifiedStatus(firstRequestToken),
+                TestDeviceStateManagerCallback.STATUS_SUSPENDED);
+        // Second request status still unknown because the service is still awaiting policy
+        // callback.
+        assertEquals(callback.getLastNotifiedStatus(secondRequestToken),
+                TestDeviceStateManagerCallback.STATUS_UNKNOWN);
+
+        assertEquals(mService.getCommittedState(), OTHER_DEVICE_STATE);
+        assertEquals(mService.getPendingState().get(), DEFAULT_DEVICE_STATE);
+        assertEquals(mService.getBaseState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
+                DEFAULT_DEVICE_STATE.getIdentifier());
+
+        mPolicy.resumeConfigure();
+
+        assertEquals(mService.getCommittedState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mService.getBaseState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
+                DEFAULT_DEVICE_STATE.getIdentifier());
+
+        // Now cancel the second request to make the first request active.
+        mService.getBinderService().cancelRequest(secondRequestToken);
+
+        assertEquals(callback.getLastNotifiedStatus(firstRequestToken),
+                TestDeviceStateManagerCallback.STATUS_ACTIVE);
+        assertEquals(callback.getLastNotifiedStatus(secondRequestToken),
+                TestDeviceStateManagerCallback.STATUS_CANCELED);
+
+        assertEquals(mService.getCommittedState(), OTHER_DEVICE_STATE);
+        assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mService.getBaseState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
+                OTHER_DEVICE_STATE.getIdentifier());
+    }
+
+    @Test
+    public void requestState_sameAsBaseState() throws RemoteException {
+        TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
+        mService.getBinderService().registerCallback(callback);
+
+        final IBinder token = new Binder();
+        assertEquals(callback.getLastNotifiedStatus(token),
+                TestDeviceStateManagerCallback.STATUS_UNKNOWN);
+
+        mService.getBinderService().requestState(token, DEFAULT_DEVICE_STATE.getIdentifier(),
+                0 /* flags */);
+
+        assertEquals(callback.getLastNotifiedStatus(token),
+                TestDeviceStateManagerCallback.STATUS_ACTIVE);
+    }
+
+    @Test
     public void requestState_flagCancelWhenBaseChanges() throws RemoteException {
         TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
         mService.getBinderService().registerCallback(callback);
@@ -400,6 +481,14 @@ public final class DeviceStateManagerServiceTest {
 
         public void resumeConfigure() {
             mConfigureBlocked = false;
+            if (mPendingConfigureCompleteRunnable != null) {
+                Runnable onComplete = mPendingConfigureCompleteRunnable;
+                mPendingConfigureCompleteRunnable = null;
+                onComplete.run();
+            }
+        }
+
+        public void resumeConfigureOnce() {
             if (mPendingConfigureCompleteRunnable != null) {
                 Runnable onComplete = mPendingConfigureCompleteRunnable;
                 mPendingConfigureCompleteRunnable = null;

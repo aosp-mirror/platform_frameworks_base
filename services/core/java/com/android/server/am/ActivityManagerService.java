@@ -15179,8 +15179,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             mFgsStartTempAllowList.add(changingUid, durationMs, reasonCode, reason,
                                     callingUid);
                         }
-                        setAppIdTempAllowlistStateLSP(changingUid, adding);
                     }
+                    setAppIdTempAllowlistStateLSP(changingUid, adding);
                 }
             }
         }

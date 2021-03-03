@@ -68,6 +68,11 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.imsserviceentitlement">
+        <permission name="android.permission.MODIFY_PHONE_STATE" />
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.launcher3">
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
@@ -251,6 +256,7 @@ applications that come with the platform
         <!-- Permissions required for reading DeviceConfig -->
         <permission name="android.permission.READ_DEVICE_CONFIG" />
         <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
+        <permission name="android.permission.MODIFY_QUIET_MODE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">
@@ -478,6 +484,8 @@ applications that come with the platform
         <permission name="android.permission.SIGNAL_REBOOT_READINESS" />
         <!-- Permission required for CTS test - PeopleManagerTest -->
         <permission name="android.permission.READ_PEOPLE_DATA" />
+        <!-- Permission required for CTS test - UiTranslationManagerTest -->
+        <permission name="android.permission.MANAGE_UI_TRANSLATION" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

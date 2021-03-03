@@ -3224,6 +3224,9 @@
   <java-symbol type="bool" name="config_reduceBrightColorsAvailable" />
   <java-symbol type="array" name="config_reduceBrightColorsCoefficients" />
   <java-symbol type="array" name="config_reduceBrightColorsCoefficientsNonlinear" />
+  <java-symbol type="integer" name="config_reduceBrightColorsStrengthDefault" />
+  <java-symbol type="integer" name="config_reduceBrightColorsStrengthMin" />
+  <java-symbol type="integer" name="config_reduceBrightColorsStrengthMax" />
   <java-symbol type="array" name="config_availableColorModes" />
   <java-symbol type="array" name="config_mappedColorModes" />
   <java-symbol type="string" name="config_vendorColorModesRestoreHint" />

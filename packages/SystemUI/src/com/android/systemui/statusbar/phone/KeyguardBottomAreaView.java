@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
-import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_BUTTON;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_UNLOCK;
@@ -74,10 +73,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.controls.dagger.ControlsComponent;
-import com.android.systemui.controls.ui.ControlsDialog;
-import com.android.systemui.controls.ui.ControlsUiController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.IntentButtonProvider;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
@@ -130,7 +125,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private KeyguardAffordanceView mRightAffordanceView;
     private KeyguardAffordanceView mLeftAffordanceView;
-    private ImageView mAltLeftButton;
+    private ImageView mWalletButton;
     private ViewGroup mIndicationArea;
     private TextView mIndicationText;
     private TextView mIndicationTextBottom;
@@ -179,11 +174,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private int mBurnInXOffset;
     private int mBurnInYOffset;
     private ActivityIntentHelper mActivityIntentHelper;
-
-    private ControlsDialog mControlsDialog;
-    private ControlsComponent mControlsComponent;
     private int mLockScreenMode;
-    private BroadcastDispatcher mBroadcastDispatcher;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     public KeyguardBottomAreaView(Context context) {
@@ -251,7 +242,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mOverlayContainer = findViewById(R.id.overlay_container);
         mRightAffordanceView = findViewById(R.id.camera_button);
         mLeftAffordanceView = findViewById(R.id.left_button);
-        mAltLeftButton = findViewById(R.id.alt_left_button);
+        mWalletButton = findViewById(R.id.wallet_button);
         mIndicationArea = findViewById(R.id.keyguard_indication_area);
         mIndicationText = findViewById(R.id.keyguard_indication_text);
         mIndicationTextBottom = findViewById(R.id.keyguard_indication_text_bottom);
@@ -351,10 +342,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLeftAffordanceView.setLayoutParams(lp);
         updateLeftAffordanceIcon();
 
-        lp = mAltLeftButton.getLayoutParams();
+        lp = mWalletButton.getLayoutParams();
         lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_width);
         lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_height);
-        mAltLeftButton.setLayoutParams(lp);
+        mWalletButton.setLayoutParams(lp);
     }
 
     private void updateRightAffordanceIcon() {
@@ -427,11 +418,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLeftAffordanceView.setContentDescription(state.contentDescription);
     }
 
-    private void updateControlsVisibility() {
-        if (mDozing || mControlsComponent.getVisibility() != AVAILABLE) {
-            mAltLeftButton.setVisibility(GONE);
+    private void updateWalletVisibility() {
+        if (mDozing) {
+            mWalletButton.setVisibility(GONE);
         } else {
-            mAltLeftButton.setVisibility(VISIBLE);
+            mWalletButton.setVisibility(VISIBLE);
         }
     }
 
@@ -699,8 +690,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public void startFinishDozeAnimation() {
         long delay = 0;
-        if (mAltLeftButton.getVisibility() == View.VISIBLE) {
-            startFinishDozeAnimationElement(mAltLeftButton, delay);
+        if (mWalletButton.getVisibility() == View.VISIBLE) {
+            startFinishDozeAnimationElement(mWalletButton, delay);
         }
         if (mLeftAffordanceView.getVisibility() == View.VISIBLE) {
             startFinishDozeAnimationElement(mLeftAffordanceView, delay);
@@ -774,14 +765,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         updateCameraVisibility();
         updateLeftAffordanceIcon();
-        updateControlsVisibility();
+        updateWalletVisibility();
 
         if (dozing) {
             mOverlayContainer.setVisibility(INVISIBLE);
-            if (mControlsDialog != null) {
-                mControlsDialog.dismiss();
-                mControlsDialog = null;
-            }
         } else {
             mOverlayContainer.setVisibility(VISIBLE);
             if (animate) {
@@ -811,7 +798,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLeftAffordanceView.setAlpha(alpha);
         mRightAffordanceView.setAlpha(alpha);
         mIndicationArea.setAlpha(alpha);
-        mAltLeftButton.setAlpha(alpha);
+        mWalletButton.setAlpha(alpha);
     }
 
     private class DefaultLeftButton implements IntentButton {
@@ -884,38 +871,18 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         return insets;
     }
 
-    /**
-     * Show or hide controls, depending on the lock screen mode and controls
-     * availability.
-     */
-    public void setupControls(ControlsComponent component, BroadcastDispatcher dispatcher) {
-        mControlsComponent = component;
-        mBroadcastDispatcher = dispatcher;
-        setupControls();
-    }
-
-    private void setupControls() {
+    private void setupWallet() {
         boolean inNewLayout = mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
         boolean settingEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 "controls_lockscreen", 0) == 1;
-        if (!inNewLayout || !settingEnabled || !mControlsComponent.isEnabled()) {
-            mAltLeftButton.setVisibility(View.GONE);
+        if (!inNewLayout || !settingEnabled) {
+            mWalletButton.setVisibility(View.GONE);
             return;
         }
 
-        mControlsComponent.getControlsListingController().get()
-                .addCallback(list -> {
-                    if (!list.isEmpty()) {
-                        mAltLeftButton.setImageDrawable(list.get(0).loadIcon());
-                        mAltLeftButton.setOnClickListener((v) -> {
-                            ControlsUiController ui = mControlsComponent
-                                    .getControlsUiController().get();
-                            mControlsDialog = new ControlsDialog(mContext, mBroadcastDispatcher)
-                                    .show(ui);
-                        });
-                    }
-                    updateControlsVisibility();
-                });
+        // TODO: add image
+        //        mWalletButton.setImageDrawable(list.get(0).loadIcon());
+        updateWalletVisibility();
     }
 
     /**
@@ -923,6 +890,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
      */
     public void onLockScreenModeChanged(int mode) {
         mLockScreenMode = mode;
-        setupControls();
+        setupWallet();
     }
 }

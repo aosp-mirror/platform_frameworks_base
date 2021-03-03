@@ -85,10 +85,10 @@
         android:tint="?attr/wallpaperTextColor" />
 
     <ImageView
-        android:id="@+id/alt_left_button"
+        android:id="@+id/wallet_button"
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
-        android:layout_gravity="bottom|start"
+        android:layout_gravity="bottom|end"
         android:scaleType="center"
         android:tint="?attr/wallpaperTextColor"
         android:layout_marginStart="24dp"

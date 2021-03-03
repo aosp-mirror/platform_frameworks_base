@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,20 @@
 
 package com.android.server.accessibility.magnification;
 
+import static com.android.server.accessibility.utils.TouchEventGenerator.movePointer;
+import static com.android.server.accessibility.utils.TouchEventGenerator.twoPointersDownEvents;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -35,18 +41,20 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 /**
- * Tests for {@link TwoFingersDown}.
+ * Tests for {@link TwoFingersDownOrSwipe}.
  */
-public class TwoFingersDownTest {
+public class TwoFingersDownOrSwipeTest {
 
     private static final float DEFAULT_X = 100f;
     private static final float DEFAULT_Y = 100f;
 
-    private static Context sContext;
+    private static float sSwipeMinDistance;
     private static int sTimeoutMillis;
+    private static Context sContext;
 
-    private Context mContext;
     private GesturesObserver mGesturesObserver;
     @Mock
     private GesturesObserver.Listener mListener;
@@ -56,13 +64,13 @@ public class TwoFingersDownTest {
         sContext = InstrumentationRegistry.getContext();
         sTimeoutMillis = MagnificationGestureMatcher.getMagnificationMultiTapTimeout(
                 sContext) + 100;
+        sSwipeMinDistance = ViewConfiguration.get(sContext).getScaledTouchSlop() + 1;
     }
 
     @Before
     public void setUp() {
-        mContext = InstrumentationRegistry.getContext();
         MockitoAnnotations.initMocks(this);
-        mGesturesObserver = new GesturesObserver(mListener, new TwoFingersDown(mContext));
+        mGesturesObserver = new GesturesObserver(mListener, new TwoFingersDownOrSwipe(sContext));
     }
 
     @Test
@@ -78,24 +86,16 @@ public class TwoFingersDownTest {
 
     @Test
     public void sendTwoFingerDownEvent_onGestureCompleted() {
-        final MotionEvent downEvent = TouchEventGenerator.downEvent(Display.DEFAULT_DISPLAY,
-                DEFAULT_X, DEFAULT_Y);
-        final MotionEvent.PointerCoords defPointerCoords = new MotionEvent.PointerCoords();
-        defPointerCoords.x = DEFAULT_X;
-        defPointerCoords.y = DEFAULT_Y;
-        final MotionEvent.PointerCoords secondPointerCoords = new MotionEvent.PointerCoords();
-        secondPointerCoords.x = DEFAULT_X + 10;
-        secondPointerCoords.y = DEFAULT_Y + 10;
+        final List<MotionEvent> downEvents = twoPointersDownEvents(Display.DEFAULT_DISPLAY,
+                new PointF(DEFAULT_X, DEFAULT_Y), new PointF(DEFAULT_X + 10, DEFAULT_Y + 10));
 
-        final MotionEvent twoPointersDownEvent = TouchEventGenerator.twoPointersDownEvent(
-                Display.DEFAULT_DISPLAY, defPointerCoords, secondPointerCoords);
-
-        mGesturesObserver.onMotionEvent(downEvent, downEvent, 0);
-        mGesturesObserver.onMotionEvent(twoPointersDownEvent, twoPointersDownEvent, 0);
+        for (MotionEvent event : downEvents) {
+            mGesturesObserver.onMotionEvent(event, event, 0);
+        }
 
         verify(mListener, timeout(sTimeoutMillis)).onGestureCompleted(
-                MagnificationGestureMatcher.GESTURE_TWO_FINGER_DOWN, twoPointersDownEvent,
-                twoPointersDownEvent, 0);
+                MagnificationGestureMatcher.GESTURE_TWO_FINGERS_DOWN_OR_SWIPE, downEvents.get(1),
+                downEvents.get(1), 0);
     }
 
     @Test
@@ -108,7 +108,39 @@ public class TwoFingersDownTest {
         mGesturesObserver.onMotionEvent(downEvent, downEvent, 0);
         mGesturesObserver.onMotionEvent(upEvent, upEvent, 0);
 
-        verify(mListener, timeout(sTimeoutMillis)).onGestureCancelled(any(MotionEvent.class),
-                any(MotionEvent.class), eq(0));
+        verify(mListener, after(ViewConfiguration.getDoubleTapTimeout())).onGestureCancelled(
+                any(MotionEvent.class), any(MotionEvent.class), eq(0));
+    }
+
+    @Test
+    public void firstPointerMove_twoPointersDown_onGestureCompleted() {
+        final List<MotionEvent> downEvents = twoPointersDownEvents(Display.DEFAULT_DISPLAY,
+                new PointF(DEFAULT_X, DEFAULT_Y), new PointF(DEFAULT_X + 10, DEFAULT_Y + 10));
+        for (MotionEvent event : downEvents) {
+            mGesturesObserver.onMotionEvent(event, event, 0);
+        }
+        final MotionEvent moveEvent = movePointer(downEvents.get(1), 0, sSwipeMinDistance, 0);
+
+        mGesturesObserver.onMotionEvent(moveEvent, moveEvent, 0);
+
+        verify(mListener).onGestureCompleted(
+                MagnificationGestureMatcher.GESTURE_TWO_FINGERS_DOWN_OR_SWIPE, moveEvent,
+                moveEvent, 0);
+    }
+
+    @Test
+    public void secondPointerMove_twoPointersDown_onGestureCompleted() {
+        final List<MotionEvent> downEvents = twoPointersDownEvents(Display.DEFAULT_DISPLAY,
+                new PointF(DEFAULT_X, DEFAULT_Y), new PointF(DEFAULT_X + 10, DEFAULT_Y + 10));
+        for (MotionEvent event : downEvents) {
+            mGesturesObserver.onMotionEvent(event, event, 0);
+        }
+        final MotionEvent moveEvent = movePointer(downEvents.get(1), 1, sSwipeMinDistance, 0);
+
+        mGesturesObserver.onMotionEvent(moveEvent, moveEvent, 0);
+
+        verify(mListener).onGestureCompleted(
+                MagnificationGestureMatcher.GESTURE_TWO_FINGERS_DOWN_OR_SWIPE, moveEvent,
+                moveEvent, 0);
     }
 }

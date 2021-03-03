@@ -95,9 +95,6 @@ public class SystemConfig {
     // property for runtime configuration differentiation in vendor
     private static final String VENDOR_SKU_PROPERTY = "ro.boot.product.vendor.sku";
 
-    // property for background blur support in surface flinger
-    private static final String BLUR_PROPERTY = "ro.surface_flinger.supports_background_blur";
-
     // Group-ids that are given to all packages as read from etc/permissions/*.xml.
     int[] mGlobalGids = EmptyArray.INT;
 
@@ -1237,8 +1234,7 @@ public class SystemConfig {
 
         final int incrementalVersion = IncrementalManager.getVersion();
         if (incrementalVersion > 0) {
-            addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY, 0);
-            addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY_VERSION, incrementalVersion);
+            addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY, incrementalVersion);
         }
 
         if (PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT) {
@@ -1247,10 +1243,6 @@ public class SystemConfig {
 
         if (Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.Q) {
             addFeature(PackageManager.FEATURE_IPSEC_TUNNELS, 0);
-        }
-
-        if (SystemProperties.get(BLUR_PROPERTY, "default").equals("1")) {
-            addFeature(PackageManager.FEATURE_CROSS_LAYER_BLUR, 0);
         }
 
         if (SensorPrivacyManager.USE_MICROPHONE_TOGGLE) {

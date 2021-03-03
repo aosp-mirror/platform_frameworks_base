@@ -65,8 +65,6 @@ public class SystemAudioInitiationActionFromAvrTest {
 
         Context context = InstrumentationRegistry.getTargetContext();
 
-        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
-
         HdmiControlService hdmiControlService = new HdmiControlService(context) {
                     @Override
                     void sendCecCommand(
@@ -164,15 +162,11 @@ public class SystemAudioInitiationActionFromAvrTest {
                     int pathToPortId(int path) {
                         return -1;
                     }
-
-                    @Override
-                    protected HdmiCecConfig getHdmiCecConfig() {
-                        return hdmiCecConfig;
-                    }
                 };
 
         Looper looper = mTestLooper.getLooper();
         hdmiControlService.setIoLooper(looper);
+        hdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         HdmiCecController.NativeWrapper nativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 hdmiControlService, nativeWrapper, hdmiControlService.getAtomWriter());

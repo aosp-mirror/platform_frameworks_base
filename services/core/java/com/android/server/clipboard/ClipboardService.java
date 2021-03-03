@@ -880,8 +880,8 @@ public class ClipboardService extends SystemService {
         CharSequence sourceAppLabel = null;
         if (clipboard.mPrimaryClipPackage != null) {
             try {
-                sourceAppLabel = mPm.getApplicationLabel(
-                        mPm.getApplicationInfo(clipboard.mPrimaryClipPackage, 0));
+                sourceAppLabel = mPm.getApplicationLabel(mPm.getApplicationInfoAsUser(
+                        clipboard.mPrimaryClipPackage, 0, userId));
             } catch (PackageManager.NameNotFoundException e) {
                 // leave label as null
             }
@@ -889,7 +889,7 @@ public class ClipboardService extends SystemService {
 
         try {
             CharSequence callingAppLabel = mPm.getApplicationLabel(
-                    mPm.getApplicationInfo(callingPackage, 0));
+                    mPm.getApplicationInfoAsUser(callingPackage, 0, userId));
             String message;
             if (sourceAppLabel != null) {
                 message = callingAppLabel + " pasted from " + sourceAppLabel;

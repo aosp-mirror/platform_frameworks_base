@@ -28,7 +28,7 @@ import com.android.internal.util.DataClass;
  * <p>This spec help specify information such as the language/locale for the translation, as well
  * as the data format for the translation (text, audio, etc.)</p>
  */
-@DataClass(genEqualsHashCode = true, genHiddenConstDefs = true)
+@DataClass(genEqualsHashCode = true, genHiddenConstDefs = true, genToString = true)
 public final class TranslationSpec implements Parcelable {
 
     /** Data format for translation is text. */
@@ -95,6 +95,18 @@ public final class TranslationSpec implements Parcelable {
     @DataClass.Generated.Member
     public @DataFormat int getDataFormat() {
         return mDataFormat;
+    }
+
+    @Override
+    @DataClass.Generated.Member
+    public String toString() {
+        // You can override field toString logic by defining methods like:
+        // String fieldNameToString() { ... }
+
+        return "TranslationSpec { " +
+                "language = " + mLanguage + ", " +
+                "dataFormat = " + mDataFormat +
+        " }";
     }
 
     @Override
@@ -175,10 +187,10 @@ public final class TranslationSpec implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1609964630624L,
+            time = 1614326090637L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationSpec.java",
-            inputSignatures = "public static final  int DATA_FORMAT_TEXT\nprivate final @android.annotation.NonNull java.lang.String mLanguage\nprivate final @android.view.translation.TranslationSpec.DataFormat int mDataFormat\nclass TranslationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genHiddenConstDefs=true)")
+            inputSignatures = "public static final  int DATA_FORMAT_TEXT\nprivate final @android.annotation.NonNull java.lang.String mLanguage\nprivate final @android.view.translation.TranslationSpec.DataFormat int mDataFormat\nclass TranslationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genHiddenConstDefs=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

@@ -35,6 +35,31 @@ import android.view.WindowManager;
 @TestApi
 public final class StartingWindowInfo implements Parcelable {
     /**
+     * Prefer nothing or not care the type of starting window.
+     * @hide
+     */
+    public static final int STARTING_WINDOW_TYPE_NONE = 0;
+    /**
+     * Prefer splash screen starting window.
+     * @hide
+     */
+    public static final int STARTING_WINDOW_TYPE_SPLASH_SCREEN = 1;
+    /**
+     * Prefer snapshot starting window.
+     * @hide
+     */
+    public static final int STARTING_WINDOW_TYPE_SNAPSHOT = 2;
+    /**
+     * @hide
+     */
+    @IntDef(flag = true, prefix = "STARTING_WINDOW_TYPE_", value = {
+            STARTING_WINDOW_TYPE_NONE,
+            STARTING_WINDOW_TYPE_SPLASH_SCREEN,
+            STARTING_WINDOW_TYPE_SNAPSHOT
+    })
+    public @interface StartingWindowType {}
+
+    /**
      * The {@link TaskInfo} from this task.
      *  @hide
      */

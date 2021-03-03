@@ -581,7 +581,7 @@ TEST(JavaClassGeneratorTest, SortsDynamicAttributesAfterFrameworkAttributes) {
   out.Flush();
 
   EXPECT_THAT(output, HasSubstr("public static final int[] MyStyleable={"));
-  EXPECT_THAT(output, HasSubstr("0x01010000, 0x00010000"));
+  EXPECT_THAT(output, HasSubstr("0x01010000, lib.R.attr.dynamic_attr"));
   EXPECT_THAT(output, HasSubstr("public static final int MyStyleable_android_framework_attr=0;"));
   EXPECT_THAT(output, HasSubstr("public static final int MyStyleable_dynamic_attr=1;"));
 }
