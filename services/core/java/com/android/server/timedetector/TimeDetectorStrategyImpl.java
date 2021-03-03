@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.joining;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AlarmManager;
 import android.app.time.ExternalTimeSuggestion;
 import android.app.timedetector.GnssTimeSuggestion;
@@ -155,6 +156,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
          */
         @Origin int[] autoOriginPriorities();
 
+        /**
+         * Returns {@link ConfigurationInternal} for specified user.
+         */
+        @NonNull
+        ConfigurationInternal configurationInternal(@UserIdInt int userId);
+
         /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
         void acquireWakeLock();
 
@@ -264,6 +271,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         // clock.
         String reason = "New telephony time suggested. timeSuggestion=" + timeSuggestion;
         doAutoTimeDetection(reason);
+    }
+
+    @Override
+    @NonNull
+    public ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
+        return mEnvironment.configurationInternal(userId);
     }
 
     @Override
