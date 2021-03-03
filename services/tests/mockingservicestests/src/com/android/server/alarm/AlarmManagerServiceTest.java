@@ -85,6 +85,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.IAlarmCompleteListener;
 import android.app.IAlarmListener;
@@ -1649,8 +1650,8 @@ public class AlarmManagerServiceTest {
                 eq(FLAG_ALLOW_WHILE_IDLE_COMPAT | FLAG_STANDALONE), isNull(), isNull(),
                 eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
-        final Bundle idleOptions = bundleCaptor.getValue();
-        final int type = idleOptions.getInt("android:broadcast.temporaryAppWhitelistType");
+        final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
+        final int type = idleOptions.getTemporaryAppAllowlistType();
         assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, type);
     }
 
@@ -1669,8 +1670,8 @@ public class AlarmManagerServiceTest {
                 eq(alarmPi), isNull(), isNull(), eq(FLAG_ALLOW_WHILE_IDLE_COMPAT), isNull(),
                 isNull(), eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
-        final Bundle idleOptions = bundleCaptor.getValue();
-        final int type = idleOptions.getInt("android:broadcast.temporaryAppWhitelistType");
+        final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
+        final int type = idleOptions.getTemporaryAppAllowlistType();
         assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, type);
     }
 
@@ -1716,8 +1717,8 @@ public class AlarmManagerServiceTest {
                 isNull(), eq(alarmClock), eq(Process.myUid()), eq(TEST_CALLING_PACKAGE),
                 bundleCaptor.capture());
 
-        final Bundle idleOptions = bundleCaptor.getValue();
-        final int type = idleOptions.getInt("android:broadcast.temporaryAppWhitelistType");
+        final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
+        final int type = idleOptions.getTemporaryAppAllowlistType();
         assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, type);
     }
 
@@ -1742,8 +1743,8 @@ public class AlarmManagerServiceTest {
                 eq(FLAG_ALLOW_WHILE_IDLE | FLAG_STANDALONE), isNull(), isNull(),
                 eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
-        final Bundle idleOptions = bundleCaptor.getValue();
-        final int type = idleOptions.getInt("android:broadcast.temporaryAppWhitelistType");
+        final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
+        final int type = idleOptions.getTemporaryAppAllowlistType();
         assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, type);
     }
 
@@ -1772,8 +1773,8 @@ public class AlarmManagerServiceTest {
                 eq(FLAG_ALLOW_WHILE_IDLE_COMPAT | FLAG_STANDALONE), isNull(), isNull(),
                 eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
-        final Bundle idleOptions = bundleCaptor.getValue();
-        final int type = idleOptions.getInt("android:broadcast.temporaryAppWhitelistType");
+        final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
+        final int type = idleOptions.getTemporaryAppAllowlistType();
         assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, type);
     }
 
@@ -1797,8 +1798,8 @@ public class AlarmManagerServiceTest {
                 eq(alarmPi), isNull(), isNull(), eq(FLAG_ALLOW_WHILE_IDLE_COMPAT), isNull(),
                 isNull(), eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
-        final Bundle idleOptions = bundleCaptor.getValue();
-        final int type = idleOptions.getInt("android:broadcast.temporaryAppWhitelistType");
+        final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
+        final int type = idleOptions.getTemporaryAppAllowlistType();
         assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, type);
     }
 
@@ -1822,8 +1823,8 @@ public class AlarmManagerServiceTest {
                 eq(alarmPi), isNull(), isNull(), eq(FLAG_ALLOW_WHILE_IDLE_COMPAT), isNull(),
                 isNull(), eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
-        final Bundle idleOptions = bundleCaptor.getValue();
-        final int type = idleOptions.getInt("android:broadcast.temporaryAppWhitelistType");
+        final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
+        final int type = idleOptions.getTemporaryAppAllowlistType();
         assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED, type);
     }
 
