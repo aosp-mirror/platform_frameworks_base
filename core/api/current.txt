@@ -31868,6 +31868,7 @@ package android.os.storage {
     method @WorkerThread public long getAllocatableBytes(@NonNull java.util.UUID) throws java.io.IOException;
     method @WorkerThread public long getCacheQuotaBytes(@NonNull java.util.UUID) throws java.io.IOException;
     method @WorkerThread public long getCacheSizeBytes(@NonNull java.util.UUID) throws java.io.IOException;
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE) public android.app.PendingIntent getManageSpaceActivityIntent(@NonNull String, int);
     method public String getMountedObbPath(String);
     method @NonNull public android.os.storage.StorageVolume getPrimaryStorageVolume();
     method @NonNull public java.util.List<android.os.storage.StorageVolume> getRecentStorageVolumes();
