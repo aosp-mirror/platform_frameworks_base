@@ -5302,5 +5302,13 @@ public final class Telephony {
          * @hide
          */
         public static final String COLUMN_RCS_CONFIG = "rcs_config";
+
+        /**
+         * TelephonyProvider column name for VoIMS provisioning. Default is 0.
+         * <P>Type: INTEGER </P>
+         *
+         * @hide
+         */
+        public static final String COLUMN_VOIMS_OPT_IN_STATUS = "voims_opt_in_status";
     }
 }
