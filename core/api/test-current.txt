@@ -302,6 +302,7 @@ package android.app {
   }
 
   public final class PendingIntent implements android.os.Parcelable {
+    method @RequiresPermission("android.permission.GET_INTENT_SENDER_INTENT") public boolean intentFilterEquals(@Nullable android.app.PendingIntent);
     method @NonNull @RequiresPermission("android.permission.GET_INTENT_SENDER_INTENT") public java.util.List<android.content.pm.ResolveInfo> queryIntentComponents(int);
     field @Deprecated public static final int FLAG_MUTABLE_UNAUDITED = 33554432; // 0x2000000
   }
