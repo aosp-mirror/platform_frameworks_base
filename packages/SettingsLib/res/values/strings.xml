@@ -1059,7 +1059,14 @@
     <!-- Title for the accessibility preference to configure display color space correction. [CHAR LIMIT=NONE] -->
     <string name="accessibility_display_daltonizer_preference_title">Color correction</string>
     <!-- Subtitle for the accessibility preference to configure display color space correction. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_display_daltonizer_preference_subtitle"><![CDATA[Color correction allows you to adjust how colors are displayed on your device]]></string>
+    <string name="accessibility_display_daltonizer_preference_subtitle">
+        <![CDATA[
+        Adjust how colors display on your device. This can be helpful when you want to:<br/><br/>
+        <ol>
+            <li> See colors more accurately</li>
+            <li> Remove colors to help you focus</li>
+        </ol>
+        ]]></string>
     <!-- Summary shown for color space correction preference when its value is overridden by another preference [CHAR LIMIT=35] -->
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
