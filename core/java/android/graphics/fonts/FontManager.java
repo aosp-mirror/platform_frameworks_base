@@ -195,6 +195,7 @@ public class FontManager {
      * @return The current font configuration. null if failed to fetch information from the system
      *         service.
      */
+    @RequiresPermission(Manifest.permission.UPDATE_FONTS)
     public @NonNull FontConfig getFontConfig() {
         try {
             return mIFontManager.getFontConfig();

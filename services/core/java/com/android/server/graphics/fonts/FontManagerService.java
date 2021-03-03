@@ -66,6 +66,8 @@ public final class FontManagerService extends IFontManager.Stub {
 
     @Override
     public FontConfig getFontConfig() {
+        getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
+                "UPDATE_FONTS permission required.");
         return getSystemFontConfig();
     }
 

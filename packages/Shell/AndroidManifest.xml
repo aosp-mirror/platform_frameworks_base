@@ -426,6 +426,9 @@
     <!-- Permission required for CTS test - ClipboardManagerTest -->
     <uses-permission android:name="android.permission.SET_CLIP_SOURCE" />
 
+    <!-- Permission required for CTS test - FontManagerTest -->
+    <uses-permission android:name="android.permission.UPDATE_FONTS" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
