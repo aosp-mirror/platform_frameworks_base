@@ -52,6 +52,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -59,6 +60,7 @@ import android.util.SparseArray;
 import android.view.autofill.AutofillManagerInternal;
 import android.widget.Toast;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
@@ -163,6 +165,10 @@ public class ClipboardService extends SystemService {
     private static final boolean IS_EMULATOR =
         SystemProperties.getBoolean("ro.kernel.qemu", false);
 
+    // DeviceConfig properties
+    private static final String PROPERTY_SHOW_ACCESS_NOTIFICATIONS = "show_access_notifications";
+    private static final boolean DEFAULT_SHOW_ACCESS_NOTIFICATIONS = true;
+
     private final ActivityManagerInternal mAmInternal;
     private final IUriGrantsManager mUgm;
     private final UriGrantsManagerInternal mUgmInternal;
@@ -176,7 +182,13 @@ public class ClipboardService extends SystemService {
     private HostClipboardMonitor mHostClipboardMonitor = null;
     private Thread mHostMonitorThread = null;
 
+    @GuardedBy("mLock")
     private final SparseArray<PerUserClipboard> mClipboards = new SparseArray<>();
+
+    @GuardedBy("mLock")
+    private boolean mShowAccessNotifications = DEFAULT_SHOW_ACCESS_NOTIFICATIONS;
+
+    private final Object mLock = new Object();
 
     /**
      * Instantiates the clipboard.
@@ -204,7 +216,7 @@ public class ClipboardService extends SystemService {
                             new ClipData("host clipboard",
                                          new String[]{"text/plain"},
                                          new ClipData.Item(contents));
-                        synchronized(mClipboards) {
+                        synchronized (mLock) {
                             setPrimaryClipInternal(getClipboard(0), clip,
                                     android.os.Process.SYSTEM_UID, null);
                         }
@@ -213,6 +225,10 @@ public class ClipboardService extends SystemService {
             mHostMonitorThread = new Thread(mHostClipboardMonitor);
             mHostMonitorThread.start();
         }
+
+        updateConfig();
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_CLIPBOARD,
+                getContext().getMainExecutor(), properties -> updateConfig());
     }
 
     @Override
@@ -222,8 +238,15 @@ public class ClipboardService extends SystemService {
 
     @Override
     public void onUserStopped(@NonNull TargetUser user) {
-        synchronized (mClipboards) {
+        synchronized (mLock) {
             mClipboards.remove(user.getUserIdentifier());
+        }
+    }
+
+    private void updateConfig() {
+        synchronized (mLock) {
+            mShowAccessNotifications = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
+                    PROPERTY_SHOW_ACCESS_NOTIFICATIONS, DEFAULT_SHOW_ACCESS_NOTIFICATIONS);
         }
     }
 
@@ -472,7 +495,7 @@ public class ClipboardService extends SystemService {
     };
 
     private PerUserClipboard getClipboard(@UserIdInt int userId) {
-        synchronized (mClipboards) {
+        synchronized (mLock) {
             PerUserClipboard puc = mClipboards.get(userId);
             if (puc == null) {
                 puc = new PerUserClipboard(userId);
@@ -849,9 +872,10 @@ public class ClipboardService extends SystemService {
         if (clipboard.primaryClip == null) {
             return;
         }
-        if (Settings.Global.getInt(getContext().getContentResolver(),
-                "clipboard_access_toast_enabled", 1) == 0) {
-            return;
+        synchronized (mLock) {
+            if (!mShowAccessNotifications) {
+                return;
+            }
         }
         // Don't notify if the app accessing the clipboard is the same as the current owner.
         if (UserHandle.isSameApp(uid, clipboard.primaryClipUid)) {
