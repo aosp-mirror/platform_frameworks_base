@@ -94,8 +94,7 @@ public class LogicalDisplayMapperTest {
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
 
-        mLogicalDisplayMapper = new LogicalDisplayMapper(
-                mContext, mDisplayDeviceRepo, mListenerMock);
+        mLogicalDisplayMapper = new LogicalDisplayMapper(mDisplayDeviceRepo, mListenerMock);
     }
 
 
