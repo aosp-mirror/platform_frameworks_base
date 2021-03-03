@@ -29,7 +29,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/** @hide */
+/**
+ * Network preferences to set the default active network on a per-application basis as per a given
+ * {@link OemNetworkPreference}. An example of this would be to set an application's network
+ * preference to {@link #OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK} which would have the default
+ * network for that application set to an unmetered network first if available and if not, it then
+ * set that application's default network to an OEM managed network if available.
+ *
+ * @hide
+ */
 @SystemApi
 public final class OemNetworkPreferences implements Parcelable {
     /**
@@ -64,6 +72,10 @@ public final class OemNetworkPreferences implements Parcelable {
     @NonNull
     private final Bundle mNetworkMappings;
 
+    /**
+     * Return the currently built application package name to {@link OemNetworkPreference} mappings.
+     * @return the current network preferences map.
+     */
     @NonNull
     public Map<String, Integer> getNetworkPreferences() {
         return convertToUnmodifiableMap(mNetworkMappings);
@@ -105,6 +117,11 @@ public final class OemNetworkPreferences implements Parcelable {
             mNetworkMappings = new Bundle();
         }
 
+        /**
+         * Constructor to populate the builder's values with an already built
+         * {@link OemNetworkPreferences}.
+         * @param preferences the {@link OemNetworkPreferences} to populate with.
+         */
         public Builder(@NonNull final OemNetworkPreferences preferences) {
             Objects.requireNonNull(preferences);
             mNetworkMappings = (Bundle) preferences.mNetworkMappings.clone();
