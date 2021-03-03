@@ -3880,13 +3880,15 @@ public class StatsPullAtomService extends SystemService {
             ConnectivityManager.NetworkCallback {
         @Override
         public void onAvailable(Network network) {
-            FrameworkStatsLog.write(FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+            FrameworkStatsLog.write(FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED,
+                    network.getNetId(),
                     FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED__STATE__CONNECTED);
         }
 
         @Override
         public void onLost(Network network) {
-            FrameworkStatsLog.write(FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+            FrameworkStatsLog.write(FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED,
+                    network.getNetId(),
                     FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED__STATE__DISCONNECTED);
         }
     }
