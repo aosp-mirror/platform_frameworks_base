@@ -2943,10 +2943,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return dockFrame.bottom - imeFrame.top;
     }
 
-    void prepareFreezingTaskBounds() {
-        forAllRootTasks(Task::prepareFreezingTaskBounds);
-    }
-
     void rotateBounds(@Rotation int oldRotation, @Rotation int newRotation, Rect inOutBounds) {
         // Get display bounds on oldRotation as parent bounds for the rotation.
         getBounds(mTmpRect, oldRotation);
