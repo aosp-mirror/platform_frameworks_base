@@ -3699,8 +3699,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // app.
         assignWindowLayers(true /* setLayoutNeeded */);
         // 3. The z-order of IME might have been changed. Update the above insets state.
-        mInsetsStateController.updateAboveInsetsState(
-                mInputMethodWindow, true /* notifyInsetsChange */);
+        mInsetsStateController.updateAboveInsetsState(mInputMethodWindow,
+                mInsetsStateController.getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
         // 4. Update the IME control target to apply any inset change and animation.
         // 5. Reparent the IME container surface to either the input target app, or the IME window
         // parent.
