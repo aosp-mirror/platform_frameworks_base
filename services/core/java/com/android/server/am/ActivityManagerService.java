@@ -92,6 +92,7 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
@@ -104,7 +105,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
@@ -4963,7 +4963,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public List<ResolveInfo> queryIntentComponentsForIntentSender(
+    public ParceledListSlice<ResolveInfo> queryIntentComponentsForIntentSender(
             IIntentSender pendingResult, int matchFlags) {
         enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
                 "queryIntentComponentsForIntentSender()");
@@ -4981,15 +4981,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int userId = res.key.userId;
         switch (res.key.type) {
             case ActivityManager.INTENT_SENDER_ACTIVITY:
-                return mContext.getPackageManager().queryIntentActivitiesAsUser(
-                        intent, matchFlags, userId);
+                return new ParceledListSlice<>(mContext.getPackageManager()
+                        .queryIntentActivitiesAsUser(intent, matchFlags, userId));
             case ActivityManager.INTENT_SENDER_SERVICE:
             case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
-                return mContext.getPackageManager().queryIntentServicesAsUser(
-                        intent, matchFlags, userId);
+                return new ParceledListSlice<>(mContext.getPackageManager()
+                        .queryIntentServicesAsUser(intent, matchFlags, userId));
             case ActivityManager.INTENT_SENDER_BROADCAST:
-                return mContext.getPackageManager().queryBroadcastReceiversAsUser(
-                        intent, matchFlags, userId);
+                return new ParceledListSlice<>(mContext.getPackageManager()
+                        .queryBroadcastReceiversAsUser(intent, matchFlags, userId));
             default: // ActivityManager.INTENT_SENDER_ACTIVITY_RESULT
                 throw new IllegalStateException("Unsupported intent sender type: " + res.key.type);
         }

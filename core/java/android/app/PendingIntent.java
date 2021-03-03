@@ -26,7 +26,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemApi.Client;
 import android.annotation.TestApi;
@@ -41,6 +40,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.ResolveInfoFlags;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
@@ -60,6 +60,7 @@ import com.android.internal.os.IResultReceiver;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -1239,14 +1240,17 @@ public final class PendingIntent implements Parcelable {
      * @param flags MATCH_* flags from {@link android.content.pm.PackageManager}.
      * @hide
      */
-    @SuppressLint("NullableCollection")
     @RequiresPermission(permission.GET_INTENT_SENDER_INTENT)
     @SystemApi(client = Client.MODULE_LIBRARIES)
     @TestApi
-    public @Nullable List<ResolveInfo> queryIntentComponents(@ResolveInfoFlags int flags) {
+    public @NonNull List<ResolveInfo> queryIntentComponents(@ResolveInfoFlags int flags) {
         try {
-            return ActivityManager.getService()
+            ParceledListSlice<ResolveInfo> parceledList = ActivityManager.getService()
                     .queryIntentComponentsForIntentSender(mTarget, flags);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

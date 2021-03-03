@@ -35,7 +35,7 @@ package android.app {
   }
 
   public final class PendingIntent implements android.os.Parcelable {
-    method @Nullable @RequiresPermission(android.Manifest.permission.GET_INTENT_SENDER_INTENT) public java.util.List<android.content.pm.ResolveInfo> queryIntentComponents(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.GET_INTENT_SENDER_INTENT) public java.util.List<android.content.pm.ResolveInfo> queryIntentComponents(int);
   }
 
   public class StatusBarManager {
