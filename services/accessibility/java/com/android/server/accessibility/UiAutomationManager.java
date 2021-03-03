@@ -53,6 +53,8 @@ class UiAutomationManager {
 
     private AbstractAccessibilityServiceConnection.SystemSupport mSystemSupport;
 
+    private AccessibilityTrace mTrace;
+
     private int mUiAutomationFlags;
 
     UiAutomationManager(Object lock) {
@@ -89,6 +91,7 @@ class UiAutomationManager {
             int id, Handler mainHandler,
             AccessibilitySecurityPolicy securityPolicy,
             AbstractAccessibilityServiceConnection.SystemSupport systemSupport,
+            AccessibilityTrace trace,
             WindowManagerInternal windowManagerInternal,
             SystemActionPerformer systemActionPerformer,
             AccessibilityWindowManager awm, int flags) {
@@ -111,13 +114,14 @@ class UiAutomationManager {
 
             mUiAutomationFlags = flags;
             mSystemSupport = systemSupport;
+            mTrace = trace;
             // Ignore registering UiAutomation if it is not allowed to use the accessibility
             // subsystem.
             if (!useAccessibility()) {
                 return;
             }
             mUiAutomationService = new UiAutomationService(context, accessibilityServiceInfo, id,
-                    mainHandler, mLock, securityPolicy, systemSupport, windowManagerInternal,
+                    mainHandler, mLock, securityPolicy, systemSupport, trace, windowManagerInternal,
                     systemActionPerformer, awm);
             mUiAutomationServiceOwner = owner;
             mUiAutomationServiceInfo = accessibilityServiceInfo;
@@ -239,11 +243,12 @@ class UiAutomationManager {
         UiAutomationService(Context context, AccessibilityServiceInfo accessibilityServiceInfo,
                 int id, Handler mainHandler, Object lock,
                 AccessibilitySecurityPolicy securityPolicy,
-                SystemSupport systemSupport, WindowManagerInternal windowManagerInternal,
+                SystemSupport systemSupport, AccessibilityTrace trace,
+                WindowManagerInternal windowManagerInternal,
                 SystemActionPerformer systemActionPerformer, AccessibilityWindowManager awm) {
             super(context, COMPONENT_NAME, accessibilityServiceInfo, id, mainHandler, lock,
-                    securityPolicy, systemSupport, windowManagerInternal, systemActionPerformer,
-                    awm);
+                    securityPolicy, systemSupport, trace, windowManagerInternal,
+                    systemActionPerformer, awm);
             mMainHandler = mainHandler;
         }
 

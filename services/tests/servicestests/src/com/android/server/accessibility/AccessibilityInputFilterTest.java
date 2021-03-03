@@ -30,7 +30,6 @@ import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEA
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -51,16 +50,19 @@ import android.view.MotionEvent;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
+import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -91,7 +93,9 @@ public class AccessibilityInputFilterTest {
                     FullScreenMagnificationGestureHandler.class, TouchExplorer.class,
                     AutoclickController.class, AccessibilityInputFilter.class};
 
-    private FullScreenMagnificationController mMockFullScreenMagnificationController;
+    @Mock private WindowManagerInternal.AccessibilityControllerInternal mMockA11yController;
+    @Mock private WindowManagerInternal mMockWindowManagerService;
+    @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
     private AccessibilityManagerService mAms;
     private AccessibilityInputFilter mA11yInputFilter;
     private EventCaptor mCaptor1;
@@ -134,16 +138,21 @@ public class AccessibilityInputFilterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         Context context = InstrumentationRegistry.getContext();
+        LocalServices.removeServiceForTest(WindowManagerInternal.class);
+        LocalServices.addService(
+                WindowManagerInternal.class, mMockWindowManagerService);
+        when(mMockWindowManagerService.getAccessibilityController()).thenReturn(
+                mMockA11yController);
+        when(mMockA11yController.isAccessibilityTracingEnabled()).thenReturn(false);
 
         setDisplayCount(1);
         mAms = spy(new AccessibilityManagerService(context));
-        mMockFullScreenMagnificationController = mock(FullScreenMagnificationController.class);
         mA11yInputFilter = new AccessibilityInputFilter(context, mAms, mEventHandler);
         mA11yInputFilter.onInstalled();
 
-        when(mAms.getValidDisplayList()).thenReturn(mDisplayList);
-        when(mAms.getFullScreenMagnificationController()).thenReturn(
-                mMockFullScreenMagnificationController);
+        doReturn(mDisplayList).when(mAms).getValidDisplayList();
+        doReturn(mMockFullScreenMagnificationController).when(mAms)
+                .getFullScreenMagnificationController();
     }
 
     @After
