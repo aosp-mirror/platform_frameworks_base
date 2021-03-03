@@ -1400,13 +1400,13 @@ static void insertPackagesToMergedList(JNIEnv* env,
 }
 
 static void isolateAppData(JNIEnv* env, jobjectArray pkg_data_info_list,
-    jobjectArray whitelisted_data_info_list, uid_t uid, const char* process_name,
+    jobjectArray allowlisted_data_info_list, uid_t uid, const char* process_name,
     jstring managed_nice_name, fail_fn_t fail_fn) {
 
   std::vector<std::string> merged_data_info_list;
   insertPackagesToMergedList(env, merged_data_info_list, pkg_data_info_list,
           process_name, managed_nice_name, fail_fn);
-  insertPackagesToMergedList(env, merged_data_info_list, whitelisted_data_info_list,
+  insertPackagesToMergedList(env, merged_data_info_list, allowlisted_data_info_list,
           process_name, managed_nice_name, fail_fn);
 
   isolateAppData(env, merged_data_info_list, uid, process_name, managed_nice_name, fail_fn);
@@ -1518,7 +1518,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
                              bool is_child_zygote, jstring managed_instruction_set,
                              jstring managed_app_data_dir, bool is_top_app,
                              jobjectArray pkg_data_info_list,
-                             jobjectArray whitelisted_data_info_list,
+                             jobjectArray allowlisted_data_info_list,
                              bool mount_data_dirs, bool mount_storage_dirs) {
   const char* process_name = is_system_server ? "system_server" : "zygote";
   auto fail_fn = std::bind(ZygoteFailure, env, process_name, managed_nice_name, _1);
@@ -1555,7 +1555,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   // Sandbox data and jit profile directories by overlaying a tmpfs on those dirs and bind
   // mount all related packages separately.
   if (mount_data_dirs) {
-    isolateAppData(env, pkg_data_info_list, whitelisted_data_info_list,
+    isolateAppData(env, pkg_data_info_list, allowlisted_data_info_list,
             uid, process_name, managed_nice_name, fail_fn);
     isolateJitProfile(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
@@ -2073,7 +2073,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jint mount_external, jstring se_info, jstring nice_name,
         jintArray managed_fds_to_close, jintArray managed_fds_to_ignore, jboolean is_child_zygote,
         jstring instruction_set, jstring app_data_dir, jboolean is_top_app,
-        jobjectArray pkg_data_info_list, jobjectArray whitelisted_data_info_list,
+        jobjectArray pkg_data_info_list, jobjectArray allowlisted_data_info_list,
         jboolean mount_data_dirs, jboolean mount_storage_dirs) {
     jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
@@ -2113,7 +2113,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
                        mount_external, se_info, nice_name, false,
                        is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
                        is_top_app == JNI_TRUE, pkg_data_info_list,
-                       whitelisted_data_info_list,
+                       allowlisted_data_info_list,
                        mount_data_dirs == JNI_TRUE,
                        mount_storage_dirs == JNI_TRUE);
     }
@@ -2152,7 +2152,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
                        MOUNT_EXTERNAL_DEFAULT, nullptr, nullptr, true,
                        false, nullptr, nullptr, /* is_top_app= */ false,
                        /* pkg_data_info_list */ nullptr,
-                       /* whitelisted_data_info_list */ nullptr, false, false);
+                       /* allowlisted_data_info_list */ nullptr, false, false);
   } else if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -2260,7 +2260,7 @@ static void com_android_internal_os_Zygote_nativeAllowFileAcrossFork(
     if (!path_cstr) {
         RuntimeAbort(env, __LINE__, "path_cstr == nullptr");
     }
-    FileDescriptorWhitelist::Get()->Allow(path_cstr);
+    FileDescriptorAllowlist::Get()->Allow(path_cstr);
 }
 
 static void com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter(
@@ -2299,7 +2299,7 @@ static void com_android_internal_os_Zygote_nativeSpecializeAppProcess(
     jint runtime_flags, jobjectArray rlimits,
     jint mount_external, jstring se_info, jstring nice_name,
     jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir, jboolean is_top_app,
-    jobjectArray pkg_data_info_list, jobjectArray whitelisted_data_info_list,
+    jobjectArray pkg_data_info_list, jobjectArray allowlisted_data_info_list,
     jboolean mount_data_dirs, jboolean mount_storage_dirs) {
   jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
@@ -2307,7 +2307,7 @@ static void com_android_internal_os_Zygote_nativeSpecializeAppProcess(
                    capabilities, capabilities,
                    mount_external, se_info, nice_name, false,
                    is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
-                   is_top_app == JNI_TRUE, pkg_data_info_list, whitelisted_data_info_list,
+                   is_top_app == JNI_TRUE, pkg_data_info_list, allowlisted_data_info_list,
                    mount_data_dirs == JNI_TRUE, mount_storage_dirs == JNI_TRUE);
 }
 

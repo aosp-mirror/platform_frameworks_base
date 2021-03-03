@@ -31,8 +31,8 @@
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 
-// Static whitelist of open paths that the zygote is allowed to keep open.
-static const char* kPathWhitelist[] = {
+// Static allowlist of open paths that the zygote is allowed to keep open.
+static const char* kPathAllowlist[] = {
         "/dev/null",
         "/dev/socket/zygote",
         "/dev/socket/zygote_secondary",
@@ -51,9 +51,9 @@ static const char* kPathWhitelist[] = {
 static const char kFdPath[] = "/proc/self/fd";
 
 // static
-FileDescriptorWhitelist* FileDescriptorWhitelist::Get() {
+FileDescriptorAllowlist* FileDescriptorAllowlist::Get() {
   if (instance_ == nullptr) {
-    instance_ = new FileDescriptorWhitelist();
+    instance_ = new FileDescriptorAllowlist();
   }
   return instance_;
 }
@@ -62,16 +62,16 @@ static bool IsArtMemfd(const std::string& path) {
   return android::base::StartsWith(path, "/memfd:/boot-image-methods.art");
 }
 
-bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
-  // Check the static whitelist path.
-  for (const auto& whitelist_path : kPathWhitelist) {
-    if (path == whitelist_path)
+bool FileDescriptorAllowlist::IsAllowed(const std::string& path) const {
+  // Check the static allowlist path.
+  for (const auto& allowlist_path : kPathAllowlist) {
+    if (path == allowlist_path)
       return true;
   }
 
-  // Check any paths added to the dynamic whitelist.
-  for (const auto& whitelist_path : whitelist_) {
-    if (path == whitelist_path)
+  // Check any paths added to the dynamic allowlist.
+  for (const auto& allowlist_path : allowlist_) {
+    if (path == allowlist_path)
       return true;
   }
 
@@ -103,7 +103,7 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
     return true;
   }
 
-  // Whitelist files needed for Runtime Resource Overlay, like these:
+  // Allowlist files needed for Runtime Resource Overlay, like these:
   // /system/vendor/overlay/framework-res.apk
   // /system/vendor/overlay-subdir/pg/framework-res.apk
   // /vendor/overlay/framework-res.apk
@@ -148,9 +148,10 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
     return true;
   }
 
-  // All regular files that are placed under this path are whitelisted automatically.
-  static const char* kZygoteWhitelistPath = "/vendor/zygote_whitelist/";
-  if (android::base::StartsWith(path, kZygoteWhitelistPath)
+  // All regular files that are placed under this path are allowlisted
+  // automatically.  The directory name is maintained for compatibility.
+  static const char* kZygoteAllowlistPath = "/vendor/zygote_whitelist/";
+  if (android::base::StartsWith(path, kZygoteAllowlistPath)
       && path.find("/../") == std::string::npos) {
     return true;
   }
@@ -158,11 +159,11 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
   return false;
 }
 
-FileDescriptorWhitelist::FileDescriptorWhitelist()
-    : whitelist_() {
+FileDescriptorAllowlist::FileDescriptorAllowlist()
+    : allowlist_() {
 }
 
-FileDescriptorWhitelist* FileDescriptorWhitelist::instance_ = nullptr;
+FileDescriptorAllowlist* FileDescriptorAllowlist::instance_ = nullptr;
 
 // Keeps track of all relevant information (flags, offset etc.) of an
 // open zygote file descriptor.
@@ -215,7 +216,7 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) 
     fail_fn(android::base::StringPrintf("Unable to stat %d", fd));
   }
 
-  const FileDescriptorWhitelist* whitelist = FileDescriptorWhitelist::Get();
+  const FileDescriptorAllowlist* allowlist = FileDescriptorAllowlist::Get();
 
   if (S_ISSOCK(f_stat.st_mode)) {
     std::string socket_name;
@@ -223,8 +224,8 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) 
       fail_fn("Unable to get socket name");
     }
 
-    if (!whitelist->IsAllowed(socket_name)) {
-      fail_fn(android::base::StringPrintf("Socket name not whitelisted : %s (fd=%d)",
+    if (!allowlist->IsAllowed(socket_name)) {
+      fail_fn(android::base::StringPrintf("Socket name not allowlisted : %s (fd=%d)",
                                           socket_name.c_str(),
                                           fd));
     }
@@ -232,7 +233,7 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) 
     return new FileDescriptorInfo(fd);
   }
 
-  // We only handle whitelisted regular files and character devices. Whitelisted
+  // We only handle allowlisted regular files and character devices. Allowlisted
   // character devices must provide a guarantee of sensible behaviour when
   // reopened.
   //
@@ -266,8 +267,8 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) 
                                         strerror(errno)));
   }
 
-  if (!whitelist->IsAllowed(file_path)) {
-    fail_fn(android::base::StringPrintf("Not whitelisted (%d): %s", fd, file_path.c_str()));
+  if (!allowlist->IsAllowed(file_path)) {
+    fail_fn(android::base::StringPrintf("Not allowlisted (%d): %s", fd, file_path.c_str()));
   }
 
   // File descriptor flags : currently on FD_CLOEXEC. We can set these
