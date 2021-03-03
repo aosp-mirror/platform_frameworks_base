@@ -32,6 +32,7 @@ package android {
     field public static final String BATTERY_PREDICTION = "android.permission.BATTERY_PREDICTION";
     field public static final String BIND_ATTENTION_SERVICE = "android.permission.BIND_ATTENTION_SERVICE";
     field public static final String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
+    field public static final String BIND_CALL_DIAGNOSTIC_SERVICE = "android.permission.BIND_CALL_DIAGNOSTIC_SERVICE";
     field public static final String BIND_CELL_BROADCAST_SERVICE = "android.permission.BIND_CELL_BROADCAST_SERVICE";
     field @Deprecated public static final String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
     field public static final String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
@@ -10340,6 +10341,16 @@ package android.telecom {
     ctor @Deprecated public Call.Listener();
   }
 
+  public abstract class CallDiagnosticService extends android.app.Service {
+    ctor public CallDiagnosticService();
+    method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onBluetoothCallQualityReportReceived(@NonNull android.telecom.BluetoothCallQualityReport);
+    method public abstract void onCallAudioStateChanged(@NonNull android.telecom.CallAudioState);
+    method @NonNull public abstract android.telecom.DiagnosticCall onInitializeDiagnosticCall(@NonNull android.telecom.Call.Details);
+    method public abstract void onRemoveDiagnosticCall(@NonNull android.telecom.DiagnosticCall);
+    field public static final String SERVICE_INTERFACE = "android.telecom.CallDiagnosticService";
+  }
+
   public static class CallScreeningService.CallResponse.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public android.telecom.CallScreeningService.CallResponse.Builder setShouldScreenCallViaAudioProcessing(boolean);
   }
@@ -10372,6 +10383,9 @@ package android.telecom {
     method public void setTelecomCallId(@NonNull String);
     field public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 2097152; // 0x200000
     field public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 262144; // 0x40000
+    field public static final String EVENT_DEVICE_TO_DEVICE_MESSAGE = "android.telecom.event.DEVICE_TO_DEVICE_MESSAGE";
+    field public static final String EXTRA_DEVICE_TO_DEVICE_MESSAGE_TYPE = "android.telecom.extra.DEVICE_TO_DEVICE_MESSAGE_TYPE";
+    field public static final String EXTRA_DEVICE_TO_DEVICE_MESSAGE_VALUE = "android.telecom.extra.DEVICE_TO_DEVICE_MESSAGE_VALUE";
     field public static final String EXTRA_DISABLE_ADD_CALL = "android.telecom.extra.DISABLE_ADD_CALL";
     field public static final int PROPERTY_EMERGENCY_CALLBACK_MODE = 1; // 0x1
     field public static final int PROPERTY_GENERIC_CONFERENCE = 2; // 0x2
@@ -10395,6 +10409,34 @@ package android.telecom {
 
   public abstract class ConnectionService extends android.app.Service {
     method public final void addExistingConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.Connection, @NonNull android.telecom.Conference);
+  }
+
+  public abstract class DiagnosticCall {
+    ctor public DiagnosticCall();
+    method public final void clearDiagnosticMessage(int);
+    method public final void displayDiagnosticMessage(int, @NonNull CharSequence);
+    method @NonNull public android.telecom.Call.Details getCallDetails();
+    method public abstract void onCallDetailsChanged(@NonNull android.telecom.Call.Details);
+    method @Nullable public abstract CharSequence onCallDisconnected(int, int);
+    method @Nullable public abstract CharSequence onCallDisconnected(@NonNull android.telephony.ims.ImsReasonInfo);
+    method public abstract void onCallQualityReceived(@NonNull android.telephony.CallQuality);
+    method public abstract void onReceiveDeviceToDeviceMessage(int, int);
+    method public final void sendDeviceToDeviceMessage(int, int);
+    field public static final int AUDIO_CODEC_AMR_NB = 3; // 0x3
+    field public static final int AUDIO_CODEC_AMR_WB = 2; // 0x2
+    field public static final int AUDIO_CODEC_EVS = 1; // 0x1
+    field public static final int BATTERY_STATE_CHARGING = 3; // 0x3
+    field public static final int BATTERY_STATE_GOOD = 2; // 0x2
+    field public static final int BATTERY_STATE_LOW = 1; // 0x1
+    field public static final int COVERAGE_GOOD = 2; // 0x2
+    field public static final int COVERAGE_POOR = 1; // 0x1
+    field public static final int MESSAGE_CALL_AUDIO_CODEC = 2; // 0x2
+    field public static final int MESSAGE_CALL_NETWORK_TYPE = 1; // 0x1
+    field public static final int MESSAGE_DEVICE_BATTERY_STATE = 3; // 0x3
+    field public static final int MESSAGE_DEVICE_NETWORK_COVERAGE = 4; // 0x4
+    field public static final int NETWORK_TYPE_IWLAN = 2; // 0x2
+    field public static final int NETWORK_TYPE_LTE = 1; // 0x1
+    field public static final int NETWORK_TYPE_NR = 3; // 0x3
   }
 
   public abstract class InCallService extends android.app.Service {
