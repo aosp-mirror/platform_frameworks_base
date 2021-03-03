@@ -32,7 +32,6 @@ import android.app.Person;
 import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -62,11 +61,9 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.internal.graphics.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -118,7 +115,6 @@ public class ConversationLayout extends FrameLayout
     private ViewGroup mExpandButtonAndContentContainer;
     private NotificationExpandButton mExpandButton;
     private MessagingLinearLayout mImageMessageContainer;
-    private int mExpandButtonExpandedTopMargin;
     private int mBadgedSideMargins;
     private int mConversationAvatarSize;
     private int mConversationAvatarSizeExpanded;
@@ -147,7 +143,6 @@ public class ConversationLayout extends FrameLayout
     private int mFacePileProtectionWidth;
     private int mFacePileProtectionWidthExpanded;
     private boolean mImportantConversation;
-    private TextView mUnreadBadge;
     private View mFeedbackIcon;
     private float mMinTouchSize;
     private Icon mConversationIcon;
@@ -245,8 +240,6 @@ public class ConversationLayout extends FrameLayout
         mContentContainer = findViewById(R.id.notification_action_list_margin_target);
         mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
         mExpandButton = findViewById(R.id.expand_button);
-        mExpandButtonExpandedTopMargin = getResources().getDimensionPixelSize(
-                R.dimen.conversation_expand_button_top_margin_expanded);
         mNotificationHeaderExpandedPadding = getResources().getDimensionPixelSize(
                 R.dimen.conversation_header_expanded_padding_end);
         mContentMarginEnd = getResources().getDimensionPixelSize(
@@ -286,7 +279,6 @@ public class ConversationLayout extends FrameLayout
         mAppName.setOnVisibilityChangedListener((visibility) -> {
             onAppNameVisibilityChanged();
         });
-        mUnreadBadge = findViewById(R.id.conversation_unread_count);
         mConversationContentStart = getResources().getDimensionPixelSize(
                 R.dimen.conversation_content_start);
         mInternalButtonPadding
@@ -426,17 +418,7 @@ public class ConversationLayout extends FrameLayout
 
     /** @hide */
     public void setUnreadCount(int unreadCount) {
-        boolean visible = mIsCollapsed && unreadCount > 1;
-        mUnreadBadge.setVisibility(visible ? VISIBLE : GONE);
-        if (visible) {
-            CharSequence text = unreadCount >= 100
-                    ? getResources().getString(R.string.unread_convo_overflow, 99)
-                    : String.format(Locale.getDefault(), "%d", unreadCount);
-            mUnreadBadge.setText(text);
-            mUnreadBadge.setBackgroundTintList(ColorStateList.valueOf(mLayoutColor));
-            boolean needDarkText = ColorUtils.calculateLuminance(mLayoutColor) > 0.5f;
-            mUnreadBadge.setTextColor(needDarkText ? Color.BLACK : Color.WHITE);
-        }
+        mExpandButton.setNumber(unreadCount);
     }
 
     private void addRemoteInputHistoryToMessages(
@@ -1132,15 +1114,16 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateExpandButton() {
-        int gravity;
-        int topMargin = 0;
+        int buttonGravity;
+        int containerHeight;
         ViewGroup newContainer;
         if (mIsCollapsed) {
-            gravity = Gravity.CENTER;
+            buttonGravity = Gravity.CENTER;
+            containerHeight = ViewGroup.LayoutParams.WRAP_CONTENT;
             newContainer = mExpandButtonAndContentContainer;
         } else {
-            gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
-            topMargin = mExpandButtonExpandedTopMargin;
+            buttonGravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+            containerHeight = ViewGroup.LayoutParams.MATCH_PARENT;
             newContainer = this;
         }
         mExpandButton.setExpanded(!mIsCollapsed);
@@ -1149,14 +1132,14 @@ public class ConversationLayout extends FrameLayout
         // content when collapsed, but allows the content to flow under it when expanded.
         if (newContainer != mExpandButtonContainer.getParent()) {
             ((ViewGroup) mExpandButtonContainer.getParent()).removeView(mExpandButtonContainer);
+            mExpandButtonContainer.getLayoutParams().height = containerHeight;
             newContainer.addView(mExpandButtonContainer);
         }
 
         // update if the expand button is centered
         LinearLayout.LayoutParams layoutParams =
                 (LinearLayout.LayoutParams) mExpandButton.getLayoutParams();
-        layoutParams.gravity = gravity;
-        layoutParams.topMargin = topMargin;
+        layoutParams.gravity = buttonGravity;
         mExpandButton.setLayoutParams(layoutParams);
     }
 
@@ -1210,6 +1193,7 @@ public class ConversationLayout extends FrameLayout
             mExpandButtonContainer.setVisibility(GONE);
             mConversationIconContainer.setOnClickListener(null);
         }
+        mExpandButton.setVisibility(VISIBLE);
         updateContentEndPaddings();
     }
 

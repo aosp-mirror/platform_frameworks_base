@@ -3957,6 +3957,10 @@
          color supplied by the Notification.Builder if present. -->
     <bool name="config_tintNotificationActionButtons">true</bool>
 
+    <!-- Flag indicating that tinted items (actions, expander, etc) are to be tinted using the
+         theme color, rather than the notification color. -->
+    <bool name="config_tintNotificationsWithTheme">true</bool>
+
     <!-- Show area update info settings in CellBroadcastReceiver and information in SIM status in Settings app -->
     <bool name="config_showAreaUpdateInfoSettings">false</bool>
 
