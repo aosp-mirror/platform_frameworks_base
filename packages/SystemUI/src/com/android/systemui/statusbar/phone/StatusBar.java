@@ -2692,6 +2692,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mDisplay.getRotation();
     }
 
+    int getDisplayId() {
+        return mDisplayId;
+    }
+
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             boolean dismissShade, int flags) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
@@ -2717,7 +2721,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.addFlags(flags);
             int result = ActivityManager.START_CANCELED;
-            ActivityOptions options = new ActivityOptions(getActivityOptions(
+            ActivityOptions options = new ActivityOptions(getActivityOptions(mDisplayId,
                     null /* remoteAnimation */));
             options.setDisallowEnterPictureInPictureWhileLaunching(
                     disallowEnterPictureInPictureWhileLaunching);
@@ -4362,6 +4366,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         executeActionDismissingKeyguard(() -> {
             try {
                 intent.send(null, 0, null, null, null, null, getActivityOptions(
+                        mDisplayId,
                         mActivityLaunchAnimator.getLaunchAnimation(associatedView, isOccluded())));
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.
@@ -4383,15 +4388,38 @@ public class StatusBar extends SystemUI implements DemoMode,
         mMainThreadHandler.post(runnable);
     }
 
-    public static Bundle getActivityOptions(@Nullable RemoteAnimationAdapter animationAdapter) {
+    /**
+     * Returns an ActivityOptions bundle created using the given parameters.
+     *
+     * @param displayId The ID of the display to launch the activity in. Typically this would be the
+     *                  display the status bar is on.
+     * @param animationAdapter The animation adapter used to start this activity, or {@code null}
+     *                         for the default animation.
+     */
+    public static Bundle getActivityOptions(int displayId,
+            @Nullable RemoteAnimationAdapter animationAdapter) {
         return getDefaultActivityOptions(animationAdapter).toBundle();
     }
 
-    public static Bundle getActivityOptions(@Nullable RemoteAnimationAdapter animationAdapter,
-            boolean isKeyguardShowing, long eventTime) {
+    /**
+     * Returns an ActivityOptions bundle created using the given parameters.
+     *
+     * @param displayId The ID of the display to launch the activity in. Typically this would be the
+     *                  display the status bar is on.
+     * @param animationAdapter The animation adapter used to start this activity, or {@code null}
+     *                         for the default animation.
+     * @param isKeyguardShowing Whether keyguard is currently showing.
+     * @param eventTime The event time in milliseconds since boot, not including sleep. See
+     *                  {@link ActivityOptions#setSourceInfo}.
+     */
+    public static Bundle getActivityOptions(int displayId,
+            @Nullable RemoteAnimationAdapter animationAdapter, boolean isKeyguardShowing,
+            long eventTime) {
         ActivityOptions options = getDefaultActivityOptions(animationAdapter);
         options.setSourceInfo(isKeyguardShowing ? ActivityOptions.SourceInfo.TYPE_LOCKSCREEN
                 : ActivityOptions.SourceInfo.TYPE_NOTIFICATION, eventTime);
+        options.setLaunchDisplayId(displayId);
+        options.setCallerDisplayId(displayId);
         return options.toBundle();
     }
 
