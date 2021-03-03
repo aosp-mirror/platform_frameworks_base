@@ -67,15 +67,21 @@ public class VcnNetworkProvider extends NetworkProvider {
         mListeners.add(listener);
 
         // Send listener all cached requests
-        for (NetworkRequestEntry entry : mRequests.values()) {
-            notifyListenerForEvent(listener, entry);
-        }
+        resendAllRequests(listener);
     }
 
     /** Unregisters the specified listener from receiving future NetworkRequests. */
     @VisibleForTesting(visibility = Visibility.PACKAGE)
     public void unregisterListener(@NonNull NetworkRequestListener listener) {
         mListeners.remove(listener);
+    }
+
+    /** Sends all cached NetworkRequest(s) to the specified listener. */
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
+    public void resendAllRequests(@NonNull NetworkRequestListener listener) {
+        for (NetworkRequestEntry entry : mRequests.values()) {
+            notifyListenerForEvent(listener, entry);
+        }
     }
 
     private void notifyListenerForEvent(
