@@ -106,10 +106,18 @@ public class WifiSignalController extends
         if (mCurrentState.inetCondition == 0) {
             contentDescription += ("," + mContext.getString(R.string.data_connection_no_internet));
         }
-        IconState statusIcon = new IconState(wifiVisible, getCurrentIconId(), contentDescription);
         if (mProviderModel) {
+            // WiFi icon will only be shown in the statusbar in 2 scenarios
+            // 1. WiFi is the default network, and it is validated
+            // 2. WiFi is the default network, it is not validated and there is no other
+            // non-Carrier WiFi networks available.
+            boolean maybeShowIcons = (mCurrentState.inetCondition == 1)
+                    || (mCurrentState.inetCondition == 0
+                            && !mNetworkController.isNonCarrierWifiNetworkAvailable());
+            IconState statusIcon = new IconState(
+                    wifiVisible && maybeShowIcons, getCurrentIconId(), contentDescription);
             IconState qsIcon = null;
-            if (mCurrentState.isDefault || (!mNetworkController.isRadioOn()
+            if ((mCurrentState.isDefault && maybeShowIcons) || (!mNetworkController.isRadioOn()
                     && !mNetworkController.isEthernetDefault())) {
                 qsIcon = new IconState(mCurrentState.connected,
                         mWifiTracker.isCaptivePortal ? R.drawable.ic_qs_wifi_disconnected
@@ -123,6 +131,8 @@ public class WifiSignalController extends
             );
             callback.setWifiIndicators(wifiIndicators);
         } else {
+            IconState statusIcon = new IconState(
+                    wifiVisible, getCurrentIconId(), contentDescription);
             IconState qsIcon = new IconState(mCurrentState.connected,
                     mWifiTracker.isCaptivePortal ? R.drawable.ic_qs_wifi_disconnected
                             : getQsCurrentIconId(), contentDescription);
@@ -146,15 +156,25 @@ public class WifiSignalController extends
         if (mCurrentState.inetCondition == 0) {
             dataContentDescription = mContext.getString(R.string.data_connection_no_internet);
         }
-        boolean qsVisible = mCurrentState.enabled
-                && (mCurrentState.connected && mCurrentState.inetCondition == 1);
-
+        // Mobile icon will only be shown in the statusbar in 2 scenarios
+        // 1. Mobile is the default network, and it is validated
+        // 2. Mobile is the default network, it is not validated and there is no other
+        // non-Carrier WiFi networks available.
+        boolean maybeShowIcons = (mCurrentState.inetCondition == 1)
+                || (mCurrentState.inetCondition == 0
+                        && !mNetworkController.isNonCarrierWifiNetworkAvailable());
+        boolean sbVisible = mCurrentState.enabled && mCurrentState.connected
+                && maybeShowIcons && mCurrentState.isDefault;
         IconState statusIcon =
-                new IconState(qsVisible, getCurrentIconIdForCarrierWifi(), contentDescription);
-        int qsTypeIcon = mCurrentState.connected ? icons.qsDataType : 0;
-        int typeIcon = mCurrentState.connected ? icons.dataType : 0;
-        IconState qsIcon = new IconState(
-                mCurrentState.connected, getQsCurrentIconIdForCarrierWifi(), contentDescription);
+                new IconState(sbVisible, getCurrentIconIdForCarrierWifi(), contentDescription);
+        int typeIcon = sbVisible ? icons.dataType : 0;
+        int qsTypeIcon = 0;
+        IconState qsIcon = null;
+        if (sbVisible) {
+            qsTypeIcon = icons.qsDataType;
+            qsIcon = new IconState(mCurrentState.connected, getQsCurrentIconIdForCarrierWifi(),
+                    contentDescription);
+        }
         CharSequence description =
                 mNetworkController.getNetworkNameForCarrierWiFi(mCurrentState.subId);
         MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(

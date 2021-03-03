@@ -27,7 +27,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.SystemClock;
@@ -1243,7 +1242,10 @@ public abstract class PanelViewController {
                     mVelocityTracker.clear();
                     break;
             }
-            return false;
+
+            // Finally, if none of the above cases applies, ensure that touches do not get handled
+            // by the contents of a panel that is not showing (a bit of a hack to avoid b/178277858)
+            return (mView.getVisibility() != View.VISIBLE);
         }
 
         @Override

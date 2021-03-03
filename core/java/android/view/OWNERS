@@ -57,6 +57,7 @@ per-file ViewRootImpl.java = file:/graphics/java/android/graphics/OWNERS
 per-file ViewRootImpl.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file ViewRootImpl.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file ViewRootImpl.java = file:/core/java/android/view/inputmethod/OWNERS
+per-file AccessibilityInteractionController.java = file:/services/accessibility/OWNERS
 
 # WindowManager
 per-file DisplayCutout.aidl = file:/services/core/java/com/android/server/wm/OWNERS

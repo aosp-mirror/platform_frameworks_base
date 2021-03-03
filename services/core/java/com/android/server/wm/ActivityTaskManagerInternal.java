@@ -348,13 +348,16 @@ public abstract class ActivityTaskManagerInternal {
     public final class ActivityTokens {
         private final @NonNull IBinder mActivityToken;
         private final @NonNull IBinder mAssistToken;
+        private final @NonNull IBinder mShareableActivityToken;
         private final @NonNull IApplicationThread mAppThread;
 
         public ActivityTokens(@NonNull IBinder activityToken,
-                @NonNull IBinder assistToken, @NonNull IApplicationThread appThread) {
+                @NonNull IBinder assistToken, @NonNull IApplicationThread appThread,
+                @NonNull IBinder shareableActivityToken) {
             mActivityToken = activityToken;
             mAssistToken = assistToken;
             mAppThread = appThread;
+            mShareableActivityToken = shareableActivityToken;
         }
 
         /**
@@ -369,6 +372,13 @@ public abstract class ActivityTaskManagerInternal {
          */
         public @NonNull IBinder getAssistToken() {
             return mAssistToken;
+        }
+
+        /**
+         * @return The sharable activity token..
+         */
+        public @NonNull IBinder getShareableActivityToken() {
+            return mShareableActivityToken;
         }
 
         /**

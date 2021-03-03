@@ -107,7 +107,7 @@ public class DomainVerificationDebug {
         reusedMap.clear();
         reusedMap.putAll(pkgState.getStateMap());
 
-        ArraySet<String> declaredDomains = mCollector.collectAutoVerifyDomains(pkg);
+        ArraySet<String> declaredDomains = mCollector.collectValidAutoVerifyDomains(pkg);
         int declaredSize = declaredDomains.size();
         for (int declaredIndex = 0; declaredIndex < declaredSize; declaredIndex++) {
             String domain = declaredDomains.valueAt(declaredIndex);
@@ -132,6 +132,17 @@ public class DomainVerificationDebug {
             }
 
             writer.increaseIndent();
+            final ArraySet<String> invalidDomains = mCollector.collectInvalidAutoVerifyDomains(pkg);
+            if (!invalidDomains.isEmpty()) {
+                writer.println("Invalid autoVerify domains:");
+                writer.increaseIndent();
+                int size = invalidDomains.size();
+                for (int index = 0; index < size; index++) {
+                    writer.println(invalidDomains.valueAt(index));
+                }
+                writer.decreaseIndent();
+            }
+
             writer.println("Domain verification state:");
             writer.increaseIndent();
             int stateSize = reusedMap.size();

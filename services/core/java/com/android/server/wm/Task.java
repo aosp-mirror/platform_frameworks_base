@@ -1260,10 +1260,13 @@ class Task extends WindowContainer<WindowContainer> {
      * @param info The activity info which could be different from {@code r.info} if set.
      */
     void setIntent(ActivityRecord r, @Nullable Intent intent, @Nullable ActivityInfo info) {
-        mCallingUid = r.launchedFromUid;
-        mCallingPackage = r.launchedFromPackage;
-        mCallingFeatureId = r.launchedFromFeatureId;
-        setIntent(intent != null ? intent : r.intent, info != null ? info : r.info);
+        if (this.intent == null || !mNeverRelinquishIdentity) {
+            mCallingUid = r.launchedFromUid;
+            mCallingPackage = r.launchedFromPackage;
+            mCallingFeatureId = r.launchedFromFeatureId;
+            setIntent(intent != null ? intent : r.intent, info != null ? info : r.info);
+            return;
+        }
         setLockTaskAuth(r);
     }
 
@@ -1271,13 +1274,7 @@ class Task extends WindowContainer<WindowContainer> {
     private void setIntent(Intent _intent, ActivityInfo info) {
         if (!isLeafTask()) return;
 
-        if (intent == null) {
-            mNeverRelinquishIdentity =
-                    (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
-        } else if (mNeverRelinquishIdentity) {
-            return;
-        }
-
+        mNeverRelinquishIdentity = (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
         affinity = info.taskAffinity;
         if (intent == null) {
             // If this task already has an intent associated with it, don't set the root

@@ -97,7 +97,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
 import android.net.NetworkStack;
-import android.net.NetworkState;
+import android.net.NetworkStateSnapshot;
 import android.net.NetworkStats;
 import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
@@ -296,7 +296,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Last states of all networks sent from ConnectivityService. */
     @GuardedBy("mStatsLock")
     @Nullable
-    private NetworkState[] mLastNetworkStates = null;
+    private NetworkStateSnapshot[] mLastNetworkStateSnapshots = null;
 
     private final DropBoxNonMonotonicObserver mNonMonotonicObserver =
             new DropBoxNonMonotonicObserver();
@@ -378,8 +378,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 }
                 case MSG_UPDATE_IFACES: {
                     // If no cached states, ignore.
-                    if (mLastNetworkStates == null) break;
-                    updateIfaces(mDefaultNetworks, mLastNetworkStates, mActiveIface);
+                    if (mLastNetworkStateSnapshots == null) break;
+                    updateIfaces(mDefaultNetworks, mLastNetworkStateSnapshots, mActiveIface);
                     break;
                 }
                 case MSG_PERFORM_POLL_REGISTER_ALERT: {
@@ -967,10 +967,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
-    @Override
     public void forceUpdateIfaces(
             Network[] defaultNetworks,
-            NetworkState[] networkStates,
+            NetworkStateSnapshot[] networkStates,
             String activeIface,
             UnderlyingNetworkInfo[] underlyingNetworkInfos) {
         checkNetworkStackPermission(mContext);
@@ -1248,13 +1247,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private void updateIfaces(
             Network[] defaultNetworks,
-            NetworkState[] networkStates,
+            NetworkStateSnapshot[] snapshots,
             String activeIface) {
         synchronized (mStatsLock) {
             mWakeLock.acquire();
             try {
                 mActiveIface = activeIface;
-                updateIfacesLocked(defaultNetworks, networkStates);
+                updateIfacesLocked(defaultNetworks, snapshots);
             } finally {
                 mWakeLock.release();
             }
@@ -1262,13 +1261,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     /**
-     * Inspect all current {@link NetworkState} to derive mapping from {@code iface} to {@link
-     * NetworkStatsHistory}. When multiple networks are active on a single {@code iface},
+     * Inspect all current {@link NetworkStateSnapshot}s to derive mapping from {@code iface} to
+     * {@link NetworkStatsHistory}. When multiple networks are active on a single {@code iface},
      * they are combined under a single {@link NetworkIdentitySet}.
      */
     @GuardedBy("mStatsLock")
     private void updateIfacesLocked(@Nullable Network[] defaultNetworks,
-            @NonNull NetworkState[] states) {
+            @NonNull NetworkStateSnapshot[] snapshots) {
         if (!mSystemReady) return;
         if (LOGV) Slog.v(TAG, "updateIfacesLocked()");
 
@@ -1288,21 +1287,21 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mDefaultNetworks = defaultNetworks;
         }
 
-        mLastNetworkStates = states;
+        mLastNetworkStateSnapshots = snapshots;
 
         final boolean combineSubtypeEnabled = mSettings.getCombineSubtypeEnabled();
         final ArraySet<String> mobileIfaces = new ArraySet<>();
-        for (NetworkState state : states) {
-            final boolean isMobile = isNetworkTypeMobile(state.legacyNetworkType);
-            final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, state.network);
+        for (NetworkStateSnapshot snapshot : snapshots) {
+            final boolean isMobile = isNetworkTypeMobile(snapshot.legacyType);
+            final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, snapshot.network);
             final int subType = combineSubtypeEnabled ? SUBTYPE_COMBINED
-                    : getSubTypeForState(state);
-            final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state,
+                    : getSubTypeForStateSnapshot(snapshot);
+            final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, snapshot,
                     isDefault, subType);
 
             // Traffic occurring on the base interface is always counted for
             // both total usage and UID details.
-            final String baseIface = state.linkProperties.getInterfaceName();
+            final String baseIface = snapshot.linkProperties.getInterfaceName();
             if (baseIface != null) {
                 findOrCreateNetworkIdentitySet(mActiveIfaces, baseIface).add(ident);
                 findOrCreateNetworkIdentitySet(mActiveUidIfaces, baseIface).add(ident);
@@ -1312,7 +1311,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 // If IMS is metered, then the IMS network usage has already included VT usage.
                 // VT is considered always metered in framework's layer. If VT is not metered
                 // per carrier's policy, modem will report 0 usage for VT calls.
-                if (state.networkCapabilities.hasCapability(
+                if (snapshot.networkCapabilities.hasCapability(
                         NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.getMetered()) {
 
                     // Copy the identify from IMS one but mark it as metered.
@@ -1358,7 +1357,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // (or non eBPF offloaded) TX they would appear on both, however egress interface
             // accounting is explicitly bypassed for traffic from the clat uid.
             //
-            final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
+            final List<LinkProperties> stackedLinks = snapshot.linkProperties.getStackedLinks();
             for (LinkProperties stackedLink : stackedLinks) {
                 final String stackedIface = stackedLink.getInterfaceName();
                 if (stackedIface != null) {
@@ -1381,7 +1380,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * {@link PhoneStateListener}. Otherwise, return 0 given that other networks with different
      * transport types do not actually fill this value.
      */
-    private int getSubTypeForState(@NonNull NetworkState state) {
+    private int getSubTypeForStateSnapshot(@NonNull NetworkStateSnapshot state) {
         if (!state.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
             return 0;
         }

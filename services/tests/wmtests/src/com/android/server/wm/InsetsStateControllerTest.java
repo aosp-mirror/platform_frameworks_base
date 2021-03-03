@@ -416,6 +416,16 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         verify(navBar, atLeastOnce()).notifyInsetsChanged();
     }
 
+    @Test
+    public void testDispatchGlobalInsets() {
+        final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
+        getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_NAVIGATION_BAR));
+        app.mAttrs.receiveInsetsIgnoringZOrder = true;
+        assertNotNull(getController().getInsetsForWindow(app).peekSource(ITYPE_NAVIGATION_BAR));
+    }
+
     private WindowState createTestWindow(String name) {
         final WindowState win = createWindow(null, TYPE_APPLICATION, name);
         win.setHasSurface(true);

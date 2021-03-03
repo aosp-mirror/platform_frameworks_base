@@ -43,7 +43,6 @@ import android.net.QosSession;
 import android.net.TcpKeepalivePacketData;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.data.EpsBearerQosSessionAttributes;
@@ -341,8 +340,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public NetworkAgentInfo(INetworkAgent na, Network net, NetworkInfo info,
             @NonNull LinkProperties lp, @NonNull NetworkCapabilities nc, int score, Context context,
             Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
-            IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber,
-            int creatorUid, QosCallbackTracker qosCallbackTracker) {
+            IDnsResolver dnsResolver, int factorySerialNumber, int creatorUid,
+            QosCallbackTracker qosCallbackTracker) {
         Objects.requireNonNull(net);
         Objects.requireNonNull(info);
         Objects.requireNonNull(lp);
@@ -356,7 +355,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         linkProperties = lp;
         networkCapabilities = nc;
         mScore = score;
-        clatd = new Nat464Xlat(this, netd, dnsResolver, nms);
+        clatd = new Nat464Xlat(this, netd, dnsResolver);
         mConnService = connService;
         mContext = context;
         mHandler = handler;

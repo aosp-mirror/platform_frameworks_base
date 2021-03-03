@@ -16,8 +16,11 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,31 +31,49 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi(client = MODULE_LIBRARIES)
 public final class NetworkStateSnapshot implements Parcelable {
-    @NonNull
-    public final LinkProperties linkProperties;
-    @NonNull
-    public final NetworkCapabilities networkCapabilities;
+    /** The network associated with this snapshot. */
     @NonNull
     public final Network network;
+
+    /** The {@link NetworkCapabilities} of the network associated with this snapshot. */
+    @NonNull
+    public final NetworkCapabilities networkCapabilities;
+
+    /** The {@link LinkProperties} of the network associated with this snapshot. */
+    @NonNull
+    public final LinkProperties linkProperties;
+
+    /**
+     * The Subscriber Id of the network associated with this snapshot. See
+     * {@link android.telephony.TelephonyManager#getSubscriberId()}.
+     */
     @Nullable
     public final String subscriberId;
+
+    /**
+     * The legacy type of the network associated with this snapshot. See
+     * {@code ConnectivityManager#TYPE_*}.
+     */
     public final int legacyType;
 
-    public NetworkStateSnapshot(@NonNull LinkProperties linkProperties,
-            @NonNull NetworkCapabilities networkCapabilities, @NonNull Network network,
+    public NetworkStateSnapshot(@NonNull Network network,
+            @NonNull NetworkCapabilities networkCapabilities,
+            @NonNull LinkProperties linkProperties,
             @Nullable String subscriberId, int legacyType) {
-        this.linkProperties = Objects.requireNonNull(linkProperties);
-        this.networkCapabilities = Objects.requireNonNull(networkCapabilities);
         this.network = Objects.requireNonNull(network);
+        this.networkCapabilities = Objects.requireNonNull(networkCapabilities);
+        this.linkProperties = Objects.requireNonNull(linkProperties);
         this.subscriberId = subscriberId;
         this.legacyType = legacyType;
     }
 
+    /** @hide */
     public NetworkStateSnapshot(@NonNull Parcel in) {
-        linkProperties = in.readParcelable(null);
-        networkCapabilities = in.readParcelable(null);
         network = in.readParcelable(null);
+        networkCapabilities = in.readParcelable(null);
+        linkProperties = in.readParcelable(null);
         subscriberId = in.readString();
         legacyType = in.readInt();
     }
@@ -64,9 +85,9 @@ public final class NetworkStateSnapshot implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        out.writeParcelable(linkProperties, flags);
-        out.writeParcelable(networkCapabilities, flags);
         out.writeParcelable(network, flags);
+        out.writeParcelable(networkCapabilities, flags);
+        out.writeParcelable(linkProperties, flags);
         out.writeString(subscriberId);
         out.writeInt(legacyType);
     }
@@ -93,14 +114,14 @@ public final class NetworkStateSnapshot implements Parcelable {
         if (!(o instanceof NetworkStateSnapshot)) return false;
         NetworkStateSnapshot that = (NetworkStateSnapshot) o;
         return legacyType == that.legacyType
-                && Objects.equals(linkProperties, that.linkProperties)
-                && Objects.equals(networkCapabilities, that.networkCapabilities)
                 && Objects.equals(network, that.network)
+                && Objects.equals(networkCapabilities, that.networkCapabilities)
+                && Objects.equals(linkProperties, that.linkProperties)
                 && Objects.equals(subscriberId, that.subscriberId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(linkProperties, networkCapabilities, network, subscriberId, legacyType);
+        return Objects.hash(network, networkCapabilities, linkProperties, subscriberId, legacyType);
     }
 }

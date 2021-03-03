@@ -52,8 +52,10 @@ class DomainVerificationCollectorTest {
         val collector = mockCollector()
         assertThat(collector.collectAllWebDomains(pkg))
                 .containsExactly("example1.com", "example2.com", "example3.com")
-        assertThat(collector.collectAutoVerifyDomains(pkg))
+        assertThat(collector.collectValidAutoVerifyDomains(pkg))
                 .containsExactly("example1.com", "example2.com", "example3.com", "example4.com")
+        assertThat(collector.collectInvalidAutoVerifyDomains(pkg))
+                .containsExactly("invalid1", "invalid2", "invalid3", "invalid4")
     }
 
     @Test
@@ -62,7 +64,8 @@ class DomainVerificationCollectorTest {
         val collector = mockCollector()
         assertThat(collector.collectAllWebDomains(pkg))
                 .containsExactly("example1.com", "example2.com", "example3.com")
-        assertThat(collector.collectAutoVerifyDomains(pkg)).isEmpty()
+        assertThat(collector.collectValidAutoVerifyDomains(pkg)).isEmpty()
+        assertThat(collector.collectInvalidAutoVerifyDomains(pkg)).isEmpty()
     }
 
     @Test
@@ -71,8 +74,10 @@ class DomainVerificationCollectorTest {
         val collector = mockCollector(linkedApps = setOf(TEST_PKG_NAME))
         assertThat(collector.collectAllWebDomains(pkg))
                 .containsExactly("example1.com", "example2.com", "example3.com")
-        assertThat(collector.collectAutoVerifyDomains(pkg))
+        assertThat(collector.collectValidAutoVerifyDomains(pkg))
                 .containsExactly("example1.com", "example2.com", "example3.com", "example4.com")
+        assertThat(collector.collectInvalidAutoVerifyDomains(pkg))
+                .containsExactly("invalid1", "invalid2", "invalid3", "invalid4")
     }
 
     @Test
@@ -92,6 +97,7 @@ class DomainVerificationCollectorTest {
                                     addDataScheme("https")
                                     addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
                                     addDataAuthority("example1.com", null)
+                                    addDataAuthority("invalid1", null)
                                 }
                         )
                     },
@@ -111,6 +117,7 @@ class DomainVerificationCollectorTest {
                                     addDataScheme("nonWebScheme")
                                     addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
                                     addDataAuthority("example2.com", null)
+                                    addDataAuthority("invalid2", null)
                                 }
                         )
                     },
@@ -122,7 +129,8 @@ class DomainVerificationCollectorTest {
         val collector = mockCollector()
         assertThat(collector.collectAllWebDomains(pkg))
                 .containsExactly("example1.com", "example2.com")
-        assertThat(collector.collectAutoVerifyDomains(pkg)).isEmpty()
+        assertThat(collector.collectValidAutoVerifyDomains(pkg)).isEmpty()
+        assertThat(collector.collectInvalidAutoVerifyDomains(pkg)).isEmpty()
     }
 
     @Test
@@ -132,8 +140,10 @@ class DomainVerificationCollectorTest {
 
         assertThat(collector.collectAllWebDomains(pkg))
                 .containsExactly("example1.com", "example2.com", "example3.com")
-        assertThat(collector.collectAutoVerifyDomains(pkg))
+        assertThat(collector.collectValidAutoVerifyDomains(pkg))
                 .containsExactly("example1.com", "example3.com")
+        assertThat(collector.collectInvalidAutoVerifyDomains(pkg))
+                .containsExactly("invalid1", "invalid3")
     }
 
     @Test
@@ -143,7 +153,8 @@ class DomainVerificationCollectorTest {
 
         assertThat(collector.collectAllWebDomains(pkg))
                 .containsExactly("example1.com", "example2.com", "example3.com")
-        assertThat(collector.collectAutoVerifyDomains(pkg)).isEmpty()
+        assertThat(collector.collectValidAutoVerifyDomains(pkg)).isEmpty()
+        assertThat(collector.collectInvalidAutoVerifyDomains(pkg)).isEmpty()
     }
 
     @Test
@@ -153,7 +164,8 @@ class DomainVerificationCollectorTest {
 
         assertThat(collector.collectAllWebDomains(pkg))
                 .containsExactly("example1.com", "example2.com", "example3.com")
-        assertThat(collector.collectAutoVerifyDomains(pkg)).isEmpty()
+        assertThat(collector.collectValidAutoVerifyDomains(pkg)).isEmpty()
+        assertThat(collector.collectInvalidAutoVerifyDomains(pkg)).isEmpty()
     }
 
     private fun mockCollector(linkedApps: Set<String> = emptySet()): DomainVerificationCollector {
@@ -178,6 +190,7 @@ class DomainVerificationCollectorTest {
                     <data android:scheme="https"/>
                     <data android:path="/sub"/>
                     <data android:host="example1.com"/>
+                    <data android:host="invalid1"/>
                 </intent-filter>
                 <intent-filter>
                     <action android:name="android.intent.action.VIEW"/>
@@ -186,6 +199,7 @@ class DomainVerificationCollectorTest {
                     <data android:scheme="http"/>
                     <data android:path="/sub2"/>
                     <data android:host="example2.com"/>
+                    <data android:host="invalid2."/>
                 </intent-filter>
                 <intent-filter android:autoVerify="$autoVerify">
                     <action android:name="android.intent.action.VIEW"/>
@@ -194,6 +208,7 @@ class DomainVerificationCollectorTest {
                     <data android:scheme="https"/>
                     <data android:path="/sub3"/>
                     <data android:host="example3.com"/>
+                    <data android:host=".invalid3"/>
                 </intent-filter>
                 <intent-filter android:autoVerify="$autoVerify">
                     <action android:name="android.intent.action.VIEW"/>
@@ -201,6 +216,7 @@ class DomainVerificationCollectorTest {
                     <data android:scheme="https"/>
                     <data android:path="/sub4"/>
                     <data android:host="example4.com"/>
+                    <data android:host="invalid4"/>
                 </intent-filter>
                 <intent-filter android:autoVerify="$autoVerify">
                     <action android:name="android.intent.action.VIEW"/>
@@ -208,6 +224,7 @@ class DomainVerificationCollectorTest {
                     <data android:scheme="https"/>
                     <data android:path="/sub5"/>
                     <data android:host="example5.com"/>
+                    <data android:host="invalid5"/>
                 </intent-filter>
                 <intent-filter android:autoVerify="$autoVerify">
                     <category android:name="android.intent.category.BROWSABLE"/>
@@ -215,11 +232,12 @@ class DomainVerificationCollectorTest {
                     <data android:scheme="https"/>
                     <data android:path="/sub5"/>
                     <data android:host="example5.com"/>
+                    <data android:host="invalid5"/>
                 </intent-filter>
             </xml>
         """.trimIndent()
 
-        return mockThrowOnUnmocked<AndroidPackage> {
+        return mockThrowOnUnmocked {
             whenever(packageName) { TEST_PKG_NAME }
             whenever(targetSdkVersion) {
                 if (useV2) Build.VERSION_CODES.S else Build.VERSION_CODES.R
@@ -238,6 +256,7 @@ class DomainVerificationCollectorTest {
                                     addDataScheme("https")
                                     addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
                                     addDataAuthority("example1.com", null)
+                                    addDataAuthority("invalid1", null)
                                 }
                         )
                         addIntent(
@@ -248,6 +267,7 @@ class DomainVerificationCollectorTest {
                                     addDataScheme("http")
                                     addDataPath("/sub2", PatternMatcher.PATTERN_LITERAL)
                                     addDataAuthority("example2.com", null)
+                                    addDataAuthority("invalid2", null)
                                 }
                         )
                     },
@@ -261,6 +281,7 @@ class DomainVerificationCollectorTest {
                                     addDataScheme("https")
                                     addDataPath("/sub3", PatternMatcher.PATTERN_LITERAL)
                                     addDataAuthority("example3.com", null)
+                                    addDataAuthority("invalid3", null)
                                 }
                         )
                     },
@@ -273,6 +294,7 @@ class DomainVerificationCollectorTest {
                                     addDataScheme("https")
                                     addDataPath("/sub4", PatternMatcher.PATTERN_LITERAL)
                                     addDataAuthority("example4.com", null)
+                                    addDataAuthority("invalid4", null)
                                 }
                         )
                         addIntent(
@@ -283,6 +305,7 @@ class DomainVerificationCollectorTest {
                                     addDataScheme("https")
                                     addDataPath("/sub5", PatternMatcher.PATTERN_LITERAL)
                                     addDataAuthority("example5.com", null)
+                                    addDataAuthority("invalid5", null)
                                 }
                         )
                         addIntent(
@@ -293,6 +316,7 @@ class DomainVerificationCollectorTest {
                                     addDataScheme("https")
                                     addDataPath("/sub6", PatternMatcher.PATTERN_LITERAL)
                                     addDataAuthority("example6.com", null)
+                                    addDataAuthority("invalid6", null)
                                 }
                         )
                     },

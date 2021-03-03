@@ -71,6 +71,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private boolean mIsForward;
     private ProfilerInfo mProfilerInfo;
     private IBinder mAssistToken;
+    private IBinder mShareableActivityToken;
     /**
      * It is only non-null if the process is the first time to launch activity. It is only an
      * optimization for quick look up of the interface so the field is ignored for comparison.
@@ -95,7 +96,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
                 mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mActivityOptions, mIsForward, mProfilerInfo,
-                client, mAssistToken, mFixedRotationAdjustments);
+                client, mAssistToken, mFixedRotationAdjustments, mShareableActivityToken);
         client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -119,7 +120,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
             List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
             boolean isForward, ProfilerInfo profilerInfo, IBinder assistToken,
             IActivityClientController activityClientController,
-            FixedRotationAdjustments fixedRotationAdjustments) {
+            FixedRotationAdjustments fixedRotationAdjustments, IBinder shareableActivityToken) {
         LaunchActivityItem instance = ObjectPool.obtain(LaunchActivityItem.class);
         if (instance == null) {
             instance = new LaunchActivityItem();
@@ -127,7 +128,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         setValues(instance, intent, ident, info, curConfig, overrideConfig, compatInfo, referrer,
                 voiceInteractor, procState, state, persistentState, pendingResults,
                 pendingNewIntents, activityOptions, isForward, profilerInfo, assistToken,
-                activityClientController, fixedRotationAdjustments);
+                activityClientController, fixedRotationAdjustments, shareableActivityToken);
 
         return instance;
     }
@@ -135,7 +136,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     @Override
     public void recycle() {
         setValues(this, null, 0, null, null, null, null, null, null, 0, null, null, null, null,
-                null, false, null, null, null, null);
+                null, false, null, null, null, null, null);
         ObjectPool.recycle(this);
     }
 
@@ -164,6 +165,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         dest.writeStrongBinder(mAssistToken);
         dest.writeStrongInterface(mActivityClientController);
         dest.writeTypedObject(mFixedRotationAdjustments, flags);
+        dest.writeStrongBinder(mShareableActivityToken);
     }
 
     /** Read from Parcel. */
@@ -181,7 +183,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 in.readTypedObject(ProfilerInfo.CREATOR),
                 in.readStrongBinder(),
                 IActivityClientController.Stub.asInterface(in.readStrongBinder()),
-                in.readTypedObject(FixedRotationAdjustments.CREATOR));
+                in.readTypedObject(FixedRotationAdjustments.CREATOR), in.readStrongBinder());
     }
 
     public static final @NonNull Creator<LaunchActivityItem> CREATOR =
@@ -219,7 +221,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 && mIsForward == other.mIsForward
                 && Objects.equals(mProfilerInfo, other.mProfilerInfo)
                 && Objects.equals(mAssistToken, other.mAssistToken)
-                && Objects.equals(mFixedRotationAdjustments, other.mFixedRotationAdjustments);
+                && Objects.equals(mFixedRotationAdjustments, other.mFixedRotationAdjustments)
+                && Objects.equals(mShareableActivityToken, other.mShareableActivityToken);
     }
 
     @Override
@@ -241,6 +244,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         result = 31 * result + Objects.hashCode(mProfilerInfo);
         result = 31 * result + Objects.hashCode(mAssistToken);
         result = 31 * result + Objects.hashCode(mFixedRotationAdjustments);
+        result = 31 * result + Objects.hashCode(mShareableActivityToken);
         return result;
     }
 
@@ -277,7 +281,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 + ",persistentState=" + mPersistentState + ",pendingResults=" + mPendingResults
                 + ",pendingNewIntents=" + mPendingNewIntents + ",options=" + mActivityOptions
                 + ",profilerInfo=" + mProfilerInfo + ",assistToken=" + mAssistToken
-                + ",rotationAdj=" + mFixedRotationAdjustments + "}";
+                + ",rotationAdj=" + mFixedRotationAdjustments
+                + ",shareableActivityToken=" + mShareableActivityToken + "}";
     }
 
     // Using the same method to set and clear values to make sure we don't forget anything
@@ -288,7 +293,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
             ActivityOptions activityOptions, boolean isForward, ProfilerInfo profilerInfo,
             IBinder assistToken, IActivityClientController activityClientController,
-            FixedRotationAdjustments fixedRotationAdjustments) {
+            FixedRotationAdjustments fixedRotationAdjustments, IBinder shareableActivityToken) {
         instance.mIntent = intent;
         instance.mIdent = ident;
         instance.mInfo = info;
@@ -308,5 +313,6 @@ public class LaunchActivityItem extends ClientTransactionItem {
         instance.mAssistToken = assistToken;
         instance.mActivityClientController = activityClientController;
         instance.mFixedRotationAdjustments = fixedRotationAdjustments;
+        instance.mShareableActivityToken = shareableActivityToken;
     }
 }

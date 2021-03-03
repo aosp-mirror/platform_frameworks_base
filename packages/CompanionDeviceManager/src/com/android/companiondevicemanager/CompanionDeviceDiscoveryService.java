@@ -107,12 +107,10 @@ public class CompanionDeviceDiscoveryService extends Service {
                 String callingPackage,
                 IFindDeviceCallback findCallback,
                 AndroidFuture serviceCallback) {
-            if (DEBUG) {
-                Log.i(LOG_TAG,
-                        "startDiscovery() called with: filter = [" + request
-                                + "], findCallback = [" + findCallback + "]"
-                                + "], serviceCallback = [" + serviceCallback + "]");
-            }
+            Log.i(LOG_TAG,
+                    "startDiscovery() called with: filter = [" + request
+                            + "], findCallback = [" + findCallback + "]"
+                            + "], serviceCallback = [" + serviceCallback + "]");
             mFindCallback = findCallback;
             mServiceCallback = serviceCallback;
             Handler.getMain().sendMessage(obtainMessage(
@@ -127,7 +125,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (DEBUG) Log.i(LOG_TAG, "onBind(" + intent + ")");
+        Log.i(LOG_TAG, "onBind(" + intent + ")");
         return mBinder.asBinder();
     }
 
@@ -135,7 +133,7 @@ public class CompanionDeviceDiscoveryService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        if (DEBUG) Log.i(LOG_TAG, "onCreate()");
+        Log.i(LOG_TAG, "onCreate()");
 
         mBluetoothManager = getSystemService(BluetoothManager.class);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
@@ -160,7 +158,9 @@ public class CompanionDeviceDiscoveryService extends Service {
                     = CollectionUtils.map(mBLEFilters, BluetoothLeDeviceFilter::getScanFilter);
 
             reset();
-        } else if (DEBUG) Log.i(LOG_TAG, "startDiscovery: duplicate request: " + request);
+        } else {
+            Log.i(LOG_TAG, "startDiscovery: duplicate request: " + request);
+        }
 
         if (!ArrayUtils.isEmpty(mDevicesFound)) {
             onReadyToShowUI();
@@ -197,17 +197,20 @@ public class CompanionDeviceDiscoveryService extends Service {
             final IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
 
+            Log.i(LOG_TAG, "registerReceiver(BluetoothDevice.ACTION_FOUND)");
             mBluetoothBroadcastReceiver = new BluetoothBroadcastReceiver();
             registerReceiver(mBluetoothBroadcastReceiver, intentFilter);
             mBluetoothAdapter.startDiscovery();
         }
 
         if (shouldScan(mBLEFilters) && mBLEScanner != null) {
+            Log.i(LOG_TAG, "BLEScanner.startScan");
             mBLEScanCallback = new BLEScanCallback();
             mBLEScanner.startScan(mBLEScanFilters, mDefaultScanSettings, mBLEScanCallback);
         }
 
         if (shouldScan(mWifiFilters)) {
+            Log.i(LOG_TAG, "registerReceiver(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)");
             mWifiBroadcastReceiver = new WifiBroadcastReceiver();
             registerReceiver(mWifiBroadcastReceiver,
                     new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -225,7 +228,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     @MainThread
     private void reset() {
-        if (DEBUG) Log.i(LOG_TAG, "reset()");
+        Log.i(LOG_TAG, "reset()");
         stopScan();
         mDevicesFound.clear();
         mSelectedDevice = null;
@@ -234,12 +237,13 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
+        Log.i(LOG_TAG, "onUnbind(intent = " + intent + ")");
         stopScan();
         return super.onUnbind(intent);
     }
 
     private void stopScan() {
-        if (DEBUG) Log.i(LOG_TAG, "stopScan()");
+        Log.i(LOG_TAG, "stopScan()");
 
         if (!mIsScanning) return;
         mIsScanning = false;

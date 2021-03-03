@@ -144,6 +144,9 @@ public class AppStandbyControllerTests {
     private static final long RARE_THRESHOLD = 48 * HOUR_MS;
     private static final long RESTRICTED_THRESHOLD = 96 * HOUR_MS;
 
+    private static final int ASSERT_RETRY_ATTEMPTS = 20;
+    private static final int ASSERT_RETRY_DELAY_MILLISECONDS = 500;
+
     /** Mock variable used in {@link MyInjector#isPackageInstalled(String, int, int)} */
     private static boolean isPackageInstalled = true;
 
@@ -589,16 +592,37 @@ public class AppStandbyControllerTests {
                 mInjector.mElapsedRealtime);
     }
 
-    private void assertBucket(int bucket) {
+    private void assertBucket(int bucket) throws InterruptedException {
         assertBucket(bucket, PACKAGE_1);
     }
 
-    private void assertBucket(int bucket, String pkg) {
+    private void assertBucket(int bucket, String pkg) throws InterruptedException {
+        int retries = 0;
+        do {
+            if (bucket == getStandbyBucket(mController, pkg)) {
+                // Success
+                return;
+            }
+            Thread.sleep(ASSERT_RETRY_DELAY_MILLISECONDS);
+            retries++;
+        } while(retries < ASSERT_RETRY_ATTEMPTS);
+        // try one last time
         assertEquals(bucket, getStandbyBucket(mController, pkg));
     }
 
-    private void assertNotBucket(int bucket) {
-        assertNotEquals(bucket, getStandbyBucket(mController, PACKAGE_1));
+    private void assertNotBucket(int bucket) throws InterruptedException {
+        final String pkg = PACKAGE_1;
+        int retries = 0;
+        do {
+            if (bucket != getStandbyBucket(mController, pkg)) {
+                // Success
+                return;
+            }
+            Thread.sleep(ASSERT_RETRY_DELAY_MILLISECONDS);
+            retries++;
+        } while(retries < ASSERT_RETRY_ATTEMPTS);
+        // try one last time
+        assertNotEquals(bucket, getStandbyBucket(mController, pkg));
     }
 
     @Test
@@ -996,7 +1020,7 @@ public class AppStandbyControllerTests {
      * a low bucket after the RESTRICTED timeout.
      */
     @Test
-    public void testRestrictedTimeoutOverridesRestoredLowBucketPrediction() {
+    public void testRestrictedTimeoutOverridesRestoredLowBucketPrediction() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
         assertBucket(STANDBY_BUCKET_ACTIVE);
 
@@ -1032,7 +1056,7 @@ public class AppStandbyControllerTests {
      * a low bucket after the RESTRICTED timeout.
      */
     @Test
-    public void testRestrictedTimeoutOverridesPredictionLowBucket() {
+    public void testRestrictedTimeoutOverridesPredictionLowBucket() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
 
         // Not long enough to time out into RESTRICTED.
@@ -1055,7 +1079,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testRestrictedBucketDisabled() {
+    public void testRestrictedBucketDisabled() throws Exception {
         mInjector.mIsRestrictedBucketEnabled = false;
         // Get the controller to read the new value. Capturing the ContentObserver isn't possible
         // at the moment.
@@ -1080,7 +1104,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testRestrictedBucket_EnabledToDisabled() {
+    public void testRestrictedBucket_EnabledToDisabled() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
         mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
@@ -1097,7 +1121,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testPredictionRaiseFromRestrictedTimeout_highBucket() {
+    public void testPredictionRaiseFromRestrictedTimeout_highBucket() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
 
         // Way past all timeouts. App times out into RESTRICTED bucket.
@@ -1114,7 +1138,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testPredictionRaiseFromRestrictedTimeout_lowBucket() {
+    public void testPredictionRaiseFromRestrictedTimeout_lowBucket() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
 
         // Way past all timeouts. App times out into RESTRICTED bucket.
@@ -1366,7 +1390,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testAddActiveDeviceAdmin() {
+    public void testAddActiveDeviceAdmin() throws Exception {
         assertActiveAdmins(USER_ID, (String[]) null);
         assertActiveAdmins(USER_ID2, (String[]) null);
 
@@ -1402,7 +1426,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void isActiveDeviceAdmin() {
+    public void isActiveDeviceAdmin() throws Exception {
         assertActiveAdmins(USER_ID, (String[]) null);
         assertActiveAdmins(USER_ID2, (String[]) null);
 
@@ -1488,7 +1512,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testAppUpdateOnRestrictedBucketStatus() {
+    public void testAppUpdateOnRestrictedBucketStatus() throws Exception {
         // Updates shouldn't change bucket if the app timed out.
         // Way past all timeouts. App times out into RESTRICTED bucket.
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
@@ -1563,7 +1587,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testSystemHeadlessAppElevated() {
+    public void testSystemHeadlessAppElevated() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime,
                 PACKAGE_SYSTEM_HEADFULL);
@@ -1589,7 +1613,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testWellbeingAppElevated() {
+    public void testWellbeingAppElevated() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_WELLBEING);
         assertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_WELLBEING);
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);

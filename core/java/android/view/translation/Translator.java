@@ -35,6 +35,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.SyncResultReceiver;
 
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -219,6 +220,12 @@ public class Translator {
     /** @hide */
     public int getTranslatorId() {
         return mId;
+    }
+
+    /** @hide */
+    public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
+        pw.print(prefix); pw.print("sourceSpec: "); pw.println(mSourceSpec);
+        pw.print(prefix); pw.print("destSpec: "); pw.println(mDestSpec);
     }
 
     /**

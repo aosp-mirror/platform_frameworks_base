@@ -35,6 +35,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
+import android.app.assist.ActivityId;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.content.ComponentName;
@@ -241,6 +242,7 @@ final class ContentCapturePerUserService
 
     @GuardedBy("mLock")
     public void startSessionLocked(@NonNull IBinder activityToken,
+            @NonNull IBinder shareableActivityToken,
             @NonNull ActivityPresentationInfo activityPresentationInfo, int sessionId, int uid,
             int flags, @NonNull IResultReceiver clientReceiver) {
         if (activityPresentationInfo == null) {
@@ -340,8 +342,8 @@ final class ContentCapturePerUserService
         mRemoteService.ensureBoundLocked();
 
         final ContentCaptureServerSession newSession = new ContentCaptureServerSession(mLock,
-                activityToken, this, componentName, clientReceiver, taskId, displayId, sessionId,
-                uid, flags);
+                activityToken, new ActivityId(taskId, shareableActivityToken), this, componentName,
+                clientReceiver, taskId, displayId, sessionId, uid, flags);
         if (mMaster.verbose) {
             Slog.v(TAG, "startSession(): new session for "
                     + ComponentName.flattenToShortString(componentName) + " and id " + sessionId);

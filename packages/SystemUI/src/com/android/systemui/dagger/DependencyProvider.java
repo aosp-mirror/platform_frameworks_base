@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.om.OverlayManager;
 import android.hardware.display.AmbientDisplayConfiguration;
+import android.hardware.display.ColorDisplayManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -60,6 +61,7 @@ import com.android.systemui.navigationbar.NavigationBarOverlayController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.UserTracker;
@@ -82,6 +84,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.theme.ThemeOverlayApplier;
 import com.android.systemui.util.leak.LeakDetector;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
@@ -266,6 +269,15 @@ public class DependencyProvider {
     }
 
     /** */
+    @SysUISingleton
+    @Provides
+    public ReduceBrightColorsController provideReduceBrightColorsListener(
+            @Background Handler bgHandler, UserTracker userTracker,
+            ColorDisplayManager colorDisplayManager, SecureSettings secureSettings) {
+        return new ReduceBrightColorsController(userTracker, bgHandler,
+                colorDisplayManager, secureSettings);
+    }
+
     @Provides
     @SysUISingleton
     public ActivityManagerWrapper provideActivityManagerWrapper() {

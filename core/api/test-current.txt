@@ -399,6 +399,8 @@ package android.app.admin {
     method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void forceRemoveActiveAdmin(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceSecurityLogs();
     method public void forceUpdateUserSetupComplete();
+    method @NonNull public java.util.Set<java.lang.String> getDefaultCrossProfilePackages();
+    method @NonNull public java.util.Set<java.lang.String> getDisallowedSystemApps(@NonNull android.content.ComponentName, int, @NonNull String);
     method public long getLastBugReportRequestTime();
     method public long getLastNetworkLogRetrievalTime();
     method public long getLastSecurityLogRetrievalTime();
@@ -540,6 +542,15 @@ package android.app.admin {
   public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {
     ctor public UnsafeStateException(int, int);
     method public int getOperation();
+  }
+
+}
+
+package android.app.assist {
+
+  public class ActivityId {
+    method public int getTaskId();
+    method @Nullable public android.os.IBinder getToken();
   }
 
 }

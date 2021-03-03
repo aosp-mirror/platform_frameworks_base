@@ -21,7 +21,6 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 
 import android.content.Context;
 import android.net.INetworkStatsService;
-import android.os.INetworkManagementService;
 import android.os.ServiceManager;
 import android.util.Log;
 
@@ -38,8 +37,7 @@ public final class ConnectivityServiceInitializer extends SystemService {
         // Load JNI libraries used by ConnectivityService and its dependencies
         System.loadLibrary("service-connectivity");
         // TODO: Define formal APIs to get the needed services.
-        mConnectivity = new ConnectivityService(context, getNetworkManagementService(),
-                getNetworkStatsService());
+        mConnectivity = new ConnectivityService(context, getNetworkStatsService());
     }
 
     @Override
@@ -47,11 +45,6 @@ public final class ConnectivityServiceInitializer extends SystemService {
         Log.i(TAG, "Registering " + Context.CONNECTIVITY_SERVICE);
         publishBinderService(Context.CONNECTIVITY_SERVICE, mConnectivity,
                 /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
-    }
-
-    private INetworkManagementService getNetworkManagementService() {
-        return INetworkManagementService.Stub.asInterface(
-               ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
     }
 
     private INetworkStatsService getNetworkStatsService() {
