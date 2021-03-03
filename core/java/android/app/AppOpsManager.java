@@ -57,7 +57,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LongSparseArray;
@@ -8080,8 +8079,8 @@ public class AppOpsManager {
                 } else if (collectionMode == COLLECT_SYNC
                         // Only collect app-ops when the proxy is trusted
                         && (mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
-                        myUid) == PackageManager.PERMISSION_GRANTED || isTrustedVoiceServiceProxy(
-                        mContext, mContext.getOpPackageName(), op, mContext.getUserId()))) {
+                        myUid) == PackageManager.PERMISSION_GRANTED ||
+                        Binder.getCallingUid() == proxiedUid)) {
                     collectNotedOpSync(op, proxiedAttributionTag);
                 }
             }
@@ -8090,28 +8089,6 @@ public class AppOpsManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Checks if the voice recognition service is a trust proxy.
-     *
-     * @return {@code true} if the package is a trust voice recognition service proxy
-     * @hide
-     */
-    public static boolean isTrustedVoiceServiceProxy(Context context, String packageName,
-            int code, int userId) {
-        // This is a workaround for R QPR, new API change is not allowed. We only allow the current
-        // voice recognizer is also the voice interactor to noteproxy op.
-        if (code != OP_RECORD_AUDIO) {
-            return false;
-        }
-        final String voiceRecognitionComponent = Settings.Secure.getStringForUser(
-                context.getContentResolver(), Settings.Secure.VOICE_RECOGNITION_SERVICE, userId);
-
-        final String voiceRecognitionServicePackageName =
-                getComponentPackageNameFromString(voiceRecognitionComponent);
-        return (Objects.equals(packageName, voiceRecognitionServicePackageName))
-                && isPackagePreInstalled(context, packageName, userId);
     }
 
     private static String getComponentPackageNameFromString(String from) {
@@ -8488,8 +8465,7 @@ public class AppOpsManager {
                         // Only collect app-ops when the proxy is trusted
                         && (mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
                         Process.myUid()) == PackageManager.PERMISSION_GRANTED
-                        || isTrustedVoiceServiceProxy(mContext, mContext.getOpPackageName(), opInt,
-                        mContext.getUserId()))) {
+                        || Binder.getCallingUid() == proxiedUid)) {
                     collectNotedOpSync(opInt, proxiedAttributionTag);
                 }
             }
