@@ -53,7 +53,6 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.sizecompatui.SizeCompatUIController;
-import com.android.wm.shell.startingsurface.StartingSurfaceDrawer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -79,8 +78,6 @@ public class ShellTaskOrganizerTests {
     private Context mContext;
     @Mock
     private SizeCompatUIController mSizeCompatUI;
-    @Mock
-    private StartingSurfaceDrawer mStartingSurfaceDrawer;
 
     ShellTaskOrganizer mOrganizer;
     private final SyncTransactionQueue mSyncTransactionQueue = mock(SyncTransactionQueue.class);
@@ -116,7 +113,7 @@ public class ShellTaskOrganizerTests {
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
         mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mTestExecutor, mContext,
-                mSizeCompatUI, mStartingSurfaceDrawer));
+                mSizeCompatUI));
     }
 
     @Test

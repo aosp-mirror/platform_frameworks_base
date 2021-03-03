@@ -88,7 +88,6 @@ import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.GlobalWhitelistState;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
@@ -101,6 +100,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -602,10 +602,11 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void startSession(@NonNull IBinder activityToken,
-                @NonNull ComponentName componentName, int sessionId, int flags,
-                @NonNull IResultReceiver result) {
-            Preconditions.checkNotNull(activityToken);
-            Preconditions.checkNotNull(sessionId);
+                @NonNull IBinder shareableActivityToken, @NonNull ComponentName componentName,
+                int sessionId, int flags, @NonNull IResultReceiver result) {
+            Objects.requireNonNull(activityToken);
+            Objects.requireNonNull(shareableActivityToken);
+            Objects.requireNonNull(sessionId);
             final int userId = UserHandle.getCallingUserId();
 
             final ActivityPresentationInfo activityPresentationInfo = getAmInternal()
@@ -617,14 +618,14 @@ public final class ContentCaptureManagerService extends
                     setClientState(result, STATE_DISABLED, /* binder= */ null);
                     return;
                 }
-                service.startSessionLocked(activityToken, activityPresentationInfo, sessionId,
-                        Binder.getCallingUid(), flags, result);
+                service.startSessionLocked(activityToken, shareableActivityToken,
+                        activityPresentationInfo, sessionId, Binder.getCallingUid(), flags, result);
             }
         }
 
         @Override
         public void finishSession(int sessionId) {
-            Preconditions.checkNotNull(sessionId);
+            Objects.requireNonNull(sessionId);
             final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
@@ -650,7 +651,7 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void removeData(@NonNull DataRemovalRequest request) {
-            Preconditions.checkNotNull(request);
+            Objects.requireNonNull(request);
             assertCalledByPackageOwner(request.getPackageName());
 
             final int userId = UserHandle.getCallingUserId();
@@ -663,8 +664,8 @@ public final class ContentCaptureManagerService extends
         @Override
         public void shareData(@NonNull DataShareRequest request,
                 @NonNull IDataShareWriteAdapter clientAdapter) {
-            Preconditions.checkNotNull(request);
-            Preconditions.checkNotNull(clientAdapter);
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(clientAdapter);
 
             assertCalledByPackageOwner(request.getPackageName());
 

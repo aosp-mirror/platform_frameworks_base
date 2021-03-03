@@ -126,9 +126,15 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
                 Slog.w(TAG, "Cannot create GestureDetector, display removed:" + displayId);
                 return;
             }
+            onDisplayInfoChanged(info);
             mGestureDetector = new GestureDetector(mContext, new FlingGestureDetector(), mHandler) {
             };
         });
+    }
+
+    void onDisplayInfoChanged(DisplayInfo info) {
+        screenWidth = info.logicalWidth;
+        screenHeight = info.logicalHeight;
     }
 
     @Override

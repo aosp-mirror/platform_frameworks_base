@@ -16,6 +16,9 @@
 
 package com.android.server.pm.verify.domain.proxy;
 
+import static android.os.PowerWhitelistManager.REASON_DOMAIN_VERIFICATION_V2;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.BroadcastOptions;
@@ -69,11 +72,14 @@ public class DomainVerificationProxyV2 implements DomainVerificationProxy {
 
                 final long allowListTimeout = mConnection.getPowerSaveTempWhitelistAppDuration();
                 final BroadcastOptions options = BroadcastOptions.makeBasic();
-                options.setTemporaryAppWhitelistDuration(allowListTimeout);
+                options.setTemporaryAppAllowlist(allowListTimeout,
+                        TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                        REASON_DOMAIN_VERIFICATION_V2, "");
 
                 mConnection.getDeviceIdleInternal().addPowerSaveTempWhitelistApp(Process.myUid(),
                         mVerifierComponent.getPackageName(), allowListTimeout,
-                        UserHandle.USER_SYSTEM, true, "domain verification agent");
+                        UserHandle.USER_SYSTEM, true, REASON_DOMAIN_VERIFICATION_V2,
+                        "domain verification agent");
 
                 Intent intent = new Intent(Intent.ACTION_DOMAINS_NEED_VERIFICATION)
                         .setComponent(mVerifierComponent)

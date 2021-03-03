@@ -279,9 +279,11 @@ public class NavigationBarView extends FrameLayout implements
             return;
         }
 
+        // When in gestural and the IME is showing, don't use the nearest region since it will take
+        // gesture space away from the IME
         info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
         info.touchableRegion.set(getButtonLocations(false /* includeFloatingRotationButton */,
-                false /* inScreen */));
+                false /* inScreen */, false /* useNearestRegion */));
     };
 
     private final Consumer<Boolean> mRotationButtonListener = (visible) -> {
@@ -981,7 +983,8 @@ public class NavigationBarView extends FrameLayout implements
      */
     public void notifyActiveTouchRegions() {
         mOverviewProxyService.onActiveNavBarRegionChanges(
-                getButtonLocations(true /* includeFloatingRotationButton */, true /* inScreen */));
+                getButtonLocations(true /* includeFloatingRotationButton */, true /* inScreen */,
+                        true /* useNearestRegion */));
     }
 
     private void updateButtonTouchRegionCache() {
@@ -992,35 +995,49 @@ public class NavigationBarView extends FrameLayout implements
                 .findViewById(R.id.nav_buttons)).getFullTouchableChildRegions();
     }
 
+    /**
+     * @param includeFloatingRotationButton Whether to include the floating rotation button in the
+     *                                      region for all the buttons
+     * @param inScreenSpace Whether to return values in screen space or window space
+     * @param useNearestRegion Whether to use the nearest region instead of the actual button bounds
+     * @return
+     */
     private Region getButtonLocations(boolean includeFloatingRotationButton,
-            boolean inScreenSpace) {
+            boolean inScreenSpace, boolean useNearestRegion) {
+        if (useNearestRegion && !inScreenSpace) {
+            // We currently don't support getting the nearest region in anything but screen space
+            useNearestRegion = false;
+        }
         mTmpRegion.setEmpty();
         updateButtonTouchRegionCache();
-        updateButtonLocation(getBackButton(), inScreenSpace);
-        updateButtonLocation(getHomeButton(), inScreenSpace);
-        updateButtonLocation(getRecentsButton(), inScreenSpace);
-        updateButtonLocation(getImeSwitchButton(), inScreenSpace);
-        updateButtonLocation(getAccessibilityButton(), inScreenSpace);
+        updateButtonLocation(getBackButton(), inScreenSpace, useNearestRegion);
+        updateButtonLocation(getHomeButton(), inScreenSpace, useNearestRegion);
+        updateButtonLocation(getRecentsButton(), inScreenSpace, useNearestRegion);
+        updateButtonLocation(getImeSwitchButton(), inScreenSpace, useNearestRegion);
+        updateButtonLocation(getAccessibilityButton(), inScreenSpace, useNearestRegion);
         if (includeFloatingRotationButton && mFloatingRotationButton.isVisible()) {
+            // Note: this button is floating so the nearest region doesn't apply
             updateButtonLocation(mFloatingRotationButton.getCurrentView(), inScreenSpace);
         } else {
-            updateButtonLocation(getRotateSuggestionButton(), inScreenSpace);
+            updateButtonLocation(getRotateSuggestionButton(), inScreenSpace, useNearestRegion);
         }
         if (mNavBarOverlayController.isNavigationBarOverlayEnabled()
                 && mNavBarOverlayController.isVisible()) {
+            // Note: this button is floating so the nearest region doesn't apply
             updateButtonLocation(mNavBarOverlayController.getCurrentView(), inScreenSpace);
         }
         return mTmpRegion;
     }
 
-    private void updateButtonLocation(ButtonDispatcher button, boolean inScreenSpace) {
+    private void updateButtonLocation(ButtonDispatcher button, boolean inScreenSpace,
+            boolean useNearestRegion) {
         View view = button.getCurrentView();
         if (view == null || !button.isVisible()) {
             return;
         }
         // If the button is tappable from perspective of NearestTouchFrame, then we'll
         // include the regions where the tap is valid instead of just the button layout location
-        if (mButtonFullTouchableRegions.containsKey(view)) {
+        if (useNearestRegion && mButtonFullTouchableRegions.containsKey(view)) {
             mTmpRegion.op(mButtonFullTouchableRegions.get(view), Op.UNION);
             return;
         }

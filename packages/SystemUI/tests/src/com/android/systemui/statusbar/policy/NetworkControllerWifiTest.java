@@ -223,13 +223,14 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         setWifiEnabled(true);
         verifyLastWifiIcon(false, WifiIcons.WIFI_NO_NETWORK);
 
+        mNetworkController.setNoNetworksAvailable(false);
         setWifiStateForVcn(true, testSsid);
         setWifiLevelForVcn(0);
-
         // Connected, but still not validated - does not show
         //verifyLastWifiIcon(false, WifiIcons.WIFI_SIGNAL_STRENGTH[0][0]);
-        verifyLastMobileDataIndicatorsForVcn(false, 0, TelephonyIcons.ICON_CWF, false);
+        verifyLastMobileDataIndicatorsForVcn(false, 0, 0, false);
 
+        mNetworkController.setNoNetworksAvailable(true);
         for (int testLevel = 0; testLevel < WifiIcons.WIFI_LEVEL_COUNT; testLevel++) {
             setWifiLevelForVcn(testLevel);
 
@@ -239,7 +240,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
 
             setConnectivityViaBroadcastForVcn(
                     NetworkCapabilities.TRANSPORT_CELLULAR, false, true, mVcnTransportInfo);
-            verifyLastMobileDataIndicatorsForVcn(false, testLevel, TelephonyIcons.ICON_CWF, false);
+            verifyLastMobileDataIndicatorsForVcn(true, testLevel, TelephonyIcons.ICON_CWF, false);
         }
     }
 

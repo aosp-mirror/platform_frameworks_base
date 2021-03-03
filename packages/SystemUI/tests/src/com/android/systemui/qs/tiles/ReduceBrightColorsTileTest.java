@@ -18,10 +18,12 @@ package com.android.systemui.qs.tiles;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
-import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -34,9 +36,9 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.util.settings.FakeSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,8 +62,9 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
     private QSLogger mQSLogger;
     @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private ReduceBrightColorsController mReduceBrightColorsController;
 
-    private FakeSettings mFakeSettings;
     private TestableLooper mTestableLooper;
     private ReduceBrightColorsTile mTile;
 
@@ -72,24 +75,23 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
 
         when(mHost.getContext()).thenReturn(mContext);
-        mFakeSettings = new FakeSettings();
 
         mTile = new ReduceBrightColorsTile(
                 true,
+                mReduceBrightColorsController,
                 mHost,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 mMetricsLogger,
                 mStatusBarStateController,
                 mActivityStarter,
-                mQSLogger,
-                mUserTracker,
-                mFakeSettings
+                mQSLogger
         );
     }
 
     @Test
     public void testNotActive() {
+        when(mReduceBrightColorsController.isReduceBrightColorsActivated()).thenReturn(false);
         mTile.refreshState();
         mTestableLooper.processAllMessages();
 
@@ -100,33 +102,27 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
 
     @Test
     public void testActive() {
-        mFakeSettings.putIntForUser(
-                Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
-                1,
-                mUserTracker.getUserId());
+        when(mReduceBrightColorsController.isReduceBrightColorsActivated()).thenReturn(true);
         mTile.refreshState();
         mTestableLooper.processAllMessages();
 
-        assertActiveState();
+        assertEquals(Tile.STATE_ACTIVE, mTile.getState().state);
+        assertEquals(mTile.getState().label.toString(),
+                mContext.getString(R.string.quick_settings_reduce_bright_colors_label));
     }
 
     @Test
-    public void testActive_clicked_isActive() {
+    public void testActive_clicked_featureIsActivated() {
+        when(mReduceBrightColorsController.isReduceBrightColorsActivated()).thenReturn(false);
         mTile.refreshState();
         mTestableLooper.processAllMessages();
         // Validity check
         assertEquals(Tile.STATE_INACTIVE, mTile.getState().state);
 
         mTile.handleClick();
-        mTile.refreshState();
-        mTestableLooper.processAllMessages();
 
-        assertActiveState();
+        verify(mReduceBrightColorsController, times(1))
+                .setReduceBrightColorsActivated(eq(true));
     }
 
-    private void assertActiveState() {
-        assertEquals(Tile.STATE_ACTIVE, mTile.getState().state);
-        assertEquals(mTile.getState().label.toString(),
-                mContext.getString(R.string.quick_settings_reduce_bright_colors_label));
-    }
 }

@@ -517,6 +517,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         @UnsupportedAppUsage
         public IBinder token;
         public IBinder assistToken;
+        // A reusable token for other purposes, e.g. content capture, translation. It shouldn't be
+        // used without security checks
+        public IBinder shareableActivityToken;
         int ident;
         @UnsupportedAppUsage
         Intent intent;
@@ -604,9 +607,11 @@ public final class ActivityThread extends ClientTransactionHandler {
                 PersistableBundle persistentState, List<ResultInfo> pendingResults,
                 List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
                 boolean isForward, ProfilerInfo profilerInfo, ClientTransactionHandler client,
-                IBinder assistToken, FixedRotationAdjustments fixedRotationAdjustments) {
+                IBinder assistToken, FixedRotationAdjustments fixedRotationAdjustments,
+                IBinder shareableActivityToken) {
             this.token = token;
             this.assistToken = assistToken;
+            this.shareableActivityToken = shareableActivityToken;
             this.ident = ident;
             this.intent = intent;
             this.referrer = referrer;
@@ -3157,11 +3162,13 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final Activity startActivityNow(Activity parent, String id,
-        Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state,
-        Activity.NonConfigurationInstances lastNonConfigurationInstances, IBinder assistToken) {
+            Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state,
+            Activity.NonConfigurationInstances lastNonConfigurationInstances, IBinder assistToken,
+            IBinder shareableActivityToken) {
         ActivityClientRecord r = new ActivityClientRecord();
             r.token = token;
             r.assistToken = assistToken;
+            r.shareableActivityToken = shareableActivityToken;
             r.ident = 0;
             r.intent = intent;
             r.state = state;
@@ -3504,7 +3511,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
                         r.embeddedID, r.lastNonConfigurationInstances, config,
                         r.referrer, r.voiceInteractor, window, r.configCallback,
-                        r.assistToken);
+                        r.assistToken, r.shareableActivityToken);
 
                 if (customIntent != null) {
                     activity.mIntent = customIntent;

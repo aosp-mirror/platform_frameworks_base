@@ -280,7 +280,8 @@ public class ShortcutBitmapSaver {
                     IoUtils.closeQuietly(out);
                 }
 
-                shortcut.setBitmapPath(file.getAbsolutePath());
+                final String path = file.getAbsolutePath();
+                mService.postValue(shortcut, si -> si.setBitmapPath(path));
 
             } catch (IOException | RuntimeException e) {
                 Slog.e(ShortcutService.TAG, "Unable to write bitmap to file", e);
@@ -295,12 +296,14 @@ public class ShortcutBitmapSaver {
                 Slog.d(TAG, "Saved bitmap.");
             }
             if (shortcut != null) {
-                if (shortcut.getBitmapPath() == null) {
-                    removeIcon(shortcut);
-                }
+                mService.postValue(shortcut, si -> {
+                    if (si.getBitmapPath() == null) {
+                        removeIcon(si);
+                    }
 
-                // Whatever happened, remove this flag.
-                shortcut.clearFlags(ShortcutInfo.FLAG_ICON_FILE_PENDING_SAVE);
+                    // Whatever happened, remove this flag.
+                    si.clearFlags(ShortcutInfo.FLAG_ICON_FILE_PENDING_SAVE);
+                });
             }
         }
         return true;

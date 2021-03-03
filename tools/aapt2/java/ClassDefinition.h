@@ -70,8 +70,8 @@ class PrimitiveMember : public ClassMember {
     return name_;
   }
 
-  void Print(bool final, text::Printer* printer, bool strip_api_annotations = false)
-      const override {
+  void Print(bool final, text::Printer* printer,
+             bool strip_api_annotations = false) const override {
     using std::to_string;
 
     ClassMember::Print(final, printer, strip_api_annotations);
@@ -127,13 +127,13 @@ using IntMember = PrimitiveMember<uint32_t>;
 using ResourceMember = PrimitiveMember<ResourceId>;
 using StringMember = PrimitiveMember<std::string>;
 
-template <typename T>
+template <typename T, typename StringConverter>
 class PrimitiveArrayMember : public ClassMember {
  public:
   explicit PrimitiveArrayMember(const android::StringPiece& name) : name_(name.to_string()) {}
 
   void AddElement(const T& val) {
-    elements_.push_back(val);
+    elements_.emplace_back(val);
   }
 
   bool empty() const override {
@@ -158,7 +158,7 @@ class PrimitiveArrayMember : public ClassMember {
         printer->Println();
       }
 
-      printer->Print(to_string(*current));
+      printer->Print(StringConverter::ToString(*current));
       if (std::distance(current, end) > 1) {
         printer->Print(", ");
       }
@@ -175,7 +175,24 @@ class PrimitiveArrayMember : public ClassMember {
   std::vector<T> elements_;
 };
 
-using ResourceArrayMember = PrimitiveArrayMember<ResourceId>;
+struct FieldReference {
+  explicit FieldReference(std::string reference) : ref(std::move(reference)) {
+  }
+  std::string ref;
+};
+
+struct ResourceArrayMemberStringConverter {
+  static std::string ToString(const std::variant<ResourceId, FieldReference>& ref) {
+    if (auto id = std::get_if<ResourceId>(&ref)) {
+      return to_string(*id);
+    } else {
+      return std::get<FieldReference>(ref).ref;
+    }
+  }
+};
+
+using ResourceArrayMember = PrimitiveArrayMember<std::variant<ResourceId, FieldReference>,
+                                                 ResourceArrayMemberStringConverter>;
 
 // Represents a method in a class.
 class MethodDefinition : public ClassMember {

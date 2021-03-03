@@ -32,6 +32,7 @@ import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.transition.RemoteTransitions;
 
 import java.util.Optional;
@@ -98,4 +99,7 @@ public interface WMComponent {
 
     @WMSingleton
     RemoteTransitions getTransitions();
+
+    @WMSingleton
+    Optional<StartingSurface> getStartingSurface();
 }

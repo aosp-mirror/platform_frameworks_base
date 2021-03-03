@@ -48,6 +48,10 @@ struct AssetsProvider {
   virtual bool ForEachFile(const std::string& path,
                            const std::function<void(const StringPiece&, FileType)>& f) const = 0;
 
+  // Retrieves the path to the contents of the AssetsProvider on disk. The path could represent an
+  // APk, a directory, or some other file type.
+  WARN_UNUSED virtual std::optional<std::string_view> GetPath() const = 0;
+
   // Retrieves a name that represents the interface. This may or may not be the path of the
   // interface source.
   WARN_UNUSED virtual const std::string& GetDebugName() const = 0;
@@ -85,9 +89,9 @@ struct ZipAssetsProvider : public AssetsProvider {
   bool ForEachFile(const std::string& root_path,
                    const std::function<void(const StringPiece&, FileType)>& f) const override;
 
+  WARN_UNUSED std::optional<std::string_view> GetPath() const override;
   WARN_UNUSED const std::string& GetDebugName() const override;
   WARN_UNUSED bool IsUpToDate() const override;
-
   WARN_UNUSED std::optional<uint32_t> GetCrc(std::string_view path) const;
 
   ~ZipAssetsProvider() override = default;
@@ -125,6 +129,7 @@ struct DirectoryAssetsProvider : public AssetsProvider {
   bool ForEachFile(const std::string& path,
                    const std::function<void(const StringPiece&, FileType)>& f) const override;
 
+  WARN_UNUSED std::optional<std::string_view> GetPath() const override;
   WARN_UNUSED const std::string& GetDebugName() const override;
   WARN_UNUSED bool IsUpToDate() const override;
 
@@ -149,6 +154,7 @@ struct MultiAssetsProvider : public AssetsProvider {
   bool ForEachFile(const std::string& root_path,
                    const std::function<void(const StringPiece&, FileType)>& f) const override;
 
+  WARN_UNUSED std::optional<std::string_view> GetPath() const override;
   WARN_UNUSED const std::string& GetDebugName() const override;
   WARN_UNUSED bool IsUpToDate() const override;
 
@@ -163,6 +169,7 @@ struct MultiAssetsProvider : public AssetsProvider {
 
   std::unique_ptr<AssetsProvider> primary_;
   std::unique_ptr<AssetsProvider> secondary_;
+  std::optional<std::string_view> path_;
   std::string debug_name_;
 };
 
@@ -173,6 +180,7 @@ struct EmptyAssetsProvider : public AssetsProvider {
   bool ForEachFile(const std::string& path,
                   const std::function<void(const StringPiece&, FileType)>& f) const override;
 
+  WARN_UNUSED std::optional<std::string_view> GetPath() const override;
   WARN_UNUSED const std::string& GetDebugName() const override;
   WARN_UNUSED bool IsUpToDate() const override;
 

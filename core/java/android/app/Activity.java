@@ -803,6 +803,7 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     private IBinder mToken;
     private IBinder mAssistToken;
+    private IBinder mShareableActivityToken;
     @UnsupportedAppUsage
     private int mIdent;
     @UnsupportedAppUsage
@@ -1210,7 +1211,7 @@ public class Activity extends ContextThemeWrapper
                     if (window != null) {
                         cm.updateWindowAttributes(window.getAttributes());
                     }
-                    cm.onActivityCreated(mToken, getComponentName());
+                    cm.onActivityCreated(mToken, mShareableActivityToken, getComponentName());
                     break;
                 case CONTENT_CAPTURE_RESUME:
                     cm.onActivityResumed();
@@ -7118,6 +7119,9 @@ public class Activity extends ContextThemeWrapper
                 case "--contentcapture":
                     dumpContentCaptureManager(prefix, writer);
                     return;
+                case "--translation":
+                    dumpUiTranslation(prefix, writer);
+                    return;
             }
         }
         writer.print(prefix); writer.print("Local Activity ");
@@ -7158,6 +7162,7 @@ public class Activity extends ContextThemeWrapper
 
         dumpAutofillManager(prefix, writer);
         dumpContentCaptureManager(prefix, writer);
+        dumpUiTranslation(prefix, writer);
 
         ResourcesManager.getInstance().dump(prefix, writer);
     }
@@ -7179,6 +7184,14 @@ public class Activity extends ContextThemeWrapper
             cm.dump(prefix, writer);
         } else {
             writer.print(prefix); writer.println("No ContentCaptureManager");
+        }
+    }
+
+    void dumpUiTranslation(String prefix, PrintWriter writer) {
+        if (mUiTranslationController != null) {
+            mUiTranslationController.dump(prefix, writer);
+        } else {
+            writer.print(prefix); writer.println("No UiTranslationController");
         }
     }
 
@@ -7838,7 +7851,8 @@ public class Activity extends ContextThemeWrapper
             CharSequence title, Activity parent, String id,
             NonConfigurationInstances lastNonConfigurationInstances,
             Configuration config, String referrer, IVoiceInteractor voiceInteractor,
-            Window window, ActivityConfigCallback activityConfigCallback, IBinder assistToken) {
+            Window window, ActivityConfigCallback activityConfigCallback, IBinder assistToken,
+            IBinder shareableActivityToken) {
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
@@ -7860,6 +7874,7 @@ public class Activity extends ContextThemeWrapper
         mInstrumentation = instr;
         mToken = token;
         mAssistToken = assistToken;
+        mShareableActivityToken = shareableActivityToken;
         mIdent = ident;
         mApplication = application;
         mIntent = intent;
@@ -7915,6 +7930,11 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     public final IBinder getAssistToken() {
         return mParent != null ? mParent.getAssistToken() : mAssistToken;
+    }
+
+    /** @hide */
+    public final IBinder getShareableActivityToken() {
+        return mParent != null ? mParent.getShareableActivityToken() : mShareableActivityToken;
     }
 
     /** @hide */

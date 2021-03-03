@@ -2636,7 +2636,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // We'll want to include browser possibilities in a few cases
             boolean includeBrowser = false;
 
-            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, matchFlags)) {
+            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, candidates,
+                            matchFlags)) {
                 result.addAll(undefinedList);
                 // Maybe add one for the other profile.
                 if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
@@ -2820,8 +2821,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 result.highestApprovalLevel = Math.max(mDomainVerificationManager
-                        .approvalLevelForDomain(ps, intent, flags, riTargetUser.targetUserId),
-                        result.highestApprovalLevel);
+                        .approvalLevelForDomain(ps, intent, resultTargetUser, flags,
+                                riTargetUser.targetUserId), result.highestApprovalLevel);
             }
             if (result != null && result.highestApprovalLevel
                     <= DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
@@ -3067,8 +3068,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     final String packageName = info.activityInfo.packageName;
                     final PackageSetting ps = mSettings.getPackageLPr(packageName);
                     if (ps.getInstantApp(userId)) {
-                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent, flags,
-                                userId)) {
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
+                                instantApps, flags, userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "Instant app approved for intent; pkg: "
                                         + packageName);
@@ -3995,8 +3996,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     // only check domain verification status if the app is not a browser
                     if (!info.handleAllWebDataURI) {
-                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent, flags,
-                                userId)) {
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
+                                resolvedActivities, flags, userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "DENY instant app;" + " pkg: " + packageName
                                         + ", approved");
@@ -9575,7 +9576,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         final String packageName = ri.activityInfo.packageName;
                         final PackageSetting ps = mSettings.getPackageLPr(packageName);
                         if (ps != null && hasAnyDomainApproval(mDomainVerificationManager, ps,
-                                intent, flags, userId)) {
+                                intent, query, flags, userId)) {
                             return ri;
                         }
                     }
@@ -9632,10 +9633,10 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private static boolean hasAnyDomainApproval(
             @NonNull DomainVerificationManagerInternal manager, @NonNull PackageSetting pkgSetting,
-            @NonNull Intent intent, @PackageManager.ResolveInfoFlags int resolveInfoFlags,
-            @UserIdInt int userId) {
-        return manager.approvalLevelForDomain(pkgSetting, intent, resolveInfoFlags, userId)
-                > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
+            @NonNull Intent intent, @NonNull List<ResolveInfo> candidates,
+            @PackageManager.ResolveInfoFlags int resolveInfoFlags, @UserIdInt int userId) {
+        return manager.approvalLevelForDomain(pkgSetting, intent, candidates, resolveInfoFlags,
+                userId) > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
     }
 
     /**
@@ -11633,9 +11634,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
                 healthCheckParams.unhealthyMonitoringMs =
                         INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
+                // Continue monitoring health and loading progress of active incremental packages
                 mIncrementalManager.registerHealthListener(parsedPackage.getPath(),
                         healthCheckParams,
                         new IncrementalHealthListener(parsedPackage.getPackageName()));
+                final IncrementalStatesCallback incrementalStatesCallback =
+                        new IncrementalStatesCallback(parsedPackage.getPackageName(),
+                                UserHandle.getUid(UserHandle.ALL, pkgSetting.appId),
+                                getInstalledUsers(pkgSetting, UserHandle.USER_ALL));
+                pkgSetting.setIncrementalStatesCallback(incrementalStatesCallback);
+                mIncrementalManager.registerLoadingProgressCallback(parsedPackage.getPath(),
+                        new IncrementalProgressListener(parsedPackage.getPackageName()));
             }
         }
         return scanResult.pkgSetting.pkg;
@@ -17984,7 +17993,9 @@ public class PackageManagerService extends IPackageManager.Stub
             try {
                 makeDirRecursive(afterCodeFile.getParentFile(), 0775);
                 if (onIncremental) {
-                    mIncrementalManager.renameCodePath(beforeCodeFile, afterCodeFile);
+                    // Just link files here. The stage dir will be removed when the installation
+                    // session is completed.
+                    mIncrementalManager.linkCodePath(beforeCodeFile, afterCodeFile);
                 } else {
                     Os.rename(beforeCodeFile.getAbsolutePath(), afterCodeFile.getAbsolutePath());
                 }
@@ -17993,7 +18004,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 return false;
             }
 
-            //TODO(b/136132412): enable selinux restorecon for incremental directories
             if (!onIncremental && !SELinux.restoreconRecursive(afterCodeFile)) {
                 Slog.w(TAG, "Failed to restorecon");
                 return false;
@@ -19419,6 +19429,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mIncrementalManager.unregisterLoadingProgressCallbacks(codePath);
             // Unregister health listener as it will always be healthy from now
             mIncrementalManager.unregisterHealthListener(codePath);
+            // Make sure the information is preserved
+            scheduleWriteSettingsLocked();
         }
 
         @Override
@@ -19481,11 +19493,11 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageSetting ps;
             synchronized (mLock) {
                 ps = mSettings.getPackageLPr(mPackageName);
+                if (ps == null) {
+                    return;
+                }
+                ps.setLoadingProgress(progress);
             }
-            if (ps == null) {
-                return;
-            }
-            ps.setLoadingProgress(progress);
         }
     }
 
@@ -20089,7 +20101,7 @@ public class PackageManagerService extends IPackageManager.Stub
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
                 throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Error deriving application ABI");
+                        "Error deriving application ABI: " + pme.getMessage());
             }
         }
 
@@ -26116,6 +26128,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 throws RemoteException {
             return PackageManagerService.this.hasSigningCertificate(
                 packageName, certificate, CERT_INPUT_SHA256);
+        }
+
+        @Override
+        public boolean hasSystemFeature(String featureName, int version) {
+            return PackageManagerService.this.hasSystemFeature(featureName, version);
         }
     }
 
