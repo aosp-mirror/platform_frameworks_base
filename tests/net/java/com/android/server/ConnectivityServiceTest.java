@@ -53,6 +53,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_EIMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_ENTERPRISE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_FOREGROUND;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_FOTA;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_IA;
@@ -2798,7 +2799,8 @@ public class ConnectivityServiceTest {
         if (capability == NET_CAPABILITY_CBS || capability == NET_CAPABILITY_DUN ||
                 capability == NET_CAPABILITY_EIMS || capability == NET_CAPABILITY_FOTA ||
                 capability == NET_CAPABILITY_IA || capability == NET_CAPABILITY_IMS ||
-                capability == NET_CAPABILITY_RCS || capability == NET_CAPABILITY_XCAP) {
+                capability == NET_CAPABILITY_RCS || capability == NET_CAPABILITY_XCAP
+                || capability == NET_CAPABILITY_ENTERPRISE) {
             assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
         } else {
             assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
@@ -2901,6 +2903,7 @@ public class ConnectivityServiceTest {
         tryNetworkFactoryRequests(NET_CAPABILITY_IA);
         tryNetworkFactoryRequests(NET_CAPABILITY_RCS);
         tryNetworkFactoryRequests(NET_CAPABILITY_XCAP);
+        tryNetworkFactoryRequests(NET_CAPABILITY_ENTERPRISE);
         tryNetworkFactoryRequests(NET_CAPABILITY_EIMS);
         tryNetworkFactoryRequests(NET_CAPABILITY_NOT_METERED);
         tryNetworkFactoryRequests(NET_CAPABILITY_INTERNET);

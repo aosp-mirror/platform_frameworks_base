@@ -138,6 +138,7 @@ public final class DataCallResponse implements Parcelable {
     private final Qos mDefaultQos;
     private final List<QosBearerSession> mQosBearerSessions;
     private final SliceInfo mSliceInfo;
+    private final List<TrafficDescriptor> mTrafficDescriptors;
 
     /**
      * @param cause Data call fail cause. {@link DataFailCause#NONE} indicates no error.
@@ -189,6 +190,7 @@ public final class DataCallResponse implements Parcelable {
         mDefaultQos = null;
         mQosBearerSessions = new ArrayList<>();
         mSliceInfo = null;
+        mTrafficDescriptors = new ArrayList<>();
     }
 
     private DataCallResponse(@DataFailureCause int cause, long suggestedRetryTime, int id,
@@ -198,7 +200,7 @@ public final class DataCallResponse implements Parcelable {
             @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6,
             @HandoverFailureMode int handoverFailureMode, int pduSessionId,
             @Nullable Qos defaultQos, @Nullable List<QosBearerSession> qosBearerSessions,
-            @Nullable SliceInfo sliceInfo) {
+            @Nullable SliceInfo sliceInfo, @Nullable List<TrafficDescriptor> trafficDescriptors) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
         mId = id;
@@ -219,8 +221,11 @@ public final class DataCallResponse implements Parcelable {
         mHandoverFailureMode = handoverFailureMode;
         mPduSessionId = pduSessionId;
         mDefaultQos = defaultQos;
-        mQosBearerSessions = qosBearerSessions;
+        mQosBearerSessions = (qosBearerSessions == null)
+                ? new ArrayList<>() : new ArrayList<>(qosBearerSessions);
         mSliceInfo = sliceInfo;
+        mTrafficDescriptors = (trafficDescriptors == null)
+                ? new ArrayList<>() : new ArrayList<>(trafficDescriptors);
     }
 
     /** @hide */
@@ -249,6 +254,8 @@ public final class DataCallResponse implements Parcelable {
         mQosBearerSessions = new ArrayList<>();
         source.readList(mQosBearerSessions, QosBearerSession.class.getClassLoader());
         mSliceInfo = source.readParcelable(SliceInfo.class.getClassLoader());
+        mTrafficDescriptors = new ArrayList<>();
+        source.readList(mTrafficDescriptors, TrafficDescriptor.class.getClassLoader());
     }
 
     /**
@@ -380,7 +387,6 @@ public final class DataCallResponse implements Parcelable {
      *
      * @hide
      */
-
     @Nullable
     public Qos getDefaultQos() {
         return mDefaultQos;
@@ -403,6 +409,14 @@ public final class DataCallResponse implements Parcelable {
     @Nullable
     public SliceInfo getSliceInfo() {
         return mSliceInfo;
+    }
+
+    /**
+     * @return The traffic descriptors related to this data connection.
+     */
+    @NonNull
+    public List<TrafficDescriptor> getTrafficDescriptors() {
+        return mTrafficDescriptors;
     }
 
     @NonNull
@@ -428,6 +442,7 @@ public final class DataCallResponse implements Parcelable {
            .append(" defaultQos=").append(mDefaultQos)
            .append(" qosBearerSessions=").append(mQosBearerSessions)
            .append(" sliceInfo=").append(mSliceInfo)
+           .append(" trafficDescriptors=").append(mTrafficDescriptors)
            .append("}");
         return sb.toString();
     }
@@ -442,14 +457,21 @@ public final class DataCallResponse implements Parcelable {
 
         DataCallResponse other = (DataCallResponse) o;
 
-        final boolean isQosSame = (mDefaultQos == null || other.mDefaultQos == null) ?
-                mDefaultQos == other.mDefaultQos :
-                mDefaultQos.equals(other.mDefaultQos);
+        final boolean isQosSame = (mDefaultQos == null || other.mDefaultQos == null)
+                ? mDefaultQos == other.mDefaultQos
+                : mDefaultQos.equals(other.mDefaultQos);
 
-        final boolean isQosBearerSessionsSame = (mQosBearerSessions == null || mQosBearerSessions == null) ?
-                mQosBearerSessions == other.mQosBearerSessions :
-                mQosBearerSessions.size() == other.mQosBearerSessions.size()
+        final boolean isQosBearerSessionsSame =
+                (mQosBearerSessions == null || other.mQosBearerSessions == null)
+                ? mQosBearerSessions == other.mQosBearerSessions
+                : mQosBearerSessions.size() == other.mQosBearerSessions.size()
                 && mQosBearerSessions.containsAll(other.mQosBearerSessions);
+
+        final boolean isTrafficDescriptorsSame =
+                (mTrafficDescriptors == null || other.mTrafficDescriptors == null)
+                ? mTrafficDescriptors == other.mTrafficDescriptors
+                : mTrafficDescriptors.size() == other.mTrafficDescriptors.size()
+                && mTrafficDescriptors.containsAll(other.mTrafficDescriptors);
 
         return mCause == other.mCause
                 && mSuggestedRetryTime == other.mSuggestedRetryTime
@@ -472,7 +494,8 @@ public final class DataCallResponse implements Parcelable {
                 && mPduSessionId == other.mPduSessionId
                 && isQosSame
                 && isQosBearerSessionsSame
-                && Objects.equals(mSliceInfo, other.mSliceInfo);
+                && Objects.equals(mSliceInfo, other.mSliceInfo)
+                && isTrafficDescriptorsSame;
     }
 
     @Override
@@ -480,7 +503,7 @@ public final class DataCallResponse implements Parcelable {
         return Objects.hash(mCause, mSuggestedRetryTime, mId, mLinkStatus, mProtocolType,
                 mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses, mPcscfAddresses,
                 mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId, mDefaultQos,
-                mQosBearerSessions, mSliceInfo);
+                mQosBearerSessions, mSliceInfo, mTrafficDescriptors);
     }
 
     @Override
@@ -512,6 +535,7 @@ public final class DataCallResponse implements Parcelable {
         }
         dest.writeList(mQosBearerSessions);
         dest.writeParcelable(mSliceInfo, flags);
+        dest.writeList(mTrafficDescriptors);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<DataCallResponse> CREATOR =
@@ -596,6 +620,8 @@ public final class DataCallResponse implements Parcelable {
         private List<QosBearerSession> mQosBearerSessions = new ArrayList<>();
 
         private SliceInfo mSliceInfo;
+
+        private List<TrafficDescriptor> mTrafficDescriptors = new ArrayList<>();
 
         /**
          * Default constructor for Builder.
@@ -836,6 +862,24 @@ public final class DataCallResponse implements Parcelable {
         }
 
         /**
+         * The traffic descriptors for this data connection, as defined in 3GPP TS 24.526
+         * Section 5.2. They are used for URSP traffic matching as described in 3GPP TS 24.526
+         * Section 4.2.2. They includes an optional DNN, which, if present, must be used for traffic
+         * matching; it does not specify the end point to be used for the data call. The end point
+         * is specified by {@link DataProfile}, which must be used as the end point if one is not
+         * specified through URSP rules.
+         *
+         * @param trafficDescriptors the traffic descriptors for the data call.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setTrafficDescriptors(
+                @NonNull List<TrafficDescriptor> trafficDescriptors) {
+            mTrafficDescriptors = trafficDescriptors;
+            return this;
+        }
+
+        /**
          * Build the DataCallResponse.
          *
          * @return the DataCallResponse object.
@@ -844,7 +888,7 @@ public final class DataCallResponse implements Parcelable {
             return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
                     mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
                     mPcscfAddresses, mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId,
-                    mDefaultQos, mQosBearerSessions, mSliceInfo);
+                    mDefaultQos, mQosBearerSessions, mSliceInfo, mTrafficDescriptors);
         }
     }
 }
