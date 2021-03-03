@@ -736,4 +736,13 @@ class WindowToken extends WindowContainer<WindowState> {
     boolean isFromClient() {
         return mFromClientToken;
     }
+
+    /** @see WindowState#freezeInsetsState() */
+    void setInsetsFrozen(boolean freeze) {
+        if (freeze) {
+            forAllWindows(WindowState::freezeInsetsState, true /* traverseTopToBottom */);
+        } else {
+            forAllWindows(WindowState::clearFrozenInsetsState, true /* traverseTopToBottom */);
+        }
+    }
 }
