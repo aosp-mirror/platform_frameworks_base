@@ -168,6 +168,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private int mTaskId;
     private boolean mIsTaskOverlay;
     private boolean mIsLockTask;
+    private boolean mAsync;
     private BroadcastOptions mBroadcastOptions;
 
     final boolean mDumping;
@@ -342,6 +343,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mTaskId = INVALID_TASK_ID;
         mIsTaskOverlay = false;
         mIsLockTask = false;
+        mAsync = false;
         mBroadcastOptions = null;
 
         return Intent.parseCommandArgs(this, new Intent.CommandOptionHandler() {
@@ -406,6 +408,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         mBroadcastOptions = BroadcastOptions.makeBasic();
                     }
                     mBroadcastOptions.setBackgroundActivityStartsAllowed(true);
+                } else if (opt.equals("--async")) {
+                    mAsync = true;
                 } else {
                     return false;
                 }
@@ -756,7 +760,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mInterface.broadcastIntentWithFeature(null, null, intent, null, receiver, 0, null, null,
                 requiredPermissions, android.app.AppOpsManager.OP_NONE, bundle, true, false,
                 mUserId);
-        receiver.waitForFinish();
+        if (!mAsync) {
+            receiver.waitForFinish();
+        }
         return 0;
     }
 
@@ -3180,13 +3186,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Stop a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
             pw.println("          specified then run as the current user.");
-            pw.println("  broadcast [--user <USER_ID> | all | current] <INTENT>");
+            pw.println("  broadcast [--user <USER_ID> | all | current]");
+            pw.println("          [--receiver-permission <PERMISSION>]");
+            pw.println("          [--allow-background-activity-starts]");
+            pw.println("          [--async] <INTENT>");
             pw.println("      Send a broadcast Intent.  Options are:");
             pw.println("      --user <USER_ID> | all | current: Specify which user to send to; if not");
             pw.println("          specified then send to all users.");
             pw.println("      --receiver-permission <PERMISSION>: Require receiver to hold permission.");
             pw.println("      --allow-background-activity-starts: The receiver may start activities");
             pw.println("          even if in the background.");
+            pw.println("      --async: Send without waiting for the completion of the receiver.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
             pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
