@@ -170,7 +170,7 @@ import android.net.NetworkPolicyManager.UidState;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
-import android.net.NetworkState;
+import android.net.NetworkStateSnapshot;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
@@ -1887,14 +1887,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Collect all ifaces from a {@link NetworkState} into the given set.
+     * Collect all ifaces from a {@link NetworkStateSnapshot} into the given set.
      */
-    private static void collectIfaces(ArraySet<String> ifaces, NetworkState state) {
-        final String baseIface = state.linkProperties.getInterfaceName();
+    private static void collectIfaces(ArraySet<String> ifaces, NetworkStateSnapshot snapshot) {
+        final String baseIface = snapshot.linkProperties.getInterfaceName();
         if (baseIface != null) {
             ifaces.add(baseIface);
         }
-        for (LinkProperties stackedLink : state.linkProperties.getStackedLinks()) {
+        for (LinkProperties stackedLink : snapshot.linkProperties.getStackedLinks()) {
             final String stackedIface = stackedLink.getInterfaceName();
             if (stackedIface != null) {
                 ifaces.add(stackedIface);
@@ -1964,7 +1964,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Examine all connected {@link NetworkState}, looking for
+     * Examine all connected {@link NetworkStateSnapshot}, looking for
      * {@link NetworkPolicy} that need to be enforced. When matches found, set
      * remaining quota based on usage cycle and historical stats.
      */
@@ -1973,29 +1973,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "updateNetworkRulesNL()");
         Trace.traceBegin(TRACE_TAG_NETWORK, "updateNetworkRulesNL");
 
-        final NetworkState[] states;
+        final List<NetworkStateSnapshot> snapshots;
         try {
-            states = defeatNullable(mConnManager.getAllNetworkState());
+            snapshots = mConnManager.getAllNetworkStateSnapshot();
         } catch (RemoteException e) {
-            // ignored; service lives in system_server
+            // Cannot happen, service lives in system_server.
             return;
         }
 
         // First, generate identities of all connected networks so we can
         // quickly compare them against all defined policies below.
         mNetIdToSubId.clear();
-        final ArrayMap<NetworkState, NetworkIdentity> identified = new ArrayMap<>();
-        for (NetworkState state : states) {
-            if (state.network != null) {
-                mNetIdToSubId.put(state.network.netId, parseSubId(state));
-            }
+        final ArrayMap<NetworkStateSnapshot, NetworkIdentity> identified = new ArrayMap<>();
+        for (final NetworkStateSnapshot snapshot : snapshots) {
+            mNetIdToSubId.put(snapshot.network.netId, parseSubId(snapshot));
 
             // Policies matched by NPMS only match by subscriber ID or by ssid. Thus subtype
             // in the object created here is never used and its value doesn't matter, so use
             // NETWORK_TYPE_UNKNOWN.
-            final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state,
+            final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, snapshot,
                     true, TelephonyManager.NETWORK_TYPE_UNKNOWN /* subType */);
-            identified.put(state, ident);
+            identified.put(snapshot, ident);
         }
 
         final ArraySet<String> newMeteredIfaces = new ArraySet<>();
@@ -2069,10 +2067,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // One final pass to catch any metered ifaces that don't have explicitly
         // defined policies; typically Wi-Fi networks.
-        for (NetworkState state : states) {
-            if (!state.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
+        for (final NetworkStateSnapshot snapshot : snapshots) {
+            if (!snapshot.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
                 matchingIfaces.clear();
-                collectIfaces(matchingIfaces, state);
+                collectIfaces(matchingIfaces, snapshot);
                 for (int j = matchingIfaces.size() - 1; j >= 0; j--) {
                     final String iface = matchingIfaces.valueAt(j);
                     if (!newMeteredIfaces.contains(iface)) {
@@ -2104,16 +2102,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // Finally, calculate our opportunistic quotas
         mSubscriptionOpportunisticQuota.clear();
-        for (NetworkState state : states) {
+        for (final NetworkStateSnapshot snapshot : snapshots) {
             if (!quotaEnabled) continue;
-            if (state.network == null) continue;
-            final int subId = getSubIdLocked(state.network);
+            if (snapshot.network == null) continue;
+            final int subId = getSubIdLocked(snapshot.network);
             final SubscriptionPlan plan = getPrimarySubscriptionPlanLocked(subId);
             if (plan == null) continue;
 
             final long quotaBytes;
             final long limitBytes = plan.getDataLimitBytes();
-            if (!state.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_ROAMING)) {
+            if (!snapshot.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_ROAMING)) {
                 // Clamp to 0 when roaming
                 quotaBytes = 0;
             } else if (limitBytes == SubscriptionPlan.BYTES_UNKNOWN) {
@@ -2131,7 +2129,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .truncatedTo(ChronoUnit.DAYS)
                         .toInstant().toEpochMilli();
                 final long totalBytes = getTotalBytes(
-                        NetworkTemplate.buildTemplateMobileAll(state.subscriberId),
+                        NetworkTemplate.buildTemplateMobileAll(snapshot.subscriberId),
                         start, startOfDay);
                 final long remainingBytes = limitBytes - totalBytes;
                 // Number of remaining days including current day
@@ -5628,11 +5626,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private int parseSubId(NetworkState state) {
+    private int parseSubId(@NonNull NetworkStateSnapshot snapshot) {
         int subId = INVALID_SUBSCRIPTION_ID;
-        if (state != null && state.networkCapabilities != null
-                && state.networkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
-            NetworkSpecifier spec = state.networkCapabilities.getNetworkSpecifier();
+        if (snapshot.networkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+            NetworkSpecifier spec = snapshot.networkCapabilities.getNetworkSpecifier();
             if (spec instanceof TelephonyNetworkSpecifier) {
                 subId = ((TelephonyNetworkSpecifier) spec).getSubscriptionId();
             }
@@ -5707,10 +5704,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static boolean hasRule(int uidRules, int rule) {
         return (uidRules & rule) != 0;
-    }
-
-    private static @NonNull NetworkState[] defeatNullable(@Nullable NetworkState[] val) {
-        return (val != null) ? val : new NetworkState[0];
     }
 
     private static boolean getBooleanDefeatingNullable(@Nullable PersistableBundle bundle,

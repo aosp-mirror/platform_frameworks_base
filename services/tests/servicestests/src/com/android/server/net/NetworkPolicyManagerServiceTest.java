@@ -115,7 +115,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicy;
-import android.net.NetworkState;
+import android.net.NetworkStateSnapshot;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
@@ -1072,7 +1072,7 @@ public class NetworkPolicyManagerServiceTest {
     @FlakyTest
     @Test
     public void testNetworkPolicyAppliedCycleLastMonth() throws Exception {
-        NetworkState[] state = null;
+        List<NetworkStateSnapshot> snapshots = null;
         NetworkStats stats = null;
 
         final int CYCLE_DAY = 15;
@@ -1084,8 +1084,8 @@ public class NetworkPolicyManagerServiceTest {
 
         // first, pretend that wifi network comes online. no policy active,
         // which means we shouldn't push limit to interface.
-        state = new NetworkState[] { buildWifi() };
-        when(mConnManager.getAllNetworkState()).thenReturn(state);
+        snapshots = List.of(buildWifi());
+        when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
 
         mPolicyListener.expect().onMeteredIfacesChanged(any());
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
@@ -1093,7 +1093,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // now change cycle to be on 15th, and test in early march, to verify we
         // pick cycle day in previous month.
-        when(mConnManager.getAllNetworkState()).thenReturn(state);
+        when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
 
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(getElapsedRealtime(), 1)
@@ -1339,7 +1339,7 @@ public class NetworkPolicyManagerServiceTest {
 
     @Test
     public void testMeteredNetworkWithoutLimit() throws Exception {
-        NetworkState[] state = null;
+        List<NetworkStateSnapshot> snapshots = null;
         NetworkStats stats = null;
 
         final long TIME_FEB_15 = 1171497600000L;
@@ -1349,12 +1349,12 @@ public class NetworkPolicyManagerServiceTest {
         setCurrentTimeMillis(TIME_MAR_10);
 
         // bring up wifi network with metered policy
-        state = new NetworkState[] { buildWifi() };
+        snapshots = List.of(buildWifi());
         stats = new NetworkStats(getElapsedRealtime(), 1)
                 .insertEntry(TEST_IFACE, 0L, 0L, 0L, 0L);
 
         {
-            when(mConnManager.getAllNetworkState()).thenReturn(state);
+            when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
             when(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15,
                     currentTimeMillis())).thenReturn(stats.getTotalBytes());
 
@@ -1477,7 +1477,8 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private PersistableBundle setupUpdateMobilePolicyCycleTests() throws RemoteException {
-        when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[0]);
+        when(mConnManager.getAllNetworkStateSnapshot())
+                .thenReturn(new ArrayList<NetworkStateSnapshot>());
 
         setupTelephonySubscriptionManagers(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
 
@@ -1489,7 +1490,8 @@ public class NetworkPolicyManagerServiceTest {
 
     @Test
     public void testUpdateMobilePolicyCycleWithNullConfig() throws RemoteException {
-        when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[0]);
+        when(mConnManager.getAllNetworkStateSnapshot())
+                .thenReturn(new ArrayList<NetworkStateSnapshot>());
 
         setupTelephonySubscriptionManagers(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
 
@@ -1720,7 +1722,7 @@ public class NetworkPolicyManagerServiceTest {
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             expectMobileDefaults();
-            expectNetworkState(true /* roaming */);
+            expectNetworkStateSnapshot(true /* roaming */);
 
             mService.updateNetworks();
 
@@ -1749,7 +1751,7 @@ public class NetworkPolicyManagerServiceTest {
             // Capabilities change to roaming
             final ConnectivityManager.NetworkCallback callback = mNetworkCallbackCaptor.getValue();
             assertNotNull(callback);
-            expectNetworkState(true /* roaming */);
+            expectNetworkStateSnapshot(true /* roaming */);
             callback.onCapabilitiesChanged(
                     new Network(TEST_NET_ID),
                     buildNetworkCapabilities(TEST_SUB_ID, true /* roaming */));
@@ -2035,14 +2037,14 @@ public class NetworkPolicyManagerServiceTest {
         mService.setNetworkPolicies(policies);
     }
 
-    private static NetworkState buildWifi() {
+    private static NetworkStateSnapshot buildWifi() {
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
         final NetworkCapabilities networkCapabilities = new NetworkCapabilities();
         networkCapabilities.addTransportType(TRANSPORT_WIFI);
         networkCapabilities.setSSID(TEST_SSID);
-        return new NetworkState(TYPE_WIFI, prop, networkCapabilities, new Network(TEST_NET_ID),
-                null);
+        return new NetworkStateSnapshot(new Network(TEST_NET_ID), networkCapabilities, prop,
+                null /*subscriberId*/, TYPE_WIFI);
     }
 
     private void expectHasInternetPermission(int uid, boolean hasIt) throws Exception {
@@ -2059,15 +2061,14 @@ public class NetworkPolicyManagerServiceTest {
                 PackageManager.PERMISSION_DENIED);
     }
 
-    private void expectNetworkState(boolean roaming) throws Exception {
+    private void expectNetworkStateSnapshot(boolean roaming) throws Exception {
         when(mCarrierConfigManager.getConfigForSubId(eq(TEST_SUB_ID)))
                 .thenReturn(mCarrierConfig);
-        when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[] {
-                new NetworkState(TYPE_MOBILE,
-                        buildLinkProperties(TEST_IFACE),
-                        buildNetworkCapabilities(TEST_SUB_ID, roaming),
-                        new Network(TEST_NET_ID), TEST_IMSI)
-        });
+        List<NetworkStateSnapshot> snapshots = List.of(new NetworkStateSnapshot(
+                new Network(TEST_NET_ID),
+                buildNetworkCapabilities(TEST_SUB_ID, roaming),
+                buildLinkProperties(TEST_IFACE), TEST_IMSI, TYPE_MOBILE));
+        when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
     }
 
     private void expectDefaultCarrierConfig() throws Exception {
@@ -2078,7 +2079,7 @@ public class NetworkPolicyManagerServiceTest {
     private TelephonyManager expectMobileDefaults() throws Exception {
         TelephonyManager tmSub = setupTelephonySubscriptionManagers(TEST_SUB_ID, TEST_IMSI);
         doNothing().when(tmSub).setPolicyDataEnabled(anyBoolean());
-        expectNetworkState(false /* roaming */);
+        expectNetworkStateSnapshot(false /* roaming */);
         return tmSub;
     }
 
