@@ -22,4 +22,5 @@ package android.app;
 interface IGameManagerService {
     int getGameMode(String packageName, int userId);
     void setGameMode(String packageName, int gameMode, int userId);
+    int[] getAvailableGameModes(String packageName);
 }
