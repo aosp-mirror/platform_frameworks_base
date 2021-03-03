@@ -16,7 +16,6 @@
 
 package com.android.server.display;
 
-import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.SystemProperties;
 import android.text.TextUtils;
@@ -90,7 +89,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final DisplayDeviceRepository mDisplayDeviceRepo;
     private final DeviceStateToLayoutMap mDeviceStateToLayoutMap;
     private final Listener mListener;
-    private final int[] mFoldedDeviceStates;
 
     /**
      * Has an entry for every logical display that the rest of the system has been notified about.
@@ -122,16 +120,12 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private Layout mCurrentLayout = null;
     private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
 
-    LogicalDisplayMapper(Context context, DisplayDeviceRepository repo, Listener listener) {
+    LogicalDisplayMapper(DisplayDeviceRepository repo, Listener listener) {
         mDisplayDeviceRepo = repo;
         mListener = listener;
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mDisplayDeviceRepo.addListener(this);
-
-        mFoldedDeviceStates = context.getResources().getIntArray(
-                com.android.internal.R.array.config_foldedDeviceStates);
-
-        mDeviceStateToLayoutMap = new DeviceStateToLayoutMap(context);
+        mDeviceStateToLayoutMap = new DeviceStateToLayoutMap();
     }
 
     @Override
@@ -470,10 +464,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     }
 
     /**
-     * Resets the current layout in preparation for a new layout; essentially just marks
-     * all the currently layed out displays as disabled. This ensures the display devices
-     * are turned off. If they are meant to be used in the new layout,
-     * {@link #applyLayoutLocked()} will reenabled them.
+     * Resets the current layout in preparation for a new layout. Layouts can specify if some
+     * displays should be disabled (OFF). When switching from one layout to another, we go
+     * through each of the displays and make sure any displays we might have disabled are
+     * enabled again.
      */
     private void resetLayoutLocked() {
         final Layout layout = mDeviceStateToLayoutMap.get(mDeviceState);
@@ -481,7 +475,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             final Layout.Display displayLayout = layout.getAt(i);
             final LogicalDisplay display = getDisplayLocked(displayLayout.getLogicalDisplayId());
             if (display != null) {
-                enableDisplayLocked(display, false);
+                enableDisplayLocked(display, true); // Reset all displays back to enabled
             }
         }
     }
@@ -503,7 +497,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
             // If the underlying display-device we want to use for this display
             // doesn't exist, then skip it. This can happen at startup as display-devices
-            // trickle in one at a time, or if the layout has an error.
+            // trickle in one at a time. When the new display finally shows up, the layout is
+            // recalculated so that the display is properly added to the current layout.
             final DisplayAddress address = displayLayout.getAddress();
             final DisplayDevice device = mDisplayDeviceRepo.getByAddressLocked(address);
             if (device == null) {
@@ -526,7 +521,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             if (newDisplay != oldDisplay) {
                 newDisplay.swapDisplaysLocked(oldDisplay);
             }
-            enableDisplayLocked(newDisplay, true);
+            enableDisplayLocked(newDisplay, displayLayout.isEnabled());
         }
     }
 
@@ -545,13 +540,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         final LogicalDisplay display = new LogicalDisplay(displayId, layerStack, device);
         display.updateLocked(mDisplayDeviceRepo);
         mLogicalDisplays.put(displayId, display);
-
-        // Internal displays start off disabled. The display is enabled later if it is part of the
-        // currently selected display layout.
-        final boolean isEnabled = device != null
-                && device.getDisplayDeviceInfoLocked().type != Display.TYPE_INTERNAL;
-        enableDisplayLocked(display, isEnabled);
-
+        enableDisplayLocked(display, device != null);
         return display;
     }
 
@@ -582,7 +571,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         final Layout layoutSet = mDeviceStateToLayoutMap.get(DeviceStateToLayoutMap.STATE_DEFAULT);
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         final boolean isDefault = (info.flags & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0;
-        layoutSet.createDisplayLocked(info.address, isDefault);
+        layoutSet.createDisplayLocked(info.address, isDefault, true /* isEnabled */);
     }
 
     private int assignLayerStackLocked(int displayId) {

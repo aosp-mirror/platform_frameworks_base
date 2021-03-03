@@ -57,7 +57,7 @@ public class Layout {
      * @return The new layout.
      */
     public Display createDisplayLocked(
-            @NonNull DisplayAddress address, boolean isDefault) {
+            @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled) {
         if (contains(address)) {
             Slog.w(TAG, "Attempting to add second definition for display-device: " + address);
             return null;
@@ -74,7 +74,7 @@ public class Layout {
         // different layouts, a logical display can be destroyed and later recreated with the
         // same logical display ID.
         final int logicalDisplayId = assignDisplayIdLocked(isDefault);
-        final Display layout = new Display(address, logicalDisplayId);
+        final Display layout = new Display(address, logicalDisplayId, isEnabled);
 
         mDisplays.add(layout);
         return layout;
@@ -130,17 +130,25 @@ public class Layout {
      * Describes how a {@link LogicalDisplay} is built from {@link DisplayDevice}s.
      */
     public static class Display {
+        // Address of the display device to map to this display.
         private final DisplayAddress mAddress;
+
+        // Logical Display ID to apply to this display.
         private final int mLogicalDisplayId;
 
-        Display(@NonNull DisplayAddress address, int logicalDisplayId) {
+        // Indicates that this display is not usable and should remain off.
+        private final boolean mIsEnabled;
+
+        Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled) {
             mAddress = address;
             mLogicalDisplayId = logicalDisplayId;
+            mIsEnabled = isEnabled;
         }
 
         @Override
         public String toString() {
-            return "{addr: " + mAddress + ", dispId: " + mLogicalDisplayId + "}";
+            return "{addr: " + mAddress + ", dispId: " + mLogicalDisplayId
+                    + "(" + (mIsEnabled ? "ON" : "OFF") + ")}";
         }
 
         public DisplayAddress getAddress() {
@@ -149,6 +157,10 @@ public class Layout {
 
         public int getLogicalDisplayId() {
             return mLogicalDisplayId;
+        }
+
+        public boolean isEnabled() {
+            return mIsEnabled;
         }
     }
 }
