@@ -2245,31 +2245,6 @@ public class ConnectivityManager {
         }
     }
 
-    /* TODO: These permissions checks don't belong in client-side code. Move them to
-     * services.jar, possibly in com.android.server.net. */
-
-    /** {@hide} */
-    public static final void enforceChangePermission(Context context,
-            String callingPkg, String callingAttributionTag) {
-        int uid = Binder.getCallingUid();
-        checkAndNoteChangeNetworkStateOperation(context, uid, callingPkg,
-                callingAttributionTag, true /* throwException */);
-    }
-
-    /**
-     * Check if the package is a allowed to change the network state. This also accounts that such
-     * an access happened.
-     *
-     * @return {@code true} iff the package is allowed to change the network state.
-     */
-    // TODO: Remove method and replace with direct call once R code is pushed to AOSP
-    private static boolean checkAndNoteChangeNetworkStateOperation(@NonNull Context context,
-            int uid, @NonNull String callingPackage, @Nullable String callingAttributionTag,
-            boolean throwException) {
-        return Settings.checkAndNoteChangeNetworkStateOperation(context, uid, callingPackage,
-                throwException);
-    }
-
     /**
      * Check if the package is a allowed to write settings. This also accounts that such an access
      * happened.
