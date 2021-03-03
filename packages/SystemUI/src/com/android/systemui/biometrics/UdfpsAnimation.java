@@ -40,6 +40,7 @@ public abstract class UdfpsAnimation extends Drawable {
     public UdfpsAnimation(@NonNull Context context) {
         mContext = context;
         mFingerprintDrawable = context.getResources().getDrawable(R.drawable.ic_fingerprint, null);
+        mFingerprintDrawable.mutate();
     }
 
     public void onSensorRectUpdated(@NonNull RectF sensorRect) {
