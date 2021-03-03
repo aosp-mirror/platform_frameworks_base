@@ -93,12 +93,21 @@ public final class MediaMetricsManagerService extends SystemService {
             StatsLog.write(statsEvent);
         }
 
-        @Override
-        public String getSessionId(int userId) {
+        private String getSessionIdInternal(int userId) {
             byte[] byteId = new byte[16]; // 128 bits
             mSecureRandom.nextBytes(byteId);
             String id = Base64.encodeToString(byteId, Base64.DEFAULT);
             return id;
+        }
+
+        @Override
+        public String getPlaybackSessionId(int userId) {
+            return getSessionIdInternal(userId);
+        }
+
+        @Override
+        public String getRecordingSessionId(int userId) {
+            return getSessionIdInternal(userId);
         }
 
         @Override
