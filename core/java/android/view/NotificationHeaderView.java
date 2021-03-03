@@ -27,7 +27,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -42,7 +42,7 @@ import java.util.ArrayList;
  * @hide
  */
 @RemoteViews.RemoteView
-public class NotificationHeaderView extends FrameLayout {
+public class NotificationHeaderView extends RelativeLayout {
     private final int mHeadingEndMargin;
     private final int mTouchableHeight;
     private OnClickListener mExpandClickListener;
@@ -159,7 +159,7 @@ public class NotificationHeaderView extends FrameLayout {
      * @param extraMarginEnd extra margin in px
      */
     public void setTopLineExtraMarginEnd(int extraMarginEnd) {
-        mTopLineView.setHeaderTextMarginEnd(extraMarginEnd + mHeadingEndMargin);
+        mTopLineView.setHeaderTextMarginEnd(extraMarginEnd);
     }
 
     /**
@@ -181,12 +181,15 @@ public class NotificationHeaderView extends FrameLayout {
      * @return extra margin
      */
     public int getTopLineExtraMarginEnd() {
-        return mTopLineView.getHeaderTextMarginEnd() - mHeadingEndMargin;
+        return mTopLineView.getHeaderTextMarginEnd();
     }
 
     /**
      * Get the base margin at the end of the top line view.
      * Add this to {@link #getTopLineExtraMarginEnd()} to get the total margin of the top line.
+     * <p>
+     * NOTE: This method's result is only valid if the expander does not have a number. Currently
+     * only groups headers and conversations have numbers, so this is safe to use by MediaStyle.
      *
      * @return base margin
      */

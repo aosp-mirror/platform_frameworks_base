@@ -224,7 +224,7 @@
     <dimen name="notification_content_margin_end">16dp</dimen>
 
     <!-- The margin on the end of the top-line content views (accommodates the expander) -->
-    <dimen name="notification_heading_margin_end">48dp</dimen>
+    <dimen name="notification_heading_margin_end">56dp</dimen>
 
     <!-- The margin for text at the end of the image view for media notifications -->
     <dimen name="notification_media_image_margin_end">72dp</dimen>
