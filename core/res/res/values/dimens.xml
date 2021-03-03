@@ -690,6 +690,13 @@
     <!-- The default minimal size of a PiP task, in both dimensions. -->
     <dimen name="default_minimal_size_pip_resizable_task">108dp</dimen>
 
+    <!--
+      The overridable minimal size of a PiP task, in both dimensions.
+      Different from default_minimal_size_pip_resizable_task, this is to limit the dimension
+      when the pinned stack size is overridden by app via minWidth/minHeight.
+    -->
+    <dimen name="overridable_minimal_size_pip_resizable_task">48dp</dimen>
+
     <!-- Height of a task when in minimized mode from the top when launcher is resizable. -->
     <dimen name="task_height_of_minimized_mode">80dp</dimen>
 

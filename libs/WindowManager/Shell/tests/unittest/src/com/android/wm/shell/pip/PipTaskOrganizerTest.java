@@ -43,7 +43,6 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 
@@ -125,7 +124,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
 
     @Test
     public void startSwipePipToHome_updatesOverrideMinSize() {
-        final Size minSize = new Size(100, 80);
+        final Size minSize = new Size(400, 320);
 
         mSpiedPipTaskOrganizer.startSwipePipToHome(mComponent1, createActivityInfo(minSize),
                 createPipParams(null));
@@ -153,7 +152,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
 
     @Test
     public void onTaskAppeared_updatesOverrideMinSize() {
-        final Size minSize = new Size(100, 80);
+        final Size minSize = new Size(400, 320);
 
         mSpiedPipTaskOrganizer.onTaskAppeared(
                 createTaskInfo(mComponent1, createPipParams(null), minSize),
@@ -191,7 +190,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
                 createPipParams(null)), null /* leash */);
 
-        final Size minSize = new Size(100, 80);
+        final Size minSize = new Size(400, 320);
         mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent2,
                 createPipParams(null), minSize));
 
