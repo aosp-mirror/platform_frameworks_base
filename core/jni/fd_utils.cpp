@@ -52,10 +52,10 @@ static const char kFdPath[] = "/proc/self/fd";
 
 // static
 FileDescriptorAllowlist* FileDescriptorAllowlist::Get() {
-  if (instance_ == nullptr) {
-    instance_ = new FileDescriptorAllowlist();
-  }
-  return instance_;
+    if (instance_ == nullptr) {
+        instance_ = new FileDescriptorAllowlist();
+    }
+    return instance_;
 }
 
 static bool IsArtMemfd(const std::string& path) {
@@ -63,105 +63,100 @@ static bool IsArtMemfd(const std::string& path) {
 }
 
 bool FileDescriptorAllowlist::IsAllowed(const std::string& path) const {
-  // Check the static allowlist path.
-  for (const auto& allowlist_path : kPathAllowlist) {
-    if (path == allowlist_path)
-      return true;
-  }
-
-  // Check any paths added to the dynamic allowlist.
-  for (const auto& allowlist_path : allowlist_) {
-    if (path == allowlist_path)
-      return true;
-  }
-
-  // Framework jars are allowed.
-  static const char* kFrameworksPrefix[] = {
-          "/system/framework/",
-          "/system_ext/framework/",
-  };
-
-  static const char* kJarSuffix = ".jar";
-
-  for (const auto& frameworks_prefix : kFrameworksPrefix) {
-    if (android::base::StartsWith(path, frameworks_prefix)
-        && android::base::EndsWith(path, kJarSuffix)) {
-      return true;
+    // Check the static allowlist path.
+    for (const auto& allowlist_path : kPathAllowlist) {
+        if (path == allowlist_path) return true;
     }
-  }
 
-  // Jars from APEXes are allowed. This matches /apex/**/javalib/*.jar.
-  static const char* kApexPrefix = "/apex/";
-  static const char* kApexJavalibPathSuffix = "/javalib";
-  if (android::base::StartsWith(path, kApexPrefix) && android::base::EndsWith(path, kJarSuffix) &&
-      android::base::EndsWith(android::base::Dirname(path), kApexJavalibPathSuffix)) {
-      return true;
-  }
+    // Check any paths added to the dynamic allowlist.
+    for (const auto& allowlist_path : allowlist_) {
+        if (path == allowlist_path) return true;
+    }
 
-  // the in-memory file created by ART through memfd_create is allowed.
-  if (IsArtMemfd(path)) {
-    return true;
-  }
+    // Framework jars are allowed.
+    static const char* kFrameworksPrefix[] = {
+            "/system/framework/",
+            "/system_ext/framework/",
+    };
 
-  // Allowlist files needed for Runtime Resource Overlay, like these:
-  // /system/vendor/overlay/framework-res.apk
-  // /system/vendor/overlay-subdir/pg/framework-res.apk
-  // /vendor/overlay/framework-res.apk
-  // /vendor/overlay/PG/android-framework-runtime-resource-overlay.apk
-  // /data/resource-cache/system@vendor@overlay@framework-res.apk@idmap
-  // /data/resource-cache/system@vendor@overlay-subdir@pg@framework-res.apk@idmap
-  // See AssetManager.cpp for more details on overlay-subdir.
-  static const char* kOverlayDir = "/system/vendor/overlay/";
-  static const char* kVendorOverlayDir = "/vendor/overlay";
-  static const char* kVendorOverlaySubdir = "/system/vendor/overlay-subdir/";
-  static const char* kSystemProductOverlayDir = "/system/product/overlay/";
-  static const char* kProductOverlayDir = "/product/overlay";
-  static const char* kSystemSystemExtOverlayDir = "/system/system_ext/overlay/";
-  static const char* kSystemExtOverlayDir = "/system_ext/overlay";
-  static const char* kSystemOdmOverlayDir = "/system/odm/overlay";
-  static const char* kOdmOverlayDir = "/odm/overlay";
-  static const char* kSystemOemOverlayDir = "/system/oem/overlay";
-  static const char* kOemOverlayDir = "/oem/overlay";
-  static const char* kApkSuffix = ".apk";
+    static const char* kJarSuffix = ".jar";
 
-  if ((android::base::StartsWith(path, kOverlayDir)
-       || android::base::StartsWith(path, kVendorOverlaySubdir)
-       || android::base::StartsWith(path, kVendorOverlayDir)
-       || android::base::StartsWith(path, kSystemProductOverlayDir)
-       || android::base::StartsWith(path, kProductOverlayDir)
-       || android::base::StartsWith(path, kSystemSystemExtOverlayDir)
-       || android::base::StartsWith(path, kSystemExtOverlayDir)
-       || android::base::StartsWith(path, kSystemOdmOverlayDir)
-       || android::base::StartsWith(path, kOdmOverlayDir)
-       || android::base::StartsWith(path, kSystemOemOverlayDir)
-       || android::base::StartsWith(path, kOemOverlayDir))
-      && android::base::EndsWith(path, kApkSuffix)
-      && path.find("/../") == std::string::npos) {
-    return true;
-  }
+    for (const auto& frameworks_prefix : kFrameworksPrefix) {
+        if (android::base::StartsWith(path, frameworks_prefix) &&
+            android::base::EndsWith(path, kJarSuffix)) {
+            return true;
+        }
+    }
 
-  static const char* kOverlayIdmapPrefix = "/data/resource-cache/";
-  static const char* kOverlayIdmapSuffix = ".apk@idmap";
-  if (android::base::StartsWith(path, kOverlayIdmapPrefix)
-      && android::base::EndsWith(path, kOverlayIdmapSuffix)
-      && path.find("/../") == std::string::npos) {
-    return true;
-  }
+    // Jars from APEXes are allowed. This matches /apex/**/javalib/*.jar.
+    static const char* kApexPrefix = "/apex/";
+    static const char* kApexJavalibPathSuffix = "/javalib";
+    if (android::base::StartsWith(path, kApexPrefix) && android::base::EndsWith(path, kJarSuffix) &&
+        android::base::EndsWith(android::base::Dirname(path), kApexJavalibPathSuffix)) {
+        return true;
+    }
 
-  // All regular files that are placed under this path are allowlisted
-  // automatically.  The directory name is maintained for compatibility.
-  static const char* kZygoteAllowlistPath = "/vendor/zygote_whitelist/";
-  if (android::base::StartsWith(path, kZygoteAllowlistPath)
-      && path.find("/../") == std::string::npos) {
-    return true;
-  }
+    // the in-memory file created by ART through memfd_create is allowed.
+    if (IsArtMemfd(path)) {
+        return true;
+    }
 
-  return false;
+    // Allowlist files needed for Runtime Resource Overlay, like these:
+    // /system/vendor/overlay/framework-res.apk
+    // /system/vendor/overlay-subdir/pg/framework-res.apk
+    // /vendor/overlay/framework-res.apk
+    // /vendor/overlay/PG/android-framework-runtime-resource-overlay.apk
+    // /data/resource-cache/system@vendor@overlay@framework-res.apk@idmap
+    // /data/resource-cache/system@vendor@overlay-subdir@pg@framework-res.apk@idmap
+    // See AssetManager.cpp for more details on overlay-subdir.
+    static const char* kOverlayDir = "/system/vendor/overlay/";
+    static const char* kVendorOverlayDir = "/vendor/overlay";
+    static const char* kVendorOverlaySubdir = "/system/vendor/overlay-subdir/";
+    static const char* kSystemProductOverlayDir = "/system/product/overlay/";
+    static const char* kProductOverlayDir = "/product/overlay";
+    static const char* kSystemSystemExtOverlayDir = "/system/system_ext/overlay/";
+    static const char* kSystemExtOverlayDir = "/system_ext/overlay";
+    static const char* kSystemOdmOverlayDir = "/system/odm/overlay";
+    static const char* kOdmOverlayDir = "/odm/overlay";
+    static const char* kSystemOemOverlayDir = "/system/oem/overlay";
+    static const char* kOemOverlayDir = "/oem/overlay";
+    static const char* kApkSuffix = ".apk";
+
+    if ((android::base::StartsWith(path, kOverlayDir) ||
+         android::base::StartsWith(path, kVendorOverlaySubdir) ||
+         android::base::StartsWith(path, kVendorOverlayDir) ||
+         android::base::StartsWith(path, kSystemProductOverlayDir) ||
+         android::base::StartsWith(path, kProductOverlayDir) ||
+         android::base::StartsWith(path, kSystemSystemExtOverlayDir) ||
+         android::base::StartsWith(path, kSystemExtOverlayDir) ||
+         android::base::StartsWith(path, kSystemOdmOverlayDir) ||
+         android::base::StartsWith(path, kOdmOverlayDir) ||
+         android::base::StartsWith(path, kSystemOemOverlayDir) ||
+         android::base::StartsWith(path, kOemOverlayDir)) &&
+        android::base::EndsWith(path, kApkSuffix) && path.find("/../") == std::string::npos) {
+        return true;
+    }
+
+    static const char* kOverlayIdmapPrefix = "/data/resource-cache/";
+    static const char* kOverlayIdmapSuffix = ".apk@idmap";
+    if (android::base::StartsWith(path, kOverlayIdmapPrefix) &&
+        android::base::EndsWith(path, kOverlayIdmapSuffix) &&
+        path.find("/../") == std::string::npos) {
+        return true;
+    }
+
+    // All regular files that are placed under this path are allowlisted
+    // automatically.  The directory name is maintained for compatibility.
+    static const char* kZygoteAllowlistPath = "/vendor/zygote_whitelist/";
+    if (android::base::StartsWith(path, kZygoteAllowlistPath) &&
+        path.find("/../") == std::string::npos) {
+        return true;
+    }
+
+    return false;
 }
 
-FileDescriptorAllowlist::FileDescriptorAllowlist()
-    : allowlist_() {
-}
+FileDescriptorAllowlist::FileDescriptorAllowlist() : allowlist_() {}
 
 FileDescriptorAllowlist* FileDescriptorAllowlist::instance_ = nullptr;
 
@@ -225,9 +220,8 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) 
     }
 
     if (!allowlist->IsAllowed(socket_name)) {
-      fail_fn(android::base::StringPrintf("Socket name not allowlisted : %s (fd=%d)",
-                                          socket_name.c_str(),
-                                          fd));
+        fail_fn(android::base::StringPrintf("Socket name not allowlisted : %s (fd=%d)",
+                                            socket_name.c_str(), fd));
     }
 
     return new FileDescriptorInfo(fd);
@@ -268,7 +262,7 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) 
   }
 
   if (!allowlist->IsAllowed(file_path)) {
-    fail_fn(android::base::StringPrintf("Not allowlisted (%d): %s", fd, file_path.c_str()));
+      fail_fn(android::base::StringPrintf("Not allowlisted (%d): %s", fd, file_path.c_str()));
   }
 
   // File descriptor flags : currently on FD_CLOEXEC. We can set these

@@ -46,29 +46,27 @@ typedef const std::function<void(std::string)>& fail_fn_t;
 // AF_UNIX socket, the socket will refer to /dev/null after each
 // fork, and all operations on it will fail.
 class FileDescriptorAllowlist {
- public:
-  // Lazily creates the global allowlist.
-  static FileDescriptorAllowlist* Get();
+public:
+    // Lazily creates the global allowlist.
+    static FileDescriptorAllowlist* Get();
 
-  // Adds a path to the allowlist.
-  void Allow(const std::string& path) {
-    allowlist_.push_back(path);
-  }
+    // Adds a path to the allowlist.
+    void Allow(const std::string& path) { allowlist_.push_back(path); }
 
-  // Returns true iff. a given path is allowlisted. A path is allowlisted
-  // if it belongs to the allowlist (see kPathAllowlist) or if it's a path
-  // under /system/framework that ends with ".jar" or if it is a system
-  // framework overlay.
-  bool IsAllowed(const std::string& path) const;
+    // Returns true iff. a given path is allowlisted. A path is allowlisted
+    // if it belongs to the allowlist (see kPathAllowlist) or if it's a path
+    // under /system/framework that ends with ".jar" or if it is a system
+    // framework overlay.
+    bool IsAllowed(const std::string& path) const;
 
- private:
-  FileDescriptorAllowlist();
+private:
+    FileDescriptorAllowlist();
 
-  static FileDescriptorAllowlist* instance_;
+    static FileDescriptorAllowlist* instance_;
 
-  std::vector<std::string> allowlist_;
+    std::vector<std::string> allowlist_;
 
-  DISALLOW_COPY_AND_ASSIGN(FileDescriptorAllowlist);
+    DISALLOW_COPY_AND_ASSIGN(FileDescriptorAllowlist);
 };
 
 // A FileDescriptorTable is a collection of FileDescriptorInfo objects
