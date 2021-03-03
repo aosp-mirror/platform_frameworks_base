@@ -365,6 +365,19 @@ public class MagnificationControllerTest {
                 eq(MODE_FULLSCREEN));
     }
 
+
+    @Test
+    public void onTouchInteractionChanged_fullscreenNotActivated_notShowMagnificationButton()
+            throws RemoteException {
+        setMagnificationModeSettings(MODE_FULLSCREEN);
+
+        mMagnificationController.onTouchInteractionStart(TEST_DISPLAY, MODE_FULLSCREEN);
+        mMagnificationController.onTouchInteractionEnd(TEST_DISPLAY, MODE_FULLSCREEN);
+
+        verify(mWindowMagnificationManager, never()).showMagnificationButton(eq(TEST_DISPLAY),
+                eq(MODE_FULLSCREEN));
+    }
+
     @Test
     public void onShortcutTriggered_windowModeEnabledAndCapabilitiesAll_showMagnificationButton()
             throws RemoteException {
@@ -450,6 +463,8 @@ public class MagnificationControllerTest {
         }
         if (mode == MODE_FULLSCREEN) {
             when(mScreenMagnificationController.isMagnifying(TEST_DISPLAY)).thenReturn(true);
+            when(mScreenMagnificationController.isForceShowMagnifiableBounds(
+                    TEST_DISPLAY)).thenReturn(true);
             when(mScreenMagnificationController.getPersistedScale()).thenReturn(DEFAULT_SCALE);
             when(mScreenMagnificationController.getScale(TEST_DISPLAY)).thenReturn(DEFAULT_SCALE);
             when(mScreenMagnificationController.getCenterX(TEST_DISPLAY)).thenReturn(

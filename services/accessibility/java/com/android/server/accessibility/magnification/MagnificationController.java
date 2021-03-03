@@ -358,7 +358,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         boolean isActivated = false;
         if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
                 && mFullScreenMagnificationController != null) {
-            isActivated = mFullScreenMagnificationController.isMagnifying(displayId);
+            isActivated = mFullScreenMagnificationController.isMagnifying(displayId)
+                    || mFullScreenMagnificationController.isForceShowMagnifiableBounds(displayId);
         } else if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
                 && mWindowMagnificationMgr != null) {
             isActivated = mWindowMagnificationMgr.isWindowMagnifierEnabled(displayId);
