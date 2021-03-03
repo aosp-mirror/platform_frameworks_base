@@ -412,7 +412,7 @@ class AssetManager2 {
   void RebuildFilterList();
 
   // Retrieves the APK paths of overlays that overlay non-system packages.
-  std::set<std::string> GetNonSystemOverlayPaths() const;
+  std::set<const ApkAssets*> GetNonSystemOverlays() const;
 
   // AssetManager2::GetBag(resid) wraps this function to track which resource ids have already
   // been seen while traversing bag parents.

@@ -199,7 +199,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
-import android.net.NetworkState;
+import android.net.NetworkStateSnapshot;
 import android.net.NetworkTestResultParcelable;
 import android.net.OemNetworkPreferences;
 import android.net.ProxyInfo;
@@ -1464,7 +1464,6 @@ public class ConnectivityServiceTest {
         mDeps = makeDependencies();
         returnRealCallingUid();
         mService = new ConnectivityService(mServiceContext,
-                mNetworkManagementService,
                 mStatsService,
                 mMockDnsResolver,
                 mock(IpConnectivityLog.class),
@@ -5488,7 +5487,7 @@ public class ConnectivityServiceTest {
                 UnderlyingNetworkInfo[].class);
 
         verify(mStatsService, atLeastOnce()).forceUpdateIfaces(networksCaptor.capture(),
-                any(NetworkState[].class), eq(defaultIface), vpnInfosCaptor.capture());
+                any(NetworkStateSnapshot[].class), eq(defaultIface), vpnInfosCaptor.capture());
 
         assertSameElementsNoDuplicates(networksCaptor.getValue(), networks);
 
@@ -5558,9 +5557,8 @@ public class ConnectivityServiceTest {
         // Temp metered change shouldn't update ifaces
         mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED);
         waitForIdle();
-        verify(mStatsService, never())
-                .forceUpdateIfaces(eq(onlyCell), any(NetworkState[].class), eq(MOBILE_IFNAME),
-                        eq(new UnderlyingNetworkInfo[0]));
+        verify(mStatsService, never()).forceUpdateIfaces(eq(onlyCell), any(
+                NetworkStateSnapshot[].class), eq(MOBILE_IFNAME), eq(new UnderlyingNetworkInfo[0]));
         reset(mStatsService);
 
         // Roaming change should update ifaces
@@ -5642,7 +5640,7 @@ public class ConnectivityServiceTest {
         // Confirm that we never tell NetworkStatsService that cell is no longer the underlying
         // network for the VPN...
         verify(mStatsService, never()).forceUpdateIfaces(any(Network[].class),
-                any(NetworkState[].class), any() /* anyString() doesn't match null */,
+                any(NetworkStateSnapshot[].class), any() /* anyString() doesn't match null */,
                 argThat(infos -> infos[0].underlyingIfaces.size() == 1
                         && WIFI_IFNAME.equals(infos[0].underlyingIfaces.get(0))));
         verifyNoMoreInteractions(mStatsService);
@@ -5656,7 +5654,7 @@ public class ConnectivityServiceTest {
         mEthernetNetworkAgent.connect(false);
         waitForIdle();
         verify(mStatsService).forceUpdateIfaces(any(Network[].class),
-                any(NetworkState[].class), any() /* anyString() doesn't match null */,
+                any(NetworkStateSnapshot[].class), any() /* anyString() doesn't match null */,
                 argThat(vpnInfos -> vpnInfos[0].underlyingIfaces.size() == 1
                         && WIFI_IFNAME.equals(vpnInfos[0].underlyingIfaces.get(0))));
         mEthernetNetworkAgent.disconnect();
@@ -7859,7 +7857,6 @@ public class ConnectivityServiceTest {
         cellLp.addRoute(defaultRoute);
         cellLp.addRoute(ipv6Subnet);
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, cellLp);
-        reset(mNetworkManagementService);
         reset(mMockDnsResolver);
         reset(mMockNetd);
         reset(mBatteryStatsService);
@@ -7899,7 +7896,6 @@ public class ConnectivityServiceTest {
 
         verifyNoMoreInteractions(mMockNetd);
         verifyNoMoreInteractions(mMockDnsResolver);
-        reset(mNetworkManagementService);
         reset(mMockNetd);
         reset(mMockDnsResolver);
         when(mMockNetd.interfaceGetCfg(CLAT_PREFIX + MOBILE_IFNAME))
@@ -7999,7 +7995,6 @@ public class ConnectivityServiceTest {
         verify(mMockNetd, times(1)).networkRemoveInterface(cellNetId, CLAT_PREFIX + MOBILE_IFNAME);
         verifyNoMoreInteractions(mMockNetd);
         verifyNoMoreInteractions(mMockDnsResolver);
-        reset(mNetworkManagementService);
         reset(mMockNetd);
         reset(mMockDnsResolver);
         when(mMockNetd.interfaceGetCfg(CLAT_PREFIX + MOBILE_IFNAME))
@@ -8236,7 +8231,6 @@ public class ConnectivityServiceTest {
         final LinkProperties cellLp = new LinkProperties();
         cellLp.setInterfaceName(MOBILE_IFNAME);
         mCellNetworkAgent.sendLinkProperties(cellLp);
-        reset(mNetworkManagementService);
         mCellNetworkAgent.connect(true);
         networkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
         verify(mMockNetd, times(1)).idletimerAddInterface(eq(MOBILE_IFNAME), anyInt(),
@@ -8930,8 +8924,8 @@ public class ConnectivityServiceTest {
                 ConnectivityManager.getNetworkTypeName(TYPE_MOBILE),
                 TelephonyManager.getNetworkTypeName(TelephonyManager.NETWORK_TYPE_LTE));
         return new NetworkAgentInfo(null, new Network(NET_ID), info, new LinkProperties(),
-                nc, 0, mServiceContext, null, new NetworkAgentConfig(), mService, null, null, null,
-                0, INVALID_UID, mQosCallbackTracker);
+                nc, 0, mServiceContext, null, new NetworkAgentConfig(), mService, null, null, 0,
+                INVALID_UID, mQosCallbackTracker);
     }
 
     @Test

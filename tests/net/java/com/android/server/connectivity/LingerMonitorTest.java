@@ -41,7 +41,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkProvider;
 import android.os.Binder;
-import android.os.INetworkManagementService;
 import android.text.format.DateUtils;
 
 import androidx.test.filters.SmallTest;
@@ -74,7 +73,6 @@ public class LingerMonitorTest {
     @Mock ConnectivityService mConnService;
     @Mock IDnsResolver mDnsResolver;
     @Mock INetd mNetd;
-    @Mock INetworkManagementService mNMS;
     @Mock Context mCtx;
     @Mock NetworkNotificationManager mNotifier;
     @Mock Resources mResources;
@@ -358,8 +356,8 @@ public class LingerMonitorTest {
         caps.addTransportType(transport);
         NetworkAgentInfo nai = new NetworkAgentInfo(null, new Network(netId), info,
                 new LinkProperties(), caps, 50, mCtx, null, new NetworkAgentConfig() /* config */,
-                mConnService, mNetd, mDnsResolver, mNMS, NetworkProvider.ID_NONE,
-                Binder.getCallingUid(), mQosCallbackTracker);
+                mConnService, mNetd, mDnsResolver, NetworkProvider.ID_NONE, Binder.getCallingUid(),
+                mQosCallbackTracker);
         nai.everValidated = true;
         return nai;
     }

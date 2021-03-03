@@ -18,18 +18,17 @@
 
 #include <dirent.h>
 
-#include "android-base/errors.h"
-#include "android-base/file.h"
-#include "android-base/stringprintf.h"
-#include "android-base/utf8.h"
-#include "androidfw/StringPiece.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <android-base/errors.h>
+#include <android-base/file.h>
+#include <android-base/stringprintf.h>
+#include <android-base/utf8.h>
+#include <androidfw/StringPiece.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "cmd/Compile.h"
 #include "cmd/Link.h"
 #include "io/FileStream.h"
-#include "io/Util.h"
 #include "util/Files.h"
 
 using testing::Eq;
@@ -168,6 +167,76 @@ void CommandTestFixture::AssertLoadXml(LoadedApk* apk, const io::IData* data,
     ASSERT_THAT(out_tree->getEventType(), Ne(android::ResXMLTree::BAD_DOCUMENT));
     ASSERT_THAT(out_tree->getEventType(), Ne(android::ResXMLTree::END_DOCUMENT));
   }
+}
+
+ManifestBuilder::ManifestBuilder(CommandTestFixture* fixture) : fixture_(fixture) {
+}
+
+ManifestBuilder& ManifestBuilder::SetPackageName(const std::string& package_name) {
+  package_name_ = package_name;
+  return *this;
+}
+
+ManifestBuilder& ManifestBuilder::AddContents(const std::string& contents) {
+  contents_ += contents + "\n";
+  return *this;
+}
+
+std::string ManifestBuilder::Build(const std::string& file_path) {
+  const char* manifest_template = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="%s">
+          %s
+      </manifest>)";
+
+  fixture_->WriteFile(file_path, android::base::StringPrintf(
+                                     manifest_template, package_name_.c_str(), contents_.c_str()));
+  return file_path;
+}
+
+std::string ManifestBuilder::Build() {
+  return Build(fixture_->GetTestPath("AndroidManifest.xml"));
+}
+
+LinkCommandBuilder::LinkCommandBuilder(CommandTestFixture* fixture) : fixture_(fixture) {
+}
+
+LinkCommandBuilder& LinkCommandBuilder::SetManifestFile(const std::string& file) {
+  manifest_supplied_ = true;
+  args_.emplace_back("--manifest");
+  args_.emplace_back(file);
+  return *this;
+}
+
+LinkCommandBuilder& LinkCommandBuilder::AddFlag(const std::string& flag) {
+  args_.emplace_back(flag);
+  return *this;
+}
+
+LinkCommandBuilder& LinkCommandBuilder::AddCompiledResDir(const std::string& dir,
+                                                          IDiagnostics* diag) {
+  if (auto files = file::FindFiles(dir, diag)) {
+    for (std::string& compile_file : files.value()) {
+      args_.emplace_back(file::BuildPath({dir, compile_file}));
+    }
+  }
+  return *this;
+}
+
+LinkCommandBuilder& LinkCommandBuilder::AddParameter(const std::string& param,
+                                                     const std::string& value) {
+  args_.emplace_back(param);
+  args_.emplace_back(value);
+  return *this;
+}
+
+std::vector<std::string> LinkCommandBuilder::Build(const std::string& out_apk) {
+  if (!manifest_supplied_) {
+    SetManifestFile(ManifestBuilder(fixture_).Build());
+  }
+  args_.emplace_back("-o");
+  args_.emplace_back(out_apk);
+  return args_;
 }
 
 } // namespace aapt

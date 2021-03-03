@@ -120,6 +120,7 @@ import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
 import android.net.NetworkState;
+import android.net.NetworkStateSnapshot;
 import android.net.NetworkTestResultParcelable;
 import android.net.NetworkUtils;
 import android.net.NetworkWatchlistManager;
@@ -155,7 +156,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
@@ -324,7 +324,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // 0 is full bad, 100 is full good
     private int mDefaultInetConditionPublished = 0;
 
-    private INetworkManagementService mNMS;
     @VisibleForTesting
     protected IDnsResolver mDnsResolver;
     @VisibleForTesting
@@ -1040,15 +1039,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    public ConnectivityService(Context context, INetworkManagementService netManager,
-            INetworkStatsService statsService) {
-        this(context, netManager, statsService, getDnsResolver(context), new IpConnectivityLog(),
+    public ConnectivityService(Context context, INetworkStatsService statsService) {
+        this(context, statsService, getDnsResolver(context), new IpConnectivityLog(),
                 NetdService.getInstance(), new Dependencies());
     }
 
     @VisibleForTesting
-    protected ConnectivityService(Context context, INetworkManagementService netManager,
-            INetworkStatsService statsService, IDnsResolver dnsresolver, IpConnectivityLog logger,
+    protected ConnectivityService(Context context, INetworkStatsService statsService,
+            IDnsResolver dnsresolver, IpConnectivityLog logger,
             INetd netd, Dependencies deps) {
         if (DBG) log("ConnectivityService starting up");
 
@@ -1095,7 +1093,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // TODO: Consider making the timer customizable.
         mNascentDelayMs = DEFAULT_NASCENT_DELAY_MS;
 
-        mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
         mStatsService = Objects.requireNonNull(statsService, "missing INetworkStatsService");
         mPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
         mPolicyManagerInternal = Objects.requireNonNull(
@@ -1203,7 +1200,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mUserAllContext.registerReceiver(mIntentReceiver, intentFilter,
                 null /* broadcastPermission */, mHandler);
 
-        mNetworkActivityTracker = new LegacyNetworkActivityTracker(mContext, mHandler, mNMS, mNetd);
+        mNetworkActivityTracker = new LegacyNetworkActivityTracker(mContext, mHandler, mNetd);
 
         mNetdCallback = new NetdCallback();
         try {
@@ -1237,12 +1234,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDnsManager = new DnsManager(mContext, mDnsResolver);
         registerPrivateDnsSettingsCallbacks();
 
-        mNoServiceNetwork =  new NetworkAgentInfo(null,
+        mNoServiceNetwork = new NetworkAgentInfo(null,
                 new Network(NO_SERVICE_NET_ID),
                 new NetworkInfo(TYPE_NONE, 0, "", ""),
                 new LinkProperties(), new NetworkCapabilities(), 0, mContext,
                 null, new NetworkAgentConfig(), this, null,
-                null, null, 0, INVALID_UID,
+                null, 0, INVALID_UID,
                 mQosCallbackTracker);
     }
 
@@ -2201,8 +2198,45 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "ConnectivityService");
     }
 
+    /**
+     * Performs a strict and comprehensive check of whether a calling package is allowed to
+     * change the state of network, as the condition differs for pre-M, M+, and
+     * privileged/preinstalled apps. The caller is expected to have either the
+     * CHANGE_NETWORK_STATE or the WRITE_SETTINGS permission declared. Either of these
+     * permissions allow changing network state; WRITE_SETTINGS is a runtime permission and
+     * can be revoked, but (except in M, excluding M MRs), CHANGE_NETWORK_STATE is a normal
+     * permission and cannot be revoked. See http://b/23597341
+     *
+     * Note: if the check succeeds because the application holds WRITE_SETTINGS, the operation
+     * of this app will be updated to the current time.
+     */
     private void enforceChangePermission(String callingPkg, String callingAttributionTag) {
-        ConnectivityManager.enforceChangePermission(mContext, callingPkg, callingAttributionTag);
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.CHANGE_NETWORK_STATE)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (callingPkg == null) {
+            throw new SecurityException("Calling package name is null.");
+        }
+
+        final AppOpsManager appOpsMgr = mContext.getSystemService(AppOpsManager.class);
+        final int uid = mDeps.getCallingUid();
+        final int mode = appOpsMgr.noteOpNoThrow(AppOpsManager.OPSTR_WRITE_SETTINGS, uid,
+                callingPkg, callingAttributionTag, null /* message */);
+
+        if (mode == AppOpsManager.MODE_ALLOWED) {
+            return;
+        }
+
+        if ((mode == AppOpsManager.MODE_DEFAULT) && (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.WRITE_SETTINGS) == PackageManager.PERMISSION_GRANTED)) {
+            return;
+        }
+
+        throw new SecurityException(callingPkg + " was not granted either of these permissions:"
+                + android.Manifest.permission.CHANGE_NETWORK_STATE + ","
+                + android.Manifest.permission.WRITE_SETTINGS + ".");
     }
 
     private void enforceSettingsPermission() {
@@ -6030,7 +6064,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkAgentInfo nai = new NetworkAgentInfo(na,
                 new Network(mNetIdManager.reserveNetId()), new NetworkInfo(networkInfo), lp, nc,
                 currentScore, mContext, mTrackerHandler, new NetworkAgentConfig(networkAgentConfig),
-                this, mNetd, mDnsResolver, mNMS, providerId, uid, mQosCallbackTracker);
+                this, mNetd, mDnsResolver, providerId, uid, mQosCallbackTracker);
 
         // Make sure the LinkProperties and NetworkCapabilities reflect what the agent info says.
         processCapabilitiesFromAgent(nai, nc);
@@ -7952,8 +7986,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final UnderlyingNetworkInfo[] underlyingNetworkInfos = getAllVpnInfo();
         try {
-            mStatsService.forceUpdateIfaces(getDefaultNetworks(), getAllNetworkState(), activeIface,
-                    underlyingNetworkInfos);
+            final ArrayList<NetworkStateSnapshot> snapshots = new ArrayList<>();
+            // TODO: Directly use NetworkStateSnapshot when feasible.
+            for (final NetworkState state : getAllNetworkState()) {
+                final NetworkStateSnapshot snapshot = new NetworkStateSnapshot(state.network,
+                        state.networkCapabilities, state.linkProperties, state.subscriberId,
+                        state.legacyNetworkType);
+                snapshots.add(snapshot);
+            }
+            mStatsService.forceUpdateIfaces(getDefaultNetworks(), snapshots.toArray(
+                    new NetworkStateSnapshot[0]), activeIface, underlyingNetworkInfos);
         } catch (Exception ignored) {
         }
     }
@@ -8186,7 +8228,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             TestNetworkService.enforceTestNetworkPermissions(mContext);
 
             if (mTNS == null) {
-                mTNS = new TestNetworkService(mContext, mNMS);
+                mTNS = new TestNetworkService(mContext);
             }
 
             return mTNS;
@@ -8661,9 +8703,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private class NetdCallback extends BaseNetdUnsolicitedEventListener {
         @Override
-        public void onInterfaceClassActivityChanged(boolean isActive, int timerLabel,
+        public void onInterfaceClassActivityChanged(boolean isActive, int transportType,
                 long timestampNs, int uid) {
-            mNetworkActivityTracker.setAndReportNetworkActive(isActive, timerLabel, timestampNs);
+            mNetworkActivityTracker.setAndReportNetworkActive(isActive, transportType, timestampNs);
+        }
+
+        @Override
+        public void onInterfaceLinkStateChanged(String iface, boolean up) {
+            for (NetworkAgentInfo nai : mNetworkAgentInfos) {
+                nai.clatd.interfaceLinkStateChanged(iface, up);
+            }
+        }
+
+        @Override
+        public void onInterfaceRemoved(String iface) {
+            for (NetworkAgentInfo nai : mNetworkAgentInfos) {
+                nai.clatd.interfaceRemoved(iface);
+            }
         }
     }
 
@@ -8697,7 +8753,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         LegacyNetworkActivityTracker(@NonNull Context context, @NonNull Handler handler,
-                @NonNull INetworkManagementService nms, @NonNull INetd netd) {
+                @NonNull INetd netd) {
             mContext = context;
             mNetd = netd;
             mHandler = handler;

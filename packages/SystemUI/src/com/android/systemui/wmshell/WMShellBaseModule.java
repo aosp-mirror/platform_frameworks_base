@@ -77,6 +77,8 @@ import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.startingsurface.StartingSurface;
+import com.android.wm.shell.startingsurface.StartingWindowController;
 import com.android.wm.shell.transition.RemoteTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -373,6 +375,9 @@ public abstract class WMShellBaseModule {
         return new PipUiEventLogger(uiEventLogger, packageManager);
     }
 
+    @BindsOptionalOf
+    abstract PipTouchHandler optionalPipTouchHandler();
+
     //
     // Shell transitions
     //
@@ -448,6 +453,22 @@ public abstract class WMShellBaseModule {
     @BindsOptionalOf
     abstract AppPairsController optionalAppPairs();
 
+    // Starting window
+
+    @WMSingleton
+    @Provides
+    static Optional<StartingSurface> provideStartingSurface(
+            StartingWindowController startingWindowController) {
+        return Optional.of(startingWindowController.asStartingSurface());
+    }
+
+    @WMSingleton
+    @Provides
+    static StartingWindowController provideStartingWindowController(Context context,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new StartingWindowController(context, mainExecutor);
+    }
+
     //
     // Task view factory
     //
@@ -479,6 +500,8 @@ public abstract class WMShellBaseModule {
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
+            Optional<StartingSurface> startingSurface,
+            Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -488,6 +511,8 @@ public abstract class WMShellBaseModule {
                 legacySplitScreenOptional,
                 splitScreenOptional,
                 appPairsOptional,
+                startingSurface,
+                pipTouchHandlerOptional,
                 fullscreenTaskListener,
                 transitions,
                 mainExecutor);

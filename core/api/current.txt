@@ -6810,14 +6810,18 @@ package android.app {
   public final class WallpaperColors implements android.os.Parcelable {
     ctor public WallpaperColors(android.os.Parcel);
     ctor public WallpaperColors(@NonNull android.graphics.Color, @Nullable android.graphics.Color, @Nullable android.graphics.Color);
+    ctor public WallpaperColors(@NonNull android.graphics.Color, @Nullable android.graphics.Color, @Nullable android.graphics.Color, int);
     method public int describeContents();
     method public static android.app.WallpaperColors fromBitmap(@NonNull android.graphics.Bitmap);
     method public static android.app.WallpaperColors fromDrawable(android.graphics.drawable.Drawable);
+    method public int getColorHints();
     method @NonNull public android.graphics.Color getPrimaryColor();
     method @Nullable public android.graphics.Color getSecondaryColor();
     method @Nullable public android.graphics.Color getTertiaryColor();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
+    field public static final int HINT_SUPPORTS_DARK_TEXT = 1; // 0x1
+    field public static final int HINT_SUPPORTS_DARK_THEME = 2; // 0x2
   }
 
   public final class WallpaperInfo implements android.os.Parcelable {
@@ -18565,6 +18569,23 @@ package android.hardware.camera2.params {
 
 package android.hardware.display {
 
+  public final class DeviceProductInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getConnectionToSinkType();
+    method public int getManufactureWeek();
+    method public int getManufactureYear();
+    method @NonNull public String getManufacturerPnpId();
+    method public int getModelYear();
+    method @Nullable public String getName();
+    method @NonNull public String getProductId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONNECTION_TO_SINK_BUILT_IN = 1; // 0x1
+    field public static final int CONNECTION_TO_SINK_DIRECT = 2; // 0x2
+    field public static final int CONNECTION_TO_SINK_TRANSITIVE = 3; // 0x3
+    field public static final int CONNECTION_TO_SINK_UNKNOWN = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.DeviceProductInfo> CREATOR;
+  }
+
   public final class DisplayManager {
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, int, int, int, @Nullable android.view.Surface, int);
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, int, int, int, @Nullable android.view.Surface, int, @Nullable android.hardware.display.VirtualDisplay.Callback, @Nullable android.os.Handler);
@@ -25865,6 +25886,7 @@ package android.net {
     method @NonNull public static java.util.Set<java.lang.String> getSupportedAlgorithms();
     method public int getTruncationLengthBits();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final String AUTH_AES_CMAC = "cmac(aes)";
     field public static final String AUTH_AES_XCBC = "xcbc(aes)";
     field public static final String AUTH_CRYPT_AES_GCM = "rfc4106(gcm(aes))";
     field public static final String AUTH_CRYPT_CHACHA20_POLY1305 = "rfc7539esp(chacha20,poly1305)";
@@ -26004,6 +26026,16 @@ package android.net {
     field public static final int TYPE_IKEV2_IPSEC_PSK = 7; // 0x7
     field public static final int TYPE_IKEV2_IPSEC_RSA = 8; // 0x8
     field public static final int TYPE_IKEV2_IPSEC_USER_PASS = 6; // 0x6
+  }
+
+  public final class Proxy {
+    ctor public Proxy();
+    method @Deprecated public static String getDefaultHost();
+    method @Deprecated public static int getDefaultPort();
+    method @Deprecated public static String getHost(android.content.Context);
+    method @Deprecated public static int getPort(android.content.Context);
+    field @Deprecated public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
+    field public static final String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
   }
 
   @Deprecated public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
@@ -41312,7 +41344,6 @@ package android.telephony {
     method @NonNull public java.util.List<java.lang.Integer> getAvailableServices();
     method @Nullable public android.telephony.CellIdentity getCellIdentity();
     method public int getDomain();
-    method public int getNrState();
     method @Nullable public String getRegisteredPlmn();
     method public int getTransportType();
     method public boolean isRegistered();
@@ -45855,7 +45886,7 @@ package android.util {
     method public void clear();
     method public android.util.SparseArray<E> clone();
     method public boolean contains(int);
-    method public boolean contentEquals(@Nullable android.util.SparseArray<E>);
+    method public boolean contentEquals(@Nullable android.util.SparseArray<?>);
     method public int contentHashCode();
     method public void delete(int);
     method public E get(int);
@@ -46251,6 +46282,7 @@ package android.view {
     method public long getAppVsyncOffsetNanos();
     method public void getCurrentSizeRange(android.graphics.Point, android.graphics.Point);
     method @Nullable public android.view.DisplayCutout getCutout();
+    method @Nullable public android.hardware.display.DeviceProductInfo getDeviceProductInfo();
     method public int getDisplayId();
     method public int getFlags();
     method public android.view.Display.HdrCapabilities getHdrCapabilities();
@@ -49727,9 +49759,12 @@ package android.view {
   }
 
   public interface WindowManager extends android.view.ViewManager {
+    method public default void addCrossWindowBlurEnabledListener(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @NonNull public default android.view.WindowMetrics getCurrentWindowMetrics();
     method @Deprecated public android.view.Display getDefaultDisplay();
     method @NonNull public default android.view.WindowMetrics getMaximumWindowMetrics();
+    method public default boolean isCrossWindowBlurEnabled();
+    method public default void removeCrossWindowBlurEnabledListener(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void removeViewImmediate(android.view.View);
   }
 
@@ -49754,12 +49789,14 @@ package android.view {
     method public final int copyFrom(android.view.WindowManager.LayoutParams);
     method public String debug(String);
     method public int describeContents();
+    method public int getBlurBehindRadius();
     method public int getColorMode();
     method public int getFitInsetsSides();
     method public int getFitInsetsTypes();
     method public final CharSequence getTitle();
     method public boolean isFitInsetsIgnoringVisibility();
     method public static boolean mayUseInputMethod(int);
+    method public void setBlurBehindRadius(@IntRange(from=0) int);
     method public void setColorMode(int);
     method public void setFitInsetsIgnoringVisibility(boolean);
     method public void setFitInsetsSides(int);
@@ -49870,7 +49907,6 @@ package android.view {
     field @Deprecated public static final int TYPE_TOAST = 2005; // 0x7d5
     field public static final int TYPE_WALLPAPER = 2013; // 0x7dd
     field public float alpha;
-    field public int blurBehindRadius;
     field public float buttonBrightness;
     field public float dimAmount;
     field public int flags;

@@ -16,6 +16,9 @@
 
 package com.android.server.pm.verify.domain.proxy;
 
+import static android.os.PowerWhitelistManager.REASON_DOMAIN_VERIFICATION_V1;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -238,7 +241,8 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
         final long allowListTimeout = mConnection.getPowerSaveTempWhitelistAppDuration();
         mConnection.getDeviceIdleInternal().addPowerSaveTempWhitelistApp(Process.myUid(),
                 mVerifierComponent.getPackageName(), allowListTimeout,
-                UserHandle.USER_SYSTEM, true, "domain verification agent");
+                UserHandle.USER_SYSTEM, true, REASON_DOMAIN_VERIFICATION_V1,
+                "domain verification agent");
 
         int size = verifications.size();
         for (int index = 0; index < size; index++) {
@@ -261,7 +265,9 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
                     .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
             final BroadcastOptions options = BroadcastOptions.makeBasic();
-            options.setTemporaryAppWhitelistDuration(allowListTimeout);
+            options.setTemporaryAppAllowlist(allowListTimeout,
+                    TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                    REASON_DOMAIN_VERIFICATION_V1, "");
             mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM, null, options.toBundle());
         }
     }
@@ -270,7 +276,7 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
     private String buildHostsString(@NonNull AndroidPackage pkg) {
         // The collector itself handles the v1 vs v2 behavior, which is based on targetSdkVersion,
         // not the version of the verification agent on device.
-        ArraySet<String> domains = mCollector.collectAutoVerifyDomains(pkg);
+        ArraySet<String> domains = mCollector.collectValidAutoVerifyDomains(pkg);
 
         // v1 doesn't handle wildcard domains, so transform them here to the root
         StringBuilder builder = new StringBuilder();

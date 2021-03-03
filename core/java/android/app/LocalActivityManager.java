@@ -158,7 +158,7 @@ public class LocalActivityManager {
                 r.activityInfo = mActivityThread.resolveActivityInfo(r.intent);
             }
             r.activity = mActivityThread.startActivityNow(
-                    mParent, r.id, r.intent, r.activityInfo, r, r.instanceState, instance, r);
+                    mParent, r.id, r.intent, r.activityInfo, r, r.instanceState, instance, r, r);
             if (r.activity == null) {
                 return;
             }

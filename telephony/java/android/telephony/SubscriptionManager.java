@@ -928,6 +928,14 @@ public class SubscriptionManager {
     public static final String PROFILE_CLASS = SimInfo.COLUMN_PROFILE_CLASS;
 
     /**
+     * TelephonyProvider column name for VoIMS opt-in status.
+     *
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String VOIMS_OPT_IN_STATUS = SimInfo.COLUMN_VOIMS_OPT_IN_STATUS;
+
+    /**
      * Profile class of the subscription
      * @hide
      */

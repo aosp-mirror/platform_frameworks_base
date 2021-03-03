@@ -857,13 +857,6 @@ package android.app {
     method public void onVrStateChanged(boolean);
   }
 
-  public final class WallpaperColors implements android.os.Parcelable {
-    ctor public WallpaperColors(@NonNull android.graphics.Color, @Nullable android.graphics.Color, @Nullable android.graphics.Color, int);
-    method public int getColorHints();
-    field public static final int HINT_SUPPORTS_DARK_TEXT = 1; // 0x1
-    field public static final int HINT_SUPPORTS_DARK_THEME = 2; // 0x2
-  }
-
   public final class WallpaperInfo implements android.os.Parcelable {
     method public boolean supportsAmbientMode();
   }
@@ -960,6 +953,9 @@ package android.app.admin {
 }
 
 package android.app.assist {
+
+  public class ActivityId {
+  }
 
   public static class AssistStructure.ViewNode {
     ctor public AssistStructure.ViewNode();
@@ -2556,9 +2552,7 @@ package android.content.pm {
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
     field public static final String FEATURE_CAMERA_TOGGLE = "android.hardware.camera.toggle";
     field public static final String FEATURE_CONTEXT_HUB = "android.hardware.context_hub";
-    field public static final String FEATURE_CROSS_LAYER_BLUR = "android.software.cross_layer_blur";
-    field @Deprecated public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
-    field public static final String FEATURE_INCREMENTAL_DELIVERY_VERSION = "android.software.incremental_delivery_version";
+    field public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
     field public static final String FEATURE_MICROPHONE_TOGGLE = "android.hardware.microphone.toggle";
     field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
@@ -5087,9 +5081,10 @@ package android.media {
   }
 
   public static class AudioTrack.TunerConfiguration {
-    ctor @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public AudioTrack.TunerConfiguration(@IntRange(from=1) int, @IntRange(from=1) int);
+    ctor @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public AudioTrack.TunerConfiguration(@IntRange(from=0) int, @IntRange(from=1) int);
     method @IntRange(from=1) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getContentId();
     method @IntRange(from=1) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getSyncId();
+    field public static final int CONTENT_ID_NONE = 0; // 0x0
   }
 
   public class HwAudioSource {
@@ -7155,9 +7150,6 @@ package android.net {
     method public abstract void onRequestScores(android.net.NetworkKey[]);
   }
 
-  public class NetworkReleasedException extends java.lang.Exception {
-  }
-
   public class NetworkScoreManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, android.Manifest.permission.REQUEST_NETWORK_SCORES}) public boolean clearScores() throws java.lang.SecurityException;
     method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, android.Manifest.permission.REQUEST_NETWORK_SCORES}) public void disableScoring() throws java.lang.SecurityException;
@@ -7241,47 +7233,6 @@ package android.net {
     method @NonNull public android.net.OemNetworkPreferences.Builder clearNetworkPreference(@NonNull String);
   }
 
-  public abstract class QosCallback {
-    ctor public QosCallback();
-    method public void onError(@NonNull android.net.QosCallbackException);
-    method public void onQosSessionAvailable(@NonNull android.net.QosSession, @NonNull android.net.QosSessionAttributes);
-    method public void onQosSessionLost(@NonNull android.net.QosSession);
-  }
-
-  public static class QosCallback.QosCallbackRegistrationException extends java.lang.RuntimeException {
-  }
-
-  public final class QosCallbackException extends java.lang.Exception {
-  }
-
-  public abstract class QosFilter {
-    method @NonNull public abstract android.net.Network getNetwork();
-    method public abstract boolean matchesLocalAddress(@NonNull java.net.InetAddress, int, int);
-  }
-
-  public final class QosSession implements android.os.Parcelable {
-    ctor public QosSession(int, int);
-    method public int describeContents();
-    method public int getSessionId();
-    method public int getSessionType();
-    method public long getUniqueId();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.QosSession> CREATOR;
-    field public static final int TYPE_EPS_BEARER = 1; // 0x1
-  }
-
-  public interface QosSessionAttributes {
-  }
-
-  public final class QosSocketInfo implements android.os.Parcelable {
-    ctor public QosSocketInfo(@NonNull android.net.Network, @NonNull java.net.Socket) throws java.io.IOException;
-    method public int describeContents();
-    method @NonNull public java.net.InetSocketAddress getLocalSocketAddress();
-    method @NonNull public android.net.Network getNetwork();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.QosSocketInfo> CREATOR;
-  }
-
   public class RssiCurve implements android.os.Parcelable {
     ctor public RssiCurve(int, int, byte[]);
     ctor public RssiCurve(int, int, byte[], int);
@@ -7311,12 +7262,6 @@ package android.net {
     field public final boolean meteredHint;
     field public final android.net.NetworkKey networkKey;
     field public final android.net.RssiCurve rssiCurve;
-  }
-
-  public class SocketLocalAddressChangedException extends java.lang.Exception {
-  }
-
-  public class SocketNotBoundException extends java.lang.Exception {
   }
 
   public class TrafficStats {
@@ -7544,6 +7489,19 @@ package android.net.sip {
 
   public class SipProfile implements java.lang.Cloneable android.os.Parcelable java.io.Serializable {
     method public int getCallingUid();
+  }
+
+}
+
+package android.net.util {
+
+  public final class SocketUtils {
+    method public static void bindSocketToInterface(@NonNull java.io.FileDescriptor, @NonNull String) throws android.system.ErrnoException;
+    method public static void closeSocket(@Nullable java.io.FileDescriptor) throws java.io.IOException;
+    method @NonNull public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
+    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int);
+    method @Deprecated @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
+    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int, @NonNull byte[]);
   }
 
 }
@@ -8246,10 +8204,11 @@ package android.os {
     field public static final int EVENT_MMS = 2; // 0x2
     field public static final int EVENT_SMS = 1; // 0x1
     field public static final int EVENT_UNSPECIFIED = 0; // 0x0
-    field public static final int REASON_ACTIVITY_RECOGNITION = 102; // 0x66
+    field public static final int REASON_ACTIVITY_RECOGNITION = 103; // 0x67
     field public static final int REASON_GEOFENCING = 100; // 0x64
     field public static final int REASON_OTHER = 1; // 0x1
     field public static final int REASON_PUSH_MESSAGING = 101; // 0x65
+    field public static final int REASON_PUSH_MESSAGING_OVER_QUOTA = 102; // 0x66
     field public static final int REASON_UNKNOWN = 0; // 0x0
     field public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0; // 0x0
     field public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED = 1; // 0x1
@@ -14004,6 +13963,7 @@ package android.view.contentcapture {
 
   public final class ContentCaptureContext implements android.os.Parcelable {
     method @Nullable public android.content.ComponentName getActivityComponent();
+    method @Nullable public android.app.assist.ActivityId getActivityId();
     method public int getDisplayId();
     method public int getFlags();
     method @Nullable public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();

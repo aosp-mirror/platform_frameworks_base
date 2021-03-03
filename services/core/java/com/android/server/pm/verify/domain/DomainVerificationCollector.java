@@ -84,7 +84,7 @@ public class DomainVerificationCollector {
 
     @NonNull
     public ArraySet<String> collectAllWebDomains(@NonNull AndroidPackage pkg) {
-        return collectDomains(pkg, false);
+        return collectDomains(pkg, false /* checkAutoVerify */, true /* valid */);
     }
 
     /**
@@ -92,20 +92,29 @@ public class DomainVerificationCollector {
      * IntentFilter#getAutoVerify()} == true.
      */
     @NonNull
-    public ArraySet<String> collectAutoVerifyDomains(@NonNull AndroidPackage pkg) {
-        return collectDomains(pkg, true);
+    public ArraySet<String> collectValidAutoVerifyDomains(@NonNull AndroidPackage pkg) {
+        return collectDomains(pkg, true /* checkAutoVerify */, true /* valid */);
+    }
+
+    /**
+     * Returns all the domains that are configured to be auto verified, but aren't actually valid
+     * HTTP domains, per {@link #DOMAIN_NAME_WITH_WILDCARD}.
+     */
+    @NonNull
+    public ArraySet<String> collectInvalidAutoVerifyDomains(@NonNull AndroidPackage pkg) {
+        return collectDomains(pkg, true /* checkAutoVerify */, false /* valid */);
     }
 
     @NonNull
     private ArraySet<String> collectDomains(@NonNull AndroidPackage pkg,
-            boolean checkAutoVerify) {
+            boolean checkAutoVerify, boolean valid) {
         boolean restrictDomains =
                 DomainVerificationUtils.isChangeEnabled(mPlatformCompat, pkg, RESTRICT_DOMAINS);
 
         if (restrictDomains) {
-            return collectDomainsInternal(pkg, checkAutoVerify);
+            return collectDomainsInternal(pkg, checkAutoVerify, valid);
         } else {
-            return collectDomainsLegacy(pkg, checkAutoVerify);
+            return collectDomainsLegacy(pkg, checkAutoVerify, valid);
         }
     }
 
@@ -113,10 +122,10 @@ public class DomainVerificationCollector {
      * @see #RESTRICT_DOMAINS
      */
     private ArraySet<String> collectDomainsLegacy(@NonNull AndroidPackage pkg,
-            boolean checkAutoVerify) {
+            boolean checkAutoVerify, boolean valid) {
         if (!checkAutoVerify) {
             // Per-domain user selection state doesn't have a V1 equivalent on S, so just use V2
-            return collectDomainsInternal(pkg, false);
+            return collectDomainsInternal(pkg, false /* checkAutoVerify */, true /* valid */);
         }
 
         List<ParsedActivity> activities = pkg.getActivities();
@@ -157,7 +166,7 @@ public class DomainVerificationCollector {
                     int authorityCount = intent.countDataAuthorities();
                     for (int index = 0; index < authorityCount; index++) {
                         String host = intent.getDataAuthority(index).getHost();
-                        if (isValidHost(host)) {
+                        if (isValidHost(host) == valid) {
                             totalSize += byteSizeOf(host);
                             underMaxSize = totalSize < MAX_DOMAINS_BYTE_SIZE;
                             domains.add(host);
@@ -174,7 +183,7 @@ public class DomainVerificationCollector {
      * @see #RESTRICT_DOMAINS
      */
     private ArraySet<String> collectDomainsInternal(@NonNull AndroidPackage pkg,
-            boolean checkAutoVerify) {
+            boolean checkAutoVerify, boolean valid) {
         ArraySet<String> domains = new ArraySet<>();
         int totalSize = 0;
         boolean underMaxSize = true;
@@ -214,7 +223,7 @@ public class DomainVerificationCollector {
                 int authorityCount = intent.countDataAuthorities();
                 for (int index = 0; index < authorityCount && underMaxSize; index++) {
                     String host = intent.getDataAuthority(index).getHost();
-                    if (isValidHost(host)) {
+                    if (isValidHost(host) == valid) {
                         totalSize += byteSizeOf(host);
                         underMaxSize = totalSize < MAX_DOMAINS_BYTE_SIZE;
                         domains.add(host);

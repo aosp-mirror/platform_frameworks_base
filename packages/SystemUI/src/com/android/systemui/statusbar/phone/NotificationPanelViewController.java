@@ -89,10 +89,8 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
@@ -245,7 +243,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 public void onLockScreenModeChanged(int mode) {
                     mLockScreenMode = mode;
                     mClockPositionAlgorithm.onLockScreenModeChanged(mode);
-                    mKeyguardBottomArea.onLockScreenModeChanged(mode);
                 }
 
                 @Override
@@ -304,7 +301,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private final QSDetailDisplayer mQSDetailDisplayer;
     private final FeatureFlags mFeatureFlags;
     private final ScrimController mScrimController;
-    private final ControlsComponent mControlsComponent;
 
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
@@ -520,7 +516,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private NotificationShelfController mNotificationShelfController;
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
-    private BroadcastDispatcher mBroadcastDispatcher;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
@@ -578,9 +573,7 @@ public class NotificationPanelViewController extends PanelViewController {
             UserManager userManager,
             MediaDataManager mediaDataManager,
             AmbientState ambientState,
-            FeatureFlags featureFlags,
-            ControlsComponent controlsComponent,
-            BroadcastDispatcher broadcastDispatcher) {
+            FeatureFlags featureFlags) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder.get(), statusBarTouchableRegionManager,
@@ -623,7 +616,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mScrimController = scrimController;
         mUserManager = userManager;
         mMediaDataManager = mediaDataManager;
-        mControlsComponent = controlsComponent;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();
@@ -662,7 +654,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mEntryManager = notificationEntryManager;
         mConversationNotificationManager = conversationNotificationManager;
         mAuthController = authController;
-        mBroadcastDispatcher = broadcastDispatcher;
 
         mView.setBackgroundColor(Color.TRANSPARENT);
         OnAttachStateChangeListener onAttachStateChangeListener = new OnAttachStateChangeListener();
@@ -972,7 +963,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setAffordanceHelper(mAffordanceHelper);
         mKeyguardBottomArea.setStatusBar(mStatusBar);
         mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);
-        mKeyguardBottomArea.setupControls(mControlsComponent, mBroadcastDispatcher);
     }
 
     private void updateMaxDisplayedNotifications(boolean recompute) {

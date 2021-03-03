@@ -20,14 +20,13 @@ import android.content.Context
 import android.net.ConnectivityManager.TYPE_MOBILE
 import android.net.ConnectivityManager.TYPE_WIFI
 import android.net.NetworkIdentity.SUBTYPE_COMBINED
-import android.net.NetworkIdentity.OEM_NONE;
-import android.net.NetworkIdentity.OEM_PAID;
-import android.net.NetworkIdentity.OEM_PRIVATE;
+import android.net.NetworkIdentity.OEM_NONE
+import android.net.NetworkIdentity.OEM_PAID
+import android.net.NetworkIdentity.OEM_PRIVATE
 import android.net.NetworkIdentity.buildNetworkIdentity
 import android.net.NetworkStats.DEFAULT_NETWORK_ALL
 import android.net.NetworkStats.METERED_ALL
 import android.net.NetworkStats.ROAMING_ALL
-import android.net.NetworkTemplate.MATCH_ETHERNET
 import android.net.NetworkTemplate.MATCH_MOBILE
 import android.net.NetworkTemplate.MATCH_MOBILE_WILDCARD
 import android.net.NetworkTemplate.MATCH_WIFI
@@ -50,7 +49,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 private const val TEST_IMSI1 = "imsi1"
 private const val TEST_IMSI2 = "imsi2"
@@ -60,17 +58,17 @@ private const val TEST_SSID1 = "ssid1"
 class NetworkTemplateTest {
     private val mockContext = mock(Context::class.java)
 
-    private fun buildMobileNetworkState(subscriberId: String): NetworkState =
+    private fun buildMobileNetworkState(subscriberId: String): NetworkStateSnapshot =
             buildNetworkState(TYPE_MOBILE, subscriberId = subscriberId)
-    private fun buildWifiNetworkState(ssid: String): NetworkState =
+    private fun buildWifiNetworkState(ssid: String): NetworkStateSnapshot =
             buildNetworkState(TYPE_WIFI, ssid = ssid)
 
     private fun buildNetworkState(
         type: Int,
         subscriberId: String? = null,
         ssid: String? = null,
-        oemManaged: Int = OEM_NONE,
-    ): NetworkState {
+        oemManaged: Int = OEM_NONE
+    ): NetworkStateSnapshot {
         val lp = LinkProperties()
         val caps = NetworkCapabilities().apply {
             setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false)
@@ -81,7 +79,7 @@ class NetworkTemplateTest {
             setCapability(NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE,
                     (oemManaged and OEM_PRIVATE) == OEM_PRIVATE)
         }
-        return NetworkState(type, lp, caps, mock(Network::class.java), subscriberId)
+        return NetworkStateSnapshot(mock(Network::class.java), caps, lp, subscriberId, type)
     }
 
     private fun NetworkTemplate.assertMatches(ident: NetworkIdentity) =
@@ -179,7 +177,7 @@ class NetworkTemplateTest {
                 OEM_PAID, OEM_PRIVATE, OEM_PAID or OEM_PRIVATE)
 
         // Verify that "not OEM managed network" constants are equal.
-        assertEquals(OEM_MANAGED_NO, OEM_NONE);
+        assertEquals(OEM_MANAGED_NO, OEM_NONE)
 
         // Verify the constants don't conflict.
         assertEquals(constantValues.size, constantValues.distinct().count())
@@ -201,8 +199,13 @@ class NetworkTemplateTest {
      * @param identSsid If networkType is {@code TYPE_WIFI}, this value must *NOT* be null. Provide
      *         one of {@code TEST_SSID*}.
      */
-    private fun matchOemManagedIdent(networkType: Int, matchType:Int, subscriberId: String? = null,
-            templateSsid: String? = null, identSsid: String? = null) {
+    private fun matchOemManagedIdent(
+        networkType: Int,
+        matchType: Int,
+        subscriberId: String? = null,
+        templateSsid: String? = null,
+        identSsid: String? = null
+    ) {
         val oemManagedStates = arrayOf(OEM_NONE, OEM_PAID, OEM_PRIVATE, OEM_PAID or OEM_PRIVATE)
         // A null subscriberId needs a null matchSubscriberIds argument as well.
         val matchSubscriberIds = if (subscriberId == null) null else arrayOf(subscriberId)

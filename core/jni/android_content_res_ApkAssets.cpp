@@ -83,6 +83,10 @@ class LoaderAssetsProvider : public AssetsProvider {
     return true;
   }
 
+  std::optional<std::string_view> GetPath() const override {
+    return {};
+  }
+
   const std::string& GetDebugName() const override {
     return debug_name_;
   }
@@ -358,8 +362,16 @@ static jlong NativeGetFinalizer(JNIEnv* /*env*/, jclass /*clazz*/) {
 }
 
 static jstring NativeGetAssetPath(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
-  return env->NewStringUTF(apk_assets->GetPath().c_str());
+  auto apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+  if (auto path = apk_assets->GetPath()) {
+    return env->NewStringUTF(path->data());
+  }
+  return nullptr;
+}
+
+static jstring NativeGetDebugName(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
+  auto apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+  return env->NewStringUTF(apk_assets->GetDebugName().c_str());
 }
 
 static jlong NativeGetStringBlock(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
@@ -467,6 +479,7 @@ static const JNINativeMethod gApkAssetsMethods[] = {
      (void*)NativeLoadFromFdOffset},
     {"nativeGetFinalizer", "()J", (void*)NativeGetFinalizer},
     {"nativeGetAssetPath", "(J)Ljava/lang/String;", (void*)NativeGetAssetPath},
+    {"nativeGetDebugName", "(J)Ljava/lang/String;", (void*)NativeGetDebugName},
     {"nativeGetStringBlock", "(J)J", (void*)NativeGetStringBlock},
     {"nativeIsUpToDate", "(J)Z", (void*)NativeIsUpToDate},
     {"nativeOpenXml", "(JLjava/lang/String;)J", (void*)NativeOpenXml},

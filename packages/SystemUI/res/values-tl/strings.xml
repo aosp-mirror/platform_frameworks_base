@@ -412,7 +412,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Hanggang sunrise"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Ma-o-on nang <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Hanggang <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"Bawasan ang Liwanag"</string>
+    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Naka-disable ang NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Naka-enable ang NFC"</string>
@@ -446,6 +447,8 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"I-unlock para magamit ang NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Pagmamay-ari ng iyong organisasyon ang device na ito"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ang device na ito"</string>
+    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"Mag-swipe mula sa icon para sa telepono"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Mag-swipe mula sa icon para sa voice assist"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Mag-swipe mula sa icon para sa camera"</string>
@@ -625,6 +628,8 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. I-tap upang i-mute. Maaaring i-mute ang mga serbisyo sa Accessibility."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. I-tap upang itakda na mag-vibrate."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. I-tap upang i-mute."</string>
+    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"i-mute"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"i-unmute"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"i-vibrate"</string>
@@ -1038,6 +1043,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Idagdag"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Iminungkahi ng <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Na-update na ang mga kontrol"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"Naka-lock ang device"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"May mga titik o simbolo ang PIN"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"I-verify ang <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Maling PIN"</string>

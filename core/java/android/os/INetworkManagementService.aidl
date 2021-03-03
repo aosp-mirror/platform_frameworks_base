@@ -23,7 +23,6 @@ import android.net.ITetheringStatsProvider;
 import android.net.Network;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
-import android.net.UidRange;
 
 /**
  * @hide
@@ -182,11 +181,6 @@ interface INetworkManagementService
     String[] listTetheredInterfaces();
 
     /**
-     * Sets the list of DNS forwarders (in order of priority)
-     */
-    void setDnsForwarders(in Network network, in String[] dns);
-
-    /**
      * Returns the list of DNS forwarders (in order of priority)
      */
     String[] getDnsForwarders();
@@ -299,8 +293,6 @@ interface INetworkManagementService
     void setFirewallUidRule(int chain, int uid, int rule);
     void setFirewallUidRules(int chain, in int[] uids, in int[] rules);
     void setFirewallChainEnabled(int chain, boolean enable);
-
-    void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
 
     /**
      * Allow UID to call protect().

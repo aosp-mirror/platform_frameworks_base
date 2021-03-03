@@ -123,6 +123,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @Nullable
     private IBinder mApplicationToken;
+    @Nullable
+    private IBinder mShareableActivityToken;
 
     @Nullable
     private ComponentName mComponentName;
@@ -217,8 +219,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * Starts this session.
      */
     @UiThread
-    void start(@NonNull IBinder token, @NonNull ComponentName component,
-            int flags) {
+    void start(@NonNull IBinder token, @NonNull IBinder shareableActivityToken,
+            @NonNull ComponentName component, int flags) {
         if (!isContentCaptureEnabled()) return;
 
         if (sVerbose) {
@@ -237,6 +239,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
         mState = STATE_WAITING_FOR_SERVER;
         mApplicationToken = token;
+        mShareableActivityToken = shareableActivityToken;
         mComponentName = component;
 
         if (sVerbose) {
@@ -245,8 +248,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
 
         try {
-            mSystemServerInterface.startSession(mApplicationToken, component, mId, flags,
-                    mSessionStateReceiver);
+            mSystemServerInterface.startSession(mApplicationToken, mShareableActivityToken,
+                    component, mId, flags, mSessionStateReceiver);
         } catch (RemoteException e) {
             Log.w(TAG, "Error starting session for " + component.flattenToShortString() + ": " + e);
         }
@@ -583,6 +586,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         mDisabled.set((newState & STATE_DISABLED) != 0);
         // TODO(b/122454205): must reset children (which currently is owned by superclass)
         mApplicationToken = null;
+        mShareableActivityToken = null;
         mComponentName = null;
         mEvents = null;
         if (mDirectServiceInterface != null) {
@@ -720,6 +724,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         pw.print(prefix); pw.print("state: "); pw.println(getStateAsString(mState));
         if (mApplicationToken != null) {
             pw.print(prefix); pw.print("app token: "); pw.println(mApplicationToken);
+        }
+        if (mShareableActivityToken != null) {
+            pw.print(prefix); pw.print("sharable activity token: ");
+            pw.println(mShareableActivityToken);
         }
         if (mComponentName != null) {
             pw.print(prefix); pw.print("component name: ");

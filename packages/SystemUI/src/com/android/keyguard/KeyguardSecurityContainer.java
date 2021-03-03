@@ -29,12 +29,17 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.OrientationEventListener;
 import android.view.VelocityTracker;
+import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimationControlListener;
@@ -55,6 +60,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 import java.util.List;
 
@@ -98,6 +104,12 @@ public class KeyguardSecurityContainer extends FrameLayout {
     private float mStartTouchY = -1;
     private boolean mDisappearAnimRunning;
     private SwipeListener mSwipeListener;
+
+    private boolean mIsSecurityViewLeftAligned = true;
+    private boolean mOneHandedMode = false;
+    private SecurityMode mSecurityMode = SecurityMode.Invalid;
+    private ViewPropertyAnimator mRunningOneHandedAnimator;
+    private final OrientationEventListener mOrientationEventListener;
 
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
             new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
@@ -157,16 +169,20 @@ public class KeyguardSecurityContainer extends FrameLayout {
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
         boolean dismiss(boolean authenticated, int targetUserId, boolean bypassSecondaryLockScreen);
+
         void userActivity();
+
         void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput);
 
         /**
-         * @param strongAuth wheher the user has authenticated with strong authentication like
-         *                   pattern, password or PIN but not by trust agents or fingerprint
+         * @param strongAuth   wheher the user has authenticated with strong authentication like
+         *                     pattern, password or PIN but not by trust agents or fingerprint
          * @param targetUserId a user that needs to be the foreground user at the finish completion.
          */
         void finish(boolean strongAuth, int targetUserId);
+
         void reset();
+
         void onCancelClicked();
     }
 
@@ -224,12 +240,136 @@ public class KeyguardSecurityContainer extends FrameLayout {
         super(context, attrs, defStyle);
         mSpringAnimation = new SpringAnimation(this, DynamicAnimation.Y);
         mViewConfiguration = ViewConfiguration.get(context);
+
+        mOrientationEventListener = new OrientationEventListener(context) {
+            @Override
+            public void onOrientationChanged(int orientation) {
+                updateLayoutForSecurityMode(mSecurityMode);
+            }
+        };
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
+        mSecurityMode = securityMode;
         mSecurityViewFlipper.setWindowInsetsAnimationCallback(mWindowInsetsAnimationCallback);
         updateBiometricRetry(securityMode, faceAuthEnabled);
 
+        updateLayoutForSecurityMode(securityMode);
+        mOrientationEventListener.enable();
+    }
+
+    void updateLayoutForSecurityMode(SecurityMode securityMode) {
+        mSecurityMode = securityMode;
+        mOneHandedMode = canUseOneHandedBouncer();
+
+        if (mOneHandedMode) {
+            mIsSecurityViewLeftAligned = isOneHandedKeyguardLeftAligned(mContext);
+        }
+
+        updateSecurityViewGravity();
+        updateSecurityViewLocation(false);
+    }
+
+    /** Return whether the one-handed keyguard should be enabled. */
+    private boolean canUseOneHandedBouncer() {
+        // Is it enabled?
+        if (!getResources().getBoolean(
+                com.android.internal.R.bool.config_enableOneHandedKeyguard)) {
+            return false;
+        }
+
+        if (!KeyguardSecurityModel.isSecurityViewOneHanded(mSecurityMode)) {
+            return false;
+        }
+
+        return getResources().getBoolean(R.bool.can_use_one_handed_bouncer);
+    }
+
+    /** Read whether the one-handed keyguard should be on the left/right from settings. */
+    private boolean isOneHandedKeyguardLeftAligned(Context context) {
+        try {
+            return Settings.Global.getInt(context.getContentResolver(),
+                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE)
+                    == Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT;
+        } catch (Settings.SettingNotFoundException ex) {
+            return true;
+        }
+    }
+
+    private void updateSecurityViewGravity() {
+        View securityView = findKeyguardSecurityView();
+
+        if (securityView == null) {
+            return;
+        }
+
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) securityView.getLayoutParams();
+
+        if (mOneHandedMode) {
+            lp.gravity = Gravity.LEFT | Gravity.BOTTOM;
+        } else {
+            lp.gravity = Gravity.CENTER_HORIZONTAL;
+        }
+
+        securityView.setLayoutParams(lp);
+    }
+
+    /**
+     * Moves the inner security view to the correct location (in one handed mode) with animation.
+     * This is triggered when the user taps on the side of the screen that is not currently occupied
+     * by the security view .
+     */
+    private void updateSecurityViewLocation(boolean animate) {
+        View securityView = findKeyguardSecurityView();
+
+        if (securityView == null) {
+            return;
+        }
+
+        if (!mOneHandedMode) {
+            securityView.setTranslationX(0);
+            return;
+        }
+
+        if (mRunningOneHandedAnimator != null) {
+            mRunningOneHandedAnimator.cancel();
+            mRunningOneHandedAnimator = null;
+        }
+
+        int targetTranslation = mIsSecurityViewLeftAligned ? 0 : (int) (getMeasuredWidth() / 2f);
+
+        if (animate) {
+            mRunningOneHandedAnimator = securityView.animate().translationX(targetTranslation);
+            mRunningOneHandedAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+            mRunningOneHandedAnimator.setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRunningOneHandedAnimator = null;
+                }
+            });
+
+            mRunningOneHandedAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+            mRunningOneHandedAnimator.start();
+        } else {
+            securityView.setTranslationX(targetTranslation);
+        }
+    }
+
+    @Nullable
+    private KeyguardSecurityViewFlipper findKeyguardSecurityView() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+
+            if (isKeyguardSecurityView(child)) {
+                return (KeyguardSecurityViewFlipper) child;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isKeyguardSecurityView(View view) {
+        return view instanceof KeyguardSecurityViewFlipper;
     }
 
     public void onPause() {
@@ -238,6 +378,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
             mAlertDialog = null;
         }
         mSecurityViewFlipper.setWindowInsetsAnimationCallback(null);
+        mOrientationEventListener.disable();
     }
 
     @Override
@@ -319,9 +460,34 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 if (mSwipeListener != null) {
                     mSwipeListener.onSwipeUp();
                 }
+            } else {
+                if (!mIsDragging) {
+                    handleTap(event);
+                }
             }
         }
         return true;
+    }
+
+    private void handleTap(MotionEvent event) {
+        // If we're using a fullscreen security mode, skip
+        if (!mOneHandedMode) {
+            return;
+        }
+
+        // Did the tap hit the "other" side of the bouncer?
+        if ((mIsSecurityViewLeftAligned && (event.getX() > getWidth() / 2f))
+                || (!mIsSecurityViewLeftAligned && (event.getX() < getWidth() / 2f))) {
+            mIsSecurityViewLeftAligned = !mIsSecurityViewLeftAligned;
+
+            Settings.Global.putInt(
+                    mContext.getContentResolver(),
+                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
+                    mIsSecurityViewLeftAligned ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
+                            : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
+
+            updateSecurityViewLocation(true);
+        }
     }
 
     void setSwipeListener(SwipeListener swipeListener) {
@@ -330,8 +496,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     private void startSpringAnimation(float startVelocity) {
         mSpringAnimation
-            .setStartVelocity(startVelocity)
-            .animateToFinalPosition(0);
+                .setStartVelocity(startVelocity)
+                .animateToFinalPosition(0);
     }
 
     public void startDisappearAnimation(SecurityMode securitySelection) {
@@ -441,18 +607,17 @@ public class KeyguardSecurityContainer extends FrameLayout {
         return insets.inset(0, 0, 0, inset);
     }
 
-
     private void showDialog(String title, String message) {
         if (mAlertDialog != null) {
             mAlertDialog.dismiss();
         }
 
         mAlertDialog = new AlertDialog.Builder(mContext)
-            .setTitle(title)
-            .setMessage(message)
-            .setCancelable(false)
-            .setNeutralButton(R.string.ok, null)
-            .create();
+                .setTitle(title)
+                .setMessage(message)
+                .setCancelable(false)
+                .setNeutralButton(R.string.ok, null)
+                .create();
         if (!(mContext instanceof Activity)) {
             mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         }
@@ -488,6 +653,47 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     timeoutInSeconds);
             showDialog(null, message);
         }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int maxHeight = 0;
+        int maxWidth = 0;
+        int childState = 0;
+
+        int halfWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
+                MeasureSpec.getSize(widthMeasureSpec) / 2,
+                MeasureSpec.getMode(widthMeasureSpec));
+
+        for (int i = 0; i < getChildCount(); i++) {
+            final View view = getChildAt(i);
+            if (view.getVisibility() != GONE) {
+                if (mOneHandedMode && isKeyguardSecurityView(view)) {
+                    measureChildWithMargins(view, halfWidthMeasureSpec, 0,
+                            heightMeasureSpec, 0);
+                } else {
+                    measureChildWithMargins(view, widthMeasureSpec, 0,
+                            heightMeasureSpec, 0);
+                }
+                final LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                maxWidth = Math.max(maxWidth,
+                        view.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
+                maxHeight = Math.max(maxHeight,
+                        view.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
+                childState = combineMeasuredStates(childState, view.getMeasuredState());
+            }
+        }
+
+        maxWidth += getPaddingLeft() + getPaddingRight();
+        maxHeight += getPaddingTop() + getPaddingBottom();
+
+        // Check against our minimum height and width
+        maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
+        maxWidth = Math.max(maxWidth, getSuggestedMinimumWidth());
+
+        setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
+                resolveSizeAndState(maxHeight, heightMeasureSpec,
+                        childState << MEASURED_HEIGHT_STATE_SHIFT));
     }
 
     void showAlmostAtWipeDialog(int attempts, int remaining, int userType) {

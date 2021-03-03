@@ -323,4 +323,16 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertFalse(navBarSource.getFrame().isEmpty());
         assertTrue(imeSource.getFrame().contains(navBarSource.getFrame()));
     }
+
+    @UseTestDisplay
+    @Test
+    public void testDisplayPolicyNotCrash() {
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+
+        // Verify if modules initialized after DisplayContent ctr throws NPE.
+        displayPolicy.onDisplayInfoChanged(mDisplayInfo);
+        displayPolicy.onConfigurationChanged();
+        displayPolicy.onOverlayChangedLw();
+        displayPolicy.release();
+    }
 }

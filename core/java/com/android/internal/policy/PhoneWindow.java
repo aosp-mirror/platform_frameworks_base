@@ -75,6 +75,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
+import android.view.CrossWindowBlurListeners;
 import android.view.Gravity;
 import android.view.IRotationWatcher.Stub;
 import android.view.IScrollCaptureCallbacks;
@@ -258,7 +259,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     Drawable mBackgroundDrawable = null;
     Drawable mBackgroundFallbackDrawable = null;
 
-    int mBackgroundBlurRadius = 0;
+    private int mBackgroundBlurRadius = 0;
 
     private boolean mLoadElevation = true;
     private float mElevation;
@@ -1527,9 +1528,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public final void setBackgroundBlurRadius(int blurRadius) {
         super.setBackgroundBlurRadius(blurRadius);
-        if (getContext().getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_CROSS_LAYER_BLUR)) {
-            mBackgroundBlurRadius = Math.max(blurRadius, 0);
+        if (CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED) {
+            if (mBackgroundBlurRadius != Math.max(blurRadius, 0)) {
+                mBackgroundBlurRadius = Math.max(blurRadius, 0);
+                mDecor.setBackgroundBlurRadius(mBackgroundBlurRadius);
+            }
         }
     }
 
@@ -2556,8 +2559,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 params.flags |= WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
             }
 
-            params.blurBehindRadius = a.getDimensionPixelSize(
-                    android.R.styleable.Window_windowBlurBehindRadius, 0);
+            params.setBlurBehindRadius(a.getDimensionPixelSize(
+                    android.R.styleable.Window_windowBlurBehindRadius, 0));
         }
 
         setBackgroundBlurRadius(a.getDimensionPixelSize(
