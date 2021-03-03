@@ -351,6 +351,9 @@ public class ConnectivityServiceTest {
     private static final String TAG = "ConnectivityServiceTest";
 
     private static final int TIMEOUT_MS = 500;
+    // Broadcasts can take a long time to be delivered. The test will not wait for that long unless
+    // there is a failure, so use a long timeout.
+    private static final int BROADCAST_TIMEOUT_MS = 30_000;
     private static final int TEST_LINGER_DELAY_MS = 400;
     private static final int TEST_NASCENT_DELAY_MS = 300;
     // Chosen to be less than the linger and nascent timeout. This ensures that we can distinguish
@@ -1688,7 +1691,7 @@ public class ConnectivityServiceTest {
         }
 
         public Intent expectBroadcast() throws Exception {
-            return expectBroadcast(TIMEOUT_MS);
+            return expectBroadcast(BROADCAST_TIMEOUT_MS);
         }
 
         public void expectNoBroadcast(int timeoutMs) throws Exception {
