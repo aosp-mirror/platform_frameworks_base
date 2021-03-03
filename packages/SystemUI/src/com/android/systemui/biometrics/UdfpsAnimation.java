@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -46,12 +47,17 @@ public abstract class UdfpsAnimation extends Drawable {
     }
 
     public void onSensorRectUpdated(@NonNull RectF sensorRect) {
-        int margin =  (int) (sensorRect.bottom - sensorRect.top) / 5;
-        mFingerprintDrawable.setBounds(
-                (int) sensorRect.left + margin,
+        final int margin =  (int) sensorRect.height() / 5;
+
+        final Rect bounds = new Rect((int) sensorRect.left + margin,
                 (int) sensorRect.top + margin,
                 (int) sensorRect.right - margin,
                 (int) sensorRect.bottom - margin);
+        updateFingerprintIconBounds(bounds);
+    }
+
+    protected void updateFingerprintIconBounds(@NonNull Rect bounds) {
+        mFingerprintDrawable.setBounds(bounds);
     }
 
     @Override
