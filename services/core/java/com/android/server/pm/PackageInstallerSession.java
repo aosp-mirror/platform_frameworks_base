@@ -2086,15 +2086,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 sealLocked();
 
-                // Session that are staged, ready and not multi package will be installed during
-                // this boot. As such, we need populate all the fields for successful installation.
-                if (isMultiPackage()) {
+                // Session that are staged, committed and not multi package will be installed or
+                // restart verification during this boot. As such, we need populate all the fields
+                // for successful installation.
+                if (isMultiPackage() || !isStaged() || !isCommitted()) {
                     return;
                 }
                 final PackageInstallerSession root = hasParentSessionId()
                         ? allSessions.get(getParentSessionId())
                         : this;
-                if (root != null && root.isStagedSessionReady()) {
+                if (root != null) {
                     if (isApexSession()) {
                         validateApexInstallLocked();
                     } else {
