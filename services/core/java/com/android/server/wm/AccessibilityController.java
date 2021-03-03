@@ -1861,7 +1861,7 @@ final class AccessibilityController {
         }
 
         @Override
-        public boolean isEnabled() {
+        public boolean isAccessibilityTracingEnabled() {
             return mTracing.isEnabled();
         }
 
