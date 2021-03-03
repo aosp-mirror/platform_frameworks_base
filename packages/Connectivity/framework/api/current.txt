@@ -302,6 +302,7 @@ package android.net {
     field public static final int NET_CAPABILITY_CBS = 5; // 0x5
     field public static final int NET_CAPABILITY_DUN = 2; // 0x2
     field public static final int NET_CAPABILITY_EIMS = 10; // 0xa
+    field public static final int NET_CAPABILITY_ENTERPRISE = 29; // 0x1d
     field public static final int NET_CAPABILITY_FOREGROUND = 19; // 0x13
     field public static final int NET_CAPABILITY_FOTA = 3; // 0x3
     field public static final int NET_CAPABILITY_IA = 7; // 0x7
