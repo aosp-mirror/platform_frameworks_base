@@ -25,7 +25,6 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
-import android.net.TetheringManager;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.os.BatteryManager;
@@ -91,10 +90,10 @@ public class Utils {
      * Return string resource that best describes combination of tethering
      * options available on this device.
      */
-    public static int getTetheringLabel(TetheringManager tm) {
-        String[] usbRegexs = tm.getTetherableUsbRegexs();
-        String[] wifiRegexs = tm.getTetherableWifiRegexs();
-        String[] bluetoothRegexs = tm.getTetherableBluetoothRegexs();
+    public static int getTetheringLabel(ConnectivityManager cm) {
+        String[] usbRegexs = cm.getTetherableUsbRegexs();
+        String[] wifiRegexs = cm.getTetherableWifiRegexs();
+        String[] bluetoothRegexs = cm.getTetherableBluetoothRegexs();
 
         boolean usbAvailable = usbRegexs.length != 0;
         boolean wifiAvailable = wifiRegexs.length != 0;

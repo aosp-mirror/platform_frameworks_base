@@ -26,7 +26,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.net.TetheringManager;
+import android.net.ConnectivityManager;
 import android.net.TrafficStats;
 import android.os.Process;
 import android.os.RemoteException;
@@ -123,8 +123,9 @@ public class UidDetailProvider {
                 detail.icon = pm.getDefaultActivityIcon();
                 return detail;
             case TrafficStats.UID_TETHERING:
-                final TetheringManager tm = mContext.getSystemService(TetheringManager.class);
-                detail.label = res.getString(Utils.getTetheringLabel(tm));
+                final ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(
+                        Context.CONNECTIVITY_SERVICE);
+                detail.label = res.getString(Utils.getTetheringLabel(cm));
                 detail.icon = pm.getDefaultActivityIcon();
                 return detail;
             case Process.OTA_UPDATE_UID:
