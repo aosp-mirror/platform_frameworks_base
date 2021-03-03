@@ -33,7 +33,7 @@ import java.lang.annotation.RetentionPolicy;
 class MagnificationGestureMatcher {
 
     private static final int GESTURE_BASE = 100;
-    public static final int GESTURE_TWO_FINGER_DOWN = GESTURE_BASE + 1;
+    public static final int GESTURE_TWO_FINGERS_DOWN_OR_SWIPE = GESTURE_BASE + 1;
     public static final int GESTURE_SWIPE = GESTURE_BASE + 2;
     public static final int GESTURE_SINGLE_TAP = GESTURE_BASE + 3;
     public static final int GESTURE_SINGLE_TAP_AND_HOLD = GESTURE_BASE + 4;
@@ -41,7 +41,7 @@ class MagnificationGestureMatcher {
     public static final int GESTURE_TRIPLE_TAP_AND_HOLD = GESTURE_BASE + 6;
 
     @IntDef(prefix = {"GESTURE_MAGNIFICATION_"}, value = {
-            GESTURE_TWO_FINGER_DOWN,
+            GESTURE_TWO_FINGERS_DOWN_OR_SWIPE,
             GESTURE_SWIPE
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -57,8 +57,8 @@ class MagnificationGestureMatcher {
         switch (gestureId) {
             case GESTURE_SWIPE:
                 return "GESTURE_SWIPE";
-            case GESTURE_TWO_FINGER_DOWN:
-                return "GESTURE_TWO_FINGER_DOWN";
+            case GESTURE_TWO_FINGERS_DOWN_OR_SWIPE:
+                return "GESTURE_TWO_FINGERS_DOWN_OR_SWIPE";
             case GESTURE_SINGLE_TAP:
                 return "GESTURE_SINGLE_TAP";
             case GESTURE_SINGLE_TAP_AND_HOLD:
@@ -71,6 +71,12 @@ class MagnificationGestureMatcher {
         return "none";
     }
 
+    /**
+     * @param context
+     * @return the duration in milliseconds between the first tap's down event and
+     * the second tap's down event to be considered that the user is going to performing
+     *  panning/scaling gesture.
+     */
     static int getMagnificationMultiTapTimeout(Context context) {
         return ViewConfiguration.getDoubleTapTimeout() + context.getResources().getInteger(
                 R.integer.config_screen_magnification_multi_tap_adjustment);

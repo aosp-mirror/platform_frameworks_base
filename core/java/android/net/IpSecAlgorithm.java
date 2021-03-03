@@ -146,6 +146,25 @@ public final class IpSecAlgorithm implements Parcelable {
     public static final String AUTH_AES_XCBC = "xcbc(aes)";
 
     /**
+     * AES-CMAC Authentication/Integrity Algorithm.
+     *
+     * <p>Keys for this algorithm must be 128 bits in length.
+     *
+     * <p>The only valid truncation length is 96 bits.
+     *
+     * <p>This algorithm may be available on the device. Caller MUST check if it is supported before
+     * using it by calling {@link #getSupportedAlgorithms()} and checking if this algorithm is
+     * included in the returned algorithm set. The returned algorithm set will not change unless the
+     * device is rebooted. {@link IllegalArgumentException} will be thrown if this algorithm is
+     * requested on an unsupported device.
+     *
+     * <p>@see {@link #getSupportedAlgorithms()}
+     */
+    // This algorithm may be available on devices released before Android 12, and is guaranteed
+    // to be available on devices first shipped with Android 12 or later.
+    public static final String AUTH_AES_CMAC = "cmac(aes)";
+
+    /**
      * AES-GCM Authentication/Integrity + Encryption/Ciphering Algorithm.
      *
      * <p>Valid lengths for keying material are {160, 224, 288}.
@@ -191,6 +210,7 @@ public final class IpSecAlgorithm implements Parcelable {
         AUTH_HMAC_SHA384,
         AUTH_HMAC_SHA512,
         AUTH_AES_XCBC,
+        AUTH_AES_CMAC,
         AUTH_CRYPT_AES_GCM,
         AUTH_CRYPT_CHACHA20_POLY1305
     })
@@ -215,6 +235,7 @@ public final class IpSecAlgorithm implements Parcelable {
         // STOPSHIP: b/170424293 Use Build.VERSION_CODES.S when it is defined
         ALGO_TO_REQUIRED_FIRST_SDK.put(CRYPT_AES_CTR, Build.VERSION_CODES.R + 1);
         ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_AES_XCBC, Build.VERSION_CODES.R + 1);
+        ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_AES_CMAC, Build.VERSION_CODES.R + 1);
         ALGO_TO_REQUIRED_FIRST_SDK.put(AUTH_CRYPT_CHACHA20_POLY1305, Build.VERSION_CODES.R + 1);
     }
 
@@ -383,6 +404,10 @@ public final class IpSecAlgorithm implements Parcelable {
                 isValidLen = keyLen == 128;
                 isValidTruncLen = truncLen == 96;
                 break;
+            case AUTH_AES_CMAC:
+                isValidLen = keyLen == 128;
+                isValidTruncLen = truncLen == 96;
+                break;
             case AUTH_CRYPT_AES_GCM:
                 // The keying material for GCM is a key plus a 32-bit salt
                 isValidLen = keyLen == 128 + 32 || keyLen == 192 + 32 || keyLen == 256 + 32;
@@ -416,6 +441,7 @@ public final class IpSecAlgorithm implements Parcelable {
             case AUTH_HMAC_SHA384:
             case AUTH_HMAC_SHA512:
             case AUTH_AES_XCBC:
+            case AUTH_AES_CMAC:
                 return true;
             default:
                 return false;

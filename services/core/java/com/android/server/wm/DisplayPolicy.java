@@ -69,6 +69,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
+import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
@@ -242,7 +243,7 @@ public class DisplayPolicy {
         }
     }
 
-    private final SystemGesturesPointerEventListener mSystemGestures;
+    private SystemGesturesPointerEventListener mSystemGestures;
 
     private volatile int mLidState = LID_ABSENT;
     private volatile int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
@@ -384,7 +385,7 @@ public class DisplayPolicy {
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
 
-    private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
+    private GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
     private final WindowManagerInternal.AppTransitionListener mAppTransitionListener;
 
@@ -448,119 +449,6 @@ public class DisplayPolicy {
 
         final Looper looper = UiThread.getHandler().getLooper();
         mHandler = new PolicyHandler(looper);
-        mSystemGestures = new SystemGesturesPointerEventListener(mContext, mHandler,
-                new SystemGesturesPointerEventListener.Callbacks() {
-                    @Override
-                    public void onSwipeFromTop() {
-                        synchronized (mLock) {
-                            if (mStatusBar != null) {
-                                requestTransientBars(mStatusBar);
-                            }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_TOP);
-                        }
-                    }
-
-                    @Override
-                    public void onSwipeFromBottom() {
-                        synchronized (mLock) {
-                            if (mNavigationBar != null
-                                    && mNavigationBarPosition == NAV_BAR_BOTTOM) {
-                                requestTransientBars(mNavigationBar);
-                            }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_BOTTOM);
-                        }
-                    }
-
-                    @Override
-                    public void onSwipeFromRight() {
-                        final Region excludedRegion = Region.obtain();
-                        synchronized (mLock) {
-                            mDisplayContent.calculateSystemGestureExclusion(
-                                    excludedRegion, null /* outUnrestricted */);
-                            final boolean excluded =
-                                    mSystemGestures.currentGestureStartedInRegion(excludedRegion);
-                            if (mNavigationBar != null && (mNavigationBarPosition == NAV_BAR_RIGHT
-                                    || !excluded && mNavigationBarAlwaysShowOnSideGesture)) {
-                                requestTransientBars(mNavigationBar);
-                            }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_RIGHT);
-                        }
-                        excludedRegion.recycle();
-                    }
-
-                    @Override
-                    public void onSwipeFromLeft() {
-                        final Region excludedRegion = Region.obtain();
-                        synchronized (mLock) {
-                            mDisplayContent.calculateSystemGestureExclusion(
-                                    excludedRegion, null /* outUnrestricted */);
-                            final boolean excluded =
-                                    mSystemGestures.currentGestureStartedInRegion(excludedRegion);
-                            if (mNavigationBar != null && (mNavigationBarPosition == NAV_BAR_LEFT
-                                    || !excluded && mNavigationBarAlwaysShowOnSideGesture)) {
-                                requestTransientBars(mNavigationBar);
-                            }
-                            checkAltBarSwipeForTransientBars(ALT_BAR_LEFT);
-                        }
-                        excludedRegion.recycle();
-                    }
-
-                    @Override
-                    public void onFling(int duration) {
-                        if (mService.mPowerManagerInternal != null) {
-                            mService.mPowerManagerInternal.setPowerBoost(
-                                    Boost.INTERACTION, duration);
-                        }
-                    }
-
-                    @Override
-                    public void onDebug() {
-                        // no-op
-                    }
-
-                    private WindowOrientationListener getOrientationListener() {
-                        final DisplayRotation rotation = mDisplayContent.getDisplayRotation();
-                        return rotation != null ? rotation.getOrientationListener() : null;
-                    }
-
-                    @Override
-                    public void onDown() {
-                        final WindowOrientationListener listener = getOrientationListener();
-                        if (listener != null) {
-                            listener.onTouchStart();
-                        }
-                    }
-
-                    @Override
-                    public void onUpOrCancel() {
-                        final WindowOrientationListener listener = getOrientationListener();
-                        if (listener != null) {
-                            listener.onTouchEnd();
-                        }
-                    }
-
-                    @Override
-                    public void onMouseHoverAtTop() {
-                        mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
-                        Message msg = mHandler.obtainMessage(MSG_REQUEST_TRANSIENT_BARS);
-                        msg.arg1 = MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS;
-                        mHandler.sendMessageDelayed(msg, 500 /* delayMillis */);
-                    }
-
-                    @Override
-                    public void onMouseHoverAtBottom() {
-                        mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
-                        Message msg = mHandler.obtainMessage(MSG_REQUEST_TRANSIENT_BARS);
-                        msg.arg1 = MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION;
-                        mHandler.sendMessageDelayed(msg, 500 /* delayMillis */);
-                    }
-
-                    @Override
-                    public void onMouseLeaveFromEdge() {
-                        mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
-                    }
-                });
-        displayContent.registerPointerEventListener(mSystemGestures);
         mAppTransitionListener = new WindowManagerInternal.AppTransitionListener() {
 
             private Runnable mAppTransitionPending = () -> {
@@ -616,7 +504,7 @@ public class DisplayPolicy {
         mImmersiveModeConfirmation = new ImmersiveModeConfirmation(mContext, looper,
                 mService.mVrModeEnabled);
 
-        // TODO: Make it can take screenshot on external display
+        // TODO(b/180986447): Make it can take screenshot on external display
         mScreenshotHelper = displayContent.isDefaultDisplay
                 ? new ScreenshotHelper(mContext) : null;
 
@@ -640,16 +528,6 @@ public class DisplayPolicy {
         mRefreshRatePolicy = new RefreshRatePolicy(mService,
                 mDisplayContent.getDisplayInfo(),
                 mService.mHighRefreshRateDenylist);
-
-        mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(mHandler,
-                mContext, () -> {
-            synchronized (mLock) {
-                onConfigurationChanged();
-                mSystemGestures.onConfigurationChanged();
-                mDisplayContent.updateSystemGestureExclusion();
-            }
-        });
-        mHandler.post(mGestureNavigationSettingsObserver::register);
     }
 
     private void checkAltBarSwipeForTransientBars(@WindowManagerPolicy.AltBarPosition int pos) {
@@ -668,10 +546,152 @@ public class DisplayPolicy {
     }
 
     void systemReady() {
-        mSystemGestures.systemReady();
         if (mService.mPointerLocationEnabled) {
             setPointerLocationEnabled(true);
         }
+    }
+
+    @NonNull
+    private GestureNavigationSettingsObserver getGestureNavigationSettingsObserver() {
+        if (mGestureNavigationSettingsObserver == null) {
+            mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(mHandler,
+                    mContext, () -> {
+                synchronized (mLock) {
+                    onConfigurationChanged();
+                    getSystemGestures().onConfigurationChanged();
+                    mDisplayContent.updateSystemGestureExclusion();
+                }
+            });
+            mHandler.post(mGestureNavigationSettingsObserver::register);
+        }
+        return mGestureNavigationSettingsObserver;
+    }
+
+    @NonNull
+    private SystemGesturesPointerEventListener getSystemGestures() {
+        if (mSystemGestures == null) {
+            final Context gestureContext = mUiContext.createWindowContext(
+                    mDisplayContent.getDisplay(), TYPE_POINTER, null /* options */);
+            mSystemGestures = new SystemGesturesPointerEventListener(gestureContext, mHandler,
+                    new SystemGesturesPointerEventListener.Callbacks() {
+                        @Override
+                        public void onSwipeFromTop() {
+                            synchronized (mLock) {
+                                if (mStatusBar != null) {
+                                    requestTransientBars(mStatusBar);
+                                }
+                                checkAltBarSwipeForTransientBars(ALT_BAR_TOP);
+                            }
+                        }
+
+                        @Override
+                        public void onSwipeFromBottom() {
+                            synchronized (mLock) {
+                                if (mNavigationBar != null
+                                        && mNavigationBarPosition == NAV_BAR_BOTTOM) {
+                                    requestTransientBars(mNavigationBar);
+                                }
+                                checkAltBarSwipeForTransientBars(ALT_BAR_BOTTOM);
+                            }
+                        }
+
+                        @Override
+                        public void onSwipeFromRight() {
+                            final Region excludedRegion = Region.obtain();
+                            synchronized (mLock) {
+                                mDisplayContent.calculateSystemGestureExclusion(
+                                        excludedRegion, null /* outUnrestricted */);
+                                final boolean excluded = mSystemGestures
+                                        .currentGestureStartedInRegion(excludedRegion);
+                                if (mNavigationBar != null
+                                        && (mNavigationBarPosition == NAV_BAR_RIGHT
+                                        || !excluded && mNavigationBarAlwaysShowOnSideGesture)) {
+                                    requestTransientBars(mNavigationBar);
+                                }
+                                checkAltBarSwipeForTransientBars(ALT_BAR_RIGHT);
+                            }
+                            excludedRegion.recycle();
+                        }
+
+                        @Override
+                        public void onSwipeFromLeft() {
+                            final Region excludedRegion = Region.obtain();
+                            synchronized (mLock) {
+                                mDisplayContent.calculateSystemGestureExclusion(
+                                        excludedRegion, null /* outUnrestricted */);
+                                final boolean excluded = mSystemGestures
+                                        .currentGestureStartedInRegion(excludedRegion);
+                                if (mNavigationBar != null
+                                        && (mNavigationBarPosition == NAV_BAR_LEFT
+                                        || !excluded && mNavigationBarAlwaysShowOnSideGesture)) {
+                                    requestTransientBars(mNavigationBar);
+                                }
+                                checkAltBarSwipeForTransientBars(ALT_BAR_LEFT);
+                            }
+                            excludedRegion.recycle();
+                        }
+
+                        @Override
+                        public void onFling(int duration) {
+                            if (mService.mPowerManagerInternal != null) {
+                                mService.mPowerManagerInternal.setPowerBoost(
+                                        Boost.INTERACTION, duration);
+                            }
+                        }
+
+                        @Override
+                        public void onDebug() {
+                            // no-op
+                        }
+
+                        private WindowOrientationListener getOrientationListener() {
+                            final DisplayRotation rotation = mDisplayContent.getDisplayRotation();
+                            return rotation != null ? rotation.getOrientationListener() : null;
+                        }
+
+                        @Override
+                        public void onDown() {
+                            final WindowOrientationListener listener = getOrientationListener();
+                            if (listener != null) {
+                                listener.onTouchStart();
+                            }
+                        }
+
+                        @Override
+                        public void onUpOrCancel() {
+                            final WindowOrientationListener listener = getOrientationListener();
+                            if (listener != null) {
+                                listener.onTouchEnd();
+                            }
+                        }
+
+                        @Override
+                        public void onMouseHoverAtTop() {
+                            mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
+                            Message msg = mHandler.obtainMessage(MSG_REQUEST_TRANSIENT_BARS);
+                            msg.arg1 = MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS;
+                            mHandler.sendMessageDelayed(msg, 500 /* delayMillis */);
+                        }
+
+                        @Override
+                        public void onMouseHoverAtBottom() {
+                            mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
+                            Message msg = mHandler.obtainMessage(MSG_REQUEST_TRANSIENT_BARS);
+                            msg.arg1 = MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION;
+                            mHandler.sendMessageDelayed(msg, 500 /* delayMillis */);
+                        }
+
+                        @Override
+                        public void onMouseLeaveFromEdge() {
+                            mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
+                        }
+                    });
+            mDisplayContent.registerPointerEventListener(getSystemGestures());
+            if (mService.mSystemReady) {
+                mSystemGestures.systemReady();
+            }
+        }
+        return mSystemGestures;
     }
 
     private int getDisplayId() {
@@ -1455,8 +1475,7 @@ public class DisplayPolicy {
     }
 
     void onDisplayInfoChanged(DisplayInfo info) {
-        mSystemGestures.screenWidth = info.logicalWidth;
-        mSystemGestures.screenHeight = info.logicalHeight;
+        getSystemGestures().onDisplayInfoChanged(info);
     }
 
     private void layoutStatusBar(DisplayFrames displayFrames, Rect contentFrame) {
@@ -1969,7 +1988,7 @@ public class DisplayPolicy {
     public void onOverlayChangedLw() {
         updateCurrentUserResources();
         onConfigurationChanged();
-        mSystemGestures.onConfigurationChanged();
+        getSystemGestures().onConfigurationChanged();
     }
 
     /**
@@ -2040,10 +2059,10 @@ public class DisplayPolicy {
         }
 
         mNavBarOpacityMode = res.getInteger(R.integer.config_navBarOpacityMode);
-        mLeftGestureInset = mGestureNavigationSettingsObserver.getLeftSensitivity(res);
-        mRightGestureInset = mGestureNavigationSettingsObserver.getRightSensitivity(res);
-        mNavButtonForcedVisible =
-                mGestureNavigationSettingsObserver.areNavigationButtonForcedVisible();
+        final GestureNavigationSettingsObserver observer = getGestureNavigationSettingsObserver();
+        mLeftGestureInset = observer.getLeftSensitivity(res);
+        mRightGestureInset = observer.getRightSensitivity(res);
+        mNavButtonForcedVisible = observer.areNavigationButtonForcedVisible();
         mNavigationBarLetsThroughTaps = res.getBoolean(R.bool.config_navBarTapThrough);
         mNavigationBarAlwaysShowOnSideGesture =
                 res.getBoolean(R.bool.config_navBarAlwaysShowOnSideEdgeGesture);
@@ -3056,7 +3075,7 @@ public class DisplayPolicy {
     }
 
     void release() {
-        mHandler.post(mGestureNavigationSettingsObserver::unregister);
+        mHandler.post(getGestureNavigationSettingsObserver()::unregister);
     }
 
     @VisibleForTesting

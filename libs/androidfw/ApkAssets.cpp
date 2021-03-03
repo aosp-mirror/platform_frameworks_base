@@ -156,7 +156,11 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadImpl(std::unique_ptr<Asset> resources_
                                                   std::move(loaded_idmap)));
 }
 
-const std::string& ApkAssets::GetPath() const {
+std::optional<std::string_view> ApkAssets::GetPath() const {
+  return assets_provider_->GetPath();
+}
+
+const std::string& ApkAssets::GetDebugName() const {
   return assets_provider_->GetDebugName();
 }
 

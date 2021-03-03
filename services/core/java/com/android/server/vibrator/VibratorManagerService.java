@@ -127,9 +127,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @GuardedBy("mLock")
     private ExternalVibrationHolder mCurrentExternalVibration;
 
-    private VibrationSettings mVibrationSettings;
-    private VibrationScaler mVibrationScaler;
-    private InputDeviceDelegate mInputDeviceDelegate;
+    private final VibrationSettings mVibrationSettings;
+    private final VibrationScaler mVibrationScaler;
+    private final InputDeviceDelegate mInputDeviceDelegate;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -169,6 +169,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     VibratorManagerService(Context context, Injector injector) {
         mContext = context;
         mHandler = injector.createHandler(Looper.myLooper());
+
+        mVibrationSettings = new VibrationSettings(mContext, mHandler);
+        mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
+        mInputDeviceDelegate = new InputDeviceDelegate(mContext, mHandler);
 
         VibrationCompleteListener listener = new VibrationCompleteListener(this);
         mNativeWrapper = injector.getNativeWrapper();
@@ -224,12 +228,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         Slog.v(TAG, "Initializing VibratorManager service...");
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "systemReady");
         try {
-            mVibrationSettings = new VibrationSettings(mContext, mHandler);
-            mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
-            mInputDeviceDelegate = new InputDeviceDelegate(mContext, mHandler);
+            mVibrationSettings.onSystemReady();
+            mInputDeviceDelegate.onSystemReady();
 
             mVibrationSettings.addListener(this::updateServiceState);
 
+            // Will update settings and input devices.
             updateServiceState();
         } finally {
             Slog.v(TAG, "VibratorManager service initialized");

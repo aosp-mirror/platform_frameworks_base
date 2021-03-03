@@ -25,8 +25,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.server.ServiceWatcher;
-import com.android.server.ServiceWatcher.BoundService;
+import com.android.server.servicewatcher.ServiceWatcher;
+import com.android.server.servicewatcher.ServiceWatcher.BoundService;
 
 /**
  * Proxy class to bind GmsCore to the ActivityRecognitionHardware.

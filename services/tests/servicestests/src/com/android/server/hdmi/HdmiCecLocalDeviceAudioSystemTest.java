@@ -98,8 +98,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         PowerManager powerManager = new PowerManager(context, mIPowerManagerMock,
                 mIThermalServiceMock, new Handler(mMyLooper));
 
-        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
-
         mHdmiControlService =
             new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
                 @Override
@@ -188,17 +186,13 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 protected PowerManager getPowerManager() {
                     return powerManager;
                 }
-
-                @Override
-                protected HdmiCecConfig getHdmiCecConfig() {
-                    return hdmiCecConfig;
-                }
             };
 
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
                 HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mMyLooper = mTestLooper.getLooper();
+        mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mHdmiCecLocalDeviceAudioSystem = new HdmiCecLocalDeviceAudioSystem(mHdmiControlService);
         mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService) {
             @Override

@@ -109,6 +109,7 @@ class TestUtils {
         private boolean mIsForward;
         private ProfilerInfo mProfilerInfo;
         private IBinder mAssistToken;
+        private IBinder mShareableActivityToken;
         private FixedRotationAdjustments mFixedRotationAdjustments;
 
         LaunchActivityItemBuilder setIntent(Intent intent) {
@@ -196,6 +197,11 @@ class TestUtils {
             return this;
         }
 
+        LaunchActivityItemBuilder setShareableActivityToken(IBinder shareableActivityToken) {
+            mShareableActivityToken = shareableActivityToken;
+            return this;
+        }
+
         LaunchActivityItemBuilder setFixedRotationAdjustments(FixedRotationAdjustments fra) {
             mFixedRotationAdjustments = fra;
             return this;
@@ -206,7 +212,8 @@ class TestUtils {
                     mCurConfig, mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor,
                     mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
                     mActivityOptions, mIsForward, mProfilerInfo, mAssistToken,
-                    null /* activityClientController */, mFixedRotationAdjustments);
+                    null /* activityClientController */, mFixedRotationAdjustments,
+                    mShareableActivityToken);
         }
     }
 }

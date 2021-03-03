@@ -21,7 +21,6 @@
 
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="cleanup" value="true" />
-        <option name="push" value="block_device_writer->/data/local/tmp/block_device_writer" />
         <option name="push" value="UpdatableSystemFontTestCert.der->/data/local/tmp/UpdatableSystemFontTestCert.der" />
         <option name="push" value="NotoColorEmoji.ttf->/data/local/tmp/NotoColorEmoji.ttf" />
         <option name="push" value="UpdatableSystemFontTestNotoColorEmoji.ttf.fsv_sig->/data/local/tmp/UpdatableSystemFontTestNotoColorEmoji.ttf.fsv_sig" />

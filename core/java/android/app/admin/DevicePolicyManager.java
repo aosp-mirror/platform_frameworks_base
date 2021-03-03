@@ -12239,8 +12239,9 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    public Set<String> getDisallowedSystemApps(ComponentName admin, int userId,
-            String provisioningAction) {
+    @TestApi
+    public @NonNull Set<String> getDisallowedSystemApps(@NonNull ComponentName admin,
+            @UserIdInt int userId, @NonNull String provisioningAction) {
         try {
             return new ArraySet<>(
                     mService.getDisallowedSystemApps(admin, userId, provisioningAction));
@@ -13004,6 +13005,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public @NonNull Set<String> getDefaultCrossProfilePackages() {
         throwIfParentInstance("getDefaultCrossProfilePackages");
         if (mService != null) {

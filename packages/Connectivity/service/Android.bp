@@ -63,6 +63,7 @@ java_library {
         "unsupportedappusage",
     ],
     static_libs: [
+        "modules-utils-os",
         "net-utils-device-common",
         "net-utils-framework-common",
         "netd-client",

@@ -383,8 +383,15 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             int qsTypeIcon = 0;
             IconState qsIcon = null;
             CharSequence description = null;
+            // Mobile icon will only be shown in the statusbar in 2 scenarios
+            // 1. Mobile is the default network, and it is validated
+            // 2. Mobile is the default network, it is not validated and there is no other
+            // non-Carrier WiFi networks available.
+            boolean maybeShowIcons = (mCurrentState.inetCondition == 1)
+                    || (mCurrentState.inetCondition == 0
+                            && !mNetworkController.isNonCarrierWifiNetworkAvailable());
             // Only send data sim callbacks to QS.
-            if (mCurrentState.dataSim && mCurrentState.isDefault) {
+            if (mCurrentState.dataSim && mCurrentState.isDefault && maybeShowIcons) {
                 qsTypeIcon =
                         (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.qsDataType : 0;
                 qsIcon = new IconState(mCurrentState.enabled
@@ -397,7 +404,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             boolean activityOut = mCurrentState.dataConnected
                     && !mCurrentState.carrierNetworkChangeMode
                     && mCurrentState.activityOut;
-            showDataIcon &= mCurrentState.dataSim && mCurrentState.isDefault;
+            showDataIcon &= mCurrentState.dataSim && mCurrentState.isDefault && maybeShowIcons;
             boolean showTriangle = showDataIcon && !mCurrentState.airplaneMode;
             int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
             showDataIcon |= mCurrentState.roaming;

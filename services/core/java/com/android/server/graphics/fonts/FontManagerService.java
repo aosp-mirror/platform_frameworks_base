@@ -63,7 +63,6 @@ public final class FontManagerService extends IFontManager.Stub {
     private static final String TAG = "FontManagerService";
 
     private static final String FONT_FILES_DIR = "/data/fonts/files";
-    private static final String CRASH_MARKER_FILE = "/data/fonts/config/crash.txt";
 
     @Override
     public FontConfig getFontConfig() {
@@ -200,10 +199,6 @@ public final class FontManagerService extends IFontManager.Stub {
     private final Object mUpdatableFontDirLock = new Object();
 
     @GuardedBy("mUpdatableFontDirLock")
-    @NonNull
-    private final FontCrashDetector mFontCrashDetector;
-
-    @GuardedBy("mUpdatableFontDirLock")
     @Nullable
     private final UpdatableFontDir mUpdatableFontDir;
 
@@ -217,7 +212,6 @@ public final class FontManagerService extends IFontManager.Stub {
 
     private FontManagerService(Context context) {
         mContext = context;
-        mFontCrashDetector = new FontCrashDetector(new File(CRASH_MARKER_FILE));
         mUpdatableFontDir = createUpdatableFontDir();
         initialize();
     }
@@ -244,19 +238,8 @@ public final class FontManagerService extends IFontManager.Stub {
                 }
                 return;
             }
-            if (mFontCrashDetector.hasCrashed()) {
-                Slog.i(TAG, "Crash detected. Clearing font updates.");
-                try {
-                    mUpdatableFontDir.clearUpdates();
-                } catch (SystemFontException e) {
-                    Slog.e(TAG, "Failed to clear updates.", e);
-                }
-                mFontCrashDetector.clear();
-            }
-            try (FontCrashDetector.MonitoredBlock ignored = mFontCrashDetector.start()) {
-                mUpdatableFontDir.loadFontFileMap();
-                updateSerializedFontMap();
-            }
+            mUpdatableFontDir.loadFontFileMap();
+            updateSerializedFontMap();
         }
     }
 
@@ -286,10 +269,8 @@ public final class FontManagerService extends IFontManager.Stub {
                         FontManager.RESULT_ERROR_VERSION_MISMATCH,
                         "The base config version is older than current.");
             }
-            try (FontCrashDetector.MonitoredBlock ignored = mFontCrashDetector.start()) {
-                mUpdatableFontDir.update(requests);
-                updateSerializedFontMap();
-            }
+            mUpdatableFontDir.update(requests);
+            updateSerializedFontMap();
         }
     }
 
@@ -300,10 +281,8 @@ public final class FontManagerService extends IFontManager.Stub {
                     "The font updater is disabled.");
         }
         synchronized (mUpdatableFontDirLock) {
-            try (FontCrashDetector.MonitoredBlock ignored = mFontCrashDetector.start()) {
-                mUpdatableFontDir.clearUpdates();
-                updateSerializedFontMap();
-            }
+            mUpdatableFontDir.clearUpdates();
+            updateSerializedFontMap();
         }
     }
 

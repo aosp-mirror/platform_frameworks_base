@@ -2041,7 +2041,8 @@ public class NetworkPolicyManagerServiceTest {
         final NetworkCapabilities networkCapabilities = new NetworkCapabilities();
         networkCapabilities.addTransportType(TRANSPORT_WIFI);
         networkCapabilities.setSSID(TEST_SSID);
-        return new NetworkState(TYPE_WIFI, prop, networkCapabilities, null, null);
+        return new NetworkState(TYPE_WIFI, prop, networkCapabilities, new Network(TEST_NET_ID),
+                null);
     }
 
     private void expectHasInternetPermission(int uid, boolean hasIt) throws Exception {

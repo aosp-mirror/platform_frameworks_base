@@ -124,7 +124,8 @@ class InsetsStateController {
                 ? provider.getSource().getType() : ITYPE_INVALID;
         return getInsetsForTarget(type, target.getWindowingMode(), target.isAlwaysOnTop(),
                 target.getFrozenInsetsState() != null ? target.getFrozenInsetsState() :
-                target.mAboveInsetsState);
+                        (target.mAttrs.receiveInsetsIgnoringZOrder ? mState :
+                         target.mAboveInsetsState));
     }
 
     InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {

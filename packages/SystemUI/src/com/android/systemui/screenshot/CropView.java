@@ -65,6 +65,9 @@ public class CropView extends View {
     private float mTopDelta = 0f;
     private float mBottomDelta = 0f;
 
+    private int mExtraTopPadding;
+    private int mExtraBottomPadding;
+
     private CropBoundary mCurrentDraggingBoundary = CropBoundary.NONE;
     private float mStartingY;  // y coordinate of ACTION_DOWN
     private CropInteractionListener mCropInteractionListener;
@@ -117,12 +120,13 @@ public class CropView extends View {
                 if (mCurrentDraggingBoundary != CropBoundary.NONE) {
                     float delta = event.getY() - mStartingY;
                     if (mCurrentDraggingBoundary == CropBoundary.TOP) {
-                        mTopDelta = pixelsToFraction((int) MathUtils.constrain(delta, -topPx,
+                        mTopDelta = pixelDistanceToFraction((int) MathUtils.constrain(delta,
+                                -topPx + mExtraTopPadding,
                                 bottomPx - 2 * mCropTouchMargin - topPx));
                     } else {  // Bottom
-                        mBottomDelta = pixelsToFraction((int) MathUtils.constrain(delta,
+                        mBottomDelta = pixelDistanceToFraction((int) MathUtils.constrain(delta,
                                 topPx + 2 * mCropTouchMargin - bottomPx,
-                                getHeight() - bottomPx));
+                                getHeight() - bottomPx - mExtraBottomPadding));
                     }
                     updateListener(event);
                     invalidate();
@@ -195,6 +199,16 @@ public class CropView extends View {
     }
 
     /**
+     * Set additional top and bottom padding for the image being cropped (used when the
+     * corresponding ImageView doesn't take the full height).
+     */
+    public void setExtraPadding(int top, int bottom) {
+        mExtraTopPadding = top;
+        mExtraBottomPadding = bottom;
+        invalidate();
+    }
+
+    /**
      * @return value [0,1] representing the position of the top crop boundary. Does not reflect
      * changes from any in-progress touch input.
      */
@@ -244,12 +258,22 @@ public class CropView extends View {
                 true, mHandlePaint);
     }
 
+    /**
+     * Convert the given fraction position to pixel position within the View.
+     */
     private int fractionToPixels(float frac) {
-        return (int) (frac * getHeight());
+        return (int) (mExtraTopPadding + frac * getImageHeight());
     }
 
-    private float pixelsToFraction(int px) {
-        return px / (float) getHeight();
+    private int getImageHeight() {
+        return getHeight() - mExtraTopPadding - mExtraBottomPadding;
+    }
+
+    /**
+     * Convert the given pixel distance to fraction of the image.
+     */
+    private float pixelDistanceToFraction(int px) {
+        return px / (float) getImageHeight();
     }
 
     private CropBoundary nearestBoundary(MotionEvent event, int topPx, int bottomPx) {

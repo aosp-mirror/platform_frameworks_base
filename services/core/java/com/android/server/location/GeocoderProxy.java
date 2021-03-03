@@ -24,7 +24,7 @@ import android.location.IGeocodeProvider;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.android.server.ServiceWatcher;
+import com.android.server.servicewatcher.ServiceWatcher;
 
 import java.util.Collections;
 

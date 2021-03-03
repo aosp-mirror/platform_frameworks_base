@@ -521,6 +521,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN);
     }
 
+
     @Test
     public void testKeepsPictureInPictureLaunchModeInOptions() {
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
@@ -588,17 +589,23 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     }
 
     @Test
-    public void testNonEmptyLayoutInfersFreeformWithEmptySize() {
+    public void testLayoutWithGravityAndEmptySizeInfersFreeformAndRespectsCurrentSize() {
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
+        final Rect expectedLaunchBounds = new Rect(0, 0, 200, 100);
+
         mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+        mCurrent.mBounds.set(expectedLaunchBounds);
 
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setGravity(Gravity.LEFT).build();
 
         assertEquals(RESULT_CONTINUE,
                 new CalculateRequestBuilder().setLayout(layout).calculate());
+
+        assertEquals(expectedLaunchBounds.width(), mResult.mBounds.width());
+        assertEquals(expectedLaunchBounds.height(), mResult.mBounds.height());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);

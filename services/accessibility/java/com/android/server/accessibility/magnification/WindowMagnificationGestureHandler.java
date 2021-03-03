@@ -323,7 +323,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
      * manipulate the window magnifier or want to interact with current UI. The rule of leaving
      * this state is as follows:
      * <ol>
-     *   <li> If {@link MagnificationGestureMatcher#GESTURE_TWO_FINGER_DOWN} is detected,
+     *   <li> If {@link MagnificationGestureMatcher#GESTURE_TWO_FINGERS_DOWN_OR_SWIPE} is detected,
      *   {@link State} will be transited to {@link PanningScalingGestureState}.</li>
      *   <li> If other gesture is detected and the last motion event is neither ACTION_UP nor
      *   ACTION_CANCEL.
@@ -357,7 +357,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                     new SimpleSwipe(context),
                     multiTap,
                     multiTapAndHold,
-                    new TwoFingersDown(context));
+                    new TwoFingersDownOrSwipe(context));
         }
 
         @Override
@@ -399,7 +399,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                 Slog.d(mLogTag,
                         "onGestureDetected : delayedEventQueue = " + delayedEventQueue);
             }
-            if (gestureId == MagnificationGestureMatcher.GESTURE_TWO_FINGER_DOWN
+            if (gestureId == MagnificationGestureMatcher.GESTURE_TWO_FINGERS_DOWN_OR_SWIPE
                     && mWindowMagnificationMgr.pointersInWindow(mDisplayId, motionEvent) > 0) {
                 transitionTo(mObservePanningScalingState);
             } else if (gestureId == MagnificationGestureMatcher.GESTURE_TRIPLE_TAP) {

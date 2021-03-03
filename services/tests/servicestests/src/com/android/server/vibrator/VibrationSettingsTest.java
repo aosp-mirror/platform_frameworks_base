@@ -106,6 +106,7 @@ public class VibrationSettingsTest {
         mAudioManager = mContextSpy.getSystemService(AudioManager.class);
         mVibrationSettings = new VibrationSettings(mContextSpy,
                 new Handler(mTestLooper.getLooper()));
+        mVibrationSettings.onSystemReady();
 
         setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0);
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
@@ -159,6 +160,23 @@ public class VibrationSettingsTest {
         verifyNoMoreInteractions(mListenerMock);
         setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
         setGlobalSetting(Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_ALARMS);
+    }
+
+    @Test
+    public void shouldVibrateForRingerMode_beforeSystemReady_returnsFalseOnlyForRingtone() {
+        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
+        setRingerMode(AudioManager.RINGER_MODE_MAX);
+        VibrationSettings vibrationSettings = new VibrationSettings(mContextSpy,
+                new Handler(mTestLooper.getLooper()));
+
+        assertFalse(vibrationSettings.shouldVibrateForRingerMode(
+                VibrationAttributes.USAGE_RINGTONE));
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(VibrationAttributes.USAGE_ALARM));
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(VibrationAttributes.USAGE_TOUCH));
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(
+                VibrationAttributes.USAGE_NOTIFICATION));
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(
+                VibrationAttributes.USAGE_COMMUNICATION_REQUEST));
     }
 
     @Test
@@ -300,6 +318,37 @@ public class VibrationSettingsTest {
         setGlobalSetting(Settings.Global.ZEN_MODE,
                 Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
         assertTrue(mVibrationSettings.isInZenMode());
+    }
+
+    @Test
+    public void getDefaultIntensity_beforeSystemReady_returnsMediumToAllExceptAlarm() {
+        mFakeVibrator.setDefaultHapticFeedbackIntensity(Vibrator.VIBRATION_INTENSITY_HIGH);
+        mFakeVibrator.setDefaultNotificationVibrationIntensity(Vibrator.VIBRATION_INTENSITY_HIGH);
+        mFakeVibrator.setDefaultRingVibrationIntensity(Vibrator.VIBRATION_INTENSITY_HIGH);
+
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_OFF);
+        setUserSetting(Settings.System.RING_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_OFF);
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_OFF);
+
+        VibrationSettings vibrationSettings = new VibrationSettings(mContextSpy,
+                new Handler(mTestLooper.getLooper()));
+
+        assertEquals(Vibrator.VIBRATION_INTENSITY_HIGH,
+                vibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_ALARM));
+        assertEquals(Vibrator.VIBRATION_INTENSITY_MEDIUM,
+                vibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_TOUCH));
+        assertEquals(Vibrator.VIBRATION_INTENSITY_MEDIUM,
+                vibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_NOTIFICATION));
+        assertEquals(Vibrator.VIBRATION_INTENSITY_MEDIUM,
+                vibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_UNKNOWN));
+        assertEquals(Vibrator.VIBRATION_INTENSITY_MEDIUM,
+                vibrationSettings.getDefaultIntensity(
+                        VibrationAttributes.USAGE_PHYSICAL_EMULATION));
+        assertEquals(Vibrator.VIBRATION_INTENSITY_MEDIUM,
+                vibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_RINGTONE));
     }
 
     @Test

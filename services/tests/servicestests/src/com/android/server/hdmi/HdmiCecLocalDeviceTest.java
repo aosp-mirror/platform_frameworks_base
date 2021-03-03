@@ -128,8 +128,6 @@ public class HdmiCecLocalDeviceTest {
 
         Context context = InstrumentationRegistry.getTargetContext();
 
-        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
-
         mHdmiControlService =
                 new HdmiControlService(context) {
                     @Override
@@ -163,13 +161,9 @@ public class HdmiCecLocalDeviceTest {
                     void wakeUp() {
                         mWakeupMessageReceived = true;
                     }
-
-                    @Override
-                    protected HdmiCecConfig getHdmiCecConfig() {
-                        return hdmiCecConfig;
-                    }
                 };
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
+        mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());

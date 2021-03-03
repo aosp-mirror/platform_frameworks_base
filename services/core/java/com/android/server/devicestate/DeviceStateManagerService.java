@@ -425,7 +425,13 @@ public final class DeviceStateManagerService extends SystemService {
             if (!mRequestRecords.isEmpty()) {
                 final OverrideRequestRecord topRequest =
                         mRequestRecords.get(mRequestRecords.size() - 1);
-                topRequest.setStatusLocked(OverrideRequestRecord.STATUS_ACTIVE);
+                if (topRequest.mRequestedState.getIdentifier() == mCommittedState.getIdentifier()) {
+                    // The top request could have come in while the service was awaiting callback
+                    // from the policy. In that case we only set it to active if it matches the
+                    // current committed state, otherwise it will be set to active when its
+                    // requested state is committed.
+                    topRequest.setStatusLocked(OverrideRequestRecord.STATUS_ACTIVE);
+                }
             }
 
             mPendingState = Optional.empty();
@@ -563,10 +569,13 @@ public final class DeviceStateManagerService extends SystemService {
                     new OverrideRequestRecord(processRecord, token, deviceState.get(), flags);
             mRequestRecords.add(request);
             processRecord.mRequestRecords.put(request.mToken, request);
-            // We don't set the status of the new request to ACTIVE here as it will be set in
-            // commitPendingState().
 
-            updatePendingStateLocked();
+            final boolean updatedPendingState = updatePendingStateLocked();
+            if (!updatedPendingState && !mPendingState.isPresent()) {
+                // We don't set the status of the new request to ACTIVE if the request updated the
+                // pending state as it will be set in commitPendingState().
+                request.setStatusLocked(OverrideRequestRecord.STATUS_ACTIVE, true /* markDirty */);
+            }
         }
 
         notifyRequestsOfStatusChangeIfNeeded();

@@ -207,33 +207,35 @@ public class DataLoaderManagerService extends SystemService {
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             Slog.i(TAG, "DataLoader " + mId + " disconnected, but will try to recover");
-            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
-            destroy();
+            unbindAndReportDestroyed();
         }
 
         @Override
         public void onBindingDied(ComponentName name) {
             Slog.i(TAG, "DataLoader " + mId + " died");
-            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
-            destroy();
+            unbindAndReportDestroyed();
         }
 
         @Override
         public void onNullBinding(ComponentName name) {
             Slog.i(TAG, "DataLoader " + mId + " failed to start");
-            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
-            destroy();
+            unbindAndReportDestroyed();
         }
 
         @Override
         public void binderDied() {
             Slog.i(TAG, "DataLoader " + mId + " died");
-            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
-            destroy();
+            unbindAndReportDestroyed();
         }
 
         IDataLoader getDataLoader() {
             return mDataLoader;
+        }
+
+        private void unbindAndReportDestroyed() {
+            if (unbind()) {
+                callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
+            }
         }
 
         void destroy() {
@@ -244,11 +246,15 @@ public class DataLoaderManagerService extends SystemService {
                 }
                 mDataLoader = null;
             }
+            unbind();
+        }
+
+        boolean unbind() {
             try {
                 mContext.unbindService(this);
             } catch (Exception ignored) {
             }
-            remove();
+            return remove();
         }
 
         private boolean append() {
@@ -266,12 +272,14 @@ public class DataLoaderManagerService extends SystemService {
             }
         }
 
-        private void remove() {
+        private boolean remove() {
             synchronized (mServiceConnections) {
                 if (mServiceConnections.get(mId) == this) {
                     mServiceConnections.remove(mId);
+                    return true;
                 }
             }
+            return false;
         }
 
         private void callListener(int status) {
