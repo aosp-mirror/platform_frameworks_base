@@ -2305,7 +2305,6 @@ package android.util {
     field public static final String FFLAG_PREFIX = "sys.fflag.";
     field public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
     field public static final String PERSIST_PREFIX = "persist.sys.fflag.override.";
-    field public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
     field public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
   }
 

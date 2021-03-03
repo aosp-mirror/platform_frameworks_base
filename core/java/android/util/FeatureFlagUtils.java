@@ -39,7 +39,6 @@ public class FeatureFlagUtils {
     public static final String FFLAG_OVERRIDE_PREFIX = FFLAG_PREFIX + "override.";
     public static final String PERSIST_PREFIX = "persist." + FFLAG_OVERRIDE_PREFIX;
     public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
-    public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
     public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
     /** @hide */
     public static final String SETTINGS_DO_NOT_RESTORE_PRESERVED =
@@ -57,7 +56,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
-        DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
         DEFAULT_FLAGS.put("settings_wifi_details_datausage_header", "false");
         DEFAULT_FLAGS.put("settings_skip_direction_mutable", "true");
         DEFAULT_FLAGS.put(SETTINGS_WIFITRACKER2, "true");
