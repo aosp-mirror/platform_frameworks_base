@@ -39,37 +39,34 @@
 
     <Space android:id="@+id/space_above_icon"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:visibility="visible" />
+        android:layout_height="48dp" />
 
-    <!-- Use a frame layout since certain biometrics (such as UDFPS) require the icon to be centered
-         within a certain area on the display. This makes it easy to 1) guarantee max size, and
-         2) center the icon within the reserved area. -->
-    <FrameLayout android:id="@+id/biometric_icon_frame"
+    <FrameLayout
+        android:id="@+id/biometric_icon_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal">
+
         <ImageView
             android:id="@+id/biometric_icon"
             android:layout_width="@dimen/biometric_dialog_biometric_icon_size"
             android:layout_height="@dimen/biometric_dialog_biometric_icon_size"
             android:layout_gravity="center"
             android:scaleType="fitXY" />
+
     </FrameLayout>
 
-    <!-- For sensors such as UDFPS, this view is used during custom measurement/layoutto add extra
+    <!-- For sensors such as UDFPS, this view is used during custom measurement/layout to add extra
          padding so that the biometric icon is always in the right physical position. -->
     <Space android:id="@+id/space_below_icon"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="gone" />
+        android:layout_height="12dp" />
 
     <TextView
         android:id="@+id/indicator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="24dp"
-        android:paddingVertical="12dp"
         android:textSize="12sp"
         android:gravity="center_horizontal"
         android:accessibilityLiveRegion="polite"
@@ -84,6 +81,7 @@
         style="?android:attr/buttonBarStyle"
         android:orientation="horizontal"
         android:paddingTop="16dp">
+
         <Space android:id="@+id/leftSpacer"
             android:layout_width="8dp"
             android:layout_height="match_parent"
