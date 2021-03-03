@@ -17,48 +17,33 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
+import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+
 /**
- * UDFPS animations that should be shown when authenticating via FingerprintManager, excluding
- * keyguard.
+ * Class that coordinates non-HBM animations during keyguard authentication.
  */
-public class UdfpsAnimationFpmOther extends UdfpsAnimation {
+public class UdfpsAnimationViewKeyguard extends UdfpsAnimationView {
+    @Nullable private UdfpsAnimationKeyguard mAnimation;
 
-    UdfpsAnimationFpmOther(@NonNull Context context) {
-        super(context);
+    public UdfpsAnimationViewKeyguard(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
     }
 
-    @Override
-    protected void updateColor() {
-
-    }
-
-    @Override
-    protected void onDestroy() {
-
-    }
-
-    @Override
-    public void draw(@NonNull Canvas canvas) {
-        if (isIlluminationShowing()) {
-            return;
+    void setStatusBarStateController(@NonNull StatusBarStateController statusBarStateController) {
+        if (mAnimation == null) {
+            mAnimation = new UdfpsAnimationKeyguard(getContext(), statusBarStateController);
+            mAnimation.setAnimationView(this);
         }
-
-        mFingerprintDrawable.draw(canvas);
     }
 
+    @Nullable
     @Override
-    public void setColorFilter(@Nullable ColorFilter colorFilter) {
-
-    }
-
-    @Override
-    public int getOpacity() {
-        return 0;
+    protected UdfpsAnimation getUdfpsAnimation() {
+        return mAnimation;
     }
 }
