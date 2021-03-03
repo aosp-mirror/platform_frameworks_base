@@ -42,6 +42,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
@@ -161,18 +162,20 @@ public abstract class RegisteredServicesCache<V> {
         intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
-        mContext.registerReceiverAsUser(mPackageReceiver, UserHandle.ALL, intentFilter, null, null);
+        Handler handler = BackgroundThread.getHandler();
+        mContext.registerReceiverAsUser(
+                mPackageReceiver, UserHandle.ALL, intentFilter, null, handler);
 
         // Register for events related to sdcard installation.
         IntentFilter sdFilter = new IntentFilter();
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        mContext.registerReceiver(mExternalReceiver, sdFilter);
+        mContext.registerReceiver(mExternalReceiver, sdFilter, null, handler);
 
         // Register for user-related events
         IntentFilter userFilter = new IntentFilter();
         sdFilter.addAction(Intent.ACTION_USER_REMOVED);
-        mContext.registerReceiver(mUserRemovedReceiver, userFilter);
+        mContext.registerReceiver(mUserRemovedReceiver, userFilter, null, handler);
     }
 
     private void handlePackageEvent(Intent intent, int userId) {
@@ -265,7 +268,7 @@ public abstract class RegisteredServicesCache<V> {
 
     public void setListener(RegisteredServicesCacheListener<V> listener, Handler handler) {
         if (handler == null) {
-            handler = new Handler(mContext.getMainLooper());
+            handler = BackgroundThread.getHandler();
         }
         synchronized (this) {
             mHandler = handler;
