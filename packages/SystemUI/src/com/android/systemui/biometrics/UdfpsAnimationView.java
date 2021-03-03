@@ -22,39 +22,47 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.view.View;
+import android.widget.FrameLayout;
 
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
- * Class that coordinates non-HBM animations (such as enroll, keyguard, BiometricPrompt,
- * FingerprintManager).
+ * Base class for views containing UDFPS animations. Note that this is a FrameLayout so that we
+ * can support multiple child views drawing on the same region around the sensor location.
  */
-public class UdfpsAnimationView extends View implements DozeReceiver,
+public abstract class UdfpsAnimationView extends FrameLayout implements DozeReceiver,
         StatusBar.ExpansionChangedListener {
 
     private static final String TAG = "UdfpsAnimationView";
 
+    @Nullable protected abstract UdfpsAnimation getUdfpsAnimation();
+
     @NonNull private UdfpsView mParent;
-    @Nullable private UdfpsAnimation mUdfpsAnimation;
     @NonNull private RectF mSensorRect;
     private int mAlpha;
 
     public UdfpsAnimationView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mSensorRect = new RectF();
+        setWillNotDraw(false);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mUdfpsAnimation != null) {
+        if (getUdfpsAnimation() != null) {
             final int alpha = mParent.shouldPauseAuth() ? mAlpha : 255;
-            mUdfpsAnimation.setAlpha(alpha);
-            mUdfpsAnimation.draw(canvas);
+            getUdfpsAnimation().setAlpha(alpha);
+            getUdfpsAnimation().draw(canvas);
         }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        getUdfpsAnimation().onDestroy();
     }
 
     private int expansionToAlpha(float expansion) {
@@ -69,38 +77,38 @@ public class UdfpsAnimationView extends View implements DozeReceiver,
         return (int) ((1 - percent) * 255);
     }
 
+    void onIlluminationStarting() {
+        getUdfpsAnimation().setIlluminationShowing(true);
+        postInvalidate();
+    }
+
+    void onIlluminationStopped() {
+        getUdfpsAnimation().setIlluminationShowing(false);
+        postInvalidate();
+    }
+
     void setParent(@NonNull UdfpsView parent) {
         mParent = parent;
     }
 
-    void setAnimation(@Nullable UdfpsAnimation animation) {
-        if (mUdfpsAnimation != null) {
-            mUdfpsAnimation.setAnimationView(null);
-        }
-
-        mUdfpsAnimation = animation;
-        if (mUdfpsAnimation != null) {
-            mUdfpsAnimation.setAnimationView(this);
-        }
-    }
-
     void onSensorRectUpdated(@NonNull RectF sensorRect) {
         mSensorRect = sensorRect;
-        if (mUdfpsAnimation != null) {
-            mUdfpsAnimation.onSensorRectUpdated(mSensorRect);
+        if (getUdfpsAnimation() != null) {
+            getUdfpsAnimation().onSensorRectUpdated(mSensorRect);
         }
     }
 
     void updateColor() {
-        if (mUdfpsAnimation != null) {
-            mUdfpsAnimation.updateColor();
+        if (getUdfpsAnimation() != null) {
+            getUdfpsAnimation().updateColor();
         }
+        postInvalidate();
     }
 
     @Override
     public void dozeTimeTick() {
-        if (mUdfpsAnimation instanceof DozeReceiver) {
-            ((DozeReceiver) mUdfpsAnimation).dozeTimeTick();
+        if (getUdfpsAnimation() instanceof DozeReceiver) {
+            ((DozeReceiver) getUdfpsAnimation()).dozeTimeTick();
         }
     }
 
@@ -111,16 +119,16 @@ public class UdfpsAnimationView extends View implements DozeReceiver,
     }
 
     public int getPaddingX() {
-        if (mUdfpsAnimation == null) {
+        if (getUdfpsAnimation() == null) {
             return 0;
         }
-        return mUdfpsAnimation.getPaddingX();
+        return getUdfpsAnimation().getPaddingX();
     }
 
     public int getPaddingY() {
-        if (mUdfpsAnimation == null) {
+        if (getUdfpsAnimation() == null) {
             return 0;
         }
-        return mUdfpsAnimation.getPaddingY();
+        return getUdfpsAnimation().getPaddingY();
     }
 }

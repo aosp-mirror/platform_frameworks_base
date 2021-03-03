@@ -16,9 +16,9 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.fingerprint.IUdfpsOverlayController;
-
-import androidx.annotation.NonNull;
 
 /**
  * Helps keep track of enrollment state and animates the progress bar accordingly.
@@ -26,11 +26,17 @@ import androidx.annotation.NonNull;
 public class UdfpsEnrollHelper {
     private static final String TAG = "UdfpsEnrollHelper";
 
+    interface Listener {
+        void onEnrollmentProgress(int remaining, int totalSteps);
+    }
+
     // IUdfpsOverlayController reason
     private final int mEnrollReason;
 
     private int mTotalSteps = -1;
     private int mCurrentProgress = 0;
+
+    @Nullable Listener mListener;
 
     public UdfpsEnrollHelper(int reason) {
         mEnrollReason = reason;
@@ -40,21 +46,29 @@ public class UdfpsEnrollHelper {
         return mEnrollReason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING;
     }
 
-    void onEnrollmentProgress(int remaining, @NonNull UdfpsProgressBar progressBar) {
+    void onEnrollmentProgress(int remaining) {
         if (mTotalSteps == -1) {
             mTotalSteps = remaining;
         }
 
-        mCurrentProgress = progressBar.getMax() * Math.max(0, mTotalSteps + 1 - remaining)
-                / (mTotalSteps + 1);
-        progressBar.setProgress(mCurrentProgress, true /* animate */);
-    }
-
-    void updateProgress(@NonNull UdfpsProgressBar progressBar) {
-        progressBar.setProgress(mCurrentProgress);
+        if (mListener != null) {
+            mListener.onEnrollmentProgress(remaining, mTotalSteps);
+        }
     }
 
     void onEnrollmentHelp() {
 
+    }
+
+    void setListener(@NonNull Listener listener) {
+        mListener = listener;
+
+        // Only notify during setListener if enrollment is already in progress, so the progress
+        // bar can be updated. If enrollment has not started yet, the progress bar will be empty
+        // anyway.
+        if (mTotalSteps != -1) {
+            final int remainingSteps = mTotalSteps - mCurrentProgress;
+            mListener.onEnrollmentProgress(remainingSteps, mTotalSteps);
+        }
     }
 }
