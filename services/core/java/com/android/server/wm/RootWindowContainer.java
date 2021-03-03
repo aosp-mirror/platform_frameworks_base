@@ -650,28 +650,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     @Override
-    void dispatchConfigurationToChildren() {
-        final Configuration configuration = getConfiguration();
-        for (int i = getChildCount() - 1; i >= 0; i--) {
-            final DisplayContent displayContent = getChildAt(i);
-            if (displayContent.isDefaultDisplay) {
-                // The global configuration is also the override configuration of default display.
-                displayContent.performDisplayOverrideConfigUpdate(configuration);
-            } else {
-                displayContent.onConfigurationChanged(configuration);
-            }
-        }
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newParentConfig) {
-        prepareFreezingTaskBounds();
-        super.onConfigurationChanged(newParentConfig);
-    }
-
-    private void prepareFreezingTaskBounds() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            mChildren.get(i).prepareFreezingTaskBounds();
+    void dispatchConfigurationToChild(DisplayContent child, Configuration config) {
+        if (child.isDefaultDisplay) {
+            // The global configuration is also the override configuration of default display.
+            child.performDisplayOverrideConfigUpdate(config);
+        } else {
+            child.onConfigurationChanged(config);
         }
     }
 
