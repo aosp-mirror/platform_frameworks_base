@@ -843,11 +843,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void accessed(int proxyUid, @Nullable String proxyPackageName,
                 @Nullable String proxyAttributionTag, @AppOpsManager.UidState int uidState,
                 @OpFlags int flags) {
-            accessed(System.currentTimeMillis(), -1, proxyUid, proxyPackageName,
+            long accessTime = System.currentTimeMillis();
+            accessed(accessTime, -1, proxyUid, proxyPackageName,
                     proxyAttributionTag, uidState, flags);
 
             mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
                     tag, uidState, flags);
+
+            mHistoricalRegistry.mDiscreteRegistry.recordDiscreteAccess(parent.uid,
+                    parent.packageName, parent.op, tag, flags, uidState, accessTime, -1);
         }
 
         /**
@@ -1004,14 +1008,20 @@ public class AppOpsService extends IAppOpsService.Stub {
                 OpEventProxyInfo proxyCopy = event.getProxy() != null
                         ? new OpEventProxyInfo(event.getProxy()) : null;
 
+                long accessDurationMillis =
+                        SystemClock.elapsedRealtime() - event.getStartElapsedTime();
                 NoteOpEvent finishedEvent = new NoteOpEvent(event.getStartTime(),
-                        SystemClock.elapsedRealtime() - event.getStartElapsedTime(), proxyCopy);
+                        accessDurationMillis, proxyCopy);
                 mAccessEvents.put(makeKey(event.getUidState(), event.getFlags()),
                         finishedEvent);
 
                 mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
                         parent.packageName, tag, event.getUidState(),
                         event.getFlags(), finishedEvent.getDuration());
+
+                mHistoricalRegistry.mDiscreteRegistry.recordDiscreteAccess(parent.uid,
+                        parent.packageName, parent.op, tag, event.getFlags(), event.getUidState(),
+                        event.getStartTime(), accessDurationMillis);
 
                 mInProgressStartOpEventPool.release(event);
 
@@ -2087,8 +2097,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void getHistoricalOps(int uid, String packageName, String attributionTag,
-            List<String> opNames, int filter, long beginTimeMillis, long endTimeMillis,
-            int flags, RemoteCallback callback) {
+            List<String> opNames, int dataType, int filter, long beginTimeMillis,
+            long endTimeMillis, int flags, RemoteCallback callback) {
         PackageManager pm = mContext.getPackageManager();
 
         ensureHistoricalOpRequestIsValid(uid, packageName, attributionTag, opNames, filter,
@@ -2120,14 +2130,14 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         // Must not hold the appops lock
         mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::getHistoricalOps,
-                mHistoricalRegistry, uid, packageName, attributionTag, opNamesArray, filter,
-                beginTimeMillis, endTimeMillis, flags, callback).recycleOnUse());
+                mHistoricalRegistry, uid, packageName, attributionTag, opNamesArray, dataType,
+                filter, beginTimeMillis, endTimeMillis, flags, callback).recycleOnUse());
     }
 
     @Override
     public void getHistoricalOpsFromDiskRaw(int uid, String packageName, String attributionTag,
-            List<String> opNames, int filter, long beginTimeMillis, long endTimeMillis,
-            int flags, RemoteCallback callback) {
+            List<String> opNames, int dataType, int filter, long beginTimeMillis,
+            long endTimeMillis, int flags, RemoteCallback callback) {
         ensureHistoricalOpRequestIsValid(uid, packageName, attributionTag, opNames, filter,
                 beginTimeMillis, endTimeMillis, flags);
         Objects.requireNonNull(callback, "callback cannot be null");
@@ -2140,7 +2150,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         // Must not hold the appops lock
         mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::getHistoricalOpsFromDiskRaw,
-                mHistoricalRegistry, uid, packageName, attributionTag, opNamesArray,
+                mHistoricalRegistry, uid, packageName, attributionTag, opNamesArray, dataType,
                 filter, beginTimeMillis, endTimeMillis, flags, callback).recycleOnUse());
     }
 
@@ -4759,6 +4769,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mFile.failWrite(stream);
             }
         }
+        mHistoricalRegistry.mDiscreteRegistry.writeAndClearAccessHistory();
     }
 
     static class Shell extends ShellCommand {
@@ -6115,6 +6126,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 "clearHistory");
         // Must not hold the appops lock
         mHistoricalRegistry.clearHistory();
+        mHistoricalRegistry.mDiscreteRegistry.clearHistory();
     }
 
     @Override
