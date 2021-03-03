@@ -148,11 +148,13 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeRead
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
+import com.android.internal.os.KernelSingleProcessCpuThreadReader.ProcessCpuUsage;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.ProcessCpuTracker;
+import com.android.internal.os.SelectedProcessCpuThreadReader;
 import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.internal.util.CollectionUtils;
@@ -350,6 +352,8 @@ public class StatsPullAtomService extends SystemService {
     // List that stores SubInfo of subscriptions that ever appeared since boot.
     @GuardedBy("mDataBytesTransferLock")
     private final ArrayList<SubInfo> mHistoricalSubs = new ArrayList<>();
+
+    private SelectedProcessCpuThreadReader mSurfaceFlingerProcessCpuThreadReader;
 
     // Puller locks
     private final Object mDataBytesTransferLock = new Object();
@@ -753,6 +757,9 @@ public class StatsPullAtomService extends SystemService {
                 }
             }
         }
+
+        mSurfaceFlingerProcessCpuThreadReader =
+                new SelectedProcessCpuThreadReader("/system/bin/surfaceflinger");
     }
 
     void registerEventListeners() {
@@ -1677,6 +1684,18 @@ public class StatsPullAtomService extends SystemService {
         addCpuCyclesPerThreadGroupClusterAtoms(atomTag, pulledData,
                 FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER__THREAD_GROUP__SYSTEM_SERVER_BINDER,
                 times.binderThreadCpuTimesUs);
+
+        ProcessCpuUsage surfaceFlingerTimes = mSurfaceFlingerProcessCpuThreadReader.readAbsolute();
+        if (surfaceFlingerTimes != null && surfaceFlingerTimes.threadCpuTimesMillis != null) {
+            long[] surfaceFlingerTimesUs =
+                    new long[surfaceFlingerTimes.threadCpuTimesMillis.length];
+            for (int i = 0; i < surfaceFlingerTimesUs.length; ++i) {
+                surfaceFlingerTimesUs[i] = surfaceFlingerTimes.threadCpuTimesMillis[i] * 1_000;
+            }
+            addCpuCyclesPerThreadGroupClusterAtoms(atomTag, pulledData,
+                    FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER__THREAD_GROUP__SURFACE_FLINGER,
+                    surfaceFlingerTimesUs);
+        }
 
         return StatsManager.PULL_SUCCESS;
     }
