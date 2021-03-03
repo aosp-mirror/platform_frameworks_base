@@ -50074,7 +50074,7 @@ package android.view.accessibility {
     method public boolean canOpenPopup();
     method public int describeContents();
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String);
-    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(String);
+    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(@NonNull String);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public android.view.accessibility.AccessibilityNodeInfo focusSearch(int);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> getActionList();
