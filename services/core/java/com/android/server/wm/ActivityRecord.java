@@ -4383,6 +4383,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         mVisibleRequested = visible;
+        setInsetsFrozen(!visible);
         if (app != null) {
             mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
         }

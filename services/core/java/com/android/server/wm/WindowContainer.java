@@ -2684,14 +2684,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             @Nullable ArrayList<WindowContainer> sources) {
         final Task task = asTask();
         if (task != null && !enter && !task.isHomeOrRecentsRootTask()) {
-            if (AppTransition.isClosingTransitOld(transit)) {
-                // Freezes the insets state when the window is in app exiting transition, to
-                // ensure the exiting window won't receive unexpected insets changes from the
-                // next window.
-                task.forAllWindows(w -> {
-                    w.freezeInsetsState();
-                }, true /* traverseTopToBottom */);
-            }
             mDisplayContent.showImeScreenshot();
         }
         final Pair<AnimationAdapter, AnimationAdapter> adapters = getAnimationAdapter(lp,
