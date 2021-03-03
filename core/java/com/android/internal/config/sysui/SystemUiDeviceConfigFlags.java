@@ -488,6 +488,12 @@ public final class SystemUiDeviceConfigFlags {
     public static final String APPLY_SHARING_APP_LIMITS_IN_SYSUI =
             "apply_sharing_app_limits_in_sysui";
 
+    /*
+     * (long) The duration that the home button must be pressed before triggering Assist
+     */
+    public static final String HOME_BUTTON_LONG_PRESS_DURATION_MS =
+            "home_button_long_press_duration_ms";
+
     private SystemUiDeviceConfigFlags() {
     }
 }
