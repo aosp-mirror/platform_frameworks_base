@@ -379,8 +379,8 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     boolean isWithinExecutionGuaranteeTime() {
-        return mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis
-                < sElapsedRealtimeClock.millis();
+        return sElapsedRealtimeClock.millis()
+                < mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
     }
 
     @GuardedBy("mLock")
@@ -848,11 +848,12 @@ public final class JobServiceContext implements ServiceConnection {
         }
         applyStoppedReasonLocked(reason);
         completedJob = mRunningJob;
-        mJobPackageTracker.noteInactive(completedJob, mParams.getStopReason(), reason);
+        final int stopReason = mParams.getStopReason();
+        mJobPackageTracker.noteInactive(completedJob, stopReason, reason);
         FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                 completedJob.getSourceUid(), null, completedJob.getBatteryName(),
                 FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED,
-                mParams.getStopReason(), completedJob.getStandbyBucket(), completedJob.getJobId(),
+                stopReason, completedJob.getStandbyBucket(), completedJob.getJobId(),
                 completedJob.hasChargingConstraint(),
                 completedJob.hasBatteryNotLowConstraint(),
                 completedJob.hasStorageNotLowConstraint(),
@@ -863,7 +864,7 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.hasContentTriggerConstraint());
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),
-                    mParams.getStopReason());
+                    stopReason);
         } catch (RemoteException e) {
             // Whatever.
         }
@@ -882,7 +883,7 @@ public final class JobServiceContext implements ServiceConnection {
         service = null;
         mAvailable = true;
         removeOpTimeOutLocked();
-        mCompletedListener.onJobCompletedLocked(completedJob, reschedule);
+        mCompletedListener.onJobCompletedLocked(completedJob, stopReason, reschedule);
         mJobConcurrencyManager.onJobCompletedLocked(this, completedJob, workType);
     }
 
