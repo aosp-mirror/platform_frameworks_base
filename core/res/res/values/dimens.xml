@@ -248,7 +248,7 @@
     <dimen name="call_notification_collapsible_indent">64dp</dimen>
 
     <!-- The size of icons for visual actions in the notification_material_action_list -->
-    <dimen name="notification_actions_icon_size">48dp</dimen>
+    <dimen name="notification_actions_icon_size">56dp</dimen>
 
     <!-- The size of icons for visual actions in the notification_material_action_list -->
     <dimen name="notification_actions_icon_drawable_size">20dp</dimen>
@@ -314,10 +314,10 @@
     <dimen name="notification_conversation_header_separating_margin">4dp</dimen>
 
     <!-- The absolute size of the notification expand icon. -->
-    <dimen name="notification_header_expand_icon_size">48dp</dimen>
+    <dimen name="notification_header_expand_icon_size">56dp</dimen>
 
-    <!-- The top padding for the notification expand button. -->
-    <dimen name="notification_expand_button_padding_top">1dp</dimen>
+    <!-- the height of the expand button pill -->
+    <dimen name="notification_expand_button_pill_height">24dp</dimen>
 
     <!-- Vertical margin for the headerless notification content, when content has 1 line -->
     <!-- 16 * 2 (margins) + 24 (1 line) = 56 (notification) -->
@@ -746,7 +746,7 @@
     <dimen name="notification_right_icon_headerless_margin">20dp</dimen>
     <!-- The top margin of the right icon in the "big" notification states -->
     <!--  TODO(b/181048615): Move the large icon below the expander in big states  -->
-    <dimen name="notification_right_icon_big_margin_top">16dp</dimen>
+    <dimen name="notification_right_icon_big_margin_top">20dp</dimen>
     <!-- The size of the left icon -->
     <dimen name="notification_left_icon_size">@dimen/notification_icon_circle_size</dimen>
     <!-- The left padding of the left icon -->
@@ -777,13 +777,10 @@
     <dimen name="conversation_icon_circle_start">28dp</dimen>
     <!-- Start of the content in the conversation template -->
     <dimen name="conversation_content_start">80dp</dimen>
-    <!-- Size of the expand button in the conversation layout -->
-    <dimen name="conversation_expand_button_size">80dp</dimen>
-    <!-- Top margin of the expand button for conversations when expanded -->
-    <dimen name="conversation_expand_button_top_margin_expanded">18dp</dimen>
-    <!-- Side margin of the expand button for conversations.
-         width of expand asset (22) + 2 * this (13) == notification_header_expand_icon_size (48) -->
-    <dimen name="conversation_expand_button_side_margin">13dp</dimen>
+    <!-- Height of the expand button in the conversation layout -->
+    <dimen name="conversation_expand_button_height">80dp</dimen>
+    <!-- this is the margin between the Conversation image and the content -->
+    <dimen name="conversation_image_start_margin">12dp</dimen>
     <!-- Side margins of the conversation badge in relation to the conversation icon -->
     <dimen name="conversation_badge_side_margin">36dp</dimen>
     <!-- size of the notification badge when applied to the conversation icon -->

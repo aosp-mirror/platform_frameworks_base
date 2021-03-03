@@ -14,6 +14,6 @@
   ~ limitations under the License.
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <corners android:radius="20sp" />
+    <corners android:radius="@dimen/notification_expand_button_pill_height" />
     <solid android:color="@android:color/white" />
 </shape>
