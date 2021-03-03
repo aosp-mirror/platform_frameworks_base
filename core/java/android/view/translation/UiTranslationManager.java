@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.assist.ActivityId;
 import android.content.Context;
 import android.os.RemoteException;
 import android.view.View;
@@ -95,26 +96,61 @@ public final class UiTranslationManager {
     /**
      * Request ui translation for a given Views.
      *
+     * NOTE: Please use {@code startTranslation(TranslationSpec, TranslationSpec, List<AutofillId>,
+     * ActivityId)} instead.
+     *
      * @param sourceSpec {@link TranslationSpec} for the data to be translated.
      * @param destSpec {@link TranslationSpec} for the translated data.
      * @param viewIds A list of the {@link View}'s {@link AutofillId} which needs to be translated
      * @param taskId the Activity Task id which needs ui translation
      */
+    // TODO, hide the APIs
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
     public void startTranslation(@NonNull TranslationSpec sourceSpec,
             @NonNull TranslationSpec destSpec, @NonNull List<AutofillId> viewIds,
             int taskId) {
-        // TODO(b/177789967): Return result code or find a way to notify the status.
-        // TODO(b/177394471): The is a temparary API, the expected is requestUiTranslation(
-        //  TranslationSpec, TranslationSpec,List<AutofillId>, Binder). We may need more time to
-        //  implement it, use task id as initial version for demo.
         Objects.requireNonNull(sourceSpec);
         Objects.requireNonNull(destSpec);
         Objects.requireNonNull(viewIds);
+        if (viewIds.size() == 0) {
+            throw new IllegalArgumentException("Invalid empty views: " + viewIds);
+        }
+        try {
+            mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_STARTED, sourceSpec,
+                    destSpec, viewIds, taskId, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
+    /**
+     * Request ui translation for a given Views.
+     *
+     * @param sourceSpec {@link TranslationSpec} for the data to be translated.
+     * @param destSpec {@link TranslationSpec} for the translated data.
+     * @param viewIds A list of the {@link View}'s {@link AutofillId} which needs to be translated
+     * @param activityId the identifier for the Activity which needs ui translation
+     * @throws IllegalArgumentException if the no {@link View}'s {@link AutofillId} in the list
+     * @throws NullPointerException the sourceSpec, destSpec, viewIds, activityId or
+     *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
+    public void startTranslation(@NonNull TranslationSpec sourceSpec,
+            @NonNull TranslationSpec destSpec, @NonNull List<AutofillId> viewIds,
+            @NonNull ActivityId activityId) {
+        // TODO(b/177789967): Return result code or find a way to notify the status.
+        Objects.requireNonNull(sourceSpec);
+        Objects.requireNonNull(destSpec);
+        Objects.requireNonNull(viewIds);
+        Objects.requireNonNull(activityId);
+        Objects.requireNonNull(activityId.getToken());
+        if (viewIds.size() == 0) {
+            throw new IllegalArgumentException("Invalid empty views: " + viewIds);
+        }
         try {
             mService.updateUiTranslationState(STATE_UI_TRANSLATION_STARTED, sourceSpec,
-                    destSpec, viewIds, taskId, mContext.getUserId());
+                    destSpec, viewIds, activityId.getToken(), activityId.getTaskId(),
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -124,14 +160,56 @@ public final class UiTranslationManager {
      * Request to disable the ui translation. It will destroy all the {@link Translator}s and no
      * longer to show to show the translated text.
      *
+     * NOTE: Please use {@code finishTranslation(ActivityId)} instead.
+     *
      * @param taskId the Activity Task id which needs ui translation
      */
+    // TODO, hide the APIs
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
     public void finishTranslation(int taskId) {
         try {
-            // TODO(b/177394471): The is a temparary API, the expected is finishUiTranslation(
-            //  Binder). We may need more time to implement it, use task id as initial version.
+            mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_FINISHED,
+                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */, taskId,
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to disable the ui translation. It will destroy all the {@link Translator}s and no
+     * longer to show to show the translated text.
+     *
+     * @param activityId the identifier for the Activity which needs ui translation
+     * @throws NullPointerException the activityId or
+     *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
+    public void finishTranslation(@NonNull ActivityId activityId) {
+        try {
+            Objects.requireNonNull(activityId);
+            Objects.requireNonNull(activityId.getToken());
             mService.updateUiTranslationState(STATE_UI_TRANSLATION_FINISHED,
+                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */,
+                    activityId.getToken(), activityId.getTaskId(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to pause the current ui translation's {@link Translator} which will switch back to
+     * the original language.
+     *
+     * NOTE: Please use {@code pauseTranslation(ActivityId)} instead.
+     *
+     * @param taskId the Activity Task id which needs ui translation
+     */
+    // TODO, hide the APIs
+    @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
+    public void pauseTranslation(int taskId) {
+        try {
+            mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_PAUSED,
                     null /* sourceSpec */, null /* destSpec*/, null /* viewIds */, taskId,
                     mContext.getUserId());
         } catch (RemoteException e) {
@@ -143,16 +221,18 @@ public final class UiTranslationManager {
      * Request to pause the current ui translation's {@link Translator} which will switch back to
      * the original language.
      *
-     * @param taskId the Activity Task id which needs ui translation
+     * @param activityId the identifier for the Activity which needs ui translation
+     * @throws NullPointerException the activityId or
+     *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    public void pauseTranslation(int taskId) {
+    public void pauseTranslation(@NonNull ActivityId activityId) {
         try {
-            // TODO(b/177394471): The is a temparary API, the expected is pauseUiTranslation(Binder)
-            // We may need more time to implement it, use task id as initial version for demo
+            Objects.requireNonNull(activityId);
+            Objects.requireNonNull(activityId.getToken());
             mService.updateUiTranslationState(STATE_UI_TRANSLATION_PAUSED,
-                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */, taskId,
-                    mContext.getUserId());
+                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */,
+                    activityId.getToken(), activityId.getTaskId(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -162,16 +242,38 @@ public final class UiTranslationManager {
      * Request to resume the paused ui translation's {@link Translator} which will switch to the
      * translated language if the text had been translated.
      *
+     * NOTE: Please use {@code resumeTranslation(ActivityId)} instead.
+     *
      * @param taskId the Activity Task id which needs ui translation
      */
+    // TODO, hide the APIs
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
     public void resumeTranslation(int taskId) {
         try {
-            // TODO(b/177394471): The is a temparary API, the expected is resumeUiTranslation(
-            //  Binder). We may need more time to implement it, use task id as initial version.
-            mService.updateUiTranslationState(STATE_UI_TRANSLATION_RESUMED,
+            mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_RESUMED,
                     null /* sourceSpec */, null /* destSpec*/, null /* viewIds */,
                     taskId, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to resume the paused ui translation's {@link Translator} which will switch to the
+     * translated language if the text had been translated.
+     *
+     * @param activityId the identifier for the Activity which needs ui translation
+     * @throws NullPointerException the activityId or
+     *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
+    public void resumeTranslation(@NonNull ActivityId activityId) {
+        try {
+            Objects.requireNonNull(activityId);
+            Objects.requireNonNull(activityId.getToken());
+            mService.updateUiTranslationState(STATE_UI_TRANSLATION_RESUMED,
+                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */,
+                    activityId.getToken(), activityId.getTaskId(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
