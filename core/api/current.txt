@@ -19599,6 +19599,10 @@ package android.media {
     field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_BIT_WIDTH;
     field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_CHANNEL_MASK;
     field @NonNull public static final android.media.AudioMetadata.Key<java.lang.String> KEY_MIME;
+    field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_PRESENTATION_CONTENT_CLASSIFIER;
+    field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_PRESENTATION_ID;
+    field @NonNull public static final android.media.AudioMetadata.Key<java.lang.String> KEY_PRESENTATION_LANGUAGE;
+    field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_PROGRAM_ID;
     field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_SAMPLE_RATE;
   }
 
@@ -19652,6 +19656,15 @@ package android.media {
     method public boolean hasAudioDescription();
     method public boolean hasDialogueEnhancement();
     method public boolean hasSpokenSubtitles();
+    field public static final int CONTENT_COMMENTARY = 5; // 0x5
+    field public static final int CONTENT_DIALOG = 4; // 0x4
+    field public static final int CONTENT_EMERGENCY = 6; // 0x6
+    field public static final int CONTENT_HEARING_IMPAIRED = 3; // 0x3
+    field public static final int CONTENT_MAIN = 0; // 0x0
+    field public static final int CONTENT_MUSIC_AND_EFFECTS = 1; // 0x1
+    field public static final int CONTENT_UNKNOWN = -1; // 0xffffffff
+    field public static final int CONTENT_VISUALLY_IMPAIRED = 2; // 0x2
+    field public static final int CONTENT_VOICEOVER = 7; // 0x7
     field public static final int MASTERED_FOR_3D = 3; // 0x3
     field public static final int MASTERED_FOR_HEADPHONE = 4; // 0x4
     field public static final int MASTERED_FOR_STEREO = 1; // 0x1
