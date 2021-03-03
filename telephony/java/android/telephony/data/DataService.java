@@ -200,6 +200,17 @@ public abstract class DataService extends Service {
          *        handover is occurring from EPDG to 5G.  If the slice passed is rejected, then
          *        {@link DataCallResponse#getCause()} is
          *        {@link android.telephony.DataFailCause#SLICE_REJECTED}.
+         * @param trafficDescriptor {@link TrafficDescriptor} for which data connection needs to be
+         *        established. It is used for URSP traffic matching as described in 3GPP TS 24.526
+         *        Section 4.2.2. It includes an optional DNN which, if present, must be used for
+         *        traffic matching; it does not specify the end point to be used for the data call.
+         * @param matchAllRuleAllowed Indicates if using default match-all URSP rule for this
+         *        request is allowed. If false, this request must not use the match-all URSP rule
+         *        and if a non-match-all rule is not found (or if URSP rules are not available) then
+         *        {@link DataCallResponse#getCause()} is
+         *        {@link android.telephony.DataFailCause#MATCH_ALL_RULE_NOT_ALLOWED}. This is needed
+         *        as some requests need to have a hard failure if the intention cannot be met,
+         *        for example, a zero-rating slice.
          * @param callback The result callback for this request.
          */
         public void setupDataCall(int accessNetworkType, @NonNull DataProfile dataProfile,
@@ -207,6 +218,7 @@ public abstract class DataService extends Service {
                 @SetupDataReason int reason,
                 @Nullable LinkProperties linkProperties,
                 @IntRange(from = 0, to = 15) int pduSessionId, @Nullable SliceInfo sliceInfo,
+                @Nullable TrafficDescriptor trafficDescriptor, boolean matchAllRuleAllowed,
                 @NonNull DataServiceCallback callback) {
             /* Call the old version since the new version isn't supported */
             setupDataCall(accessNetworkType, dataProfile, isRoaming, allowRoaming, reason,
@@ -399,10 +411,13 @@ public abstract class DataService extends Service {
         public final LinkProperties linkProperties;
         public final int pduSessionId;
         public final SliceInfo sliceInfo;
+        public final TrafficDescriptor trafficDescriptor;
+        public final boolean matchAllRuleAllowed;
         public final IDataServiceCallback callback;
         SetupDataCallRequest(int accessNetworkType, DataProfile dataProfile, boolean isRoaming,
-                             boolean allowRoaming, int reason, LinkProperties linkProperties,
-                             int pduSessionId, SliceInfo sliceInfo, IDataServiceCallback callback) {
+                boolean allowRoaming, int reason, LinkProperties linkProperties, int pduSessionId,
+                SliceInfo sliceInfo, TrafficDescriptor trafficDescriptor,
+                boolean matchAllRuleAllowed, IDataServiceCallback callback) {
             this.accessNetworkType = accessNetworkType;
             this.dataProfile = dataProfile;
             this.isRoaming = isRoaming;
@@ -411,6 +426,8 @@ public abstract class DataService extends Service {
             this.reason = reason;
             this.pduSessionId = pduSessionId;
             this.sliceInfo = sliceInfo;
+            this.trafficDescriptor = trafficDescriptor;
+            this.matchAllRuleAllowed = matchAllRuleAllowed;
             this.callback = callback;
         }
     }
@@ -521,7 +538,8 @@ public abstract class DataService extends Service {
                             setupDataCallRequest.dataProfile, setupDataCallRequest.isRoaming,
                             setupDataCallRequest.allowRoaming, setupDataCallRequest.reason,
                             setupDataCallRequest.linkProperties, setupDataCallRequest.pduSessionId,
-                            setupDataCallRequest.sliceInfo,
+                            setupDataCallRequest.sliceInfo, setupDataCallRequest.trafficDescriptor,
+                            setupDataCallRequest.matchAllRuleAllowed,
                             (setupDataCallRequest.callback != null)
                                     ? new DataServiceCallback(setupDataCallRequest.callback)
                                     : null);
@@ -686,11 +704,12 @@ public abstract class DataService extends Service {
         public void setupDataCall(int slotIndex, int accessNetworkType, DataProfile dataProfile,
                 boolean isRoaming, boolean allowRoaming, int reason,
                 LinkProperties linkProperties, int pduSessionId, SliceInfo sliceInfo,
+                TrafficDescriptor trafficDescriptor, boolean matchAllRuleAllowed,
                 IDataServiceCallback callback) {
             mHandler.obtainMessage(DATA_SERVICE_REQUEST_SETUP_DATA_CALL, slotIndex, 0,
                     new SetupDataCallRequest(accessNetworkType, dataProfile, isRoaming,
                             allowRoaming, reason, linkProperties, pduSessionId, sliceInfo,
-                            callback))
+                            trafficDescriptor, matchAllRuleAllowed, callback))
                     .sendToTarget();
         }
 
