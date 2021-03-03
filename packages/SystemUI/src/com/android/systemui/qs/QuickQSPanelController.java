@@ -99,7 +99,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
                 break;
             }
         }
-        super.setTiles(tiles, !mQSLabelFlag);
+        super.setTiles(tiles, /* collapsedView */ true);
     }
 
     /** */

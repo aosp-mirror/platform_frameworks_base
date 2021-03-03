@@ -14,7 +14,7 @@ import com.android.systemui.qs.tileimpl.QSTileViewHorizontal
 class CustomizeTileViewHorizontal(
     context: Context,
     icon: QSIconView
-) : QSTileViewHorizontal(context, icon),
+) : QSTileViewHorizontal(context, icon, collapsed = false),
     TileAdapter.CustomizeView {
 
     private var showAppLabel = false

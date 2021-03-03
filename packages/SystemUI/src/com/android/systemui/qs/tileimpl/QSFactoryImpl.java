@@ -242,10 +242,10 @@ public class QSFactoryImpl implements QSFactory {
     public QSTileView createTileView(QSTile tile, boolean collapsedView) {
         Context context = new ContextThemeWrapper(mQsHostLazy.get().getContext(), R.style.qs_theme);
         QSIconView icon = tile.createTileView(context);
-        if (collapsedView) {
+        if (mSideLabels) {
+            return new QSTileViewHorizontal(context, icon, collapsedView);
+        } else if (collapsedView) {
             return new QSTileBaseView(context, icon, collapsedView);
-        } else if (mSideLabels) {
-            return new QSTileViewHorizontal(context, icon);
         } else {
             return new com.android.systemui.qs.tileimpl.QSTileView(context, icon);
         }

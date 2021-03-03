@@ -64,7 +64,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     protected Drawable mTileBackground;
     private String mAccessibilityClass;
     private boolean mTileState;
-    private boolean mCollapsedView;
+    protected boolean mCollapsedView;
     protected boolean mShowRippleEffect = true;
     private float mStrokeWidthActive;
     private float mStrokeWidthInactive;

@@ -32,14 +32,11 @@ import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState
 
-// Placeholder
-private const val CORNER_RADIUS = 40f
-private val RADII = (1..8).map { CORNER_RADIUS }.toFloatArray()
-
 open class QSTileViewHorizontal(
     context: Context,
-    icon: QSIconView
-) : QSTileView(context, icon, false) {
+    icon: QSIconView,
+    collapsed: Boolean
+) : QSTileView(context, icon, collapsed) {
 
     protected var backgroundDrawable: ShapeDrawable? = null
     private var paintColor = Color.WHITE
@@ -47,10 +44,10 @@ open class QSTileViewHorizontal(
 
     init {
         orientation = HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL or Gravity.START
         mDualTargetAllowed = false
         mBg.setImageDrawable(null)
         mColorLabelActive = ColorStateList.valueOf(getColorForState(getContext(), STATE_ACTIVE))
-        mMaxLabelLines = 3
     }
 
     override fun createLabel() {
@@ -69,14 +66,29 @@ open class QSTileViewHorizontal(
         mLabelContainer.setPaddingRelative(0, padding, padding, padding)
         (mLabelContainer.layoutParams as LayoutParams).gravity =
             Gravity.CENTER_VERTICAL or Gravity.START
+        if (mCollapsedView) {
+            mSecondLine.visibility = GONE
+        }
+    }
+
+    override fun shouldLabelBeSingleLine(): Boolean {
+        return true
     }
 
     override fun updateRippleSize() {
     }
 
     override fun newTileBackground(): Drawable? {
-        backgroundDrawable = ShapeDrawable(RoundRectShape(RADII, null, null))
+        val cornerRadius = context.resources
+            .getDimensionPixelSize(R.dimen.qs_corner_radius).toFloat()
+        backgroundDrawable = ShapeDrawable(createShape(cornerRadius))
         return backgroundDrawable
+    }
+
+    private fun createShape(cornerRadius: Float): RoundRectShape {
+        val radii = FloatArray(8)
+        radii.indices.forEach { radii[it] = cornerRadius }
+        return RoundRectShape(radii, null, null)
     }
 
     override fun setClickable(clickable: Boolean) {
@@ -86,7 +98,9 @@ open class QSTileViewHorizontal(
 
     override fun handleStateChanged(state: QSTile.State) {
         super.handleStateChanged(state)
-        mSecondLine.setTextColor(mLabel.textColors)
+        if (!mCollapsedView) {
+            mSecondLine.setTextColor(mLabel.textColors)
+        }
         mLabelContainer.background = null
 
         val allowAnimations = animationsEnabled() && paintColor != Color.WHITE
@@ -96,7 +110,9 @@ open class QSTileViewHorizontal(
         } else {
             if (newColor != paintColor) {
                 clearAnimator()
-                backgroundDrawable?.setTintList(ColorStateList.valueOf(newColor))
+                backgroundDrawable?.setTintList(ColorStateList.valueOf(newColor))?.also {
+                    paintColor = newColor
+                }
                 paintColor = newColor
             }
         }
@@ -109,8 +125,9 @@ open class QSTileViewHorizontal(
                 .setDuration(QSIconViewImpl.QS_ANIM_LENGTH).apply {
                     addUpdateListener { animation: ValueAnimator ->
                         val c = animation.animatedValue as Int
-                        backgroundDrawable?.setTintList(ColorStateList.valueOf(c))
-                        paintColor = c
+                        backgroundDrawable?.setTintList(ColorStateList.valueOf(c))?.also {
+                            paintColor = c
+                        }
                     }
                     start()
                 }

@@ -50,4 +50,8 @@ public abstract class QSTileView extends LinearLayout {
     public abstract void onStateChanged(State state);
 
     public abstract int getDetailY();
+
+    public View getLabelContainer() {
+        return null;
+    }
 }
