@@ -58,8 +58,13 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
     }
 
     @Override
-    void updateColor() {
+    protected void updateColor() {
         mFingerprintDrawable.setTint(mContext.getColor(R.color.udfps_enroll_icon));
+    }
+
+    @Override
+    protected void onDestroy() {
+
     }
 
     @Override
@@ -70,6 +75,10 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        if (isIlluminationShowing()) {
+            return;
+        }
+
         final boolean isNightMode = (mContext.getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_YES) != 0;
         if (!isNightMode) {
