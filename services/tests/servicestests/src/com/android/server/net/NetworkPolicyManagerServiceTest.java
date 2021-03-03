@@ -108,7 +108,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
-import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.LinkProperties;
@@ -242,8 +241,7 @@ public class NetworkPolicyManagerServiceTest {
 
     private @Mock IActivityManager mActivityManager;
     private @Mock INetworkManagementService mNetworkManager;
-    private @Mock IConnectivityManager mConnManager;
-    private @Mock ConnectivityManager mConnectivityManager;
+    private @Mock ConnectivityManager mConnManager;
     private @Mock NotificationManager mNotifManager;
     private @Mock PackageManager mPackageManager;
     private @Mock IPackageManager mIpm;
@@ -361,7 +359,7 @@ public class NetworkPolicyManagerServiceTest {
                     case Context.NOTIFICATION_SERVICE:
                         return mNotifManager;
                     case Context.CONNECTIVITY_SERVICE:
-                        return mConnectivityManager;
+                        return mConnManager;
                     case Context.USER_SERVICE:
                         return mUserManager;
                     default:
@@ -390,7 +388,7 @@ public class NetworkPolicyManagerServiceTest {
         mFutureIntent = newRestrictBackgroundChangedFuture();
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager,
                 mNetworkManager, mIpm, mClock, mPolicyDir, true);
-        mService.bindConnectivityManager(mConnManager);
+        mService.bindConnectivityManager();
         mPolicyListener = new NetworkPolicyListenerAnswer(mService);
 
         // Sets some common expectations.
@@ -429,7 +427,7 @@ public class NetworkPolicyManagerServiceTest {
         when(mUserManager.getUsers()).thenReturn(buildUserInfoList());
         when(mNetworkManager.isBandwidthControlEnabled()).thenReturn(true);
         when(mNetworkManager.setDataSaverModeEnabled(anyBoolean())).thenReturn(true);
-        doNothing().when(mConnectivityManager)
+        doNothing().when(mConnManager)
                 .registerNetworkCallback(any(), mNetworkCallbackCaptor.capture());
 
         // Create the expected carrier config

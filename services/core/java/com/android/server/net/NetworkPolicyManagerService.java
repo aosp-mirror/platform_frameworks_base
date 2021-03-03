@@ -431,7 +431,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final CarrierConfigManager mCarrierConfigManager;
     private final MultipathPolicyTracker mMultipathPolicyTracker;
 
-    private IConnectivityManager mConnManager;
+    private ConnectivityManager mConnManager;
     private PowerManagerInternal mPowerManagerInternal;
     private PowerWhitelistManager mPowerWhitelistManager;
 
@@ -711,8 +711,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 new NetworkPolicyManagerInternalImpl());
     }
 
-    public void bindConnectivityManager(IConnectivityManager connManager) {
-        mConnManager = Objects.requireNonNull(connManager, "missing IConnectivityManager");
+    public void bindConnectivityManager() {
+        mConnManager = Objects.requireNonNull(mContext.getSystemService(ConnectivityManager.class),
+                "missing ConnectivityManager");
     }
 
     @GuardedBy("mUidRulesFirstLock")
@@ -943,7 +944,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mContext.registerReceiver(mCarrierConfigReceiver, carrierConfigFilter, null, mHandler);
 
             // listen for meteredness changes
-            mContext.getSystemService(ConnectivityManager.class).registerNetworkCallback(
+            mConnManager.registerNetworkCallback(
                     new NetworkRequest.Builder().build(), mNetworkCallback);
 
             mAppStandby.addListener(new NetPolicyAppIdleStateChangeListener());
@@ -1973,13 +1974,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "updateNetworkRulesNL()");
         Trace.traceBegin(TRACE_TAG_NETWORK, "updateNetworkRulesNL");
 
-        final List<NetworkStateSnapshot> snapshots;
-        try {
-            snapshots = mConnManager.getAllNetworkStateSnapshot();
-        } catch (RemoteException e) {
-            // Cannot happen, service lives in system_server.
-            return;
-        }
+        final List<NetworkStateSnapshot> snapshots = mConnManager.getAllNetworkStateSnapshot();
 
         // First, generate identities of all connected networks so we can
         // quickly compare them against all defined policies below.
