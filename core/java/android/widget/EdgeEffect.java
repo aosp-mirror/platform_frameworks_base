@@ -20,6 +20,9 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -58,6 +61,29 @@ import java.lang.annotation.RetentionPolicy;
  * {@link #draw(Canvas)} method.</p>
  */
 public class EdgeEffect {
+    /**
+     * This sets the default value for {@link #setType(int)} to {@link #TYPE_STRETCH} instead
+     * of {@link #TYPE_GLOW}. The type can still be overridden by the theme, view attribute,
+     * or by calling {@link #setType(int)}.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    public static final long USE_STRETCH_EDGE_EFFECT_BY_DEFAULT = 171228096L;
+
+    /**
+     * This sets the default value for {@link #setType(int)} to {@link #TYPE_STRETCH} instead
+     * of {@link #TYPE_GLOW} for views that instantiate with
+     * {@link #EdgeEffect(Context, AttributeSet)}, indicating use of S+ EdgeEffect support. The
+     * type can still be overridden by the theme, view attribute, or by calling
+     * {@link #setType(int)}.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    public static final long USE_STRETCH_EDGE_EFFECT_FOR_SUPPORTED = 178807038L;
 
     /**
      * The default blend mode used by {@link EdgeEffect}.
@@ -132,7 +158,7 @@ public class EdgeEffect {
     private float mStretchIntensity = DEFAULT_MAX_STRETCH_INTENSITY;
     private float mStretchDistance = -1f;
 
-    private final Interpolator mInterpolator;
+    private final Interpolator mInterpolator = new DecelerateInterpolator();
 
     private static final int STATE_IDLE = 0;
     private static final int STATE_PULL = 1;
@@ -166,7 +192,7 @@ public class EdgeEffect {
      * @param context Context used to provide theming and resource information for the EdgeEffect
      */
     public EdgeEffect(Context context) {
-        this(context, null);
+        this(context, null, Compatibility.isChangeEnabled(USE_STRETCH_EDGE_EFFECT_BY_DEFAULT));
     }
 
     /**
@@ -175,18 +201,26 @@ public class EdgeEffect {
      * @param attrs The attributes of the XML tag that is inflating the view
      */
     public EdgeEffect(@NonNull Context context, @Nullable AttributeSet attrs) {
-        mPaint.setAntiAlias(true);
+        this(context, attrs,
+                Compatibility.isChangeEnabled(USE_STRETCH_EDGE_EFFECT_BY_DEFAULT)
+                        || Compatibility.isChangeEnabled(USE_STRETCH_EDGE_EFFECT_FOR_SUPPORTED));
+    }
+
+    private EdgeEffect(@NonNull Context context, @Nullable AttributeSet attrs,
+            boolean defaultStretch) {
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.EdgeEffect);
         final int themeColor = a.getColor(
                 com.android.internal.R.styleable.EdgeEffect_colorEdgeEffect, 0xff666666);
         mEdgeEffectType = a.getInt(
-                com.android.internal.R.styleable.EdgeEffect_edgeEffectType, TYPE_GLOW);
+                com.android.internal.R.styleable.EdgeEffect_edgeEffectType,
+                defaultStretch ? TYPE_STRETCH : TYPE_GLOW);
         a.recycle();
+
+        mPaint.setAntiAlias(true);
         mPaint.setColor((themeColor & 0xffffff) | 0x33000000);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setBlendMode(DEFAULT_BLEND_MODE);
-        mInterpolator = new DecelerateInterpolator();
     }
 
     /**
