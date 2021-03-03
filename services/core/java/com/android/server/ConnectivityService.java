@@ -3067,9 +3067,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 log(nai.toShortString() + " validation " + (valid ? "passed" : "failed") + logMsg);
             }
             if (valid != nai.lastValidated) {
-                if (wasDefault) {
-                    mMetricsLog.logDefaultNetworkValidity(valid);
-                }
                 final int oldScore = nai.getCurrentScore();
                 nai.lastValidated = valid;
                 nai.everValidated |= valid;
@@ -3490,14 +3487,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final boolean wasDefault = isDefaultNetwork(nai);
         if (wasDefault) {
             mDefaultInetConditionPublished = 0;
-            // Log default network disconnection before required book-keeping.
-            // Let rematchAllNetworksAndRequests() below record a new default network event
-            // if there is a fallback. Taken together, the two form a X -> 0, 0 -> Y sequence
-            // whose timestamps tell how long it takes to recover a default network.
-            long now = SystemClock.elapsedRealtime();
-            mMetricsLog.logDefaultNetworkEvent(null, 0, false,
-                    null /* lp */, null /* nc */, nai.network, nai.getCurrentScore(),
-                    nai.linkProperties, nai.networkCapabilities);
         }
         notifyIfacesChangedForNetworkStats();
         // TODO - we shouldn't send CALLBACK_LOST to requests that can be satisfied
@@ -7133,27 +7122,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         updateTcpBufferSizes(null != newDefaultNetwork
                 ? newDefaultNetwork.linkProperties.getTcpBufferSizes() : null);
         notifyIfacesChangedForNetworkStats();
-
-        // Log 0 -> X and Y -> X default network transitions, where X is the new default.
-        final Network network = (newDefaultNetwork != null) ? newDefaultNetwork.network : null;
-        final int score = (newDefaultNetwork != null) ? newDefaultNetwork.getCurrentScore() : 0;
-        final boolean validated = newDefaultNetwork != null && newDefaultNetwork.lastValidated;
-        final LinkProperties lp = (newDefaultNetwork != null)
-                ? newDefaultNetwork.linkProperties : null;
-        final NetworkCapabilities nc = (newDefaultNetwork != null)
-                ? newDefaultNetwork.networkCapabilities : null;
-
-        final Network prevNetwork = (oldDefaultNetwork != null)
-                ? oldDefaultNetwork.network : null;
-        final int prevScore = (oldDefaultNetwork != null)
-                ? oldDefaultNetwork.getCurrentScore() : 0;
-        final LinkProperties prevLp = (oldDefaultNetwork != null)
-                ? oldDefaultNetwork.linkProperties : null;
-        final NetworkCapabilities prevNc = (oldDefaultNetwork != null)
-                ? oldDefaultNetwork.networkCapabilities : null;
-
-        mMetricsLog.logDefaultNetworkEvent(network, score, validated, lp, nc,
-                prevNetwork, prevScore, prevLp, prevNc);
     }
 
     private void makeDefaultForApps(@NonNull final NetworkRequestInfo nri,
