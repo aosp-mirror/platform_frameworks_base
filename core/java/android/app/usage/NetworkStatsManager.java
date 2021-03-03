@@ -16,6 +16,8 @@
 
 package android.app.usage;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -28,8 +30,11 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.DataUsageRequest;
 import android.net.INetworkStatsService;
+import android.net.Network;
 import android.net.NetworkStack;
+import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
+import android.net.UnderlyingNetworkInfo;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
 import android.os.Binder;
@@ -48,6 +53,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.net.module.util.NetworkIdentityUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -631,6 +637,50 @@ public class NetworkStatsManager {
                         + NetworkIdentityUtils.scrubSubscriberId(subscriberId) + "'.");
         }
         return template;
+    }
+
+    /**
+     *  Notify {@code NetworkStatsService} about network status changed.
+     *
+     *  Notifies NetworkStatsService of network state changes for data usage accounting purposes.
+     *
+     *  To avoid races that attribute data usage to wrong network, such as new network with
+     *  the same interface after SIM hot-swap, this function will not return until
+     *  {@code NetworkStatsService} finishes its work of retrieving traffic statistics from
+     *  all data sources.
+     *
+     * @param defaultNetworks the list of all networks that could be used by network traffic that
+     *                        does not explicitly select a network.
+     * @param networkStateSnapshots a list of {@link NetworkStateSnapshot}s, one for
+     *                              each network that is currently connected.
+     * @param activeIface the active (i.e., connected) default network interface for the calling
+     *                    uid. Used to determine on which network future calls to
+     *                    {@link android.net.TrafficStats#incrementOperationCount} applies to.
+     * @param underlyingNetworkInfos the list of underlying network information for all
+     *                               currently-connected VPNs.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public void notifyNetworkStatus(
+            @NonNull List<Network> defaultNetworks,
+            @NonNull List<NetworkStateSnapshot> networkStateSnapshots,
+            @Nullable String activeIface,
+            @NonNull List<UnderlyingNetworkInfo> underlyingNetworkInfos) {
+        try {
+            Objects.requireNonNull(defaultNetworks);
+            Objects.requireNonNull(networkStateSnapshots);
+            Objects.requireNonNull(underlyingNetworkInfos);
+            // TODO: Change internal namings after the name is decided.
+            mService.forceUpdateIfaces(defaultNetworks.toArray(new Network[0]),
+                    networkStateSnapshots.toArray(new NetworkStateSnapshot[0]), activeIface,
+                    underlyingNetworkInfos.toArray(new UnderlyingNetworkInfo[0]));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     private static class CallbackHandler extends Handler {
