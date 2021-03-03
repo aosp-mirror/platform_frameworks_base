@@ -593,6 +593,16 @@ public class VcnManagementServiceTest {
         mVcnMgmtSvc.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
     }
 
+    @Test(expected = SecurityException.class)
+    public void testRemoveVcnUnderlyingNetworkPolicyListenerInvalidPermission() {
+        doThrow(new SecurityException())
+                .when(mMockContext)
+                .enforceCallingOrSelfPermission(
+                        eq(android.Manifest.permission.NETWORK_FACTORY), any());
+
+        mVcnMgmtSvc.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+    }
+
     @Test
     public void testRemoveVcnUnderlyingNetworkPolicyListenerNeverRegistered() {
         mVcnMgmtSvc.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);

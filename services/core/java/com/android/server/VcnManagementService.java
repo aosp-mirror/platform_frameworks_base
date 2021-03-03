@@ -666,6 +666,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             @NonNull IVcnUnderlyingNetworkPolicyListener listener) {
         requireNonNull(listener, "listener was null");
 
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.NETWORK_FACTORY,
+                "Must have permission NETWORK_FACTORY to unregister a policy listener");
+
         Binder.withCleanCallingIdentity(() -> {
             synchronized (mLock) {
                 PolicyListenerBinderDeath listenerBinderDeath =
