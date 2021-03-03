@@ -5694,7 +5694,7 @@ public class NotificationManagerService extends SystemService {
                     + " trying to post for invalid pkg " + pkg + " in user " + incomingUserId);
         }
 
-        checkRestrictedCategories(notification);
+        checkRestrictedCategories(pkg, notification);
 
         // Fix the notification as best we can.
         try {
@@ -8541,7 +8541,7 @@ public class NotificationManagerService extends SystemService {
      * Check if the notification is of a category type that is restricted to system use only,
      * if so throw SecurityException
      */
-    private void checkRestrictedCategories(final Notification notification) {
+    private void checkRestrictedCategories(final String pkg, final Notification notification) {
         try {
             if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0)) {
                 return;
@@ -8551,10 +8551,24 @@ public class NotificationManagerService extends SystemService {
                     + "restrictions check thus the check will be done anyway");
         }
         if (Notification.CATEGORY_CAR_EMERGENCY.equals(notification.category)
-                || Notification.CATEGORY_CAR_WARNING.equals(notification.category)
-                || Notification.CATEGORY_CAR_INFORMATION.equals(notification.category)) {
+                || Notification.CATEGORY_CAR_WARNING.equals(notification.category)) {
                     checkCallerIsSystem();
         }
+
+        if (Notification.CATEGORY_CAR_INFORMATION.equals(notification.category)) {
+            checkCallerIsSystemOrSUW(pkg);
+        }
+    }
+
+    private void checkCallerIsSystemOrSUW(final String pkg) {
+
+        final PackageManagerInternal pmi = LocalServices.getService(
+                PackageManagerInternal.class);
+        String suwPkg =  pmi.getSetupWizardPackageName();
+        if (suwPkg != null && suwPkg.equals(pkg)) {
+            return;
+        }
+        checkCallerIsSystem();
     }
 
     @VisibleForTesting

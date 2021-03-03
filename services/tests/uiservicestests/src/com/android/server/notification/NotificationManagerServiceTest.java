@@ -111,6 +111,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
@@ -243,6 +244,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     Resources mResources;
     @Mock
     RankingHandler mRankingHandler;
+    @Mock
+    protected PackageManagerInternal mPackageManagerInternal;
 
     private static final int MAX_POST_DELAY = 1000;
 
@@ -1184,6 +1187,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
         waitForIdle();
         assertEquals(0, mBinderService.getActiveNotifications(PKG).length);
+    }
+
+    @Test
+    public void testEnqueuedRestrictedNotifications_asSuwApp() throws Exception {
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
+        when(mPackageManagerInternal.getSetupWizardPackageName()).thenReturn(PKG);
+
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0))
+                .thenReturn(true);
+
+        final StatusBarNotification sbn =
+                generateNotificationRecord(mTestNotificationChannel, 0, "", false).getSbn();
+        sbn.getNotification().category = Notification.CATEGORY_CAR_INFORMATION;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testEnqueuedRestrictedNotifications_asSuwApp",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+
+        waitForIdle();
+        assertEquals(1, mBinderService.getActiveNotifications(PKG).length);
     }
 
     @Test
