@@ -394,16 +394,20 @@ public class DynamicSystemInstallationService extends Service
     }
 
     private void executeNotifyIfInUseCommand() {
-        int status = getStatus();
-
-        if (status == STATUS_IN_USE) {
-            startForeground(NOTIFICATION_ID,
-                    buildNotification(STATUS_IN_USE, CAUSE_NOT_SPECIFIED));
-        } else if (status == STATUS_READY) {
-            startForeground(NOTIFICATION_ID,
-                    buildNotification(STATUS_READY, CAUSE_NOT_SPECIFIED));
-        } else {
-            stopSelf();
+        switch (getStatus()) {
+            case STATUS_IN_USE:
+                startForeground(NOTIFICATION_ID,
+                        buildNotification(STATUS_IN_USE, CAUSE_NOT_SPECIFIED));
+                break;
+            case STATUS_READY:
+                startForeground(NOTIFICATION_ID,
+                        buildNotification(STATUS_READY, CAUSE_NOT_SPECIFIED));
+                break;
+            case STATUS_IN_PROGRESS:
+                break;
+            case STATUS_NOT_STARTED:
+            default:
+                stopSelf();
         }
     }
 
