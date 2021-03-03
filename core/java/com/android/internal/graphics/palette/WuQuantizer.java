@@ -16,7 +16,6 @@
 
 package com.android.internal.graphics.palette;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,7 +119,11 @@ public class WuQuantizer implements Quantizer {
             }
         }
 
-        for (k = 0; k < mMaxColors; ++k) {
+        // If extraction is run on a set of pixels whose count is less than the
+        // number of max colors, then colors.length < max colors, and accesses
+        // to colors[index] inside the for loop throw an ArrayOutOfBoundsException.
+        int numColorsToCreate = (int) Math.min(mMaxColors, colors.length);
+        for (k = 0; k < numColorsToCreate; ++k) {
             weight = getVolume(cube[k], mWt);
             if (weight > 0) {
                 red = (int) (getVolume(cube[k], mMr) / weight);
