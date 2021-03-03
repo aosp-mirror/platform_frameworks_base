@@ -228,6 +228,8 @@ public final class InputMethodDebug {
                 return "HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR";
             case SoftInputShowHideReason.HIDE_REMOVE_CLIENT:
                 return "HIDE_REMOVE_CLIENT";
+            case SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY:
+                return "SHOW_RESTORE_IME_VISIBILITY";
             default:
                 return "Unknown=" + reason;
         }

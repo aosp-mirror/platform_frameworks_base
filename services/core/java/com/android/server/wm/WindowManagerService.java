@@ -8024,6 +8024,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 return dc.getImeTarget(IME_TARGET_LAYERING).getWindow().getName();
             }
         }
+
+        @Override
+        public boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {
+            return WindowManagerService.this.shouldRestoreImeVisibility(imeTargetWindowToken);
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {
@@ -8679,6 +8684,22 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mDisplayHashController.generateDisplayHash(screenshotHardwareBuffer.getHardwareBuffer(),
                 boundsInWindow, hashAlgorithm, callback);
+    }
+
+    boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {
+        synchronized (mGlobalLock) {
+            final WindowState imeTargetWindow = mWindowMap.get(imeTargetWindowToken);
+            if (imeTargetWindow == null) {
+                return false;
+            }
+            final Task imeTargetWindowTask = imeTargetWindow.getTask();
+            if (imeTargetWindowTask == null) {
+                return false;
+            }
+            final TaskSnapshot snapshot = mAtmService.getTaskSnapshot(imeTargetWindowTask.mTaskId,
+                    false /* isLowResolution */);
+            return snapshot != null && snapshot.hasImeSurface();
+        }
     }
 
     private void sendDisplayHashError(RemoteCallback callback, int errorCode) {
