@@ -8474,7 +8474,7 @@ package android.appwidget {
     field public static final int WIDGET_CATEGORY_HOME_SCREEN = 1; // 0x1
     field public static final int WIDGET_CATEGORY_KEYGUARD = 2; // 0x2
     field public static final int WIDGET_CATEGORY_SEARCHBOX = 4; // 0x4
-    field public static final int WIDGET_FEATURE_CONFIGURATION_OPTIONAL = 3; // 0x3
+    field public static final int WIDGET_FEATURE_CONFIGURATION_OPTIONAL = 4; // 0x4
     field public static final int WIDGET_FEATURE_HIDE_FROM_PICKER = 2; // 0x2
     field public static final int WIDGET_FEATURE_RECONFIGURABLE = 1; // 0x1
     field public int autoAdvanceViewId;

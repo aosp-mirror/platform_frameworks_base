@@ -8154,7 +8154,7 @@
             <flag name="hide_from_picker" value="0x2" />
               <!-- The widget provides a default configuration. The host may decide not to launch
                    the provided configuration activity. -->
-           <flag name="configuration_optional" value="0x3" />
+           <flag name="configuration_optional" value="0x4" />
         </attr>
         <!-- A resource identifier for a string containing a short description of the widget. -->
         <attr name="description" />
