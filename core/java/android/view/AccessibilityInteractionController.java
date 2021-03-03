@@ -436,7 +436,8 @@ public final class AccessibilityInteractionController {
         final List<AccessibilityNodeInfo> infos = mTempAccessibilityNodeInfoList;
         infos.clear();
         try {
-            if (mViewRootImpl.mView == null || mViewRootImpl.mAttachInfo == null) {
+            if (mViewRootImpl.mView == null || mViewRootImpl.mAttachInfo == null
+                    || viewId == null) {
                 return;
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
