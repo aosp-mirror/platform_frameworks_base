@@ -28,10 +28,13 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.TaskInfo;
 import android.content.Context;
+import android.content.LocusId;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
@@ -50,6 +53,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Unified task organizer for all components in the shell.
@@ -96,6 +100,17 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     }
 
     /**
+     * Callbacks for events on a task with a locus id.
+     */
+    public interface LocusIdListener {
+        /**
+         * Notifies when a task with a locusId becomes visible, when a visible task's locusId
+         * changes, or if a previously visible task with a locusId becomes invisible.
+         */
+        void onVisibilityChanged(int taskId, LocusId locus, boolean visible);
+    }
+
+    /**
      * Keys map from either a task id or {@link TaskListenerType}.
      * @see #addListenerForTaskId
      * @see #addListenerForType
@@ -108,6 +123,13 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     /** @see #setPendingLaunchCookieListener */
     private final ArrayMap<IBinder, TaskListener> mLaunchCookieToListener = new ArrayMap<>();
+
+    // Keeps track of taskId's with visible locusIds. Used to notify any {@link LocusIdListener}s
+    // that might be set.
+    private final SparseArray<LocusId> mVisibleTasksWithLocusId = new SparseArray<>();
+
+    /** @see #addLocusIdListener */
+    private final ArraySet<LocusIdListener> mLocusIdListeners = new ArraySet<>();
 
     private final Object mLock = new Object();
     private final StartingSurfaceDrawer mStartingSurfaceDrawer;
@@ -252,6 +274,28 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         }
     }
 
+    /**
+     * Adds a listener to be notified for {@link LocusId} visibility changes.
+     */
+    public void addLocusIdListener(LocusIdListener listener) {
+        synchronized (mLock) {
+            mLocusIdListeners.add(listener);
+            for (int i = 0; i < mVisibleTasksWithLocusId.size(); i++) {
+                listener.onVisibilityChanged(mVisibleTasksWithLocusId.keyAt(i),
+                        mVisibleTasksWithLocusId.valueAt(i), true /* visible */);
+            }
+        }
+    }
+
+    /**
+     * Removes listener.
+     */
+    public void removeLocusIdListener(LocusIdListener listener) {
+        synchronized (mLock) {
+            mLocusIdListeners.remove(listener);
+        }
+    }
+
     @Override
     public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
         mStartingSurfaceDrawer.addStartingWindow(info, appToken);
@@ -283,6 +327,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         if (listener != null) {
             listener.onTaskAppeared(info.getTaskInfo(), info.getLeash());
         }
+        notifyLocusVisibilityIfNeeded(info.getTaskInfo());
         notifySizeCompatUI(info.getTaskInfo(), listener);
     }
 
@@ -299,6 +344,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             if (!updated && newListener != null) {
                 newListener.onTaskInfoChanged(taskInfo);
             }
+            notifyLocusVisibilityIfNeeded(taskInfo);
             if (updated || !taskInfo.equalsForSizeCompat(data.getTaskInfo())) {
                 // Notify the size compat UI if the listener or task info changed.
                 notifySizeCompatUI(taskInfo, newListener);
@@ -327,6 +373,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             if (listener != null) {
                 listener.onTaskVanished(taskInfo);
             }
+            notifyLocusVisibilityIfNeeded(taskInfo);
             // Pass null for listener to remove the size compat UI on this task if there is any.
             notifySizeCompatUI(taskInfo, null /* taskListener */);
         }
@@ -353,6 +400,39 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             newListener.onTaskAppeared(taskInfo, leash);
         }
         return true;
+    }
+
+    private void notifyLocusVisibilityIfNeeded(TaskInfo taskInfo) {
+        final int taskId = taskInfo.taskId;
+        final LocusId prevLocus = mVisibleTasksWithLocusId.get(taskId);
+        final boolean sameLocus = Objects.equals(prevLocus, taskInfo.mTopActivityLocusId);
+        if (prevLocus == null) {
+            // New visible locus
+            if (taskInfo.mTopActivityLocusId != null && taskInfo.isVisible) {
+                mVisibleTasksWithLocusId.put(taskId, taskInfo.mTopActivityLocusId);
+                notifyLocusIdChange(taskId, taskInfo.mTopActivityLocusId, true /* visible */);
+            }
+        } else if (sameLocus && !taskInfo.isVisible) {
+            // Hidden locus
+            mVisibleTasksWithLocusId.remove(taskId);
+            notifyLocusIdChange(taskId, taskInfo.mTopActivityLocusId, false /* visible */);
+        } else if (!sameLocus) {
+            // Changed locus
+            if (taskInfo.isVisible) {
+                mVisibleTasksWithLocusId.put(taskId, taskInfo.mTopActivityLocusId);
+                notifyLocusIdChange(taskId, prevLocus, false /* visible */);
+                notifyLocusIdChange(taskId, taskInfo.mTopActivityLocusId, true /* visible */);
+            } else {
+                mVisibleTasksWithLocusId.remove(taskInfo.taskId);
+                notifyLocusIdChange(taskId, prevLocus, false /* visible */);
+            }
+        }
+    }
+
+    private void notifyLocusIdChange(int taskId, LocusId locus, boolean visible) {
+        for (int i = 0; i < mLocusIdListeners.size(); i++) {
+            mLocusIdListeners.valueAt(i).onVisibilityChanged(taskId, locus, visible);
+        }
     }
 
     /**
