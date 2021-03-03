@@ -519,7 +519,7 @@ public class ScreenshotController {
         setWindowFocusable(true);
 
         if (mConfigProxy.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SCREENSHOT_SCROLLING_ENABLED, false)) {
+                SystemUiDeviceConfigFlags.SCREENSHOT_SCROLLING_ENABLED, true)) {
             View decorView = mWindow.getDecorView();
 
             // Wait until this window is attached to request because it is
