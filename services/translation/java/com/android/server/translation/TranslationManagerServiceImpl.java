@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.translation.TranslationServiceInfo;
 import android.util.Slog;
@@ -133,18 +134,40 @@ final class TranslationManagerServiceImpl extends
     }
 
     @GuardedBy("mLock")
-    public void updateUiTranslationState(@UiTranslationState int state,
+    public void updateUiTranslationStateLocked(@UiTranslationState int state,
             TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
             int taskId) {
-        // TODO(b/177394471): use taskId as a temporary solution. The solution may use a token to
-        //  content capture manager service find the activitytoken. Then we can use this
-        //  activitytoken to find the activity to callback. But we need to change cc API so use
-        //  temporary solution.
-        final ActivityTokens tokens = mActivityTaskManagerInternal.getTopActivityForTask(taskId);
-        if (tokens == null) {
+        // deprecated
+        final ActivityTokens taskTopActivityTokens =
+                mActivityTaskManagerInternal.getTopActivityForTask(taskId);
+        if (taskTopActivityTokens == null) {
             Slog.w(TAG, "Unknown activity to query for update translation state.");
             return;
         }
+        updateUiTranslationStateByActivityTokens(taskTopActivityTokens, state, sourceSpec, destSpec,
+                viewIds);
+    }
+
+    @GuardedBy("mLock")
+    public void updateUiTranslationStateLocked(@UiTranslationState int state,
+            TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
+            IBinder token, int taskId) {
+        // Get top activity for a given task id
+        final ActivityTokens taskTopActivityTokens =
+                mActivityTaskManagerInternal.getTopActivityForTask(taskId);
+        if (taskTopActivityTokens == null
+                || taskTopActivityTokens.getShareableActivityToken() != token) {
+            Slog.w(TAG, "Unknown activity or it was finished to query for update "
+                    + "translation state for token=" + token + " taskId=" + taskId);
+            return;
+        }
+        updateUiTranslationStateByActivityTokens(taskTopActivityTokens, state, sourceSpec, destSpec,
+                viewIds);
+    }
+
+    private void updateUiTranslationStateByActivityTokens(ActivityTokens tokens,
+            @UiTranslationState int state, TranslationSpec sourceSpec, TranslationSpec destSpec,
+            List<AutofillId> viewIds) {
         try {
             tokens.getApplicationThread().updateUiTranslationState(tokens.getActivityToken(), state,
                     sourceSpec, destSpec, viewIds);
