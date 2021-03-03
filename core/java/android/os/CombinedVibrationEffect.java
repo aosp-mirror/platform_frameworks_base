@@ -76,7 +76,9 @@ public abstract class CombinedVibrationEffect implements Parcelable {
      * A sequential vibration effect should be performed by multiple vibrators in order.
      *
      * @see CombinedVibrationEffect.SequentialCombination
+     * @hide
      */
+    @TestApi
     @NonNull
     public static SequentialCombination startSequential() {
         return new SequentialCombination();
@@ -162,7 +164,9 @@ public abstract class CombinedVibrationEffect implements Parcelable {
      * A combination of haptic effects that should be played in multiple vibrators in sequence.
      *
      * @see CombinedVibrationEffect#startSequential()
+     * @hide
      */
+    @TestApi
     public static final class SequentialCombination {
 
         private final ArrayList<CombinedVibrationEffect> mEffects = new ArrayList<>();
