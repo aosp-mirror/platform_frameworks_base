@@ -47,15 +47,6 @@ oneway interface IAccessibilityInteractionConnectionCallback {
         int interactionId);
 
     /**
-     * Sets the result of a prefetch request that returns {@link AccessibilityNodeInfo}s.
-     *
-     * @param root The {@link AccessibilityNodeInfo} for which the prefetching is based off of.
-     * @param infos The result {@link AccessibilityNodeInfo}s.
-     */
-    void setPrefetchAccessibilityNodeInfoResult(
-        in List<AccessibilityNodeInfo> infos, int interactionId);
-
-    /**
      * Sets the result of a request to perform an accessibility action.
      *
      * @param Whether the action was performed.
