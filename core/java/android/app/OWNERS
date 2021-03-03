@@ -73,6 +73,7 @@ per-file ClientTransactionHandler.java = file:/services/core/java/com/android/se
 per-file Fragment.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *Task* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file Window* = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ConfigurationController.java = file:/services/core/java/com/android/server/wm/OWNERS
 
 # TODO(b/174932174): determine the ownership of KeyguardManager.java
 
