@@ -976,7 +976,7 @@ public class ConnectivityManager {
      * Specify that the traffic for this user should by follow the default rules.
      * @hide
      */
-    // TODO : @SystemApi
+    @SystemApi
     public static final int PROFILE_NETWORK_PREFERENCE_DEFAULT = 0;
 
     /**
@@ -986,7 +986,7 @@ public class ConnectivityManager {
      * if no such network is available.
      * @hide
      */
-    // TODO : @SystemApi
+    @SystemApi
     public static final int PROFILE_NETWORK_PREFERENCE_ENTERPRISE = 1;
 
     /** @hide */
@@ -5077,21 +5077,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Listener for {@link #setOemNetworkPreference(OemNetworkPreferences, Executor,
-     * OnSetOemNetworkPreferenceListener)}.
-     * @hide
-     */
-    // TODO : remove this in favor of a vanilla runnable to follow API guidance to use
-    // functional interfaces when they are appropriate.
-    @SystemApi
-    public interface OnSetOemNetworkPreferenceListener {
-        /**
-         * Called when setOemNetworkPreference() successfully completes.
-         */
-        void onComplete();
-    }
-
-    /**
      * Used by automotive devices to set the network preferences used to direct traffic at an
      * application level as per the given OemNetworkPreferences. An example use-case would be an
      * automotive OEM wanting to provide connectivity for applications critical to the usage of a
@@ -5113,16 +5098,16 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE)
     public void setOemNetworkPreference(@NonNull final OemNetworkPreferences preference,
             @Nullable @CallbackExecutor final Executor executor,
-            @Nullable final OnSetOemNetworkPreferenceListener listener) {
+            @Nullable final Runnable listener) {
         Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
         if (null != listener) {
             Objects.requireNonNull(executor, "Executor must be non-null");
         }
-        final IOnSetOemNetworkPreferenceListener listenerInternal = listener == null ? null :
-                new IOnSetOemNetworkPreferenceListener.Stub() {
+        final IOnCompleteListener listenerInternal = listener == null ? null :
+                new IOnCompleteListener.Stub() {
                     @Override
                     public void onComplete() {
-                        executor.execute(listener::onComplete);
+                        executor.execute(listener::run);
                     }
         };
 
@@ -5148,7 +5133,12 @@ public class ConnectivityManager {
      * @throws SecurityException if missing the appropriate permissions.
      * @hide
      */
-    // TODO : @SystemApi
+    // This function is for establishing per-profile default networking and can only be called by
+    // the device policy manager, running as the system server. It would make no sense to call it
+    // on a context for a user because it does not establish a setting on behalf of a user, rather
+    // it establishes a setting for a user on behalf of the DPM.
+    @SuppressLint({"UserHandle"})
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void setProfileNetworkPreference(@NonNull final UserHandle profile,
             @ProfileNetworkPreference final int preference,

@@ -21,7 +21,6 @@ import android.net.ConnectionInfo;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IOnCompleteListener;
-import android.net.IOnSetOemNetworkPreferenceListener;
 import android.net.INetworkActivityListener;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
@@ -217,7 +216,7 @@ interface IConnectivityManager
     void unregisterQosCallback(in IQosCallback callback);
 
     void setOemNetworkPreference(in OemNetworkPreferences preference,
-            in IOnSetOemNetworkPreferenceListener listener);
+            in IOnCompleteListener listener);
 
     void setProfileNetworkPreference(in UserHandle profile, int preference,
             in IOnCompleteListener listener);

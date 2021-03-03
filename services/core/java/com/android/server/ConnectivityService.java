@@ -99,7 +99,6 @@ import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
 import android.net.IOnCompleteListener;
-import android.net.IOnSetOemNetworkPreferenceListener;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
 import android.net.InetAddresses;
@@ -4544,9 +4543,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     handleSetRequireVpnForUids(toBool(msg.arg1), (UidRange[]) msg.obj);
                     break;
                 case EVENT_SET_OEM_NETWORK_PREFERENCE: {
-                    final Pair<OemNetworkPreferences, IOnSetOemNetworkPreferenceListener> arg =
-                            (Pair<OemNetworkPreferences,
-                                    IOnSetOemNetworkPreferenceListener>) msg.obj;
+                    final Pair<OemNetworkPreferences, IOnCompleteListener> arg =
+                            (Pair<OemNetworkPreferences, IOnCompleteListener>) msg.obj;
                     handleSetOemNetworkPreference(arg.first, arg.second);
                     break;
                 }
@@ -9279,13 +9277,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * Calling this will overwrite the existing preference.
      *
      * @param preference {@link OemNetworkPreferences} The application network preference to be set.
-     * @param listener {@link ConnectivityManager.OnSetOemNetworkPreferenceListener} Listener used
+     * @param listener {@link ConnectivityManager.OnCompleteListener} Listener used
      * to communicate completion of setOemNetworkPreference();
      */
     @Override
     public void setOemNetworkPreference(
             @NonNull final OemNetworkPreferences preference,
-            @Nullable final IOnSetOemNetworkPreferenceListener listener) {
+            @Nullable final IOnCompleteListener listener) {
 
         enforceAutomotiveDevice();
         enforceOemNetworkPreferencesPermission();
@@ -9317,7 +9315,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void handleSetOemNetworkPreference(
             @NonNull final OemNetworkPreferences preference,
-            @Nullable final IOnSetOemNetworkPreferenceListener listener) {
+            @Nullable final IOnCompleteListener listener) {
         Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
         if (DBG) {
             log("set OEM network preferences :" + preference.toString());
