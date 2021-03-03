@@ -59,6 +59,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Controls the lifecycle of the {@link ActiveConnection} to an {@link ExternalStorageService}
@@ -323,6 +324,23 @@ public final class StorageUserConnection {
             }
         }
 
+        private void asyncBestEffort(Consumer<IExternalStorageService> consumer) {
+            synchronized (mLock) {
+                if (mRemoteFuture == null) {
+                    Slog.w(TAG, "Dropping async request service is not bound");
+                    return;
+                }
+
+                IExternalStorageService service = mRemoteFuture.getNow(null);
+                if (service == null) {
+                    Slog.w(TAG, "Dropping async request service is not connected");
+                    return;
+                }
+
+                consumer.accept(service);
+            }
+        }
+
         private void waitForAsyncVoid(AsyncStorageServiceCall asyncCall) throws Exception {
             CompletableFuture<Void> opFuture = new CompletableFuture<>();
             RemoteCallback callback = new RemoteCallback(result -> setResult(result, opFuture));
@@ -407,13 +425,13 @@ public final class StorageUserConnection {
 
         public void notifyAnrDelayStarted(String packgeName, int uid, int tid, int reason)
                 throws ExternalStorageServiceException {
-            try {
-                waitForAsyncVoid((service, callback) ->
-                        service.notifyAnrDelayStarted(packgeName, uid, tid, reason, callback));
-            } catch (Exception e) {
-                throw new ExternalStorageServiceException("Failed to notify ANR delay started: "
-                        + packgeName, e);
-            }
+            asyncBestEffort(service -> {
+                try {
+                    service.notifyAnrDelayStarted(packgeName, uid, tid, reason);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to notify ANR delay started", e);
+                }
+            });
         }
 
         private void setResult(Bundle result, CompletableFuture<Void> future) {
