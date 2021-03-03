@@ -1190,16 +1190,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutYDiff = 0;
         } else {
             windowFrames.mContainingFrame.set(getBounds());
-            if (mActivityRecord != null && !mActivityRecord.mFrozenBounds.isEmpty()) {
-
-                // If the bounds are frozen, we still want to translate the window freely and only
-                // freeze the size.
-                Rect frozen = mActivityRecord.mFrozenBounds.peek();
-                windowFrames.mContainingFrame.right =
-                        windowFrames.mContainingFrame.left + frozen.width();
-                windowFrames.mContainingFrame.bottom =
-                        windowFrames.mContainingFrame.top + frozen.height();
-            }
             // IME is up and obscuring this window. Adjust the window position so it is visible.
             if (isImeTarget) {
                 if (inFreeformWindowingMode()) {
@@ -2066,23 +2056,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         super.onResize();
-    }
-
-    void onUnfreezeBounds() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            c.onUnfreezeBounds();
-        }
-
-        if (!mHasSurface) {
-            return;
-        }
-
-        mLayoutNeeded = true;
-        setDisplayLayoutNeeded();
-        if (!mWmService.mResizingWindows.contains(this)) {
-            mWmService.mResizingWindows.add(this);
-        }
     }
 
     /**
@@ -3579,10 +3552,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public Configuration getConfiguration() {
-        if (mActivityRecord != null && mActivityRecord.mFrozenMergedConfig.size() > 0) {
-            return mActivityRecord.mFrozenMergedConfig.peek();
-        }
-
         // If the process has not registered to any display area to listen to the configuration
         // change, we can simply return the mFullConfiguration as default.
         if (!registeredForDisplayAreaConfigChanges()) {
@@ -3944,14 +3913,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return true;
         }
 
-        // If the bounds are currently frozen, it means that the layout size that the app sees
-        // and the bounds we clip this window to might be different. In order to avoid holes, we
-        // simulate that we are still resizing so the app fills the hole with the resizing
-        // background.
-        return (getDisplayContent().mDividerControllerLocked.isResizing()
-                        || mActivityRecord != null && !mActivityRecord.mFrozenBounds.isEmpty()) &&
-                !task.inFreeformWindowingMode() && !isGoneForLayout();
-
+        return getDisplayContent().mDividerControllerLocked.isResizing()
+                && !task.inFreeformWindowingMode() && !isGoneForLayout();
     }
 
     void setDragResizing() {

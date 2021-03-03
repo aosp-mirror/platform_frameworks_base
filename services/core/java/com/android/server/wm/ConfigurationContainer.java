@@ -141,14 +141,17 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             mChangeListeners.get(i).onMergedOverrideConfigurationChanged(
                     mMergedOverrideConfiguration);
         }
-        dispatchConfigurationToChildren();
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            dispatchConfigurationToChild(getChildAt(i), mFullConfiguration);
+        }
     }
 
-    void dispatchConfigurationToChildren() {
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final ConfigurationContainer child = getChildAt(i);
-            child.onConfigurationChanged(mFullConfiguration);
-        }
+    /**
+     * Dispatches the configuration to child when {@link #onConfigurationChanged(Configuration)} is
+     * called. This allows the derived classes to override how to dispatch the configuration.
+     */
+    void dispatchConfigurationToChild(E child, Configuration config) {
+        child.onConfigurationChanged(config);
     }
 
     /**
