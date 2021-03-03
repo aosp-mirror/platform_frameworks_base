@@ -421,6 +421,18 @@ public final class IncrementalManager {
         storage.unregisterStorageHealthListener();
     }
 
+    /**
+     * Returns the metrics of an Incremental Storage.
+     */
+    public IncrementalMetrics getMetrics(@NonNull String codePath) {
+        final IncrementalStorage storage = openStorage(codePath);
+        if (storage == null) {
+            // storage does not exist, package not installed
+            return null;
+        }
+        return new IncrementalMetrics(storage.getMetrics());
+    }
+
     /* Native methods */
     private static native boolean nativeIsEnabled();
     private static native boolean nativeIsV2Available();
