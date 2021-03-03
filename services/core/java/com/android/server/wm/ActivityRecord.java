@@ -7418,6 +7418,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 getPid(), info.applicationInfo.uid) == PERMISSION_GRANTED) {
             return false;
         }
+        // Do not sandbox to activity window bounds if the feature is disabled.
+        if (mDisplayContent != null && !mDisplayContent.sandboxDisplayApis()) {
+            return false;
+        }
         // Max bounds should be sandboxed where an activity is letterboxed (activity bounds will be
         // smaller than task bounds).
         if (!matchParentBounds()) {
