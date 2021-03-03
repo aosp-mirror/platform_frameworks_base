@@ -39,10 +39,6 @@ class DeviceStateToLayoutMap {
 
     public static final int STATE_DEFAULT = DeviceStateManager.INVALID_DEVICE_STATE;
 
-    // TODO - b/168208162 - Remove these when we check in static definitions for layouts
-    public static final int STATE_FOLDED = 100;
-    public static final int STATE_UNFOLDED = 101;
-
     private final SparseArray<Layout> mLayoutMap = new SparseArray<>();
 
     DeviceStateToLayoutMap(Context context) {
@@ -68,7 +64,7 @@ class DeviceStateToLayoutMap {
         return layout;
     }
 
-    private Layout create(int state) {
+    private Layout createLayout(int state) {
         if (mLayoutMap.contains(state)) {
             Slog.e(TAG, "Attempted to create a second layout for state " + state);
             return null;
@@ -79,10 +75,12 @@ class DeviceStateToLayoutMap {
         return layout;
     }
 
+    /**
+     * Loads config.xml-specified folded configurations for foldable devices.
+     */
     private void loadFoldedDisplayConfig(Context context) {
         final String[] strDisplayIds = context.getResources().getStringArray(
                 com.android.internal.R.array.config_internalFoldedPhysicalDisplayIds);
-
         if (strDisplayIds.length != 2 || TextUtils.isEmpty(strDisplayIds[0])
                 || TextUtils.isEmpty(strDisplayIds[1])) {
             Slog.w(TAG, "Folded display configuration invalid: [" + Arrays.toString(strDisplayIds)
@@ -103,19 +101,23 @@ class DeviceStateToLayoutMap {
 
         final int[] foldedDeviceStates = context.getResources().getIntArray(
                 com.android.internal.R.array.config_foldedDeviceStates);
+        final int[] unfoldedDeviceStates = context.getResources().getIntArray(
+                com.android.internal.R.array.config_unfoldedDeviceStates);
         // Only add folded states if folded state config is not empty
-        if (foldedDeviceStates.length == 0) {
+        if (foldedDeviceStates.length == 0 || unfoldedDeviceStates.length == 0) {
             return;
         }
 
-        // Create the folded state layout
-        final Layout foldedLayout = create(STATE_FOLDED);
-        foldedLayout.createDisplayLocked(
-                DisplayAddress.fromPhysicalDisplayId(displayIds[0]), true /*isDefault*/);
+        for (int state : foldedDeviceStates) {
+            // Create the folded state layout
+            createLayout(state).createDisplayLocked(
+                    DisplayAddress.fromPhysicalDisplayId(displayIds[0]), true /*isDefault*/);
+        }
 
-        // Create the unfolded state layout
-        final Layout unfoldedLayout = create(STATE_UNFOLDED);
-        unfoldedLayout.createDisplayLocked(
-                DisplayAddress.fromPhysicalDisplayId(displayIds[1]), true /*isDefault*/);
+        for (int state : unfoldedDeviceStates) {
+            // Create the unfolded state layout
+            createLayout(state).createDisplayLocked(
+                    DisplayAddress.fromPhysicalDisplayId(displayIds[1]), true /*isDefault*/);
+        }
     }
 }
