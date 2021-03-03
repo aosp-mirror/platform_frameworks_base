@@ -362,6 +362,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private List<Integer> mDirtyUserIds = new ArrayList<>();
 
     private final AtomicBoolean mBootCompleted = new AtomicBoolean();
+    private final AtomicBoolean mShutdown = new AtomicBoolean();
 
     /**
      * Note we use a fine-grained lock for {@link #mUnlockedUsers} due to b/64303666.
@@ -497,6 +498,12 @@ public class ShortcutService extends IShortcutService.Stub {
         localeFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL,
                 localeFilter, null, mHandler);
+
+        IntentFilter shutdownFilter = new IntentFilter();
+        shutdownFilter.addAction(Intent.ACTION_SHUTDOWN);
+        shutdownFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        mContext.registerReceiverAsUser(mShutdownReceiver, UserHandle.SYSTEM,
+                shutdownFilter, null, mHandler);
 
         injectRegisterUidObserver(mUidObserver, ActivityManager.UID_OBSERVER_PROCSTATE
                 | ActivityManager.UID_OBSERVER_GONE);
@@ -1161,6 +1168,9 @@ public class ShortcutService extends IShortcutService.Stub {
     void saveDirtyInfo() {
         if (DEBUG) {
             Slog.d(TAG, "saveDirtyInfo");
+        }
+        if (mShutdown.get()) {
+            return;
         }
         try {
             synchronized (mLock) {
@@ -3490,6 +3500,22 @@ public class ShortcutService extends IShortcutService.Stub {
                 wtf("Exception in mPackageMonitor.onReceive", e);
             } finally {
                 injectRestoreCallingIdentity(token);
+            }
+        }
+    };
+
+    private final BroadcastReceiver mShutdownReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Since it cleans up the shortcut directory and rewrite the ShortcutPackageItems
+            // in odrder during saveToXml(), it could lead to shortcuts missing when shutdown.
+            // We need it so that it can finish up saving before shutdown.
+            synchronized (mLock) {
+                if (mHandler.hasCallbacks(mSaveDirtyInfoRunner)) {
+                    mHandler.removeCallbacks(mSaveDirtyInfoRunner);
+                    saveDirtyInfo();
+                }
+                mShutdown.set(true);
             }
         }
     };
