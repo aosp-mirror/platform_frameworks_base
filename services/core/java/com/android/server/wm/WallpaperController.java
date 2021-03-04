@@ -126,12 +126,18 @@ class WallpaperController {
         }
 
         mFindResults.resetTopWallpaper = true;
-        if (w.mActivityRecord != null && !w.mActivityRecord.isVisible()
-                && !w.mActivityRecord.isAnimating(TRANSITION | PARENTS)) {
-
-            // If this window's app token is hidden and not animating, it is of no interest to us.
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Skipping hidden and not animating token: " + w);
-            return false;
+        if (mService.mAtmService.getTransitionController().getTransitionPlayer() == null) {
+            if (w.mActivityRecord != null && !w.mActivityRecord.isVisible()
+                    && !w.mActivityRecord.isAnimating(TRANSITION | PARENTS)) {
+                // If this window's app token is hidden and not animating, it is of no interest.
+                if (DEBUG_WALLPAPER) Slog.v(TAG, "Skipping hidden and not animating token: " + w);
+                return false;
+            }
+        } else {
+            if (w.mActivityRecord != null && !w.mActivityRecord.isVisibleRequested()) {
+                // An activity that is not going to remain visible shouldn't be the target.
+                return false;
+            }
         }
         if (DEBUG_WALLPAPER) Slog.v(TAG, "Win " + w + ": isOnScreen=" + w.isOnScreen()
                 + " mDrawState=" + w.mWinAnimator.mDrawState);
@@ -227,7 +233,10 @@ class WallpaperController {
     }
 
     boolean isWallpaperVisible() {
-        return isWallpaperVisible(mWallpaperTarget);
+        for (int i = mWallpaperTokens.size() - 1; i >= 0; --i) {
+            if (mWallpaperTokens.get(i).isVisible()) return true;
+        }
+        return false;
     }
 
     /**
@@ -240,7 +249,7 @@ class WallpaperController {
         }
     }
 
-    private boolean isWallpaperVisible(WindowState wallpaperTarget) {
+    private boolean shouldWallpaperBeVisible(WindowState wallpaperTarget) {
         if (DEBUG_WALLPAPER) {
             Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + " prev="
                     + mPrevWallpaperTarget);
@@ -255,18 +264,18 @@ class WallpaperController {
     }
 
     void updateWallpaperVisibility() {
-        final boolean visible = isWallpaperVisible(mWallpaperTarget);
+        final boolean visible = shouldWallpaperBeVisible(mWallpaperTarget);
 
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.updateWallpaperVisibility(visible);
+            token.setVisibility(visible);
         }
     }
 
-    void hideDeferredWallpapersIfNeeded() {
-        if (mDeferredHideWallpaper != null) {
-            hideWallpapers(mDeferredHideWallpaper);
-            mDeferredHideWallpaper = null;
+    void hideDeferredWallpapersIfNeededLegacy() {
+        for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
+            final WallpaperWindowToken token = mWallpaperTokens.get(i);
+            token.commitVisibility(false);
         }
     }
 
@@ -275,18 +284,9 @@ class WallpaperController {
                 && (mWallpaperTarget != winGoingAway || mPrevWallpaperTarget != null)) {
             return;
         }
-        if (mWallpaperTarget != null
-                && mWallpaperTarget.getDisplayContent().mAppTransition.isRunning()) {
-            // Defer hiding the wallpaper when app transition is running until the animations
-            // are done.
-            mDeferredHideWallpaper = winGoingAway;
-            return;
-        }
-
-        final boolean wasDeferred = (mDeferredHideWallpaper == winGoingAway);
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
-            token.hideWallpaperToken(wasDeferred, "hideWallpapers");
+            token.setVisibility(false);
             if (DEBUG_WALLPAPER_LIGHT && token.isVisible()) {
                 Slog.d(TAG, "Hiding wallpaper " + token
                         + " from " + winGoingAway + " target=" + mWallpaperTarget + " prev="
@@ -616,7 +616,7 @@ class WallpaperController {
 
         // The window is visible to the compositor...but is it visible to the user?
         // That is what the wallpaper cares about.
-        final boolean visible = mWallpaperTarget != null && isWallpaperVisible(mWallpaperTarget);
+        final boolean visible = mWallpaperTarget != null;
         if (DEBUG_WALLPAPER) {
             Slog.v(TAG, "Wallpaper visibility: " + visible + " at display "
                     + mDisplayContent.getDisplayId());

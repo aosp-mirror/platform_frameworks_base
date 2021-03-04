@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -111,6 +112,9 @@ class WindowToken extends WindowContainer<WindowState> {
      * When set to {@code true}, this window token is created from {@link android.app.WindowContext}
      */
     private final boolean mFromClientToken;
+
+    /** Have we told the window clients to show themselves? */
+    private boolean mClientVisible;
 
     /**
      * Used to fix the transform of the token to be rotated to a rotation different than it's
@@ -395,6 +399,21 @@ class WindowToken extends WindowContainer<WindowState> {
             builder.setParent(null);
         }
         return builder;
+    }
+
+    boolean isClientVisible() {
+        return mClientVisible;
+    }
+
+    void setClientVisible(boolean clientVisible) {
+        if (mClientVisible == clientVisible) {
+            return;
+        }
+        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                "setClientVisible: %s clientVisible=%b Callers=%s", this, clientVisible,
+                Debug.getCallers(5));
+        mClientVisible = clientVisible;
+        sendAppVisibilityToClients();
     }
 
     boolean hasFixedRotationTransform() {
