@@ -133,7 +133,7 @@ public class AmbientState {
      */
     public static int getNotificationLaunchHeight(Context context) {
         int zDistance = getZDistanceBetweenElements(context);
-        return getBaseHeight(zDistance) * 2;
+        return NOTIFICATIONS_HAVE_SHADOWS ? 2 * getBaseHeight(zDistance) : 4 * zDistance;
     }
 
     /**
