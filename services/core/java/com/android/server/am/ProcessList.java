@@ -1016,76 +1016,7 @@ public final class ProcessList {
     }
 
     public static String makeProcStateString(int curProcState) {
-        String procState;
-        switch (curProcState) {
-            case ActivityManager.PROCESS_STATE_PERSISTENT:
-                procState = "PER ";
-                break;
-            case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
-                procState = "PERU";
-                break;
-            case ActivityManager.PROCESS_STATE_TOP:
-                procState = "TOP ";
-                break;
-            case ActivityManager.PROCESS_STATE_BOUND_TOP:
-                procState = "BTOP";
-                break;
-            case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
-                procState = "FGS ";
-                break;
-            case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                procState = "BFGS";
-                break;
-            case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
-                procState = "IMPF";
-                break;
-            case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
-                procState = "IMPB";
-                break;
-            case ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND:
-                procState = "TRNB";
-                break;
-            case ActivityManager.PROCESS_STATE_BACKUP:
-                procState = "BKUP";
-                break;
-            case ActivityManager.PROCESS_STATE_SERVICE:
-                procState = "SVC ";
-                break;
-            case ActivityManager.PROCESS_STATE_RECEIVER:
-                procState = "RCVR";
-                break;
-            case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
-                procState = "TPSL";
-                break;
-            case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
-                procState = "HVY ";
-                break;
-            case ActivityManager.PROCESS_STATE_HOME:
-                procState = "HOME";
-                break;
-            case ActivityManager.PROCESS_STATE_LAST_ACTIVITY:
-                procState = "LAST";
-                break;
-            case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY:
-                procState = "CAC ";
-                break;
-            case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
-                procState = "CACC";
-                break;
-            case ActivityManager.PROCESS_STATE_CACHED_RECENT:
-                procState = "CRE ";
-                break;
-            case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
-                procState = "CEM ";
-                break;
-            case ActivityManager.PROCESS_STATE_NONEXISTENT:
-                procState = "NONE";
-                break;
-            default:
-                procState = "??";
-                break;
-        }
-        return procState;
+        return ActivityManager.procStateToString(curProcState);
     }
 
     public static int makeProcStateProtoEnum(int curProcState) {
@@ -3833,10 +3764,13 @@ public final class ProcessList {
     int getBlockStateForUid(UidRecord uidRec) {
         // Denotes whether uid's process state is currently allowed network access.
         final boolean isAllowed =
-                isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.getCurProcState())
+                isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.getCurProcState(),
+                        uidRec.curCapability)
                 || isProcStateAllowedWhileOnRestrictBackground(uidRec.getCurProcState());
         // Denotes whether uid's process state was previously allowed network access.
-        final boolean wasAllowed = isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.setProcState)
+        final boolean wasAllowed =
+                isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.setProcState,
+                        uidRec.setCapability)
                 || isProcStateAllowedWhileOnRestrictBackground(uidRec.setProcState);
 
         // When the uid is coming to foreground, AMS should inform the app thread that it should

@@ -601,11 +601,15 @@ public class ActivityManager {
     @TestApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 2;
 
+    /** @hide Process can access network despite any power saving resrictions */
+    public static final int PROCESS_CAPABILITY_NETWORK = 1 << 3;
+
     /** @hide all capabilities, the ORing of all flags in {@link ProcessCapability}*/
     @TestApi
     public static final int PROCESS_CAPABILITY_ALL = PROCESS_CAPABILITY_FOREGROUND_LOCATION
             | PROCESS_CAPABILITY_FOREGROUND_CAMERA
-            | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+            | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
+            | PROCESS_CAPABILITY_NETWORK;
     /**
      * All explicit capabilities. These are capabilities that need to be specified from manifest
      * file.
@@ -631,6 +635,15 @@ public class ActivityManager {
         pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0 ? 'L' : '-');
         pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0 ? 'C' : '-');
         pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0 ? 'M' : '-');
+        pw.print((caps & PROCESS_CAPABILITY_NETWORK) != 0 ? 'N' : '-');
+    }
+
+    /** @hide */
+    public static void printCapabilitiesSummary(StringBuilder sb, @ProcessCapability int caps) {
+        sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0 ? 'L' : '-');
+        sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0 ? 'C' : '-');
+        sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0 ? 'M' : '-');
+        sb.append((caps & PROCESS_CAPABILITY_NETWORK) != 0 ? 'N' : '-');
     }
 
     /**
@@ -641,11 +654,19 @@ public class ActivityManager {
         printCapabilitiesSummary(pw, caps);
         final int remain = caps & ~(PROCESS_CAPABILITY_FOREGROUND_LOCATION
                 | PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE);
+                | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
+                | PROCESS_CAPABILITY_NETWORK);
         if (remain != 0) {
             pw.print('+');
             pw.print(remain);
         }
+    }
+
+    /** @hide */
+    public static String getCapabilitiesSummary(@ProcessCapability int caps) {
+        final StringBuilder sb = new StringBuilder();
+        printCapabilitiesSummary(sb, caps);
+        return sb.toString();
     }
 
     // NOTE: If PROCESS_STATEs are added, then new fields must be added
@@ -4775,6 +4796,80 @@ public class ActivityManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** @hide */
+    public static String procStateToString(int procState) {
+        final String procStateStr;
+        switch (procState) {
+            case ActivityManager.PROCESS_STATE_PERSISTENT:
+                procStateStr = "PER ";
+                break;
+            case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
+                procStateStr = "PERU";
+                break;
+            case ActivityManager.PROCESS_STATE_TOP:
+                procStateStr = "TOP ";
+                break;
+            case ActivityManager.PROCESS_STATE_BOUND_TOP:
+                procStateStr = "BTOP";
+                break;
+            case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
+                procStateStr = "FGS ";
+                break;
+            case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
+                procStateStr = "BFGS";
+                break;
+            case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
+                procStateStr = "IMPF";
+                break;
+            case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
+                procStateStr = "IMPB";
+                break;
+            case ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND:
+                procStateStr = "TRNB";
+                break;
+            case ActivityManager.PROCESS_STATE_BACKUP:
+                procStateStr = "BKUP";
+                break;
+            case ActivityManager.PROCESS_STATE_SERVICE:
+                procStateStr = "SVC ";
+                break;
+            case ActivityManager.PROCESS_STATE_RECEIVER:
+                procStateStr = "RCVR";
+                break;
+            case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
+                procStateStr = "TPSL";
+                break;
+            case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
+                procStateStr = "HVY ";
+                break;
+            case ActivityManager.PROCESS_STATE_HOME:
+                procStateStr = "HOME";
+                break;
+            case ActivityManager.PROCESS_STATE_LAST_ACTIVITY:
+                procStateStr = "LAST";
+                break;
+            case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY:
+                procStateStr = "CAC ";
+                break;
+            case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
+                procStateStr = "CACC";
+                break;
+            case ActivityManager.PROCESS_STATE_CACHED_RECENT:
+                procStateStr = "CRE ";
+                break;
+            case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
+                procStateStr = "CEM ";
+                break;
+            case ActivityManager.PROCESS_STATE_NONEXISTENT:
+                procStateStr = "NONE";
+                break;
+            default:
+                procStateStr = "??";
+                break;
+        }
+        return procStateStr;
     }
 
     /**
