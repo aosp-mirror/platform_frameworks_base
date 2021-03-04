@@ -15,6 +15,8 @@
  */
 package android.security;
 
+import static android.security.Credentials.ACTION_MANAGE_CREDENTIALS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -38,6 +40,8 @@ import android.os.UserManager;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
+import android.system.keystore2.Domain;
+import android.system.keystore2.KeyDescriptor;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
 
@@ -122,6 +126,11 @@ public final class KeyChain {
     private static final String CERT_INSTALLER_PACKAGE = "com.android.certinstaller";
 
     /**
+     * Package name for Settings.
+     */
+    private static final String SETTINGS_PACKAGE = "com.android.settings";
+
+    /**
      * Extra for use with {@link #ACTION_CHOOSER}
      * @hide Also used by KeyChainActivity implementation
      */
@@ -200,6 +209,20 @@ public final class KeyChain {
      */
     // Compatible with old android.security.Credentials.PKCS12
     public static final String EXTRA_PKCS12 = "PKCS12";
+
+    /**
+     * Extra used by {@link #createManageCredentialsIntent(AppUriAuthenticationPolicy)} to specify
+     * the authentication policy of the credential management app.
+     *
+     * <p>The authentication policy declares which alias for a private key and certificate pair
+     * should be used for authentication, given a list of apps and URIs.
+     *
+     * <p>The extra value should be a {@link AppUriAuthenticationPolicy}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_AUTHENTICATION_POLICY =
+            "android.security.extra.AUTHENTICATION_POLICY";
 
     /**
      * Broadcast Action: Indicates the trusted storage has changed. Sent when
@@ -382,6 +405,23 @@ public final class KeyChain {
         Intent intent = new Intent(ACTION_INSTALL);
         intent.setClassName(CERT_INSTALLER_PACKAGE,
                             "com.android.certinstaller.CertInstallerMain");
+        return intent;
+    }
+
+    /**
+     * Returns an {@code Intent} that should be used by an app to request to manage the user's
+     * credentials. This is limited to unmanaged devices. The authentication policy must be
+     * provided to be able to make this request successfully.
+     *
+     * @param policy The authentication policy determines which alias for a private key and
+     *               certificate pair should be used for authentication.
+     */
+    @NonNull
+    public static Intent createManageCredentialsIntent(@NonNull AppUriAuthenticationPolicy policy) {
+        Intent intent = new Intent(ACTION_MANAGE_CREDENTIALS);
+        intent.setComponent(ComponentName.createRelative(SETTINGS_PACKAGE,
+                ".security.RequestManageCredentials"));
+        intent.putExtra(EXTRA_AUTHENTICATION_POLICY, policy);
         return intent;
     }
 
@@ -584,6 +624,33 @@ public final class KeyChain {
         return null;
     }
 
+    /**
+     * This prefix is used to disambiguate grant aliase strings from normal key alias strings.
+     * Technically, a key alias string can use the same prefix. However, a collision does not
+     * lead to privilege escalation, because grants are access controlled in the Keystore daemon.
+     * @hide
+     */
+    public static final String GRANT_ALIAS_PREFIX = "ks2_keychain_grant_id:";
+
+    private static KeyDescriptor getGrantDescriptor(String keyid) {
+        KeyDescriptor result = new KeyDescriptor();
+        result.domain = Domain.GRANT;
+        result.blob = null;
+        result.alias = null;
+        try {
+            result.nspace = Long.parseUnsignedLong(
+                    keyid.substring(GRANT_ALIAS_PREFIX.length()), 16 /* radix */);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return result;
+    }
+
+    /** @hide */
+    public static String getGrantString(KeyDescriptor key) {
+        return String.format(GRANT_ALIAS_PREFIX + "%016X", key.nspace);
+    }
+
     /** @hide */
     @Nullable @WorkerThread
     public static KeyPair getKeyPair(@NonNull Context context, @NonNull String alias)
@@ -607,11 +674,23 @@ public final class KeyChain {
 
         if (keyId == null) {
             return null;
+        }
+
+        if (AndroidKeyStoreProvider.isKeystore2Enabled()) {
+            try {
+                return android.security.keystore2.AndroidKeyStoreProvider
+                        .loadAndroidKeyStoreKeyPairFromKeystore(
+                                KeyStore2.getInstance(),
+                                getGrantDescriptor(keyId));
+            } catch (UnrecoverableKeyException | KeyPermanentlyInvalidatedException e) {
+                throw new KeyChainException(e);
+            }
         } else {
             try {
                 return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
                         KeyStore.getInstance(), keyId, KeyStore.UID_SELF);
-            } catch (RuntimeException | UnrecoverableKeyException | KeyPermanentlyInvalidatedException e) {
+            } catch (RuntimeException | UnrecoverableKeyException
+                    | KeyPermanentlyInvalidatedException e) {
                 throw new KeyChainException(e);
             }
         }
@@ -729,11 +808,8 @@ public final class KeyChain {
     @Deprecated
     public static boolean isBoundKeyAlgorithm(
             @NonNull @KeyProperties.KeyAlgorithmEnum String algorithm) {
-        if (!isKeyAlgorithmSupported(algorithm)) {
-            return false;
-        }
-
-        return KeyStore.getInstance().isHardwareBacked(algorithm);
+        // All supported algorithms are hardware backed. Individual keys may not be.
+        return true;
     }
 
     /** @hide */

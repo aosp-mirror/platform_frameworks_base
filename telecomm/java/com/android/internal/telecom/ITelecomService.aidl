@@ -179,9 +179,9 @@ interface ITelecomService {
     boolean isInCall(String callingPackage, String callingFeatureId);
 
     /**
-     * @see TelecomServiceImpl#hasCompanionInCallServiceAccess
+     * @see TelecomServiceImpl#hasManageOngoingCallsPermission
      */
-    boolean hasCompanionInCallServiceAccess(String callingPackage);
+    boolean hasManageOngoingCallsPermission(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#isInManagedCall
@@ -351,4 +351,8 @@ interface ITelecomService {
      */
     void setTestDefaultDialer(in String packageName);
 
+    /**
+     * @see TelecomServiceImpl#setTestCallDiagnosticService
+     */
+    void setTestCallDiagnosticService(in String packageName);
 }

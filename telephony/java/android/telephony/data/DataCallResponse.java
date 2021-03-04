@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.DataFailureCause;
@@ -135,8 +136,9 @@ public final class DataCallResponse implements Parcelable {
     private final @HandoverFailureMode int mHandoverFailureMode;
     private final int mPduSessionId;
     private final Qos mDefaultQos;
-    private final List<QosSession> mQosSessions;
+    private final List<QosBearerSession> mQosBearerSessions;
     private final SliceInfo mSliceInfo;
+    private final List<TrafficDescriptor> mTrafficDescriptors;
 
     /**
      * @param cause Data call fail cause. {@link DataFailCause#NONE} indicates no error.
@@ -186,8 +188,9 @@ public final class DataCallResponse implements Parcelable {
         mHandoverFailureMode = HANDOVER_FAILURE_MODE_LEGACY;
         mPduSessionId = PDU_SESSION_ID_NOT_SET;
         mDefaultQos = null;
-        mQosSessions = new ArrayList<>();
+        mQosBearerSessions = new ArrayList<>();
         mSliceInfo = null;
+        mTrafficDescriptors = new ArrayList<>();
     }
 
     private DataCallResponse(@DataFailureCause int cause, long suggestedRetryTime, int id,
@@ -196,8 +199,8 @@ public final class DataCallResponse implements Parcelable {
             @Nullable List<InetAddress> dnsAddresses, @Nullable List<InetAddress> gatewayAddresses,
             @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6,
             @HandoverFailureMode int handoverFailureMode, int pduSessionId,
-            @Nullable Qos defaultQos, @Nullable List<QosSession> qosSessions,
-            @Nullable SliceInfo sliceInfo) {
+            @Nullable Qos defaultQos, @Nullable List<QosBearerSession> qosBearerSessions,
+            @Nullable SliceInfo sliceInfo, @Nullable List<TrafficDescriptor> trafficDescriptors) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
         mId = id;
@@ -218,8 +221,11 @@ public final class DataCallResponse implements Parcelable {
         mHandoverFailureMode = handoverFailureMode;
         mPduSessionId = pduSessionId;
         mDefaultQos = defaultQos;
-        mQosSessions = qosSessions;
+        mQosBearerSessions = (qosBearerSessions == null)
+                ? new ArrayList<>() : new ArrayList<>(qosBearerSessions);
         mSliceInfo = sliceInfo;
+        mTrafficDescriptors = (trafficDescriptors == null)
+                ? new ArrayList<>() : new ArrayList<>(trafficDescriptors);
     }
 
     /** @hide */
@@ -245,9 +251,11 @@ public final class DataCallResponse implements Parcelable {
         mHandoverFailureMode = source.readInt();
         mPduSessionId = source.readInt();
         mDefaultQos = source.readParcelable(Qos.class.getClassLoader());
-        mQosSessions = new ArrayList<>();
-        source.readList(mQosSessions, QosSession.class.getClassLoader());
+        mQosBearerSessions = new ArrayList<>();
+        source.readList(mQosBearerSessions, QosBearerSession.class.getClassLoader());
         mSliceInfo = source.readParcelable(SliceInfo.class.getClassLoader());
+        mTrafficDescriptors = new ArrayList<>();
+        source.readList(mTrafficDescriptors, TrafficDescriptor.class.getClassLoader());
     }
 
     /**
@@ -274,9 +282,11 @@ public final class DataCallResponse implements Parcelable {
     }
 
     /**
-     * @return The network suggested data retry duration in milliseconds. {@code Long.MAX_VALUE}
-     * indicates data retry should not occur. {@link #RETRY_DURATION_UNDEFINED} indicates network
-     * did not suggest any retry duration.
+     * @return The network suggested data retry duration in milliseconds as specified in
+     * 3GPP TS 24.302 section 8.2.9.1.  The APN associated to this data call will be throttled for
+     * the specified duration unless {@link DataServiceCallback#onApnUnthrottled} is called.
+     * {@code Long.MAX_VALUE} indicates data retry should not occur.
+     * {@link #RETRY_DURATION_UNDEFINED} indicates network did not suggest any retry duration.
      */
     public long getRetryDurationMillis() {
         return mSuggestedRetryTime;
@@ -377,7 +387,6 @@ public final class DataCallResponse implements Parcelable {
      *
      * @hide
      */
-
     @Nullable
     public Qos getDefaultQos() {
         return mDefaultQos;
@@ -390,8 +399,8 @@ public final class DataCallResponse implements Parcelable {
      * @hide
      */
     @NonNull
-    public List<QosSession> getQosSessions() {
-        return mQosSessions;
+    public List<QosBearerSession> getQosBearerSessions() {
+        return mQosBearerSessions;
     }
 
     /**
@@ -400,6 +409,14 @@ public final class DataCallResponse implements Parcelable {
     @Nullable
     public SliceInfo getSliceInfo() {
         return mSliceInfo;
+    }
+
+    /**
+     * @return The traffic descriptors related to this data connection.
+     */
+    @NonNull
+    public List<TrafficDescriptor> getTrafficDescriptors() {
+        return mTrafficDescriptors;
     }
 
     @NonNull
@@ -423,8 +440,9 @@ public final class DataCallResponse implements Parcelable {
            .append(" handoverFailureMode=").append(getHandoverFailureMode())
            .append(" pduSessionId=").append(getPduSessionId())
            .append(" defaultQos=").append(mDefaultQos)
-           .append(" qosSessions=").append(mQosSessions)
+           .append(" qosBearerSessions=").append(mQosBearerSessions)
            .append(" sliceInfo=").append(mSliceInfo)
+           .append(" trafficDescriptors=").append(mTrafficDescriptors)
            .append("}");
         return sb.toString();
     }
@@ -439,14 +457,21 @@ public final class DataCallResponse implements Parcelable {
 
         DataCallResponse other = (DataCallResponse) o;
 
-        final boolean isQosSame = (mDefaultQos == null || other.mDefaultQos == null) ?
-                mDefaultQos == other.mDefaultQos :
-                mDefaultQos.equals(other.mDefaultQos);
+        final boolean isQosSame = (mDefaultQos == null || other.mDefaultQos == null)
+                ? mDefaultQos == other.mDefaultQos
+                : mDefaultQos.equals(other.mDefaultQos);
 
-        final boolean isQosSessionsSame = (mQosSessions == null || mQosSessions == null) ?
-                mQosSessions == other.mQosSessions :
-                mQosSessions.size() == other.mQosSessions.size()
-                && mQosSessions.containsAll(other.mQosSessions);
+        final boolean isQosBearerSessionsSame =
+                (mQosBearerSessions == null || other.mQosBearerSessions == null)
+                ? mQosBearerSessions == other.mQosBearerSessions
+                : mQosBearerSessions.size() == other.mQosBearerSessions.size()
+                && mQosBearerSessions.containsAll(other.mQosBearerSessions);
+
+        final boolean isTrafficDescriptorsSame =
+                (mTrafficDescriptors == null || other.mTrafficDescriptors == null)
+                ? mTrafficDescriptors == other.mTrafficDescriptors
+                : mTrafficDescriptors.size() == other.mTrafficDescriptors.size()
+                && mTrafficDescriptors.containsAll(other.mTrafficDescriptors);
 
         return mCause == other.mCause
                 && mSuggestedRetryTime == other.mSuggestedRetryTime
@@ -468,8 +493,9 @@ public final class DataCallResponse implements Parcelable {
                 && mHandoverFailureMode == other.mHandoverFailureMode
                 && mPduSessionId == other.mPduSessionId
                 && isQosSame
-                && isQosSessionsSame
-                && Objects.equals(mSliceInfo, other.mSliceInfo);
+                && isQosBearerSessionsSame
+                && Objects.equals(mSliceInfo, other.mSliceInfo)
+                && isTrafficDescriptorsSame;
     }
 
     @Override
@@ -477,7 +503,7 @@ public final class DataCallResponse implements Parcelable {
         return Objects.hash(mCause, mSuggestedRetryTime, mId, mLinkStatus, mProtocolType,
                 mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses, mPcscfAddresses,
                 mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId, mDefaultQos,
-                mQosSessions, mSliceInfo);
+                mQosBearerSessions, mSliceInfo, mTrafficDescriptors);
     }
 
     @Override
@@ -507,8 +533,9 @@ public final class DataCallResponse implements Parcelable {
         } else {
             dest.writeParcelable((NrQos)mDefaultQos, flags);
         }
-        dest.writeList(mQosSessions);
+        dest.writeList(mQosBearerSessions);
         dest.writeParcelable(mSliceInfo, flags);
+        dest.writeList(mTrafficDescriptors);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<DataCallResponse> CREATOR =
@@ -590,9 +617,11 @@ public final class DataCallResponse implements Parcelable {
 
         private Qos mDefaultQos;
 
-        private List<QosSession> mQosSessions = new ArrayList<>();
+        private List<QosBearerSession> mQosBearerSessions = new ArrayList<>();
 
         private SliceInfo mSliceInfo;
+
+        private List<TrafficDescriptor> mTrafficDescriptors = new ArrayList<>();
 
         /**
          * Default constructor for Builder.
@@ -804,15 +833,16 @@ public final class DataCallResponse implements Parcelable {
         /**
          * Set the dedicated bearer QOS sessions for this data connection.
          *
-         * @param qosSessions Dedicated bearer QOS (Quality Of Service) sessions received
+         * @param qosBearerSessions Dedicated bearer QOS (Quality Of Service) sessions received
          * from network.
          *
          * @return The same instance of the builder.
          *
          * @hide
          */
-        public @NonNull Builder setQosSessions(@NonNull List<QosSession> qosSessions) {
-            mQosSessions = qosSessions;
+        public @NonNull Builder setQosBearerSessions(
+                @NonNull List<QosBearerSession> qosBearerSessions) {
+            mQosBearerSessions = qosBearerSessions;
             return this;
         }
 
@@ -832,6 +862,24 @@ public final class DataCallResponse implements Parcelable {
         }
 
         /**
+         * The traffic descriptors for this data connection, as defined in 3GPP TS 24.526
+         * Section 5.2. They are used for URSP traffic matching as described in 3GPP TS 24.526
+         * Section 4.2.2. They includes an optional DNN, which, if present, must be used for traffic
+         * matching; it does not specify the end point to be used for the data call. The end point
+         * is specified by {@link DataProfile}, which must be used as the end point if one is not
+         * specified through URSP rules.
+         *
+         * @param trafficDescriptors the traffic descriptors for the data call.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setTrafficDescriptors(
+                @NonNull List<TrafficDescriptor> trafficDescriptors) {
+            mTrafficDescriptors = trafficDescriptors;
+            return this;
+        }
+
+        /**
          * Build the DataCallResponse.
          *
          * @return the DataCallResponse object.
@@ -840,7 +888,7 @@ public final class DataCallResponse implements Parcelable {
             return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
                     mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
                     mPcscfAddresses, mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId,
-                    mDefaultQos, mQosSessions, mSliceInfo);
+                    mDefaultQos, mQosBearerSessions, mSliceInfo, mTrafficDescriptors);
         }
     }
 }

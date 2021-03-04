@@ -6554,7 +6554,10 @@ public class AudioService extends IAudioService.Stub
     private void onSetVolumeIndexOnDevice(@NonNull DeviceVolumeUpdate update) {
         final VolumeStreamState streamState = mStreamStates[update.mStreamType];
         if (update.hasVolumeIndex()) {
-            final int index = update.getVolumeIndex();
+            int index = update.getVolumeIndex();
+            if (!checkSafeMediaVolume(update.mStreamType, index, update.mDevice)) {
+                index = safeMediaVolumeIndex(update.mDevice);
+            }
             streamState.setIndex(index, update.mDevice, update.mCaller,
                     // trusted as index is always validated before message is posted
                     true /*hasModifyAudioSettings*/);
@@ -7491,8 +7494,8 @@ public class AudioService extends IAudioService.Stub
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
     private static final int MUSIC_ACTIVE_POLL_PERIOD_MS = 60000;  // 1 minute polling interval
     private static final int SAFE_VOLUME_CONFIGURE_TIMEOUT_MS = 30000;  // 30s after boot completed
-    // check playback or record activity every 3 seconds for UIDs owning mode IN_COMMUNICATION
-    private static final int CHECK_MODE_FOR_UID_PERIOD_MS = 3000;
+    // check playback or record activity every 6 seconds for UIDs owning mode IN_COMMUNICATION
+    private static final int CHECK_MODE_FOR_UID_PERIOD_MS = 6000;
 
     private int safeMediaVolumeIndex(int device) {
         if (!mSafeMediaVolumeDevices.contains(device)) {
@@ -8129,6 +8132,7 @@ public class AudioService extends IAudioService.Stub
         public void postDisplaySafeVolumeWarning(int flags) {
             if (mController == null)
                 return;
+            flags = flags | AudioManager.FLAG_SHOW_UI;
             try {
                 mController.displaySafeVolumeWarning(flags);
             } catch (RemoteException e) {

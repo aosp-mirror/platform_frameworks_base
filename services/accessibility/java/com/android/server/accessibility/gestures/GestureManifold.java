@@ -94,17 +94,23 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
     private boolean mServiceHandlesDoubleTap = false;
     // Whether multi-finger gestures are enabled.
     boolean mMultiFingerGesturesEnabled;
+    // Whether the two-finger passthrough is enabled when multi-finger gestures are enabled.
+    private boolean mTwoFingerPassthroughEnabled;
     // A list of all the multi-finger gestures, for easy adding and removal.
     private final List<GestureMatcher> mMultiFingerGestures = new ArrayList<>();
+    // A list of two-finger swipes, for easy adding and removal when turning on or off two-finger
+    // passthrough.
+    private final List<GestureMatcher> mTwoFingerSwipes = new ArrayList<>();
     // Shared state information.
     private TouchState mState;
 
-    GestureManifold(Context context, Listener listener, TouchState state) {
+    GestureManifold(Context context, Listener listener, TouchState state, Handler handler) {
         mContext = context;
-        mHandler = new Handler(context.getMainLooper());
+        mHandler = handler;
         mListener = listener;
         mState = state;
         mMultiFingerGesturesEnabled = false;
+        mTwoFingerPassthroughEnabled = false;
         // Set up gestures.
         // Start with double tap.
         mGestures.add(new MultiTap(context, 2, GESTURE_DOUBLE_TAP, this));
@@ -161,14 +167,14 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
         mMultiFingerGestures.add(
                 new MultiFingerMultiTap(mContext, 4, 3, GESTURE_4_FINGER_TRIPLE_TAP, this));
         // Two-finger swipes.
-        mMultiFingerGestures.add(
+        mTwoFingerSwipes.add(
                 new MultiFingerSwipe(context, 2, DOWN, GESTURE_2_FINGER_SWIPE_DOWN, this));
-        mMultiFingerGestures.add(
+        mTwoFingerSwipes.add(
                 new MultiFingerSwipe(context, 2, LEFT, GESTURE_2_FINGER_SWIPE_LEFT, this));
-        mMultiFingerGestures.add(
+        mTwoFingerSwipes.add(
                 new MultiFingerSwipe(context, 2, RIGHT, GESTURE_2_FINGER_SWIPE_RIGHT, this));
-        mMultiFingerGestures.add(
-                new MultiFingerSwipe(context, 2, UP, GESTURE_2_FINGER_SWIPE_UP, this));
+        mTwoFingerSwipes.add(new MultiFingerSwipe(context, 2, UP, GESTURE_2_FINGER_SWIPE_UP, this));
+        mMultiFingerGestures.addAll(mTwoFingerSwipes);
         // Three-finger swipes.
         mMultiFingerGestures.add(
                 new MultiFingerSwipe(context, 3, DOWN, GESTURE_3_FINGER_SWIPE_DOWN, this));
@@ -356,6 +362,25 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                 mGestures.addAll(mMultiFingerGestures);
             } else {
                 mGestures.removeAll(mMultiFingerGestures);
+            }
+        }
+    }
+
+    public boolean isTwoFingerPassthroughEnabled() {
+        return mTwoFingerPassthroughEnabled;
+    }
+
+    public void setTwoFingerPassthroughEnabled(boolean mode) {
+        if (mTwoFingerPassthroughEnabled != mode) {
+            mTwoFingerPassthroughEnabled = mode;
+            if (!mode) {
+                mMultiFingerGestures.addAll(mTwoFingerSwipes);
+                if (mMultiFingerGesturesEnabled) {
+                    mGestures.addAll(mTwoFingerSwipes);
+                }
+            } else {
+                mMultiFingerGestures.removeAll(mTwoFingerSwipes);
+                mGestures.removeAll(mTwoFingerSwipes);
             }
         }
     }

@@ -125,8 +125,10 @@ public class AndroidPackageUtils {
     public static void validatePackageDexMetadata(AndroidPackage pkg)
             throws PackageParserException {
         Collection<String> apkToDexMetadataList = getPackageDexMetadata(pkg).values();
+        String packageName = pkg.getPackageName();
+        long versionCode = pkg.toAppInfoWithoutState().longVersionCode;
         for (String dexMetadata : apkToDexMetadataList) {
-            DexMetadataHelper.validateDexMetadataFile(dexMetadata);
+            DexMetadataHelper.validateDexMetadataFile(dexMetadata, packageName, versionCode);
         }
     }
 

@@ -40,7 +40,4 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Телефон құлпын ашуға <xliff:g id="NUMBER">%d</xliff:g> рет сәтсіз әрекет жасалды. Жұмыс профилі өшіріліп, оның бүкіл деректері жойылады."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Құлыпты ашу өрнегі <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате енгізілді. <xliff:g id="NUMBER_1">%2$d</xliff:g> әрекет қалды. Одан кейін планшетті есептік жазба арқылы ашу сұралады. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Құлыпты ашу өрнегі <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате енгізілді. <xliff:g id="NUMBER_1">%2$d</xliff:g> әрекет қалды. Одан кейін телефонды есептік жазба арқылы ашу сұралады. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
-    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Басқа опцияларды көру үшін телефон құлпын ашыңыз."</string>
-    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Басқа опцияларды көру үшін планшет құлпын ашыңыз."</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Басқа опцияларды көру үшін құрылғы құлпын ашыңыз."</string>
 </resources>

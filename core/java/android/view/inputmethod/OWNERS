@@ -2,3 +2,5 @@
 set noparent
 
 include /services/core/java/com/android/server/inputmethod/OWNERS
+
+per-file *InlineSuggestion* = file:/core/java/android/service/autofill/OWNERS

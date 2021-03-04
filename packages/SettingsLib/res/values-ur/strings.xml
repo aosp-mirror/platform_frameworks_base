@@ -31,7 +31,7 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"توثیق کا مسئلہ"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"منسلک نہیں ہو سکتا ہے"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' سے منسلک نہیں ہو سکتا ہے"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"پاس ورڈ چیک کر کے دوبارہ کوشش کریں"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"پاسورڈ چیک کر کے دوبارہ کوشش کریں"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"رینج میں نہیں ہے"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"خودکار طور پر منسلک نہیں ہو گا"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"انٹرنیٹ تک کوئی رسائی نہیں"</string>
@@ -197,9 +197,9 @@
     <string name="category_personal" msgid="6236798763159385225">"ذاتی"</string>
     <string name="category_work" msgid="4014193632325996115">"دفتر"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ڈویلپر کے اختیارات"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"ڈویلپر کے اختیارات فعال کریں"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"ڈیولپر کے اختیارات فعال کریں"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ایپ ڈویلپمنٹ کیلئے اختیارات سیٹ کریں"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"اس صارف کیلئے ڈویلپر کے اختیارات دستیاب نہیں ہیں"</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"اس صارف کیلئے ڈیولپر کے اختیارات دستیاب نہیں ہیں"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"‏VPN ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ٹیدرنگ ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"رسائی کی جگہ کے نام کی ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"وائرلیس ڈیبگنگ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"دستیاب آلات کو دیکھنے اور استعمال کرنے کے لیے، وائرلیس ڈیبگنگ آن کریں"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"‏QR کوڈ کے ذریعے آلہ کا جوڑا بنائیں"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"‏QR کوڈ اسکینر کا استعمال کر کے نئے آلات کا جوڑا بنائیں"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"‏QR کوڈ اسکینر کا استعمال کر کے نئے آلہ کا جوڑا بنائیں"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"جوڑا بنانے کے کوڈ کے ذریعے آلہ کا جوڑا بنائیں"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"چھ ہندسوں کا کوڈ استعمال کر کے نئے آلات کا جوڑا بنائیں"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"جوڑا بنائے گئے آلات"</string>
@@ -231,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"‏آلہ کا جوڑا بنانے میں ناکام۔ یا تو QR کوڈ غلط تھا، یا آلہ اسی نیٹ ورک سے منسلک نہیں ہے۔"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏IP پتہ اور پورٹ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"‏QR کوڈ اسکین کریں"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏QR کوڈ اسکین کر کے Wi-Fi پر آلہ کا جوڑا بنائیں"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏براہ کرم ایک Wi-Fi نیٹ ورک سے منسلک ہوں"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"‏QR کوڈ اسکین کر کے Wi-Fi پر آلہ کا جوڑا بنائیں"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb، ڈیبگ، dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"بگ رپورٹ کا شارٹ کٹ"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"بگ رپورٹ لینے کیلئے پاور مینو میں ایک بٹن دکھائیں"</string>
@@ -251,7 +250,6 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"وائرلیس ڈسپلے سرٹیفیکیشن"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏Wi‑Fi وربوس لاگنگ فعال کریں"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏Wi‑Fi اسکین کو زبردستی روکا جا رہا ہے"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏بہتر Wi-Fi ‏ MAC رینڈمائزیشن"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"موبائل ڈیٹا ہمیشہ فعال رکھیں"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ٹیدرنگ ہارڈویئر سرعت کاری"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"بغیر نام والے بلوٹوتھ آلات دکھائیں"</string>
@@ -283,7 +281,6 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"بیٹری ڈرین کم کرتا ہے اور نیٹ ورک کارکردگی کو بہتر بناتا ہے"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"‏جب یہ وضع فعال ہوتا ہے تو، اس آلہ کا MAC پتہ ہر بار تبدیل ہو سکتا ہے جب یہ کسی نیٹ ورک سے منسلک ہوتا ہے جس میں MAC ہے رینڈمائزیشن کو فعال کرتا ہے۔"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"میٹرڈ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"غیر میٹر شدہ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"لاگر بفر کے سائز"</string>
@@ -301,8 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"اگر دستیاب ہو تو ٹیدرنگ ہارڈویئر سرعت کاری کا استعمال کریں"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"‏USB ڈیبگ کرنے کی اجازت دیں؟"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"‏USB ڈیبگ کرنا صرف ڈیولپمنٹ کے مقاصد کیلئے ہے۔ اپنے کمپیوٹر اور اپنے آلہ کے درمیان ڈیٹا کاپی کرنے کیلئے اسے استعمال کریں، بغیر اطلاع کے اپنے آلہ پر ایپس انسٹال کریں اور لاگ ڈیٹا پڑھیں۔"</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"وائرلیس ڈیبگنگ کی اجازت دیں؟"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"وائرلیس ڈیبگنگ صرف ڈیولپمنٹ کے مقاصد کے لیے ہے۔ اپنے کمپیوٹر اور اپنے آلہ کے درمیان ڈیٹا کاپی کرنے کے لیے اسے استعمال کریں، بغیر اطلاع کے اپنے آلہ پر ایپس انسٹال کریں اور لاگ ڈیٹا پڑھیں۔"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"وائرلیس ڈیبگ کرنے کی اجازت دیں؟"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"وائرلیس ڈیبگ کرنا صرف ڈیولپمنٹ کے مقاصد کے لیے ہے۔ اپنے کمپیوٹر اور اپنے آلہ کے درمیان ڈیٹا کاپی کرنے کے لیے اسے استعمال کریں، بغیر اطلاع کے اپنے آلہ پر ایپس انسٹال کریں اور لاگ ڈیٹا پڑھیں۔"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"‏اپنے ذریعہ پہلے سے اجازت یافتہ سبھی کمپیوٹرز سے USB ڈیبگ کرنے کی رسائی کو کالعدم کریں؟"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"ڈویلپمنٹ ترتیبات کی اجازت دیں؟"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"یہ ترتیبات صرف ڈویلپمنٹ استعمال کے ارادے سے ہیں۔ ان سے آپ کا آلہ اور اس پر موجود ایپلیکیشنز بریک ہو سکتی یا غلط برتاؤ کر سکتی ہیں۔"</string>
@@ -311,7 +308,6 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"‏بغیر نام والے بلوٹوتھ آلات (صرف MAC پتے) ڈسپلے کئے جائیں گے"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ریموٹ آلات کے ساتھ والیوم کے مسائل مثلاً نا قابل قبول حد تک بلند والیوم یا کنٹرول نہ ہونے کی صورت میں بلو ٹوتھ مطلق والیوم والی خصوصیت کو غیر فعال کریں۔"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"‏بلوٹوتھ Gabeldorsche خصوصیت کے انبار کو فعال کرتا ہے۔"</string>
-    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"بہتر کردہ کنیکٹوٹی کی خصوصیات کو فعال کرتا ہے۔"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"مقامی ٹرمینل"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"مقامی شیل رسائی پیش کرنے والی ٹرمینل ایپ فعال کریں"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏HDCP چیکنگ"</string>
@@ -358,8 +354,6 @@
     <string name="track_frame_time" msgid="522674651937771106">"‏پروفائل HWUI رینڈرنگ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏GPU ڈیبگ پرتیں فعال کریں"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏ڈیبگ ایپس کیلئے GPU ڈیبگ پرتوں کو لوڈ کرنے دیں"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"وربوس وینڈر لاگنگ فعال کریں"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"اضافی آلہ کے مخصوص وینڈر لاگز کو بگ رپورٹس میں شامل کریں، جن میں نجی معلومات، بیٹری کا زیادہ استعمال اور/یا اسٹوریج کا زیادہ استعمال شامل ہوسکتے ہیں۔"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ونڈو اینیمیشن اسکیل"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ٹرانزیشن اینیمیشن اسکیل"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"اینیمیٹر دورانیے کا اسکیل"</string>
@@ -418,7 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"‏Protanomaly (سرخ سبز)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"‏Tritanomaly (نیلا پیلا)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"رنگ کی اصلاح"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"رنگ کی اصلاح آپ کو یہ ایڈجسٹ کرنے کی سہولت دیتی ہے کہ آپ کے آلے پر رنگ کیسے ڈسپلے کئے جاتے ہیں"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"رنگ کی درستگی رنگ نہ دکھائی دینے والے لوگوں کی رنگوں کو مزید درست طریقے سے دیکھنے میں مدد کرتی ہے"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> کے ذریعہ منسوخ کردیا گیا"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"تقریباً <xliff:g id="TIME_REMAINING">%1$s</xliff:g> باقی ہے"</string>
@@ -432,11 +426,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> تک"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"‫<xliff:g id="TIME">%1$s</xliff:g> تک بیٹری ختم ہو سکتی ہے"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے"</string>
-    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"<xliff:g id="TIME">%1$s</xliff:g> کے بعد بیٹری لائف بڑھائیں"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"فون جلد ہی بند ہو سکتا ہے"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ٹیبلیٹ جلد ہی بند ہو سکتا ہے"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"آلہ جلد ہی بند ہو سکتا ہے"</string>
@@ -507,50 +501,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ہر بار پوچھیں"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"یہاں تک کہ آپ آف کر دیں"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ابھی ابھی"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"فون اسپیکر"</string>
+    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"یہ آلہ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"منسلک کرنے میں مسئلہ پیش آ گیا۔ آلہ کو آف اور بیک آن کریں"</string>
-    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"وائرڈ آڈیو آلہ"</string>
-    <string name="help_label" msgid="3528360748637781274">"مدد اور تاثرات"</string>
-    <string name="storage_category" msgid="2287342585424631813">"اسٹوریج"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"اشتراک کردہ ڈیٹا"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"اشتراک کردہ ڈیٹا میں ترمیم اور ملاحظہ کریں"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"اس صارف کے لیے کوئی اشتراک کردہ ڈیٹا نہیں ہے۔"</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"اشتراک کردہ ڈیٹا بازیافت کرنے میں ایک خرابی تھی۔ دوبارہ کوشش کریں۔"</string>
-    <string name="blob_id_text" msgid="8680078988996308061">"‏اشتراک کردہ ڈیٹا کی ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"میعاد کے اختتام کی تاریخ <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"اشتراک کردہ ڈیٹا حذف کرنے میں ایک خرابی پیش آ گئی تھی۔"</string>
-    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"اس اشتراک کردہ ڈیٹا کے لیے کوئی لیز حاصل نہیں کی گئی ہے۔ کیا آپ اسے حذف کرنا چاہیں گے؟"</string>
-    <string name="accessor_info_title" msgid="8289823651512477787">"ڈیٹا کا اشتراک کرنے والی ایپس"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"ایپ کے ذریعے کوئی بھی تفصیل فراہم نہیں کی گئی۔"</string>
-    <string name="accessor_expires_text" msgid="4625619273236786252">"لیز کی میعاد <xliff:g id="DATE">%s</xliff:g> کو ختم ہونے والی ہے"</string>
-    <string name="delete_blob_text" msgid="2819192607255625697">"اشتراک کردہ ڈیٹا کو حذف کریں"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"کیا آپ واقعی اس اشتراک کردہ ڈیٹا کو حذف کرنا چاہتے ہیں؟"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"صارفین کے پاس اپنی خود کی ایپس اور مواد ہیں"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"آپ اپنے اکاؤنٹ سے ایپس اور مواد تک رسائی کو محدود کر سکتے ہیں"</string>
-    <string name="user_add_user_item_title" msgid="2394272381086965029">"صارف"</string>
-    <string name="user_add_profile_item_title" msgid="3111051717414643029">"محدود پروفائل"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"نیا صارف شامل کریں؟"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏آپ اضافی صارفین تخلیق کر کے دوسرے لوگوں کے ساتھ اس آلہ کا اشتراک کر سکتے ہیں۔ ہر صارف کے پاس اپنی جگہ ہوتی ہے، جسے وہ ایپس، وال پیپر وغیرہ کے ساتھ حسب ضرورت بنا سکتا ہے۔ صارفین Wi‑Fi جیسی آلے کی ترتیبات کو ایڈجسٹ بھی کر سکتے ہیں جس کا اثر ہر کسی پر ہوتا ہے۔\n\nجب آپ ایک نیا صارف شامل کرتے ہیں، تو اسے اپنی جگہ سیٹ اپ کرنا پڑتی ہے۔\n\nکوئی بھی صارف دیگر تمام صارفین کیلئے ایپس اپ ڈیٹ کر سکتا ہے۔ رسائی کی ترتیبات اور سروسز کو نئے صارف کو منتقل نہیں کیا جا سکتا۔"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ کو ترتیب دینے کی ضرورت ہوتی ہے\n\nکوئی بھی صارف دیگر سبھی صارفین کیلئے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"صارف کو ابھی سیٹ اپ کریں؟"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"یقینی بنائیں کہ وہ شخص آلہ لینے اور اپنی جگہ کو سیٹ اپ کرنے کیلئے دستیاب ہے"</string>
-    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"پروفائل کو ابھی ترتیب دیں؟"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ابھی سیٹ اپ کریں"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ابھی نہیں"</string>
-    <string name="user_add_user_type_title" msgid="551279664052914497">"شامل کریں"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"نیا صارف"</string>
-    <string name="user_new_profile_name" msgid="2405500423304678841">"نیا پروفائل"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"صارف کی معلومات"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"پروفائل کی معلومات"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"ایک محدود پروفائل بنانے سے پہلے، آپ کو اپنی ایپس اور ذاتی ڈیٹا کو محفوظ کرنے کیلئے ایک اسکرین لاک سیٹ اپ کرنا ہوگا۔"</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"لاک سیٹ کریں"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"‫<xliff:g id="USER_NAME">%s</xliff:g> پر سوئچ کریں"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"مہمان کو شامل کریں"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"مہمان کو ہٹائیں"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"مہمان"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"آلہ ڈیفالٹ"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیر فعال"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"اس تبدیلی کو لاگو کرنے کے ليے آپ کے آلہ کو ریبوٹ کرنا ضروری ہے۔ ابھی ریبوٹ کریں یا منسوخ کریں۔"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"وائرڈ ہیڈ فون"</string>
 </resources>

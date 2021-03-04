@@ -82,6 +82,11 @@ interface IPackageManager {
     @UnsupportedAppUsage
     ApplicationInfo getApplicationInfo(String packageName, int flags ,int userId);
 
+    /**
+     * @return the target SDK for the given package name, or -1 if it cannot be retrieved
+     */
+    int getTargetSdkVersion(String packageName);
+
     @UnsupportedAppUsage
     ActivityInfo getActivityInfo(in ComponentName className, int flags, int userId);
 

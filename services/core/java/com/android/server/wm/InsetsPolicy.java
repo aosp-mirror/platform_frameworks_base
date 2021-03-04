@@ -36,6 +36,7 @@ import android.view.InsetsAnimationControlCallbacks;
 import android.view.InsetsAnimationControlImpl;
 import android.view.InsetsAnimationControlRunner;
 import android.view.InsetsController;
+import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
@@ -212,11 +213,21 @@ class InsetsPolicy {
      * @see InsetsStateController#getInsetsForDispatch
      */
     InsetsState getInsetsForDispatch(WindowState target) {
-        InsetsState originalState = mStateController.getInsetsForDispatch(target);
+        final InsetsState originalState = mStateController.getInsetsForDispatch(target);
         InsetsState state = originalState;
         for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
-            state = new InsetsState(state);
-            state.setSourceVisible(mShowingTransientTypes.get(i), false);
+            final int type = mShowingTransientTypes.get(i);
+            final InsetsSource originalSource = state.peekSource(type);
+            if (originalSource != null && originalSource.isVisible()) {
+                if (state == originalState) {
+                    // The source will be modified, create a non-deep copy to store the new one.
+                    state = new InsetsState(originalState);
+                }
+                // Replace the source with a copy in invisible state.
+                final InsetsSource source = new InsetsSource(originalSource);
+                source.setVisible(false);
+                state.addSource(source);
+            }
         }
         return state;
     }
@@ -252,11 +263,14 @@ class InsetsPolicy {
         }
     }
 
+    /**
+     * If the caller is not {@link #updateBarControlTarget}, it should call
+     * updateBarControlTarget(mFocusedWin) after this invocation.
+     */
     private void abortTransient() {
         mPolicy.getStatusBarManagerInternal().abortTransient(mDisplayContent.getDisplayId(),
                 mShowingTransientTypes.toArray());
         mShowingTransientTypes.clear();
-        updateBarControlTarget(mFocusedWin);
     }
 
     private @Nullable InsetsControlTarget getFakeControlTarget(@Nullable WindowState focused,
@@ -290,12 +304,22 @@ class InsetsPolicy {
             // fake control to the client, so that it can re-show the bar during this scenario.
             return mDummyControlTarget;
         }
-        if (mPolicy.topAppHidesStatusBar()) {
+        if (!canBeTopFullscreenOpaqueWindow(focusedWin) && mPolicy.topAppHidesStatusBar()) {
             // Non-fullscreen focused window should not break the state that the top-fullscreen-app
             // window hides status bar.
             return mPolicy.getTopFullscreenOpaqueWindow();
         }
         return focusedWin;
+    }
+
+    private static boolean canBeTopFullscreenOpaqueWindow(@Nullable WindowState win) {
+        // The condition doesn't use WindowState#canAffectSystemUiFlags because the window may
+        // haven't drawn or committed the visibility.
+        final boolean nonAttachedAppWindow = win != null
+                && win.mAttrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
+                && win.mAttrs.type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+        return nonAttachedAppWindow && win.mAttrs.isFullscreen() && !win.isFullyTransparent()
+                && !win.inMultiWindowMode();
     }
 
     private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin,

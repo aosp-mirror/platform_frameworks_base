@@ -55,4 +55,15 @@ public class VcnContext {
     public VcnNetworkProvider getVcnNetworkProvider() {
         return mVcnNetworkProvider;
     }
+
+    /**
+     * Verifies that the caller is running on the VcnContext Thread.
+     *
+     * @throwsIllegalStateException if the caller is not running on the VcnContext Thread.
+     */
+    public void ensureRunningOnLooperThread() {
+        if (getLooper().getThread() != Thread.currentThread()) {
+            throw new IllegalStateException("Not running on VcnMgmtSvc thread");
+        }
+    }
 }

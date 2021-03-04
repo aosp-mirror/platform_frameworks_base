@@ -4,4 +4,3 @@ android.os.FileObserver
 android.os.NullVibrator
 android.speech.tts.TextToSpeech$Connection$SetupConnectionAsyncTask
 android.widget.Magnifier
-com.android.server.BootReceiver$2

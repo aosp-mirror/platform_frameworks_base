@@ -1,3 +1,12 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 filegroup {
     name: "services.core-sources",
     srcs: ["java/**/*.java"],
@@ -95,10 +104,9 @@ java_library_static {
     libs: [
         "services.net",
         "android.hardware.light-V2.0-java",
-        "android.hardware.power-java",
+        "android.hardware.power-V1-java",
         "android.hardware.power-V1.0-java",
-        "android.hardware.vibrator-java",
-        "android.net.ipsec.ike.stubs.module_lib",
+        "android.hardware.vibrator-V1-java",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
         "service-permission.stubs.system_server",
@@ -120,7 +128,7 @@ java_library_static {
         "android.hardware.health-V1.0-java",
         "android.hardware.health-V2.0-java",
         "android.hardware.health-V2.1-java",
-        "android.hardware.light-java",
+        "android.hardware.light-V1-java",
         "android.hardware.tv.cec-V1.0-java",
         "android.hardware.weaver-V1.0-java",
         "android.hardware.biometrics.face-V1.0-java",
@@ -128,11 +136,11 @@ java_library_static {
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.configstore-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
-        "android.hardware.rebootescrow-java",
+        "android.hardware.rebootescrow-V1-java",
         "android.hardware.soundtrigger-V2.3-java",
         "android.hidl.manager-V1.2-java",
         "capture_state_listener-aidl-java",
-        "dnsresolver_aidl_interface-java",
+        "dnsresolver_aidl_interface-V7-java",
         "icu4j_calendar_astronomer",
         "netd-client",
         "overlayable_policy_aidl-java",
@@ -207,8 +215,5 @@ filegroup {
         "java/com/android/server/connectivity/QosCallbackAgentConnection.java",
         "java/com/android/server/connectivity/QosCallbackTracker.java",
         "java/com/android/server/connectivity/TcpKeepaliveController.java",
-        "java/com/android/server/connectivity/Vpn.java",
-        "java/com/android/server/connectivity/VpnIkev2Utils.java",
-        "java/com/android/server/net/LockdownVpnTracker.java",
     ],
 }

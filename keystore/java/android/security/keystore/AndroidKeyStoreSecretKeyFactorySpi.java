@@ -215,7 +215,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 // Keystore 1.0 does not tell us the exact security level of the key
                 // so we report an unknown but secure security level.
                 insideSecureHardware ? KeyProperties.SECURITY_LEVEL_UNKNOWN_SECURE
-                        : KeyProperties.SECURITY_LEVEL_SOFTWARE);
+                        : KeyProperties.SECURITY_LEVEL_SOFTWARE,
+                KeyProperties.UNRESTRICTED_USAGE_COUNT);
     }
 
     private static BigInteger getGateKeeperSecureUserId() throws ProviderException {

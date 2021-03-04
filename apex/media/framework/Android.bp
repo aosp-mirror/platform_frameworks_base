@@ -12,6 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_library {
     name: "updatable-media",
 
@@ -35,7 +44,6 @@ java_library {
     libs: [
         "framework_media_annotation",
     ],
-
     static_libs: [
         "exoplayer2-extractor"
     ],
@@ -49,6 +57,10 @@ java_library {
         "test_com.android.media",
     ],
     min_sdk_version: "29",
+    visibility: [
+        "//frameworks/av/apex:__subpackages__",
+        "//frameworks/base", // For framework-all
+    ],
 }
 
 filegroup {
@@ -58,6 +70,7 @@ filegroup {
         ":mediasession2-java-srcs",
         ":mediasession2-aidl-srcs",
     ],
+    visibility: ["//frameworks/base"],
 }
 
 filegroup {
@@ -101,10 +114,33 @@ java_sdk_library {
     impl_library_visibility: ["//frameworks/av/apex:__subpackages__"],
 }
 
-
 java_library {
     name: "framework_media_annotation",
     srcs: [":framework-media-annotation-srcs"],
     installable: false,
     sdk_version: "core_current",
+}
+
+cc_library_shared {
+    name: "libmediaparser-jni",
+    srcs: [
+        "jni/android_media_MediaParserJNI.cpp",
+    ],
+    header_libs: ["jni_headers"],
+    shared_libs: [
+        "libandroid",
+        "liblog",
+        "libmediametrics",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wunreachable-code",
+        "-Wunused",
+    ],
+    apex_available: [
+        "com.android.media",
+    ],
+    min_sdk_version: "29",
 }

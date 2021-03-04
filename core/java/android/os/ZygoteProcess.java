@@ -426,7 +426,7 @@ public class ZygoteProcess {
         // avoid writing a partial response to the zygote.
         for (String arg : args) {
             // Making two indexOf calls here is faster than running a manually fused loop due
-            // to the fact that indexOf is a optimized intrinsic.
+            // to the fact that indexOf is an optimized intrinsic.
             if (arg.indexOf('\n') >= 0) {
                 throw new ZygoteStartFailedEx("Embedded newlines not allowed");
             } else if (arg.indexOf('\r') >= 0) {
@@ -657,16 +657,8 @@ public class ZygoteProcess {
         argsForZygote.add("--runtime-flags=" + runtimeFlags);
         if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
             argsForZygote.add("--mount-external-default");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {
-            argsForZygote.add("--mount-external-read");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
-            argsForZygote.add("--mount-external-write");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_FULL) {
-            argsForZygote.add("--mount-external-full");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_INSTALLER) {
             argsForZygote.add("--mount-external-installer");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_LEGACY) {
-            argsForZygote.add("--mount-external-legacy");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_PASS_THROUGH) {
             argsForZygote.add("--mount-external-pass-through");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {

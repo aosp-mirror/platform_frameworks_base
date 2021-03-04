@@ -256,6 +256,7 @@ class EventDispatcher {
                 return actionMasked;
         }
     }
+
     /**
      * Sends down events to the view hierarchy for all pointers which are not already being
      * delivered i.e. pointers that are not yet injected.
@@ -285,6 +286,79 @@ class EventDispatcher {
     }
 
     /**
+     * Sends down events to the view hierarchy for all pointers which are not already being
+     * delivered with original down location. i.e. pointers that are not yet injected. The down time
+     * is also replaced by the original one.
+     *
+     *
+     * @param prototype The prototype from which to create the injected events.
+     * @param policyFlags The policy flags associated with the event.
+     */
+    void sendDownForAllNotInjectedPointersWithOriginalDown(MotionEvent prototype, int policyFlags) {
+        // Inject the injected pointers.
+        int pointerIdBits = 0;
+        final int pointerCount = prototype.getPointerCount();
+        final MotionEvent event = computeEventWithOriginalDown(prototype);
+        for (int i = 0; i < pointerCount; i++) {
+            final int pointerId = prototype.getPointerId(i);
+            // Do not send event for already delivered pointers.
+            if (!mState.isInjectedPointerDown(pointerId)) {
+                pointerIdBits |= (1 << pointerId);
+                final int action = computeInjectionAction(MotionEvent.ACTION_DOWN, i);
+                sendMotionEvent(
+                        event,
+                        action,
+                        mState.getLastReceivedEvent(),
+                        pointerIdBits,
+                        policyFlags);
+            }
+        }
+    }
+
+    private MotionEvent computeEventWithOriginalDown(MotionEvent prototype) {
+        final int pointerCount = prototype.getPointerCount();
+        if (pointerCount != mState.getReceivedPointerTracker().getReceivedPointerDownCount()) {
+            Slog.w(LOG_TAG, "The pointer count doesn't match the received count.");
+            return MotionEvent.obtain(prototype);
+        }
+        MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[pointerCount];
+        MotionEvent.PointerProperties[] properties =
+                new MotionEvent.PointerProperties[pointerCount];
+        for (int i = 0; i < pointerCount; ++i) {
+            final int pointerId = prototype.getPointerId(i);
+            final float x = mState.getReceivedPointerTracker().getReceivedPointerDownX(pointerId);
+            final float y = mState.getReceivedPointerTracker().getReceivedPointerDownY(pointerId);
+            coords[i] = new MotionEvent.PointerCoords();
+            coords[i].x = x;
+            coords[i].y = y;
+            properties[i] = new MotionEvent.PointerProperties();
+            properties[i].id = pointerId;
+            properties[i].toolType = MotionEvent.TOOL_TYPE_FINGER;
+        }
+        MotionEvent event =
+                MotionEvent.obtain(
+                        prototype.getDownTime(),
+                        // The event time is used for downTime while sending ACTION_DOWN. We adjust
+                        // it to avoid the motion velocity is too fast in the beginning after
+                        // Delegating.
+                        prototype.getDownTime(),
+                        prototype.getAction(),
+                        pointerCount,
+                        properties,
+                        coords,
+                        prototype.getMetaState(),
+                        prototype.getButtonState(),
+                        prototype.getXPrecision(),
+                        prototype.getYPrecision(),
+                        prototype.getDeviceId(),
+                        prototype.getEdgeFlags(),
+                        prototype.getSource(),
+                        prototype.getFlags());
+        return event;
+    }
+
+    /**
+     *
      * Sends up events to the view hierarchy for all pointers which are already being delivered i.e.
      * pointers that are injected.
      *

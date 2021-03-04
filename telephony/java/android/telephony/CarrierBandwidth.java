@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -102,7 +103,7 @@ public final class CarrierBandwidth implements Parcelable {
     /**
      * Retrieves the upstream bandwidth for the primary network in Kbps.  This always only refers to
      * the estimated first hop transport bandwidth.
-     * This will be INVALID if the network is not connected
+     * This will be {@link #INVALID} if the network is not connected
      *
      * @return The estimated first hop upstream (device to network) bandwidth.
      */
@@ -113,7 +114,7 @@ public final class CarrierBandwidth implements Parcelable {
     /**
      * Retrieves the downstream bandwidth for the primary network in Kbps.  This always only refers
      * to the estimated first hop transport bandwidth.
-     * This will be INVALID if the network is not connected
+     * This will be {@link #INVALID} if the network is not connected
      *
      * @return The estimated first hop downstream (network to device) bandwidth.
      */
@@ -124,10 +125,19 @@ public final class CarrierBandwidth implements Parcelable {
     /**
      * Retrieves the upstream bandwidth for the secondary network in Kbps.  This always only refers
      * to the estimated first hop transport bandwidth.
-     * This will be INVALID if the network is not connected
+     * <p/>
+     * This will be {@link #INVALID} if either are the case:
+     * <ol>
+     *  <li>The network is not connected</li>
+     *  <li>The device does not support
+     * {@link android.telephony.TelephonyManager#CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE}.</li>
+     * </ol>
      *
      * @return The estimated first hop upstream (device to network) bandwidth.
      */
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE)
     public int getSecondaryDownlinkCapacityKbps() {
         return mSecondaryDownlinkCapacityKbps;
     }
@@ -135,10 +145,18 @@ public final class CarrierBandwidth implements Parcelable {
     /**
      * Retrieves the downstream bandwidth for the secondary network in Kbps.  This always only
      * refers to the estimated first hop transport bandwidth.
-     * This will be INVALID if the network is not connected
-     *
+     * <p/>
+     * This will be {@link #INVALID} if either are the case:
+     * <ol>
+     *  <li>The network is not connected</li>
+     *  <li>The device does not support
+     * {@link android.telephony.TelephonyManager#CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE}.</li>
+     * </ol>
      * @return The estimated first hop downstream (network to device) bandwidth.
      */
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE)
     public int getSecondaryUplinkCapacityKbps() {
         return mSecondaryUplinkCapacityKbps;
     }

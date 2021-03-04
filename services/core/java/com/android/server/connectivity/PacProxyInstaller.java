@@ -16,7 +16,6 @@
 
 package com.android.server.connectivity;
 
-import android.annotation.NonNull;
 import android.annotation.WorkerThread;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -72,6 +71,10 @@ public class PacProxyInstaller {
     private static final int DELAY_LONG = 4;
     private static final long MAX_PAC_SIZE = 20 * 1000 * 1000;
 
+    // Return values for #setCurrentProxyScriptUrl
+    public static final boolean DONT_SEND_BROADCAST = false;
+    public static final boolean DO_SEND_BROADCAST = true;
+
     private String mCurrentPac;
     @GuardedBy("mProxyLock")
     private volatile Uri mPacUrl = Uri.EMPTY;
@@ -90,20 +93,13 @@ public class PacProxyInstaller {
     private volatile boolean mHasSentBroadcast;
     private volatile boolean mHasDownloaded;
 
-    private final Handler mConnectivityHandler;
+    private Handler mConnectivityHandler;
     private final int mProxyMessage;
 
     /**
      * Used for locking when setting mProxyService and all references to mCurrentPac.
      */
     private final Object mProxyLock = new Object();
-
-    /**
-     * Lock ensuring consistency between the values of mHasSentBroadcast, mHasDownloaded, the
-     * last URL and port, and the broadcast message being sent with the correct arguments.
-     * TODO : this should probably protect all instances of these variables
-     */
-    private final Object mBroadcastStateLock = new Object();
 
     /**
      * Runnable to download PAC script.
@@ -150,7 +146,7 @@ public class PacProxyInstaller {
         }
     }
 
-    public PacProxyInstaller(@NonNull Context context, @NonNull Handler handler, int proxyMessage) {
+    public PacProxyInstaller(Context context, Handler handler, int proxyMessage) {
         mContext = context;
         mLastPort = -1;
         final HandlerThread netThread = new HandlerThread("android.pacproxyinstaller",
@@ -180,27 +176,31 @@ public class PacProxyInstaller {
      * PacProxyInstaller will trigger a new broadcast when it is ready.
      *
      * @param proxy Proxy information that is about to be broadcast.
+     * @return Returns whether the broadcast should be sent : either DO_ or DONT_SEND_BROADCAST
      */
-    public void setCurrentProxyScriptUrl(@NonNull ProxyInfo proxy) {
-        synchronized (mBroadcastStateLock) {
-            if (!Uri.EMPTY.equals(proxy.getPacFileUrl())) {
-                if (proxy.getPacFileUrl().equals(mPacUrl) && (proxy.getPort() > 0)) return;
-                mPacUrl = proxy.getPacFileUrl();
-                mCurrentDelay = DELAY_1;
-                mHasSentBroadcast = false;
-                mHasDownloaded = false;
-                getAlarmManager().cancel(mPacRefreshIntent);
-                bind();
-            } else {
-                getAlarmManager().cancel(mPacRefreshIntent);
-                synchronized (mProxyLock) {
-                    mPacUrl = Uri.EMPTY;
-                    mCurrentPac = null;
-                    if (mProxyService != null) {
-                        unbind();
-                    }
+    public synchronized boolean setCurrentProxyScriptUrl(ProxyInfo proxy) {
+        if (!Uri.EMPTY.equals(proxy.getPacFileUrl())) {
+            if (proxy.getPacFileUrl().equals(mPacUrl) && (proxy.getPort() > 0)) {
+                // Allow to send broadcast, nothing to do.
+                return DO_SEND_BROADCAST;
+            }
+            mPacUrl = proxy.getPacFileUrl();
+            mCurrentDelay = DELAY_1;
+            mHasSentBroadcast = false;
+            mHasDownloaded = false;
+            getAlarmManager().cancel(mPacRefreshIntent);
+            bind();
+            return DONT_SEND_BROADCAST;
+        } else {
+            getAlarmManager().cancel(mPacRefreshIntent);
+            synchronized (mProxyLock) {
+                mPacUrl = Uri.EMPTY;
+                mCurrentPac = null;
+                if (mProxyService != null) {
+                    unbind();
                 }
             }
+            return DO_SEND_BROADCAST;
         }
     }
 
@@ -275,7 +275,6 @@ public class PacProxyInstaller {
         getAlarmManager().set(AlarmManager.ELAPSED_REALTIME, timeTillTrigger, mPacRefreshIntent);
     }
 
-    @GuardedBy("mProxyLock")
     private void setCurrentProxyScript(String script) {
         if (mProxyService == null) {
             Log.e(TAG, "setCurrentProxyScript: no proxy service");
@@ -348,9 +347,6 @@ public class PacProxyInstaller {
                             public void setProxyPort(int port) {
                                 if (mLastPort != -1) {
                                     // Always need to send if port changed
-                                    // TODO: Here lacks synchronization because this write cannot
-                                    // guarantee that it's visible from sendProxyIfNeeded() when
-                                    // it's called by a Runnable which is post by mNetThread.
                                     mHasSentBroadcast = false;
                                 }
                                 mLastPort = port;
@@ -390,15 +386,13 @@ public class PacProxyInstaller {
         mConnectivityHandler.sendMessage(mConnectivityHandler.obtainMessage(mProxyMessage, proxy));
     }
 
-    private void sendProxyIfNeeded() {
-        synchronized (mBroadcastStateLock) {
-            if (!mHasDownloaded || (mLastPort == -1)) {
-                return;
-            }
-            if (!mHasSentBroadcast) {
-                sendPacBroadcast(ProxyInfo.buildPacProxy(mPacUrl, mLastPort));
-                mHasSentBroadcast = true;
-            }
+    private synchronized void sendProxyIfNeeded() {
+        if (!mHasDownloaded || (mLastPort == -1)) {
+            return;
+        }
+        if (!mHasSentBroadcast) {
+            sendPacBroadcast(ProxyInfo.buildPacProxy(mPacUrl, mLastPort));
+            mHasSentBroadcast = true;
         }
     }
 }

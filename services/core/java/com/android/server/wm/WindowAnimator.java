@@ -143,6 +143,9 @@ public class WindowAnimator {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, ">>> OPEN TRANSACTION animate");
         mService.openSurfaceTransaction();
         try {
+            // Remove all deferred displays, tasks, and activities.
+            mService.mRoot.handleCompleteDeferredRemoval();
+
             final AccessibilityController accessibilityController =
                     mService.mAccessibilityController;
             final int numDisplays = mDisplayContentsAnimators.size();

@@ -21,6 +21,8 @@ package android.apphibernation;
  * @hide
  */
 interface IAppHibernationService {
-    boolean isHibernating(String packageName, int userId);
-    void setHibernating(String packageName, int userId, boolean isHibernating);
+    boolean isHibernatingForUser(String packageName, int userId);
+    void setHibernatingForUser(String packageName, int userId, boolean isHibernating);
+    boolean isHibernatingGlobally(String packageName);
+    void setHibernatingGlobally(String packageName, boolean isHibernating);
 }

@@ -59,6 +59,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -71,6 +72,12 @@ import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.permission.PermissionManager;
+import android.telephony.TelephonyManager;
+import android.telephony.gba.GbaService;
+import android.telephony.ims.ImsService;
+import android.telephony.ims.ProvisioningManager;
+import android.telephony.ims.RcsUceAdapter;
+import android.telephony.ims.SipDelegateManager;
 import android.util.AndroidException;
 import android.util.Log;
 
@@ -92,6 +99,11 @@ import java.util.Set;
  * packages that are currently installed on the device.
  *
  * You can find this class through {@link Context#getPackageManager}.
+ *
+ * <p class="note"><strong>Note: </strong>If your app targets Android 11 (API level 30) or
+ * higher, the methods in this class each return a filtered list of apps. Learn more about how to
+ * <a href="/training/basics/intents/package-visibility">manage package visibility</a>.
+ * </p>
  */
 public abstract class PackageManager {
     private static final String TAG = "PackageManager";
@@ -1052,15 +1064,11 @@ public abstract class PackageManager {
 
     /**
      * A value to indicate the lack of CUJ information, disabling all installation scenario logic.
-     *
-     * @hide
      */
     public static final int INSTALL_SCENARIO_DEFAULT = 0;
 
     /**
      * Installation scenario providing the fastest “install button to launch" experience possible.
-     *
-     * @hide
      */
     public static final int INSTALL_SCENARIO_FAST = 1;
 
@@ -1077,8 +1085,6 @@ public abstract class PackageManager {
      * less optimized applications.  The device state (e.g. memory usage or battery status) should
      * not be considered when making this decision as those factors are taken into account by the
      * Package Manager when acting on the installation scenario.
-     *
-     * @hide
      */
     public static final int INSTALL_SCENARIO_BULK = 2;
 
@@ -1089,8 +1095,6 @@ public abstract class PackageManager {
      * operation that are marked BULK_SECONDARY, the faster the entire bulk operation will be.
      *
      * See the comments for INSTALL_SCENARIO_BULK for more information.
-     *
-     * @hide
      */
     public static final int INSTALL_SCENARIO_BULK_SECONDARY = 3;
 
@@ -1741,6 +1745,15 @@ public abstract class PackageManager {
      * because the packge is a shared library used by other installed packages.
      * {@hide} */
     public static final int DELETE_FAILED_USED_SHARED_LIBRARY = -6;
+
+    /**
+     * Deletion failed return code: this is passed to the
+     * {@link IPackageDeleteObserver} if the system failed to delete the package
+     * because there is an app pinned.
+     *
+     * @hide
+     */
+    public static final int DELETE_FAILED_APP_PINNED = -7;
 
     /**
      * Return code that is passed to the {@link IPackageMoveObserver} when the
@@ -2602,6 +2615,37 @@ public abstract class PackageManager {
     public static final String FEATURE_TELEPHONY_IMS = "android.hardware.telephony.ims";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports a single IMS registration as defined by carrier networks in the IMS service
+     * implementation using the {@link ImsService} API, {@link GbaService} API, and IRadio 1.6 HAL.
+     * <p>
+     * When set, the device must fully support the following APIs for an application to implement
+     * IMS single registration:
+     * <ul>
+     * <li> Updating RCS provisioning status using the {@link ProvisioningManager} API to supply an
+     * RCC.14 defined XML and notify IMS applications of Auto Configuration Server (ACS) or
+     * proprietary server provisioning updates.</li>
+     * <li>Opening a delegate in the device IMS service to forward SIP traffic to the carrier's
+     * network using the {@link SipDelegateManager} API</li>
+     * <li>Listening to EPS dedicated bearer establishment via the
+     * {@link ConnectivityManager#registerQosCallback}
+     * API to indicate to the application when to start/stop media traffic.</li>
+     * <li>Implementing Generic Bootstrapping Architecture (GBA) and providing the associated
+     * authentication keys to applications
+     * requesting this information via the {@link TelephonyManager#bootstrapAuthenticationRequest}
+     * API</li>
+     * <li>Implementing RCS User Capability Exchange using the {@link RcsUceAdapter} API</li>
+     * </ul>
+     * <p>
+     * This feature should only be defined if {@link #FEATURE_TELEPHONY_IMS} is also defined.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION =
+            "android.hardware.telephony.ims.singlereg";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device is capable of communicating with
      * other devices via ultra wideband.
@@ -3223,6 +3267,33 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_APP_ENUMERATION = "android.software.app_enumeration";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * a Keystore implementation that can only enforce limited use key in hardware with max usage
+     * count equals to 1.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_KEYSTORE_SINGLE_USE_KEY =
+            "android.hardware.keystore.single_use_key";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * a Keystore implementation that can enforce limited use key in hardware with any max usage
+     * count (including count equals to 1).
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_KEYSTORE_LIMITED_USE_KEY =
+            "android.hardware.keystore.limited_use_key";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * a Keystore implementation that can create application-specific attestation keys.
+     * See {@link android.security.keystore.KeyGenParameterSpec.Builder#setAttestKeyAlias}.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_KEYSTORE_APP_ATTEST_KEY =
+            "android.hardware.keystore.app_attest_key";
 
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
@@ -4199,6 +4270,15 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return The target SDK version for the given package name.
+     * @throws NameNotFoundException if a package with the given name cannot be found on the system.
+     */
+    @IntRange(from = 0)
+    public int getTargetSdkVersion(@NonNull String packageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Retrieve all of the information we know about a particular activity
      * class.
      *
@@ -4945,7 +5025,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
+    @SuppressWarnings({"HiddenAbstractMethod", "NullableCollection"})
     @TestApi
     public abstract @Nullable String[] getNamesForUids(int[] uids);
 
@@ -7725,6 +7805,7 @@ public abstract class PackageManager {
             case DELETE_FAILED_OWNER_BLOCKED: return "DELETE_FAILED_OWNER_BLOCKED";
             case DELETE_FAILED_ABORTED: return "DELETE_FAILED_ABORTED";
             case DELETE_FAILED_USED_SHARED_LIBRARY: return "DELETE_FAILED_USED_SHARED_LIBRARY";
+            case DELETE_FAILED_APP_PINNED: return "DELETE_FAILED_APP_PINNED";
             default: return Integer.toString(status);
         }
     }
@@ -7739,6 +7820,7 @@ public abstract class PackageManager {
             case DELETE_FAILED_OWNER_BLOCKED: return PackageInstaller.STATUS_FAILURE_BLOCKED;
             case DELETE_FAILED_ABORTED: return PackageInstaller.STATUS_FAILURE_ABORTED;
             case DELETE_FAILED_USED_SHARED_LIBRARY: return PackageInstaller.STATUS_FAILURE_CONFLICT;
+            case DELETE_FAILED_APP_PINNED: return PackageInstaller.STATUS_FAILURE_BLOCKED;
             default: return PackageInstaller.STATUS_FAILURE;
         }
     }

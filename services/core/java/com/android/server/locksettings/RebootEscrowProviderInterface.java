@@ -16,6 +16,8 @@
 
 package com.android.server.locksettings;
 
+import java.io.IOException;
+
 import javax.crypto.SecretKey;
 
 /**
@@ -33,9 +35,10 @@ public interface RebootEscrowProviderInterface {
 
     /**
      * Returns the stored RebootEscrowKey, and clears the storage. If the stored key is encrypted,
-     * use the input key to decrypt the RebootEscrowKey. Returns null on failure.
+     * use the input key to decrypt the RebootEscrowKey. Returns null on failure. Throws an
+     * IOException if the failure is non-fatal, and a retry may succeed.
      */
-    RebootEscrowKey getAndClearRebootEscrowKey(SecretKey decryptionKey);
+    RebootEscrowKey getAndClearRebootEscrowKey(SecretKey decryptionKey) throws IOException;
 
     /**
      * Clears the stored RebootEscrowKey.

@@ -80,6 +80,7 @@ public final class KeymasterDefs {
     public static final int KM_TAG_MIN_SECONDS_BETWEEN_OPS =
             Tag.MIN_SECONDS_BETWEEN_OPS; // KM_UINT | 403;
     public static final int KM_TAG_MAX_USES_PER_BOOT = Tag.MAX_USES_PER_BOOT; // KM_UINT | 404;
+    public static final int KM_TAG_USAGE_COUNT_LIMIT = Tag.USAGE_COUNT_LIMIT; // KM_UINT | 405;
 
     public static final int KM_TAG_USER_ID = Tag.USER_ID; // KM_UINT | 501;
     public static final int KM_TAG_USER_SECURE_ID = Tag.USER_SECURE_ID; // KM_ULONG_REP | 502;
@@ -129,6 +130,15 @@ public final class KeymasterDefs {
     public static final int KM_TAG_ASSOCIATED_DATA = Tag.ASSOCIATED_DATA; // KM_BYTES | 1000;
     public static final int KM_TAG_NONCE = Tag.NONCE; // KM_BYTES | 1001;
     public static final int KM_TAG_MAC_LENGTH = Tag.MAC_LENGTH; // KM_UINT | 1003;
+    public static final int KM_TAG_RESET_SINCE_ID_ROTATION =
+            Tag.RESET_SINCE_ID_ROTATION;     // KM_BOOL | 1004
+    public static final int KM_TAG_CONFIRMATION_TOKEN = Tag.CONFIRMATION_TOKEN; // KM_BYTES | 1005;
+    public static final int KM_TAG_CERTIFICATE_SERIAL = Tag.CERTIFICATE_SERIAL; // KM_UINT | 1006;
+    public static final int KM_TAG_CERTIFICATE_SUBJECT = Tag.CERTIFICATE_SUBJECT; // KM_UINT | 1007;
+    public static final int KM_TAG_CERTIFICATE_NOT_BEFORE =
+            Tag.CERTIFICATE_NOT_BEFORE; // KM_DATE | 1008;
+    public static final int KM_TAG_CERTIFICATE_NOT_AFTER =
+            Tag.CERTIFICATE_NOT_AFTER; // KM_DATE | 1009;
 
     // Algorithm values.
     public static final int KM_ALGORITHM_RSA = Algorithm.RSA;
@@ -178,6 +188,7 @@ public final class KeymasterDefs {
     public static final int KM_PURPOSE_VERIFY = KeyPurpose.VERIFY;
     public static final int KM_PURPOSE_WRAP = KeyPurpose.WRAP_KEY;
     public static final int KM_PURPOSE_AGREE_KEY = KeyPurpose.AGREE_KEY;
+    public static final int KM_PURPOSE_ATTEST_KEY = KeyPurpose.ATTEST_KEY;
 
     // Key formats.
     public static final int KM_KEY_FORMAT_X509 = KeyFormat.X509;
@@ -316,6 +327,10 @@ public final class KeymasterDefs {
             ErrorCode.HARDWARE_TYPE_UNAVAILABLE; // -68;
     public static final int KM_ERROR_DEVICE_LOCKED =
             ErrorCode.DEVICE_LOCKED; // -72;
+    public static final int KM_ERROR_MISSING_NOT_BEFORE =
+            ErrorCode.MISSING_NOT_BEFORE; // -80;
+    public static final int KM_ERROR_MISSING_NOT_AFTER =
+            ErrorCode.MISSING_NOT_AFTER; // -80;
     public static final int KM_ERROR_UNIMPLEMENTED =
             ErrorCode.UNIMPLEMENTED; // -100;
     public static final int KM_ERROR_VERSION_MISMATCH =

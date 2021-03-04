@@ -52,6 +52,7 @@ applications that come with the platform
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.RECEIVE_EMERGENCY_BROADCAST"/>
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
+        <permission name="android.permission.STATUS_BAR" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.cellbroadcastservice">
@@ -208,6 +209,7 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.providers.contacts">
         <permission name="android.permission.BIND_DIRECTORY_SEARCH"/>
+        <permission name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"/>
         <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
@@ -305,6 +307,7 @@ applications that come with the platform
         <!-- Needed for test only -->
         <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
         <permission name="android.permission.ACCESS_LOWPAN_STATE"/>
+        <permission name="android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE"/>
         <permission name="android.permission.BACKUP"/>
         <permission name="android.permission.BATTERY_STATS"/>
         <permission name="android.permission.BIND_APPWIDGET"/>
@@ -345,7 +348,6 @@ applications that come with the platform
         <permission name="android.permission.MOVE_PACKAGE"/>
         <!-- Needed for test only -->
         <permission name="android.permission.RESTART_WIFI_SUBSYSTEM"/>
-        <permission name="android.permission.NETWORK_AIRPLANE_MODE"/>
         <permission name="android.permission.OBSERVE_APP_USAGE"/>
         <permission name="android.permission.NETWORK_SCAN"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
@@ -444,6 +446,10 @@ applications that come with the platform
         <!-- Permission needed for CTS test - WifiManagerTest -->
         <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
+        <!-- Permission required for GTS test - GtsAssistIntentTestCases -->
+        <permission name="android.permission.MANAGE_SOUND_TRIGGER" />
+        <permission name="android.permission.CAPTURE_AUDIO_HOTWORD" />
+        <permission name="android.permission.MODIFY_QUIET_MODE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -457,6 +463,8 @@ applications that come with the platform
         <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
         <!-- Permissions required for quick settings tile -->
         <permission name="android.permission.STATUS_BAR"/>
+        <!-- Permissions required to query Betterbug -->
+        <permission name="android.permission.QUERY_ALL_PACKAGES"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.tv">

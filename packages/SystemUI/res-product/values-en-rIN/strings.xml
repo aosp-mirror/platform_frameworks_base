@@ -40,7 +40,4 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"You have incorrectly attempted to unlock the phone <xliff:g id="NUMBER">%d</xliff:g> times. The work profile will be removed, which will delete all profile data."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your tablet using an email account.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using an email account.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
-    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Unlock your phone for more options"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Unlock your tablet for more options"</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Unlock your device for more options"</string>
 </resources>

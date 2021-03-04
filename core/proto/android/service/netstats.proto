@@ -80,6 +80,8 @@ message NetworkIdentityProto {
     optional bool metered = 5;
 
     optional bool default_network = 6;
+
+    optional int32 oem_managed_network = 7;
 }
 
 // Corresponds to NetworkStatsRecorder.

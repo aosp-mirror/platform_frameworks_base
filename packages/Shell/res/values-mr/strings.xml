@@ -31,8 +31,8 @@
     <string name="bugreport_confirm" msgid="5917407234515812495">"बग रीपोर्टांमध्ये तुम्ही संवेदनशील (अ‍ॅप-वापर आणि स्थान डेटा यासारखा) डेटा म्हणून विचार करता त्या डेटाच्या समावेशासह सिस्टीमच्या विविध लॉग फायलींमधील डेटा असतो. ज्या लोकांवर आणि अ‍ॅपवर तुमचा विश्वास आहे केवळ त्यांच्यासह हा बग रीपोर्ट शेअर करा."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"पुन्हा दर्शवू नका"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"बग रीपोर्ट"</string>
-    <string name="bugreport_unreadable_text" msgid="586517851044535486">"बग रीपोर्ट फाइल वाचणे शक्य झाले नाही"</string>
-    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"झिप फाइल मध्ये बग रीपोर्ट तपशील जोडणे शक्य झाले नाही"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"बग रीपोर्ट फाईल वाचणे शक्य झाले नाही"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"झिप फाईल मध्ये बग रीपोर्ट तपशील जोडणे शक्य झाले नाही"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"अनामित"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"तपशील"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"स्क्रीनशॉट"</string>

@@ -96,6 +96,19 @@ public class StagedInstallInternalTest {
         assertSessionReady(sessionId);
     }
 
+    @Test
+    public void testStagedInstallationShouldCleanUpOnValidationFailure() throws Exception {
+        InstallUtils.commitExpectingFailure(AssertionError.class, "INSTALL_FAILED_INVALID_APK",
+                Install.single(TestApp.AIncompleteSplit).setStaged());
+    }
+
+    @Test
+    public void testStagedInstallationShouldCleanUpOnValidationFailureMultiPackage()
+            throws Exception {
+        InstallUtils.commitExpectingFailure(AssertionError.class, "INSTALL_FAILED_INVALID_APK",
+                Install.multi(TestApp.AIncompleteSplit, TestApp.B1, TestApp.Apex1).setStaged());
+    }
+
     private static void assertSessionReady(int sessionId) {
         assertSessionState(sessionId,
                 (session) -> assertThat(session.isStagedSessionReady()).isTrue());

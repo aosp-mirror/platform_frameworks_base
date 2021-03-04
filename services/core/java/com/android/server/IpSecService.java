@@ -29,6 +29,7 @@ import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.IIpSecService;
 import android.net.INetd;
 import android.net.InetAddresses;
@@ -41,12 +42,12 @@ import android.net.IpSecTransformResponse;
 import android.net.IpSecTunnelInterfaceResponse;
 import android.net.IpSecUdpEncapResponse;
 import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.TrafficStats;
 import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -62,6 +63,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.net.module.util.NetdUtils;
 
 import libcore.io.IoUtils;
 
@@ -114,9 +116,6 @@ public class IpSecService extends IIpSecService.Stub {
 
     /* Binder context for this service */
     private final Context mContext;
-
-    /* NetworkManager instance */
-    private final INetworkManagementService mNetworkManager;
 
     /**
      * The next non-repeating global ID for tracking resources between users, this service, and
@@ -797,9 +796,15 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    private final class TunnelInterfaceRecord extends OwnedResourceRecord {
+    /**
+     * Tracks an tunnel interface, and manages cleanup paths.
+     *
+     * <p>This class is not thread-safe, and expects that that users of this class will ensure
+     * synchronization and thread safety by holding the IpSecService.this instance lock
+     */
+    @VisibleForTesting
+    final class TunnelInterfaceRecord extends OwnedResourceRecord {
         private final String mInterfaceName;
-        private final Network mUnderlyingNetwork;
 
         // outer addresses
         private final String mLocalAddress;
@@ -809,6 +814,8 @@ public class IpSecService extends IIpSecService.Stub {
         private final int mOkey;
 
         private final int mIfId;
+
+        private Network mUnderlyingNetwork;
 
         TunnelInterfaceRecord(
                 int resourceId,
@@ -870,12 +877,20 @@ public class IpSecService extends IIpSecService.Stub {
             releaseNetId(mOkey);
         }
 
-        public String getInterfaceName() {
-            return mInterfaceName;
+        @GuardedBy("IpSecService.this")
+        public void setUnderlyingNetwork(Network underlyingNetwork) {
+            // When #applyTunnelModeTransform is called, this new underlying network will be used to
+            // update the output mark of the input transform.
+            mUnderlyingNetwork = underlyingNetwork;
         }
 
+        @GuardedBy("IpSecService.this")
         public Network getUnderlyingNetwork() {
             return mUnderlyingNetwork;
+        }
+
+        public String getInterfaceName() {
+            return mInterfaceName;
         }
 
         /** Returns the local, outer address for the tunnelInterface */
@@ -996,13 +1011,13 @@ public class IpSecService extends IIpSecService.Stub {
      *
      * @param context Binder context for this service
      */
-    private IpSecService(Context context, INetworkManagementService networkManager) {
-        this(context, networkManager, IpSecServiceConfiguration.GETSRVINSTANCE);
+    private IpSecService(Context context) {
+        this(context, IpSecServiceConfiguration.GETSRVINSTANCE);
     }
 
-    static IpSecService create(Context context, INetworkManagementService networkManager)
+    static IpSecService create(Context context)
             throws InterruptedException {
-        final IpSecService service = new IpSecService(context, networkManager);
+        final IpSecService service = new IpSecService(context);
         service.connectNativeNetdService();
         return service;
     }
@@ -1016,11 +1031,9 @@ public class IpSecService extends IIpSecService.Stub {
 
     /** @hide */
     @VisibleForTesting
-    public IpSecService(Context context, INetworkManagementService networkManager,
-            IpSecServiceConfiguration config) {
+    public IpSecService(Context context, IpSecServiceConfiguration config) {
         this(
                 context,
-                networkManager,
                 config,
                 (fd, uid) -> {
                     try {
@@ -1034,10 +1047,9 @@ public class IpSecService extends IIpSecService.Stub {
 
     /** @hide */
     @VisibleForTesting
-    public IpSecService(Context context, INetworkManagementService networkManager,
-            IpSecServiceConfiguration config, UidFdTagger uidFdTagger) {
+    public IpSecService(Context context, IpSecServiceConfiguration config,
+            UidFdTagger uidFdTagger) {
         mContext = context;
-        mNetworkManager = Objects.requireNonNull(networkManager);
         mSrvConfig = config;
         mUidFdTagger = uidFdTagger;
     }
@@ -1317,7 +1329,7 @@ public class IpSecService extends IIpSecService.Stub {
             netd.ipSecAddTunnelInterface(intfName, localAddr, remoteAddr, ikey, okey, resourceId);
 
             Binder.withCleanCallingIdentity(() -> {
-                mNetworkManager.setInterfaceUp(intfName);
+                NetdUtils.setInterfaceUp(netd, intfName);
             });
 
             for (int selAddrFamily : ADDRESS_FAMILIES) {
@@ -1427,6 +1439,34 @@ public class IpSecService extends IIpSecService.Stub {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** Set TunnelInterface to use a specific underlying network. */
+    @Override
+    public synchronized void setNetworkForTunnelInterface(
+            int tunnelResourceId, Network underlyingNetwork, String callingPackage) {
+        enforceTunnelFeatureAndPermissions(callingPackage);
+        Objects.requireNonNull(underlyingNetwork, "No underlying network was specified");
+
+        final UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
+
+        // Get tunnelInterface record; if no such interface is found, will throw
+        // IllegalArgumentException. userRecord.mTunnelInterfaceRecords is never null
+        final TunnelInterfaceRecord tunnelInterfaceInfo =
+                userRecord.mTunnelInterfaceRecords.getResourceOrThrow(tunnelResourceId);
+
+        final ConnectivityManager connectivityManager =
+                mContext.getSystemService(ConnectivityManager.class);
+        final LinkProperties lp = connectivityManager.getLinkProperties(underlyingNetwork);
+        if (tunnelInterfaceInfo.getInterfaceName().equals(lp.getInterfaceName())) {
+            throw new IllegalArgumentException(
+                    "Underlying network cannot be the network being exposed by this tunnel");
+        }
+
+        // It is meaningless to check if the network exists or is valid because the network might
+        // disconnect at any time after it passes the check.
+
+        tunnelInterfaceInfo.setUnderlyingNetwork(underlyingNetwork);
     }
 
     /**

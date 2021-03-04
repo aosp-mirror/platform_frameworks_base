@@ -299,6 +299,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         final ArraySet<File> unclaimedStages = newArraySet(
                 stagingDir.listFiles(sStageFilter));
 
+        // We also need to clean up orphaned staging directory for staged sessions
+        final File stagedSessionStagingDir = Environment.getDataStagingDirectory(volumeUuid);
+        unclaimedStages.addAll(newArraySet(stagedSessionStagingDir.listFiles()));
+
         // Ignore stages claimed by active sessions
         for (int i = 0; i < mSessions.size(); i++) {
             final PackageInstallerSession session = mSessions.valueAt(i);
@@ -393,6 +397,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                             Slog.w(TAG, "Abandoning old session created at "
                                         + session.createdMillis);
                             valid = false;
+                        } else if (isExtraSessionForStagedInstall(session)) {
+                            valid = false;
                         } else {
                             valid = true;
                         }
@@ -421,6 +427,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             PackageInstallerSession session = mSessions.valueAt(i);
             session.onAfterSessionRead();
         }
+    }
+
+    // Extra sessions are created during staged install on temporary basis. They should not be
+    // allowed to live across system server restart.
+    private boolean isExtraSessionForStagedInstall(PackageInstallerSession session) {
+        return (session.params.installFlags & PackageManager.INSTALL_DRY_RUN) != 0
+                || (session.params.installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0;
     }
 
     @GuardedBy("mSessions")

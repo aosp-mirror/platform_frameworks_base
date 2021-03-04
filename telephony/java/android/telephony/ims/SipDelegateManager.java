@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.telephony.BinderCacheManager;
@@ -47,6 +48,9 @@ import java.util.concurrent.Executor;
  * This allows multiple IMS applications to forward SIP messages to/from their application for the
  * purposes of providing a single IMS registration to the carrier's IMS network from potentially
  * many IMS stacks implementing a subset of the supported MMTEL/RCS features.
+ * <p>
+ * This API is only supported if the device supports the
+ * {@link PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION} feature.
  * @hide
  */
 @SystemApi
@@ -269,6 +273,7 @@ public class SipDelegateManager {
      * {@link ImsException#getCode()} for more information.
      *
      * @see CarrierConfigManager.Ims#KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL
+     * @see PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isSupported() throws ImsException {

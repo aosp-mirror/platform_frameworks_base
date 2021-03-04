@@ -5,3 +5,4 @@ per-file SimpleIconFactory.java = file:/packages/SystemUI/OWNERS
 per-file NetInitiatedActivity.java = file:/location/java/android/location/OWNERS
 per-file IVoice* = file:/core/java/android/service/voice/OWNERS
 per-file *Hotword* = file:/core/java/android/service/voice/OWNERS
+per-file *BatteryStats* = file:/BATTERY_STATS_OWNERS

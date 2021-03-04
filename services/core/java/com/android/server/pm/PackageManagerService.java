@@ -20,10 +20,8 @@ import static android.Manifest.permission.DELETE_PACKAGES;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
@@ -92,7 +90,6 @@ import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.MOVE_FAILED_LOCKED_USER;
 import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
-import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
@@ -355,6 +352,7 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.ArtManagerService;
+import com.android.server.pm.dex.ArtUtils;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -676,17 +674,18 @@ public class PackageManagerService extends IPackageManager.Stub
     // Compilation reasons.
     public static final int REASON_UNKNOWN = -1;
     public static final int REASON_FIRST_BOOT = 0;
-    public static final int REASON_BOOT = 1;
-    public static final int REASON_INSTALL = 2;
-    public static final int REASON_INSTALL_FAST = 3;
-    public static final int REASON_INSTALL_BULK = 4;
-    public static final int REASON_INSTALL_BULK_SECONDARY = 5;
-    public static final int REASON_INSTALL_BULK_DOWNGRADED = 6;
-    public static final int REASON_INSTALL_BULK_SECONDARY_DOWNGRADED = 7;
-    public static final int REASON_BACKGROUND_DEXOPT = 8;
-    public static final int REASON_AB_OTA = 9;
-    public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 10;
-    public static final int REASON_SHARED = 11;
+    public static final int REASON_BOOT_AFTER_OTA = 1;
+    public static final int REASON_POST_BOOT = 2;
+    public static final int REASON_INSTALL = 3;
+    public static final int REASON_INSTALL_FAST = 4;
+    public static final int REASON_INSTALL_BULK = 5;
+    public static final int REASON_INSTALL_BULK_SECONDARY = 6;
+    public static final int REASON_INSTALL_BULK_DOWNGRADED = 7;
+    public static final int REASON_INSTALL_BULK_SECONDARY_DOWNGRADED = 8;
+    public static final int REASON_BACKGROUND_DEXOPT = 9;
+    public static final int REASON_AB_OTA = 10;
+    public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 11;
+    public static final int REASON_SHARED = 12;
 
     public static final int REASON_LAST = REASON_SHARED;
 
@@ -5349,6 +5348,23 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
+    public int getTargetSdkVersion(String packageName)  {
+        synchronized (mLock) {
+            final AndroidPackage pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                return -1;
+            }
+
+            final PackageSetting ps = getPackageSetting(pkg.getPackageName());
+            if (shouldFilterApplicationLocked(ps, Binder.getCallingUid(),
+                    UserHandle.getCallingUserId())) {
+                return -1;
+            }
+            return pkg.getTargetSdkVersion();
+        }
+    }
+
+    @Override
     public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
         return getActivityInfoInternal(component, flags, Binder.getCallingUid(), userId);
     }
@@ -9664,10 +9680,7 @@ public class PackageManagerService extends IPackageManager.Stub
         //       first boot, as they do not have profile data.
         boolean causeFirstBoot = isFirstBoot() || mIsPreNUpgrade;
 
-        // We need to re-extract after a pruned cache, as AoT-ed files will be out of date.
-        boolean causePrunedCache = VMRuntime.didPruneDalvikCache();
-
-        if (!causeUpgrade && !causeFirstBoot && !causePrunedCache) {
+        if (!causeUpgrade && !causeFirstBoot) {
             return;
         }
 
@@ -9684,7 +9697,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final long startTime = System.nanoTime();
         final int[] stats = performDexOptUpgrade(pkgs, mIsPreNUpgrade /* showDialog */,
-                    causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
+                    causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT_AFTER_OTA,
                     false /* bootComplete */);
 
         final int elapsedTimeSeconds =
@@ -18211,6 +18224,19 @@ public class PackageManagerService extends IPackageManager.Stub
         final String packageName = versionedPackage.getPackageName();
         final long versionCode = versionedPackage.getLongVersionCode();
         final String internalPackageName;
+
+        try {
+            if (LocalServices.getService(ActivityTaskManagerInternal.class)
+                    .isBaseOfLockedTask(packageName)) {
+                observer.onPackageDeleted(
+                        packageName, PackageManager.DELETE_FAILED_APP_PINNED, null);
+                EventLog.writeEvent(0x534e4554, "127605586", -1, "");
+                return;
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
         synchronized (mLock) {
             // Normalize package name to handle renamed packages and static libs
             internalPackageName = resolveInternalPackageNameLPr(packageName, versionCode);
@@ -20583,7 +20609,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         final Intent intent = getHomeIntent();
         final List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
-                PackageManager.GET_META_DATA, userId);
+                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
         final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(
                 intent, null, 0, resolveInfos, 0, true, false, false, userId);
         final String packageName = preferredResolveInfo != null
@@ -21587,24 +21613,18 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mInjector.getStorageManagerInternal().addExternalStoragePolicy(
                 new StorageManagerInternal.ExternalStorageMountPolicy() {
-            @Override
-            public int getMountMode(int uid, String packageName) {
-                if (Process.isIsolated(uid)) {
-                    return Zygote.MOUNT_EXTERNAL_NONE;
-                }
-                if (checkUidPermission(READ_EXTERNAL_STORAGE, uid) == PERMISSION_DENIED) {
-                    return Zygote.MOUNT_EXTERNAL_DEFAULT;
-                }
-                if (checkUidPermission(WRITE_EXTERNAL_STORAGE, uid) == PERMISSION_DENIED) {
-                    return Zygote.MOUNT_EXTERNAL_READ;
-                }
-                return Zygote.MOUNT_EXTERNAL_WRITE;
-            }
+                    @Override
+                    public int getMountMode(int uid, String packageName) {
+                        if (Process.isIsolated(uid)) {
+                            return Zygote.MOUNT_EXTERNAL_NONE;
+                        }
+                        return Zygote.MOUNT_EXTERNAL_DEFAULT;
+                    }
 
-            @Override
-            public boolean hasExternalStorage(int uid, String packageName) {
-                return true;
-            }
+                    @Override
+                    public boolean hasExternalStorage(int uid, String packageName) {
+                        return true;
+                    }
         });
 
         // Now that we're mostly running, clean up stale users and apps
@@ -24027,15 +24047,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public int getTargetSdkVersionForPackage(String packageName)
-                throws RemoteException {
-            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
-            ApplicationInfo info = getApplicationInfo(packageName, 0, callingUser);
-            if (info == null) {
-                throw new RemoteException(
-                        "Couldn't get ApplicationInfo for package " + packageName);
+        public int getTargetSdkVersionForPackage(String packageName) throws RemoteException {
+            int targetSdk = getTargetSdkVersion(packageName);
+            if (targetSdk != -1) {
+                return targetSdk;
             }
-            return info.targetSdkVersion;
+
+            throw new RemoteException("Couldn't get targetSdkVersion for package " + packageName);
         }
 
         @Override
@@ -25525,43 +25543,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private String getOatDir(AndroidPackage pkg, @NonNull PackageSetting pkgSetting) {
-        if (!AndroidPackageUtils.canHaveOatDir(pkg,
-                pkgSetting.getPkgState().isUpdatedSystemApp())) {
-            return null;
-        }
-        File codePath = new File(pkg.getCodePath());
-        if (codePath.isDirectory()) {
-            return PackageDexOptimizer.getOatDir(codePath).getAbsolutePath();
-        }
-        return null;
-    }
-
     void deleteOatArtifactsOfPackage(String packageName) {
-        final String[] instructionSets;
-        final List<String> codePaths;
-        final String oatDir;
         final AndroidPackage pkg;
         final PackageSetting pkgSetting;
         synchronized (mLock) {
             pkg = mPackages.get(packageName);
             pkgSetting = mSettings.getPackageLPr(packageName);
         }
-        instructionSets = getAppDexInstructionSets(
-                AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
-                AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting));
-        codePaths = AndroidPackageUtils.getAllCodePaths(pkg);
-        oatDir = getOatDir(pkg, pkgSetting);
-
-        for (String codePath : codePaths) {
-            for (String isa : instructionSets) {
-                try {
-                    mInstaller.deleteOdex(codePath, isa, oatDir);
-                } catch (InstallerException e) {
-                    Log.e(TAG, "Failed deleting oat files for " + codePath, e);
-                }
-            }
-        }
+        mDexManager.deleteOptimizedFiles(ArtUtils.createArtPackageInfo(pkg, pkgSetting));
     }
 
     Set<String> getUnusedPackages(long downgradeTimeThresholdMillis) {

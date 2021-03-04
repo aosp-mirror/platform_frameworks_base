@@ -40,7 +40,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -48,6 +47,9 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.net.module.util.NetdUtils;
+import com.android.net.module.util.NetworkStackConstants;
+import com.android.net.module.util.PermissionUtils;
 
 import java.io.UncheckedIOException;
 import java.net.Inet4Address;
@@ -66,7 +68,6 @@ class TestNetworkService extends ITestNetworkManager.Stub {
     @NonNull private static final AtomicInteger sTestTunIndex = new AtomicInteger();
 
     @NonNull private final Context mContext;
-    @NonNull private final INetworkManagementService mNMS;
     @NonNull private final INetd mNetd;
 
     @NonNull private final HandlerThread mHandlerThread;
@@ -79,14 +80,12 @@ class TestNetworkService extends ITestNetworkManager.Stub {
     private static native int jniCreateTunTap(boolean isTun, @NonNull String iface);
 
     @VisibleForTesting
-    protected TestNetworkService(
-            @NonNull Context context, @NonNull INetworkManagementService netManager) {
+    protected TestNetworkService(@NonNull Context context) {
         mHandlerThread = new HandlerThread("TestNetworkServiceThread");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
 
         mContext = Objects.requireNonNull(context, "missing Context");
-        mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
         mNetd = Objects.requireNonNull(NetdService.getInstance(), "could not get netd instance");
         mCm = mContext.getSystemService(ConnectivityManager.class);
         mNetworkProvider = new NetworkProvider(mContext, mHandler.getLooper(),
@@ -278,10 +277,12 @@ class TestNetworkService extends ITestNetworkManager.Stub {
 
         // Add global routes (but as non-default, non-internet providing network)
         if (allowIPv4) {
-            lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null, iface));
+            lp.addRoute(new RouteInfo(new IpPrefix(
+                    NetworkStackConstants.IPV4_ADDR_ANY, 0), null, iface));
         }
         if (allowIPv6) {
-            lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null, iface));
+            lp.addRoute(new RouteInfo(new IpPrefix(
+                    NetworkStackConstants.IPV6_ADDR_ANY, 0), null, iface));
         }
 
         final TestNetworkAgent agent = new TestNetworkAgent(context, looper, nc, lp,
@@ -317,10 +318,10 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         }
 
         try {
-            // This requires NETWORK_STACK privileges.
             final long token = Binder.clearCallingIdentity();
             try {
-                mNMS.setInterfaceUp(iface);
+                PermissionUtils.enforceNetworkStackPermission(mContext);
+                NetdUtils.setInterfaceUp(mNetd, iface);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

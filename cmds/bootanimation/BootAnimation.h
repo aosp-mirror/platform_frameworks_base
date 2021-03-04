@@ -100,11 +100,13 @@ public:
         int fps;
         int width;
         int height;
+        bool progressEnabled;
         Vector<Part> parts;
         String8 audioConf;
         String8 fileName;
         ZipFileRO* zip;
         Font clockFont;
+        Font progressFont;
     };
 
     // All callbacks will be called from this class's internal thread.
@@ -168,6 +170,7 @@ private:
     bool movie();
     void drawText(const char* str, const Font& font, bool bold, int* x, int* y);
     void drawClock(const Font& font, const int xPos, const int yPos);
+    void drawProgress(int percent, const Font& font, const int xPos, const int yPos);
     void fadeFrame(int frameLeft, int frameBottom, int frameWidth, int frameHeight,
                    const Animation::Part& part, int fadedFramesCount);
     bool validClock(const Animation::Part& part);

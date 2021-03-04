@@ -386,6 +386,7 @@
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_OSU_PROVIDERS_LIST" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_SUBSCRIPTION_REMEDIATION" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_LAUNCH_OSU_VIEW" />
+    <protected-broadcast android:name="android.net.wifi.action.REFRESH_USER_PROVISIONING" />
     <protected-broadcast android:name="android.net.wifi.action.WIFI_NETWORK_SUGGESTION_POST_CONNECTION" />
     <protected-broadcast android:name="android.net.wifi.action.WIFI_SCAN_AVAILABILITY_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.supplicant.CONNECTION_CHANGE" />
@@ -1270,11 +1271,13 @@
         android:protectionLevel="dangerous|instant" />
 
     <!-- ====================================================================== -->
-    <!-- Permissions for accessing the UCE Service                              -->
+    <!-- Permissions for accessing the vendor UCE Service                       -->
     <!-- ====================================================================== -->
 
     <!-- @hide Allows an application to Access UCE-Presence.
          <p>Protection level: signature|privileged
+         @deprecated Framework should no longer use this permission to access the vendor UCE service
+         using AIDL, it is instead implemented by RcsCapabilityExchangeImplBase
     -->
     <permission android:name="android.permission.ACCESS_UCE_PRESENCE_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
@@ -1282,6 +1285,8 @@
 
     <!-- @hide Allows an application to Access UCE-OPTIONS.
          <p>Protection level: signature|privileged
+         @deprecated Framework should no longer use this permission to access the vendor UCE service
+         using AIDL, it is instead implemented by RcsCapabilityExchangeImplBase
     -->
     <permission android:name="android.permission.ACCESS_UCE_OPTIONS_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
@@ -1673,7 +1678,7 @@
      @SystemApi
      <p>Not for use by third-party applications. @hide -->
     <permission android:name="android.permission.RESTART_WIFI_SUBSYSTEM"
-                android:protectionLevel="signature|setup" />
+                android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi @hide Allows applications to toggle airplane mode.
          <p>Not for use by third-party or privileged applications.
@@ -1789,6 +1794,17 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi @hide Allows system APK to manage country code.
+             <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.MANAGE_WIFI_COUNTRY_CODE"
+        android:protectionLevel="signature" />
+
+    <!-- @SystemApi @hide Allows an application to manage an automotive device's application network
+         preference as it relates to OEM_PAID and OEM_PRIVATE capable networks.
+         <p>Not for use by third-party or privileged applications. -->
+    <permission android:name="android.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE"
+        android:protectionLevel="signature" />
 
     <!-- ======================================= -->
     <!-- Permissions for short range, peripheral networks -->
@@ -1915,6 +1931,12 @@
     <!-- @hide Allows the device to be reset, clearing all data and enables Test Harness Mode. -->
     <permission android:name="android.permission.ENABLE_TEST_HARNESS_MODE"
         android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows access to ultra wideband device.
+     <p>Not for use by third-party applications.
+     @hide -->
+    <permission android:name="android.permission.UWB_PRIVILEGED"
+                android:protectionLevel="signature|privileged" />
 
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->
@@ -2251,6 +2273,15 @@
     <permission android:name="android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a {@link android.telecom.CallDiagnosticService},
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_CALL_DIAGNOSTIC_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link android.telecom.CallRedirectionService},
          to ensure that only the system can bind to it.
          <p>Protection level: signature|privileged
@@ -2353,6 +2384,13 @@
     -->
     <permission android:name="android.permission.BIND_GBA_SERVICE"
         android:protectionLevel="signature" />
+
+    <!-- Required for an Application to access APIs related to RCS User Capability Exchange.
+         <p>Protection level: signature|privileged
+         @SystemApi
+         @hide -->
+    <permission android:name="android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE"
+        android:protectionLevel="signature|privileged" />
 
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
@@ -2498,6 +2536,10 @@
          This permission is not available to third party applications. -->
     <permission android:name="android.permission.CREATE_USERS"
         android:protectionLevel="signature" />
+
+    <!-- @TestApi @hide Allows an application to query user info for all users on the device. -->
+    <permission android:name="android.permission.QUERY_USERS"
+                android:protectionLevel="signature" />
 
     <!-- @hide Allows an application to set the profile owners and the device owner.
          This permission is not available to third party applications.-->
@@ -3053,6 +3095,11 @@
          @hide -->
     <permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES"
         android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to set, update and remove the credential management app.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP"
+        android:protectionLevel="signature" />
 
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
@@ -3793,6 +3840,11 @@
     <permission android:name="android.permission.MOVE_PACKAGE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @TestApi Allows an application to keep uninstalled packages as apks.
+         @hide -->
+    <permission android:name="android.permission.KEEP_UNINSTALLED_PACKAGES"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to change whether an application component (other than its own) is
          enabled or not.
          <p>Not for use by third-party applications. -->
@@ -4363,6 +4415,10 @@
     <permission android:name="android.permission.WRITE_DREAM_STATE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @hide Allows applications to read whether ambient display is suppressed. -->
+    <permission android:name="android.permission.READ_DREAM_SUPPRESSION"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allow an application to read and write the cache partition.
          @hide -->
     <permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM"
@@ -4507,7 +4563,7 @@
     <!-- Allows access to keyguard secure storage.  Only allowed for system processes.
         @hide -->
     <permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|setup" />
 
     <!-- Allows applications to set the initial lockscreen state.
          <p>Not for use by third-party applications. @hide -->

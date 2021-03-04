@@ -22,6 +22,8 @@ import static android.system.OsConstants.AF_INET6;
 import android.annotation.NonNull;
 import android.system.Os;
 
+import java.io.FileDescriptor;
+
 /** @hide */
 public class NetworkUtilsInternal {
 
@@ -34,6 +36,20 @@ public class NetworkUtilsInternal {
      *                        and DNS lookups.
      */
     public static native void setAllowNetworkingForProcess(boolean allowNetworking);
+
+    /**
+     * Protect {@code fd} from VPN connections.  After protecting, data sent through
+     * this socket will go directly to the underlying network, so its traffic will not be
+     * forwarded through the VPN.
+     */
+    public static native boolean protectFromVpn(FileDescriptor fd);
+
+    /**
+     * Protect {@code socketfd} from VPN connections.  After protecting, data sent through
+     * this socket will go directly to the underlying network, so its traffic will not be
+     * forwarded through the VPN.
+     */
+    public static native boolean protectFromVpn(int socketfd);
 
     /**
      * Returns true if the hostname is weakly validated.

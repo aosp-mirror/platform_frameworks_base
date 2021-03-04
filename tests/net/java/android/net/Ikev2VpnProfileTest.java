@@ -30,7 +30,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.net.VpnProfile;
 import com.android.net.module.util.ProxyUtils;
-import com.android.org.bouncycastle.x509.X509V1CertificateGenerator;
+import com.android.internal.org.bouncycastle.x509.X509V1CertificateGenerator;
 
 import org.junit.Before;
 import org.junit.Test;
