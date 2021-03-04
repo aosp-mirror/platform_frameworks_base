@@ -19,7 +19,7 @@ package com.android.server.pm.test.verify.domain
 import android.content.pm.verify.domain.DomainSet
 import android.content.pm.verify.domain.DomainVerificationInfo
 import android.content.pm.verify.domain.DomainVerificationRequest
-import android.content.pm.verify.domain.DomainVerificationUserSelection
+import android.content.pm.verify.domain.DomainVerificationUserState
 import android.os.Parcel
 import android.os.Parcelable
 import android.os.UserHandle
@@ -28,7 +28,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.util.UUID
-import kotlin.random.Random
 
 @RunWith(Parameterized::class)
 class DomainVerificationCoreApiTest {
@@ -92,9 +91,9 @@ class DomainVerificationCoreApiTest {
                 }
             ),
             Parameter(
-                testName = "DomainVerificationUserSelection",
+                testName = "DomainVerificationUserState",
                 initial = {
-                    DomainVerificationUserSelection(
+                    DomainVerificationUserState(
                         UUID.fromString("703f6d34-6241-4cfd-8176-2e1d23355811"),
                         "com.test.pkg",
                         UserHandle.of(10),
@@ -103,22 +102,22 @@ class DomainVerificationCoreApiTest {
                             .associate { it.value to (it.index % 3) }
                     )
                 },
-                unparcel = { DomainVerificationUserSelection.CREATOR.createFromParcel(it) },
+                unparcel = { DomainVerificationUserState.CREATOR.createFromParcel(it) },
                 assertion = { first, second ->
-                    assertAll<DomainVerificationUserSelection, UUID>(first, second,
+                    assertAll<DomainVerificationUserState, UUID>(first, second,
                         { it.identifier }, { it.component1() }, IS_EQUAL_TO
                     )
-                    assertAll<DomainVerificationUserSelection, String>(first, second,
+                    assertAll<DomainVerificationUserState, String>(first, second,
                         { it.packageName }, { it.component2() }, IS_EQUAL_TO
                     )
-                    assertAll<DomainVerificationUserSelection, UserHandle>(first, second,
+                    assertAll<DomainVerificationUserState, UserHandle>(first, second,
                         { it.user }, { it.component3() }, IS_EQUAL_TO
                     )
-                    assertAll<DomainVerificationUserSelection, Boolean>(
+                    assertAll<DomainVerificationUserState, Boolean>(
                         first, second, { it.isLinkHandlingAllowed },
                         { it.component4() }, IS_EQUAL_TO
                     )
-                    assertAll<DomainVerificationUserSelection, Map<String, Int>>(
+                    assertAll<DomainVerificationUserState, Map<String, Int>>(
                         first, second, { it.hostToStateMap },
                         { it.component5() }, IS_MAP_EQUAL_TO
                     )

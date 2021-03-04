@@ -19,7 +19,6 @@ package com.android.server.pm.verify.domain.models;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationState;
 import android.util.ArrayMap;
 import android.util.SparseArray;
@@ -44,9 +43,9 @@ public class DomainVerificationPkgState {
 
     /**
      * Whether or not the package declares any autoVerify domains. This is separate from an empty
-     * check on the map itself, because an empty map means no response recorded, not necessarily no
-     * domains declared. When this is false, {@link #mStateMap} will be empty, but
-     * {@link #mUserSelectionStates} may contain any domains the user has explicitly chosen to
+     * check on the map itself, because an empty map means no response recorded, not necessarily
+     * no domains declared. When this is false, {@link #mStateMap} will be empty, but
+     * {@link #mUserStates} may contain any domains the user has explicitly chosen to
      * allow this package to open, which may or may not be marked autoVerify.
      */
     private final boolean mHasAutoVerifyDomains;
@@ -62,7 +61,7 @@ public class DomainVerificationPkgState {
     private final ArrayMap<String, Integer> mStateMap;
 
     @NonNull
-    private final SparseArray<DomainVerificationUserState> mUserSelectionStates;
+    private final SparseArray<DomainVerificationInternalUserState> mUserStates;
 
     public DomainVerificationPkgState(@NonNull String packageName, @NonNull UUID id,
             boolean hasAutoVerifyDomains) {
@@ -70,16 +69,17 @@ public class DomainVerificationPkgState {
     }
 
     @Nullable
-    public DomainVerificationUserState getUserSelectionState(@UserIdInt int userId) {
-        return mUserSelectionStates.get(userId);
+    public DomainVerificationInternalUserState getUserState(@UserIdInt int userId) {
+        return mUserStates.get(userId);
     }
 
     @Nullable
-    public DomainVerificationUserState getOrCreateUserSelectionState(@UserIdInt int userId) {
-        DomainVerificationUserState userState = mUserSelectionStates.get(userId);
+    public DomainVerificationInternalUserState getOrCreateUserState(
+            @UserIdInt int userId) {
+        DomainVerificationInternalUserState userState = mUserStates.get(userId);
         if (userState == null) {
-            userState = new DomainVerificationUserState(userId);
-            mUserSelectionStates.put(userId, userState);
+            userState = new DomainVerificationInternalUserState(userId);
+            mUserStates.put(userId, userState);
         }
         return userState;
     }
@@ -89,20 +89,20 @@ public class DomainVerificationPkgState {
     }
 
     public void removeUser(@UserIdInt int userId) {
-        mUserSelectionStates.remove(userId);
+        mUserStates.remove(userId);
     }
 
     public void removeAllUsers() {
-        mUserSelectionStates.clear();
+        mUserStates.clear();
     }
 
-    private int userSelectionStatesHashCode() {
-        return mUserSelectionStates.contentHashCode();
+    private int userStatesHashCode() {
+        return mUserStates.contentHashCode();
     }
 
-    private boolean userSelectionStatesEquals(
-            @NonNull SparseArray<DomainVerificationUserState> other) {
-        return mUserSelectionStates.contentEquals(other);
+    private boolean userStatesEquals(
+            @NonNull SparseArray<DomainVerificationInternalUserState> other) {
+        return mUserStates.contentEquals(other);
     }
 
 
@@ -113,7 +113,7 @@ public class DomainVerificationPkgState {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/services/core/java/com/android/server/pm/domain/verify/models/DomainVerificationPkgState.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/services/core/java/com/android/server/pm/verify/domain/models/DomainVerificationPkgState.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -123,9 +123,15 @@ public class DomainVerificationPkgState {
     /**
      * Creates a new DomainVerificationPkgState.
      *
+     * @param hasAutoVerifyDomains
+     *   Whether or not the package declares any autoVerify domains. This is separate from an empty
+     *   check on the map itself, because an empty map means no response recorded, not necessarily
+     *   no domains declared. When this is false, {@link #mStateMap} will be empty, but
+     *   {@link #mUserStates} may contain any domains the user has explicitly chosen to
+     *   allow this package to open, which may or may not be marked autoVerify.
      * @param stateMap
      *   Map of domains to state integers. Only domains that are not set to the default value of
-     *   {@link DomainVerificationManager#STATE_NO_RESPONSE} are included.
+     *   {@link DomainVerificationState#STATE_NO_RESPONSE} are included.
      *
      *   TODO(b/159952358): Hide the state map entirely from the caller, to allow optimizations,
      *    such as storing no state when the package is marked as a linked app in SystemConfig.
@@ -136,7 +142,7 @@ public class DomainVerificationPkgState {
             @NonNull UUID id,
             boolean hasAutoVerifyDomains,
             @NonNull ArrayMap<String,Integer> stateMap,
-            @NonNull SparseArray<DomainVerificationUserState> userSelectionStates) {
+            @NonNull SparseArray<DomainVerificationInternalUserState> userStates) {
         this.mPackageName = packageName;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPackageName);
@@ -147,9 +153,9 @@ public class DomainVerificationPkgState {
         this.mStateMap = stateMap;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mStateMap);
-        this.mUserSelectionStates = userSelectionStates;
+        this.mUserStates = userStates;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mUserSelectionStates);
+                NonNull.class, null, mUserStates);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -164,6 +170,13 @@ public class DomainVerificationPkgState {
         return mId;
     }
 
+    /**
+     * Whether or not the package declares any autoVerify domains. This is separate from an empty
+     * check on the map itself, because an empty map means no response recorded, not necessarily
+     * no domains declared. When this is false, {@link #mStateMap} will be empty, but
+     * {@link #mUserStates} may contain any domains the user has explicitly chosen to
+     * allow this package to open, which may or may not be marked autoVerify.
+     */
     @DataClass.Generated.Member
     public boolean isHasAutoVerifyDomains() {
         return mHasAutoVerifyDomains;
@@ -171,7 +184,7 @@ public class DomainVerificationPkgState {
 
     /**
      * Map of domains to state integers. Only domains that are not set to the default value of
-     * {@link DomainVerificationManager#STATE_NO_RESPONSE} are included.
+     * {@link DomainVerificationState#STATE_NO_RESPONSE} are included.
      *
      * TODO(b/159952358): Hide the state map entirely from the caller, to allow optimizations,
      *  such as storing no state when the package is marked as a linked app in SystemConfig.
@@ -182,8 +195,8 @@ public class DomainVerificationPkgState {
     }
 
     @DataClass.Generated.Member
-    public @NonNull SparseArray<DomainVerificationUserState> getUserSelectionStates() {
-        return mUserSelectionStates;
+    public @NonNull SparseArray<DomainVerificationInternalUserState> getUserStates() {
+        return mUserStates;
     }
 
     @Override
@@ -197,7 +210,7 @@ public class DomainVerificationPkgState {
                 "id = " + mId + ", " +
                 "hasAutoVerifyDomains = " + mHasAutoVerifyDomains + ", " +
                 "stateMap = " + mStateMap + ", " +
-                "userSelectionStates = " + mUserSelectionStates +
+                "userStates = " + mUserStates +
         " }";
     }
 
@@ -218,7 +231,7 @@ public class DomainVerificationPkgState {
                 && Objects.equals(mId, that.mId)
                 && mHasAutoVerifyDomains == that.mHasAutoVerifyDomains
                 && Objects.equals(mStateMap, that.mStateMap)
-                && userSelectionStatesEquals(that.mUserSelectionStates);
+                && userStatesEquals(that.mUserStates);
     }
 
     @Override
@@ -232,15 +245,15 @@ public class DomainVerificationPkgState {
         _hash = 31 * _hash + Objects.hashCode(mId);
         _hash = 31 * _hash + Boolean.hashCode(mHasAutoVerifyDomains);
         _hash = 31 * _hash + Objects.hashCode(mStateMap);
-        _hash = 31 * _hash + userSelectionStatesHashCode();
+        _hash = 31 * _hash + userStatesHashCode();
         return _hash;
     }
 
     @DataClass.Generated(
-            time = 1608234185474L,
+            time = 1614818362549L,
             codegenVersion = "1.0.22",
-            sourceFile = "frameworks/base/services/core/java/com/android/server/pm/domain/verify/models/DomainVerificationPkgState.java",
-            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate @android.annotation.NonNull java.util.UUID mId\nprivate final  boolean mHasAutoVerifyDomains\nprivate final @android.annotation.NonNull android.util.ArrayMap<java.lang.String,java.lang.Integer> mStateMap\nprivate final @android.annotation.NonNull android.util.SparseArray<com.android.server.pm.verify.domain.models.DomainVerificationUserState> mUserSelectionStates\npublic @android.annotation.Nullable com.android.server.pm.verify.domain.models.DomainVerificationUserState getUserSelectionState(int)\npublic @android.annotation.Nullable com.android.server.pm.verify.domain.models.DomainVerificationUserState getOrCreateUserSelectionState(int)\npublic  void setId(java.util.UUID)\npublic  void removeUser(int)\npublic  void removeAllUsers()\nprivate  int userSelectionStatesHashCode()\nprivate  boolean userSelectionStatesEquals(android.util.SparseArray<com.android.server.pm.verify.domain.models.DomainVerificationUserState>)\nclass DomainVerificationPkgState extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true)")
+            sourceFile = "frameworks/base/services/core/java/com/android/server/pm/verify/domain/models/DomainVerificationPkgState.java",
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate @android.annotation.NonNull java.util.UUID mId\nprivate final  boolean mHasAutoVerifyDomains\nprivate final @android.annotation.NonNull android.util.ArrayMap<java.lang.String,java.lang.Integer> mStateMap\nprivate final @android.annotation.NonNull android.util.SparseArray<com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState> mUserStates\npublic @android.annotation.Nullable com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState getUserState(int)\npublic @android.annotation.Nullable com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState getOrCreateUserState(int)\npublic  void setId(java.util.UUID)\npublic  void removeUser(int)\npublic  void removeAllUsers()\nprivate  int userStatesHashCode()\nprivate  boolean userStatesEquals(android.util.SparseArray<com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState>)\nclass DomainVerificationPkgState extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 
