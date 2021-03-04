@@ -26748,7 +26748,22 @@ package android.net.vcn {
 
   public class VcnManager {
     method @RequiresPermission("carrier privileges") public void clearVcnConfig(@NonNull android.os.ParcelUuid) throws java.io.IOException;
+    method public void registerVcnStatusCallback(@NonNull android.os.ParcelUuid, @NonNull java.util.concurrent.Executor, @NonNull android.net.vcn.VcnManager.VcnStatusCallback);
     method @RequiresPermission("carrier privileges") public void setVcnConfig(@NonNull android.os.ParcelUuid, @NonNull android.net.vcn.VcnConfig) throws java.io.IOException;
+    method public void unregisterVcnStatusCallback(@NonNull android.net.vcn.VcnManager.VcnStatusCallback);
+    field public static final int VCN_ERROR_CODE_CONFIG_ERROR = 1; // 0x1
+    field public static final int VCN_ERROR_CODE_INTERNAL_ERROR = 0; // 0x0
+    field public static final int VCN_ERROR_CODE_NETWORK_ERROR = 2; // 0x2
+    field public static final int VCN_STATUS_CODE_ACTIVE = 2; // 0x2
+    field public static final int VCN_STATUS_CODE_INACTIVE = 1; // 0x1
+    field public static final int VCN_STATUS_CODE_NOT_CONFIGURED = 0; // 0x0
+    field public static final int VCN_STATUS_CODE_SAFE_MODE = 3; // 0x3
+  }
+
+  public abstract static class VcnManager.VcnStatusCallback {
+    ctor public VcnManager.VcnStatusCallback();
+    method public abstract void onGatewayConnectionError(@NonNull int[], int, @Nullable Throwable);
+    method public abstract void onVcnStatusChanged(int);
   }
 
 }
