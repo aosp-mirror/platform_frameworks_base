@@ -29261,6 +29261,7 @@ package android.os {
     field public static final String HARDWARE;
     field public static final String HOST;
     field public static final String ID;
+    field public static final boolean IS_DEBUGGABLE;
     field public static final String MANUFACTURER;
     field public static final String MODEL;
     field @NonNull public static final String ODM_SKU;
