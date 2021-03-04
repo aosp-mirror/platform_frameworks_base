@@ -21,6 +21,7 @@ import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -7361,6 +7362,7 @@ class Task extends WindowContainer<WindowContainer> {
         return reuseOrCreateTask(info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
                 toTop, null /*activity*/, null /*source*/, null /*options*/);
     }
+
     // TODO: Can be removed once we change callpoints creating root tasks to be creating tasks.
     /** Either returns this current task to be re-used or creates a new child task. */
     Task reuseOrCreateTask(ActivityInfo info, Intent intent, IVoiceInteractionSession voiceSession,
@@ -7368,7 +7370,7 @@ class Task extends WindowContainer<WindowContainer> {
             ActivityRecord source, ActivityOptions options) {
 
         Task task;
-        if (DisplayContent.canReuseExistingTask(getWindowingMode(), getActivityType())) {
+        if (canReuseAsLeafTask()) {
             // This root task will only contain one task, so just return itself since all root
             // tasks ara now tasks and all tasks are now root tasks.
             task = reuseAsLeafTask(voiceSession, voiceInteractor, intent, info, activity);
@@ -7403,10 +7405,24 @@ class Task extends WindowContainer<WindowContainer> {
         return task;
     }
 
+    /** Return {@code true} if this task can be reused as leaf task. */
+    private boolean canReuseAsLeafTask() {
+        // Cannot be reused as leaf task if this task is created by organizer or having child tasks.
+        if (mCreatedByOrganizer || !isLeafTask()) {
+            return false;
+        }
+
+        // Existing Tasks can be reused if a new root task will be created anyway, or for the
+        // Dream - because there can only ever be one DreamActivity.
+        final int windowingMode = getWindowingMode();
+        final int activityType = getActivityType();
+        return DisplayContent.alwaysCreateRootTask(windowingMode, activityType)
+                || activityType == ACTIVITY_TYPE_DREAM;
+    }
+
     void addChild(WindowContainer child, final boolean toTop, boolean showForAllUsers) {
         Task task = child.asTask();
         try {
-
             if (task != null) {
                 task.setForceShowForAllUsers(showForAllUsers);
             }

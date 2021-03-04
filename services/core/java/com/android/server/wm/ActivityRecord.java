@@ -911,7 +911,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pw.print(Integer.toHexString(taskDescription.getStatusBarColor()));
                         pw.print(" navigationBarColor=");
                         pw.println(Integer.toHexString(taskDescription.getNavigationBarColor()));
-                        pw.print(" backgroundColorFloating=");
+                        pw.print(prefix); pw.print(" backgroundColorFloating=");
                         pw.println(Integer.toHexString(
                                 taskDescription.getBackgroundColorFloating()));
             }
