@@ -19,7 +19,6 @@ package com.android.server.power;
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -147,7 +146,6 @@ final class PreRebootLogger {
             return;
         }
 
-        final long token = Binder.clearCallingIdentity();
         try {
             final File dumpFile = new File(dumpDir, serviceName);
             final ParcelFileDescriptor fd = ParcelFileDescriptor.open(dumpFile,
@@ -156,8 +154,6 @@ final class PreRebootLogger {
             binder.dump(fd.getFileDescriptor(), ArrayUtils.emptyArray(String.class));
         } catch (FileNotFoundException | RemoteException e) {
             Slog.e(TAG, String.format("Failed to dump %s service before reboot", serviceName), e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 }
