@@ -888,6 +888,14 @@ public abstract class Context {
         return getAttributionTag();
     }
 
+    /**
+     * Return the set of parameters which this Context was created with, if it
+     * was created via {@link #createContext(ContextParams)}.
+     */
+    public @Nullable ContextParams getParams() {
+        return null;
+    }
+
     /** Return the full application info for this context's package. */
     public abstract ApplicationInfo getApplicationInfo();
 

@@ -172,6 +172,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public @Nullable ContextParams getParams() {
+        return mBase.getParams();
+    }
+
+    @Override
     public ApplicationInfo getApplicationInfo() {
         return mBase.getApplicationInfo();
     }
@@ -1042,6 +1047,12 @@ public class ContextWrapper extends Context {
     public Context createWindowContext(@NonNull Display display, @WindowType int type,
             @Nullable Bundle options) {
         return mBase.createWindowContext(display, type, options);
+    }
+
+    @Override
+    @NonNull
+    public Context createContext(@NonNull ContextParams contextParams) {
+        return mBase.createContext(contextParams);
     }
 
     @Override

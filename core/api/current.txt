@@ -10376,6 +10376,7 @@ package android.content {
     method public abstract android.content.pm.PackageManager getPackageManager();
     method public abstract String getPackageName();
     method public abstract String getPackageResourcePath();
+    method @Nullable public android.content.ContextParams getParams();
     method public abstract android.content.res.Resources getResources();
     method public abstract android.content.SharedPreferences getSharedPreferences(String, int);
     method @NonNull public final String getString(@StringRes int);
