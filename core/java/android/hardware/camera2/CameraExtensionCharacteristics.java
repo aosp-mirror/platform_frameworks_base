@@ -21,9 +21,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.ImageFormat;
+import android.hardware.camera2.extension.IAdvancedExtenderImpl;
 import android.hardware.camera2.extension.ICameraExtensionsProxyService;
 import android.hardware.camera2.extension.IImageCaptureExtenderImpl;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
+import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.SizeList;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -220,6 +222,7 @@ public final class CameraExtensionCharacteristics {
         private InitializerFuture mInitFuture = null;
         private ServiceConnection mConnection = null;
         private ICameraExtensionsProxyService mProxy = null;
+        private boolean mSupportsAdvancedExtensions = false;
 
         // Singleton, don't allow construction
         private CameraExtensionManagerGlobal() {}
@@ -245,6 +248,11 @@ public final class CameraExtensionCharacteristics {
                     public void onServiceConnected(ComponentName component, IBinder binder) {
                         mProxy = ICameraExtensionsProxyService.Stub.asInterface(binder);
                         mInitFuture.setStatus(true);
+                        try {
+                            mSupportsAdvancedExtensions = mProxy.advancedExtensionsSupported();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Remote IPC failed!");
+                        }
                     }
                 };
                 ctx.bindService(intent, mConnection, Context.BIND_AUTO_CREATE |
@@ -334,6 +342,10 @@ public final class CameraExtensionCharacteristics {
             }
         }
 
+        public boolean areAdvancedExtensionsSupported() {
+            return mSupportsAdvancedExtensions;
+        }
+
         public IPreviewExtenderImpl initializePreviewExtension(int extensionType)
                 throws RemoteException {
             synchronized (mLock) {
@@ -350,6 +362,17 @@ public final class CameraExtensionCharacteristics {
             synchronized (mLock) {
                 if (mProxy != null) {
                     return mProxy.initializeImageExtension(extensionType);
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        public IAdvancedExtenderImpl initializeAdvancedExtension(int extensionType)
+                throws RemoteException {
+            synchronized (mLock) {
+                if (mProxy != null) {
+                    return mProxy.initializeAdvancedExtension(extensionType);
                 } else {
                     return null;
                 }
@@ -374,23 +397,60 @@ public final class CameraExtensionCharacteristics {
     /**
      * @hide
      */
+    public static boolean areAdvancedExtensionsSupported() {
+        return CameraExtensionManagerGlobal.get().areAdvancedExtensionsSupported();
+    }
+
+    /**
+     * @hide
+     */
     public static boolean isExtensionSupported(String cameraId, int extensionType,
             CameraCharacteristics chars) {
-        Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders;
+        if (areAdvancedExtensionsSupported()) {
+            try {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extensionType);
+                return extender.isExtensionAvailable(cameraId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to query extension availability! Extension service does not"
+                        + " respond!");
+                return false;
+            }
+        } else {
+            Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders;
+            try {
+                extenders = initializeExtension(extensionType);
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+
+            try {
+                return extenders.first.isExtensionAvailable(cameraId, chars.getNativeMetadata()) &&
+                        extenders.second.isExtensionAvailable(cameraId, chars.getNativeMetadata());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to query extension availability! Extension service does not"
+                        + " respond!");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static IAdvancedExtenderImpl initializeAdvancedExtension(@Extension int extensionType) {
+        IAdvancedExtenderImpl extender;
         try {
-            extenders = initializeExtension(extensionType);
-        } catch (IllegalArgumentException e) {
-            return false;
+            extender = CameraExtensionManagerGlobal.get().initializeAdvancedExtension(
+                    extensionType);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failed to initialize extension: " + extensionType);
         }
 
-        try {
-            return extenders.first.isExtensionAvailable(cameraId, chars.getNativeMetadata()) &&
-                extenders.second.isExtensionAvailable(cameraId, chars.getNativeMetadata());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to query extension availability! Extension service does not"
-                    + " respond!");
-            return false;
+        if (extender == null) {
+            throw new IllegalArgumentException("Unknown extension: " + extensionType);
         }
+
+        return extender;
     }
 
     /**
@@ -487,13 +547,21 @@ public final class CameraExtensionCharacteristics {
                 throw new IllegalArgumentException("Unsupported extension");
             }
 
-            Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
-                    initializeExtension(extension);
             StreamConfigurationMap streamMap = mChars.get(
                     CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-            extenders.first.init(mCameraId, mChars.getNativeMetadata());
-            return generateSupportedSizes(extenders.first.getSupportedResolutions(),
-                    ImageFormat.PRIVATE, streamMap);
+            if (areAdvancedExtensionsSupported()) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId);
+                return generateSupportedSizes(
+                        extender.getSupportedPreviewOutputResolutions(mCameraId),
+                        ImageFormat.PRIVATE, streamMap);
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.first.init(mCameraId, mChars.getNativeMetadata());
+                return generateSupportedSizes(extenders.first.getSupportedResolutions(),
+                        ImageFormat.PRIVATE, streamMap);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to query the extension supported sizes! Extension service does"
                     + " not respond!");
@@ -536,31 +604,47 @@ public final class CameraExtensionCharacteristics {
                     throw new IllegalArgumentException("Unsupported extension");
                 }
 
-                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
-                        initializeExtension(extension);
                 StreamConfigurationMap streamMap = mChars.get(
                         CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-                if (format == ImageFormat.YUV_420_888) {
-                    extenders.second.init(mCameraId, mChars.getNativeMetadata());
-                    if (extenders.second.getCaptureProcessor() == null) {
-                        // Extensions that don't implement any capture processor are limited to
-                        // JPEG only!
-                        return new ArrayList<>();
+                if (areAdvancedExtensionsSupported()) {
+                    switch(format) {
+                        case ImageFormat.YUV_420_888:
+                        case ImageFormat.JPEG:
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unsupported format: " + format);
                     }
-                    return generateSupportedSizes(extenders.second.getSupportedResolutions(),
-                            format, streamMap);
-                } else if (format == ImageFormat.JPEG) {
-                    extenders.second.init(mCameraId, mChars.getNativeMetadata());
-                    if (extenders.second.getCaptureProcessor() != null) {
-                        // The framework will perform the additional encoding pass on the
-                        // processed YUV_420 buffers.
-                        return generateJpegSupportedSizes(
-                                extenders.second.getSupportedResolutions(), streamMap);
-                    } else {
-                        return generateSupportedSizes(null, format, streamMap);
-                    }
+                    IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                    extender.init(mCameraId);
+                    return generateSupportedSizes(extender.getSupportedCaptureOutputResolutions(
+                            mCameraId), format, streamMap);
                 } else {
-                    throw new IllegalArgumentException("Unsupported format: " + format);
+                    if (format == ImageFormat.YUV_420_888) {
+                        Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                                initializeExtension(extension);
+                        extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                        if (extenders.second.getCaptureProcessor() == null) {
+                            // Extensions that don't implement any capture processor are limited to
+                            // JPEG only!
+                            return new ArrayList<>();
+                        }
+                        return generateSupportedSizes(extenders.second.getSupportedResolutions(),
+                                format, streamMap);
+                    } else if (format == ImageFormat.JPEG) {
+                        Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                                initializeExtension(extension);
+                        extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                        if (extenders.second.getCaptureProcessor() != null) {
+                            // The framework will perform the additional encoding pass on the
+                            // processed YUV_420 buffers.
+                            return generateJpegSupportedSizes(
+                                    extenders.second.getSupportedResolutions(), streamMap);
+                        } else {
+                            return generateSupportedSizes(null, format, streamMap);
+                        }
+                    } else {
+                        throw new IllegalArgumentException("Unsupported format: " + format);
+                    }
                 }
             } finally {
                 unregisterClient(clientId);
@@ -608,6 +692,23 @@ public final class CameraExtensionCharacteristics {
             if (!isExtensionSupported(mCameraId, extension, mChars)) {
                 throw new IllegalArgumentException("Unsupported extension");
             }
+
+            if (areAdvancedExtensionsSupported()) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId);
+                android.hardware.camera2.extension.Size sz =
+                        new android.hardware.camera2.extension.Size();
+                sz.width = captureOutputSize.getWidth();
+                sz.height = captureOutputSize.getHeight();
+                LatencyRange latencyRange = extender.getEstimatedCaptureLatencyRange(mCameraId,
+                        sz, format);
+                if (latencyRange != null) {
+                    return new Range(latencyRange.min, latencyRange.max);
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query the extension capture latency! Extension service does"
+                    + " not respond!");
         } finally {
             unregisterClient(clientId);
         }

@@ -16,6 +16,9 @@
 
 package android.hardware.camera2.impl;
 
+import static android.hardware.camera2.impl.CameraExtensionUtils.JPEG_DEFAULT_QUALITY;
+import static android.hardware.camera2.impl.CameraExtensionUtils.JPEG_DEFAULT_ROTATION;
+
 import android.annotation.NonNull;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CaptureResult;
@@ -42,8 +45,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     public final static String TAG = "CameraExtensionJpeg";
     private final static int JPEG_QUEUE_SIZE = 1;
-    private final static int JPEG_DEFAULT_QUALITY = 100;
-    private final static int JPEG_DEFAULT_ROTATION = 0;
 
     private final Handler mHandler;
     private final HandlerThread mHandlerThread;
