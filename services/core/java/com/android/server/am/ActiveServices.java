@@ -86,6 +86,7 @@ import android.app.Service;
 import android.app.ServiceStartArgs;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.compat.CompatChanges;
+import android.app.usage.UsageEvents;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -2504,6 +2505,10 @@ public final class ActiveServices {
                 s.setAllowedBgFgsStartsByBinding(true);
             }
 
+            if ((flags & Context.BIND_NOT_APP_COMPONENT_USAGE) != 0) {
+                s.isNotAppComponentUsage = true;
+            }
+
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app.mServices, c, true);
             }
@@ -3370,6 +3375,14 @@ public final class ActiveServices {
             Slog.w(TAG, msg);
             bringDownServiceLocked(r, enqueueOomAdj);
             return msg;
+        }
+
+        // Report usage if binding is from a different package except for explicitly exempted
+        // bindings
+        if (!r.appInfo.packageName.equals(r.mRecentCallingPackage)
+                && !r.isNotAppComponentUsage) {
+            mAm.mUsageStatsService.reportEvent(
+                    r.packageName, r.userId, UsageEvents.Event.APP_COMPONENT_USED);
         }
 
         // Service is now being launched, its package can't be stopped.
