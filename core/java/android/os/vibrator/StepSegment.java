@@ -27,23 +27,25 @@ import com.android.internal.util.Preconditions;
 import java.util.Objects;
 
 /**
- * Representation of {@link VibrationEffectSegment} that holds a fixed vibration amplitude for a
- * specified duration.
+ * Representation of {@link VibrationEffectSegment} that holds a fixed vibration amplitude and
+ * frequency for a specified duration.
  *
  * @hide
  */
 @TestApi
 public final class StepSegment extends VibrationEffectSegment {
     private final float mAmplitude;
+    private final float mFrequency;
     private final int mDuration;
 
     StepSegment(@NonNull Parcel in) {
-        this(in.readFloat(), in.readInt());
+        this(in.readFloat(), in.readFloat(), in.readInt());
     }
 
     /** @hide */
-    public StepSegment(float amplitude, int duration) {
+    public StepSegment(float amplitude, float frequency, int duration) {
         mAmplitude = amplitude;
+        mFrequency = frequency;
         mDuration = duration;
     }
 
@@ -54,11 +56,16 @@ public final class StepSegment extends VibrationEffectSegment {
         }
         StepSegment other = (StepSegment) o;
         return Float.compare(mAmplitude, other.mAmplitude) == 0
+                && Float.compare(mFrequency, other.mFrequency) == 0
                 && mDuration == other.mDuration;
     }
 
     public float getAmplitude() {
         return mAmplitude;
+    }
+
+    public float getFrequency() {
+        return mFrequency;
     }
 
     @Override
@@ -92,7 +99,8 @@ public final class StepSegment extends VibrationEffectSegment {
         if (Float.compare(mAmplitude, VibrationEffect.DEFAULT_AMPLITUDE) != 0) {
             return this;
         }
-        return new StepSegment((float) defaultAmplitude / VibrationEffect.MAX_AMPLITUDE, mDuration);
+        return new StepSegment((float) defaultAmplitude / VibrationEffect.MAX_AMPLITUDE, mFrequency,
+                mDuration);
     }
 
     @NonNull
@@ -101,7 +109,8 @@ public final class StepSegment extends VibrationEffectSegment {
         if (Float.compare(mAmplitude, VibrationEffect.DEFAULT_AMPLITUDE) == 0) {
             return this;
         }
-        return new StepSegment(VibrationEffect.scale(mAmplitude, scaleFactor), mDuration);
+        return new StepSegment(VibrationEffect.scale(mAmplitude, scaleFactor), mFrequency,
+                mDuration);
     }
 
     @NonNull
@@ -112,12 +121,13 @@ public final class StepSegment extends VibrationEffectSegment {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mAmplitude, mDuration);
+        return Objects.hash(mAmplitude, mFrequency, mDuration);
     }
 
     @Override
     public String toString() {
         return "Step{amplitude=" + mAmplitude
+                + ", frequency=" + mFrequency
                 + ", duration=" + mDuration
                 + "}";
     }
@@ -131,6 +141,7 @@ public final class StepSegment extends VibrationEffectSegment {
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeInt(PARCEL_TOKEN_STEP);
         out.writeFloat(mAmplitude);
+        out.writeFloat(mFrequency);
         out.writeInt(mDuration);
     }
 

@@ -25,6 +25,16 @@ message StepSegmentProto {
    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
    optional int32 duration = 1;
    optional float amplitude = 2;
+   optional float frequency = 3;
+}
+
+message RampSegmentProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional int32 duration = 1;
+    optional float startAmplitude = 2;
+    optional float endAmplitude = 3;
+    optional float startFrequency = 4;
+    optional float endFrequency = 5;
 }
 
 message PrebakedSegmentProto {
@@ -46,6 +56,7 @@ message SegmentProto {
     optional PrebakedSegmentProto prebaked = 1;
     optional PrimitiveSegmentProto primitive = 2;
     optional StepSegmentProto step = 3;
+    optional RampSegmentProto ramp = 4;
 }
 
 // A com.android.os.VibrationEffect object.

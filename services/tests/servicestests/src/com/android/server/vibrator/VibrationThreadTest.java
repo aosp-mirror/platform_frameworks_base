@@ -921,7 +921,7 @@ public class VibrationThreadTest {
     }
 
     private VibrationEffectSegment expectedOneShot(long millis) {
-        return new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, (int) millis);
+        return new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, /* frequency= */ 0, (int) millis);
     }
 
     private VibrationEffectSegment expectedPrebaked(int effectId) {

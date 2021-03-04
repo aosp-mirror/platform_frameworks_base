@@ -118,7 +118,16 @@ public class VibrationEffectTest {
     public void testValidateWaveform() {
         VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, -1).validate();
         VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, 0).validate();
+        VibrationEffect.startWaveform()
+                .addStep(/* amplitude= */ 1, /* duration= */ 10)
+                .addRamp(/* amplitude= */ 0, /* duration= */ 20)
+                .addStep(/* amplitude= */ 1, /* frequency*/ 1, /* duration= */ 100)
+                .addRamp(/* amplitude= */ 0.5f, /* frequency*/ -1, /* duration= */ 50)
+                .build()
+                .validate();
 
+        assertThrows(IllegalStateException.class,
+                () -> VibrationEffect.startWaveform().build().validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.createWaveform(new long[0], new int[0], -1).validate());
         assertThrows(IllegalArgumentException.class,
@@ -132,22 +141,46 @@ public class VibrationEffectTest {
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.createWaveform(
                         TEST_TIMINGS, TEST_AMPLITUDES, TEST_TIMINGS.length).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startWaveform()
+                        .addStep(/* amplitude= */ -2, 10).build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startWaveform()
+                        .addStep(1, /* duration= */ -1).build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startWaveform()
+                        .addStep(1, 0, /* duration= */ -1).build().validate());
     }
 
     @Test
     public void testValidateComposed() {
         VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addEffect(TEST_ONE_SHOT)
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
+                .addEffect(TEST_WAVEFORM, 100)
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .compose()
                 .validate();
 
+        assertThrows(IllegalStateException.class,
+                () -> VibrationEffect.startComposition().compose().validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.startComposition().addPrimitive(-1).compose().validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.startComposition()
                         .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, -1, 10)
+                        .compose()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, -10)
+                        .compose()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startComposition()
+                        .addEffect(TEST_ONE_SHOT, /* delay= */ -10)
                         .compose()
                         .validate());
         assertThrows(IllegalArgumentException.class,
@@ -185,6 +218,12 @@ public class VibrationEffectTest {
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 1)
                 .compose();
         assertEquals(effect, effect.resolve(51));
+
+        VibrationEffect.Composed resolved = VibrationEffect.startComposition()
+                .addEffect(DEFAULT_ONE_SHOT)
+                .compose()
+                .resolve(51);
+        assertEquals(0.2f, ((StepSegment) resolved.getSegments().get(0)).getAmplitude());
     }
 
     @Test
@@ -215,6 +254,13 @@ public class VibrationEffectTest {
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 1)
                 .compose();
         assertEquals(effect, effect.applyEffectStrength(VibrationEffect.EFFECT_STRENGTH_LIGHT));
+
+        VibrationEffect.Composed applied = VibrationEffect.startComposition()
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .compose()
+                .applyEffectStrength(VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        assertEquals(VibrationEffect.EFFECT_STRENGTH_LIGHT,
+                ((PrebakedSegment) applied.getSegments().get(0)).getEffectStrength());
     }
 
     @Test
@@ -251,13 +297,16 @@ public class VibrationEffectTest {
         VibrationEffect.Composed effect =
                 (VibrationEffect.Composed) VibrationEffect.startComposition()
                         .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 1)
+                        .addEffect(TEST_ONE_SHOT)
                         .compose();
 
         VibrationEffect.Composed scaledUp = effect.scale(1.5f);
         assertTrue(0.5f < ((PrimitiveSegment) scaledUp.getSegments().get(0)).getScale());
+        assertTrue(100 / 255f < ((StepSegment) scaledUp.getSegments().get(1)).getAmplitude());
 
         VibrationEffect.Composed scaledDown = effect.scale(0.5f);
         assertTrue(0.5f > ((PrimitiveSegment) scaledDown.getSegments().get(0)).getScale());
+        assertTrue(100 / 255f > ((StepSegment) scaledDown.getSegments().get(1)).getAmplitude());
     }
 
     private Resources mockRingtoneResources() {

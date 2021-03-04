@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
@@ -30,6 +31,7 @@ import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.util.MathUtils;
@@ -250,7 +252,7 @@ public abstract class VibrationEffect implements Parcelable {
         for (int i = 0; i < timings.length; i++) {
             float parsedAmplitude = amplitudes[i] == DEFAULT_AMPLITUDE
                     ? DEFAULT_AMPLITUDE : (float) amplitudes[i] / MAX_AMPLITUDE;
-            segments.add(new StepSegment(parsedAmplitude, (int) timings[i]));
+            segments.add(new StepSegment(parsedAmplitude, /* frequency= */ 0, (int) timings[i]));
         }
         VibrationEffect effect = new Composed(segments, repeat);
         effect.validate();
@@ -389,8 +391,26 @@ public abstract class VibrationEffect implements Parcelable {
      * @see VibrationEffect.Composition
      */
     @NonNull
-    public static VibrationEffect.Composition startComposition() {
-        return new VibrationEffect.Composition();
+    public static Composition startComposition() {
+        return new Composition();
+    }
+
+    /**
+     * Start building a waveform vibration.
+     *
+     * <p>The waveform builder offers more flexibility for creating waveform vibrations, allowing
+     * control over vibration frequency and ramping up or down the vibration amplitude, frequency or
+     * both.
+     *
+     * <p>For simpler waveform patterns see {@link #createWaveform} methods.
+     *
+     * @hide
+     * @see VibrationEffect.WaveformBuilder
+     */
+    @TestApi
+    @NonNull
+    public static WaveformBuilder startWaveform() {
+        return new WaveformBuilder();
     }
 
     @Override
@@ -771,6 +791,42 @@ public abstract class VibrationEffect implements Parcelable {
         Composition() {}
 
         /**
+         * Add a haptic effect to the end of the current composition.
+         *
+         * <p>Similar to {@link #addEffect(VibrationEffect, int)} , but with no delay applied.
+         *
+         * @param effect The effect to add to this composition as a primitive
+         * @return The {@link Composition} object to enable adding multiple primitives in one chain.
+         * @hide
+         */
+        @TestApi
+        @NonNull
+        public Composition addEffect(@NonNull VibrationEffect effect) {
+            return addEffect(effect, /* delay= */ 0);
+        }
+
+        /**
+         * Add a haptic effect to the end of the current composition.
+         *
+         * @param effect The effect to add to this composition as a primitive
+         * @param delay  The amount of time in milliseconds to wait before playing this primitive
+         * @return The {@link Composition} object to enable adding multiple primitives in one chain.
+         * @hide
+         */
+        @TestApi
+        @NonNull
+        public Composition addEffect(@NonNull VibrationEffect effect,
+                @IntRange(from = 0) int delay) {
+            Preconditions.checkArgumentNonnegative(delay);
+            if (delay > 0) {
+                // Created a segment sustaining the zero amplitude to represent the delay.
+                addSegment(new StepSegment(/* amplitude= */ 0, /* frequency= */ 0,
+                        /* duration= */ delay));
+            }
+            return addSegments(effect);
+        }
+
+        /**
          * Add a haptic primitive to the end of the current composition.
          *
          * Similar to {@link #addPrimitive(int, float, int)}, but with no delay and a
@@ -829,6 +885,21 @@ public abstract class VibrationEffect implements Parcelable {
             return this;
         }
 
+        private Composition addSegments(VibrationEffect effect) {
+            if (mRepeatIndex >= 0) {
+                throw new IllegalStateException(
+                        "Composition already have a repeating effect so any new primitive would be"
+                                + " unreachable.");
+            }
+            Composed composed = (Composed) effect;
+            if (composed.getRepeatIndex() >= 0) {
+                // Start repeating from the index relative to the composed waveform.
+                mRepeatIndex = mSegments.size() + composed.getRepeatIndex();
+            }
+            mSegments.addAll(composed.getSegments());
+            return this;
+        }
+
         /**
          * Compose all of the added primitives together into a single {@link VibrationEffect}.
          *
@@ -878,6 +949,164 @@ public abstract class VibrationEffect implements Parcelable {
                 default:
                     return Integer.toString(id);
             }
+        }
+    }
+
+    /**
+     * A builder for waveform haptic effects.
+     *
+     * <p>Waveform vibrations constitute of one or more timed segments where the vibration
+     * amplitude, frequency or both can linearly ramp to new values.
+     *
+     * <p>Waveform segments may have zero duration, which represent a jump to new vibration
+     * amplitude and/or frequency values.
+     *
+     * <p>Waveform segments may have the same start and end vibration amplitude and frequency,
+     * which represent a step where the amplitude and frequency are maintained for that duration.
+     *
+     * @hide
+     * @see VibrationEffect#startWaveform()
+     */
+    @TestApi
+    public static final class WaveformBuilder {
+        private ArrayList<VibrationEffectSegment> mSegments = new ArrayList<>();
+
+        WaveformBuilder() {}
+
+        /**
+         * Vibrate with given amplitude for the given duration, in millis, keeping the previous
+         * frequency the same.
+         *
+         * <p>If the duration is zero the vibrator will jump to new amplitude.
+         *
+         * @param amplitude The amplitude for this step
+         * @param duration  The duration of this step in milliseconds
+         * @return The {@link WaveformBuilder} object to enable adding multiple steps in chain.
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public WaveformBuilder addStep(@FloatRange(from = 0f, to = 1f) float amplitude,
+                @IntRange(from = 0) int duration) {
+            return addStep(amplitude, getPreviousFrequency(), duration);
+        }
+
+        /**
+         * Vibrate with given amplitude for the given duration, in millis, keeping the previous
+         * vibration frequency the same.
+         *
+         * <p>If the duration is zero the vibrator will jump to new amplitude.
+         *
+         * @param amplitude The amplitude for this step
+         * @param frequency The frequency for this step
+         * @param duration  The duration of this step in milliseconds
+         * @return The {@link WaveformBuilder} object to enable adding multiple steps in chain.
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public WaveformBuilder addStep(@FloatRange(from = 0f, to = 1f) float amplitude,
+                @FloatRange(from = -1f, to = 1f) float frequency,
+                @IntRange(from = 0) int duration) {
+            mSegments.add(new StepSegment(amplitude, frequency, duration));
+            return this;
+        }
+
+        /**
+         * Ramp vibration linearly for the given duration, in millis, from previous amplitude value
+         * to the given one, keeping previous frequency.
+         *
+         * <p>If the duration is zero the vibrator will jump to new amplitude.
+         *
+         * @param amplitude The final amplitude this ramp should reach
+         * @param duration  The duration of this ramp in milliseconds
+         * @return The {@link WaveformBuilder} object to enable adding multiple steps in chain.
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public WaveformBuilder addRamp(@FloatRange(from = 0f, to = 1f) float amplitude,
+                @IntRange(from = 0) int duration) {
+            return addRamp(amplitude, getPreviousFrequency(), duration);
+        }
+
+        /**
+         * Ramp vibration linearly for the given duration, in millis, from previous amplitude and
+         * frequency values to the given ones.
+         *
+         * <p>If the duration is zero the vibrator will jump to new amplitude and frequency.
+         *
+         * @param amplitude The final amplitude this ramp should reach
+         * @param frequency The final frequency this ramp should reach
+         * @param duration  The duration of this ramp in milliseconds
+         * @return The {@link WaveformBuilder} object to enable adding multiple steps in chain.
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public WaveformBuilder addRamp(@FloatRange(from = 0f, to = 1f) float amplitude,
+                @FloatRange(from = -1f, to = 1f) float frequency,
+                @IntRange(from = 0) int duration) {
+            mSegments.add(new RampSegment(getPreviousAmplitude(), amplitude, getPreviousFrequency(),
+                    frequency, duration));
+            return this;
+        }
+
+        /**
+         * Compose all of the steps together into a single {@link VibrationEffect}.
+         *
+         * The {@link WaveformBuilder} object is still valid after this call, so you can
+         * continue adding more primitives to it and generating more {@link VibrationEffect}s by
+         * calling this method again.
+         *
+         * @return The {@link VibrationEffect} resulting from the composition of the steps.
+         */
+        @NonNull
+        public VibrationEffect build() {
+            return build(/* repeat= */ -1);
+        }
+
+        /**
+         * Compose all of the steps together into a single {@link VibrationEffect}.
+         *
+         * <p>To cause the pattern to repeat, pass the index at which to start the repetition
+         * (starting at 0), or -1 to disable repeating.
+         *
+         * <p>The {@link WaveformBuilder} object is still valid after this call, so you can
+         * continue adding more primitives to it and generating more {@link VibrationEffect}s by
+         * calling this method again.
+         *
+         * @return The {@link VibrationEffect} resulting from the composition of the steps.
+         */
+        @NonNull
+        public VibrationEffect build(int repeat) {
+            if (mSegments.isEmpty()) {
+                throw new IllegalStateException(
+                        "WaveformBuilder must have at least one element to build.");
+            }
+            VibrationEffect effect = new Composed(mSegments, repeat);
+            effect.validate();
+            return effect;
+        }
+
+        private float getPreviousFrequency() {
+            if (!mSegments.isEmpty()) {
+                VibrationEffectSegment segment = mSegments.get(mSegments.size() - 1);
+                if (segment instanceof StepSegment) {
+                    return ((StepSegment) segment).getFrequency();
+                } else if (segment instanceof RampSegment) {
+                    return ((RampSegment) segment).getEndFrequency();
+                }
+            }
+            return 0;
+        }
+
+        private float getPreviousAmplitude() {
+            if (!mSegments.isEmpty()) {
+                VibrationEffectSegment segment = mSegments.get(mSegments.size() - 1);
+                if (segment instanceof StepSegment) {
+                    return ((StepSegment) segment).getAmplitude();
+                } else if (segment instanceof RampSegment) {
+                    return ((RampSegment) segment).getEndAmplitude();
+                }
+            }
+            return 0;
         }
     }
 
