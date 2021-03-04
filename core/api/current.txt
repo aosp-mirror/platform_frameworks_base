@@ -40452,7 +40452,7 @@ package android.telephony {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int BAND_UNKNOWN = 0; // 0x0
     field public static final int CELL_BANDWIDTH_UNKNOWN = 0; // 0x0
-    field public static final int CHANNEL_NUMBER_UNKNOWN = -1; // 0xffffffff
+    field public static final int CHANNEL_NUMBER_UNKNOWN = 2147483647; // 0x7fffffff
     field public static final int CONNECTION_PRIMARY_SERVING = 1; // 0x1
     field public static final int CONNECTION_SECONDARY_SERVING = 2; // 0x2
     field public static final int CONNECTION_UNKNOWN = -1; // 0xffffffff
