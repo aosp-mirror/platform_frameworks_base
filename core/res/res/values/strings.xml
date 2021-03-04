@@ -5193,6 +5193,8 @@
     <string name="app_category_maps">Maps &amp; Navigation</string>
     <!-- Category title for apps which are primarily productivity apps, such as cloud storage or workplace apps. [CHAR LIMIT=32] -->
     <string name="app_category_productivity">Productivity</string>
+    <!-- Category title for apps which are primarily accessibility apps, such as screen-readers. [CHAR LIMIT=32] -->
+    <string name="app_category_accessibility">Accessibility</string>
 
     <!-- Channel name for DeviceStorageMonitor notifications -->
     <string name="device_storage_monitor_notification_channel">Device storage</string>
