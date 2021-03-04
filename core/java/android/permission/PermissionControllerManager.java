@@ -668,7 +668,7 @@ public final class PermissionControllerManager {
     public void getPrivilegesDescriptionStringForProfile(
             @NonNull String profileName,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<String> callback) {
+            @NonNull Consumer<CharSequence> callback) {
         mRemoteService.postAsync(service -> {
             AndroidFuture<String> future = new AndroidFuture<>();
             service.getPrivilegesDescriptionStringForProfile(profileName, future);
