@@ -2516,14 +2516,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         mRelinquished = true;
 
-        // TODO(b/169375643): Remove this workaround once b/161121612 is fixed.
-        PackageInstaller.SessionParams copiedParams = params.copy();
-        if (params.isStaged) {
-            // This is called by the pre-reboot verification. Don't enable rollback here since
-            // it has been enabled when pre-reboot verification starts.
-            copiedParams.installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
-        }
-        return mPm.new VerificationParams(user, stageDir, localObserver, copiedParams,
+        return mPm.new VerificationParams(user, stageDir, localObserver, params,
                 mInstallSource, mInstallerUid, mSigningDetails, sessionId, mPackageLite);
     }
 

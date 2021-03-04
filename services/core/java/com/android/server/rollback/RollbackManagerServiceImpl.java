@@ -789,7 +789,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             newRollback = createNewRollback(parentSession);
         }
 
-        return enableRollbackForPackageSession(newRollback, packageSession);
+        if (enableRollbackForPackageSession(newRollback, packageSession)) {
+            // Persist the rollback if all packages are enabled. We will make the rollback
+            // available once the whole session is installed successfully.
+            return newRollback.allPackagesEnabled() ? completeEnableRollback(newRollback) : true;
+        } else {
+            return false;
+        }
     }
 
     @WorkerThread
@@ -978,43 +984,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             throw new SecurityException("notifyStagedSession may only be called by the system.");
         }
 
-        // NOTE: We post this runnable on the RollbackManager's binder thread because we'd prefer
-        // to preserve the invariant that all operations that modify state happen there.
         return awaitResult(() -> {
             assertInWorkerThread();
-            PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
-
-            final PackageInstaller.SessionInfo session = installer.getSessionInfo(sessionId);
-            if (session == null) {
-                Slog.e(TAG, "No matching install session for: " + sessionId);
-                return -1;
-            }
-
-            Rollback newRollback = createNewRollback(session);
-            if (!session.isMultiPackage()) {
-                if (!enableRollbackForPackageSession(newRollback, session)) {
-                    Slog.e(TAG, "Unable to enable rollback for session: " + sessionId);
-                }
-            } else {
-                for (int childSessionId : session.getChildSessionIds()) {
-                    final PackageInstaller.SessionInfo childSession =
-                            installer.getSessionInfo(childSessionId);
-                    if (childSession == null) {
-                        Slog.e(TAG, "No matching child install session for: " + childSessionId);
-                        break;
-                    }
-                    if (!enableRollbackForPackageSession(newRollback, childSession)) {
-                        Slog.e(TAG, "Unable to enable rollback for session: " + sessionId);
-                        break;
-                    }
-                }
-            }
-
-            if (!completeEnableRollback(newRollback)) {
-                return -1;
-            } else {
-                return newRollback.info.getRollbackId();
-            }
+            Rollback rollback = getRollbackForSession(sessionId);
+            return rollback != null ? rollback.info.getRollbackId() : -1;
         });
     }
 
@@ -1124,21 +1097,25 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 Slog.v(TAG, "SessionCallback.onFinished id=" + sessionId + " success=" + success);
             }
 
+            Rollback rollback = getRollbackForSession(sessionId);
+            if (rollback == null || !rollback.isEnabling()
+                    || sessionId != rollback.getOriginalSessionId()) {
+                // We only care about the parent session id which will tell us whether the
+                // whole session is successful or not.
+                return;
+            }
             if (success) {
-                Rollback rollback = getRollbackForSession(sessionId);
-                if (rollback != null && !rollback.isStaged() && rollback.isEnabling()
-                        && rollback.notifySessionWithSuccess()
-                        && completeEnableRollback(rollback)) {
+                if (!rollback.isStaged() && completeEnableRollback(rollback)) {
+                    // completeEnableRollback() ensures the rollback is deleted if not all packages
+                    // are enabled. For staged rollbacks, we will make them available in
+                    // onBootCompleted().
                     makeRollbackAvailable(rollback);
                 }
             } else {
-                Rollback rollback = getRollbackForSession(sessionId);
-                if (rollback != null && rollback.isEnabling()) {
-                    Slog.w(TAG, "Delete rollback id=" + rollback.info.getRollbackId()
-                            + " for failed session id=" + sessionId);
-                    mRollbacks.remove(rollback);
-                    deleteRollback(rollback, "Session " + sessionId + " failed");
-                }
+                Slog.w(TAG, "Delete rollback id=" + rollback.info.getRollbackId()
+                        + " for failed session id=" + sessionId);
+                mRollbacks.remove(rollback);
+                deleteRollback(rollback, "Session " + sessionId + " failed");
             }
         }
     }
