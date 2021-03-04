@@ -4466,16 +4466,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case EVENT_SET_REQUIRE_VPN_FOR_UIDS:
                     handleSetRequireVpnForUids(toBool(msg.arg1), (UidRange[]) msg.obj);
                     break;
-                case EVENT_SET_OEM_NETWORK_PREFERENCE:
+                case EVENT_SET_OEM_NETWORK_PREFERENCE: {
                     final Pair<OemNetworkPreferences, IOnSetOemNetworkPreferenceListener> arg =
                             (Pair<OemNetworkPreferences,
                                     IOnSetOemNetworkPreferenceListener>) msg.obj;
-                    try {
-                        handleSetOemNetworkPreference(arg.first, arg.second);
-                    } catch (RemoteException e) {
-                        loge("handleMessage.EVENT_SET_OEM_NETWORK_PREFERENCE failed", e);
-                    }
+                    handleSetOemNetworkPreference(arg.first, arg.second);
                     break;
+                }
                 case EVENT_REPORT_NETWORK_ACTIVITY:
                     mNetworkActivityTracker.handleReportNetworkActivity();
                     break;
@@ -5284,6 +5281,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         public String toString() {
             return "uid/pid:" + mUid + "/" + mPid + " active request Id: "
                     + (mActiveRequest == null ? null : mActiveRequest.requestId)
+                    + " callback request Id: "
+                    + mNetworkRequestForCallback.requestId
                     + " " + mRequests
                     + (mPendingIntent == null ? "" : " to trigger " + mPendingIntent);
         }
@@ -7140,7 +7139,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         toUidRangeStableParcels(nri.getUids()));
             }
         } catch (RemoteException | ServiceSpecificException e) {
-            loge("Exception setting OEM network preference default network :" + e);
+            loge("Exception setting OEM network preference default network", e);
         }
     }
 
@@ -7212,7 +7211,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
 
             public String toString() {
-                return mNetworkRequestInfo.mRequests.get(0).requestId + " : "
+                final NetworkRequest requestToShow = null != mNewNetworkRequest
+                        ? mNewNetworkRequest : mNetworkRequestInfo.mRequests.get(0);
+                return requestToShow.requestId + " : "
                         + (null != mOldNetwork ? mOldNetwork.network.getNetId() : "null")
                         + " → " + (null != mNewNetwork ? mNewNetwork.network.getNetId() : "null");
             }
@@ -7296,6 +7297,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 newSatisfier.unlingerRequest(NetworkRequest.REQUEST_ID_NONE);
             }
 
+            // if newSatisfier is not null, then newRequest may not be null.
             newSatisfier.unlingerRequest(newRequest.requestId);
             if (!newSatisfier.addRequest(newRequest)) {
                 Log.wtf(TAG, "BUG: " + newSatisfier.toShortString() + " already has "
@@ -9015,7 +9017,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void handleSetOemNetworkPreference(
             @NonNull final OemNetworkPreferences preference,
-            @NonNull final IOnSetOemNetworkPreferenceListener listener) throws RemoteException {
+            @Nullable final IOnSetOemNetworkPreferenceListener listener) {
         Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
         if (DBG) {
             log("set OEM network preferences :" + preference.toString());
@@ -9027,7 +9029,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // TODO http://b/176496396 persist data to shared preferences.
 
         if (null != listener) {
-            listener.onComplete();
+            try {
+                listener.onComplete();
+            } catch (RemoteException e) {
+                loge("handleMessage.EVENT_SET_OEM_NETWORK_PREFERENCE failed", e);
+            }
         }
     }
 
@@ -9043,10 +9049,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDefaultNetworkRequests.addAll(nris);
         final ArraySet<NetworkRequestInfo> perAppCallbackRequestsToUpdate =
                 getPerAppCallbackRequestsToUpdate();
-        handleRemoveNetworkRequests(perAppCallbackRequestsToUpdate);
         final ArraySet<NetworkRequestInfo> nrisToRegister = new ArraySet<>(nris);
         nrisToRegister.addAll(
                 createPerAppCallbackRequestsToRegister(perAppCallbackRequestsToUpdate));
+        handleRemoveNetworkRequests(perAppCallbackRequestsToUpdate);
         handleRegisterNetworkRequests(nrisToRegister);
     }
 
