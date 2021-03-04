@@ -174,6 +174,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The ID of the LogicalDisplay tied to this DisplayPowerController.
     private final int mDisplayId;
 
+    // The unique ID of the primary display device currently tied to this logical display
+    private String mUniqueDisplayId;
+
     // Tracker for brightness changes.
     @Nullable
     private final BrightnessTracker mBrightnessTracker;
@@ -413,16 +416,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      */
     public DisplayPowerController(Context context,
             DisplayPowerCallbacks callbacks, Handler handler,
-            SensorManager sensorManager, DisplayBlanker blanker, LogicalDisplay logicalDisplay) {
+            SensorManager sensorManager, DisplayBlanker blanker, LogicalDisplay logicalDisplay,
+            BrightnessTracker brightnessTracker) {
         mLogicalDisplay = logicalDisplay;
         mDisplayId = mLogicalDisplay.getDisplayIdLocked();
         mHandler = new DisplayControllerHandler(handler.getLooper());
 
         if (mDisplayId == Display.DEFAULT_DISPLAY) {
-            mBrightnessTracker = new BrightnessTracker(context, null);
             mBatteryStats = BatteryStatsService.getService();
         } else {
-            mBrightnessTracker = null;
             mBatteryStats = null;
         }
 
@@ -432,6 +434,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mWindowManagerPolicy = LocalServices.getService(WindowManagerPolicy.class);
         mBlanker = blanker;
         mContext = context;
+        mBrightnessTracker = brightnessTracker;
 
         PowerManager pm = context.getSystemService(PowerManager.class);
 
@@ -750,8 +753,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * when displays get swapped on foldable devices.  For example, different brightness properties
      * of each display need to be properly reflected in AutomaticBrightnessController.
      */
-    public void onDisplayChanged() {
+    public void onDisplayChangedLocked() {
         // TODO: b/175821789 - Support high brightness on multiple (folding) displays
+
+        mUniqueDisplayId = mLogicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId();
     }
 
     /**
@@ -772,10 +777,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             if (mAutomaticBrightnessController != null) {
                 mAutomaticBrightnessController.stop();
-            }
-
-            if (mBrightnessTracker != null) {
-                mBrightnessTracker.stop();
             }
 
             mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
@@ -1868,7 +1869,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     : 1.0f;
             mBrightnessTracker.notifyBrightnessChanged(brightnessInNits, userInitiated,
                     powerFactor, hadUserDataPoint,
-                    mAutomaticBrightnessController.isDefaultConfig());
+                    mAutomaticBrightnessController.isDefaultConfig(), mUniqueDisplayId);
         }
     }
 
@@ -2034,11 +2035,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         if (mAutomaticBrightnessController != null) {
             mAutomaticBrightnessController.dump(pw);
-        }
-
-        if (mBrightnessTracker != null) {
-            pw.println();
-            mBrightnessTracker.dump(pw);
         }
 
         pw.println();
