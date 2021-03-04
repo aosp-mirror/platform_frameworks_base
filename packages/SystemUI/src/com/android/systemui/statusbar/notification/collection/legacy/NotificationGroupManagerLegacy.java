@@ -242,12 +242,12 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         int childCount = 0;
         boolean hasBubbles = false;
         for (NotificationEntry entry : group.children.values()) {
-            if (mBubblesOptional.isPresent() && !mBubblesOptional.get()
+            if (mBubblesOptional.isPresent() && mBubblesOptional.get()
                     .isBubbleNotificationSuppressedFromShade(
                             entry.getKey(), entry.getSbn().getGroupKey())) {
-                childCount++;
-            } else {
                 hasBubbles = true;
+            } else {
+                childCount++;
             }
         }
 
