@@ -2691,7 +2691,8 @@ class ActivityStarter {
                     launchFlags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
                     break;
                 case ActivityInfo.DOCUMENT_LAUNCH_NEVER:
-                    launchFlags &= ~FLAG_ACTIVITY_MULTIPLE_TASK;
+                    launchFlags &=
+                            ~(Intent.FLAG_ACTIVITY_NEW_DOCUMENT | FLAG_ACTIVITY_MULTIPLE_TASK);
                     break;
             }
         }
