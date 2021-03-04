@@ -168,8 +168,8 @@ import static com.android.server.wm.WindowStateProto.FINISHED_SEAMLESS_ROTATION_
 import static com.android.server.wm.WindowStateProto.FORCE_SEAMLESS_ROTATION;
 import static com.android.server.wm.WindowStateProto.GIVEN_CONTENT_INSETS;
 import static com.android.server.wm.WindowStateProto.GLOBAL_SCALE;
+import static com.android.server.wm.WindowStateProto.HAS_COMPAT_SCALE;
 import static com.android.server.wm.WindowStateProto.HAS_SURFACE;
-import static com.android.server.wm.WindowStateProto.IN_SIZE_COMPAT_MODE;
 import static com.android.server.wm.WindowStateProto.IS_ON_SCREEN;
 import static com.android.server.wm.WindowStateProto.IS_READY_FOR_DISPLAY;
 import static com.android.server.wm.WindowStateProto.IS_VISIBLE;
@@ -1050,18 +1050,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * scaling override set.
      * @see CompatModePackages#getCompatScale
      * @see android.content.res.CompatibilityInfo#supportsScreen
-     * @see ActivityRecord#inSizeCompatMode()
+     * @see ActivityRecord#hasSizeCompatBounds()
      */
-    boolean inSizeCompatMode() {
-        return mOverrideScale != 1f || inSizeCompatMode(mAttrs, mActivityRecord);
+    boolean hasCompatScale() {
+        return mOverrideScale != 1f || hasCompatScale(mAttrs, mActivityRecord);
     }
 
     /**
      * @return {@code true} if the application runs in size compatibility mode.
      * @see android.content.res.CompatibilityInfo#supportsScreen
-     * @see ActivityRecord#inSizeCompatMode()
+     * @see ActivityRecord#hasSizeCompatBounds()
      */
-    static boolean inSizeCompatMode(WindowManager.LayoutParams attrs, WindowToken windowToken) {
+    static boolean hasCompatScale(WindowManager.LayoutParams attrs, WindowToken windowToken) {
         return (attrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0
                 || (windowToken != null && windowToken.hasSizeCompatBounds()
                 // Exclude starting window because it is not displayed by the application.
@@ -1266,7 +1266,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowFrames.offsetFrames(-layoutXDiff, -layoutYDiff);
 
         windowFrames.mCompatFrame.set(windowFrames.mFrame);
-        if (inSizeCompatMode()) {
+        if (hasCompatScale()) {
             // Also the scaled frame that we report to the app needs to be
             // adjusted to be in its coordinate space.
             windowFrames.mCompatFrame.scale(mInvGlobalScale);
@@ -1538,7 +1538,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     InsetsState getCompatInsetsState() {
         InsetsState state = getInsetsState();
-        if (inSizeCompatMode()) {
+        if (hasCompatScale()) {
             state = new InsetsState(state, true);
             state.scale(mInvGlobalScale);
         }
@@ -1676,7 +1676,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void prelayout() {
-        if (inSizeCompatMode()) {
+        if (hasCompatScale()) {
             if (mOverrideScale != 1f) {
                 mGlobalScale = mToken.hasSizeCompatBounds()
                         ? mToken.getSizeCompatScale() * mOverrideScale
@@ -3590,7 +3590,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void fillClientWindowFrames(ClientWindowFrames outFrames) {
         outFrames.frame.set(mWindowFrames.mCompatFrame);
         outFrames.displayFrame.set(mWindowFrames.mDisplayFrame);
-        if (mInvGlobalScale != 1.0f && inSizeCompatMode()) {
+        if (mInvGlobalScale != 1.0f && hasCompatScale()) {
             outFrames.displayFrame.scale(mInvGlobalScale);
         }
 
@@ -3990,7 +3990,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.write(PENDING_SEAMLESS_ROTATION, mPendingSeamlessRotate != null);
         proto.write(FINISHED_SEAMLESS_ROTATION_FRAME, mFinishSeamlessRotateFrameNumber);
         proto.write(FORCE_SEAMLESS_ROTATION, mForceSeamlesslyRotate);
-        proto.write(IN_SIZE_COMPAT_MODE, inSizeCompatMode());
+        proto.write(HAS_COMPAT_SCALE, hasCompatScale());
         proto.write(GLOBAL_SCALE, mGlobalScale);
         proto.end(token);
     }
@@ -4092,7 +4092,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         pw.println(prefix + "mHasSurface=" + mHasSurface
                 + " isReadyForDisplay()=" + isReadyForDisplay()
                 + " mWindowRemovalAllowed=" + mWindowRemovalAllowed);
-        if (inSizeCompatMode()) {
+        if (hasCompatScale()) {
             pw.println(prefix + "mCompatFrame=" + mWindowFrames.mCompatFrame.toShortString(sTmpSB));
         }
         if (dumpAll) {
@@ -4215,18 +4215,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         float x, y;
         int w,h;
 
-        final boolean inSizeCompatMode = inSizeCompatMode();
+        final boolean hasCompatScale = hasCompatScale();
         if ((mAttrs.flags & FLAG_SCALED) != 0) {
             if (mAttrs.width < 0) {
                 w = pw;
-            } else if (inSizeCompatMode) {
+            } else if (hasCompatScale) {
                 w = (int)(mAttrs.width * mGlobalScale + .5f);
             } else {
                 w = mAttrs.width;
             }
             if (mAttrs.height < 0) {
                 h = ph;
-            } else if (inSizeCompatMode) {
+            } else if (hasCompatScale) {
                 h = (int)(mAttrs.height * mGlobalScale + .5f);
             } else {
                 h = mAttrs.height;
@@ -4234,21 +4234,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             if (mAttrs.width == MATCH_PARENT) {
                 w = pw;
-            } else if (inSizeCompatMode) {
+            } else if (hasCompatScale) {
                 w = (int)(mRequestedWidth * mGlobalScale + .5f);
             } else {
                 w = mRequestedWidth;
             }
             if (mAttrs.height == MATCH_PARENT) {
                 h = ph;
-            } else if (inSizeCompatMode) {
+            } else if (hasCompatScale) {
                 h = (int)(mRequestedHeight * mGlobalScale + .5f);
             } else {
                 h = mRequestedHeight;
             }
         }
 
-        if (inSizeCompatMode) {
+        if (hasCompatScale) {
             x = mAttrs.x * mGlobalScale;
             y = mAttrs.y * mGlobalScale;
         } else {
@@ -4276,7 +4276,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // We need to make sure we update the CompatFrame as it is used for
         // cropping decisions, etc, on systems where we lack a decor layer.
         windowFrames.mCompatFrame.set(windowFrames.mFrame);
-        if (inSizeCompatMode) {
+        if (hasCompatScale) {
             // See comparable block in computeFrameLw.
             windowFrames.mCompatFrame.scale(mInvGlobalScale);
         }
@@ -4394,7 +4394,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     float translateToWindowX(float x) {
         float winX = x - mWindowFrames.mFrame.left;
-        if (inSizeCompatMode()) {
+        if (hasCompatScale()) {
             winX *= mGlobalScale;
         }
         return winX;
@@ -4402,7 +4402,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     float translateToWindowY(float y) {
         float winY = y - mWindowFrames.mFrame.top;
-        if (inSizeCompatMode()) {
+        if (hasCompatScale()) {
             winY *= mGlobalScale;
         }
         return winY;
@@ -5331,7 +5331,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * scaled, the insets also need to be scaled for surface position in global coordinate.
      */
     private void transformSurfaceInsetsPosition(Point outPos, Rect surfaceInsets) {
-        if (!inSizeCompatMode()) {
+        if (!hasCompatScale()) {
             outPos.x = surfaceInsets.left;
             outPos.y = surfaceInsets.top;
             return;
