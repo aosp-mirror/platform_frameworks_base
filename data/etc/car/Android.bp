@@ -26,6 +26,14 @@ package {
 }
 
 prebuilt_etc {
+    name: "allowed_privapp_com.android.carsystemui",
+    system_ext_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.carsystemui.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "allowed_privapp_android.car.cluster.loggingrenderer",
     sub_dir: "permissions",
     src: "android.car.cluster.loggingrenderer.xml",
