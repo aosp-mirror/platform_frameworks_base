@@ -19,7 +19,7 @@ package android.content.pm.verify.domain;
 import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainSet;
 import android.content.pm.verify.domain.DomainVerificationInfo;
-import android.content.pm.verify.domain.DomainVerificationUserSelection;
+import android.content.pm.verify.domain.DomainVerificationUserState;
 import java.util.List;
 
 /**
@@ -28,13 +28,13 @@ import java.util.List;
  */
 interface IDomainVerificationManager {
 
-    List<String> getValidVerificationPackageNames();
+    List<String> queryValidVerificationPackageNames();
 
     @nullable
     DomainVerificationInfo getDomainVerificationInfo(String packageName);
 
     @nullable
-    DomainVerificationUserSelection getDomainVerificationUserSelection(String packageName,
+    DomainVerificationUserState getDomainVerificationUserState(String packageName,
             int userId);
 
     @nullable

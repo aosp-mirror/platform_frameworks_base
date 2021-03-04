@@ -71,7 +71,6 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.pm.verify.domain.DomainVerificationManager;
-import android.content.pm.verify.domain.DomainVerificationManagerImpl;
 import android.content.pm.verify.domain.IDomainVerificationManager;
 import android.content.res.Resources;
 import android.content.rollback.RollbackManagerFrameworkInitializer;
@@ -1422,7 +1421,6 @@ public final class SystemServiceRegistry {
                     }
                 });
 
-        // TODO(b/159952358): Only register this service for the domain verification agent?
         registerService(Context.DOMAIN_VERIFICATION_SERVICE, DomainVerificationManager.class,
                 new CachedServiceFetcher<DomainVerificationManager>() {
                     @Override
@@ -1432,7 +1430,7 @@ public final class SystemServiceRegistry {
                                 Context.DOMAIN_VERIFICATION_SERVICE);
                         IDomainVerificationManager service =
                                 IDomainVerificationManager.Stub.asInterface(binder);
-                        return new DomainVerificationManagerImpl(context, service);
+                        return new DomainVerificationManager(context, service);
                     }
                 });
 

@@ -94,7 +94,7 @@ public final class DomainVerificationInfo implements Parcelable {
 
     private Map<String, Integer> unparcelHostToStateMap(Parcel in) {
         return DomainVerificationUtils.readHostMap(in, new ArrayMap<>(),
-                DomainVerificationUserSelection.class.getClassLoader());
+                DomainVerificationUserState.class.getClassLoader());
     }
 
 
@@ -105,8 +105,7 @@ public final class DomainVerificationInfo implements Parcelable {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/verify/domain
-    // /DomainVerificationInfo.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationInfo.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -321,7 +320,7 @@ public final class DomainVerificationInfo implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1613002530369L,
+            time = 1614721812023L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationInfo.java",
             inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForUUID.class) java.util.UUID mIdentifier\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> mHostToStateMap\nprivate  void parcelHostToStateMap(android.os.Parcel,int)\nprivate  java.util.Map<java.lang.String,java.lang.Integer> unparcelHostToStateMap(android.os.Parcel)\nclass DomainVerificationInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=true, genHiddenConstructor=true, genParcelable=true, genToString=true, genEqualsHashCode=true)")

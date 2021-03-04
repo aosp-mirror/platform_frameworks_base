@@ -66,16 +66,7 @@ public final class DomainOwner implements Parcelable {
      * @param packageName
      *   Package name of that owns the domain.
      * @param overrideable
-     *   Whether or not this owner can be automatically overridden. If all owners for a domain are
-     *   overrideable, then calling
-     *   {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID,
-     *   Set, boolean)} to enable the domain will disable all other owners. On the other hand, if any
-     *   of the owners are non-overrideable, then
-     *   {@link DomainVerificationManager#setDomainVerificationLinkHandlingAllowed(String,
-     *   boolean)} must be called with false to disable all of the other owners before this domain can
-     *   be taken by a new owner through
-     *   {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID,
-     *   Set, boolean)}.
+     *   Whether or not this owner can be automatically overridden.
      */
     @DataClass.Generated.Member
     public DomainOwner(
@@ -98,16 +89,9 @@ public final class DomainOwner implements Parcelable {
     }
 
     /**
-     * Whether or not this owner can be automatically overridden. If all owners for a domain are
-     * overrideable, then calling
-     * {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID,
-     * Set, boolean)} to enable the domain will disable all other owners. On the other hand, if any
-     * of the owners are non-overrideable, then
-     * {@link DomainVerificationManager#setDomainVerificationLinkHandlingAllowed(String,
-     * boolean)} must be called with false to disable all of the other owners before this domain can
-     * be taken by a new owner through
-     * {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID,
-     * Set, boolean)}.
+     * Whether or not this owner can be automatically overridden.
+     *
+     * @see DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set, boolean)
      */
     @DataClass.Generated.Member
     public boolean isOverrideable() {
@@ -205,7 +189,7 @@ public final class DomainOwner implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1614119379978L,
+            time = 1614721802044L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/content/pm/verify/domain/DomainOwner.java",
             inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final  boolean mOverrideable\nclass DomainOwner extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genEqualsHashCode=true, genAidl=true, genToString=true)")
