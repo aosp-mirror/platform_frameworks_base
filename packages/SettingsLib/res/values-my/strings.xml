@@ -307,7 +307,7 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"သင် ယခင်က ခွင့်ပြုခဲ့သော ကွန်ပျူတာအားလုံးမှ ယူအက်စ်ဘီ အမှားစစ်ခွင့်ကို ရုတ်သိမ်းမည်လား ?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"တည်ဆောက်ပြုပြင်ရန်ဆက်တင်များကို အသုံးပြုခွင့်ပေးမည်လား?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ဤဆက်တင်းများကို တည်ဆောက်ပြုပြင်ရာတွင် သုံးရန်အတွက်သာ ရည်ရွယ်သည်။ ၎င်းတို့သည် သင်၏စက်နှင့် အပလီကေးရှင်းများကို ရပ်စေခြင်း သို့ လုပ်ဆောင်ချက်မမှန်ကန်ခြင်းများ ဖြစ်ပေါ်စေနိုင်သည်။"</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB ဖြင့် အက်ပ်များကို အတည်ပြုစိစစ်ရန်"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB ဖြင့် အက်ပ်များစိစစ်ရန်"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT မှတစ်ဆင့် ထည့်သွင်းသော အက်ပ်များ အန္တရာယ်ဖြစ်နိုင်ခြင်း ရှိမရှိ စစ်ဆေးသည်။"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"အမည်မရှိသော (MAC လိပ်စာများသာပါသော) ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသပါမည်"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ချိတ်ဆက်ထားသည့် ကိရိယာတွင် လက်မခံနိုင်လောက်အောင် ဆူညံ သို့မဟုတ် ထိန်းညှိမရနိုင်သော အသံပိုင်းပြဿနာ ရှိခဲ့လျှင် ဘလူးတုသ် ပကတိ အသံနှုန်းကို ပိတ်ပါ။"</string>
