@@ -35,6 +35,12 @@ class RebootEscrowData {
      */
     private static final int CURRENT_VERSION = 2;
 
+    /**
+    * This is the legacy version of the escrow data format for R builds. The escrow data is only
+    * encrypted by the escrow key, without additional wrap of another key from keystore.
+    */
+    private static final int LEGACY_SINGLE_ENCRYPTED_VERSION = 1;
+
     private RebootEscrowData(byte spVersion, byte[] syntheticPassword, byte[] blob,
             RebootEscrowKey key) {
         mSpVersion = spVersion;
@@ -64,6 +70,19 @@ class RebootEscrowData {
         return mKey;
     }
 
+    private static byte[] decryptBlobCurrentVersion(SecretKey kk, RebootEscrowKey ks,
+            DataInputStream dis) throws IOException {
+        if (kk == null) {
+            throw new IOException("Failed to find wrapper key in keystore, cannot decrypt the"
+                    + " escrow data");
+        }
+
+        // Decrypt the blob with the key from keystore first, then decrypt again with the reboot
+        // escrow key.
+        byte[] ksEncryptedBlob = AesEncryptionUtil.decrypt(kk, dis);
+        return AesEncryptionUtil.decrypt(ks.getKey(), ksEncryptedBlob);
+    }
+
     static RebootEscrowData fromEncryptedData(RebootEscrowKey ks, byte[] blob, SecretKey kk)
             throws IOException {
         Objects.requireNonNull(ks);
@@ -71,17 +90,20 @@ class RebootEscrowData {
 
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(blob));
         int version = dis.readInt();
-        if (version != CURRENT_VERSION) {
-            throw new IOException("Unsupported version " + version);
-        }
         byte spVersion = dis.readByte();
-
-        // Decrypt the blob with the key from keystore first, then decrypt again with the reboot
-        // escrow key.
-        byte[] ksEncryptedBlob = AesEncryptionUtil.decrypt(kk, dis);
-        final byte[] syntheticPassword = AesEncryptionUtil.decrypt(ks.getKey(), ksEncryptedBlob);
-
-        return new RebootEscrowData(spVersion, syntheticPassword, blob, ks);
+        switch (version) {
+            case CURRENT_VERSION: {
+                byte[] syntheticPassword = decryptBlobCurrentVersion(kk, ks, dis);
+                return new RebootEscrowData(spVersion, syntheticPassword, blob, ks);
+            }
+            case LEGACY_SINGLE_ENCRYPTED_VERSION: {
+                // Decrypt the blob with the escrow key directly.
+                byte[] syntheticPassword = AesEncryptionUtil.decrypt(ks.getKey(), dis);
+                return new RebootEscrowData(spVersion, syntheticPassword, blob, ks);
+            }
+            default:
+                throw new IOException("Unsupported version " + version);
+        }
     }
 
     static RebootEscrowData fromSyntheticPassword(RebootEscrowKey ks, byte spVersion,

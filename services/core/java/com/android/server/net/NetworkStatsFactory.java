@@ -27,7 +27,7 @@ import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 import android.annotation.Nullable;
 import android.net.INetd;
 import android.net.NetworkStats;
-import android.net.VpnInfo;
+import android.net.UnderlyingNetworkInfo;
 import android.net.util.NetdService;
 import android.os.RemoteException;
 import android.os.StrictMode;
@@ -81,7 +81,7 @@ public class NetworkStatsFactory {
     private final Object mPersistentDataLock = new Object();
 
     /** Set containing info about active VPNs and their underlying networks. */
-    private volatile VpnInfo[] mVpnInfos = new VpnInfo[0];
+    private volatile UnderlyingNetworkInfo[] mUnderlyingNetworkInfos = new UnderlyingNetworkInfo[0];
 
     // A persistent snapshot of cumulative stats since device start
     @GuardedBy("mPersistentDataLock")
@@ -116,8 +116,8 @@ public class NetworkStatsFactory {
      *
      * @param vpnArray The snapshot of the currently-running VPNs.
      */
-    public void updateVpnInfos(VpnInfo[] vpnArray) {
-        mVpnInfos = vpnArray.clone();
+    public void updateUnderlyingNetworkInfos(UnderlyingNetworkInfo[] vpnArray) {
+        mUnderlyingNetworkInfos = vpnArray.clone();
     }
 
     /**
@@ -319,7 +319,7 @@ public class NetworkStatsFactory {
         // code that will acquire other locks within the system server. See b/134244752.
         synchronized (mPersistentDataLock) {
             // Take a reference. If this gets swapped out, we still have the old reference.
-            final VpnInfo[] vpnArray = mVpnInfos;
+            final UnderlyingNetworkInfo[] vpnArray = mUnderlyingNetworkInfos;
             // Take a defensive copy. mPersistSnapshot is mutated in some cases below
             final NetworkStats prev = mPersistSnapshot.clone();
 
@@ -369,8 +369,8 @@ public class NetworkStatsFactory {
     }
 
     @GuardedBy("mPersistentDataLock")
-    private NetworkStats adjustForTunAnd464Xlat(
-            NetworkStats uidDetailStats, NetworkStats previousStats, VpnInfo[] vpnArray) {
+    private NetworkStats adjustForTunAnd464Xlat(NetworkStats uidDetailStats,
+            NetworkStats previousStats, UnderlyingNetworkInfo[] vpnArray) {
         // Calculate delta from last snapshot
         final NetworkStats delta = uidDetailStats.subtract(previousStats);
 
@@ -381,8 +381,9 @@ public class NetworkStatsFactory {
         delta.apply464xlatAdjustments(mStackedIfaces);
 
         // Migrate data usage over a VPN to the TUN network.
-        for (VpnInfo info : vpnArray) {
-            delta.migrateTun(info.ownerUid, info.vpnIface, info.underlyingIfaces);
+        for (UnderlyingNetworkInfo info : vpnArray) {
+            delta.migrateTun(info.ownerUid, info.iface,
+                    info.underlyingIfaces.toArray(new String[0]));
             // Filter out debug entries as that may lead to over counting.
             delta.filterDebugEntries();
         }

@@ -34,6 +34,14 @@ public abstract class ArrayUtils {
         return ((array != null) && (array.length > 0)) ? array.clone() : array;
     }
 
+    /**
+     * Clones an array if it is not null and has a length greater than 0. Otherwise, returns the
+     * array.
+     */
+    public static int[] cloneIfNotEmpty(int[] array) {
+        return ((array != null) && (array.length > 0)) ? array.clone() : array;
+    }
+
     public static byte[] cloneIfNotEmpty(byte[] array) {
         return ((array != null) && (array.length > 0)) ? array.clone() : array;
     }

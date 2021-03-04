@@ -51,11 +51,15 @@ import android.app.AppGlobals;
 import android.app.GrantedUriPermission;
 import android.app.IUriGrantsManager;
 import android.content.ClipData;
+import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ModuleInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PathPermission;
@@ -115,12 +119,18 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     private static final String TAG = "UriGrantsManagerService";
     // Maximum number of persisted Uri grants a package is allowed
     private static final int MAX_PERSISTED_URI_GRANTS = 512;
-    private static final boolean ENABLE_DYNAMIC_PERMISSIONS = false;
+    private static final boolean ENABLE_DYNAMIC_PERMISSIONS = true;
+    private static final String MEDIA_PROVIDER_MODULE_NAME = "com.android.mediaprovider";
+    private static final long MIN_DYNAMIC_PERMISSIONS_MP_VERSION = 301400000L;
 
     private final Object mLock = new Object();
+    private final Context mContext;
     private final H mH;
     ActivityManagerInternal mAmInternal;
     PackageManagerInternal mPmInternal;
+
+    private boolean isDynamicPermissionEnabledInMP = false;
+    private boolean isMPVersionChecked = false;
 
     /** File storing persisted {@link #mGrantedUriPermissions}. */
     @GuardedBy("mLock")
@@ -148,18 +158,19 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     private final SparseArray<ArrayMap<GrantUri, UriPermission>>
             mGrantedUriPermissions = new SparseArray<>();
 
-    private UriGrantsManagerService() {
-        this(SystemServiceManager.ensureSystemDir());
+    private UriGrantsManagerService(Context context) {
+        this(context, SystemServiceManager.ensureSystemDir());
     }
 
-    private UriGrantsManagerService(File systemDir) {
+    private UriGrantsManagerService(Context context, File systemDir) {
+        mContext = context;
         mH = new H(IoThread.get().getLooper());
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"), "uri-grants");
     }
 
     @VisibleForTesting
-    static UriGrantsManagerService createForTest(File systemDir) {
-        final UriGrantsManagerService service = new UriGrantsManagerService(systemDir);
+    static UriGrantsManagerService createForTest(Context context, File systemDir) {
+        final UriGrantsManagerService service = new UriGrantsManagerService(context, systemDir);
         service.mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         service.mPmInternal = LocalServices.getService(PackageManagerInternal.class);
         return service;
@@ -179,7 +190,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         public Lifecycle(Context context) {
             super(context);
-            mService = new UriGrantsManagerService();
+            mService = new UriGrantsManagerService(context);
         }
 
         @Override
@@ -991,7 +1002,9 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         // If this provider says that grants are always required, we need to
         // consult it directly to determine if the UID has permission
         final boolean forceMet;
-        if (ENABLE_DYNAMIC_PERMISSIONS && pi.forceUriPermissions) {
+        if (ENABLE_DYNAMIC_PERMISSIONS
+                && pi.forceUriPermissions
+                && isDynamicPermissionEnabledInMP()) {
             final int providerUserId = UserHandle.getUserId(pi.applicationInfo.uid);
             final int clientUserId = UserHandle.getUserId(uid);
             if (providerUserId == clientUserId) {
@@ -1007,6 +1020,35 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         return readMet && writeMet && forceMet;
+    }
+
+    /**
+     * Returns true if the available MediaProvider version contains the changes that enable dynamic
+     * permission.
+     */
+    private boolean isDynamicPermissionEnabledInMP() {
+        if (isMPVersionChecked) {
+            return isDynamicPermissionEnabledInMP;
+        }
+
+        try {
+            ModuleInfo moduleInfo = mContext.getPackageManager().getModuleInfo(
+                    MEDIA_PROVIDER_MODULE_NAME, PackageManager.MODULE_APEX_NAME);
+            PackageInfo packageInfo =
+                    mContext.getPackageManager().getPackageInfo(
+                            moduleInfo.getPackageName(), PackageManager.MATCH_APEX);
+            isDynamicPermissionEnabledInMP =
+                    packageInfo.getLongVersionCode() >= MIN_DYNAMIC_PERMISSIONS_MP_VERSION;
+        } catch (NameNotFoundException e) {
+            Slog.i(TAG, "Module name not found:  " + MEDIA_PROVIDER_MODULE_NAME);
+            // If module is not found, then MP changes are expected to be there (because both this
+            // change and the module change will be mandated together for non-module builds).
+            isDynamicPermissionEnabledInMP = true;
+        } finally {
+            isMPVersionChecked = true;
+        }
+
+        return isDynamicPermissionEnabledInMP;
     }
 
     @GuardedBy("mLock")

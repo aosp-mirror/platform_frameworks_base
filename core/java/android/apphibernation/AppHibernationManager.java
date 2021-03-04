@@ -49,29 +49,59 @@ public final class AppHibernationManager {
     }
 
     /**
-     * Returns true if the package is hibernating, false otherwise.
+     * Returns true if the package is hibernating for this context's user, false otherwise.
      *
      * @hide
      */
     @SystemApi
-    public boolean isHibernating(@NonNull String packageName) {
+    public boolean isHibernatingForUser(@NonNull String packageName) {
         try {
-            return mIAppHibernationService.isHibernating(packageName, mContext.getUserId());
+            return mIAppHibernationService.isHibernatingForUser(packageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Set whether the package is hibernating.
+     * Set whether the package is hibernating for this context's user.
      *
      * @hide
      */
     @SystemApi
-    public void setHibernating(@NonNull String packageName, boolean isHibernating) {
+    public void setHibernatingForUser(@NonNull String packageName, boolean isHibernating) {
         try {
-            mIAppHibernationService.setHibernating(packageName, mContext.getUserId(),
+            mIAppHibernationService.setHibernatingForUser(packageName, mContext.getUserId(),
                     isHibernating);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if app is hibernating globally / at the package level.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isHibernatingGlobally(@NonNull String packageName) {
+        try {
+            return mIAppHibernationService.isHibernatingGlobally(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set whether a package should be globally hibernating. This hibernates the package at a
+     * package level. User-level hibernation (e.g.. {@link #isHibernatingForUser} is independent
+     * from global hibernation.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setHibernatingGlobally(@NonNull String packageName, boolean isHibernating) {
+        try {
+            mIAppHibernationService.setHibernatingGlobally(packageName, isHibernating);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

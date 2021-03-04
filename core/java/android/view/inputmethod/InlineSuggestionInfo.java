@@ -82,6 +82,7 @@ public final class InlineSuggestionInfo implements Parcelable {
     public static InlineSuggestionInfo newInlineSuggestionInfo(
             @NonNull InlinePresentationSpec presentationSpec,
             @NonNull @Source String source,
+            @SuppressLint("NullableCollection")
             @Nullable String[] autofillHints, @NonNull @Type String type, boolean isPinned) {
         return new InlineSuggestionInfo(presentationSpec, source, autofillHints, type, isPinned);
     }

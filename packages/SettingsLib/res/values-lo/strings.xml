@@ -203,16 +203,16 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"ຜູ່​ໃຊ້​ນີ້​ບໍ່​ສາ​ມາດ​ຕັ້ງ​ຄ່າ VPN ໄດ້"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"​ຜູ່​ໃຊ້​ນີ້​ບໍ່​ສາ​ມາດ​ຕັ້ງ​ຄ່າ​ການ​ປ່ອຍ​ສັນ​ຍານ​ໄດ້"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ຜູ່​ໃຊ້​ນີ້ບໍ່​ສາ​ມາດ​ຕັ້ງ​ຄ່າ​ຊື່​ເອດ​ເຊ​ສ​ພອຍ​​​​ໄ​ດ້"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"ການດີບັກຜ່ານ USB"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"ການດີບັ໊ກຜ່ານ USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"ເປີດໃຊ້ໂໝດດີບັ໊ກເມື່ອເຊື່ອມຕໍ່ USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"ຖອດຖອນການອະນຸຍາດການດີບັກຜ່ານ USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"ຖອດຖອນການອະນຸຍາດການດີບັ໊ກຜ່ານ USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ການດີບັກໄຮ້ສາຍ"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ໂໝດດີບັກເມື່ອເຊື່ອມຕໍ່ Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ຜິດພາດ"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ການດີບັກໄຮ້ສາຍ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ເພື່ອເບິ່ງ ແລະ ໃຊ້ອຸປະກອນທີ່ມີຢູ່, ກະລຸນາເປີດການດີບັກໄຮ້ສາຍ"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"ຈັບຄູ່ອຸປະກອນດ້ວຍລະຫັດ QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"ຈັບຄູ່ອຸປະກອນໃໝ່ໂດຍໃຊ້ຕົວສະແກນລະຫັດ QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"ຈັບຄູ່ອຸປະກອນໃໝ່ໂດຍໃຊ້ຕົວສະແກນລະຫັດ QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ຈັບຄູ່ອຸປະກອນໂດຍໃຊ້ລະຫັດການຈັບຄູ່"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ຈັບຄູ່ອຸປະກອນໃໝ່ໂດຍໃຊ້ລະຫັດຫົກຕົວເລກ"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"ອຸປະກອນທີ່ຈັບຄູ່ແລ້ວ"</string>
@@ -231,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ຈັບຄູ່ອຸປະກອນບໍ່ສຳເລັດ. ລະຫັດ QR ບໍ່ຖືກຕ້ອງ ຫຼື ອຸປະກອນບໍ່ໄດ້ເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍດຽວກັນ."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"ທີ່ຢູ່ IP ແລະ ຜອດ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"ສະແກນລະຫັດ QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"ຈັບຄູ່ອຸປະກອນຜ່ານ Wi‑Fi ໂດຍການສະແກນລະຫັດ QR"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ກະ​ລຸ​ນາ​ເຊື່ອມ​ຕໍ່​ກັບ​ເຄືອ​ຂ່າຍ Wi​-Fi"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"ຈັບຄູ່ອຸປະກອນຜ່ານ Wi‑Fi ໂດຍການສະແກນລະຫັດ QR"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ທາງ​ລັດລ​າຍງານ​ຂໍ້​ຜິດພາດ"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"​ສະ​ແດງ​ປຸ່ມ​ໃນ​ເມ​ນູ​ປິດ​ເປີດ​ເພື່ອ​ບັນ​ທຶກ​ການ​ລາຍ​ງານ​ຂໍ້​ຜິດ​ພາດ"</string>
@@ -251,7 +250,6 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ສະແດງການຮັບຮອງຂອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"​ເປີດ​ນຳ​ໃຊ້ການ​ເກັບ​ປະ​ຫວັດ​ Verbose Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ການຈຳກັດການສະແກນ Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ການສຸ່ມ MAC ສຳລັບ Wi‑Fi ແບບປັບປຸງແລ້ວ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືຕະຫຼອດເວລາ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ສະແດງອຸປະກອນ Bluetooth ທີ່ບໍ່ມີຊື່"</string>
@@ -283,7 +281,6 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ສະແດງໂຕເລືອກສຳລັບການສະແດງການຮັບຮອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ເພີ່ມ​ລະ​ດັບ​ການ​ເກັບ​ປະ​ຫວັດ Wi‑Fi, ສະ​ແດງ​ຕໍ່ SSID RSSI ​ໃນ​ Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ຫຼຸດການໃຊ້ແບັດເຕີຣີ ແລະ ປັບປຸງປະສິດທິພາບເຄືອຂ່າຍ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ຫາກເປີດການນຳໃຊ້ໂໝດນີ້, ທີ່ຢູ່ MAC ຂອງອຸປະກອນນີ້ອາດມີການປ່ຽນແປງໃນແຕ່ລະເທື່ອທີ່ມັນເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍໃດໜຶ່ງທີ່ເປີດການນຳໃຊ້ການສຸ່ມ MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"ມີການວັດແທກ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ບໍ່ໄດ້ວັດແທກ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ຂະໜາດບັບເຟີຕົວບັນທຶກ"</string>
@@ -299,11 +296,11 @@
     <string name="debug_view_attributes" msgid="3539609843984208216">"ເປີດ​ນຳ​ໃຊ້​ການກວດ​ສອບ​ຄຸນ​ສົມ​ບັດ​ມຸມມອງ"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືໄວ້ຕະຫຼອດ, ເຖິງແມ່ນວ່າ Wi-Fi ຈະເຮັດວຽກຢູ່ກໍຕາມ (ສຳລັບການສະຫຼັບເຄືອຂ່າຍແບບໄວ)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວຫາກວ່າສາມາດໃຊ້ໄດ້"</string>
-    <string name="adb_warning_title" msgid="7708653449506485728">"ອະນຸຍາດໃຫ້ດີບັກຜ່ານ USB?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"ການດີບັກຜ່ານ USB ແມ່ນມີຈຸດປະສົງເພື່ອການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບຯໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະອ່ານຂໍ້ມູນການບັນທຶກ."</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"ອະນຸຍາດໃຫ້ດີບັ໊ກຜ່ານ USB?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"ການດີບັ໊ກຜ່ານ USB ແມ່ນມີຈຸດປະສົງເພື່ອການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບຯໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະອ່ານຂໍ້ມູນການບັນທຶກ."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"ອະນຸຍາດການດີບັກໄຮ້ສາຍບໍ?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"ການດີບັກໄຮ້ສາຍແມ່ນມີຈຸດປະສົງສຳລັບການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະ ອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະ ອ່ານຂໍ້ມູນບັນທຶກ."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"ຖອດຖອນການເຂົ້າເຖິງການດີບັກຜ່ານ USB ຈາກຄອມພິວເຕີທຸກເຄື່ອງ ທີ່ທ່ານເຄີຍອະນຸຍາດກ່ອນໜ້ານີ້?"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"ຖອດຖອນການເຂົ້າເຖິງການດີບັ໊ກຜ່ານ USB ຈາກຄອມພິວເຕີທຸກເຄື່ອງ ທີ່ທ່ານເຄີຍອະນຸຍາດກ່ອນໜ້ານີ້?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"ອະນຸຍາດການຕັ້ງຄ່າສຳລັບນັກພັດທະນາ?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ການ​ຕັ້ງຄ່າ​ເຫຼົ່ານີ້​ແມ່ນ​ມີ​ຈຸດປະສົງ​ເພື່ອ​ການ​ພັດທະນາ​ເທົ່ານັ້ນ. ພວກ​ມັນ​ສາມາດ​ເຮັດ​ໃຫ້​ອຸປະກອນ ແລະ​ແອັບພລິເຄຊັນ​ຂອງ​ທ່ານ​ຢຸດ​ເຮັດ​ວຽກ ຫຼື​ເຮັດ​ວຽກ​ຜິດປົກກະຕິ​ໄດ້."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"ຢືນຢັນແອັບຜ່ານທາງ USB"</string>
@@ -311,7 +308,6 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"ຈະສະແດງອຸປະກອນ Bluetooth ທີ່ບໍ່ມີຊື່ (ທີ່ຢູ່ MAC ເທົ່ານັ້ນ)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ປິດໃຊ້ຄຸນສົມບັດລະດັບສຽງສົມບູນຂອງ Bluetooth ໃນກໍລະນີເກີດບັນຫາລະດັບສຽງສົມບູນກັບອຸປະກອນທາງໄກ ເຊັ່ນວ່າ ລະດັບສຽງດັງເກີນຍອມຮັບໄດ້ ຫຼື ຄວບຄຸມບໍ່ໄດ້."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ເປີດໃຊ້ສະແຕັກຄຸນສົມບັດ Bluetooth Gabeldorsche."</string>
-    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"ເປີດນຳໃຊ້ຄຸນສົມບັດການເຊື່ອມຕໍ່ທີ່ເສີມແຕ່ງແລ້ວ"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal ໃນໂຕເຄື່ອງ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ເປີດນຳໃຊ້ແອັບຯ Terminal ທີ່ໃຫ້ການເຂົ້າເຖິງ shell ໃນໂຕເຄື່ອງໄດ້"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"ການກວດສອບ HDCP"</string>
@@ -358,8 +354,6 @@
     <string name="track_frame_time" msgid="522674651937771106">"ການປະມວນຜົນໂປຣໄຟລ໌ HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"ເປີດໃຊ້ຊັ້ນຂໍ້ມູນດີບັກ GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ອະນຸຍາດການໂຫລດຊັ້ນຂໍ້ມູນດີບັກ GPU ສຳລັບແອັບດີບັກ"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ເປີດໃຊ້ການບັນທຶກຜູ້ຂາຍແບບລະອຽດ"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ຮວມທັງການລາຍງານຂໍ້ຜິດພາດການເຂົ້າສູ່ລະບົບຂອງຜູ້ຂາຍສະເພາະອຸປະກອນເພີ່ມເຕີມ, ເຊິ່ງອາດມີຂໍ້ມູນສ່ວນຕົວ, ໃຊ້ແບັດເຕີຣີຫຼາຍຂຶ້ນ ແລະ/ຫຼື ໃຊ້ບ່ອນຈັດເກັບຂໍ້ມູນເພີ່ມເຕີມ."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ຂະໜາດໜ້າ​ຈໍ​ຂອງອະນິເມຊັນ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ຂະໜາດອະນິເມຊັນ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ໄລຍະເວລາອະນິເມຊັນ"</string>
@@ -418,7 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (ສີ​ແດງ​-ສີ​ຂຽວ​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (ສີ​ຟ້າ​-ສີ​ເຫຼືອງ​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ການ​ປັບ​ແຕ່ງ​ສີ"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"ການແກ້ໄຂສີຈະເຮັດໃຫ້ທ່ານສາມາດປັບແຕ່ງການສະແດງຜົນຂອງສີຢູ່ອຸປະກອນຂອງທ່ານໄດ້"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"ການແກ້ໄຂສີຈະຊ່ວຍໃຫ້ຄົນທີ່ຕາບອດສີສາມາດເບິ່ງເຫັນສີໄດ້ຖືກຕ້ອງຍິ່ງຂຶ້ນ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"ຖືກແທນໂດຍ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"ເຫຼືອອີກປະມານ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -432,11 +426,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"ໜ້າຈະໃຊ້ໄດ້ຈົນຮອດປະມານ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"ໜ້າຈະໃຊ້ໄດ້ຈົນຮອດປະມານ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"ຈົນກວ່າຈະຮອດ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ແບັດເຕີຣີອາດຈະໝົດພາຍໃນເວລາ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"ເຫຼືອໜ້ອຍກວ່າ <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"ເຫຼືອໜ້ອຍກວ່າ <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"ເຫຼືອຫຼາຍກວ່າ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"ເຫຼືອຫຼາຍກວ່າ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"ຂະຫຍາຍອາຍຸແບັດເຕີຣີກາຍ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"ຍັງເຫຼືອໜ້ອຍກວ່າ <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"ຍັງເຫຼືອໜ້ອຍກວ່າ <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"ຍັງເຫຼືອຫຼາຍກວ່າ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"ຍັງເຫຼືອຫຼາຍກວ່າ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ໂທລະສັບອາດປິດໃນໄວໆນີ້"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ແທັບເລັດອາດປິດໃນໄວໆນີ້"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ອຸປະກອນອາດປິດໃນໄວໆນີ້"</string>
@@ -507,50 +501,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ຖາມທຸກເທື່ອ"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"ຈົນກວ່າທ່ານຈະປິດ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ຕອນນີ້"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ລຳໂພງໂທລະສັບ"</string>
+    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"ອຸປະກອນນີ້"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ເກີດບັນຫາໃນການເຊື່ອມຕໍ່. ປິດອຸປະກອນແລ້ວເປີດກັບຄືນມາໃໝ່"</string>
-    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ອຸປະກອນສຽງແບບມີສາຍ"</string>
-    <string name="help_label" msgid="3528360748637781274">"ຊ່ວຍເຫຼືອ ແລະ ຕິຊົມ"</string>
-    <string name="storage_category" msgid="2287342585424631813">"ບ່ອນເກັບຂໍ້ມູນ"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"ຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"ເບິ່ງ ແລະ ແກ້ໄຂຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ບໍ່ມີຂໍ້ມູນທີ່ແບ່ງປັນສຳລັບຜູ້ໃຊ້ນີ້."</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"ເກີດຄວາມຜິດພາດໃນການໂຫຼດຂໍ້ມູນທີ່ແບ່ງປັນ. ກະລຸນາລອງໃໝ່."</string>
-    <string name="blob_id_text" msgid="8680078988996308061">"ID ຂໍ້ມູນທີ່ແບ່ງປັນແລ້ວ: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"ໝົດອາຍຸວັນທີ <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"ເກີດຄວາມຜິດພາດໃນການລຶບຂໍ້ມູນທີ່ແບ່ງປັນ."</string>
-    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"ບໍ່ມີການເຊົ່າທີ່ໄດ້ຮັບມາສຳລັບຂໍ້ມູນທີ່ແບ່ງປັນນີ້. ທ່ານຕ້ອງການລຶບມັນອອກບໍ່?"</string>
-    <string name="accessor_info_title" msgid="8289823651512477787">"ຂໍ້ມູນການແບ່ງປັນແອັບ"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"ບໍ່ມີຄຳອະທິບາຍທີ່ສະໜອງໃຫ້ໂດຍແອັບ."</string>
-    <string name="accessor_expires_text" msgid="4625619273236786252">"ການເຊົ່າຈະໝົດອາຍຸວັນທີ <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="delete_blob_text" msgid="2819192607255625697">"ລຶບຂໍ້ມູນທີ່ແບ່ງປັນອອກ"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບຂໍ້ມູນທີ່ແບ່ງປັນແລ້ວນີ້ອອກ?"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"ຜູ່ໃຊ້ມີແອັບຯ ແລະເນື້ອຫາຂອງຕົນເອງ"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"ທ່ານ​ສາ​ມາດ​ຈໍາ​ກັດ​ການ​ເຂົ້າ​ເຖິງແອັບຯ ​ແລະ​ເນື້ອຫາ​ຈາກ​ບັນ​ຊີ​ຂອງ​ທ່ານໄດ້"</string>
-    <string name="user_add_user_item_title" msgid="2394272381086965029">"ຜູ້ໃຊ້"</string>
-    <string name="user_add_profile_item_title" msgid="3111051717414643029">"ໂປຣໄຟລ໌ທີ່ຖືກຈຳກັດ"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"ເພີ່ມຜູ້ໃຊ້ໃໝ່ບໍ?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"ທ່ານສາມາດໃຊ້ອຸປະກອນນີ້ຮ່ວມກັບຄົນອື່ນໄດ້ໂດຍການສ້າງຜູ້ໃຊ້ເພີ່ມເຕີມ. ຜູ້ໃຊ້ແຕ່ລະຄົນຈະມີພື້ນທີ່ຂອງຕົວເອງ, ເຊິ່ງເຂົາເຈົ້າສາມາດປັບແຕ່ງແອັບ, ຮູບພື້ນຫຼັງ ແລະ ອື່ນໆໄດ້. ຜູ້ໃຊ້ຕ່າງໆ ສາມາດປັບແຕ່ງການຕັ້ງຄ່າອຸປະກອນໄດ້ ເຊັ່ນ: Wi‑Fi ທີ່ມີຜົນກະທົບທຸກຄົນ.\n\nເມື່ອທ່ານເພີ່ມຜູ້ໃຊ້ໃໝ່, ບຸກຄົນນັ້ນຈະຕ້ອງຕັ້ງຄ່າພື້ນທີ່ຂອງເຂົາເຈົ້າກ່ອນ.\n\nຜູ້ໃຊ້ໃດກໍຕາມສາມາດອັບເດດແອັບສຳລັບຜູ້ໃຊ້ຄົນອື່ນທັງໝົດໄດ້. ການຕັ້ງຄ່າການຊ່ວຍເຂົ້າເຖິງອາດບໍ່ຖືກໂອນຍ້າຍໄປໃຫ້ຜູ້ໃຊ້ໃໝ່."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້​ໃຊ້​ໃໝ່, ຜູ້​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບຯສຳ​ລັບ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ຕັ້ງຄ່າຜູ້ໃຊ້ຕອນນີ້ບໍ?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"ກວດ​ສອບ​ໃຫ້​ແນ່​ໃຈ​ວ່າ​ບຸກ​ຄົນ​ດັ່ງ​ກ່າວ​ສາ​ມາດ​ຮັບ​ອຸ​ປະ​ກອນ​ ແລະ ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ຂອງ​ພວກ​ເຂົາ​ໄດ້"</string>
-    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ຕັ້ງຄ່າໂປຣໄຟລ໌ດຽວນີ້?"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ຕັ້ງຄ່າດຽວນີ້"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ບໍ່ແມ່ນຕອນນີ້"</string>
-    <string name="user_add_user_type_title" msgid="551279664052914497">"ເພີ່ມ"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"ຜູ້ໃຊ້ໃໝ່"</string>
-    <string name="user_new_profile_name" msgid="2405500423304678841">"ໂປຣໄຟລ໌ໃໝ່"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"ຂໍ້​ມູນ​ຜູ້ໃຊ້"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"ຂໍ້ມູນໂປຣໄຟລ໌"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"ກ່ອນທ່ານຈະສ້າງໂປຣໄຟລ໌ທີ່ຖືກຈຳກັດນັ້ນ, ທ່ານຈະຕ້ອງຕັ້ງຄ່າການລັອກໜ້າຈໍ ເພື່ອປ້ອງກັນແອັບຯ ແລະຂໍ້ມູນສ່ວນໂຕຂອງທ່ານກ່ອນ."</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"ຕັ້ງການລັອກ"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"ສະຫຼັບໄປ <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"ເພີ່ມແຂກ"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"ລຶບແຂກອອກ"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"ແຂກ"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ຄ່າເລີ່ມຕົ້ນອຸປະກອນ"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ປິດການນຳໃຊ້ແລ້ວ"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ເປີດການນຳໃຊ້ແລ້ວ"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ທ່ານຕ້ອງປິດເປີດອຸປະກອນຄືນໃໝ່ເພື່ອນຳໃຊ້ການປ່ຽນແປງນີ້. ປິດເປີດໃໝ່ດຽວນີ້ ຫຼື ຍົກເລີກ."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"ຫູຟັງແບບມີສາຍ"</string>
 </resources>

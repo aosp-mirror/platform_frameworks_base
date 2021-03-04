@@ -14,6 +14,15 @@
 // limitations under the License.
 //
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 cc_library_shared {
     name: "libservice-connectivity",
     // TODO: build against the NDK (sdk_version: "30" for example)
@@ -25,7 +34,6 @@ cc_library_shared {
     ],
     srcs: [
         "jni/com_android_server_TestNetworkService.cpp",
-        "jni/com_android_server_connectivity_Vpn.cpp",
         "jni/onload.cpp",
     ],
     shared_libs: [
@@ -55,8 +63,10 @@ java_library {
         "unsupportedappusage",
     ],
     static_libs: [
+        "modules-utils-os",
         "net-utils-device-common",
         "net-utils-framework-common",
+        "netd-client",
     ],
     apex_available: [
         "//apex_available:platform",

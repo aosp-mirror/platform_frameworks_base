@@ -17,6 +17,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="enabled_by_admin" msgid="6630472777476410137">"Ativado pelo administrador"</string>
-    <string name="disabled_by_admin" msgid="4023569940620832713">"Desativado pelo administrador"</string>
+    <string name="enabled_by_admin" msgid="6630472777476410137">"Ativada pelo administrador"</string>
+    <string name="disabled_by_admin" msgid="4023569940620832713">"Desativada pelo administrador"</string>
 </resources>

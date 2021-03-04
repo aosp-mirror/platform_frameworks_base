@@ -687,7 +687,8 @@ public class PackageDexOptimizer {
         boolean generateCompactDex = true;
         switch (compilationReason) {
             case PackageManagerService.REASON_FIRST_BOOT:
-            case PackageManagerService.REASON_BOOT:
+            case PackageManagerService.REASON_BOOT_AFTER_OTA:
+            case PackageManagerService.REASON_POST_BOOT:
             case PackageManagerService.REASON_INSTALL:
                  generateCompactDex = false;
         }
@@ -779,7 +780,8 @@ public class PackageDexOptimizer {
         return getOatDir(codePath).getAbsolutePath();
     }
 
-    static File getOatDir(File codePath) {
+    /** Returns the oat dir for the given code path */
+    public static File getOatDir(File codePath) {
         return new File(codePath, OAT_DIR_NAME);
     }
 

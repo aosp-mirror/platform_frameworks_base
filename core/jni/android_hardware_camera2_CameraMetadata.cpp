@@ -249,6 +249,16 @@ static jint CameraMetadata_getEntryCount(JNIEnv *env, jclass thiz, jlong ptr) {
     return metadata->entryCount();
 }
 
+static jlong CameraMetadata_getBufferSize(JNIEnv *env, jclass thiz, jlong ptr) {
+    ALOGV("%s", __FUNCTION__);
+
+    CameraMetadata* metadata = CameraMetadata_getPointerThrow(env, ptr);
+
+    if (metadata == NULL) return 0;
+
+    return metadata->bufferSize();
+}
+
 // idempotent. calling more than once has no effect.
 static void CameraMetadata_close(JNIEnv *env, jclass thiz, jlong ptr) {
     ALOGV("%s", __FUNCTION__);
@@ -552,6 +562,9 @@ static const JNINativeMethod gCameraMetadataMethods[] = {
   { "nativeGetEntryCount",
     "(J)I",
     (void*)CameraMetadata_getEntryCount },
+  { "nativeGetBufferSize",
+    "(J)J",
+    (void*)CameraMetadata_getBufferSize },
   { "nativeClose",
     "(J)V",
     (void*)CameraMetadata_close },

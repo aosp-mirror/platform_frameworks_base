@@ -22,11 +22,14 @@ The `bootanimation.zip` archive file includes:
 
 The first line defines the general parameters of the animation:
 
-    WIDTH HEIGHT FPS
+    WIDTH HEIGHT FPS [PROGRESS]
 
   * **WIDTH:** animation width (pixels)
   * **HEIGHT:** animation height (pixels)
   * **FPS:** frames per second, e.g. 60
+  * **PROGRESS:** whether to show a progress percentage on the last part
+      + The percentage will be displayed with an x-coordinate of 'c', and a
+        y-coordinate set to 1/3 of the animation height.
 
 It is followed by a number of rows of the form:
 
@@ -76,6 +79,11 @@ The file used to draw the time on top of the boot animation. The font format is 
   * There are 16 columns and 6 rows
   * Each row is divided in half: regular weight glyphs on the top half, bold glyphs on the bottom
   * For a NxM image each character glyph will be N/16 pixels wide and M/(12*2) pixels high
+
+## progress_font.png
+
+The file used to draw the boot progress in percentage on top of the boot animation. The font format
+follows the same specification as the one described for clock_font.png.
 
 ## loading and playing frames
 

@@ -2352,6 +2352,16 @@ interface ITelephony {
     void triggerRcsReconfiguration(int subId);
 
     /**
+     * Enables or disables the test mode for RCS VoLTE single registration.
+     */
+    void setRcsSingleRegistrationTestModeEnabled(boolean enabled);
+
+    /**
+     * Gets the test mode for RCS VoLTE single registration.
+     */
+    boolean getRcsSingleRegistrationTestModeEnabled();
+
+    /**
      * Overrides the config of RCS VoLTE single registration enabled for the device.
      */
     void setDeviceSingleRegistrationEnabledOverride(String enabled);
@@ -2388,6 +2398,21 @@ interface ITelephony {
     int removeContactFromEab(int subId, String contacts);
 
     /**
+     * Get the EAB contact from the EAB database.
+     */
+    String getContactFromEab(String contact);
+
+    /*
+     * Check whether the device supports RCS User Capability Exchange or not.
+     */
+    boolean getDeviceUceEnabled();
+
+    /*
+     * Set the device supports RCS User Capability Exchange.
+     */
+     void setDeviceUceEnabled(boolean isEnabled);
+
+    /**
      * Set a SignalStrengthUpdateRequest to receive notification when Signal Strength breach the
      * specified thresholds.
      */
@@ -2399,4 +2424,18 @@ interface ITelephony {
      */
     void clearSignalStrengthUpdateRequest(int subId, in SignalStrengthUpdateRequest request,
             String callingPackage);
+
+    /**
+     * Prepare TelephonyManager for an unattended reboot. The reboot is
+     * required to be done shortly after the API is invoked.
+     *
+     * Requires system privileges.
+     *
+     * @return {@link #PREPARE_UNATTENDED_REBOOT_SUCCESS} in case of success.
+     * {@link #PREPARE_UNATTENDED_REBOOT_PIN_REQUIRED} if the device contains
+     * at least one SIM card for which the user needs to manually enter the PIN
+     * code after the reboot. {@link #PREPARE_UNATTENDED_REBOOT_ERROR} in case
+     * of error.
+     */
+    int prepareForUnattendedReboot();
 }

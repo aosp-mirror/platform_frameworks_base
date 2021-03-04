@@ -156,9 +156,9 @@
     <string name="httpErrorOk" msgid="6206751415788256357">"تأیید"</string>
     <string name="httpError" msgid="3406003584150566720">"خطایی در شبکه وجود داشت."</string>
     <string name="httpErrorLookup" msgid="3099834738227549349">"نشانی اینترنتی پیدا نشد."</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"‏طرح کلی اصالت‌سنجی سایت پشتیبانی نمی‌‎شود."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"‏طرح کلی احراز هویت سایت پشتیبانی نمی‌‎شود."</string>
     <string name="httpErrorAuth" msgid="469553140922938968">"راستی‌آزمایی ناموفق بود."</string>
-    <string name="httpErrorProxyAuth" msgid="7229662162030113406">"اصالت‌سنجی از طریق سرور پروکسی انجام نشد."</string>
+    <string name="httpErrorProxyAuth" msgid="7229662162030113406">"احراز هویت از طریق سرور پروکسی انجام نشد."</string>
     <string name="httpErrorConnect" msgid="3295081579893205617">"اتصال به سرور انجام نشد."</string>
     <string name="httpErrorIO" msgid="3860318696166314490">"برقراری ارتباط با سرور ممکن نبود. بعداً دوباره امتحان کنید."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"زمان اتصال به سرور تمام شده است."</string>
@@ -173,10 +173,10 @@
     <string name="contentServiceSync" msgid="2341041749565687871">"همگام‌سازی"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"همگام‌سازی نشد"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"تعداد <xliff:g id="CONTENT_TYPE">%s</xliff:g> برای حذف بیش از حد مجاز شد."</string>
-    <string name="low_memory" product="tablet" msgid="5557552311566179924">"‏فضای ذخیره‌سازی رایانهٔ لوحی پر است! برخی از فایل‎ها را حذف کنید تا فضا آزاد شود."</string>
+    <string name="low_memory" product="tablet" msgid="5557552311566179924">"‏حافظه رایانهٔ لوحی پر است! برخی از فایل‎ها را حذف کنید تا فضا آزاد شود."</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"حافظه ساعت پر است. برای آزادسازی فضا، چند فایل را حذف کنید."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"‏فضای ذخیره‌سازی دستگاه Android TV پر است. برخی از فایل‌ها را حذف کنید تا فضا آزاد شود."</string>
-    <string name="low_memory" product="default" msgid="2539532364144025569">"فضای ذخیره‌سازی تلفن پر است. بعضی از فایل‌ها را حذف کنید تا فضا آزاد شود."</string>
+    <string name="low_memory" product="default" msgid="2539532364144025569">"حافظه تلفن پر است. بعضی از فایل‌ها را حذف کنید تا فضا آزاد شود."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
       <item quantity="one">مرجع صدور گواهی نصب شد</item>
       <item quantity="other">مراجع صدور گواهی نصب شدند</item>
@@ -191,19 +191,13 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"سرپرست از این دستگاه برای استفاده شخصی چشم‌پوشی کرد"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"دستگاه مدیریت می‌شود"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"سازمانتان این دستگاه را مدیریت می‌کند و ممکن است ترافیک شبکه را پایش کند. برای اطلاع از جزئیات، ضربه بزنید."</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"برنامه‌ها می‌توانند به مکانتان دسترسی پیدا کنند"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"برای کسب اطلاعات بیشتر با سرپرست فناوری اطلاعات تماس بگیرید"</string>
-    <string name="country_detector" msgid="7023275114706088854">"کشوریاب"</string>
-    <string name="location_service" msgid="2439187616018455546">"خدمات مکان"</string>
-    <string name="sensor_notification_service" msgid="7474531979178682676">"سرویس اعلان حسگر"</string>
-    <string name="twilight_service" msgid="8964898045693187224">"‏سرویس Twilight"</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"سرپرست شما تنظیمات مکان را تغییر داده است"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"برای مشاهده تنظیمات مکان ضربه بزنید."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"دستگاهتان پاک خواهد شد"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"برنامه سرپرست سیستم را نمی‌توان استفاده کرد. دستگاه شما در این لحظه پاک می‌شود.\n\nاگر سؤالی دارید، با سرپرست سیستم سازمانتان تماس بگیرید."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> چاپ کردن را غیرفعال کرده است."</string>
-    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"نمایه کاری‌تان را روشن کنید"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"تا زمانی‌که نمایه کاری‌تان را روشن نکنید، برنامه‌های شخصی‌تان مسدودند"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"برنامه‌های شخصی در تاریخ <xliff:g id="DATE">%1$s</xliff:g> ساعت <xliff:g id="TIME">%2$s</xliff:g> مسدود خواهند شد. سرپرست فناوری اطلاعات اجازه نمی‌دهد نمایه کاری شما بیشتر از <xliff:g id="NUMBER">%3$d</xliff:g> روز خاموش بماند."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"روشن کردن"</string>
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"سرپرستْ برنامه‌های شخصی را به حالت تعلیق درآورد"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"برای بررسی مطابقت با خط‌مشی، اینجا ضربه بزنید."</string>
     <string name="me" msgid="6207584824693813140">"من"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"گزینه‌های رایانهٔ لوحی"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‏گزینه‌های Android TV"</string>
@@ -237,24 +231,20 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"گزینه‌های تلفن"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"قفل صفحه"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"خاموش کردن"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"روشن/خاموش کردن"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"بازراه‌اندازی"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"اضطراری"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"گزارش اشکال"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"پایان جلسه"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"نماگرفت"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"عکس صفحه‌نمایش"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"گزارش اشکال"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به‌صورت پیام ایمیل ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً کمی صبر کنید."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"گزارش تعاملی"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"در بیشتر شرایط از این گزینه استفاده کنید. به شما امکان ردیابی پیشرفت گزارش و وارد کردن جزئیات بیشتری درباره مشکل را می‌دهد. ممکن است برخی از بخش‌هایی را که کمتر استفاده شده و باعث افزایش طول زمان گزارش می‌شود حذف کند."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"گزارش کامل"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"از این گزینه برای به‌حداقل رساندن تداخل سیستم هنگام پاسخ‌گو نبودن یا کند بودن دستگاه یا هنگام نیازداشتن به همه بخش‌های گزارش استفاده کنید. نماگرفت دیگری نمی‌گیرد یا امکان وارد کردن جزئیات بیشتری به شما نمی‌دهد."</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"از این گزینه برای به‌حداقل رساندن تداخل سیستم هنگام پاسخ‌گو نبودن یا کند بودن دستگاه یا هنگام نیازداشتن به همه بخش‌های گزارش استفاده کنید. عکس صفحه‌نمایش دیگری نمی‌گیرد یا امکان وارد کردن جزئیات بیشتری به شما نمی‌دهد."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="one">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر نماگرفت برای گزارش اشکال گرفته می‌شود.</item>
-      <item quantity="other">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر نماگرفت برای گزارش اشکال گرفته می‌شود.</item>
+      <item quantity="one">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر عکس صفحه‌نمایش برای گزارش اشکال گرفته می‌شود.</item>
+      <item quantity="other">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر عکس صفحه‌نمایش برای گزارش اشکال گرفته می‌شود.</item>
     </plurals>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"نماگرفت با گزارش اشکال گرفته شد"</string>
-    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"نماگرفت با گزارش اشکال گرفته نشد"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"حالت ساکت"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"صدا خاموش است"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"صدا روشن است"</string>
@@ -383,7 +373,7 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"به برنامه امکان می‌دهد قسمت‌هایی از خود را در حافظه دائمی کند. این کار حافظه موجود را برای سایر برنامه‌ها محدود کرده و باعث کندی تلفن می‌شود."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"اجرای سرویس پیش‌زمینه"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"به برنامه اجازه می‌دهد از سرویس‌های پیش‌زمینه استفاده کند."</string>
-    <string name="permlab_getPackageSize" msgid="375391550792886641">"اندازه‌گیری اندازه فضای ذخیره‌سازی برنامه"</string>
+    <string name="permlab_getPackageSize" msgid="375391550792886641">"اندازه گیری فضای حافظه برنامه"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"‏به برنامه اجازه می‎دهد تا کدها، داده‎ها و اندازه‎های حافظهٔ پنهان خود را بازیابی کند"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"تغییر تنظیمات سیستم"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"‏به برنامه اجازه می‎دهد تا داده‎های تنظیم سیستم را تغییر دهد. برنامه‎های مخرب می‎توانند پیکربندی سیستم شما را خراب کنند."</string>
@@ -422,11 +412,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"دسترسی به فرمان‌های بیشتر ارائه دهنده مکان"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"‏به برنامه اجازه می‌دهد به دستورات ارائه‌دهنده مکان تکمیلی دسترسی داشته باشد. این کار ممکن است به برنامه امکان دهد با کارکرد GPS یا منابع دیگر مکان تداخل داشته باشد."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"دسترسی به مکان دقیق فقط در پیش‌زمینه"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"این برنامه زمانی که درحال استفاده است می‌تواند ازطریق خدمات مکان، مکان دقیق شما را دریافت کند. برای اینکه برنامه بتواند موقعیت مکان را دریافت کند، خدمات مکان دستگاهتان باید روشن باشد. روشن بودن خدمات مکان ممکن است مصرف باتری را افزایش دهد."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"این برنامه فقط زمانی می‌تواند موقعیت مکانی دقیق شما را دریافت کند که در پیش‌زمینه باشد. برای اینکه برنامه بتواند از خدمات مکان استفاده کند، این خدمات باید در دستگاهتان روشن و در دسترس باشد. ممکن است با این کار مصرف باتری افزایش یابد."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"دسترسی به مکان تقریبی فقط در پیش‌زمینه"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"این برنامه زمانی که درحال استفاده است می‌تواند ازطریق خدمات مکان، مکان تقریبی شما را دریافت کند. برای اینکه برنامه بتواند موقعیت مکان را دریافت کند، خدمات مکان دستگاهتان باید روشن باشد."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"این برنامه فقط هنگامی‌که در پیش‌زمینه است می‌تواند مکان تقریبی شما را دریافت کند. برای اینکه برنامه بتواند از خدمات مکان استفاده کند، این خدمات باید روشن و در دستگاهتان در دسترس باشند."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"دسترسی به مکان در پس‌زمینه"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"این برنامه همیشه می‌تواند به مکان دسترسی داشته باشد، حتی زمانی که از آن برنامه استفاده نمی‌شود."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"این برنامه علاوه‌بر دسترسی به مکان در پیش‌زمینه، می‌تواند هنگام اجرا در پس‌زمینه نیز به مکان دسترسی داشته باشد."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"تغییر تنظیمات صوتی"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"به برنامه امکان می‌دهد تنظیمات صوتی کلی مانند میزان صدا و بلندگوی مورد استفاده برای پخش صدا را تغییر دهد."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ضبط صدا"</string>
@@ -438,9 +428,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"عکسبرداری و فیلمبرداری"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"این برنامه می‌تواند در هرزمانی با استفاده از دوربین عکس و فیلم بگیرد."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"به برنامه یا سرویسی اجازه دهید برای عکس‌برداری و فیلم‌برداری به دوربین‌های سیستم دسترسی داشته باشد"</string>
-    <string name="permdesc_systemCamera" msgid="5938360914419175986">"‏این برنامه سیستم یا دارای امتیاز، می‌تواند با استفاده از دوربین سیستم در هرزمانی عکس‌برداری و فیلم‌برداری کند. برنامه به اجازه android.permission.CAMERA هم نیاز دارد."</string>
-    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"مجاز کردن برنامه یا سرویس برای دریافت پاسخ تماس درباره دستگاه‌های دوربینی که باز یا بسته می‌شوند."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"این برنامه می‌تواند هروقت دستگاه دوربین باز (براساس برنامه) یا بسته می‌شود، پاسخ تماس دریافت کند."</string>
+    <string name="permdesc_systemCamera" msgid="544730545441964482">"‏این برنامه سیستم که دارای امتیاز دسترسی است می‌تواند با استفاده از دوربین سیستم در هر زمانی عکس‌برداری و فیلم‌برداری کند. برنامه به مجوز android.permission.CAMERA هم نیاز دارد."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"کنترل لرزش"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"‏به برنامه اجازه می‎دهد تا لرزاننده را کنترل کند."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"به برنامه اجازه می‌دهد تا به وضعیت لرزاننده دسترسی داشته باشد."</string>
@@ -454,17 +442,13 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"به برنامه امکان می‌دهد برای بهبود تجربه تماس، تماس‌هایش را ازطریق سیستم برقرار کند."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"دیدن و کنترل تماس‌ها ازطریق سیستم."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"به برنامه‌ها اجازه می‌دهد تماس‌های درحال انجام را در این دستگاه ببیند و کنترل کند. این مورد شامل اطلاعاتی مانند شماره تلفن برای تماس‌ها و وضعیت تماس‌ها است."</string>
-    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"معافیت از محدودیت‌های مربوط به ضبط صدا"</string>
-    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"برنامه را از محدودیت‌های مربوط به ضبط صدا معاف کنید."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"ادامه دادن تماس از برنامه‌ای دیگر"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"به برنامه اجازه می‌دهد تماسی را که در برنامه دیگری شروع شده ادامه دهد."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"خواندن شماره تلفن‌ها"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"به برنامه امکان می‌دهد به شماره تلفن‌های دستگاه دسترسی داشته باشد."</string>
-    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"روشن نگه داشتن صفحه‌نمایش خودرو"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ممانعت از به خواب رفتن رایانهٔ لوحی"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"‏مانع از خوابیدن دستگاه Android TV می‌شود"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ممانعت از به خواب رفتن تلفن"</string>
-    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"به برنامه اجازه می‌دهد صفحه‌نمایش خودرو را روشن نگه دارد."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"‏به برنامه اجازه می‎دهد تا از غیرفعال شدن رایانهٔ لوحی جلوگیری کند."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"‏به برنامه اجازه می‎دهد مانع از به‌خواب رفتن دستگاه Android TV شود."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"‏به برنامه اجازه می‎دهد تا از غیرفعال شدن تلفن جلوگیری کند."</string>
@@ -514,8 +498,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در رایانهٔ لوحی را مشاهده کند و اتصال با دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"‏به برنامه اجازه می‌دهد پیکربندی بلوتوث را در دستگاه Android TV شما ببیند، و اتصالات با دستگاه‌های مرتبط‌شده را بپذیرد یا این اتصالات را برقرار کند."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در تلفن را مشاهده کند، و اتصالات دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
-    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی «ارتباط میدان نزدیک» (NFC)"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پولی «ارتباط میدان نزدیک» (NFC)، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی «سرویس پولی NFC»، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏به برنامه اجازه می‎دهد تا با تگ‌های «ارتباط میدان نزدیک» (NFC)، کارت‌ها و فایل‌خوان ارتباط برقرار کند."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"غیرفعال کردن قفل صفحه شما"</string>
@@ -523,11 +507,11 @@
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"درخواست پیچیدگی قفل صفحه"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"به برنامه اجازه می‌دهد سطح پیچیدگی قفل صفحه (بالا، متوسط، پایین، یا هیچ‌کدام) را بیاموزد که نشان‌دهنده بازه ممکن طول و نوع قفل صفحه است. همچنین برنامه می‌تواند به کاربران پیشنهاد دهد قفل صفحه را به سطح خاصی به‌روزرسانی کنند، اما کاربران می‌توانند آزادانه این پیشنهاد را نادیده بگیرند و به سطح دیگری بروند. توجه داشته باشید که قفل صفحه در قالب نوشتار ساده ذخیره نمی‌شود، بنابراین برنامه گذرواژه دقیق را نمی‌داند."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"استفاده از سخت‌افزار بیومتریک"</string>
-    <string name="permdesc_useBiometric" msgid="7502858732677143410">"به برنامه امکان می‌دهد از سخت‌افزار بیومتریک برای اصالت‌سنجی استفاده کند"</string>
+    <string name="permdesc_useBiometric" msgid="7502858732677143410">"به برنامه امکان می‌دهد از سخت‌افزار بیومتریک برای احراز هویت استفاده کند"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"مدیریت سخت‌افزار اثر انگشت"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای اثر انگشت جهت استفاده، فعال کند."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"استفاده از سخت‌افزار اثر انگشت"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"به برنامه امکان می‌دهد از سخت‌افزار اثر انگشت برای اصالت‌سنجی استفاده کند"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"به برنامه امکان می‌دهد از سخت‌افزار اثر انگشت برای احراز هویت استفاده کند"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"تغییر مجموعه موسیقی شما"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"به برنامه اجازه می‌دهد مجموعه موسیقی‌تان را تغییر دهد."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"تغییر مجموعه ویدیوی شما"</string>
@@ -536,11 +520,11 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"به برنامه اجازه می‌دهد مجموعه عکستان را تغییر دهد."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"خواندن مکان‌ها از مجموعه رسانه شما"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"به برنامه اجازه می‌دهد مکان‌ها را از مجموعه رسانه‌تان بخواند."</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شما هستید"</string>
+    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"تأیید کنید این شما هستید"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"سخت‌افزار زیست‌سنجی دردسترس نیست"</string>
-    <string name="biometric_error_user_canceled" msgid="6732303949695293730">"اصالت‌سنجی لغو شد"</string>
+    <string name="biometric_error_user_canceled" msgid="6732303949695293730">"احراز هویت لغو شد"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"شناسایی نشد"</string>
-    <string name="biometric_error_canceled" msgid="8266582404844179778">"اصالت‌سنجی لغو شد"</string>
+    <string name="biometric_error_canceled" msgid="8266582404844179778">"احراز هویت لغو شد"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"پین، الگو یا گذرواژه‌ای تنظیم نشده است"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"بخشی از اثر انگشت شناسایی شد. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"اثرانگشت پردازش نشد. لطفاً دوباره امتحان کنید."</string>
@@ -549,12 +533,12 @@
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"حرکت انگشت خیلی آهسته بود. لطفاً دوباره امتحان کنید."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_authenticated" msgid="2024862866860283100">"اثر انگشت اصالت‌سنجی شد"</string>
-    <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"چهره اصالت‌سنجی شد"</string>
-    <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
+    <string name="fingerprint_authenticated" msgid="2024862866860283100">"اثر انگشت احراز هویت شد"</string>
+    <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"چهره احراز هویت شد"</string>
+    <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره احراز هویت شد، لطفاً تأیید را فشار دهید"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"سخت‌افزار اثرانگشت در دسترس نیست."</string>
     <string name="fingerprint_error_no_space" msgid="6126456006769817485">"ذخیره اثر انگشت ممکن نیست. لطفاً یک اثر انگشت موجود را حذف کنید."</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"درنگ ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"مهلت زمانی ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"کاربر عملیات اثر انگشت را لغو کرد"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"تلاش‌های زیادی انجام شده است. بعداً دوباره امتحان کنید."</string>
@@ -562,7 +546,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"دوباره امتحان کنید."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"اثر انگشتی ثبت نشده است."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"این دستگاه حسگر اثر انگشت ندارد."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"حسگر به‌طور موقت غیرفعال است."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"انگشت <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -570,7 +555,7 @@
     <string name="permlab_manageFace" msgid="4569549381889283282">"مدیریت سخت‌افزار «بازگشایی با چهره»"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای چهره جهت استفاده فرابخواند."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"استفاده از سخت‌افزار «بازگشایی با چهره»"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"به برنامه امکان می‌دهد از سخت‌افزار «بازگشایی با چهره» برای اصالت‌سنجی استفاده کند"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"به برنامه امکان می‌دهد از سخت‌افزار «بازگشایی با چهره» برای احراز هویت استفاده کند"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"بازگشایی با چهره"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ثبت مجدد چهره"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"برای بهبود تشخیص، لطفاً چهره‌تان را دوباره ثبت کنید"</string>
@@ -589,9 +574,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"لطفاً چهره‌تان را مجدداً ثبت کنید."</string>
     <string name="face_acquired_too_different" msgid="4699657338753282542">"دیگر چهره را تشخیص نمی‌دهد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"بسیار شبیه قبلی است، لطفاً قیافه دیگری بگیرید."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"سرتان را کمی صاف بگیرید."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"سرتان را کمی صاف بگیرید."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"سرتان را کمی صاف بگیرید."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"سرتان را کمی پایین آورید."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"سرتان را کمی پایین آورید."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"سرتان را کمی پایین آورید."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"هرچیزی را که حائل چهره‌تان است بردارید."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"بالای صفحه و همچنین نوار مشکی را تمیز کنید."</string>
   <string-array name="face_acquired_vendor">
@@ -606,7 +591,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"چهره تأیید نشد. دوباره امتحان کنید."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"«بازگشایی با چهره» را راه‌اندازی نکرده‌اید."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"«بازگشایی با چهره» در این دستگاه پشتیبانی نمی‌شود."</string>
-    <string name="face_error_security_update_required" msgid="5076017208528750161">"حسگر به‌طور موقت غیرفعال است."</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"چهره <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -617,10 +603,10 @@
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"به برنامه اجازه می‌دهد تنظیمات همگام‌سازی را برای حساب تغییر دهد. به‌عنوان مثال، از این ویژگی می‌توان برای فعال کردن همگام‌سازی برنامه «افراد» با یک حساب استفاده کرد."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"خواندن اطلاعات آماری همگام‌سازی"</string>
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"به یک برنامه اجازه می‌دهد وضعیت همگام‌سازی یک حساب را بخواند، از جمله سابقه رویدادهای همگام‌سازی و میزان داده‌های همگام‌سازی شده."</string>
-    <string name="permlab_sdcardRead" msgid="5791467020950064920">"خواندن محتوای فضای ذخیره‌سازی مشترک"</string>
+    <string name="permlab_sdcardRead" msgid="5791467020950064920">"خواندن محتوای فضای ذخیره هم‌رسانی‌شده"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"به برنامه اجازه می‌دهد محتوای فضای ذخیره هم‌رسانی‌شده‌تان را بخواند."</string>
-    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"تغییر یا حذف محتوای فضای ذخیره‌سازی مشترک"</string>
-    <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"به برنامه اجازه می‌دهد محتوای فضای ذخیره‌سازی مشترکتان را بنویسد."</string>
+    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"تغییر یا حذف محتوای فضای ذخیره هم‌رسانی‌شده"</string>
+    <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"به برنامه اجازه می‌دهد محتوای فضای ذخیره هم‌رسانی‌شده‌تان را بنویسد."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"‏تماس گرفتن/دریافت تماس از طریق SIP"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"‏به برنامه اجازه می‌دهد تماس‌های SIP بگیرد یا دریافت کند."</string>
     <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"ثبت ارتباطات سیم کارت مخابراتی جدید"</string>
@@ -694,7 +680,7 @@
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"پروکسی کلی دستگاه را برای استفاده هنگام فعال بودن این خط‌مشی تنظیم می‌کند. تنها مالک دستگاه می‌تواند پروکسی کلی را تنظیم کند."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"تنظیم تاریخ انقضای گذرواژه قفل صفحه"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"تغییر تعداد دفعاتی که گذرواژه، پین یا الگوی قفل صفحه باید تغییر کند."</string>
-    <string name="policylab_encryptedStorage" msgid="9012936958126670110">"تنظیم رمزگذاری فضای ذخیره‌سازی"</string>
+    <string name="policylab_encryptedStorage" msgid="9012936958126670110">"تنظیم رمزگذاری حافظه"</string>
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"اطلاعات ذخیره شده برنامه باید رمزگذاری شود."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"غیرفعال کردن دوربین‌ها"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"جلوگیری از استفاده از همه دوربین‌های دستگاه."</string>
@@ -703,7 +689,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"خانه"</item>
     <item msgid="7740243458912727194">"تلفن همراه"</item>
-    <item msgid="8526146065496663766">"کاری"</item>
+    <item msgid="8526146065496663766">"محل کار"</item>
     <item msgid="8150904584178569699">"نمابر محل کار"</item>
     <item msgid="4537253139152229577">"نمابر خانه"</item>
     <item msgid="6751245029698664340">"پی‌جو"</item>
@@ -712,7 +698,7 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"خانه"</item>
-    <item msgid="435564470865989199">"کاری"</item>
+    <item msgid="435564470865989199">"محل کار"</item>
     <item msgid="4199433197875490373">"سایر موارد"</item>
     <item msgid="3233938986670468328">"سفارشی"</item>
   </string-array>
@@ -724,7 +710,7 @@
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"خانه"</item>
-    <item msgid="5503060422020476757">"کاری"</item>
+    <item msgid="5503060422020476757">"محل کار"</item>
     <item msgid="2530391194653760297">"سایر موارد"</item>
     <item msgid="7640927178025203330">"سفارشی"</item>
   </string-array>
@@ -746,7 +732,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"سفارشی"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"خانه"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"تلفن همراه"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"کاری"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"محل کار"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"نمابر محل کار"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"نمابر خانه"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"پی‌جو"</string>
@@ -761,7 +747,7 @@
     <string name="phoneTypeTelex" msgid="2558783611711876562">"تلکس"</string>
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"تلفن همراه محل کار"</string>
-    <string name="phoneTypeWorkPager" msgid="3748332310638505234">"پی‌جوی کاری"</string>
+    <string name="phoneTypeWorkPager" msgid="3748332310638505234">"پی‌جوی محل کار"</string>
     <string name="phoneTypeAssistant" msgid="757550783842231039">"دستیار"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"فراپیام"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"سفارشی"</string>
@@ -770,7 +756,7 @@
     <string name="eventTypeOther" msgid="530671238533887997">"سایر موارد"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"سفارشی"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"خانه"</string>
-    <string name="emailTypeWork" msgid="2020095414401882111">"کاری"</string>
+    <string name="emailTypeWork" msgid="2020095414401882111">"محل کار"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"سایر موارد"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"تلفن همراه"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"سفارشی"</string>
@@ -791,7 +777,7 @@
     <string name="imProtocolIcq" msgid="2410325380427389521">"ICQ"</string>
     <string name="imProtocolJabber" msgid="7919269388889582015">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="8684458700669564172">"کاری"</string>
+    <string name="orgTypeWork" msgid="8684458700669564172">"محل کار"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"سایر موارد"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"سفارشی"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"سفارشی"</string>
@@ -826,10 +812,10 @@
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"شماره اضطراری"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"بدون سرویس"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"صفحه قفل شد."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"برای بازکردن قفل یا انجام تماس اضطراری روی «منو» فشار دهید."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"برای بازگشایی قفل یا انجام تماس اضطراری روی منو فشار دهید."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"برای بازگشایی قفل روی منو فشار دهید."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"الگو را بکشید تا قفل آن باز شود"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"تماس اضطراری"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"اضطراری"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"بازگشت به تماس"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحیح است!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوباره امتحان کنید"</string>
@@ -1107,7 +1093,29 @@
     <string name="deleteText" msgid="4200807474529938112">"حذف"</string>
     <string name="inputMethod" msgid="1784759500516314751">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"کنش‌های متنی"</string>
-    <string name="low_internal_storage_view_title" msgid="9024241779284783414">"فضای ذخیره‌سازی درحال پر شدن است"</string>
+    <string name="email" msgid="2503484245190492693">"فرستادن ایمیل"</string>
+    <string name="email_desc" msgid="8291893932252173537">"ارسال ایمیل به نشانی انتخابی"</string>
+    <string name="dial" msgid="4954567785798679706">"تماس گرفتن"</string>
+    <string name="dial_desc" msgid="3072967472129276617">"تماس با شماره تلفن انتخابی"</string>
+    <string name="map" msgid="6865483125449986339">"نقشه"</string>
+    <string name="map_desc" msgid="1068169741300922557">"مکان‌یابی نشانی انتخاب‌شده"</string>
+    <string name="browse" msgid="8692753594669717779">"باز کردن"</string>
+    <string name="browse_desc" msgid="5328523986921597700">"باز کردن نشانی وب انتخابی"</string>
+    <string name="sms" msgid="3976991545867187342">"فرستادن پیام"</string>
+    <string name="sms_desc" msgid="997349906607675955">"ارسال پیام به شماره تلفن انتخابی"</string>
+    <string name="add_contact" msgid="7404694650594333573">"افزودن"</string>
+    <string name="add_contact_desc" msgid="6419581556288775911">"افزودن به مخاطبین"</string>
+    <string name="view_calendar" msgid="4274396845124626977">"مشاهده"</string>
+    <string name="view_calendar_desc" msgid="1739770773927245564">"مشاهده زمان انتخابی در تقویم"</string>
+    <string name="add_calendar_event" msgid="5564364269553091740">"زمان‌بندی کردن"</string>
+    <string name="add_calendar_event_desc" msgid="5827530672900331107">"زمان‌بندی رویداد برای زمان انتخابی"</string>
+    <string name="view_flight" msgid="2042802613849690108">"انجام پیگیری"</string>
+    <string name="view_flight_desc" msgid="2802812586218764790">"ردیابی پرواز انتخابی"</string>
+    <string name="translate" msgid="1416909787202727524">"ترجمه کردن"</string>
+    <string name="translate_desc" msgid="4096225388385338322">"ترجمه کردن نوشتار انتخاب‌شده"</string>
+    <string name="define" msgid="5214255850068764195">"تعریف کردن"</string>
+    <string name="define_desc" msgid="6916651934713282645">"تعریف نوشتار انتخابی"</string>
+    <string name="low_internal_storage_view_title" msgid="9024241779284783414">"حافظه درحال پر شدن است"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"فضای ذخیره‌سازی سیستم کافی نیست. اطمینان حاصل کنید که دارای ۲۵۰ مگابایت فضای خالی هستید و سیستم را راه‌اندازی مجدد کنید."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> در حال اجرا است"</string>
@@ -1122,8 +1130,8 @@
     <string name="capital_off" msgid="7443704171014626777">"خاموش"</string>
     <string name="checked" msgid="9179896827054513119">"علامت‌زده‌شده"</string>
     <string name="not_checked" msgid="7972320087569023342">"بدون علامت"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"تکمیل کنش بااستفاده از"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"‏تکمیل کنش بااستفاده از %1$s"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"تکمیل عملکرد با استفاده از"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"‏تکمیل عملکرد با استفاده از %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"تکمیل عملکرد"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"باز کردن با"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"‏باز کردن با %1$s"</string>
@@ -1136,7 +1144,7 @@
     <string name="whichEditApplication" msgid="6191568491456092812">"ویرایش با"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"‏ویرایش با %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"ویرایش"</string>
-    <string name="whichSendApplication" msgid="4143847974460792029">"هم‌رسانی"</string>
+    <string name="whichSendApplication" msgid="4143847974460792029">"اشتراک‌گذاری"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"‏اشتراک‌گذاری با %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"اشتراک‌گذاری"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"ارسال با استفاده از"</string>
@@ -1148,7 +1156,7 @@
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"تصویربرداری با"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"‏تصویربرداری با %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"تصویربرداری"</string>
-    <string name="alwaysUse" msgid="3153558199076112903">"استفاده به‌صورت پیش‌فرض برای این عملکرد."</string>
+    <string name="alwaysUse" msgid="3153558199076112903">"استفاده به صورت پیش‌فرض برای این عملکرد."</string>
     <string name="use_a_different_app" msgid="4987790276170972776">"استتفاده از یک برنامه دیگر"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"‏پیش‌فرض را در تنظیمات سیستم&gt; برنامه‎ها&gt; مورد بارگیری شده پاک کنید."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"انتخاب عملکرد"</string>
@@ -1245,6 +1253,7 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"شبکه تلفن همراه به اینترنت دسترسی ندارد"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"شبکه به اینترنت دسترسی ندارد"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"‏سرور DNS خصوصی قابل دسترسی نیست"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"متصل"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> اتصال محدودی دارد"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"به‌هرصورت، برای اتصال ضربه بزنید"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"به <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> تغییر کرد"</string>
@@ -1264,7 +1273,7 @@
     <string name="sms_control_title" msgid="4748684259903148341">"درحال ارسال پیامک‌ها"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; درحال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"مجاز است"</string>
-    <string name="sms_control_no" msgid="4845717880040355570">"مجاز نبودن"</string>
+    <string name="sms_control_no" msgid="4845717880040355570">"اجازه ندارد"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; مایل است پیامی به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ارسال کند."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"این مورد "<b>"شاید هزینه‌ای"</b>" را به حساب دستگاه همراهتان بگذارد."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"این مورد هزینه‌ای را به حساب دستگاه همراهتان می‌گذارد."</b></string>
@@ -1309,9 +1318,6 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"‏اشکال‌زدایی USB متصل شد"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"‏برای خاموش کردن اشکال‌زدایی USB ضربه بزنید"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"‏انتخاب کنید تا رفع عیب USB غیرفعال شود."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"اشکال‌زدایی بی‌سیم متصل است"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"برای خاموش کردن اشکال‌زدایی بی‌سیم ضربه بزنید"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"برای غیرفعال کردن اشکال‌زدایی بی‌سیم انتخاب کنید."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"«حالت مجموعه داده‌های تست» فعال شد"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"برای غیرفعال کردن «حالت مجموعه داده‌های تست»، بازنشانی کارخانه‌ای کنید."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"کنسول سریال فعال است"</string>
@@ -1341,20 +1347,14 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"درحال بررسی <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"درحال مرور محتوای کنونی"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> جدید"</string>
-    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> کار نمی‌کند"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"برای راه‌اندازی ضربه بزنید"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید. برای خارج کردن، ضربه بزنید."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"برای انتقال عکس‌ها و رسانه"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"مشکل مرتبط با <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> کار نمی‌کند"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"برای برطرف کردن مشکل، ضربه بزنید"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> خراب است. رفع خطا را انتخاب کنید."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید. برای خارج کردن، ضربه بزنید."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> پشتیبانی نشده"</string>
-    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> کار نمی‌کند"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"این دستگاه از این <xliff:g id="NAME">%s</xliff:g> پشتیبانی نمی‌کند. برای نصب آن در قالب پشتیبانی‌شده ضربه بزنید."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"این دستگاه از این <xliff:g id="NAME">%s</xliff:g> پشتیبانی نمی‌کند. برای تنظیم در یک قالب پشتیبانی‌شده، آن را انتخاب کنید."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> به‌طور غیرمنتظره جدا شد"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"برای جلوگیری از از دست رفتن محتوا، رسانه را قبل از برداشتن بیرون برانید"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> برداشته شد"</string>
@@ -1410,7 +1410,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"می‌خواهید به این درخواست اجازه دهید؟"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"درخواست دسترسی"</string>
     <string name="allow" msgid="6195617008611933762">"ارزیابی‌شده"</string>
-    <string name="deny" msgid="6632259981847676572">"مجاز نبودن"</string>
+    <string name="deny" msgid="6632259981847676572">"اجازه ندارد"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"مجوز درخواست شد"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"مجوز\nبرای حساب <xliff:g id="ACCOUNT">%s</xliff:g> درخواست شد."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"شما از این برنامه در خارج از نمایه کاری‌تان استفاده می‌کنید"</string>
@@ -1430,7 +1430,7 @@
     <string name="vpn_text_long" msgid="278540576806169831">"به <xliff:g id="SESSION">%s</xliff:g> متصل شد. برای مدیریت شبکه ضربه بزنید."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"‏در حال اتصال VPN همیشه فعال…"</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"‏VPN همیشه فعال متصل شد"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"‏از «VPN همیشه روشن» قطع شد"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"‏ارتباط VPN همیشه روشن قطع شد"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"‏به «VPN همیشه روشن» متصل نشد"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"‏تغییر شبکه یا تنظیمات VPN"</string>
     <string name="upload_file" msgid="8651942222301634271">"انتخاب فایل"</string>
@@ -1450,7 +1450,7 @@
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"تمام"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"درحال پاک کردن فضای ذخیره‌سازی هم‌رسانی‌شده…"</string>
-    <string name="share" msgid="4157615043345227321">"هم‌رسانی"</string>
+    <string name="share" msgid="4157615043345227321">"اشتراک‌گذاری"</string>
     <string name="find" msgid="5015737188624767706">"یافتن"</string>
     <string name="websearch" msgid="5624340204512793290">"جستجوی وب"</string>
     <string name="find_next" msgid="5341217051549648153">"یافتن بعدی"</string>
@@ -1460,9 +1460,6 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"درخواست‌کننده <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"بله"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"نه"</string>
-    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"از دسترسی به مکان اضطراری استفاده شد"</string>
-    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"سازنده دستگاهتان درحین یکی از جلسه‌های اضطراری اخیر به مکانتان دسترسی پیدا کرد"</string>
-    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"شرکت مخابراتی‌تان درحین یکی از جلسه‌های اضطراری اخیر به مکانتان دسترسی پیدا کرد"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"از حد مجاز حذف فراتر رفت"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"‏<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> مورد حذف‌شده برای <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>، حساب <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> وجود دارد. می‎خواهید چه کار بکنید؟"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"حذف موارد"</string>
@@ -1507,7 +1504,7 @@
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"سایر گزینه‌ها"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"‎%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"‎%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="8490227947584914460">"فضای ذخیره‌سازی داخلی مشترک"</string>
+    <string name="storage_internal" msgid="8490227947584914460">"حافظه داخلی مشترک"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"‏کارت SD"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"‏کارت SD ‏<xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"‏درایو USB"</string>
@@ -1548,7 +1545,9 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"مرورگر راه‌اندازی شود؟"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"تماس را می‌پذیرید؟"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"همیشه"</string>
+    <string name="activity_resolver_set_always" msgid="4142825808921411476">"تنظیم روی همیشه باز شدن"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"فقط این بار"</string>
+    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"تنظیمات"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"‏%1$s از نمایه کاری پشتیبانی نمی‌کند"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"رایانهٔ لوحی"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"تلویزیون"</string>
@@ -1560,10 +1559,10 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"سیستم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"بلوتوث‌های صوتی"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"صفحه نمایش بی‌سیم"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"ارسال محتوا"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"فرستادن"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"برقراری ارتباط با دستگاه"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"فرستادن محتوای صفحه به دستگاه"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"درحال جستجوی دستگاه‌ها…"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"فرستادن صفحه نمایش به دستگاه"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"در حال جستجو برای دستگاه‌ها..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"تنظیمات"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"قطع ارتباط"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"در حال اسکن کردن…"</string>
@@ -1619,46 +1618,20 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"حذف"</string>
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"‏سرویس پیش‌نمای <xliff:g id="PACKAGENAME">%1$s</xliff:g>، که در پس‌زمینه شروع شده، در ساخت‌های آتی R اجازهٔ حین استفاده نخواهد داشت. لطفاً به go/r-bg-fgs-restriction بروید و گزارش اشکال ارسال کنید."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"میزان صدا را به بالاتر از حد توصیه شده افزایش می‌دهید؟\n\nگوش دادن به صداهای بلند برای مدت طولانی می‌تواند به شنوایی‌تان آسیب وارد کند."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"از میان‌بر دسترس‌پذیری استفاده شود؟"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"وقتی میان‌بر روشن باشد، با فشار دادن هردو دکمه صدا به‌مدت ۳ ثانیه ویژگی دسترس‌پذیری فعال می‌شود."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ویژگی‌های دسترس‌پذیری روشن شود؟"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"با پایین نگه داشتن هردو کلید میزان صدا به‌مدت چند ثانیه، ویژگی‌های دسترس‌پذیری روشن می‌شود. با این کار نحوه عملکرد دستگاهتان تغییر می‌کند.\n\nویژگی‌های فعلی:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nمی‌توانید ویژگی‌های انتخابی را در «تنظیمات &gt; دسترس‌پذیری» تغییر دهید."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> روشن شود؟"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"با پایین نگه داشتن هردو کلید میزان صدا به‌مدت چند ثانیه، <xliff:g id="SERVICE">%1$s</xliff:g> (یکی از ویژگی‌های دسترس‌پذیری) روشن می‌شود. با این کار نحوه عملکرد دستگاهتان تغییر می‌کند.\n\nمی‌توانید در «تنظیمات &gt; دسترس‌پذیری»،‌این میان‌بر را به ویژگی دیگری تغییر دهید."</string>
-    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"روشن شود"</string>
-    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"روشن نشود"</string>
-    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"روشن"</string>
-    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"خاموش"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"به <xliff:g id="SERVICE">%1$s</xliff:g> اجازه می‌دهید بر دستگاهتان کنترل کامل داشته باشد؟"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"اگر <xliff:g id="SERVICE">%1$s</xliff:g> را روشن کنید، دستگاه شما از قفل صفحه شما جهت بهبود رمزگذاری اطلاعات استفاده نخواهد کرد."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"کنترل کامل برای بیشتر برنامه‌ها مناسب نیست، به‌جز برنامه‌هایی که به شما در زمینه نیازهای دسترس‌پذیری کمک می‌کند."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"مشاهده و کنترل صفحه"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"می‌تواند همه محتوای صفحه را بخواند و آن را روی بقیه برنامه‌ها نمایش دهد."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"مشاهده و انجام کنش‌ها"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"این عملکرد می‌تواند با برنامه یا حسگری سخت‌افزاری تعاملاتتان را ردیابی کند و ازطرف شما با برنامه‌ها تعامل داشته باشد."</string>
-    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"مجاز"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"مجاز نبودن"</string>
-    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"برای استفاده از ویژگی، روی آن ضربه بزنید:"</string>
-    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"انتخاب ویژگی‌های موردنظر برای استفاده با دکمه دسترس‌پذیری"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"انتخاب ویژگی‌های موردنظر برای استفاده با میان‌بر کلید میزان صدا"</string>
-    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> خاموش شده است"</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ویرایش میان‌برها"</string>
-    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"تمام"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"لغو"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"خاموش کردن میان‌بر"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استفاده از میان‌بر"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"وارونگی رنگ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"تصحیح رنگ"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> روشن شد."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> خاموش شد."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را روشن کرد"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را خاموش کرد"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"برای استفاده از <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید صدا را فشار دهید و سه ثانیه نگه دارید"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ویژگی را انتخاب کنید که هنگام ضربه زدن روی دکمه دسترس‌پذیری استفاده می‌شود:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ویژگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با دو انگشت صفحه را از پایین تند به‌بالا بکشید):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ویزگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با سه انگشت صفحه را از پایین تند به‌بالا بکشید):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"برای جابه‌جایی بین ویژگی‌ها، دکمه دسترس‌پذیری را لمس کنید و نگه دارید."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"برای جابه‌جایی بین ویژگی‌ها، با دو انگشت صفحه را تند به‌بالا بکشید و نگه دارید."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"برای جابه‌جایی بین ویژگی‌ها، با سه انگشت صفحه را تند به‌بالا بکشید و نگه دارید."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"درشت‌نمایی"</string>
     <string name="user_switched" msgid="7249833311585228097">"کاربر کنونی <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1792,10 +1765,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"تأیید"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n\n• «طرح زمینه تیره» را روشن می‌کند\n• فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند\n\n"<annotation id="url">"بیشتر بدانید"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n\n• «طرح زمینه تیره» را روشن می‌کند\n• فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مثل «Ok Google» را خاموش یا محدود می‌کند"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"«صرفه‌جویی داده»، برای کمک به کاهش مصرف داده، از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n «طرح زمینه تیره» را روشن می‌کند\n فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند\n\n"<annotation id="url">"بیشتر بدانید"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n «طرح زمینه تیره» را روشن می‌کند\n فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"صرفه‌جویی داده روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1847,9 +1820,9 @@
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"‏درخواست USSD به تماس معمولی تغییر کرد"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"‏درخواست USSD به‌درخواست SS تغییر کرد"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"‏به‌ درخواست USSD جدید تغییر کرد"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"‏درخواست USSD به تماس تصویری تغییر کرد"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"‏درخواست USSD به تماس ویدیویی تغییر کرد"</string>
     <string name="stk_cc_ss_to_dial" msgid="4087396658768717077">"‏درخواست SS به تماس معمولی تغییر کرد"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"‏درخواست SS به تماس تصویری تغییر کرد"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"‏درخواست SS به تماس ویدیویی تغییر کرد"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"‏درخواست SS به‌ درخواست USSD تغییر کرد"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"‏به‌ درخواست SS جدید تغییر کرد"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"نمایه کاری"</string>
@@ -1872,13 +1845,12 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"دسته‌بندی‌نشده"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"شما اهمیت این اعلان‌ها را تنظیم می‌کنید."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"به دلیل افراد درگیر مهم است."</string>
-    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"اعلان برنامه سفارشی"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"به<xliff:g id="APP">%1$s</xliff:g> اجازه می‌دهید با <xliff:g id="ACCOUNT">%2$s</xliff:g> (کاربری با این حساب درحال‌حاضر وجود دارد) کاربری جدید ایجاد کند؟"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"به <xliff:g id="APP">%1$s</xliff:g> اجازه می‌دهید با <xliff:g id="ACCOUNT">%2$s</xliff:g> کاربری جدید ایجاد کند؟"</string>
     <string name="language_selection_title" msgid="52674936078683285">"افزودن زبان"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"اولویت‌های منطقه"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"نام زبان را تایپ کنید"</string>
-    <string name="language_picker_section_suggested" msgid="6556199184638990447">"پیشنهادی"</string>
+    <string name="language_picker_section_suggested" msgid="6556199184638990447">"پیشنهادشده"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"همه زبان‌ها"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"همه منطقه‌ها"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"جستجو"</string>
@@ -1887,7 +1859,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"بیشتر بدانید"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"لغو توقف موقت برنامه"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"نمایه کاری روشن شود؟"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"برنامه‌ها، اعلان‌ها، داده‌ها، و سایر ویژگی‌های نمایه کاری شما روشن خواهد شد"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"برنامه‌ها، اعلان‌ها، داده‌ها و سایر قابلیت‌های نمایه کاری شما روشن خواهد شد"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"روشن کردن"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"برنامه در دسترس نیست"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال‌حاضر در دسترس نیست."</string>
@@ -1919,14 +1891,14 @@
     <string name="app_category_news" msgid="1172762719574964544">"اخبار و مجله"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"نقشه و پیمایش"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"بهره‌وری"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"فضای ذخیره‌سازی دستگاه"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"حافظه دستگاه"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"‏اشکال‌زدایی USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ساعت"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"دقیقه"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"تنظیم زمان"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"زمان معتبری وارد کنید"</string>
     <string name="time_picker_prompt_label" msgid="303588544656363889">"زمان را تایپ کنید"</string>
-    <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"برای وارد کردن زمان، به حالت ورودی نوشتاری تغییر وضعیت دهید."</string>
+    <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"برای وارد کردن زمان، به حالت وارد کردن نوشتار تغییر وضعیت دهید."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"برای وارد کردن زمان، به حالت ساعت تغییر وضعیت دهید."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"گزینه‌های تکمیل خودکار"</string>
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"ذخیره کردن برای تکمیل خودکار"</string>
@@ -2009,7 +1981,7 @@
     <string name="mime_type_apk" msgid="3168784749499623902">"‏برنامه Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"فایل"</string>
     <string name="mime_type_generic_ext" msgid="9220220924380909486">"<xliff:g id="EXTENSION">%1$s</xliff:g> فایل"</string>
-    <string name="mime_type_audio" msgid="4933450584432509875">"صوتی"</string>
+    <string name="mime_type_audio" msgid="4933450584432509875">"صدا"</string>
     <string name="mime_type_audio_ext" msgid="2615491023840514797">"<xliff:g id="EXTENSION">%1$s</xliff:g> صوتی"</string>
     <string name="mime_type_video" msgid="7071965726609428150">"ویدیو"</string>
     <string name="mime_type_video_ext" msgid="185438149044230136">"<xliff:g id="EXTENSION">%1$s</xliff:g> ویدیو"</string>
@@ -2029,7 +2001,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> فایل</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> فایل</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"هیچ فردی توصیه نشده است که با او هم‌رسانی کنید"</string>
+    <string name="chooser_no_direct_share_targets" msgid="492542066060841139">"اشتراک‌گذاری مستقیم دردسترس نیست"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"فهرست برنامه‌ها"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‏مجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"صفحه اصلی"</string>
@@ -2038,146 +2010,28 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"اعلان‌ها"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"تنظیمات سریع"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"کادر گفتگوی روشن/خاموش"</string>
+    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"تغییر وضعیت صفحهٔ دونیمه"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"صفحه قفل"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"نماگرفت"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"میان‌بر دسترس‌پذیری روی صفحه"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"انتخاب‌گر میان‌بر دسترس‌پذیری روی صفحه"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"میان‌بر دسترسی‌پذیری"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"عکس صفحه‌نمایش"</string>
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"منوی دسترس‌پذیری"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"نوار شرح <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> در سطل «محدودشده» قرار گرفت"</string>
-    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"تصویری ارسال کرد"</string>
-    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"مکالمه"</string>
-    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"مکالمه گروهی"</string>
-    <string name="unread_convo_overflow" msgid="920517615597353833">"+<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"شخصی"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"کاری"</string>
-    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"نمای شخصی"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"نمای کاری"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"این محتوا با برنامه‌های کاری هم‌رسانی نمی‌شود"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"سرپرست فناوری اطلاعات اجازه نمی‌دهد این محتوا را با برنامه‌های موجود در نمایه کاری هم‌رسانی کنید"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"این محتوا با برنامه‌های کاری باز نمی‌شود"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"سرپرست فناوری اطلاعات اجازه نمی‌دهد این محتوا را با برنامه‌های موجود در نمایه کاری باز کنید"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"این محتوا با برنامه‌های شخصی هم‌رسانی نمی‌شود"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"سرپرست فناوری اطلاعات اجازه نمی‌دهد این محتوا را با برنامه‌های موجود در نمایه شخصی هم‌رسانی کنید"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"این محتوا با برنامه‌های شخصی باز نمی‌شود"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"سرپرست فناوری اطلاعات اجازه نمی‌دهد این محتوا را با برنامه‌های موجود در نمایه شخصی باز کنید"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"نمایه کاری موقتاً متوقف شده است"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"روشن کردن"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"هیچ‌کدام از برنامه‌های کاری نمی‌توانند از این محتوا پشتیبانی کنند"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"هیچ‌کدام از برنامه‌های کاری نمی‌توانند این محتوا را باز کنند"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"هیچ‌کدام از برنامه‌های شخصی نمی‌توانند از این محتوا پشتیبانی کنند"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"هیچ‌کدام از برنامه‌های شخصی نمی‌توانند این محتوا را باز کنند"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"پین باز کردن قفل شبکه سیم‌کارت"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"پین باز کردن قفل زیرمجموعه شبکه سیم‌کارت"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"پین باز کردن قفل شرکت سیم‌کارت"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"پین باز کردن قفل ارائه‌دهنده خدمات سیم‌کارت"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"پین باز کردن قفل سیم‌کارت"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"‏پین باز کردن قفل شبکه ۱ RUIM"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"‏پین باز کردن قفل شبکه ۲ RUIM"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"‏پین باز کردن قفل RUIM hrpd"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"‏پین باز کردن قفل شرکت RUIM"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"‏پین باز کردن قفل ارائه‌دهنده خدمات RUIM"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"‏پین باز کردن قفل RUIM"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"‏PUK را وارد کنید"</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"‏پین باز کردن قفل SPN"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"‏پین باز کردن قفل SP Equivalent Home PLMN"</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"‏پین باز کردن قفل ICCID"</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"‏پین باز کردن قفل IMPI"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"پین باز کردن قفل ارائه‌دهنده خدمات زیرمجموعه شبکه"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"درحال درخواست باز کردن قفل شبکه سیم‌کارت…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"درحال درخواست باز کردن قفل زیرمجموعه شبکه سیم‌کارت…"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"درحال درخواست باز کردم قفل ارائه‌دهنده خدمات سیم‌کارت…"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"درحال درخواست باز کردن قفل شرکت سیم‌کارت…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"درحال درخواست باز کردن قفل سیم‌کارت…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"‏درحال درخواست باز کردن قفل شبکه ۱ RUIM…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"‏درحال درخواست باز کردن قفل شبکه ۲ RUIM…"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"‏درحال درخواست باز کردن قفل RUIM hrpd…"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"‏درحال درخواست باز کردن قفل ارائه‌دهنده خدمات RUIM…"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"‏درحال درخواست باز کردن قفل شرکت RUIM…"</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"‏درحال درخواست باز کردن قفل SPN…"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"‏درحال درخواست باز کردن قفل SP Equivalent Home PLMN…"</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"‏درحال درخواست باز کردن قفل ICCID…"</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"‏درحال درخواست باز کردن قفل IMPI…"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"درحال درخواست باز کردن قفل ارائه‌دهنده خدمات زیرمجموعه شبکه…"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"‏درحال درخواست باز کردن قفل RUIM…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"‏درحال درخواست باز کردن قفل PUK…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"درخواست باز کرد قفل شبکه سیم‌کارت انجام نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"درخواست باز کردن قفل زیرمجموعه شبکه سیم‌کارت انجام نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"درخواست باز کردن قفل ارائه‌دهنده خدمات سیم‌کارت انجام نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"درخواست باز کردن قفل شرکت سیم‌کارت انجام شد."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"درخواست باز کردن قفل سیم‌کارت انجام نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"‏درخواست باز کردن قفل شبکه ۱ RUIM انجام نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"‏درخواست باز کردن قفل شبکه ۲ RUIM انجام نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"‏درخواست باز کردن قفل RUIM Hrpd انجام نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"‏درخواست باز کردن قفل شرکت RUIM انجام نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"‏درخواست باز کردن قفل ارائه‌دهنده خدمات RUIM انجام نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"‏درخواست باز کردن قفل RUIM انجام نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"‏قفل PUK باز نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"‏درخواست باز کردن قفل SPN انجام نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"‏درخواست باز کردن قفل SP Equivalent Home PLMN انجام نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"‏درخواست باز کردن قفل ICCID انجام نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"‏درخواست باز کردن قفل IMPI انجام نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"درخواست باز کردن قفل ارائه‌دهنده خدمات زیرمجموعه شبکه انجام نشد."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"قفل شبکه سیم‌کارت باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"قفل زیرمجموعه شبکه سیم‌کارت باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"قفل ارائه‌دهنده خدمات سیم‌کارت باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"قفل شرکت سیم‌کارت باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"قفل سیم‌کارت باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"‏قفل شبکه ۱ RUIM باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"‏قفل شبکه ۲ RUIM باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"‏قفل RUIM Hrpd باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"‏قفل ارائه‌دهنده خدمات RUIM باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"‏قفل شرکت RUIM باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"‏قفل RUIM باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"‏قفل PUK باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"‏قفل SPN باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"‏قفل SP Equivalent Home PLMN باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"‏قفل ICCID باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"‏قفل IMPI باز شد."</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"قفل ارائه‌دهنده خدمات زیرمجموعه شبکه باز شد."</string>
-    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
-    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
-    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
-    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

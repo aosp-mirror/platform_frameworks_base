@@ -31,6 +31,8 @@ import android.annotation.CheckResult;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.companion.Association;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
@@ -300,6 +302,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             mFindDeviceCallback = callback;
             mRequest = request;
             mCallingPackage = callingPackage;
+            request.setCallingPackage(callingPackage);
             callback.asBinder().linkToDeath(CompanionDeviceManagerService.this /* recipient */, 0);
 
             final long callingIdentity = Binder.clearCallingIdentity();
@@ -308,7 +311,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     AndroidFuture<Association> future = new AndroidFuture<>();
                     service.startDiscovery(request, callingPackage, callback, future);
                     return future;
-                }).whenComplete(uncheckExceptions((association, err) -> {
+                }).cancelTimeout().whenComplete(uncheckExceptions((association, err) -> {
                     if (err == null) {
                         addAssociation(association);
                     } else {
@@ -564,7 +567,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         if (DEBUG) {
             Log.i(LOG_TAG, "recordAssociation(" + association + ")");
         }
-        updateAssociations(associations -> CollectionUtils.add(associations, association));
+        updateAssociations(associations -> CollectionUtils.add(associations, association),
+                        association.userId);
     }
 
     private void recordAssociation(String privilegedPackage, String deviceAddress) {
@@ -665,6 +669,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
     }
 
+    void onDeviceConnected(String address) {
+    }
+
+    void onDeviceDisconnected(String address) {
+    }
+
     private class ShellCmd extends ShellCommand {
         public static final String USAGE = "help\n"
                 + "list USER_ID\n"
@@ -709,4 +719,19 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
     }
 
+
+    private class BluetoothDeviceConnectedListener
+            extends BluetoothAdapter.BluetoothConnectionCallback {
+        @Override
+        public void onDeviceConnected(BluetoothDevice device) {
+            CompanionDeviceManagerService.this.onDeviceConnected(device.getAddress());
+        }
+
+        @Override
+        public void onDeviceDisconnected(BluetoothDevice device, @DisconnectReason int reason) {
+            Slog.d(LOG_TAG, device.getAddress() + " disconnected w/ reason: (" + reason + ") "
+                    + BluetoothAdapter.BluetoothConnectionCallback.disconnectReasonText(reason));
+            CompanionDeviceManagerService.this.onDeviceDisconnected(device.getAddress());
+        }
+    }
 }

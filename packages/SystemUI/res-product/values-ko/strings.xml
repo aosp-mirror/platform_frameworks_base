@@ -40,7 +40,4 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 직장 프로필과 모든 프로필 데이터가 삭제됩니다."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"잠금 해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금 해제해야 합니다.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"잠금 해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금 해제해야 합니다.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"더 많은 옵션을 확인하려면 휴대전화를 잠금 해제하세요."</string>
-    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"더 많은 옵션을 확인하려면 태블릿을 잠금 해제하세요."</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"더 많은 옵션을 확인하려면 기기를 잠금 해제하세요."</string>
 </resources>

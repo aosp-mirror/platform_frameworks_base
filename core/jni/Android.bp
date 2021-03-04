@@ -1,4 +1,21 @@
 
+package {
+    default_applicable_licenses: ["frameworks_base_core_jni_license"],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "frameworks_base_core_jni_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
 cc_library_shared {
     name: "libandroid_runtime",
     host_supported: true,
@@ -50,10 +67,11 @@ cc_library_shared {
         "libhwui",
         "liblog",
         "libminikin",
-        "libnativehelper",
         "libz",
         "libziparchive",
     ],
+
+    static_libs: ["libnativehelper_lazy"],
 
     export_include_dirs: [
         ".",
@@ -131,7 +149,7 @@ cc_library_shared {
                 "android_os_VintfRuntimeInfo.cpp",
                 "android_os_incremental_IncrementalManager.cpp",
                 "android_net_LocalSocketImpl.cpp",
-                "android_net_NetUtils.cpp",
+                "android_net_NetworkUtils.cpp",
                 "android_service_DataLoaderService.cpp",
                 "android_util_AssetManager.cpp",
                 "android_util_Binder.cpp",
@@ -188,6 +206,7 @@ cc_library_shared {
                 "com_android_internal_os_KernelCpuUidBpfMapReader.cpp",
                 "com_android_internal_os_KernelSingleUidTimeReader.cpp",
                 "com_android_internal_os_Zygote.cpp",
+                "com_android_internal_os_ZygoteCommandBuffer.cpp",
                 "com_android_internal_os_ZygoteInit.cpp",
                 "hwbinder/EphemeralStorage.cpp",
                 "fd_utils.cpp",
@@ -206,6 +225,7 @@ cc_library_shared {
             ],
 
             shared_libs: [
+                "android.hardware.memtrack-V1-ndk_platform",
                 "libandroidicu",
                 "libbpf_android",
                 "libnetdbpf",
@@ -266,11 +286,12 @@ cc_library_shared {
                 "libstatspull",
             ],
             export_shared_lib_headers: [
-                // AndroidRuntime.h depends on nativehelper/jni.h
-                "libnativehelper",
-
                 // our headers include libnativewindow's public headers
                 "libnativewindow",
+            ],
+            export_static_lib_headers: [
+                // AndroidRuntime.h depends on nativehelper/jni.h
+                "libnativehelper_lazy",
             ],
             header_libs: [
                 "bionic_libc_platform_headers",

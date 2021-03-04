@@ -191,19 +191,13 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"관리자가 기기를 개인용으로 전환했습니다."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"관리되는 기기"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"조직에서 이 기기를 관리하며 네트워크 트래픽을 모니터링할 수도 있습니다. 자세한 내용을 보려면 탭하세요."</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"앱에서 위치 정보에 액세스할 수 있음"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"자세한 내용은 IT 관리자에게 문의하세요."</string>
-    <string name="country_detector" msgid="7023275114706088854">"국가 감지기"</string>
-    <string name="location_service" msgid="2439187616018455546">"위치 서비스"</string>
-    <string name="sensor_notification_service" msgid="7474531979178682676">"센서 알림 서비스"</string>
-    <string name="twilight_service" msgid="8964898045693187224">"새벽 서비스"</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"관리자가 위치 설정을 변경함"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"위치 설정을 보려면 탭하세요."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"기기가 삭제됩니다."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"관리자 앱을 사용할 수 없습니다. 곧 기기가 삭제됩니다.\n\n궁금한 점이 있으면 조직의 관리자에게 문의하세요."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g>에 의해 사용 중지되었습니다."</string>
-    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"직장 프로필 사용 설정"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"직장 프로필을 사용 설정할 때까지 개인 앱이 차단됩니다."</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"개인 앱이 <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>에 차단됩니다. IT 관리자가 <xliff:g id="NUMBER">%3$d</xliff:g>일 넘게 직장 프로필을 중지하도록 허용하지 않습니다."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"사용 설정"</string>
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"관리자가 개인 앱을 정지함"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"정책 준수를 확인하려면 여기를 탭하세요."</string>
     <string name="me" msgid="6207584824693813140">"나"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"태블릿 옵션"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV 옵션"</string>
@@ -212,7 +206,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"무선 사용"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"무선 끄기"</string>
     <string name="screen_lock" msgid="2072642720826409809">"화면 잠금"</string>
-    <string name="power_off" msgid="4111692782492232778">"전원 끄기"</string>
+    <string name="power_off" msgid="4111692782492232778">"종료"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"벨소리가 무음입니다."</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"벨소리가 진동입니다."</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"벨소리가 켜져 있습니다."</string>
@@ -236,9 +230,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV 옵션"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"휴대전화 옵션"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"화면 잠금"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"전원 끄기"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"전원"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"다시 시작"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"종료"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"긴급 전화"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"버그 신고"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"세션 끝내기"</string>
@@ -253,8 +245,6 @@
       <item quantity="other">버그 신고 스크린샷을 <xliff:g id="NUMBER_1">%d</xliff:g>초 후에 찍습니다.</item>
       <item quantity="one">버그 신고 스크린샷을 <xliff:g id="NUMBER_0">%d</xliff:g>초 후에 찍습니다.</item>
     </plurals>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"버그 신고용 스크린샷 촬영 완료"</string>
-    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"버그 신고용 스크린샷 촬영 실패"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"무음 모드"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"소리 꺼짐"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"소리 켜짐"</string>
@@ -293,7 +283,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android 시스템"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"개인 프로필로 전환"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"직장 프로필로 전환"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"연락처"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"주소록"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"주소록에 액세스"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"위치"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"이 기기의 위치정보에 액세스"</string>
@@ -422,11 +412,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"추가 위치 제공업체 명령에 접근"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"앱이 추가 위치 정보 제공 기능의 명령에 접근하도록 허용합니다. 이 경우 앱이 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"포그라운드에서만 정확한 위치에 액세스"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"이 앱은 사용 중일 때 위치 서비스로부터 정확한 위치 정보를 받을 수 있습니다. 앱에서 위치 정보를 받으려면 기기의 위치 서비스가 사용 설정되어 있어야 합니다. 이로 인해 배터리 사용량이 증가할 수 있습니다."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"이 앱은 포그라운드에 있을 때만 나의 정확한 위치를 확인할 수 있습니다. 앱에서 위치 서비스를 사용하려면 기기에서 위치 서비스가 지원되며 사용 설정되어 있어야 합니다. 배터리 사용량이 늘어날 수 있습니다."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"포그라운드에서만 대략적인 위치에 액세스"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"이 앱은 사용 중일 때 위치 서비스로부터 대략적인 위치 정보를 받을 수 있습니다. 앱에서 위치 정보를 받으려면 기기의 위치 서비스가 사용 설정되어 있어야 합니다."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"이 앱은 포그라운드에 있을 때만 나의 대략적인 위치를 확인할 수 있습니다. 앱에서 위치 서비스를 사용하려면 기기에서 위치 서비스가 지원되며 사용 설정되어 있어야 합니다."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"백그라운드에서 위치 정보 액세스"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"이 앱은 사용 중이 아닐 때도 언제든지 위치 정보에 액세스할 수 있습니다."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"이 앱이 포그라운드뿐만 아니라 백그라운드에서 실행되는 동안에도 위치에 액세스할 수 있습니다."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"오디오 설정 변경"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"앱이 음량이나 출력을 위해 사용하는 스피커 등 전체 오디오 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"오디오 녹음"</string>
@@ -438,9 +428,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"사진과 동영상 찍기"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"이 앱은 언제든지 카메라를 사용하여 사진을 촬영하고 동영상을 녹화할 수 있습니다."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"사진 및 동영상 촬영을 위해 애플리케이션 또는 서비스에서 시스템 카메라에 액세스하도록 허용"</string>
-    <string name="permdesc_systemCamera" msgid="5938360914419175986">"이 권한이 있는 시스템 앱은 언제든지 시스템 카메라를 사용하여 사진을 촬영하고 동영상을 녹화할 수 있습니다. 또한 앱에 android.permission.CAMERA 권한이 필요합니다."</string>
-    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"애플리케이션 또는 서비스에서 카메라 기기 열림 또는 닫힘에 대한 콜백을 수신하도록 허용"</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"이 앱은 애플리케이션이 카메라 기기를 열거나 닫을 때 콜백을 수신할 수 있습니다."</string>
+    <string name="permdesc_systemCamera" msgid="544730545441964482">"이 권한을 가진 시스템 앱은 언제든지 시스템 카메라를 사용하여 사진을 촬영하고 동영상을 녹화할 수 있습니다. 또한 앱에 android.permission.CAMERA 권한이 필요합니다."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"진동 제어"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"앱이 진동을 제어할 수 있도록 허용합니다."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"앱이 진동 상태에 액세스하도록 허용합니다."</string>
@@ -454,17 +442,13 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"통화 환경을 개선하기 위해 앱이 시스템을 통해 통화를 연결하도록 허용합니다."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"시스템을 통해 통화 확인 및 제어"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"앱이 기기에서 진행 중인 통화를 확인 및 제어하도록 허용합니다. 여기에는 통화에 사용된 전화번호 및 통화 상태 등의 정보가 포함됩니다."</string>
-    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"오디오 기록 제한에서 제외"</string>
-    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"오디오를 기록할 수 있도록 앱을 제한에서 제외하세요."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"다른 앱에서 전화 받기"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"다른 앱에서 수신한 전화를 계속하려면 앱을 허용합니다."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"전화번호 읽기"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"앱에서 기기의 전화번호에 액세스하도록 허용합니다."</string>
-    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"차량 화면 켜진 상태로 유지"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"Android TV 기기 절전 모드 해제"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
-    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"앱에서 차량 화면을 켜진 상태로 유지하도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"앱이 태블릿의 절전 모드 전환을 막도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"앱이 Android TV 기기가 절전 모드로 전환되지 않게 막도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"앱이 휴대전화의 절전 모드 전환을 막도록 허용합니다."</string>
@@ -536,7 +520,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"앱에서 사진 컬렉션을 수정하도록 허용합니다."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"미디어 컬렉션에서 위치 읽기"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"앱에서 미디어 컬렉션의 위치를 읽도록 허용합니다."</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"본인 확인"</string>
+    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"본인 확인"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"생체 인식 하드웨어를 사용할 수 없음"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"인증이 취소되었습니다."</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"인식할 수 없음"</string>
@@ -562,7 +546,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"다시 시도해 보세요."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"등록된 지문이 없습니다."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"기기에 지문 센서가 없습니다."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"센서가 일시적으로 사용 중지되었습니다."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"손가락 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,7 +591,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"얼굴을 확인할 수 없습니다. 다시 시도하세요."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"얼굴인식 잠금해제를 설정하지 않았습니다."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"이 기기에서는 얼굴인식 잠금해제가 지원되지 않습니다."</string>
-    <string name="face_error_security_update_required" msgid="5076017208528750161">"센서가 일시적으로 사용 중지되었습니다."</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"얼굴 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -803,7 +789,7 @@
     <string name="relationTypeFriend" msgid="3192092625893980574">"친구"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"상사"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"어머니"</string>
-    <string name="relationTypeParent" msgid="4177920938333039882">"부모님"</string>
+    <string name="relationTypeParent" msgid="4177920938333039882">"부모"</string>
     <string name="relationTypePartner" msgid="4018017075116766194">"파트너"</string>
     <string name="relationTypeReferredBy" msgid="5285082289602849400">"추천인"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"친척"</string>
@@ -829,7 +815,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"비상 전화를 걸거나 잠금해제하려면 메뉴를 누르세요."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"잠금해제하려면 메뉴를 누르세요."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"잠금해제를 위해 패턴 그리기"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"긴급 전화"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"긴급 전화"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"통화로 돌아가기"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"맞습니다."</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"다시 시도"</string>
@@ -1107,6 +1093,28 @@
     <string name="deleteText" msgid="4200807474529938112">"삭제"</string>
     <string name="inputMethod" msgid="1784759500516314751">"입력 방법"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"텍스트 작업"</string>
+    <string name="email" msgid="2503484245190492693">"이메일"</string>
+    <string name="email_desc" msgid="8291893932252173537">"선택한 주소로 이메일 보내기"</string>
+    <string name="dial" msgid="4954567785798679706">"전화"</string>
+    <string name="dial_desc" msgid="3072967472129276617">"선택한 전화번호로 전화 걸기"</string>
+    <string name="map" msgid="6865483125449986339">"지도"</string>
+    <string name="map_desc" msgid="1068169741300922557">"선택한 주소 위치 확인"</string>
+    <string name="browse" msgid="8692753594669717779">"열기"</string>
+    <string name="browse_desc" msgid="5328523986921597700">"선택한 URL 열기"</string>
+    <string name="sms" msgid="3976991545867187342">"메시지"</string>
+    <string name="sms_desc" msgid="997349906607675955">"선택한 전화번호로 메시지 전송"</string>
+    <string name="add_contact" msgid="7404694650594333573">"추가"</string>
+    <string name="add_contact_desc" msgid="6419581556288775911">"연락처에 추가"</string>
+    <string name="view_calendar" msgid="4274396845124626977">"보기"</string>
+    <string name="view_calendar_desc" msgid="1739770773927245564">"선택한 시간 캘린더에서 보기"</string>
+    <string name="add_calendar_event" msgid="5564364269553091740">"일정 만들기"</string>
+    <string name="add_calendar_event_desc" msgid="5827530672900331107">"선택한 시간으로 일정 만들기"</string>
+    <string name="view_flight" msgid="2042802613849690108">"추적"</string>
+    <string name="view_flight_desc" msgid="2802812586218764790">"선택한 항공편 추적"</string>
+    <string name="translate" msgid="1416909787202727524">"번역"</string>
+    <string name="translate_desc" msgid="4096225388385338322">"선택한 텍스트 번역"</string>
+    <string name="define" msgid="5214255850068764195">"정의"</string>
+    <string name="define_desc" msgid="6916651934713282645">"선택한 텍스트 정의"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"시스템의 저장 공간이 부족합니다. 250MB의 여유 공간이 확보한 후 다시 시작하세요."</string>
@@ -1245,6 +1253,7 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"모바일 네트워크에 인터넷이 연결되어 있지 않습니다."</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"네트워크에 인터넷이 연결되어 있지 않습니다."</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"비공개 DNS 서버에 액세스할 수 없습니다."</string>
+    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"연결되었습니다."</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>에서 연결을 제한했습니다."</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"계속 연결하려면 탭하세요."</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>(으)로 전환"</string>
@@ -1309,9 +1318,6 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB 디버깅 연결됨"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB 디버깅을 사용 중지하려면 탭하세요."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB 디버깅을 사용하지 않으려면 선택합니다."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"무선 디버깅 연결됨"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"무선 디버깅을 사용 중지하려면 탭하세요."</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"무선 디버깅을 사용 중지하려면 선택하세요."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"테스트 하네스 모드 사용 설정됨"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"테스트 하네스 모드를 사용 중지하려면 초기화하세요."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"시리얼 콘솔 사용 설정됨"</string>
@@ -1341,20 +1347,14 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> 확인 중…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"현재 콘텐츠 검토 중"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"새로운 <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g>이(가) 작동하지 않음"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"설정하려면 탭하세요."</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"기기를 다시 포맷해야 할 수 있습니다. 꺼내려면 탭하세요."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"사진 및 미디어를 전송하는 데 사용합니다."</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>에 문제 발생"</string>
-    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>이(가) 작동하지 않음"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"문제를 해결하려면 탭하세요."</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>이(가) 손상되었습니다. 선택하여 문제를 해결하세요."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"기기를 다시 포맷해야 할 수 있습니다. 꺼내려면 탭하세요."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"지원되지 않는 <xliff:g id="NAME">%s</xliff:g>입니다."</string>
-    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>이(가) 작동하지 않음"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"이 기기는 <xliff:g id="NAME">%s</xliff:g>을(를) 지원하지 않습니다. 지원하는 형식으로 설정하려면 탭하세요."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"이 기기는 이 <xliff:g id="NAME">%s</xliff:g>을(를) 지원하지 않습니다. 선택하여 지원되는 형식으로 설정하세요."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"기기를 다시 포맷해야 할 수 있습니다."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>이(가) 예기치 않게 삭제됨"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"콘텐츠 손실을 피하려면 미디어를 제거하기 전에 마운트 해제하세요."</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> 제거됨"</string>
@@ -1460,9 +1460,6 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"요청한 사람: <xliff:g id="NAME">%1$s</xliff:g>(<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"예"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"아니요"</string>
-    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"응급 상황 동안 위치에 액세스함"</string>
-    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"기기 제조업체에서 최근 응급 상황 세션 동안 내 위치에 액세스했습니다."</string>
-    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"이동통신사에서 최근 응급 상황 세션 동안 내 위치에 액세스했습니다."</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"삭제 한도를 초과했습니다."</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 계정에 대해 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>개의 삭제된 항목이 있습니다. 어떻게 하시겠습니까?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"항목 삭제"</string>
@@ -1548,7 +1545,9 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"브라우저를 실행하시겠습니까?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"통화를 수락하시겠습니까?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"항상"</string>
+    <string name="activity_resolver_set_always" msgid="4142825808921411476">"항상 열도록 설정"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"한 번만"</string>
+    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"설정"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s에서 직장 프로필을 지원하지 않습니다."</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"태블릿"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
@@ -1619,46 +1618,20 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"삭제"</string>
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"향후 R 빌드에서는 백그라운드에서 시작된 <xliff:g id="PACKAGENAME">%1$s</xliff:g>의 포그라운드 서비스에 더 이상 사용 중인 상태에서 필요한 권한이 부여되지 않습니다. go/r-bg-fgs-restriction 페이지에서 버그 신고를 제출하세요."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"접근성 단축키를 사용하시겠습니까?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"단축키가 사용 설정된 경우 볼륨 버튼 두 개를 동시에 3초간 누르면 접근성 기능이 시작됩니다."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"접근성 기능을 사용하시겠습니까?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"볼륨 키 2개를 몇 초 동안 길게 누르면 접근성 기능이 사용 설정됩니다. 이때 기기 작동 방식이 달라질 수 있습니다.\n\n현재 기능:\n<xliff:g id="SERVICE">%1$s</xliff:g>\n설정 &gt; 접근성에서 선택한 기능을 변경할 수 있습니다."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g>을(를) 사용하시겠습니까?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"볼륨 키 2개를 몇 초 동안 길게 누르면 <xliff:g id="SERVICE">%1$s</xliff:g> 접근성 기능이 사용 설정됩니다. 이렇게 되면 기기 작동 방식이 달라질 수 있습니다.\n\n설정 &gt; 접근성에서 이 단축키를 다른 기능으로 변경할 수 있습니다."</string>
-    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"사용"</string>
-    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"사용 안 함"</string>
-    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"사용"</string>
-    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"사용 안함"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>에서 기기를 완전히 제어하도록 허용하시겠습니까?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g>을(를) 사용 설정하면 기기에서 데이터 암호화를 개선하기 위해 화면 잠금을 사용하지 않습니다."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"접근성 관련 지원을 제공하는 앱에는 완벽한 제어권을 부여하는 것이 좋으나, 대부분의 앱에는 적합하지 않습니다."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"화면 확인 및 제어"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"화면에 표시된 모든 콘텐츠를 읽고 다른 앱 위에 콘텐츠를 표시할 수 있습니다."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"작업 확인 및 실행"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"앱 또는 하드웨어 센서와의 상호작용을 추적할 수 있으며 나를 대신해 앱과 상호작용할 수 있습니다."</string>
-    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"허용"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"거부"</string>
-    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"기능을 사용하려면 탭하세요"</string>
-    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"접근성 버튼으로 사용할 기능 선택"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"볼륨 키 단축키로 사용할 기능 선택"</string>
-    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g>이(가) 사용 중지됨"</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"단축키 수정"</string>
-    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"완료"</string>
+    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"취소"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"단축키 사용 중지"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"단축키 사용"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"색상 반전"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"색상 보정"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 서비스를 사용하려면 두 볼륨 키를 3초 동안 길게 누르세요"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"접근성 버튼을 탭할 때 사용할 기능을 선택하세요."</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"접근성 동작(두 손가락을 사용하여 화면 하단에서 위로 스와이프)으로 실행할 기능을 선택하세요."</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"접근성 동작(세 손가락을 사용하여 화면 하단에서 위로 스와이프)으로 실행할 기능을 선택하세요."</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"기능 간에 전환하려면 접근성 버튼을 길게 터치합니다."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"기능 간에 전환하려면 두 손가락을 사용하여 위로 스와이프한 다음 잠시 기다립니다."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"기능 간에 전환하려면 세 손가락을 사용하여 위로 스와이프한 다음 잠시 기다립니다."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"확대"</string>
     <string name="user_switched" msgid="7249833311585228097">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 전환하는 중…"</string>
@@ -1792,10 +1765,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"관리자에 의해 삭제되었습니다."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"확인"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n\n• 어두운 테마를 사용 설정합니다.\n• 백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다.\n\n"<annotation id="url">"자세히 알아보기"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"배터리 수명을 연장하기 위해 절전 모드가 다음과 같이 작동합니다.\n\n• 어두운 테마를 사용 설정합니다.\n• 백그라운드 활동, 일부 시각 효과 및 \'Hey Google\' 등의 기타 기능을 사용 중지하거나 제한합니다."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n·어두운 테마를 사용 설정합니다.\n·백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다.\n\n"<annotation id="url">"자세히 알아보기"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n·어두운 테마를 사용 설정합니다.\n·백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용 설정하시겠습니까?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용할까요?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"사용 설정"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
@@ -1872,7 +1845,6 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"지정된 카테고리 없음"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"이러한 알림의 중요도를 설정했습니다."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"관련된 사용자가 있으므로 중요합니다."</string>
-    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"맞춤 앱 알림"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>에서 <xliff:g id="ACCOUNT">%2$s</xliff:g> 계정으로 신규 사용자를 만들도록 허용하시겠습니까? 이 계정으로 등록된 사용자가 이미 존재합니다."</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g>에서 <xliff:g id="ACCOUNT">%2$s</xliff:g> 계정으로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"언어 추가"</string>
@@ -1887,7 +1859,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"자세히 알아보기"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"앱 일시중지 해제"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"직장 프로필을 사용 설정하시겠어요?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"직장 앱, 알림, 데이터 및 기타 직장 프로필 기능이 사용 설정됩니다."</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"업무용 앱, 알림, 데이터 및 기타 직장 프로필 기능이 사용 설정됩니다."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"사용 설정"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
@@ -2029,7 +2001,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> 및 파일 <xliff:g id="COUNT_3">%d</xliff:g>개</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> 및 파일 <xliff:g id="COUNT_1">%d</xliff:g>개</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"공유할 추천 사용자가 없음"</string>
+    <string name="chooser_no_direct_share_targets" msgid="492542066060841139">"직접 공유가 지원되지 않음"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"앱 목록"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"이 앱에는 녹음 권한이 부여되지 않았지만, 이 USB 기기를 통해 오디오를 녹음할 수 있습니다."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"홈"</string>
@@ -2038,146 +2010,28 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"알림"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"빠른 설정"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"전원 대화상자"</string>
+    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"화면 분할 모드 전환"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"잠금 화면"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"스크린샷"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"화면상의 접근성 바로가기"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"화면상의 접근성 바로가기 선택 도구"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"접근성 단축키"</string>
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"접근성 메뉴"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 자막 표시줄입니다."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 항목이 RESTRICTED 버킷으로 이동함"</string>
-    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"이미지 보냄"</string>
-    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"대화"</string>
-    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"그룹 대화"</string>
-    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"개인"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"직장"</string>
-    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"개인 뷰"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"직장 뷰"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"직장 앱과 공유할 수 없음"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT 관리자가 이 콘텐츠를 직장 프로필의 앱과 공유할 수 있도록 허용하지 않았습니다."</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"직장 앱으로 열 수 없음"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT 관리자가 이 콘텐츠를 직장 프로필의 앱에서 열 수 있도록 허용하지 않았습니다."</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"개인 앱과 공유할 수 없는 콘텐츠"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT 관리자가 개인 프로필의 앱에서 이 콘텐츠를 공유하도록 허용하지 않습니다."</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"개인 앱으로 열 수 없는 콘텐츠"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT 관리자가 개인 프로필의 앱에서 이 콘텐츠를 열도록 허용하지 않습니다."</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"직장 프로필이 일시중지됨"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"사용 설정"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"이 콘텐츠를 지원하는 직장 앱이 없음"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"이 콘텐츠를 열 수 있는 직장 앱이 없음"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"이 콘텐츠를 지원하는 개인 앱이 없음"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"이 콘텐츠를 열 수 있는 개인 앱이 없음"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 네트워크 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 네트워크 하위 집합 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 회사 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"SIM 서비스 제공업체 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"SIM 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIM network1 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIM network2 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"RUIM HRPD 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"RUIM 회사 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"RUIM 서비스 제공업체 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"RUIM 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"PUK 입력"</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPN 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"SP Equivalent Home PLMN 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCID 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPI 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"네트워크 하위 집합 서비스 제공업체 잠금 해제 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"SIM 네트워크 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"SIM 네트워크 하위 집합 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"SIM 서비스 제공업체 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"SIM 회사 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"SIM 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"RUIM network1 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"RUIM network2 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"RUIM HRPD 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"RUIM 서비스 제공업체 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"RUIM 회사 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"SPN 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"SP Equivalent Home PLMN 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"ICCID 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"IMPI 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"네트워크 하위 집합 서비스 제공업체 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"RUIM 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"PUK 잠금 해제 요청 중…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"SIM 네트워크 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"SIM 네트워크 하위 집합 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"SIM 서비스 제공업체 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"SIM 회사 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"SIM 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"RUIM Network1 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"RUIM Network2 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"RUIM HRPD 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"RUIM 회사 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"RUIM 서비스 제공업체 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"RUIM 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK 잠금 해제가 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"SPN 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"SP Equivalent Home PLMN 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"ICCID 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"IMPI 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"네트워크 하위 집합 서비스 제공업체 잠금 해제 요청이 실패했습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"SIM 네트워크 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"SIM 네트워크 하위 집합 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"SIM 서비스 제공업체 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"SIM 회사 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"SIM 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM Network1 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM Network2 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM HRPD 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM 서비스 제공업체 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"RUIM 회사 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"RUIM 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"SPN 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"SP Equivalent Home PLMN 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI 잠금 해제가 완료되었습니다."</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"네트워크 하위 집합 서비스 제공업체 잠금 해제가 완료되었습니다."</string>
-    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
-    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
-    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
-    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

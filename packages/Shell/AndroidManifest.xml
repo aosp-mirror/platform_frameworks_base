@@ -87,6 +87,7 @@
     <!--  TODO(b/152310230): remove once APIs are confirmed to be sufficient -->
     <uses-permission android:name="com.android.permission.USE_INSTALLER_V2" />
     <uses-permission android:name="android.permission.MOVE_PACKAGE" />
+    <uses-permission android:name="android.permission.KEEP_UNINSTALLED_PACKAGES" />
     <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
     <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
     <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS" />
@@ -121,6 +122,8 @@
     <uses-permission android:name="android.permission.CREATE_USERS" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
     <uses-permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS" />
+    <uses-permission android:name="android.permission.QUERY_USERS" />
+    <uses-permission android:name="android.permission.MODIFY_QUIET_MODE" />
     <uses-permission android:name="android.permission.ACCESS_LOWPAN_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_LOWPAN_STATE"/>
     <uses-permission android:name="android.permission.READ_LOWPAN_CREDENTIAL"/>
@@ -296,9 +299,6 @@
     <uses-permission android:name="android.permission.RESTART_WIFI_SUBSYSTEM" />
 
     <!-- Permission needed to read wifi network credentials for CtsNetTestCases -->
-    <uses-permission android:name="android.permission.NETWORK_AIRPLANE_MODE" />
-
-    <!-- Permission needed to read wifi network credentials for CtsNetTestCases -->
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL" />
 
     <!-- Permission needed to use wifi usability API's for CtsNetTestCases -->
@@ -336,6 +336,9 @@
     <!-- Permissions required for CTS test - AdbManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_DEBUGGING" />
 
+    <!-- Permission required for CTS test - CtsTelephonyTestCases -->
+    <uses-permission android:name="android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE" />
+
     <!-- Permission needed for CTS test - DisplayTest -->
     <uses-permission android:name="android.permission.OVERRIDE_DISPLAY_MODE_REQUESTS" />
 
@@ -351,6 +354,14 @@
 
     <!-- Permission required for CTS test - CtsSensorPrivacyTestCases -->
     <uses-permission android:name="android.permission.MANAGE_SENSOR_PRIVACY" />
+
+    <!-- Permission required for GTS test - GtsAssistIntentTestCases -->
+    <uses-permission android:name="android.permission.MANAGE_SOUND_TRIGGER" />
+    <uses-permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD" />
+    <uses-permission android:name="android.permission.BIND_VOICE_INTERACTION" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+    <uses-permission android:name="android.permission.BIND_RESUME_ON_REBOOT_SERVICE" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

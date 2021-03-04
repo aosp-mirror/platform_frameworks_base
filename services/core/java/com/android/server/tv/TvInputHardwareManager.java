@@ -976,7 +976,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             AudioPortConfig sourceConfig = mAudioSource.activeConfig();
             List<AudioPortConfig> sinkConfigs = new ArrayList<>();
             AudioPatch[] audioPatchArray = new AudioPatch[] { mAudioPatch };
-            boolean shouldRecreateAudioPatch = sourceUpdated || sinkUpdated;
+            boolean shouldRecreateAudioPatch = sourceUpdated || sinkUpdated || mAudioPatch == null;
 
             for (AudioDevicePort audioSink : mAudioSink) {
                 AudioPortConfig sinkConfig = audioSink.activeConfig();

@@ -1,3 +1,14 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    //   SPDX-license-identifier-BSD
+    //   legacy_unencumbered
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 filegroup {
     name: "IKeyAttestationApplicationIdProvider.aidl",
     srcs: ["android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl"],
@@ -6,4 +17,9 @@ filegroup {
 filegroup {
     name: "IDropBoxManagerService.aidl",
     srcs: ["com/android/internal/os/IDropBoxManagerService.aidl"],
+}
+
+filegroup {
+    name: "ITracingServiceProxy.aidl",
+    srcs: ["android/tracing/ITracingServiceProxy.aidl"],
 }

@@ -320,6 +320,9 @@
     <style name="Animation.ShutdownUi" parent="@android:style/Animation.Toast">
     </style>
 
+    <style name="Animation.MediaOutputDialog" parent="@android:style/Animation.InputMethod">
+    </style>
+
     <!-- Standard animations for hiding and showing the status bar. -->
     <style name="Animation.StatusBar">
     </style>
@@ -398,6 +401,10 @@
     <style name="Theme.SystemUI.Dialog.GlobalActions" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen">
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:windowIsFloating">true</item>
+    </style>
+
+    <style name="Theme.SystemUI.Dialog.MediaOutput">
+        <item name="android:windowBackground">@drawable/media_output_dialog_background</item>
     </style>
 
     <style name="QSBorderlessButton">
@@ -789,5 +796,4 @@
           * Title: headline, medium 20sp
           * Message: body, 16 sp -->
     <style name="Theme.ControlsRequestDialog" parent="@*android:style/Theme.DeviceDefault.Dialog.Alert"/>
-
 </resources>

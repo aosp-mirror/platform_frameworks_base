@@ -19,6 +19,8 @@
 #include "SoundManager.h"
 #include "StreamManager.h"
 
+#include <string>
+
 namespace android {
 
 /**
@@ -29,7 +31,8 @@ namespace android {
  */
 class SoundPool {
 public:
-    SoundPool(int32_t maxStreams, const audio_attributes_t* attributes);
+    SoundPool(int32_t maxStreams, const audio_attributes_t* attributes,
+            const std::string& opPackageName = {});
     ~SoundPool();
 
     // SoundPool Java API support

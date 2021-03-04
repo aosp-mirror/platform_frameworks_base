@@ -17,6 +17,7 @@
 package com.android.server.compat;
 
 import android.app.compat.ChangeIdStateCache;
+import android.app.compat.PackageOverride;
 import android.compat.Compatibility.ChangeConfig;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -31,6 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.AndroidBuildClassifier;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.CompatibilityChangeInfo;
+import com.android.internal.compat.CompatibilityOverrideConfig;
 import com.android.internal.compat.IOverrideValidator;
 import com.android.internal.compat.OverrideAllowedState;
 import com.android.server.compat.config.Change;
@@ -48,6 +50,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,11 +73,13 @@ final class CompatConfig {
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
 
     private final OverrideValidatorImpl mOverrideValidator;
+    private Context mContext;
     private File mOverridesFile;
 
     @VisibleForTesting
     CompatConfig(AndroidBuildClassifier androidBuildClassifier, Context context) {
         mOverrideValidator = new OverrideValidatorImpl(androidBuildClassifier, context, this);
+        mContext = context;
     }
 
     static CompatConfig create(AndroidBuildClassifier androidBuildClassifier, Context context) {
@@ -210,17 +215,33 @@ final class CompatConfig {
      * @throws IllegalStateException if overriding is not allowed
      */
     boolean addOverride(long changeId, String packageName, boolean enabled) {
-        boolean alreadyKnown = addOverrideUnsafe(changeId, packageName, enabled);
+        boolean alreadyKnown = addOverrideUnsafe(changeId, packageName,
+                new PackageOverride.Builder().setEnabled(enabled).build());
         saveOverrides();
         invalidateCache();
         return alreadyKnown;
     }
 
     /**
-     * Unsafe version of {@link #addOverride(long, String, boolean)}.
-     * It does not invalidate the cache nor save the overrides.
+     * Overrides the enabled state for a given change and app.
+     *
+     * <p>Note, package overrides are not persistent and will be lost on system or runtime restart.
+     *
+     * @param overrides   list of overrides to default changes config.
+     * @param packageName app for which the overrides will be applied.
      */
-    private boolean addOverrideUnsafe(long changeId, String packageName, boolean enabled) {
+    void addOverrides(CompatibilityOverrideConfig overrides, String packageName) {
+        synchronized (mChanges) {
+            for (Long changeId : overrides.overrides.keySet()) {
+                addOverrideUnsafe(changeId, packageName, overrides.overrides.get(changeId));
+            }
+            saveOverrides();
+            invalidateCache();
+        }
+    }
+
+    private boolean addOverrideUnsafe(long changeId, String packageName,
+            PackageOverride overrides) {
         boolean alreadyKnown = true;
         OverrideAllowedState allowedState =
                 mOverrideValidator.getOverrideAllowedState(changeId, packageName);
@@ -232,17 +253,8 @@ final class CompatConfig {
                 c = new CompatChange(changeId);
                 addChange(c);
             }
-            switch (allowedState.state) {
-                case OverrideAllowedState.ALLOWED:
-                    c.addPackageOverride(packageName, enabled);
-                    break;
-                case OverrideAllowedState.DEFERRED_VERIFICATION:
-                    c.addPackageDeferredOverride(packageName, enabled);
-                    break;
-                default:
-                    throw new IllegalStateException("Should only be able to override changes that "
-                            + "are allowed or can be deferred.");
-            }
+            c.addPackageOverride(packageName, overrides, allowedState, mContext);
+            invalidateCache();
         }
         return alreadyKnown;
     }
@@ -311,47 +323,20 @@ final class CompatConfig {
      * It does not invalidate the cache nor save the overrides.
      */
     private boolean removeOverrideUnsafe(long changeId, String packageName) {
-        boolean overrideExists = false;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c != null) {
-                // Always allow removing a deferred override.
-                if (c.hasDeferredOverride(packageName)) {
-                    c.removePackageOverride(packageName);
-                    overrideExists = true;
-                } else if (c.hasOverride(packageName)) {
-                    // Regular overrides need to pass the policy.
-                    overrideExists = true;
-                    OverrideAllowedState allowedState =
-                            mOverrideValidator.getOverrideAllowedState(changeId, packageName);
+                OverrideAllowedState allowedState =
+                        mOverrideValidator.getOverrideAllowedState(changeId, packageName);
+                if (c.hasPackageOverride(packageName)) {
                     allowedState.enforce(changeId, packageName);
-                    c.removePackageOverride(packageName);
+                    c.removePackageOverride(packageName, allowedState, mContext);
+                    invalidateCache();
+                    return true;
                 }
             }
         }
-        return overrideExists;
-    }
-
-    /**
-     * Overrides the enabled state for a given change and app.
-     *
-     * <p>Note: package overrides are not persistent and will be lost on system or runtime restart.
-     *
-     * @param overrides   list of overrides to default changes config
-     * @param packageName app for which the overrides will be applied
-     */
-    void addOverrides(CompatibilityChangeConfig overrides, String packageName) {
-        synchronized (mChanges) {
-            for (Long changeId : overrides.enabledChanges()) {
-                addOverrideUnsafe(changeId, packageName, true);
-            }
-            for (Long changeId : overrides.disabledChanges()) {
-                addOverrideUnsafe(changeId, packageName, false);
-
-            }
-            saveOverrides();
-            invalidateCache();
-        }
+        return false;
     }
 
     /**
@@ -402,7 +387,8 @@ final class CompatConfig {
     int enableTargetSdkChangesForPackage(String packageName, int targetSdkVersion) {
         long[] changes = getAllowedChangesSinceTargetSdkForPackage(packageName, targetSdkVersion);
         for (long changeId : changes) {
-            addOverrideUnsafe(changeId, packageName, true);
+            addOverrideUnsafe(changeId, packageName,
+                    new PackageOverride.Builder().setEnabled(true).build());
         }
         saveOverrides();
         invalidateCache();
@@ -418,7 +404,8 @@ final class CompatConfig {
     int disableTargetSdkChangesForPackage(String packageName, int targetSdkVersion) {
         long[] changes = getAllowedChangesSinceTargetSdkForPackage(packageName, targetSdkVersion);
         for (long changeId : changes) {
-            addOverrideUnsafe(changeId, packageName, false);
+            addOverrideUnsafe(changeId, packageName,
+                    new PackageOverride.Builder().setEnabled(false).build());
         }
         saveOverrides();
         invalidateCache();
@@ -609,18 +596,23 @@ final class CompatConfig {
      * Rechecks all the existing overrides for a package.
      */
     void recheckOverrides(String packageName) {
+        // Local cache of compat changes. Holding a lock on mChanges for the whole duration of the
+        // method will cause a deadlock.
+        List<CompatChange> changes;
         synchronized (mChanges) {
-            boolean shouldInvalidateCache = false;
+            changes = new ArrayList<>(mChanges.size());
             for (int idx = 0; idx < mChanges.size(); ++idx) {
-                CompatChange c = mChanges.valueAt(idx);
-                OverrideAllowedState allowedState =
-                        mOverrideValidator.getOverrideAllowedState(c.getId(), packageName);
-                boolean allowedOverride = (allowedState.state == OverrideAllowedState.ALLOWED);
-                shouldInvalidateCache |= c.recheckOverride(packageName, allowedOverride);
+                changes.add(mChanges.valueAt(idx));
             }
-            if (shouldInvalidateCache) {
-                invalidateCache();
-            }
+        }
+        boolean shouldInvalidateCache = false;
+        for (CompatChange c: changes) {
+            OverrideAllowedState allowedState =
+                    mOverrideValidator.getOverrideAllowedState(c.getId(), packageName);
+            shouldInvalidateCache |= c.recheckOverride(packageName, allowedState, mContext);
+        }
+        if (shouldInvalidateCache) {
+            invalidateCache();
         }
     }
 

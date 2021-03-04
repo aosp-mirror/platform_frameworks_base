@@ -63,8 +63,10 @@ import com.android.internal.app.ProcessMap;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.IoThread;
+import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemServiceManager;
+import com.android.server.os.NativeTombstoneManager;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -78,6 +80,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -770,6 +773,10 @@ public final class AppExitInfoTracker {
      * Helper function for shell command
      */
     void clearHistoryProcessExitInfo(String packageName, int userId) {
+        NativeTombstoneManager tombstoneService = LocalServices.getService(
+                NativeTombstoneManager.class);
+        Optional<Integer> appId = Optional.empty();
+
         if (TextUtils.isEmpty(packageName)) {
             synchronized (mLock) {
                 removeByUserIdLocked(userId);
@@ -777,10 +784,13 @@ public final class AppExitInfoTracker {
         } else {
             final int uid = mService.mPackageManagerInt.getPackageUid(packageName,
                     PackageManager.MATCH_ALL, userId);
+            appId = Optional.of(UserHandle.getAppId(uid));
             synchronized (mLock) {
                 removePackageLocked(packageName, uid, true, userId);
             }
         }
+
+        tombstoneService.purge(Optional.of(userId), appId);
         schedulePersistProcessExitInfo(true);
     }
 

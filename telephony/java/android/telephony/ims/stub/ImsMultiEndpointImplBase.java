@@ -48,6 +48,10 @@ public class ImsMultiEndpointImplBase {
         @Override
         public void setListener(IImsExternalCallStateListener listener) throws RemoteException {
             synchronized (mLock) {
+                if (mListener != null && !mListener.asBinder().isBinderAlive()) {
+                    Log.w(TAG, "setListener: discarding dead Binder");
+                    mListener = null;
+                }
                 if (mListener != null && listener != null && Objects.equals(
                         mListener.asBinder(), listener.asBinder())) {
                     return;
@@ -58,10 +62,10 @@ public class ImsMultiEndpointImplBase {
                 } else if (listener != null && mListener == null) {
                     mListener = listener;
                 } else {
-                    // Fail fast here instead of silently overwriting the listener to another
-                    // listener due to another connection connecting.
-                    throw new IllegalStateException("ImsMultiEndpointImplBase: Listener already"
-                            + " set by another connection.");
+                    // Warn that the listener is being replaced while active
+                    Log.w(TAG, "setListener is being called when there is already an active "
+                            + "listener");
+                    mListener = listener;
                 }
             }
         }

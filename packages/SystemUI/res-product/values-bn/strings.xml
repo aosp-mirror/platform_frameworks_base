@@ -40,7 +40,4 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"আপনি <xliff:g id="NUMBER">%d</xliff:g> বার ভুল পদ্ধতিতে ফোন আনলক করার চেষ্টা করেছেন। অফিস প্রোফাইলটি সরিয়ে দেওয়া হবে, যার ফলে প্রোফাইলের সমস্ত ডেটা মুছে যাবে।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল পদ্ধতিতে প্যাটার্ন আনলক করার চেষ্টা করেছেন। আরও <xliff:g id="NUMBER_1">%2$d</xliff:g> বার এটি করলে আপনাকে প্যাটার্ন আনলক করতে একটি ইমেল অ্যাকাউন্ট ব্যবহার করতে বলা হবে।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ড পরে আবার চেষ্টা করুন।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল পদ্ধতিতে প্যাটার্ন আনলক করার চেষ্টা করেছেন। আরও <xliff:g id="NUMBER_1">%2$d</xliff:g> বার এটি করলে আপনাকে প্যাটার্ন আনলক করতে একটি ইমেল অ্যাকাউন্ট ব্যবহারের করতে বলা হবে।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ড পরে আবার চেষ্টা করুন।"</string>
-    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"আরও বিকল্প দেখতে আপনার ফোন আনলক করুন"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"আরও বিকল্প দেখতে আপনার ট্যাবলেট আনলক করুন"</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"আরও বিকল্প দেখতে আপনার ডিভাইস আনলক করুন"</string>
 </resources>

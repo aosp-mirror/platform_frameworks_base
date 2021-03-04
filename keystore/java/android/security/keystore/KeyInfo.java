@@ -85,6 +85,7 @@ public class KeyInfo implements KeySpec {
     private final boolean mInvalidatedByBiometricEnrollment;
     private final boolean mUserConfirmationRequired;
     private final @KeyProperties.SecurityLevelEnum int mSecurityLevel;
+    private final int mRemainingUsageCount;
 
     /**
      * @hide
@@ -109,7 +110,8 @@ public class KeyInfo implements KeySpec {
             boolean trustedUserPresenceRequired,
             boolean invalidatedByBiometricEnrollment,
             boolean userConfirmationRequired,
-            @KeyProperties.SecurityLevelEnum int securityLevel) {
+            @KeyProperties.SecurityLevelEnum int securityLevel,
+            int remainingUsageCount) {
         mKeystoreAlias = keystoreKeyAlias;
         mInsideSecureHardware = insideSecureHardware;
         mOrigin = origin;
@@ -134,6 +136,7 @@ public class KeyInfo implements KeySpec {
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mUserConfirmationRequired = userConfirmationRequired;
         mSecurityLevel = securityLevel;
+        mRemainingUsageCount = remainingUsageCount;
     }
 
     /**
@@ -373,5 +376,16 @@ public class KeyInfo implements KeySpec {
      */
     public @KeyProperties.SecurityLevelEnum int getSecurityLevel() {
         return mSecurityLevel;
+    }
+
+    /**
+     * Returns the remaining number of times the key is allowed to be used or
+     * {@link KeyProperties#UNRESTRICTED_USAGE_COUNT} if there's no restriction on the number of
+     * times the key can be used. Note that this gives a best effort count and need not be
+     * accurate (as there might be usages happening in parallel and the count maintained here need
+     * not be in sync with the usage).
+     */
+    public int getRemainingUsageCount() {
+        return mRemainingUsageCount;
     }
 }

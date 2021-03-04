@@ -28,9 +28,9 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"સ્ક્રીનશૉટ વિના કે સ્ક્રીનશૉટ પૂરો થાય ત્યાં સુધી રાહ જોયા વિના બગ રિપોર્ટ શેર કરવાનું પસંદ કરો"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"સ્ક્રીનશૉટ વગર અથવા સ્ક્રીનશૉટ સમાપ્ત થવાની રાહ જોયા વગર તમારી બગ રિપોર્ટ શેર કરવા ટૅપ કરો"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"સ્ક્રીનશૉટ વગર અથવા સ્ક્રીનશૉટ સમાપ્ત થવાની રાહ જોયા વગર તમારી બગ રિપોર્ટ શેર કરવા ટૅપ કરો"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"બગ રિપોર્ટ સિસ્ટમની વિભિન્ન લૉગ ફાઇલોનો ડેટા ધરાવે છે, જેમાં તે ડેટા શામેલ હોઈ શકે છે જેને તમે સંવેદી ગણો છો (જેમ કે ઍપ્લિકેશન-વપરાશ અને સ્થાન ડેટા). બગ રિપોર્ટ ફક્ત તમે વિશ્વાસ કરતા હો તે ઍપ્લિકેશનો અને લોકો સાથે જ શેર કરો."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"બગ રિપોર્ટ્સ સિસ્ટમની વિભિન્ન લૉગ ફાઇલોનો ડેટા ધરાવે છે, જેમાં તે ડેટા શામેલ હોઈ શકે છે જેને તમે સંવેદી ગણો છો (જેમ કે ઍપ્લિકેશન-વપરાશ અને સ્થાન ડેટા). બગ રિપોર્ટ્સ ફક્ત તમે વિશ્વાસ કરતા હો તે ઍપ્લિકેશનો અને લોકો સાથે જ શેર કરો."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"ફરી બતાવશો નહીં"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"બગ રિપોર્ટ"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"બગ રિપોર્ટ્સ"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"બગ રીપોર્ટ ફાઇલ વાંચી શકાઇ નથી"</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"ZIP ફાઇલમાં બગ રિપોર્ટની વિગતો ઉમેરી શકાઈ નથી"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"અનામાંકિત"</string>

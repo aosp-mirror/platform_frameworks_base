@@ -16,14 +16,19 @@
 
 package com.android.server.vcn;
 
+import static com.android.server.VcnManagementService.VDBG;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.net.NetworkProvider;
 import android.net.NetworkRequest;
 import android.os.Looper;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.SparseArray;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import java.util.Objects;
 import java.util.Set;
@@ -40,25 +45,43 @@ public class VcnNetworkProvider extends NetworkProvider {
     private static final String TAG = VcnNetworkProvider.class.getSimpleName();
 
     private final Set<NetworkRequestListener> mListeners = new ArraySet<>();
-    private final SparseArray<NetworkRequestEntry> mRequests = new SparseArray<>();
+
+    /**
+     * Cache of NetworkRequest(s), scores and network providers, keyed by NetworkRequest
+     *
+     * <p>NetworkRequests are immutable once created, and therefore can be used as stable keys.
+     */
+    private final ArrayMap<NetworkRequest, NetworkRequestEntry> mRequests = new ArrayMap<>();
 
     public VcnNetworkProvider(Context context, Looper looper) {
         super(context, looper, VcnNetworkProvider.class.getSimpleName());
     }
 
-    // Package-private
-    void registerListener(@NonNull NetworkRequestListener listener) {
+    /**
+     * Registers a NetworkRequestListener with this NetworkProvider.
+     *
+     * <p>Upon registering, the provided listener will receive all cached requests.
+     */
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
+    public void registerListener(@NonNull NetworkRequestListener listener) {
         mListeners.add(listener);
 
         // Send listener all cached requests
-        for (int i = 0; i < mRequests.size(); i++) {
-            notifyListenerForEvent(listener, mRequests.valueAt(i));
-        }
+        resendAllRequests(listener);
     }
 
-    // Package-private
-    void unregisterListener(@NonNull NetworkRequestListener listener) {
+    /** Unregisters the specified listener from receiving future NetworkRequests. */
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
+    public void unregisterListener(@NonNull NetworkRequestListener listener) {
         mListeners.remove(listener);
+    }
+
+    /** Sends all cached NetworkRequest(s) to the specified listener. */
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
+    public void resendAllRequests(@NonNull NetworkRequestListener listener) {
+        for (NetworkRequestEntry entry : mRequests.values()) {
+            notifyListenerForEvent(listener, entry);
+        }
     }
 
     private void notifyListenerForEvent(
@@ -68,14 +91,21 @@ public class VcnNetworkProvider extends NetworkProvider {
 
     @Override
     public void onNetworkRequested(@NonNull NetworkRequest request, int score, int providerId) {
-        Slog.v(
-                TAG,
-                String.format(
-                        "Network requested: Request = %s, score = %d, providerId = %d",
-                        request, score, providerId));
+        if (VDBG) {
+            Slog.v(
+                    TAG,
+                    "Network requested: Request = "
+                            + request
+                            + ", score = "
+                            + score
+                            + ", providerId = "
+                            + providerId);
+        }
 
         final NetworkRequestEntry entry = new NetworkRequestEntry(request, score, providerId);
-        mRequests.put(request.requestId, entry);
+
+        // NetworkRequests are immutable once created, and therefore can be used as stable keys.
+        mRequests.put(request, entry);
 
         // TODO(b/176939047): Intelligently route requests to prioritized VcnInstances (based on
         // Default Data Sub, or similar)
@@ -86,7 +116,7 @@ public class VcnNetworkProvider extends NetworkProvider {
 
     @Override
     public void onNetworkRequestWithdrawn(@NonNull NetworkRequest request) {
-        mRequests.remove(request.requestId);
+        mRequests.remove(request);
     }
 
     private static class NetworkRequestEntry {

@@ -19,9 +19,9 @@ package android.security;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
-import com.android.org.bouncycastle.util.io.pem.PemObject;
-import com.android.org.bouncycastle.util.io.pem.PemReader;
-import com.android.org.bouncycastle.util.io.pem.PemWriter;
+import com.android.internal.org.bouncycastle.util.io.pem.PemObject;
+import com.android.internal.org.bouncycastle.util.io.pem.PemReader;
+import com.android.internal.org.bouncycastle.util.io.pem.PemWriter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -48,6 +48,8 @@ public class Credentials {
     public static final String INSTALL_ACTION = "android.credentials.INSTALL";
 
     public static final String INSTALL_AS_USER_ACTION = "android.credentials.INSTALL_AS_USER";
+
+    public static final String ACTION_MANAGE_CREDENTIALS = "android.security.MANAGE_CREDENTIALS";
 
     /**
      * Key prefix for CA certificates.

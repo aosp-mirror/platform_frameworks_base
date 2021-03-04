@@ -42,7 +42,6 @@ import android.net.IpSecManager;
 import android.net.IpSecSpiResponse;
 import android.net.IpSecUdpEncapResponse;
 import android.os.Binder;
-import android.os.INetworkManagementService;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.system.ErrnoException;
@@ -116,7 +115,6 @@ public class IpSecServiceTest {
     }
 
     Context mMockContext;
-    INetworkManagementService mMockNetworkManager;
     INetd mMockNetd;
     IpSecService.IpSecServiceConfiguration mMockIpSecSrvConfig;
     IpSecService mIpSecService;
@@ -124,10 +122,9 @@ public class IpSecServiceTest {
     @Before
     public void setUp() throws Exception {
         mMockContext = mock(Context.class);
-        mMockNetworkManager = mock(INetworkManagementService.class);
         mMockNetd = mock(INetd.class);
         mMockIpSecSrvConfig = mock(IpSecService.IpSecServiceConfiguration.class);
-        mIpSecService = new IpSecService(mMockContext, mMockNetworkManager, mMockIpSecSrvConfig);
+        mIpSecService = new IpSecService(mMockContext, mMockIpSecSrvConfig);
 
         // Injecting mock netd
         when(mMockIpSecSrvConfig.getNetdInstance()).thenReturn(mMockNetd);
@@ -135,7 +132,7 @@ public class IpSecServiceTest {
 
     @Test
     public void testIpSecServiceCreate() throws InterruptedException {
-        IpSecService ipSecSrv = IpSecService.create(mMockContext, mMockNetworkManager);
+        IpSecService ipSecSrv = IpSecService.create(mMockContext);
         assertNotNull(ipSecSrv);
     }
 
@@ -608,7 +605,7 @@ public class IpSecServiceTest {
     public void testOpenUdpEncapSocketTagsSocket() throws Exception {
         IpSecService.UidFdTagger mockTagger = mock(IpSecService.UidFdTagger.class);
         IpSecService testIpSecService = new IpSecService(
-                mMockContext, mMockNetworkManager, mMockIpSecSrvConfig, mockTagger);
+                mMockContext, mMockIpSecSrvConfig, mockTagger);
 
         IpSecUdpEncapResponse udpEncapResp =
                 testIpSecService.openUdpEncapsulationSocket(0, new Binder());

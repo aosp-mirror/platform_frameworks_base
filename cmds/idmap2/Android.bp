@@ -12,6 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 cc_defaults {
     name: "idmap2_defaults",
     tidy: true,
@@ -26,10 +35,24 @@ cc_defaults {
     tidy_checks_as_errors: [
         "modernize-*",
         "-modernize-avoid-c-arrays",
+        "-modernize-pass-by-value",
+        "-modernize-replace-disallow-copy-and-assign-macro",
+        "-modernize-use-equals-default",
+        "-modernize-use-nodiscard",
+        "-modernize-use-override",
         "-modernize-use-trailing-return-type",
+        "-modernize-use-using",
         "android-*",
         "misc-*",
+        "-misc-non-private-member-variables-in-classes",
         "readability-*",
+        "-readability-braces-around-statements",
+        "-readability-const-return-type",
+        "-readability-convert-member-functions-to-static",
+        "-readability-else-after-return",
+        "-readability-named-parameter",
+        "-readability-redundant-access-specifiers",
+        "-readability-uppercase-literal-suffix",
     ],
     tidy_flags: [
         "-system-headers",
@@ -132,9 +155,6 @@ cc_test {
         "tests/XmlParserTests.cpp",
         "tests/ZipFileTests.cpp",
     ],
-    required: [
-        "idmap2",
-    ],
     static_libs: ["libgmock"],
     target: {
         android: {
@@ -163,9 +183,19 @@ cc_test {
             shared_libs: [
                 "libz",
             ],
+            data: [
+                ":libz",
+                ":idmap2",
+            ],
         },
     },
-    data: ["tests/data/**/*.apk"],
+    data: [
+        "tests/data/**/*.apk",
+    ],
+    compile_multilib: "first",
+    test_options: {
+        unit_test: true,
+    },
 }
 
 cc_binary {

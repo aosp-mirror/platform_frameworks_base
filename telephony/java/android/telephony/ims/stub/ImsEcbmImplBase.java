@@ -44,8 +44,12 @@ public class ImsEcbmImplBase {
         @Override
         public void setListener(IImsEcbmListener listener) {
             synchronized (mLock) {
-                if (mImsEcbm != null && listener != null && Objects.equals(
-                        mImsEcbm.asBinder(), listener.asBinder())) {
+                if (mListener != null && !mListener.asBinder().isBinderAlive()) {
+                    Log.w(TAG, "setListener: discarding dead Binder");
+                    mListener = null;
+                }
+                if (mListener != null && listener != null && Objects.equals(
+                        mListener.asBinder(), listener.asBinder())) {
                     return;
                 }
                 if (listener == null) {
@@ -53,10 +57,10 @@ public class ImsEcbmImplBase {
                 } else if (listener != null && mListener == null) {
                     mListener = listener;
                 } else {
-                    // Fail fast here instead of silently overwriting the listener to another
-                    // listener due to another connection connecting.
-                    throw new IllegalStateException("ImsEcbmImplBase: Listener already set by "
-                            + "another connection.");
+                    // Warn that the listener is being replaced while active
+                    Log.w(TAG, "setListener is being called when there is already an active "
+                            + "listener");
+                    mListener = listener;
                 }
             }
         }

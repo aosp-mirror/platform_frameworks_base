@@ -42,6 +42,7 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.platform.test.annotations.Presubmit;
@@ -86,7 +87,8 @@ public class LockSettingsShellCommandTest {
         MockitoAnnotations.initMocks(this);
         final Context context = InstrumentationRegistry.getTargetContext();
         mUserId = ActivityManager.getCurrentUser();
-        mCommand = new LockSettingsShellCommand(mLockPatternUtils);
+        mCommand = new LockSettingsShellCommand(mLockPatternUtils, context, 0,
+                Process.SHELL_UID);
         when(mLockPatternUtils.hasSecureLockScreen()).thenReturn(true);
     }
 

@@ -288,6 +288,20 @@ public final class ServiceManager {
     }
 
     /**
+     * Get service debug info.
+     * @return an array of information for each service (like listServices, but with PIDs)
+     * @hide
+     */
+    public static ServiceDebugInfo[] getServiceDebugInfo() {
+        try {
+            return getIServiceManager().getServiceDebugInfo();
+        } catch (RemoteException e) {
+            Log.e(TAG, "error in getServiceDebugInfo", e);
+            return null;
+        }
+    }
+
+    /**
      * This is only intended to be called when the process is first being brought
      * up and bound by the activity manager. There is only one thread in the process
      * at that time, so no locking is done.

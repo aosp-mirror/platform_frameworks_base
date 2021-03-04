@@ -65,6 +65,7 @@ import dalvik.system.ZygoteHooks;
 import libcore.io.IoUtils;
 
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -117,7 +118,7 @@ public class ZygoteInit {
     /**
      * Controls whether we should preload resources during zygote init.
      */
-    public static final boolean PRELOAD_RESOURCES = true;
+    private static final boolean PRELOAD_RESOURCES = true;
 
     private static final int UNPRIVILEGED_UID = 9999;
     private static final int UNPRIVILEGED_GID = 9999;
@@ -159,7 +160,7 @@ public class ZygoteInit {
         sPreloadComplete = true;
     }
 
-    public static void lazyPreload() {
+    static void lazyPreload() {
         Preconditions.checkState(!sPreloadComplete);
         Log.i(TAG, "Lazily preloading resources.");
 
@@ -364,7 +365,7 @@ public class ZygoteInit {
             }
             if ("true".equals(prop)) {
                 Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ResetJitCounters");
-                runtime.resetJitCounters();
+                VMRuntime.resetJitCounters();
                 Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
             }
 
@@ -418,8 +419,6 @@ public class ZygoteInit {
      * larger.
      */
     private static void preloadResources() {
-        final VMRuntime runtime = VMRuntime.getRuntime();
-
         try {
             mResources = Resources.getSystem();
             mResources.startPreloading();
@@ -463,9 +462,7 @@ public class ZygoteInit {
         int N = ar.length();
         for (int i = 0; i < N; i++) {
             int id = ar.getResourceId(i, 0);
-            if (false) {
-                Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
-            }
+
             if (id != 0) {
                 if (mResources.getColorStateList(id, null) == null) {
                     throw new IllegalArgumentException(
@@ -483,9 +480,7 @@ public class ZygoteInit {
         int N = ar.length();
         for (int i = 0; i < N; i++) {
             int id = ar.getResourceId(i, 0);
-            if (false) {
-                Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
-            }
+
             if (id != 0) {
                 if (mResources.getDrawable(id, null) == null) {
                     throw new IllegalArgumentException(
@@ -688,13 +683,12 @@ public class ZygoteInit {
                 final String packageName = "*";
                 final String outputPath = null;
                 final int dexFlags = 0;
-                final String compilerFilter = systemServerFilter;
                 final String uuid = StorageManager.UUID_PRIVATE_INTERNAL;
                 final String seInfo = null;
                 final int targetSdkVersion = 0;  // SystemServer targets the system's SDK version
                 try {
                     installd.dexopt(classPathElement, Process.SYSTEM_UID, packageName,
-                            instructionSet, dexoptNeeded, outputPath, dexFlags, compilerFilter,
+                            instructionSet, dexoptNeeded, outputPath, dexFlags, systemServerFilter,
                             uuid, classLoaderContext, seInfo, false /* downgrade */,
                             targetSdkVersion, /*profileName*/ null, /*dexMetadataPath*/ null,
                             "server-dexopt");
@@ -770,7 +764,7 @@ public class ZygoteInit {
         capabilities &= ((long) data[0].effective) | (((long) data[1].effective) << 32);
 
         /* Hardcoded command line to start the system server */
-        String args[] = {
+        String[] args = {
                 "--setuid=1000",
                 "--setgid=1000",
                 "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1023,"
@@ -781,19 +775,35 @@ public class ZygoteInit {
                 "--target-sdk-version=" + VMRuntime.SDK_VERSION_CUR_DEVELOPMENT,
                 "com.android.server.SystemServer",
         };
-        ZygoteArguments parsedArgs = null;
+        ZygoteArguments parsedArgs;
 
         int pid;
 
         try {
-            parsedArgs = new ZygoteArguments(args);
+            ZygoteCommandBuffer commandBuffer = new ZygoteCommandBuffer(args);
+            try {
+                parsedArgs = ZygoteArguments.getInstance(commandBuffer);
+            } catch (EOFException e) {
+                throw new AssertionError("Unexpected argument error for forking system server", e);
+            }
+            commandBuffer.close();
             Zygote.applyDebuggerSystemProperty(parsedArgs);
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
             if (Zygote.nativeSupportsMemoryTagging()) {
-                /* The system server is more privileged than regular app processes, so it has async
-                 * tag checks enabled on hardware that supports memory tagging. */
-                parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_ASYNC;
+                /* The system server has ASYNC MTE by default, in order to allow
+                 * system services to specify their own MTE level later, as you
+                 * can't re-enable MTE once it's disabled. */
+                String mode = SystemProperties.get("arm64.memtag.process.system_server", "async");
+                if (mode.equals("async")) {
+                    parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_ASYNC;
+                } else if (mode.equals("sync")) {
+                    parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_SYNC;
+                } else if (!mode.equals("off")) {
+                    /* When we have an invalid memory tag level, keep the current level. */
+                    parsedArgs.mRuntimeFlags |= Zygote.nativeCurrentTaggingLevel();
+                    Slog.e(TAG, "Unknown memory tag level for the system server: \"" + mode + "\"");
+                }
             } else if (Zygote.nativeSupportsTaggedPointers()) {
                 /* Enable pointer tagging in the system server. Hardware support for this is present
                  * in all ARMv8 CPUs. */
@@ -855,12 +865,12 @@ public class ZygoteInit {
      * into new processes are required to either set the priority to the default value or terminate
      * before executing any non-system code.  The native side of this occurs in SpecializeCommon,
      * while the Java Language priority is changed in ZygoteInit.handleSystemServerProcess,
-     * ZygoteConnection.handleChildProc, and Zygote.usapMain.
+     * ZygoteConnection.handleChildProc, and Zygote.childMain.
      *
      * @param argv  Command line arguments used to specify the Zygote's configuration.
      */
     @UnsupportedAppUsage
-    public static void main(String argv[]) {
+    public static void main(String[] argv) {
         ZygoteServer zygoteServer = null;
 
         // Mark zygote start. This ensures that thread creation will throw
@@ -1019,7 +1029,7 @@ public class ZygoteInit {
      *                              are enabled)
      * @param argv             arg strings
      */
-    public static final Runnable zygoteInit(int targetSdkVersion, long[] disabledCompatChanges,
+    public static Runnable zygoteInit(int targetSdkVersion, long[] disabledCompatChanges,
             String[] argv, ClassLoader classLoader) {
         if (RuntimeInit.DEBUG) {
             Slog.d(RuntimeInit.TAG, "RuntimeInit: Starting application from zygote");
@@ -1039,11 +1049,10 @@ public class ZygoteInit {
      * to zygoteInit(), which skips calling into initialization routines that start the Binder
      * threadpool.
      */
-    static final Runnable childZygoteInit(
-            int targetSdkVersion, String[] argv, ClassLoader classLoader) {
+    static Runnable childZygoteInit(String[] argv) {
         RuntimeInit.Arguments args = new RuntimeInit.Arguments(argv);
-        return RuntimeInit.findStaticMain(args.startClass, args.startArgs, classLoader);
+        return RuntimeInit.findStaticMain(args.startClass, args.startArgs, /* classLoader= */null);
     }
 
-    private static final native void nativeZygoteInit();
+    private static native void nativeZygoteInit();
 }

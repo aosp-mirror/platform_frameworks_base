@@ -251,11 +251,6 @@ public class SliceManagerService extends ISliceManager.Stub {
                 }
             }
         }
-        // Fallback to allowing uri permissions through.
-        if (mContext.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                == PERMISSION_GRANTED) {
-            return PackageManager.PERMISSION_GRANTED;
-        }
         return PackageManager.PERMISSION_DENIED;
     }
 

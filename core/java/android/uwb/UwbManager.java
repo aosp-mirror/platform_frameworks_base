@@ -16,9 +16,11 @@
 
 package android.uwb;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -30,10 +32,6 @@ import android.os.ServiceManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -154,6 +152,7 @@ public final class UwbManager {
      * @param executor an {@link Executor} to execute given callback
      * @param callback user implementation of the {@link AdapterStateCallback}
      */
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public void registerAdapterStateCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull AdapterStateCallback callback) {
         mAdapterStateListener.register(executor, callback);
@@ -168,6 +167,7 @@ public final class UwbManager {
      *
      * @param callback user implementation of the {@link AdapterStateCallback}
      */
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public void unregisterAdapterStateCallback(@NonNull AdapterStateCallback callback) {
         mAdapterStateListener.unregister(callback);
     }
@@ -181,135 +181,13 @@ public final class UwbManager {
      * @return {@link PersistableBundle} of the device's supported UWB protocols and parameters
      */
     @NonNull
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public PersistableBundle getSpecificationInfo() {
         try {
             return mUwbAdapter.getSpecificationInfo();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Check if ranging is supported, regardless of ranging method
-     *
-     * @return true if ranging is supported
-     */
-    public boolean isRangingSupported() {
-        try {
-            return mUwbAdapter.isRangingSupported();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {
-            ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE,
-            ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D,
-            ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL,
-            ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL})
-    public @interface AngleOfArrivalSupportType {}
-
-    /**
-     * Indicate absence of support for angle of arrival measurement
-     */
-    public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE = 1;
-
-    /**
-     * Indicate support for planar angle of arrival measurement, due to antenna
-     * limitation. Typically requires at least two antennas.
-     */
-    public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D = 2;
-
-    /**
-     * Indicate support for three dimensional angle of arrival measurement.
-     * Typically requires at least three antennas. However, due to antenna
-     * arrangement, a platform may only support hemi-spherical azimuth angles
-     * ranging from -pi/2 to pi/2
-     */
-    public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL = 3;
-
-    /**
-     * Indicate support for three dimensional angle of arrival measurement.
-     * Typically requires at least three antennas. This mode supports full
-     * azimuth angles ranging from -pi to pi.
-     */
-    public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL = 4;
-
-    /**
-     * Gets the {@link AngleOfArrivalSupportType} supported on this platform
-     * <p>Possible return values are
-     * {@link #ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE},
-     * {@link #ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D},
-     * {@link #ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL},
-     * {@link #ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL}.
-     *
-     * @return angle of arrival type supported
-     */
-    @AngleOfArrivalSupportType
-    public int getAngleOfArrivalSupport() {
-        try {
-            switch (mUwbAdapter.getAngleOfArrivalSupport()) {
-                case AngleOfArrivalSupport.TWO_DIMENSIONAL:
-                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D;
-
-                case AngleOfArrivalSupport.THREE_DIMENSIONAL_HEMISPHERICAL:
-                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL;
-
-                case AngleOfArrivalSupport.THREE_DIMENSIONAL_SPHERICAL:
-                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL;
-
-                case AngleOfArrivalSupport.NONE:
-                default:
-                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE;
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get a {@link List} of supported channel numbers based on the device's current location
-     * <p>The returned values are ordered by the system's desired ordered of use, with the first
-     * entry being the most preferred.
-     *
-     * <p>Channel numbers are defined based on the IEEE 802.15.4z standard for UWB.
-     *
-     * @return {@link List} of supported channel numbers ordered by preference
-     */
-    @NonNull
-    public List<Integer> getSupportedChannelNumbers() {
-        List<Integer> channels = new ArrayList<>();
-        try {
-            for (int channel : mUwbAdapter.getSupportedChannels()) {
-                channels.add(channel);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return channels;
-    }
-
-    /**
-     * Get a {@link List} of supported preamble code indices
-     * <p> Preamble code indices are defined based on the IEEE 802.15.4z standard for UWB.
-     *
-     * @return {@link List} of supported preamble code indices
-     */
-    @NonNull
-    public Set<Integer> getSupportedPreambleCodeIndices() {
-        Set<Integer> preambles = new HashSet<>();
-        try {
-            for (int preamble : mUwbAdapter.getSupportedPreambleCodes()) {
-                preambles.add(preamble);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return preambles;
     }
 
     /**
@@ -320,50 +198,10 @@ public final class UwbManager {
      * @return the timestamp resolution in nanoseconds
      */
     @SuppressLint("MethodNameUnits")
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public long elapsedRealtimeResolutionNanos() {
         try {
             return mUwbAdapter.getTimestampResolutionNanos();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get the number of simultaneous sessions allowed in the system
-     *
-     * @return the maximum allowed number of simultaneously open {@link RangingSession} instances.
-     */
-    public int getMaxSimultaneousSessions() {
-        try {
-            return mUwbAdapter.getMaxSimultaneousSessions();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get the maximum number of remote devices in a {@link RangingSession} when the local device
-     * is the initiator.
-     *
-     * @return the maximum number of remote devices per {@link RangingSession}
-     */
-    public int getMaxRemoteDevicesPerInitiatorSession() {
-        try {
-            return mUwbAdapter.getMaxRemoteDevicesPerInitiatorSession();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get the maximum number of remote devices in a {@link RangingSession} when the local device
-     * is a responder.
-     *
-     * @return the maximum number of remote devices per {@link RangingSession}
-     */
-    public int getMaxRemoteDevicesPerResponderSession() {
-        try {
-            return mUwbAdapter.getMaxRemoteDevicesPerResponderSession();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -396,6 +234,7 @@ public final class UwbManager {
      *         {@link RangingSession.Callback#onOpened(RangingSession)}.
      */
     @NonNull
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public AutoCloseable openRangingSession(@NonNull PersistableBundle parameters,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull RangingSession.Callback callbacks) {

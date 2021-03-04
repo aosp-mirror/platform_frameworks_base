@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.ims.ImsUtListener;
+import android.util.Log;
 
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsUtListener;
@@ -41,6 +42,7 @@ import java.util.Objects;
 // will break other implementations of ImsUt maintained by other ImsServices.
 @SystemApi
 public class ImsUtImplBase {
+    private static final String TAG = "ImsUtImplBase";
     /**
      * Bar all incoming calls. (See 3GPP TS 24.611)
      * @hide
@@ -207,6 +209,11 @@ public class ImsUtImplBase {
         @Override
         public void setListener(IImsUtListener listener) throws RemoteException {
             synchronized (mLock) {
+                if (mUtListener != null
+                        && !mUtListener.getListenerInterface().asBinder().isBinderAlive()) {
+                    Log.w(TAG, "setListener: discarding dead Binder");
+                    mUtListener = null;
+                }
                 if (mUtListener != null && listener != null && Objects.equals(
                         mUtListener.getListenerInterface().asBinder(), listener.asBinder())) {
                     return;
@@ -217,11 +224,10 @@ public class ImsUtImplBase {
                 } else if (listener != null && mUtListener == null) {
                     mUtListener = new ImsUtListener(listener);
                 } else {
-                    // This is a limitation of the current API surface, there can only be one
-                    // listener connected. Fail fast instead of silently overwriting the other
-                    // listener.
-                    throw new IllegalStateException("ImsUtImplBase#setListener: listener already "
-                            + "set by another connected interface!");
+                    // Warn that the listener is being replaced while active
+                    Log.w(TAG, "setListener is being called when there is already an active "
+                            + "listener");
+                    mUtListener = new ImsUtListener(listener);
                 }
             }
 

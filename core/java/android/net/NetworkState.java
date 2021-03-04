@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -30,7 +32,8 @@ import android.util.Slog;
 public class NetworkState implements Parcelable {
     private static final boolean VALIDATE_ROAMING_STATE = false;
 
-    public static final NetworkState EMPTY = new NetworkState(null, null, null, null, null, null);
+    // TODO: remove and make members @NonNull.
+    public static final NetworkState EMPTY = new NetworkState();
 
     public final NetworkInfo networkInfo;
     public final LinkProperties linkProperties;
@@ -38,17 +41,42 @@ public class NetworkState implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final Network network;
     public final String subscriberId;
-    public final String networkId;
+    public final int legacyNetworkType;
 
-    public NetworkState(NetworkInfo networkInfo, LinkProperties linkProperties,
-            NetworkCapabilities networkCapabilities, Network network, String subscriberId,
-            String networkId) {
+    private NetworkState() {
+        networkInfo = null;
+        linkProperties = null;
+        networkCapabilities = null;
+        network = null;
+        subscriberId = null;
+        legacyNetworkType = 0;
+    }
+
+    public NetworkState(int legacyNetworkType, @NonNull LinkProperties linkProperties,
+            @NonNull NetworkCapabilities networkCapabilities, @NonNull Network network,
+            @Nullable String subscriberId) {
+        this(legacyNetworkType, new NetworkInfo(legacyNetworkType, 0, null, null), linkProperties,
+                networkCapabilities, network, subscriberId);
+    }
+
+    // Constructor that used internally in ConnectivityService mainline module.
+    public NetworkState(@NonNull NetworkInfo networkInfo, @NonNull LinkProperties linkProperties,
+            @NonNull NetworkCapabilities networkCapabilities, @NonNull Network network,
+            @Nullable String subscriberId) {
+        this(networkInfo.getType(), networkInfo, linkProperties,
+                networkCapabilities, network, subscriberId);
+    }
+
+    public NetworkState(int legacyNetworkType, @NonNull NetworkInfo networkInfo,
+            @NonNull LinkProperties linkProperties,
+            @NonNull NetworkCapabilities networkCapabilities, @NonNull Network network,
+            @Nullable String subscriberId) {
         this.networkInfo = networkInfo;
         this.linkProperties = linkProperties;
         this.networkCapabilities = networkCapabilities;
         this.network = network;
         this.subscriberId = subscriberId;
-        this.networkId = networkId;
+        this.legacyNetworkType = legacyNetworkType;
 
         // This object is an atomic view of a network, so the various components
         // should always agree on roaming state.
@@ -68,7 +96,7 @@ public class NetworkState implements Parcelable {
         networkCapabilities = in.readParcelable(null);
         network = in.readParcelable(null);
         subscriberId = in.readString();
-        networkId = in.readString();
+        legacyNetworkType = in.readInt();
     }
 
     @Override
@@ -83,7 +111,7 @@ public class NetworkState implements Parcelable {
         out.writeParcelable(networkCapabilities, flags);
         out.writeParcelable(network, flags);
         out.writeString(subscriberId);
-        out.writeString(networkId);
+        out.writeInt(legacyNetworkType);
     }
 
     @UnsupportedAppUsage

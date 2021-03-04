@@ -1,3 +1,12 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 cc_library_static {
     name: "libservices.core",
     defaults: ["libservices.core-libs"],
@@ -28,6 +37,7 @@ cc_library_static {
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_ConsumerIrService.cpp",
         "com_android_server_devicepolicy_CryptoTestHelper.cpp",
+        "com_android_server_connectivity_Vpn.cpp",
         "com_android_server_gpu_GpuService.cpp",
         "com_android_server_HardwarePropertiesManagerService.cpp",
         "com_android_server_input_InputManagerService.cpp",
@@ -147,11 +157,11 @@ cc_defaults {
         "android.hardware.light@2.0",
         "android.hardware.power@1.0",
         "android.hardware.power@1.1",
-        "android.hardware.power-cpp",
+        "android.hardware.power-V1-cpp",
         "android.hardware.power.stats@1.0",
         "android.hardware.thermal@1.0",
         "android.hardware.tv.input@1.0",
-        "android.hardware.vibrator-cpp",
+        "android.hardware.vibrator-V1-cpp",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
         "android.hardware.vibrator@1.2",
@@ -160,7 +170,7 @@ cc_defaults {
         "android.frameworks.schedulerservice@1.0",
         "android.frameworks.sensorservice@1.0",
         "android.frameworks.stats@1.0",
-        "android.system.suspend.control-cpp",
+        "android.system.suspend.control-V1-cpp",
         "android.system.suspend.control.internal-cpp",
         "android.system.suspend@1.0",
         "service.incremental",

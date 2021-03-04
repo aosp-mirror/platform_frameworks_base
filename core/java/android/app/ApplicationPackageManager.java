@@ -451,6 +451,19 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public int getTargetSdkVersion(@NonNull String packageName) throws NameNotFoundException {
+        try {
+            int version = mPM.getTargetSdkVersion(packageName);
+            if (version != -1) {
+                return version;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        throw new PackageManager.NameNotFoundException(packageName);
+    }
+
+    @Override
     public ActivityInfo getActivityInfo(ComponentName className, int flags)
             throws NameNotFoundException {
         final int userId = getUserId();

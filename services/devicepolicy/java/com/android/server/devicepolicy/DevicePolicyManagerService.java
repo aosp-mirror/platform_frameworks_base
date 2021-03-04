@@ -125,6 +125,7 @@ import android.app.ActivityThread;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManager.Mode;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
@@ -197,6 +198,7 @@ import android.net.ConnectivityManager;
 import android.net.IIpConnectivityMetrics;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
@@ -308,6 +310,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -317,6 +320,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -640,6 +646,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Whether or not this device is a watch.
      */
     final boolean mIsWatch;
+
+    /**
+     * Whether or not this device is an automotive.
+     */
+    private final boolean mIsAutomotive;
 
     /**
      * Whether this device has the telephony feature.
@@ -2245,6 +2256,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return mContext.getSystemService(ConnectivityManager.class);
         }
 
+        VpnManager getVpnManager() {
+            return mContext.getSystemService(VpnManager.class);
+        }
+
         LocationManager getLocationManager() {
             return mContext.getSystemService(LocationManager.class);
         }
@@ -2568,6 +2583,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .hasSystemFeature(PackageManager.FEATURE_WATCH);
         mHasTelephonyFeature = mInjector.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+        mIsAutomotive = mInjector.getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
         mBackgroundHandler = BackgroundThread.getHandler();
 
         // Needed when mHasFeature == false, because it controls the certificate warning text.
@@ -6081,9 +6098,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
                 // Require authentication for the device or profile
                 if (userToLock == UserHandle.USER_ALL) {
-                    // Power off the display
-                    mInjector.powerManagerGoToSleep(SystemClock.uptimeMillis(),
-                            PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
+                    if (mIsAutomotive) {
+                        if (VERBOSE_LOG) {
+                            Slog.v(LOG_TAG, "lockNow(): not powering off display on automotive"
+                                    + " build");
+                        }
+                    } else {
+                        // Power off the display
+                        mInjector.powerManagerGoToSleep(SystemClock.uptimeMillis(),
+                                PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
+                    }
                     mInjector.getIWindowManager().lockNow(null);
                 } else {
                     mInjector.getTrustManager().setDeviceLockedForUser(userToLock, true);
@@ -6482,7 +6506,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
                     DELEGATION_CERT_INSTALL);
         }
-        final KeyGenParameterSpec keySpec = parcelableKeySpec.getSpec();
+        KeyGenParameterSpec keySpec = parcelableKeySpec.getSpec();
         final String alias = keySpec.getKeystoreAlias();
         if (TextUtils.isEmpty(alias)) {
             throw new IllegalArgumentException("Empty alias provided.");
@@ -6494,9 +6518,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
 
-        if (deviceIdAttestationRequired && (keySpec.getAttestationChallenge() == null)) {
-            throw new IllegalArgumentException(
-                    "Requested Device ID attestation but challenge is empty.");
+        if (deviceIdAttestationRequired) {
+            if (keySpec.getAttestationChallenge() == null) {
+                throw new IllegalArgumentException(
+                        "Requested Device ID attestation but challenge is empty.");
+            }
+            KeyGenParameterSpec.Builder specBuilder = new KeyGenParameterSpec.Builder(keySpec);
+            specBuilder.setAttestationIds(attestationUtilsFlags);
+            specBuilder.setDevicePropertiesAttestationIncluded(true);
+            keySpec = specBuilder.build();
         }
 
         final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
@@ -6506,15 +6536,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     KeyChain.bindAsUser(mContext, userHandle)) {
                 IKeyChainService keyChain = keyChainConnection.getService();
 
-                // Copy the provided keySpec, excluding the attestation challenge, which will be
-                // used later for requesting key attestation record.
-                final KeyGenParameterSpec noAttestationSpec =
-                    new KeyGenParameterSpec.Builder(keySpec)
-                        .setAttestationChallenge(null)
-                        .build();
-
                 final int generationResult = keyChain.generateKeyPair(algorithm,
-                    new ParcelableKeyGenParameterSpec(noAttestationSpec));
+                        new ParcelableKeyGenParameterSpec(keySpec));
                 if (generationResult != KeyChain.KEY_GEN_SUCCESS) {
                     Log.e(LOG_TAG, String.format(
                             "KeyChain failed to generate a keypair, error %d.", generationResult));
@@ -6523,6 +6546,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             throw new ServiceSpecificException(
                                     DevicePolicyManager.KEY_GEN_STRONGBOX_UNAVAILABLE,
                                     String.format("KeyChain error: %d", generationResult));
+                        case KeyChain.KEY_ATTESTATION_CANNOT_ATTEST_IDS:
+                            throw new UnsupportedOperationException(
+                                "Device does not support Device ID attestation.");
                         default:
                             return false;
                     }
@@ -6535,22 +6561,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // that UID.
                 keyChain.setGrant(callingUid, alias, true);
 
-                final byte[] attestationChallenge = keySpec.getAttestationChallenge();
-                if (attestationChallenge != null) {
-                    final int attestationResult = keyChain.attestKey(
-                            alias, attestationChallenge, attestationUtilsFlags, attestationChain);
-                    if (attestationResult != KeyChain.KEY_ATTESTATION_SUCCESS) {
-                        Log.e(LOG_TAG, String.format(
-                                "Attestation for %s failed (rc=%d), deleting key.",
-                                alias, attestationResult));
-                        keyChain.removeKeyPair(alias);
-                        if (attestationResult == KeyChain.KEY_ATTESTATION_CANNOT_ATTEST_IDS) {
-                            throw new UnsupportedOperationException(
-                                    "Device does not support Device ID attestation.");
+                try {
+                    final List<byte[]> encodedCerts = new ArrayList();
+                    final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+                    final byte[] certChainBytes = keyChain.getCaCertificates(alias);
+                    encodedCerts.add(keyChain.getCertificate(alias));
+                    if (certChainBytes != null) {
+                        final Collection<X509Certificate> certs =
+                                (Collection<X509Certificate>) certFactory.generateCertificates(
+                                    new ByteArrayInputStream(certChainBytes));
+                        for (X509Certificate cert : certs) {
+                            encodedCerts.add(cert.getEncoded());
                         }
-                        return false;
                     }
+
+                    attestationChain.shallowCopyFrom(new KeymasterCertificateChain(encodedCerts));
+                } catch (CertificateException e) {
+                    Log.e(LOG_TAG, "While retrieving certificate chain.", e);
+                    return false;
                 }
+
                 final boolean isDelegate = (who == null);
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.GENERATE_KEY_PAIR)
@@ -7090,7 +7120,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             }
             // If some package is uninstalled after the check above, it will be ignored by CM.
-            if (!mInjector.getConnectivityManager().setAlwaysOnVpnPackageForUser(
+            if (!mInjector.getVpnManager().setAlwaysOnVpnPackageForUser(
                     userId, vpnPackage, lockdown, lockdownAllowlist)) {
                 throw new UnsupportedOperationException();
             }
@@ -7121,7 +7151,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userId = mInjector.userHandleGetCallingUserId();
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getConnectivityManager().getAlwaysOnVpnPackageForUser(userId));
+                () -> mInjector.getVpnManager().getAlwaysOnVpnPackageForUser(userId));
     }
 
     @Override
@@ -7139,7 +7169,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userId = mInjector.userHandleGetCallingUserId();
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getConnectivityManager().isVpnLockdownEnabled(userId));
+                () -> mInjector.getVpnManager().isVpnLockdownEnabled(userId));
     }
 
     @Override
@@ -7158,7 +7188,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userId = mInjector.userHandleGetCallingUserId();
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getConnectivityManager().getVpnLockdownWhitelist(userId));
+                () -> mInjector.getVpnManager().getVpnLockdownAllowlist(userId));
     }
 
     private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason, boolean wipeEuicc) {
@@ -12820,6 +12850,28 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         public ComponentName getProfileOwnerAsUser(int userHandle) {
             return DevicePolicyManagerService.this.getProfileOwnerAsUser(userHandle);
         }
+
+        @Override
+        public boolean supportsResetOp(int op) {
+            return op == AppOpsManager.OP_INTERACT_ACROSS_PROFILES
+                    && LocalServices.getService(CrossProfileAppsInternal.class) != null;
+        }
+
+        @Override
+        public void resetOp(int op, String packageName, @UserIdInt int userId) {
+            if (op != AppOpsManager.OP_INTERACT_ACROSS_PROFILES) {
+                throw new IllegalArgumentException("Unsupported op for DPM reset: " + op);
+            }
+            LocalServices.getService(CrossProfileAppsInternal.class)
+                    .setInteractAcrossProfilesAppOp(
+                            packageName, findInteractAcrossProfilesResetMode(packageName), userId);
+        }
+
+        private @Mode int findInteractAcrossProfilesResetMode(String packageName) {
+            return getDefaultCrossProfilePackages().contains(packageName)
+                    ? AppOpsManager.MODE_ALLOWED
+                    : AppOpsManager.opToDefaultMode(AppOpsManager.OP_INTERACT_ACROSS_PROFILES);
+        }
     }
 
     private Intent createShowAdminSupportIntent(ComponentName admin, int userId) {
@@ -14442,15 +14494,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         enforceProfileOrDeviceOwner(admin);
-        synchronized (getLockObject()) {
-            try {
-                IBackupManager ibm = mInjector.getIBackupManager();
-                return ibm != null && ibm.isBackupServiceActive(
-                    mInjector.userHandleGetCallingUserId());
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Failed requesting backup service state.", e);
+        final int userId = mInjector.userHandleGetCallingUserId();
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            synchronized (getLockObject()) {
+                try {
+                    IBackupManager ibm = mInjector.getIBackupManager();
+                    return ibm != null && ibm.isBackupServiceActive(userId);
+                } catch (RemoteException e) {
+                    throw new IllegalStateException("Failed requesting backup service state.", e);
+                }
             }
-        }
+        });
     }
 
     @Override
