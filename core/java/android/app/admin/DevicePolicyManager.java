@@ -2997,6 +2997,7 @@ public class DevicePolicyManager {
      */
     // TODO(b/173541467): should it throw SecurityException if caller is not admin?
     public boolean isSafeOperation(@OperationSafetyReason int reason) {
+        throwIfParentInstance("isSafeOperation");
         if (mService == null) return false;
 
         try {
