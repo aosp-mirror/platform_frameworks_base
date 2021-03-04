@@ -26,6 +26,8 @@ import static android.text.FontConfig.FontFamily.VARIANT_ELEGANT;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static junit.framework.Assert.fail;
+
 import android.graphics.fonts.FontStyle;
 import android.os.LocaleList;
 import android.text.FontConfig;
@@ -44,6 +46,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -221,9 +224,113 @@ public final class FontListParserTest {
                 .that(readFamily(serialized)).isEqualTo(expected);
     }
 
+    @Test
+    public void invalidXml_unpaired_family() throws Exception {
+        String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font index='0'>test.ttc</font>"
+                + "</familyset>";
+
+        try (InputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))) {
+            FontListParser.parse(is);
+            fail();
+        } catch (IOException | XmlPullParserException e) {
+            // pass
+        }
+    }
+
+    @Test
+    public void invalidXml_unpaired_font() throws Exception {
+        String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font index='0'>test.ttc"
+                + "  </family>"
+                + "</familyset>";
+
+        try (InputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))) {
+            FontListParser.parse(is);
+            fail();
+        } catch (IOException | XmlPullParserException e) {
+            // pass
+        }
+    }
+
+    @Test
+    public void invalidXml_unpaired_axis() throws Exception {
+        String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font index='0'>test.ttc"
+                + "        <axis tag=\"wght\" styleValue=\"0\" >"
+                + "    </font>"
+                + "  </family>"
+                + "</familyset>";
+
+        try (InputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))) {
+            FontListParser.parse(is);
+            fail();
+        } catch (IOException | XmlPullParserException e) {
+            // pass
+        }
+    }
+
+    @Test
+    public void invalidXml_unclosed_family() throws Exception {
+        String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'"
+                + "    <font index='0'>test.ttc</font>"
+                + "  </family>"
+                + "</familyset>";
+
+        try (InputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))) {
+            FontListParser.parse(is);
+            fail();
+        } catch (IOException | XmlPullParserException e) {
+            // pass
+        }
+    }
+
+    @Test
+    public void invalidXml_unclosed_font() throws Exception {
+        String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font index='0'"
+                + "  </family>"
+                + "</familyset>";
+
+        try (InputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))) {
+            FontListParser.parse(is);
+            fail();
+        } catch (IOException | XmlPullParserException e) {
+            // pass
+        }
+    }
+
+    @Test
+    public void invalidXml_unclosed_axis() throws Exception {
+        String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font index='0'>test.ttc"
+                + "        <axis tag=\"wght\" styleValue=\"0\""
+                + "    </font>"
+                + "  </family>"
+                + "</familyset>";
+
+        try (InputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))) {
+            FontListParser.parse(is);
+            fail();
+        } catch (IOException | XmlPullParserException e) {
+            // pass
+        }
+    }
+
     private FontConfig.FontFamily readFamily(String xml)
             throws IOException, XmlPullParserException {
-        StandardCharsets.UTF_8.name();
         ByteArrayInputStream buffer = new ByteArrayInputStream(
                 xml.getBytes(StandardCharsets.UTF_8));
         XmlPullParser parser = Xml.newPullParser();
