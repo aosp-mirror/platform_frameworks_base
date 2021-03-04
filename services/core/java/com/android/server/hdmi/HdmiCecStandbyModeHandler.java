@@ -106,9 +106,7 @@ public final class HdmiCecStandbyModeHandler {
         addHandler(Constants.MESSAGE_SET_STREAM_PATH, mBystander);
         addHandler(Constants.MESSAGE_STANDBY, mBystander);
         addHandler(Constants.MESSAGE_SET_MENU_LANGUAGE, mBystander);
-        addHandler(Constants.MESSAGE_DEVICE_VENDOR_ID, mBystander);
         addHandler(Constants.MESSAGE_USER_CONTROL_RELEASED, mBystander);
-        addHandler(Constants.MESSAGE_REPORT_POWER_STATUS, mBystander);
         addHandler(Constants.MESSAGE_FEATURE_ABORT, mBystander);
         addHandler(Constants.MESSAGE_INACTIVE_SOURCE, mBystander);
         addHandler(Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS, mBystander);
@@ -133,6 +131,8 @@ public final class HdmiCecStandbyModeHandler {
         addHandler(Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID, mBypasser);
         addHandler(Constants.MESSAGE_GIVE_OSD_NAME, mBypasser);
         addHandler(Constants.MESSAGE_SET_OSD_NAME, mBypasser);
+        addHandler(Constants.MESSAGE_DEVICE_VENDOR_ID, mBypasser);
+        addHandler(Constants.MESSAGE_REPORT_POWER_STATUS, mBypasser);
 
         addHandler(Constants.MESSAGE_USER_CONTROL_PRESSED, mUserControlProcessedHandler);
 
