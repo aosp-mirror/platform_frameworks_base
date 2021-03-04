@@ -2027,17 +2027,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         int top = params.getTop();
         float interpolation = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(params.getProgress());
         int startClipTopAmount = params.getStartClipTopAmount();
+        int clipTopAmount = (int) MathUtils.lerp(startClipTopAmount, 0, interpolation);
         if (mNotificationParent != null) {
             float parentY = mNotificationParent.getTranslationY();
             top -= parentY;
             mNotificationParent.setTranslationZ(translationZ);
+
+            // When the expanding notification is below its parent, the parent must be clipped
+            // exactly how it was clipped before the animation. When the expanding notification is
+            // on or above its parent (top <= 0), then the parent must be clipped exactly 'top'
+            // pixels to show the expanding notification, while still taking the decreasing
+            // notification clipTopAmount into consideration, so 'top + clipTopAmount'.
             int parentStartClipTopAmount = params.getParentStartClipTopAmount();
-            if (startClipTopAmount != 0) {
-                int clipTopAmount = (int) MathUtils.lerp(parentStartClipTopAmount,
-                        parentStartClipTopAmount - startClipTopAmount,
-                        interpolation);
-                mNotificationParent.setClipTopAmount(clipTopAmount);
-            }
+            int parentClipTopAmount = Math.min(parentStartClipTopAmount,
+                    top + clipTopAmount);
+            mNotificationParent.setClipTopAmount(parentClipTopAmount);
+
             mNotificationParent.setExtraWidthForClipping(extraWidthForClipping);
             float clipBottom = Math.max(params.getBottom(),
                     parentY + mNotificationParent.getActualHeight()
@@ -2046,7 +2051,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             int minimumHeightForClipping = (int) (clipBottom - clipTop);
             mNotificationParent.setMinimumHeightForClipping(minimumHeightForClipping);
         } else if (startClipTopAmount != 0) {
-            int clipTopAmount = (int) MathUtils.lerp(startClipTopAmount, 0, interpolation);
             setClipTopAmount(clipTopAmount);
         }
         setTranslationY(top);

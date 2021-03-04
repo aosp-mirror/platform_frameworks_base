@@ -28,14 +28,12 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.FooterView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -156,7 +154,7 @@ public class StackScrollAlgorithm {
     private void updateClipping(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
         float drawStart = !ambientState.isOnKeyguard() ? ambientState.getTopPadding()
-                + ambientState.getStackTranslation() + ambientState.getExpandAnimationTopChange()
+                + ambientState.getStackTranslation()
                 : 0;
         float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
@@ -329,9 +327,6 @@ public class StackScrollAlgorithm {
         childViewState.location = ExpandableViewState.LOCATION_MAIN_AREA;
         float inset = ambientState.getTopPadding() + ambientState.getStackTranslation()
                 + ambientState.getSectionPadding();
-        if (i <= algorithmState.getIndexOfExpandingNotification()) {
-            inset += ambientState.getExpandAnimationTopChange();
-        }
         if (child.mustStayOnScreen() && childViewState.yTranslation >= 0) {
             // Even if we're not scrolled away we're in view and we're also not in the
             // shelf. We can relax the constraints and let us scroll off the top!

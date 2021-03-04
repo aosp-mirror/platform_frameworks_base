@@ -89,30 +89,22 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        // Invert the order of the scroll view and user switcher such that the notifications receive
-        // touches first but the panel gets drawn above.
         mDrawingOrderedChildren.clear();
         mLayoutDrawingOrder.clear();
         if (mKeyguardStatusBar.getVisibility() == View.VISIBLE) {
             mDrawingOrderedChildren.add(mKeyguardStatusBar);
             mLayoutDrawingOrder.add(mKeyguardStatusBar);
         }
-        if (mStackScroller.getVisibility() == View.VISIBLE) {
-            mDrawingOrderedChildren.add(mStackScroller);
-            mLayoutDrawingOrder.add(mStackScroller);
-        }
         if (mQsFrame.getVisibility() == View.VISIBLE) {
             mDrawingOrderedChildren.add(mQsFrame);
             mLayoutDrawingOrder.add(mQsFrame);
         }
-
-        if (mHasViewsAboveShelf) {
-            // StackScroller needs to be on top
-            mDrawingOrderedChildren.remove(mStackScroller);
+        if (mStackScroller.getVisibility() == View.VISIBLE) {
             mDrawingOrderedChildren.add(mStackScroller);
+            mLayoutDrawingOrder.add(mStackScroller);
         }
 
-        // Let's now find the order that the view has when drawing regulary by sorting
+        // Let's now find the order that the view has when drawing regularly by sorting
         mLayoutDrawingOrder.sort(mIndexComparator);
         super.dispatchDraw(canvas);
     }
