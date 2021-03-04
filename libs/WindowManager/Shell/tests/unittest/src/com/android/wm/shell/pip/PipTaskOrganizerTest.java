@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.pip;
 
+import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -162,11 +164,29 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     }
 
     @Test
-    public void onTaskInfoChanged_updatesAspectRatioIfChanged() {
+    public void onTaskInfoChanged_notInPip_deferUpdatesAspectRatio() {
         final Rational startAspectRatio = new Rational(2, 1);
         final Rational newAspectRatio = new Rational(1, 2);
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
                 createPipParams(startAspectRatio)), null /* leash */);
+
+        // It is in entering transition, should defer onTaskInfoChanged callback in this case.
+        mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent1,
+                createPipParams(newAspectRatio)));
+        assertEquals(startAspectRatio.floatValue(), mPipBoundsState.getAspectRatio(), 0.01f);
+
+        // Once the entering transition finishes, the new aspect ratio applies in a deferred manner
+        mSpiedPipTaskOrganizer.sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
+        assertEquals(newAspectRatio.floatValue(), mPipBoundsState.getAspectRatio(), 0.01f);
+    }
+
+    @Test
+    public void onTaskInfoChanged_inPip_updatesAspectRatioIfChanged() {
+        final Rational startAspectRatio = new Rational(2, 1);
+        final Rational newAspectRatio = new Rational(1, 2);
+        mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
+                createPipParams(startAspectRatio)), null /* leash */);
+        mSpiedPipTaskOrganizer.sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
 
         mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent1,
                 createPipParams(newAspectRatio)));
@@ -175,9 +195,10 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     }
 
     @Test
-    public void onTaskInfoChanged_updatesLastPipComponentName() {
+    public void onTaskInfoChanged_inPip_updatesLastPipComponentName() {
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
                 createPipParams(null)), null /* leash */);
+        mSpiedPipTaskOrganizer.sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
 
         mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent2,
                 createPipParams(null)));
@@ -186,9 +207,10 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     }
 
     @Test
-    public void onTaskInfoChanged_updatesOverrideMinSize() {
+    public void onTaskInfoChanged_inPip_updatesOverrideMinSize() {
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
                 createPipParams(null)), null /* leash */);
+        mSpiedPipTaskOrganizer.sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
 
         final Size minSize = new Size(400, 320);
         mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent2,
