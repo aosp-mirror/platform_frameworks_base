@@ -30,8 +30,7 @@ import com.android.settingslib.widget.R;
 public class SettingsSpinnerAdapter<T> extends ArrayAdapter<T> {
 
     private static final int DEFAULT_RESOURCE = R.layout.settings_spinner_view;
-    private static final int DFAULT_DROPDOWN_RESOURCE =
-            android.R.layout.simple_spinner_dropdown_item;
+    private static final int DFAULT_DROPDOWN_RESOURCE = R.layout.settings_spinner_dropdown_view;
     private final LayoutInflater mDefaultInflater;
 
     /**
