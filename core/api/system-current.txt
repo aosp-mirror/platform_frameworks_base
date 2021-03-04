@@ -8845,6 +8845,8 @@ package android.provider {
     field public static final String NAMESPACE_RUNTIME_NATIVE = "runtime_native";
     field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
     field public static final String NAMESPACE_SCHEDULER = "scheduler";
+    field public static final String NAMESPACE_STATSD_JAVA = "statsd_java";
+    field public static final String NAMESPACE_STATSD_JAVA_BOOT = "statsd_java_boot";
     field public static final String NAMESPACE_STATSD_NATIVE = "statsd_native";
     field public static final String NAMESPACE_STATSD_NATIVE_BOOT = "statsd_native_boot";
     field @Deprecated public static final String NAMESPACE_STORAGE = "storage";
