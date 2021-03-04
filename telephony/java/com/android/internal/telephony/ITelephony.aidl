@@ -1245,15 +1245,6 @@ interface ITelephony {
     void shutdownMobileRadios();
 
     /**
-     * Set phone radio type and access technology.
-     *
-     * @param rafs an RadioAccessFamily array to indicate all phone's
-     *        new radio access family. The length of RadioAccessFamily
-     *        must equ]]al to phone count.
-     */
-    void setRadioCapability(in RadioAccessFamily[] rafs);
-
-    /**
      * Get phone radio type and access technology.
      *
      * @param phoneId which phone you want to get
