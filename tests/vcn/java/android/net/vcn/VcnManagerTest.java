@@ -203,9 +203,6 @@ public class VcnManagerTest {
         IVcnStatusCallback cbBinder =
                 new VcnStatusCallbackBinder(INLINE_EXECUTOR, mMockStatusCallback);
 
-        cbBinder.onEnteredSafeMode();
-        verify(mMockStatusCallback).onEnteredSafeMode();
-
         cbBinder.onVcnStatusChanged(VCN_STATUS_CODE_ACTIVE);
         verify(mMockStatusCallback).onVcnStatusChanged(VCN_STATUS_CODE_ACTIVE);
 
