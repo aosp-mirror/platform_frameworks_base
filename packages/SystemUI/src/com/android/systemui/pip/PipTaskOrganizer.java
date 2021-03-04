@@ -45,6 +45,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.Size;
 import android.view.SurfaceControl;
@@ -223,6 +224,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
     private PictureInPictureParams mPictureInPictureParams;
+    private int mOverridableMinSize;
 
     /**
      * If set to {@code true}, the entering animation will be skipped and we will wait for
@@ -244,6 +246,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         mPipBoundsHandler = boundsHandler;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
+        mOverridableMinSize = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.overridable_minimal_size_pip_resizable_task);
         mSurfaceTransactionHelper = surfaceTransactionHelper;
         mPipAnimationController = pipAnimationController;
         mPipUiEventLoggerLogger = pipUiEventLogger;
@@ -949,7 +953,14 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         // -1 will be populated if an activity specifies defaultWidth/defaultHeight in <layout>
         // without minWidth/minHeight
         if (windowLayout.minWidth > 0 && windowLayout.minHeight > 0) {
-            return new Size(windowLayout.minWidth, windowLayout.minHeight);
+            // If either dimension is smaller than the allowed minimum, adjust them
+            // according to mOverridableMinSize and log to SafeNet
+            if (windowLayout.minWidth < mOverridableMinSize
+                    || windowLayout.minHeight < mOverridableMinSize) {
+                EventLog.writeEvent(0x534e4554, "174302616", -1, "");
+            }
+            return new Size(Math.max(windowLayout.minWidth, mOverridableMinSize),
+                    Math.max(windowLayout.minHeight, mOverridableMinSize));
         }
         return null;
     }
