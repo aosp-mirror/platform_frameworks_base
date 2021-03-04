@@ -55,6 +55,10 @@ package android.app.usage {
 
 package android.content {
 
+  public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
+    method @NonNull public static android.net.Uri createContentUriAsUser(@NonNull android.net.Uri, @NonNull android.os.UserHandle);
+  }
+
   public abstract class Context {
     method @NonNull public android.os.UserHandle getUser();
   }
