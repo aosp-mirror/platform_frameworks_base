@@ -32,6 +32,7 @@ import android.app.AppOpsManager;
 import android.app.ApplicationExitInfo;
 import android.app.ContentProviderHolder;
 import android.app.IApplicationThread;
+import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -57,6 +58,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -412,6 +414,12 @@ public class ContentProviderHelper {
                     final long origId = Binder.clearCallingIdentity();
 
                     try {
+                        if (!TextUtils.equals(cpr.appInfo.packageName, callingPackage)) {
+                            // Report component used since a content provider is being bound.
+                            mService.mUsageStatsService.reportEvent(
+                                    cpr.appInfo.packageName, userId, Event.APP_COMPONENT_USED);
+                        }
+
                         // Content provider is now in use, its package can't be stopped.
                         try {
                             checkTime(startTime,
