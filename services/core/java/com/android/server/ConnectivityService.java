@@ -190,7 +190,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -4142,13 +4141,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             // nai.networkMonitor() is thread-safe
             return nai.networkMonitor();
-        }
-
-        @Override
-        public void logEvent(int eventId, String packageName) {
-            enforceSettingsPermission();
-
-            new MetricsLogger().action(eventId, packageName);
         }
     }
 

@@ -2,7 +2,7 @@
 package android.net {
 
   public class CaptivePortal implements android.os.Parcelable {
-    method public void logEvent(int, @NonNull String);
+    method @Deprecated public void logEvent(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void reevaluateNetwork();
     method public void useNetwork();
     field public static final int APP_REQUEST_REEVALUATION_REQUIRED = 100; // 0x64

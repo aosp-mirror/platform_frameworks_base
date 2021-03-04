@@ -23,5 +23,4 @@ package android.net;
 oneway interface ICaptivePortal {
     void appRequest(int request);
     void appResponse(int response);
-    void logEvent(int eventId, String packageName);
 }
