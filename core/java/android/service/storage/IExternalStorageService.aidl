@@ -32,6 +32,5 @@ oneway interface IExternalStorageService
         in RemoteCallback callback);
     void freeCache(@utf8InCpp String sessionId, in String volumeUuid, long bytes,
         in RemoteCallback callback);
-    void notifyAnrDelayStarted(String packageName, int uid, int tid, int reason,
-         in RemoteCallback callback);
+    void notifyAnrDelayStarted(String packageName, int uid, int tid, int reason);
 }
