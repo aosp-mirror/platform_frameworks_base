@@ -71,12 +71,13 @@ public class PipTouchHandler {
     private static final float DEFAULT_STASH_VELOCITY_THRESHOLD = 18000.f;
 
     // Allow PIP to resize to a slightly bigger state upon touch
-    private final boolean mEnableResize;
+    private boolean mEnableResize;
     private final Context mContext;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final @NonNull PipBoundsState mPipBoundsState;
     private final PipUiEventLogger mPipUiEventLogger;
     private final PipDismissTargetHandler mPipDismissTargetHandler;
+    private final ShellExecutor mMainExecutor;
 
     private PipResizeGestureHandler mPipResizeGestureHandler;
     private WeakReference<Consumer<Rect>> mPipExclusionBoundsChangeListener;
@@ -166,16 +167,18 @@ public class PipTouchHandler {
             ShellExecutor mainExecutor) {
         // Initialize the Pip input consumer
         mContext = context;
+        mMainExecutor = mainExecutor;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
         mMenuController = menuController;
         mPipUiEventLogger = pipUiEventLogger;
+        mFloatingContentCoordinator = floatingContentCoordinator;
         mMenuController.addListener(new PipMenuListener());
         mGesture = new DefaultPipTouchGesture();
         mMotionHelper = new PipMotionHelper(mContext, pipBoundsState, pipTaskOrganizer,
                 mMenuController, mPipBoundsAlgorithm.getSnapAlgorithm(), pipTransitionController,
-                floatingContentCoordinator, mainExecutor);
+                floatingContentCoordinator);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
                         mMotionHelper, pipTaskOrganizer, this::getMovementBounds,
@@ -199,22 +202,26 @@ public class PipTouchHandler {
                 },
                 menuController::hideMenu,
                 mainExecutor);
-
-        Resources res = context.getResources();
-        mEnableResize = res.getBoolean(R.bool.config_pipEnableResizeForMenu);
-        reloadResources();
-
-        mFloatingContentCoordinator = floatingContentCoordinator;
         mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
                 this::onAccessibilityShowMenu, this::updateMovementBounds, mainExecutor);
+    }
+
+    public void init() {
+        Resources res = mContext.getResources();
+        mEnableResize = res.getBoolean(R.bool.config_pipEnableResizeForMenu);
+        reloadResources();
+
+        mMotionHelper.init();
+        mPipResizeGestureHandler.init();
+        mPipDismissTargetHandler.init();
 
         mEnableStash = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 PIP_STASHING,
                 /* defaultValue = */ true);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
-                mainExecutor,
+                mMainExecutor,
                 properties -> {
                     if (properties.getKeyset().contains(PIP_STASHING)) {
                         mEnableStash = properties.getBoolean(
@@ -226,7 +233,7 @@ public class PipTouchHandler {
                 PIP_STASH_MINIMUM_VELOCITY_THRESHOLD,
                 DEFAULT_STASH_VELOCITY_THRESHOLD);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
-                mainExecutor,
+                mMainExecutor,
                 properties -> {
                     if (properties.getKeyset().contains(PIP_STASH_MINIMUM_VELOCITY_THRESHOLD)) {
                         mStashVelocityThreshold = properties.getFloat(

@@ -42,6 +42,7 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
     private static final String TAG = "UdfpsAnimationKeyguard";
 
     @NonNull private final Context mContext;
+    @NonNull private final StatusBarStateController mStatusBarStateController;
     private final int mMaxBurnInOffsetX;
     private final int mMaxBurnInOffsetY;
 
@@ -54,6 +55,7 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
             @NonNull StatusBarStateController statusBarStateController) {
         super(context);
         mContext = context;
+        mStatusBarStateController = statusBarStateController;
 
         mMaxBurnInOffsetX = context.getResources()
                 .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
@@ -89,6 +91,10 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        if (isIlluminationShowing()) {
+            return;
+        }
+
         canvas.save();
         canvas.translate(mBurnInOffsetX, mBurnInOffsetY);
         mFingerprintDrawable.draw(canvas);
@@ -106,11 +112,16 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
     }
 
     @Override
-    public void updateColor() {
+    protected void updateColor() {
         final int lockScreenIconColor = Utils.getColorAttrDefaultColor(mContext,
                 R.attr.wallpaperTextColor);
         final int ambientDisplayIconColor = Color.WHITE;
         mFingerprintDrawable.setTint(ColorUtils.blendARGB(lockScreenIconColor,
                 ambientDisplayIconColor, mInterpolatedDarkAmount));
+    }
+
+    @Override
+    protected void onDestroy() {
+        mStatusBarStateController.removeCallback(this);
     }
 }

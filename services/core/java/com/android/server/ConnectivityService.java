@@ -142,10 +142,13 @@ import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
 import android.net.VpnManager;
 import android.net.VpnTransportInfo;
-import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.netlink.InetDiagMessage;
+import android.net.resolv.aidl.DnsHealthEventParcel;
+import android.net.resolv.aidl.IDnsResolverUnsolicitedEventListener;
+import android.net.resolv.aidl.Nat64PrefixEventParcel;
+import android.net.resolv.aidl.PrivateDnsValidationEventParcel;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
@@ -1400,7 +1403,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return null;
     }
 
-    private NetworkState getUnfilteredActiveNetworkState(int uid) {
+    private NetworkAgentInfo getNetworkAgentInfoForUid(int uid) {
         NetworkAgentInfo nai = getDefaultNetworkForUid(uid);
 
         final Network[] networks = getVpnUnderlyingNetworks(uid);
@@ -1416,12 +1419,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 nai = null;
             }
         }
-
-        if (nai != null) {
-            return nai.getNetworkState();
-        } else {
-            return NetworkState.EMPTY;
-        }
+        return nai;
     }
 
     /**
@@ -1474,24 +1472,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "%s %d(%d) on netId %d", action, nri.mUid, requestId, net.getNetId()));
     }
 
-    private void filterNetworkInfo(@NonNull NetworkInfo networkInfo,
-            @NonNull NetworkCapabilities nc, int uid, boolean ignoreBlocked) {
-        if (isNetworkWithCapabilitiesBlocked(nc, uid, ignoreBlocked)) {
-            networkInfo.setDetailedState(DetailedState.BLOCKED, null, null);
-        }
-        networkInfo.setDetailedState(
-                getLegacyLockdownState(networkInfo.getDetailedState()),
-                "" /* reason */, null /* extraInfo */);
-    }
-
     /**
-     * Apply any relevant filters to {@link NetworkState} for the given UID. For
+     * Apply any relevant filters to the specified {@link NetworkInfo} for the given UID. For
      * example, this may mark the network as {@link DetailedState#BLOCKED} based
      * on {@link #isNetworkWithCapabilitiesBlocked}.
      */
-    private void filterNetworkStateForUid(NetworkState state, int uid, boolean ignoreBlocked) {
-        if (state == null || state.networkInfo == null || state.linkProperties == null) return;
-        filterNetworkInfo(state.networkInfo, state.networkCapabilities, uid, ignoreBlocked);
+    @NonNull
+    private NetworkInfo filterNetworkInfo(@NonNull NetworkInfo networkInfo, int type,
+            @NonNull NetworkCapabilities nc, int uid, boolean ignoreBlocked) {
+        NetworkInfo filtered = new NetworkInfo(networkInfo);
+        filtered.setType(type);
+        final DetailedState state = isNetworkWithCapabilitiesBlocked(nc, uid, ignoreBlocked)
+                ? DetailedState.BLOCKED
+                : filtered.getDetailedState();
+        filtered.setDetailedState(getLegacyLockdownState(state),
+                "" /* reason */, null /* extraInfo */);
+        return filtered;
+    }
+
+    private NetworkInfo getFilteredNetworkInfo(NetworkAgentInfo nai, int uid,
+            boolean ignoreBlocked) {
+        return filterNetworkInfo(nai.networkInfo, nai.networkInfo.getType(),
+                nai.networkCapabilities, uid, ignoreBlocked);
     }
 
     /**
@@ -1505,10 +1507,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public NetworkInfo getActiveNetworkInfo() {
         enforceAccessPermission();
         final int uid = mDeps.getCallingUid();
-        final NetworkState state = getUnfilteredActiveNetworkState(uid);
-        filterNetworkStateForUid(state, uid, false);
-        maybeLogBlockedNetworkInfo(state.networkInfo, uid);
-        return state.networkInfo;
+        final NetworkAgentInfo nai = getNetworkAgentInfoForUid(uid);
+        if (nai == null) return null;
+        final NetworkInfo networkInfo = getFilteredNetworkInfo(nai, uid, false);
+        maybeLogBlockedNetworkInfo(networkInfo, uid);
+        return networkInfo;
     }
 
     @Override
@@ -1543,30 +1546,37 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public NetworkInfo getActiveNetworkInfoForUid(int uid, boolean ignoreBlocked) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
-        final NetworkState state = getUnfilteredActiveNetworkState(uid);
-        filterNetworkStateForUid(state, uid, ignoreBlocked);
-        return state.networkInfo;
+        final NetworkAgentInfo nai = getNetworkAgentInfoForUid(uid);
+        if (nai == null) return null;
+        return getFilteredNetworkInfo(nai, uid, ignoreBlocked);
     }
 
-    private NetworkInfo getFilteredNetworkInfo(int networkType, int uid) {
+    /** Returns a NetworkInfo object for a network that doesn't exist. */
+    private NetworkInfo makeFakeNetworkInfo(int networkType, int uid) {
+        final NetworkInfo info = new NetworkInfo(networkType, 0 /* subtype */,
+                getNetworkTypeName(networkType), "" /* subtypeName */);
+        info.setIsAvailable(true);
+        // For compatibility with legacy code, return BLOCKED instead of DISCONNECTED when
+        // background data is restricted.
+        final NetworkCapabilities nc = new NetworkCapabilities();  // Metered.
+        final DetailedState state = isNetworkWithCapabilitiesBlocked(nc, uid, false)
+                ? DetailedState.BLOCKED
+                : DetailedState.DISCONNECTED;
+        info.setDetailedState(getLegacyLockdownState(state),
+                "" /* reason */, null /* extraInfo */);
+        return info;
+    }
+
+    private NetworkInfo getFilteredNetworkInfoForType(int networkType, int uid) {
         if (!mLegacyTypeTracker.isTypeSupported(networkType)) {
             return null;
         }
         final NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
-        final NetworkInfo info;
-        final NetworkCapabilities nc;
-        if (nai != null) {
-            info = new NetworkInfo(nai.networkInfo);
-            info.setType(networkType);
-            nc = nai.networkCapabilities;
-        } else {
-            info = new NetworkInfo(networkType, 0, getNetworkTypeName(networkType), "");
-            info.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
-            info.setIsAvailable(true);
-            nc = new NetworkCapabilities();
+        if (nai == null) {
+            return makeFakeNetworkInfo(networkType, uid);
         }
-        filterNetworkInfo(info, nc, uid, false);
-        return info;
+        return filterNetworkInfo(nai.networkInfo, networkType, nai.networkCapabilities, uid,
+                false);
     }
 
     @Override
@@ -1576,27 +1586,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (getVpnUnderlyingNetworks(uid) != null) {
             // A VPN is active, so we may need to return one of its underlying networks. This
             // information is not available in LegacyTypeTracker, so we have to get it from
-            // getUnfilteredActiveNetworkState.
-            final NetworkState state = getUnfilteredActiveNetworkState(uid);
-            if (state.networkInfo != null && state.networkInfo.getType() == networkType) {
-                filterNetworkStateForUid(state, uid, false);
-                return state.networkInfo;
+            // getNetworkAgentInfoForUid.
+            final NetworkAgentInfo nai = getNetworkAgentInfoForUid(uid);
+            if (nai == null) return null;
+            final NetworkInfo networkInfo = getFilteredNetworkInfo(nai, uid, false);
+            if (networkInfo.getType() == networkType) {
+                return networkInfo;
             }
         }
-        return getFilteredNetworkInfo(networkType, uid);
+        return getFilteredNetworkInfoForType(networkType, uid);
     }
 
     @Override
     public NetworkInfo getNetworkInfoForUid(Network network, int uid, boolean ignoreBlocked) {
         enforceAccessPermission();
         final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
-        if (nai != null) {
-            final NetworkState state = nai.getNetworkState();
-            filterNetworkStateForUid(state, uid, ignoreBlocked);
-            return state.networkInfo;
-        } else {
-            return null;
-        }
+        if (nai == null) return null;
+        return getFilteredNetworkInfo(nai, uid, ignoreBlocked);
     }
 
     @Override
@@ -1624,10 +1630,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return null;
         }
         final int uid = mDeps.getCallingUid();
-        if (!isNetworkWithCapabilitiesBlocked(nai.networkCapabilities, uid, false)) {
-            return nai.network;
+        if (isNetworkWithCapabilitiesBlocked(nai.networkCapabilities, uid, false)) {
+            return null;
         }
-        return null;
+        return nai.network;
     }
 
     @Override
@@ -1716,9 +1722,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public LinkProperties getActiveLinkProperties() {
         enforceAccessPermission();
         final int uid = mDeps.getCallingUid();
-        NetworkState state = getUnfilteredActiveNetworkState(uid);
-        if (state.linkProperties == null) return null;
-        return linkPropertiesRestrictedForCallerPermissions(state.linkProperties,
+        NetworkAgentInfo nai = getNetworkAgentInfoForUid(uid);
+        if (nai == null) return null;
+        return linkPropertiesRestrictedForCallerPermissions(nai.linkProperties,
                 Binder.getCallingPid(), uid);
     }
 
@@ -2037,25 +2043,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return true;
     }
 
-    private class NetdEventCallback extends INetdEventListener.Stub {
+    class DnsResolverUnsolicitedEventCallback extends
+            IDnsResolverUnsolicitedEventListener.Stub {
         @Override
-        public void onPrivateDnsValidationEvent(int netId, String ipAddress,
-                String hostname, boolean validated) {
+        public void onPrivateDnsValidationEvent(final PrivateDnsValidationEventParcel event) {
             try {
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_PRIVATE_DNS_VALIDATION_UPDATE,
-                        new PrivateDnsValidationUpdate(netId,
-                                InetAddresses.parseNumericAddress(ipAddress),
-                                hostname, validated)));
+                        new PrivateDnsValidationUpdate(event.netId,
+                                InetAddresses.parseNumericAddress(event.ipAddress),
+                                event.hostname, event.validation)));
             } catch (IllegalArgumentException e) {
                 loge("Error parsing ip address in validation event");
             }
         }
 
         @Override
-        public void onDnsEvent(int netId, int eventType, int returnCode, int latencyMs,
-                String hostname,  String[] ipAddresses, int ipAddressesCount, int uid) {
-            NetworkAgentInfo nai = getNetworkAgentInfoForNetId(netId);
+        public void onDnsHealthEvent(final DnsHealthEventParcel event) {
+            NetworkAgentInfo nai = getNetworkAgentInfoForNetId(event.netId);
             // Netd event only allow registrants from system. Each NetworkMonitor thread is under
             // the caller thread of registerNetworkAgent. Thus, it's not allowed to register netd
             // event callback for certain nai. e.g. cellular. Register here to pass to
@@ -2064,34 +2069,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // callback from each caller type. Need to re-factor NetdEventListenerService to allow
             // multiple NetworkMonitor registrants.
             if (nai != null && nai.satisfies(mDefaultRequest.mRequests.get(0))) {
-                nai.networkMonitor().notifyDnsResponse(returnCode);
+                nai.networkMonitor().notifyDnsResponse(event.healthResult);
             }
         }
 
         @Override
-        public void onNat64PrefixEvent(int netId, boolean added,
-                                       String prefixString, int prefixLength) {
-            mHandler.post(() -> handleNat64PrefixEvent(netId, added, prefixString, prefixLength));
+        public void onNat64PrefixEvent(final Nat64PrefixEventParcel event) {
+            mHandler.post(() -> handleNat64PrefixEvent(event.netId, event.prefixOperation,
+                    event.prefixAddress, event.prefixLength));
         }
 
         @Override
-        public void onConnectEvent(int netId, int error, int latencyMs, String ipAddr, int port,
-                int uid) {
-        }
-
-        @Override
-        public void onWakeupEvent(String prefix, int uid, int ethertype, int ipNextHeader,
-                byte[] dstHw, String srcIp, String dstIp, int srcPort, int dstPort,
-                long timestampNs) {
-        }
-
-        @Override
-        public void onTcpSocketStatsEvent(int[] networkIds, int[] sentPackets, int[] lostPackets,
-                int[] rttsUs, int[] sentAckDiffsMs) {
-        }
-
-        @Override
-        public int getInterfaceVersion() throws RemoteException {
+        public int getInterfaceVersion() {
             return this.VERSION;
         }
 
@@ -2099,16 +2088,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         public String getInterfaceHash() {
             return this.HASH;
         }
-    };
+    }
 
     @VisibleForTesting
-    protected final INetdEventListener mNetdEventCallback = new NetdEventCallback();
+    protected final DnsResolverUnsolicitedEventCallback mResolverUnsolEventCallback =
+            new DnsResolverUnsolicitedEventCallback();
 
-    private void registerNetdEventCallback() {
+    private void registerDnsResolverUnsolicitedEventListener() {
         try {
-            mDnsResolver.registerEventListener(mNetdEventCallback);
+            mDnsResolver.registerUnsolicitedEventListener(mResolverUnsolEventCallback);
         } catch (Exception e) {
-            loge("Error registering DnsResolver callback: " + e);
+            loge("Error registering DnsResolver unsolicited event callback: " + e);
         }
     }
 
@@ -2439,7 +2429,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // to ensure the tracking will be initialized correctly.
         mPermissionMonitor.startMonitoring();
         mProxyTracker.loadGlobalProxy();
-        registerNetdEventCallback();
+        registerDnsResolverUnsolicitedEventListener();
 
         synchronized (this) {
             mSystemReady = true;
@@ -3080,9 +3070,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 log(nai.toShortString() + " validation " + (valid ? "passed" : "failed") + logMsg);
             }
             if (valid != nai.lastValidated) {
-                if (wasDefault) {
-                    mMetricsLog.logDefaultNetworkValidity(valid);
-                }
                 final int oldScore = nai.getCurrentScore();
                 nai.lastValidated = valid;
                 nai.everValidated |= valid;
@@ -3370,21 +3357,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
         handleUpdateLinkProperties(nai, new LinkProperties(nai.linkProperties));
     }
 
-    private void handleNat64PrefixEvent(int netId, boolean added, String prefixString,
+    private void handleNat64PrefixEvent(int netId, int operation, String prefixAddress,
             int prefixLength) {
         NetworkAgentInfo nai = mNetworkForNetId.get(netId);
         if (nai == null) return;
 
-        log(String.format("NAT64 prefix %s on netId %d: %s/%d",
-                          (added ? "added" : "removed"), netId, prefixString, prefixLength));
+        log(String.format("NAT64 prefix changed on netId %d: operation=%d, %s/%d",
+                netId, operation, prefixAddress, prefixLength));
 
         IpPrefix prefix = null;
-        if (added) {
+        if (operation == IDnsResolverUnsolicitedEventListener.PREFIX_OPERATION_ADDED) {
             try {
-                prefix = new IpPrefix(InetAddresses.parseNumericAddress(prefixString),
+                prefix = new IpPrefix(InetAddresses.parseNumericAddress(prefixAddress),
                         prefixLength);
             } catch (IllegalArgumentException e) {
-                loge("Invalid NAT64 prefix " + prefixString + "/" + prefixLength);
+                loge("Invalid NAT64 prefix " + prefixAddress + "/" + prefixLength);
                 return;
             }
         }
@@ -3503,14 +3490,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final boolean wasDefault = isDefaultNetwork(nai);
         if (wasDefault) {
             mDefaultInetConditionPublished = 0;
-            // Log default network disconnection before required book-keeping.
-            // Let rematchAllNetworksAndRequests() below record a new default network event
-            // if there is a fallback. Taken together, the two form a X -> 0, 0 -> Y sequence
-            // whose timestamps tell how long it takes to recover a default network.
-            long now = SystemClock.elapsedRealtime();
-            mMetricsLog.logDefaultNetworkEvent(null, 0, false,
-                    null /* lp */, null /* nc */, nai.network, nai.getCurrentScore(),
-                    nai.linkProperties, nai.networkCapabilities);
         }
         notifyIfacesChangedForNetworkStats();
         // TODO - we shouldn't send CALLBACK_LOST to requests that can be satisfied
@@ -7146,27 +7125,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         updateTcpBufferSizes(null != newDefaultNetwork
                 ? newDefaultNetwork.linkProperties.getTcpBufferSizes() : null);
         notifyIfacesChangedForNetworkStats();
-
-        // Log 0 -> X and Y -> X default network transitions, where X is the new default.
-        final Network network = (newDefaultNetwork != null) ? newDefaultNetwork.network : null;
-        final int score = (newDefaultNetwork != null) ? newDefaultNetwork.getCurrentScore() : 0;
-        final boolean validated = newDefaultNetwork != null && newDefaultNetwork.lastValidated;
-        final LinkProperties lp = (newDefaultNetwork != null)
-                ? newDefaultNetwork.linkProperties : null;
-        final NetworkCapabilities nc = (newDefaultNetwork != null)
-                ? newDefaultNetwork.networkCapabilities : null;
-
-        final Network prevNetwork = (oldDefaultNetwork != null)
-                ? oldDefaultNetwork.network : null;
-        final int prevScore = (oldDefaultNetwork != null)
-                ? oldDefaultNetwork.getCurrentScore() : 0;
-        final LinkProperties prevLp = (oldDefaultNetwork != null)
-                ? oldDefaultNetwork.linkProperties : null;
-        final NetworkCapabilities prevNc = (oldDefaultNetwork != null)
-                ? oldDefaultNetwork.networkCapabilities : null;
-
-        mMetricsLog.logDefaultNetworkEvent(network, score, validated, lp, nc,
-                prevNetwork, prevScore, prevLp, prevNc);
     }
 
     private void makeDefaultForApps(@NonNull final NetworkRequestInfo nri,

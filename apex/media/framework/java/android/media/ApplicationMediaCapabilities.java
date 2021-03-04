@@ -39,10 +39,12 @@ import java.util.Set;
  for handling newer video codec format and media features.
 
  <p>
- Android 12 introduces seamless media transcoding feature. By default, Android assumes apps can
- support playback of all media formats. Apps that would like to request that media be transcoded
- into a more compatible format should declare their media capabilities in a media_capabilities
- .xml resource file and add it as a property tag in the AndroidManifest.xml file. Here is a example:
+ Android 12 introduces Compatible media transcoding feature.  See
+ <a href="https://developer.android.com/about/versions/12/features#compatible_media_transcoding">
+ Compatible media transcoding</a>. By default, Android assumes apps can support playback of all
+ media formats. Apps that would like to request that media be transcoded into a more compatible
+ format should declare their media capabilities in a media_capabilities.xml resource file and add it
+ as a property tag in the AndroidManifest.xml file. Here is a example:
  <pre>
  {@code
  <media-capabilities xmlns:android="http://schemas.android.com/apk/res/android">

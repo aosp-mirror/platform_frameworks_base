@@ -32,8 +32,8 @@ parcelable SoundModel {
      * Unique vendor ID. Identifies the engine the sound model
      * was build for */
     String vendorUuid;
-    /** Opaque data transparent to Android framework */
-    ParcelFileDescriptor data;
+    /** Opaque data transparent to Android framework. May be null if dataSize is 0. */
+    @nullable ParcelFileDescriptor data;
     /** Size of the above data, in bytes. */
     int dataSize;
 }

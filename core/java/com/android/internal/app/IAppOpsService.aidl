@@ -74,11 +74,11 @@ interface IAppOpsService {
     @UnsupportedAppUsage
     List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
     void getHistoricalOps(int uid, String packageName, String attributionTag, in List<String> ops,
-            int filter, long beginTimeMillis, long endTimeMillis, int flags,
+            int historyFlags, int filter, long beginTimeMillis, long endTimeMillis, int flags,
             in RemoteCallback callback);
     void getHistoricalOpsFromDiskRaw(int uid, String packageName, String attributionTag,
-            in List<String> ops, int filter, long beginTimeMillis, long endTimeMillis, int flags,
-            in RemoteCallback callback);
+            in List<String> ops, int historyFlags, int filter, long beginTimeMillis,
+            long endTimeMillis, int flags, in RemoteCallback callback);
     void offsetHistory(long duration);
     void setHistoryParameters(int mode, long baseSnapshotInterval, int compressionStep);
     void addHistoricalOps(in AppOpsManager.HistoricalOps ops);

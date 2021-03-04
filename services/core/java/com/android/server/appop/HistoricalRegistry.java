@@ -19,6 +19,8 @@ import static android.app.AppOpsManager.FILTER_BY_ATTRIBUTION_TAG;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
 import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
 import static android.app.AppOpsManager.FILTER_BY_UID;
+import static android.app.AppOpsManager.HISTORY_FLAG_AGGREGATE;
+import static android.app.AppOpsManager.HISTORY_FLAG_DISCRETE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,6 +32,7 @@ import android.app.AppOpsManager.HistoricalOpsRequestFilter;
 import android.app.AppOpsManager.HistoricalPackageOps;
 import android.app.AppOpsManager.HistoricalUidOps;
 import android.app.AppOpsManager.OpFlags;
+import android.app.AppOpsManager.OpHistoryFlags;
 import android.app.AppOpsManager.UidState;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
@@ -61,9 +64,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,7 +72,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -85,7 +85,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class managers historical app op state. This includes reading, persistence,
+ * This class manages historical app op state. This includes reading, persistence,
  * accounting, querying.
  * <p>
  * The history is kept forever in multiple files. Each file time contains the
@@ -137,6 +137,8 @@ final class HistoricalRegistry {
     private static final String PARAMETER_DELIMITER = ",";
     private static final String PARAMETER_ASSIGNMENT = "=";
     private static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
+
+    volatile @NonNull DiscreteRegistry mDiscreteRegistry;
 
     @GuardedBy("mLock")
     private @NonNull LinkedList<HistoricalOps> mPendingWrites = new LinkedList<>();
@@ -199,6 +201,7 @@ final class HistoricalRegistry {
 
     HistoricalRegistry(@NonNull Object lock) {
         mInMemoryLock = lock;
+        mDiscreteRegistry = new DiscreteRegistry(lock);
     }
 
     HistoricalRegistry(@NonNull HistoricalRegistry other) {
@@ -352,36 +355,49 @@ final class HistoricalRegistry {
         }
     }
 
-    void getHistoricalOpsFromDiskRaw(int uid, @NonNull String packageName,
+    void getHistoricalOpsFromDiskRaw(int uid, @Nullable String packageName,
             @Nullable String attributionTag, @Nullable String[] opNames,
-            @HistoricalOpsRequestFilter int filter, long beginTimeMillis, long endTimeMillis,
-            @OpFlags int flags, @NonNull RemoteCallback callback) {
+            @OpHistoryFlags int historyFlags, @HistoricalOpsRequestFilter int filter,
+            long beginTimeMillis, long endTimeMillis, @OpFlags int flags,
+            @NonNull RemoteCallback callback) {
         if (!isApiEnabled()) {
             callback.sendResult(new Bundle());
             return;
         }
 
-        synchronized (mOnDiskLock) {
-            synchronized (mInMemoryLock) {
-                if (!isPersistenceInitializedMLocked()) {
-                    Slog.e(LOG_TAG, "Interaction before persistence initialized");
-                    callback.sendResult(new Bundle());
-                    return;
+        final HistoricalOps result = new HistoricalOps(beginTimeMillis, endTimeMillis);
+
+        if ((historyFlags & HISTORY_FLAG_AGGREGATE) != 0) {
+            synchronized (mOnDiskLock) {
+                synchronized (mInMemoryLock) {
+                    if (!isPersistenceInitializedMLocked()) {
+                        Slog.e(LOG_TAG, "Interaction before persistence initialized");
+                        callback.sendResult(new Bundle());
+                        return;
+                    }
+                    mPersistence.collectHistoricalOpsDLocked(result, uid, packageName,
+                            attributionTag,
+                            opNames, filter, beginTimeMillis, endTimeMillis, flags);
+
                 }
-                final HistoricalOps result = new HistoricalOps(beginTimeMillis, endTimeMillis);
-                mPersistence.collectHistoricalOpsDLocked(result, uid, packageName, attributionTag,
-                        opNames, filter, beginTimeMillis, endTimeMillis, flags);
-                final Bundle payload = new Bundle();
-                payload.putParcelable(AppOpsManager.KEY_HISTORICAL_OPS, result);
-                callback.sendResult(payload);
             }
         }
+
+        if ((historyFlags & HISTORY_FLAG_DISCRETE) != 0) {
+            mDiscreteRegistry.getHistoricalDiscreteOps(result, beginTimeMillis, endTimeMillis,
+                    filter, uid, packageName, opNames, attributionTag,
+                    flags);
+        }
+
+        final Bundle payload = new Bundle();
+        payload.putParcelable(AppOpsManager.KEY_HISTORICAL_OPS, result);
+        callback.sendResult(payload);
     }
 
-    void getHistoricalOps(int uid, @NonNull String packageName, @Nullable String attributionTag,
-            @Nullable String[] opNames, @HistoricalOpsRequestFilter int filter,
-            long beginTimeMillis, long endTimeMillis, @OpFlags int flags,
-            @NonNull RemoteCallback callback) {
+    void getHistoricalOps(int uid, @Nullable String packageName, @Nullable String attributionTag,
+            @Nullable String[] opNames, @OpHistoryFlags int historyFlags,
+            @HistoricalOpsRequestFilter int filter, long beginTimeMillis, long endTimeMillis,
+            @OpFlags int flags, @NonNull RemoteCallback callback) {
         if (!isApiEnabled()) {
             callback.sendResult(new Bundle());
             return;
@@ -392,6 +408,8 @@ final class HistoricalRegistry {
             endTimeMillis = currentTimeMillis;
         }
 
+        final Bundle payload = new Bundle();
+
         // Argument times are based off epoch start while our internal store is
         // based off now, so take this into account.
         final long inMemoryAdjBeginTimeMillis = Math.max(currentTimeMillis - endTimeMillis, 0);
@@ -399,55 +417,63 @@ final class HistoricalRegistry {
         final HistoricalOps result = new HistoricalOps(inMemoryAdjBeginTimeMillis,
                 inMemoryAdjEndTimeMillis);
 
-        synchronized (mOnDiskLock) {
-            final List<HistoricalOps> pendingWrites;
-            final HistoricalOps currentOps;
-            boolean collectOpsFromDisk;
-
-            synchronized (mInMemoryLock) {
-                if (!isPersistenceInitializedMLocked()) {
-                    Slog.e(LOG_TAG, "Interaction before persistence initialized");
-                    callback.sendResult(new Bundle());
-                    return;
-                }
-
-                currentOps = getUpdatedPendingHistoricalOpsMLocked(currentTimeMillis);
-                if (!(inMemoryAdjBeginTimeMillis >= currentOps.getEndTimeMillis()
-                        || inMemoryAdjEndTimeMillis <= currentOps.getBeginTimeMillis())) {
-                    // Some of the current batch falls into the query, so extract that.
-                    final HistoricalOps currentOpsCopy = new HistoricalOps(currentOps);
-                    currentOpsCopy.filter(uid, packageName, attributionTag, opNames, filter,
-                            inMemoryAdjBeginTimeMillis, inMemoryAdjEndTimeMillis);
-                    result.merge(currentOpsCopy);
-                }
-                pendingWrites = new ArrayList<>(mPendingWrites);
-                mPendingWrites.clear();
-                collectOpsFromDisk = inMemoryAdjEndTimeMillis > currentOps.getEndTimeMillis();
-            }
-
-            // If the query was only for in-memory state - done.
-            if (collectOpsFromDisk) {
-                // If there is a write in flight we need to force it now
-                persistPendingHistory(pendingWrites);
-                // Collect persisted state.
-                final long onDiskAndInMemoryOffsetMillis = currentTimeMillis
-                        - mNextPersistDueTimeMillis + mBaseSnapshotInterval;
-                final long onDiskAdjBeginTimeMillis = Math.max(inMemoryAdjBeginTimeMillis
-                        - onDiskAndInMemoryOffsetMillis, 0);
-                final long onDiskAdjEndTimeMillis = Math.max(inMemoryAdjEndTimeMillis
-                        - onDiskAndInMemoryOffsetMillis, 0);
-                mPersistence.collectHistoricalOpsDLocked(result, uid, packageName, attributionTag,
-                        opNames, filter, onDiskAdjBeginTimeMillis, onDiskAdjEndTimeMillis, flags);
-            }
-
-            // Rebase the result time to be since epoch.
-            result.setBeginAndEndTime(beginTimeMillis, endTimeMillis);
-
-            // Send back the result.
-            final Bundle payload = new Bundle();
-            payload.putParcelable(AppOpsManager.KEY_HISTORICAL_OPS, result);
-            callback.sendResult(payload);
+        if ((historyFlags & HISTORY_FLAG_DISCRETE) != 0) {
+            mDiscreteRegistry.getHistoricalDiscreteOps(result, beginTimeMillis, endTimeMillis,
+                    filter, uid, packageName, opNames, attributionTag, flags);
         }
+
+        if ((historyFlags & HISTORY_FLAG_AGGREGATE) != 0) {
+            synchronized (mOnDiskLock) {
+                final List<HistoricalOps> pendingWrites;
+                final HistoricalOps currentOps;
+                boolean collectOpsFromDisk;
+
+                synchronized (mInMemoryLock) {
+                    if (!isPersistenceInitializedMLocked()) {
+                        Slog.e(LOG_TAG, "Interaction before persistence initialized");
+                        callback.sendResult(new Bundle());
+                        return;
+                    }
+
+                    currentOps = getUpdatedPendingHistoricalOpsMLocked(currentTimeMillis);
+                    if (!(inMemoryAdjBeginTimeMillis >= currentOps.getEndTimeMillis()
+                            || inMemoryAdjEndTimeMillis <= currentOps.getBeginTimeMillis())) {
+                        // Some of the current batch falls into the query, so extract that.
+                        final HistoricalOps currentOpsCopy = new HistoricalOps(currentOps);
+                        currentOpsCopy.filter(uid, packageName, attributionTag, opNames,
+                                historyFlags, filter, inMemoryAdjBeginTimeMillis,
+                                inMemoryAdjEndTimeMillis);
+                        result.merge(currentOpsCopy);
+                    }
+                    pendingWrites = new ArrayList<>(mPendingWrites);
+                    mPendingWrites.clear();
+                    collectOpsFromDisk = inMemoryAdjEndTimeMillis > currentOps.getEndTimeMillis();
+                }
+
+                // If the query was only for in-memory state - done.
+                if (collectOpsFromDisk) {
+                    // If there is a write in flight we need to force it now
+                    persistPendingHistory(pendingWrites);
+                    // Collect persisted state.
+                    final long onDiskAndInMemoryOffsetMillis = currentTimeMillis
+                            - mNextPersistDueTimeMillis + mBaseSnapshotInterval;
+                    final long onDiskAdjBeginTimeMillis = Math.max(inMemoryAdjBeginTimeMillis
+                            - onDiskAndInMemoryOffsetMillis, 0);
+                    final long onDiskAdjEndTimeMillis = Math.max(inMemoryAdjEndTimeMillis
+                            - onDiskAndInMemoryOffsetMillis, 0);
+                    mPersistence.collectHistoricalOpsDLocked(result, uid, packageName,
+                            attributionTag,
+                            opNames, filter, onDiskAdjBeginTimeMillis, onDiskAdjEndTimeMillis,
+                            flags);
+                }
+            }
+        }
+        // Rebase the result time to be since epoch.
+        result.setBeginAndEndTime(beginTimeMillis, endTimeMillis);
+
+        // Send back the result.
+        payload.putParcelable(AppOpsManager.KEY_HISTORICAL_OPS, result);
+        callback.sendResult(payload);
     }
 
     void incrementOpAccessedCount(int op, int uid, @NonNull String packageName,
@@ -692,6 +718,7 @@ final class HistoricalRegistry {
             }
             persistPendingHistory(pendingWrites);
         }
+        mDiscreteRegistry.writeAndClearAccessHistory();
     }
 
     private void persistPendingHistory(@NonNull List<HistoricalOps> pendingWrites) {

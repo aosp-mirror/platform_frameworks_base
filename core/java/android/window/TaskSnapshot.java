@@ -46,7 +46,7 @@ public class TaskSnapshot implements Parcelable {
     private final int mOrientation;
     /** See {@link android.view.Surface.Rotation} */
     @Surface.Rotation
-    private int mRotation;
+    private final int mRotation;
     /** The size of the snapshot before scaling */
     private final Point mTaskSize;
     private final Rect mContentInsets;
@@ -90,15 +90,15 @@ public class TaskSnapshot implements Parcelable {
     private TaskSnapshot(Parcel source) {
         mId = source.readLong();
         mTopActivityComponent = ComponentName.readFromParcel(source);
-        mSnapshot = source.readParcelable(null /* classLoader */);
+        mSnapshot = source.readTypedObject(HardwareBuffer.CREATOR);
         int colorSpaceId = source.readInt();
         mColorSpace = colorSpaceId >= 0 && colorSpaceId < ColorSpace.Named.values().length
                 ? ColorSpace.get(ColorSpace.Named.values()[colorSpaceId])
                 : ColorSpace.get(ColorSpace.Named.SRGB);
         mOrientation = source.readInt();
         mRotation = source.readInt();
-        mTaskSize = source.readParcelable(null /* classLoader */);
-        mContentInsets = source.readParcelable(null /* classLoader */);
+        mTaskSize = source.readTypedObject(Point.CREATOR);
+        mContentInsets = source.readTypedObject(Rect.CREATOR);
         mIsLowResolution = source.readBoolean();
         mIsRealSnapshot = source.readBoolean();
         mWindowingMode = source.readInt();
@@ -235,13 +235,12 @@ public class TaskSnapshot implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mId);
         ComponentName.writeToParcel(mTopActivityComponent, dest);
-        dest.writeParcelable(mSnapshot != null && !mSnapshot.isClosed() ? mSnapshot : null,
-                0);
+        dest.writeTypedObject(mSnapshot != null && !mSnapshot.isClosed() ? mSnapshot : null, 0);
         dest.writeInt(mColorSpace.getId());
         dest.writeInt(mOrientation);
         dest.writeInt(mRotation);
-        dest.writeParcelable(mTaskSize, 0);
-        dest.writeParcelable(mContentInsets, 0);
+        dest.writeTypedObject(mTaskSize, 0);
+        dest.writeTypedObject(mContentInsets, 0);
         dest.writeBoolean(mIsLowResolution);
         dest.writeBoolean(mIsRealSnapshot);
         dest.writeInt(mWindowingMode);

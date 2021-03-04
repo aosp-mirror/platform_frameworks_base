@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -30,6 +32,7 @@ import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
@@ -1234,6 +1237,7 @@ public class NotificationContentView extends FrameLayout {
         mCachedHeadsUpRemoteInput = null;
     }
 
+
     private RemoteInputView applyRemoteInput(View view, NotificationEntry entry,
             boolean hasRemoteInput, PendingIntent existingPendingIntent,
             RemoteInputView cachedView, NotificationViewWrapper wrapper) {
@@ -1270,6 +1274,15 @@ public class NotificationContentView extends FrameLayout {
                 int color = entry.getSbn().getNotification().color;
                 if (color == Notification.COLOR_DEFAULT) {
                     color = mContext.getColor(R.color.default_remote_input_background);
+                }
+                if (mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_tintNotificationsWithTheme)) {
+                    Resources.Theme theme = new ContextThemeWrapper(mContext,
+                            com.android.internal.R.style.Theme_DeviceDefault_DayNight).getTheme();
+                    TypedArray ta = theme.obtainStyledAttributes(
+                            new int[]{com.android.internal.R.attr.colorAccent});
+                    color = ta.getColor(0, color);
+                    ta.recycle();
                 }
                 existing.setBackgroundColor(ContrastColorUtil.ensureTextBackgroundColor(color,
                         mContext.getColor(R.color.remote_input_text_enabled),
@@ -1342,12 +1355,10 @@ public class NotificationContentView extends FrameLayout {
                 && isPersonWithShortcut
                 && entry.getBubbleMetadata() != null;
         if (showButton) {
-            Drawable d = mContext.getResources().getDrawable(entry.isBubble()
+            // explicitly resolve drawable resource using SystemUI's theme
+            Drawable d = mContext.getDrawable(entry.isBubble()
                     ? R.drawable.bubble_ic_stop_bubble
                     : R.drawable.bubble_ic_create_bubble);
-            mContainingNotification.updateNotificationColor();
-            final int tint = mContainingNotification.getNotificationColor();
-            d.setTint(tint);
 
             String contentDescription = mContext.getResources().getString(entry.isBubble()
                     ? R.string.notification_conversation_unbubble
@@ -1381,9 +1392,8 @@ public class NotificationContentView extends FrameLayout {
             return;
         }
 
+        // explicitly resolve drawable resource using SystemUI's theme
         Drawable snoozeDrawable = mContext.getDrawable(R.drawable.ic_snooze);
-        mContainingNotification.updateNotificationColor();
-        snoozeDrawable.setTint(mContainingNotification.getNotificationColor());
         snoozeButton.setImageDrawable(snoozeDrawable);
 
         final NotificationSnooze snoozeGuts = (NotificationSnooze) LayoutInflater.from(mContext)
