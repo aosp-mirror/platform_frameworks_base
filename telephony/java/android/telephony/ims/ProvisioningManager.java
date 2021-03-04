@@ -869,8 +869,12 @@ public class ProvisioningManager {
      * An integer key representing the voice over IMS opt-in provisioning status for the
      * associated subscription. Determines whether the user can see for voice services over
      * IMS.
-     * <p>
-     * Use {@link #PROVISIONING_VALUE_ENABLED} to enable VoIMS provisioning and
+     *
+     * <p> The flag will force to show the VoLTE option in settings irrespective of others VoLTE
+     * carrier config which hide the VoLTE option (e.g.
+     * {@link CarrierConfigManager#KEY_HIDE_ENHANCED_4G_LTE_BOOL}).
+     *
+     * <p>Use {@link #PROVISIONING_VALUE_ENABLED} to enable VoIMS provisioning and
      * {@link #PROVISIONING_VALUE_DISABLED} to disable VoIMS  provisioning.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
