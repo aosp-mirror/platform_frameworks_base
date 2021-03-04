@@ -39,6 +39,8 @@
 
 #include "dataloader.h"
 
+// #define VERBOSE_READ_LOGS
+
 namespace android {
 
 namespace {
@@ -631,28 +633,65 @@ private:
     };
 
     void onPageReadsWithUid(dataloader::PageReadsWithUid pageReads) final {
+        if (!pageReads.size()) {
+            return;
+        }
+
         auto trace = atrace_is_tag_enabled(ATRACE_TAG);
         if (CC_LIKELY(!trace)) {
             return;
         }
 
         TracedRead last = {};
+        auto lastSerialNo = mLastSerialNo;
         for (auto&& read : pageReads) {
-            if (read.id != last.fileId || read.uid != last.uid ||
-                read.block != last.firstBlockIdx + last.count) {
-                traceRead(last);
-                last = TracedRead{
-                        .timestampUs = read.bootClockTsUs,
-                        .fileId = read.id,
-                        .uid = read.uid,
-                        .firstBlockIdx = (uint32_t)read.block,
-                        .count = 1,
-                };
-            } else {
-                ++last.count;
+            const auto expectedSerialNo = lastSerialNo + last.count;
+#ifdef VERBOSE_READ_LOGS
+            {
+                FileIdx fileIdx = convertFileIdToFileIndex(read.id);
+
+                auto appId = multiuser_get_app_id(read.uid);
+                auto userId = multiuser_get_user_id(read.uid);
+                auto trace = android::base::
+                        StringPrintf("verbose_page_read: serialNo=%lld (expected=%lld) index=%lld "
+                                     "file=%d appid=%d userid=%d",
+                                     static_cast<long long>(read.serialNo),
+                                     static_cast<long long>(expectedSerialNo),
+                                     static_cast<long long>(read.block), static_cast<int>(fileIdx),
+                                     static_cast<int>(appId), static_cast<int>(userId));
+
+                ATRACE_BEGIN(trace.c_str());
+                ATRACE_END();
             }
+#endif // VERBOSE_READ_LOGS
+
+            if (read.serialNo == expectedSerialNo && read.id == last.fileId &&
+                read.uid == last.uid && read.block == last.firstBlockIdx + last.count) {
+                ++last.count;
+                continue;
+            }
+
+            // First, trace the reads.
+            traceRead(last);
+
+            // Second, report missing reads, if any.
+            if (read.serialNo != expectedSerialNo) {
+                const auto readsMissing = read.serialNo - expectedSerialNo;
+                traceMissingReads(readsMissing);
+            }
+
+            last = TracedRead{
+                    .timestampUs = read.bootClockTsUs,
+                    .fileId = read.id,
+                    .uid = read.uid,
+                    .firstBlockIdx = (uint32_t)read.block,
+                    .count = 1,
+            };
+            lastSerialNo = read.serialNo;
         }
+
         traceRead(last);
+        mLastSerialNo = lastSerialNo + last.count;
     }
 
     void traceRead(const TracedRead& read) {
@@ -678,6 +717,13 @@ private:
                                                 static_cast<int>(fileIdx));
         }
 
+        ATRACE_BEGIN(trace.c_str());
+        ATRACE_END();
+    }
+
+    void traceMissingReads(int64_t count) {
+        const auto trace = android::base::StringPrintf("missing_page_reads: count=%lld",
+                                                       static_cast<long long>(count));
         ATRACE_BEGIN(trace.c_str());
         ATRACE_END();
     }
@@ -828,6 +874,7 @@ private:
     std::atomic<bool> mStopReceiving = false;
     std::atomic<bool> mReadLogsEnabled = false;
     std::chrono::milliseconds mWaitOnEofInterval{WaitOnEofMinInterval};
+    int64_t mLastSerialNo{1};
     /** Tracks which files have been requested */
     std::unordered_set<FileIdx> mRequestedFiles;
 };
