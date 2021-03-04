@@ -27,12 +27,14 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.modules.annotation.MinSdk;
 import com.android.modules.utils.build.SdkLevel;
 
 import java.util.Collections;
@@ -45,6 +47,7 @@ import java.util.concurrent.Executor;
  * Provides support for interacting with {@link android.media.MediaSession2 MediaSession2s}
  * that applications have published to express their ongoing media playback state.
  */
+@MinSdk(Build.VERSION_CODES.S)
 @SystemService(Context.MEDIA_COMMUNICATION_SERVICE)
 public class MediaCommunicationManager {
     private static final String TAG = "MediaCommunicationManager";
