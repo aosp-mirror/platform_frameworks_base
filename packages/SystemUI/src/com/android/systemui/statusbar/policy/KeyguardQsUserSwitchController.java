@@ -94,15 +94,6 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
                             goingToFullShade,
                             oldState);
                 }
-
-                @Override
-                public void onDozeAmountChanged(float linearAmount, float amount) {
-                    if (DEBUG) {
-                        Log.d(TAG, String.format("onDozeAmountChanged: linearAmount=%f amount=%f",
-                                linearAmount, amount));
-                    }
-                    setDarkAmount(amount);
-                }
             };
 
     @Inject
@@ -292,20 +283,6 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         if (!mKeyguardVisibilityHelper.isVisibilityAnimating()) {
             mView.setAlpha(alpha);
         }
-    }
-
-    /**
-     * Set the amount (ratio) that the device has transitioned to doze.
-     *
-     * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
-     */
-    private void setDarkAmount(float darkAmount) {
-        boolean isAwake = darkAmount != 0;
-        if (darkAmount == mDarkAmount) {
-            return;
-        }
-        mDarkAmount = darkAmount;
-        mView.setVisibility(isAwake ? View.VISIBLE : View.GONE);
     }
 
     private boolean isListAnimating() {
