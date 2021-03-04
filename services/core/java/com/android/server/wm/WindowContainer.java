@@ -2241,13 +2241,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    void assignRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
+    void assignRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer,
+            boolean forceUpdate) {
         final boolean changed = layer != mLastLayer || mLastRelativeToLayer != relativeTo;
-        if (mSurfaceControl != null && changed) {
+        if (mSurfaceControl != null && (changed || forceUpdate)) {
             setRelativeLayer(t, relativeTo, layer);
             mLastLayer = layer;
             mLastRelativeToLayer = relativeTo;
         }
+    }
+
+    void assignRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
+        assignRelativeLayer(t, relativeTo, layer, false /* forceUpdate */);
     }
 
     protected void setLayer(Transaction t, int layer) {

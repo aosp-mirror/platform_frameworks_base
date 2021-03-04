@@ -3859,6 +3859,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (newParent != null && newParent != mInputMethodSurfaceParent) {
             mInputMethodSurfaceParent = newParent;
             getPendingTransaction().reparent(mImeWindowsContainer.mSurfaceControl, newParent);
+            // When surface parent is removed, the relative layer will also be removed. We need to
+            // do a force update to make sure there is a layer set for the new parent.
+            assignRelativeLayerForIme(getPendingTransaction(), true /* forceUpdate */);
             scheduleAnimation();
         }
     }
@@ -4547,11 +4550,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         @Override
-        void assignRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
+        void assignRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer,
+                boolean forceUpdate) {
             if (!mNeedsLayer) {
                 return;
             }
-            super.assignRelativeLayer(t, relativeTo, layer);
+            super.assignRelativeLayer(t, relativeTo, layer, forceUpdate);
             mNeedsLayer = false;
         }
     }
@@ -4641,6 +4645,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     void assignChildLayers(SurfaceControl.Transaction t) {
+        assignRelativeLayerForIme(t, false /* forceUpdate */);
+        super.assignChildLayers(t);
+    }
+
+    private void assignRelativeLayerForIme(SurfaceControl.Transaction t, boolean forceUpdate) {
         mImeWindowsContainer.setNeedsLayer();
         final WindowState imeTarget = mImeLayeringTarget;
         // In the case where we have an IME target that is not in split-screen mode IME
@@ -4667,14 +4676,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mImeWindowsContainer.assignRelativeLayer(t, imeTarget.getSurfaceControl(),
                     // TODO: We need to use an extra level on the app surface to ensure
                     // this is always above SurfaceView but always below attached window.
-                    1);
+                    1, forceUpdate);
         } else if (mInputMethodSurfaceParent != null) {
             // The IME surface parent may not be its window parent's surface
             // (@see #computeImeParent), so set relative layer here instead of letting the window
             // parent to assign layer.
-            mImeWindowsContainer.assignRelativeLayer(t, mInputMethodSurfaceParent, 1);
+            mImeWindowsContainer.assignRelativeLayer(t, mInputMethodSurfaceParent, 1, forceUpdate);
         }
-        super.assignChildLayers(t);
     }
 
     /**
@@ -4687,7 +4695,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * with {@link WindowState#assignLayer}
      */
     void assignRelativeLayerForImeTargetChild(SurfaceControl.Transaction t, WindowContainer child) {
-        mImeWindowsContainer.setNeedsLayer();
         child.assignRelativeLayer(t, mImeWindowsContainer.getSurfaceControl(), 1);
     }
 

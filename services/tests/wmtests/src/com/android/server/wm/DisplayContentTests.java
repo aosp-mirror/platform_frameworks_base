@@ -342,6 +342,25 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(imeTarget.getRootDisplayArea()).placeImeContainer(imeContainer);
     }
 
+    @Test
+    public void testUpdateImeParent_forceUpdateRelativeLayer() {
+        final DisplayArea.Tokens imeContainer = mDisplayContent.getImeContainer();
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+
+        final WindowState startingWin = createWindow(null, TYPE_APPLICATION_STARTING, activity,
+                "startingWin");
+        startingWin.setHasSurface(true);
+        assertTrue(startingWin.canBeImeTarget());
+        final SurfaceControl imeSurfaceParent = mock(SurfaceControl.class);
+        doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
+        spyOn(imeContainer);
+
+        mDisplayContent.updateImeParent();
+
+        // Force reassign the relative layer when the IME surface parent is changed.
+        verify(imeContainer).assignRelativeLayer(any(), eq(imeSurfaceParent), anyInt(), eq(true));
+    }
+
     /**
      * This tests stack movement between displays and proper stack's, task's and app token's display
      * container references updates.

@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.clearInvocations;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -1006,6 +1007,30 @@ public class WindowContainerTests extends WindowTestsBase {
         task.onAnimationFinished(ANIMATION_TYPE_APP_TRANSITION,
                 task.mSurfaceAnimator.getAnimation());
         verify(win).clearFrozenInsetsState();
+    }
+
+    @Test
+    public void testAssignRelativeLayer() {
+        final WindowContainer container = new WindowContainer(mWm);
+        container.mSurfaceControl = mock(SurfaceControl.class);
+        final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
+        final SurfaceControl relativeParent = mock(SurfaceControl.class);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container);
+        spyOn(surfaceAnimator);
+
+        // Trigger for first relative layer call.
+        container.assignRelativeLayer(t, relativeParent, 1 /* layer */);
+        verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 1 /* layer */);
+
+        // Not trigger for the same relative layer call.
+        clearInvocations(surfaceAnimator);
+        container.assignRelativeLayer(t, relativeParent, 1 /* layer */);
+        verify(surfaceAnimator, never()).setRelativeLayer(t, relativeParent, 1 /* layer */);
+
+        // Trigger for the same relative layer call if forceUpdate=true
+        container.assignRelativeLayer(t, relativeParent, 1 /* layer */, true /* forceUpdate */);
+        verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 1 /* layer */);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
