@@ -329,6 +329,22 @@ class ProcessErrorStateRecord {
             info.append("Package is ").append((int) (loadingProgress * 100)).append("% loaded.\n");
         }
 
+        // Retrieve controller with max ANR delay from AnrControllers
+        // Note that we retrieve the controller before dumping stacks because dumping stacks can
+        // take a few seconds, after which the cause of the ANR delay might have completed and
+        // there might no longer be a valid ANR controller to cancel the dialog in that case
+        AnrController anrController = mService.mActivityTaskManager.getAnrController(aInfo);
+        long anrDialogDelayMs = 0;
+        if (anrController != null) {
+            String packageName = aInfo.packageName;
+            int uid = aInfo.uid;
+            anrDialogDelayMs = anrController.getAnrDelayMillis(packageName, uid);
+            // Might execute an async binder call to a system app to show an interim
+            // ANR progress UI
+            anrController.onAnrDelayStarted(packageName, uid);
+            Slog.i(TAG, "ANR delay of " + anrDialogDelayMs + "ms started for " + packageName);
+        }
+
         StringBuilder report = new StringBuilder();
         report.append(MemoryPressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
@@ -415,20 +431,6 @@ class ProcessErrorStateRecord {
                     }
                 })) {
             return;
-        }
-
-        // Retrieve max ANR delay from AnrControllers without the mService lock since the
-        // controllers might in turn call into apps
-        AnrController anrController = mService.mActivityTaskManager.getAnrController(aInfo);
-        long anrDialogDelayMs = 0;
-        if (anrController != null) {
-            String packageName = aInfo.packageName;
-            int uid = aInfo.uid;
-            anrDialogDelayMs = anrController.getAnrDelayMillis(packageName, uid);
-            // Might execute an async binder call to a system app to show an interim
-            // ANR progress UI
-            anrController.onAnrDelayStarted(packageName, uid);
-            Slog.i(TAG, "ANR delay of " + anrDialogDelayMs + "ms started for " + packageName);
         }
 
         synchronized (mService) {
