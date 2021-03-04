@@ -1367,9 +1367,12 @@
     <dimen name="accessibility_floating_menu_stroke_inset">-2dp</dimen>
     <dimen name="accessibility_floating_menu_margin">16dp</dimen>
     <dimen name="accessibility_floating_menu_padding">6dp</dimen>
-    <dimen name="accessibility_floating_menu_width_height">36dp</dimen>
-    <dimen name="accessibility_floating_menu_single_radius">25dp</dimen>
-    <dimen name="accessibility_floating_menu_multiple_radius">20dp</dimen>
+    <dimen name="accessibility_floating_menu_small_width_height">36dp</dimen>
+    <dimen name="accessibility_floating_menu_small_single_radius">25dp</dimen>
+    <dimen name="accessibility_floating_menu_small_multiple_radius">20dp</dimen>
+    <dimen name="accessibility_floating_menu_large_width_height">56dp</dimen>
+    <dimen name="accessibility_floating_menu_large_single_radius">33dp</dimen>
+    <dimen name="accessibility_floating_menu_large_multiple_radius">35dp</dimen>
 
     <dimen name="rounded_slider_height">48dp</dimen>
     <!-- rounded_slider_height / 2 -->
