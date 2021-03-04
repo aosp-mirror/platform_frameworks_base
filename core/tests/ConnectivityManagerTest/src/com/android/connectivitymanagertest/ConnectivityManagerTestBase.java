@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
+import android.net.TetheringManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -141,7 +142,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         mIntentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         mIntentFilter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
+        mIntentFilter.addAction(TetheringManager.ACTION_TETHER_STATE_CHANGED);
         mContext.registerReceiver(mWifiReceiver, mIntentFilter);
 
         logv("Clear Wifi before we start the test.");
