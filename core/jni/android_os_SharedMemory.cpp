@@ -35,21 +35,6 @@ namespace {
 jclass errnoExceptionClass;
 jmethodID errnoExceptionCtor;  // MethodID for ErrnoException.<init>(String,I)
 
-void throwErrnoException(JNIEnv* env, const char* functionName, int error) {
-    ScopedLocalRef<jstring> detailMessage(env, env->NewStringUTF(functionName));
-    if (detailMessage.get() == NULL) {
-        // Not really much we can do here. We're probably dead in the water,
-        // but let's try to stumble on...
-        env->ExceptionClear();
-    }
-
-    jobject exception = env->NewObject(errnoExceptionClass,
-                                       errnoExceptionCtor,
-                                       detailMessage.get(),
-                                       error);
-    env->Throw(reinterpret_cast<jthrowable>(exception));
-}
-
 jobject SharedMemory_nCreate(JNIEnv* env, jobject, jstring jname, jint size) {
 
     // Name is optional so we can't use ScopedUtfChars for this as it throws NPE on null
@@ -65,7 +50,7 @@ jobject SharedMemory_nCreate(JNIEnv* env, jobject, jstring jname, jint size) {
     }
 
     if (fd < 0) {
-        throwErrnoException(env, "SharedMemory_create", err);
+        jniThrowErrnoException(env, "SharedMemory_create", err);
         return nullptr;
     }
 
