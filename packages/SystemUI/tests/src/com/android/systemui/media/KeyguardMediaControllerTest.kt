@@ -27,13 +27,10 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.util.mockito.capture
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.atLeastOnce
@@ -54,8 +51,6 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
     @Mock
     private lateinit var mediaHeaderView: MediaHeaderView
-    @Captor
-    private lateinit var visibilityListener: ArgumentCaptor<((Boolean) -> Unit)>
     @JvmField @Rule
     val mockito = MockitoJUnit.rule()
     private lateinit var keyguardMediaController: KeyguardMediaController
@@ -69,7 +64,8 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     @Test
     fun testAttach_hiddenWhenHostIsHidden() {
         `when`(mediaHost.visible).thenReturn(false)
-        triggerVisibilityListener()
+
+        keyguardMediaController.attachSinglePaneContainer(mediaHeaderView)
 
         verify(mediaHeaderView, atLeastOnce()).visibility = eq(GONE)
     }
@@ -79,7 +75,8 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         `when`(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
         `when`(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
                 .thenReturn(true)
-        triggerVisibilityListener()
+
+        keyguardMediaController.attachSinglePaneContainer(mediaHeaderView)
 
         verify(mediaHeaderView, atLeastOnce()).visibility = eq(VISIBLE)
     }
@@ -89,14 +86,9 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         `when`(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
         `when`(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
                 .thenReturn(false)
-        triggerVisibilityListener()
+
+        keyguardMediaController.attachSinglePaneContainer(mediaHeaderView)
 
         verify(mediaHeaderView, atLeastOnce()).visibility = eq(GONE)
-    }
-
-    private fun triggerVisibilityListener() {
-        keyguardMediaController.attach(mediaHeaderView)
-        verify(mediaHost).addVisibilityChangeListener(capture(visibilityListener))
-        visibilityListener.value.invoke(true)
     }
 }

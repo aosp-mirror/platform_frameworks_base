@@ -75,6 +75,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.qs.QSDetailDisplayer;
@@ -240,6 +241,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private LockIconViewController mLockIconViewController;
     @Mock
     private QuickAccessWalletClient mQuickAccessWalletClient;
+    @Mock
+    private KeyguardMediaController mKeyguardMediaController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -346,6 +349,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mLockIconViewController,
                 mFeatureFlags,
                 mQuickAccessWalletClient,
+                mKeyguardMediaController,
                 new FakeExecutor(new FakeSystemClock()));
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,

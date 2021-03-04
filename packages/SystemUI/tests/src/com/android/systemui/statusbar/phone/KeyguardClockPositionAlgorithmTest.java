@@ -53,6 +53,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private boolean mHasVisibleNotifs;
     private float mQsExpansion;
     private int mCutoutTopInset = 0; // in pixels
+    private boolean mIsSplitShade = false;
 
     @Before
     public void setUp() {
@@ -397,7 +398,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
                 0 /* userSwitchHeight */, mPreferredClockY, 0 /* userSwitchPreferredY */,
                 mHasCustomClock, mHasVisibleNotifs, mDark, ZERO_DRAG, false /* bypassEnabled */,
                 0 /* unlockedStackScrollerPadding */, mQsExpansion,
-                mCutoutTopInset);
+                mCutoutTopInset, mIsSplitShade);
         mClockPositionAlgorithm.run(mClockPosition);
     }
 }
