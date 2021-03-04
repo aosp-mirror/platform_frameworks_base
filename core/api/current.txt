@@ -11768,6 +11768,7 @@ package android.content.pm {
     method public boolean isResourceOverlay();
     method public boolean isVirtualPreload();
     method public CharSequence loadDescription(android.content.pm.PackageManager);
+    field public static final int CATEGORY_ACCESSIBILITY = 8; // 0x8
     field public static final int CATEGORY_AUDIO = 1; // 0x1
     field public static final int CATEGORY_GAME = 0; // 0x0
     field public static final int CATEGORY_IMAGE = 3; // 0x3

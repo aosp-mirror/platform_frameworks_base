@@ -3300,6 +3300,7 @@
   <java-symbol type="string" name="app_category_news" />
   <java-symbol type="string" name="app_category_maps" />
   <java-symbol type="string" name="app_category_productivity" />
+  <java-symbol type="string" name="app_category_accessibility" />
 
   <java-symbol type="raw" name="fallback_categories" />
 
