@@ -1302,6 +1302,8 @@
 
     <!-- Name of the phone device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name">Phone speaker</string>
+    <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_phone">This phone</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>
