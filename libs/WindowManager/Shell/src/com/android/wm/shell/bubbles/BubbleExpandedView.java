@@ -340,7 +340,7 @@ public class BubbleExpandedView extends LinearLayout {
             mSettingsIcon.setVisibility(GONE);
         } else {
             mTaskView = new TaskView(mContext, mController.getTaskOrganizer());
-            mTaskView.setListener(mContext.getMainExecutor(), mTaskViewListener);
+            mTaskView.setListener(mController.getMainExecutor(), mTaskViewListener);
             mExpandedViewContainer.addView(mTaskView);
             bringChildToFront(mTaskView);
         }
