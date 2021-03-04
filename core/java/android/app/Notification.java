@@ -5303,14 +5303,18 @@ public class Notification implements Parcelable
         }
 
         private void bindExpandButton(RemoteViews contentView, StandardTemplateParams p) {
-            contentView.setInt(
-                    R.id.expand_button, "setDefaultTextColor", getPrimaryTextColor(p));
-            contentView.setInt(
-                    R.id.expand_button, "setDefaultPillColor", getProtectionColor(p));
-            contentView.setInt(
-                    R.id.expand_button, "setHighlightTextColor", getBackgroundColor(p));
-            contentView.setInt(
-                    R.id.expand_button, "setHighlightPillColor", getAccentColor(p));
+            // set default colors
+            int textColor = getPrimaryTextColor(p);
+            int pillColor = getProtectionColor(p);
+            contentView.setInt(R.id.expand_button, "setDefaultTextColor", textColor);
+            contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
+            // Use different highlighted colors except when low-priority mode prevents that
+            if (!p.forceDefaultColor) {
+                textColor = getBackgroundColor(p);
+                pillColor = getAccentColor(p);
+            }
+            contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
+            contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
         }
 
         private void bindHeaderChronometerAndTime(RemoteViews contentView,
