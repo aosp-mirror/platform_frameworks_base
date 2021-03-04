@@ -1478,7 +1478,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @NonNull
     private NetworkInfo filterNetworkInfo(@NonNull NetworkInfo networkInfo, int type,
             @NonNull NetworkCapabilities nc, int uid, boolean ignoreBlocked) {
-        NetworkInfo filtered = new NetworkInfo(networkInfo);
+        final NetworkInfo filtered = new NetworkInfo(networkInfo);
+        // Many legacy types (e.g,. TYPE_MOBILE_HIPRI) are not actually a property of the network
+        // but only exists if an app asks about them or requests them. Ensure the requesting app
+        // gets the type it asks for.
         filtered.setType(type);
         final DetailedState state = isNetworkWithCapabilitiesBlocked(nc, uid, ignoreBlocked)
                 ? DetailedState.BLOCKED
