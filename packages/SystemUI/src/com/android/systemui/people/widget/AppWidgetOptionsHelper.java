@@ -37,15 +37,16 @@ public class AppWidgetOptionsHelper {
     public static final String OPTIONS_PEOPLE_TILE = "options_people_tile";
 
     /** Sets {@link PeopleSpaceTile} in AppWidgetOptions. */
-    public static void setPeopleTile(AppWidgetManager appWidgetManager, int appWidgetId,
+    public static Bundle setPeopleTile(AppWidgetManager appWidgetManager, int appWidgetId,
             PeopleSpaceTile tile) {
+        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
         if (tile == null) {
             if (DEBUG) Log.d(TAG, "Requested to store null tile");
-            return;
+            return options;
         }
-        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
         options.putParcelable(OPTIONS_PEOPLE_TILE, tile);
         appWidgetManager.updateAppWidgetOptions(appWidgetId, options);
+        return options;
     }
 
     /** Gets {@link PeopleSpaceTile} from AppWidgetOptions. */

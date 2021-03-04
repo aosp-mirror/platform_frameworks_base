@@ -15,10 +15,11 @@
   -->
 
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="140dp"
-    android:minHeight="55dp"
-    android:minResizeWidth="110dp"
-    android:minResizeHeight="55dp"
+    android:minWidth="120dp"
+    android:minHeight="54dp"
+    android:minResizeWidth="60dp"
+    android:minResizeHeight="54dp"
+    android:maxResizeHeight="207dp"
     android:updatePeriodMillis="60000"
     android:description="@string/people_tile_description"
     android:previewLayout="@layout/people_space_placeholder_layout"
