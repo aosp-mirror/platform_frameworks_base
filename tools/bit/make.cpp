@@ -90,8 +90,7 @@ BuildVars::BuildVars(const string& outDir, const string& buildProduct,
 
     Json::Value json;
     Json::CharReaderBuilder builder;
-    std::string errorMessage;
-    if (!Json::parseFromStream(builder, stream, &json, &errorMessage)) {
+    if (!Json::parseFromStream(builder, stream, &json, /* errorMessage = */ nullptr)) {
         return;
     }
 
@@ -215,8 +214,7 @@ read_modules(const string& buildOut, const string& device, map<string,Module>* r
 
     Json::Value json;
     Json::CharReaderBuilder builder;
-    std::string errorMessage;
-    if (!Json::parseFromStream(builder, stream, &json, &errorMessage)) {
+    if (!Json::parseFromStream(builder, stream, &json, /* errorMessage = */ nullptr)) {
         json_error(filename, "can't parse json format", quiet);
         return;
     }
