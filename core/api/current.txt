@@ -30430,17 +30430,8 @@ package android.os {
   public abstract class CombinedVibrationEffect implements android.os.Parcelable {
     method @NonNull public static android.os.CombinedVibrationEffect createSynced(@NonNull android.os.VibrationEffect);
     method public int describeContents();
-    method @NonNull public static android.os.CombinedVibrationEffect.SequentialCombination startSequential();
     method @NonNull public static android.os.CombinedVibrationEffect.SyncedCombination startSynced();
     field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibrationEffect> CREATOR;
-  }
-
-  public static final class CombinedVibrationEffect.SequentialCombination {
-    method @NonNull public android.os.CombinedVibrationEffect.SequentialCombination addNext(int, @NonNull android.os.VibrationEffect);
-    method @NonNull public android.os.CombinedVibrationEffect.SequentialCombination addNext(int, @NonNull android.os.VibrationEffect, int);
-    method @NonNull public android.os.CombinedVibrationEffect.SequentialCombination addNext(@NonNull android.os.CombinedVibrationEffect);
-    method @NonNull public android.os.CombinedVibrationEffect.SequentialCombination addNext(@NonNull android.os.CombinedVibrationEffect, int);
-    method @NonNull public android.os.CombinedVibrationEffect combine();
   }
 
   public static final class CombinedVibrationEffect.SyncedCombination {
