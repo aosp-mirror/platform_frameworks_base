@@ -995,6 +995,15 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getScreenOnMeasuredBatteryConsumptionUC();
 
         /**
+         * Returns the battery consumption (in microcoulombs) of the uid's cpu usage, derived from
+         * on device power measurement data.
+         * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+         *
+         * {@hide}
+         */
+        public abstract long getCpuMeasuredBatteryConsumptionUC();
+
+        /**
          * Returns the battery consumption (in microcoulombs) used by this uid for each
          * {@link android.hardware.power.stats.EnergyConsumer.ordinal} of (custom) energy consumer
          * type {@link android.hardware.power.stats.EnergyConsumerType#OTHER}).
@@ -2519,6 +2528,15 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public abstract long getScreenDozeMeasuredBatteryConsumptionUC();
+
+    /**
+     * Returns the battery consumption (in microcoulombs) of the cpu, derived from on device power
+     * measurement data.
+     * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+     *
+     * {@hide}
+     */
+    public abstract long getCpuMeasuredBatteryConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) that each
