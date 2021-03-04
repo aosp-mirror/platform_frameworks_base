@@ -46,7 +46,15 @@ open class QSTileViewHorizontal(
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL or Gravity.START
         mDualTargetAllowed = false
+        val padding = context.resources.getDimensionPixelSize(R.dimen.qs_tile_side_label_padding)
+        setPadding(padding, paddingTop, padding, paddingBottom)
+
         mBg.setImageDrawable(null)
+        mIconFrame.removeAllViews()
+        removeView(mIconFrame)
+        val iconSize = context.resources.getDimensionPixelSize(R.dimen.qs_icon_size)
+        addView(mIcon, 0, LayoutParams(iconSize, iconSize))
+
         mColorLabelActive = ColorStateList.valueOf(getColorForState(getContext(), STATE_ACTIVE))
     }
 
@@ -58,12 +66,15 @@ open class QSTileViewHorizontal(
                 removeRule(RelativeLayout.ALIGN_PARENT_TOP)
             }
         }
+        mLabelContainer.setPadding(0, 0, 0, 0)
+        (mLabelContainer.layoutParams as MarginLayoutParams).apply {
+            marginStart = context.resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
+        }
         mLabel.gravity = Gravity.START
         mLabel.textDirection = TEXT_DIRECTION_LOCALE
         mSecondLine.gravity = Gravity.START
         mSecondLine.textDirection = TEXT_DIRECTION_LOCALE
-        val padding = context.resources.getDimensionPixelSize(R.dimen.qs_tile_side_label_padding)
-        mLabelContainer.setPaddingRelative(0, padding, padding, padding)
+
         (mLabelContainer.layoutParams as LayoutParams).gravity =
             Gravity.CENTER_VERTICAL or Gravity.START
         if (mCollapsedView) {

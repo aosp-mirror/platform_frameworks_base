@@ -530,6 +530,8 @@
     <dimen name="qs_tile_margin_top">0dp</dimen>
     <dimen name="qs_tile_icon_background_stroke_width">-1dp</dimen>
     <dimen name="qs_tile_background_size">44dp</dimen>
+    <dimen name="qs_icon_size">20dp</dimen>
+    <dimen name="qs_label_container_margin">10dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>
