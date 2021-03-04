@@ -1583,8 +1583,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         public String[] getPersonalAppsForSuspension(int userId) {
-            return new PersonalAppsSuspensionHelper(
-                    mContext.createContextAsUser(UserHandle.of(userId), 0 /* flags */))
+            return PersonalAppsSuspensionHelper.forUser(mContext, userId)
                     .getPersonalAppsForSuspension();
         }
 
@@ -1598,6 +1597,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
             mSafetyChecker = safetyChecker;
+        }
+
+        void dumpPerUserData(IndentingPrintWriter pw, @UserIdInt int userId) {
+            PersonalAppsSuspensionHelper.forUser(mContext, userId).dump(pw);
         }
     }
 
@@ -9164,11 +9167,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void dumpDevicePolicyData(IndentingPrintWriter pw) {
+    private void dumpPerUserData(IndentingPrintWriter pw) {
         int userCount = mUserData.size();
-        for (int u = 0; u < userCount; u++) {
-            DevicePolicyData policy = getUserData(mUserData.keyAt(u));
+        for (int userId = 0; userId < userCount; userId++) {
+            DevicePolicyData policy = getUserData(mUserData.keyAt(userId));
             policy.dump(pw);
+            pw.println();
+
+            pw.increaseIndent();
+            mInjector.dumpPerUserData(pw, userId);
+            pw.decreaseIndent();
+            pw.println();
         }
     }
 
@@ -9186,7 +9195,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 pw.println();
                 mDeviceAdminServiceController.dump(pw);
                 pw.println();
-                dumpDevicePolicyData(pw);
+                dumpPerUserData(pw);
                 pw.println();
                 mConstants.dump(pw);
                 pw.println();
@@ -9232,20 +9241,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         pw.increaseIndent();
         dumpResources(pw, mContext, "cross_profile_apps", R.array.cross_profile_apps);
         dumpResources(pw, mContext, "vendor_cross_profile_apps", R.array.vendor_cross_profile_apps);
+        dumpResources(pw, mContext, "config_packagesExemptFromSuspension",
+                R.array.config_packagesExemptFromSuspension);
         pw.decreaseIndent();
         pw.println();
     }
 
     static void dumpResources(IndentingPrintWriter pw, Context context, String resName, int resId) {
-        String[] apps = context.getResources().getStringArray(resId);
-        if (apps == null || apps.length == 0) {
-            pw.printf("%s: empty\n", resName);
+        dumpApps(pw, resName, context.getResources().getStringArray(resId));
+    }
+
+    static void dumpApps(IndentingPrintWriter pw, String name, String[] apps) {
+        dumpApps(pw, name, Arrays.asList(apps));
+    }
+
+    static void dumpApps(IndentingPrintWriter pw, String name, List apps) {
+        if (apps == null || apps.isEmpty()) {
+            pw.printf("%s: empty\n", name);
             return;
         }
-        pw.printf("%s: %d app%s\n", resName, apps.length, apps.length == 1 ? "" : "s");
+        int size = apps.size();
+        pw.printf("%s: %d app%s\n", name, size, size == 1 ? "" : "s");
         pw.increaseIndent();
-        for (int i = 0; i < apps.length; i++) {
-            pw.printf("%d: %s\n", i, apps[i]);
+        for (int i = 0; i < size; i++) {
+            pw.printf("%d: %s\n", i, apps.get(i));
         }
         pw.decreaseIndent();
     }
