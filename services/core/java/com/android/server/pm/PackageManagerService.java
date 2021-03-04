@@ -12555,6 +12555,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (hasOldPkg) {
                         mPermissionManager.revokeRuntimePermissionsIfGroupChanged(pkg, oldPkg,
                                 allPackageNames);
+                        mPermissionManager.revokeStoragePermissionsIfScopeExpanded(pkg, oldPkg);
                     }
                     if (hasPermissionDefinitionChanges) {
                         mPermissionManager.revokeRuntimePermissionsIfPermissionDefinitionChanged(
