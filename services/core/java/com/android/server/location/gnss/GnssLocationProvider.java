@@ -353,6 +353,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             reloadGpsProperties();
         } else {
             if (DEBUG) Log.d(TAG, "SIM MCC/MNC is still not available");
+            // Reload gnss config for no SIM case
+            mGnssConfiguration.reloadGpsProperties();
         }
     }
 
