@@ -439,7 +439,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
         public void onAvailable(Network network) {
-            if (DEBUG) Log.d(TAG, "onAvailable " + network.netId);
+            if (DEBUG) Log.d(TAG, "onAvailable " + network.getNetId());
             updateState();
             fireCallbacks();
         };
@@ -448,7 +448,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         // how long the VPN connection is held on to.
         @Override
         public void onLost(Network network) {
-            if (DEBUG) Log.d(TAG, "onLost " + network.netId);
+            if (DEBUG) Log.d(TAG, "onLost " + network.getNetId());
             updateState();
             fireCallbacks();
         };
