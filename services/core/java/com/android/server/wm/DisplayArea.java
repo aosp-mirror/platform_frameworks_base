@@ -495,6 +495,21 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return info;
     }
 
+    /**
+     * Gets the stable bounds of the DisplayArea, which is the bounds excluding insets for
+     * navigation bar, cutout, and status bar.
+     */
+    void getStableRect(Rect out) {
+        if (mDisplayContent == null) {
+            getBounds(out);
+            return;
+        }
+
+        // Intersect with the display stable bounds to get the DisplayArea stable bounds.
+        mDisplayContent.getStableRect(out);
+        out.intersect(getBounds());
+    }
+
     @Override
     public boolean providesMaxBounds() {
         return true;
