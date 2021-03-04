@@ -1886,6 +1886,11 @@
     <permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows system APK to manage country code.
+             <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.MANAGE_WIFI_COUNTRY_CODE"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi @hide Allows an application to manage an automotive device's application network
          preference as it relates to OEM_PAID and OEM_PRIVATE capable networks.
          <p>Not for use by third-party or privileged applications. -->
