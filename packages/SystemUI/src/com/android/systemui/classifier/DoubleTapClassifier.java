@@ -22,7 +22,6 @@ import static com.android.systemui.classifier.FalsingModule.DOUBLE_TAP_TOUCH_SLO
 import android.view.MotionEvent;
 
 import java.util.List;
-import java.util.Queue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -49,8 +48,7 @@ public class DoubleTapClassifier extends FalsingClassifier {
     @Override
     Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
         List<MotionEvent> secondTapEvents = getRecentMotionEvents();
-        Queue<? extends List<MotionEvent>> historicalEvents = getHistoricalEvents();
-        List<MotionEvent> firstTapEvents = historicalEvents.peek();
+        List<MotionEvent> firstTapEvents = getPriorMotionEvents();
 
         StringBuilder reason = new StringBuilder();
 
