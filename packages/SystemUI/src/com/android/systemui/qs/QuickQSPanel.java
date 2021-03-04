@@ -349,7 +349,6 @@ public class QuickQSPanel extends QSPanel {
             setClipToPadding(false);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.WRAP_CONTENT);
-            lp.gravity = Gravity.CENTER_HORIZONTAL;
             setLayoutParams(lp);
             setMaxColumns(4);
         }
