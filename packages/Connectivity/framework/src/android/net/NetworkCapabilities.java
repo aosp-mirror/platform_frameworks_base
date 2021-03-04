@@ -1864,7 +1864,7 @@ public final class NetworkCapabilities implements Parcelable {
                 final ArraySet<T> result = new ArraySet<>(size);
                 for (int i = 0; i < size; i++) {
                     final T value = in.readParcelable(loader);
-                    result.append(value);
+                    result.add(value);
                 }
                 return result;
             }
