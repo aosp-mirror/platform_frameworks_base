@@ -728,11 +728,11 @@ public class Environment {
     /**
      * Standard directory in which to place any audio files that should be
      * in the regular list of music for the user.
-     * This may be combined with
+     * This may be combined with {@link #DIRECTORY_AUDIOBOOKS},
      * {@link #DIRECTORY_PODCASTS}, {@link #DIRECTORY_NOTIFICATIONS},
-     * {@link #DIRECTORY_ALARMS}, and {@link #DIRECTORY_RINGTONES} as a series
-     * of directories to categories a particular audio file as more than one
-     * type.
+     * {@link #DIRECTORY_ALARMS}, {@link #DIRECTORY_RINGTONES}, and
+     * {@link #DIRECTORY_RECORDINGS} as a series of directories to
+     * categorize a particular audio file as more than one type.
      */
     public static String DIRECTORY_MUSIC = "Music";
 
@@ -741,10 +741,10 @@ public class Environment {
      * in the list of podcasts that the user can select (not as regular
      * music).
      * This may be combined with {@link #DIRECTORY_MUSIC},
-     * {@link #DIRECTORY_NOTIFICATIONS},
-     * {@link #DIRECTORY_ALARMS}, and {@link #DIRECTORY_RINGTONES} as a series
-     * of directories to categories a particular audio file as more than one
-     * type.
+     * {@link #DIRECTORY_AUDIOBOOKS}, {@link #DIRECTORY_NOTIFICATIONS},
+     * {@link #DIRECTORY_ALARMS}, {@link #DIRECTORY_RINGTONES}, and
+     * {@link #DIRECTORY_RECORDINGS} as a series of directories to
+     * categorize a particular audio file as more than one type.
      */
     public static String DIRECTORY_PODCASTS = "Podcasts";
 
@@ -753,10 +753,10 @@ public class Environment {
      * in the list of ringtones that the user can select (not as regular
      * music).
      * This may be combined with {@link #DIRECTORY_MUSIC},
-     * {@link #DIRECTORY_PODCASTS}, {@link #DIRECTORY_NOTIFICATIONS}, and
-     * {@link #DIRECTORY_ALARMS} as a series
-     * of directories to categories a particular audio file as more than one
-     * type.
+     * {@link #DIRECTORY_AUDIOBOOKS}, {@link #DIRECTORY_PODCASTS},
+     * {@link #DIRECTORY_NOTIFICATIONS}, {@link #DIRECTORY_ALARMS},
+     * and {@link #DIRECTORY_RECORDINGS} as a series of directories
+     * to categorize a particular audio file as more than one type.
      */
     public static String DIRECTORY_RINGTONES = "Ringtones";
 
@@ -765,10 +765,10 @@ public class Environment {
      * in the list of alarms that the user can select (not as regular
      * music).
      * This may be combined with {@link #DIRECTORY_MUSIC},
-     * {@link #DIRECTORY_PODCASTS}, {@link #DIRECTORY_NOTIFICATIONS},
-     * and {@link #DIRECTORY_RINGTONES} as a series
-     * of directories to categories a particular audio file as more than one
-     * type.
+     * {@link #DIRECTORY_AUDIOBOOKS}, {@link #DIRECTORY_PODCASTS},
+     * {@link #DIRECTORY_NOTIFICATIONS}, {@link #DIRECTORY_RINGTONES},
+     * and {@link #DIRECTORY_RECORDINGS} as a series of directories
+     * to categorize a particular audio file as more than one type.
      */
     public static String DIRECTORY_ALARMS = "Alarms";
 
@@ -777,10 +777,10 @@ public class Environment {
      * in the list of notifications that the user can select (not as regular
      * music).
      * This may be combined with {@link #DIRECTORY_MUSIC},
-     * {@link #DIRECTORY_PODCASTS},
-     * {@link #DIRECTORY_ALARMS}, and {@link #DIRECTORY_RINGTONES} as a series
-     * of directories to categories a particular audio file as more than one
-     * type.
+     * {@link #DIRECTORY_AUDIOBOOKS}, {@link #DIRECTORY_PODCASTS},
+     * {@link #DIRECTORY_ALARMS}, {@link #DIRECTORY_RINGTONES}, and
+     * {@link #DIRECTORY_RECORDINGS} as a series of directories to
+     * categorize a particular audio file as more than one type.
      */
     public static String DIRECTORY_NOTIFICATIONS = "Notifications";
 
@@ -831,14 +831,26 @@ public class Environment {
     public static String DIRECTORY_SCREENSHOTS = "Screenshots";
 
     /**
-     * Standard directory in which to place any audio files which are
-     * audiobooks.
+     * Standard directory in which to place any audio files that should be
+     * in the list of audiobooks that the user can select (not as regular
+     * music).
+     * This may be combined with {@link #DIRECTORY_MUSIC},
+     * {@link #DIRECTORY_PODCASTS}, {@link #DIRECTORY_NOTIFICATIONS},
+     * {@link #DIRECTORY_ALARMS}, {@link #DIRECTORY_RINGTONES},
+     * and {@link #DIRECTORY_RECORDINGS} as a series of directories
+     * to categorize a particular audio file as more than one type.
      */
     public static String DIRECTORY_AUDIOBOOKS = "Audiobooks";
 
     /**
-     * Standard directory in which to place any audio files which are
-     * recordings.
+     * Standard directory in which to place any audio files that should be
+     * in the list of voice recordings recorded by voice recorder apps that
+     * the user can select (not as regular music).
+     * This may be combined with {@link #DIRECTORY_MUSIC},
+     * {@link #DIRECTORY_AUDIOBOOKS}, {@link #DIRECTORY_PODCASTS},
+     * {@link #DIRECTORY_NOTIFICATIONS}, {@link #DIRECTORY_ALARMS},
+     * and {@link #DIRECTORY_RINGTONES} as a series of directories
+     * to categorize a particular audio file as more than one type.
      */
     @NonNull
     // The better way is that expose a static method getRecordingDirectories.
