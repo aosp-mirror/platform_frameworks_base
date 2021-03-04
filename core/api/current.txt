@@ -99,6 +99,7 @@ package android {
     field public static final String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final String MANAGE_DOCUMENTS = "android.permission.MANAGE_DOCUMENTS";
     field public static final String MANAGE_EXTERNAL_STORAGE = "android.permission.MANAGE_EXTERNAL_STORAGE";
+    field public static final String MANAGE_MEDIA = "android.permission.MANAGE_MEDIA";
     field public static final String MANAGE_ONGOING_CALLS = "android.permission.MANAGE_ONGOING_CALLS";
     field public static final String MANAGE_OWN_CALLS = "android.permission.MANAGE_OWN_CALLS";
     field public static final String MASTER_CLEAR = "android.permission.MASTER_CLEAR";
