@@ -23,6 +23,7 @@ import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.internal.util.LatencyTracker;
@@ -35,6 +36,8 @@ import com.android.keyguard.EmergencyButton.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingClassifier;
+import com.android.systemui.classifier.FalsingCollector;
 
 import java.util.List;
 
@@ -50,6 +53,7 @@ public class KeyguardPatternViewController
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final LockPatternUtils mLockPatternUtils;
     private final LatencyTracker mLatencyTracker;
+    private final FalsingCollector mFalsingCollector;
     private final KeyguardMessageAreaController.Factory mMessageAreaControllerFactory;
 
     private KeyguardMessageAreaController mMessageAreaController;
@@ -102,6 +106,11 @@ public class KeyguardPatternViewController
 
             final int userId = KeyguardUpdateMonitor.getCurrentUser();
             if (pattern.size() < LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
+                // Treat single-sized patterns as erroneous taps.
+                if (pattern.size() == 1) {
+                    mFalsingCollector.updateFalseConfidence(FalsingClassifier.Result.falsed(
+                            0.7, "empty pattern input"));
+                }
                 mLockPatternView.enableInput();
                 onPatternChecked(userId, false, 0, false /* not valid - too short */);
                 return;
@@ -179,11 +188,13 @@ public class KeyguardPatternViewController
             LockPatternUtils lockPatternUtils,
             KeyguardSecurityCallback keyguardSecurityCallback,
             LatencyTracker latencyTracker,
+            FalsingCollector falsingCollector,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory) {
         super(view, securityMode, keyguardSecurityCallback);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
+        mFalsingCollector = falsingCollector;
         mMessageAreaControllerFactory = messageAreaControllerFactory;
         KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
         mMessageAreaController = mMessageAreaControllerFactory.create(kma);
@@ -205,6 +216,12 @@ public class KeyguardPatternViewController
                 KeyguardUpdateMonitor.getCurrentUser()));
         // vibrate mode will be the same for the life of this screen
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
+        mLockPatternView.setOnTouchListener((v, event) -> {
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                mFalsingCollector.avoidGesture();
+            }
+            return false;
+        });
 
         EmergencyButton button = mView.findViewById(R.id.emergency_call_button);
         if (button != null) {
@@ -224,6 +241,7 @@ public class KeyguardPatternViewController
     protected void onViewDetached() {
         super.onViewDetached();
         mLockPatternView.setOnPatternListener(null);
+        mLockPatternView.setOnTouchListener(null);
         EmergencyButton button = mView.findViewById(R.id.emergency_call_button);
         if (button != null) {
             button.setCallback(null);

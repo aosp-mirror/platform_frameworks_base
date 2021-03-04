@@ -62,7 +62,7 @@ public class SingleTapClassifier extends FalsingClassifier {
             } else if (Math.abs(event.getY() - downY) >= mTouchSlop) {
                 reason = "dY too big for a tap: "
                         + Math.abs(event.getY() - downY)
-                        + "vs "
+                        + " vs "
                         + mTouchSlop;
                 return Result.falsed(0.5, reason);
             }

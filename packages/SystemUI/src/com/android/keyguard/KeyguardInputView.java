@@ -26,16 +26,11 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.systemui.Gefingerpoken;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A Base class for all Keyguard password/pattern/pin related inputs.
  */
 public abstract class KeyguardInputView extends LinearLayout {
-    private final List<Gefingerpoken> mMotionEventListener = new ArrayList<>();
 
     public KeyguardInputView(Context context) {
         super(context);
@@ -53,7 +48,6 @@ public abstract class KeyguardInputView extends LinearLayout {
     abstract CharSequence getTitle();
 
     void animateForIme(float interpolatedFraction) {
-        return;
     }
 
     boolean disallowInterceptTouch(MotionEvent event) {
@@ -64,27 +58,6 @@ public abstract class KeyguardInputView extends LinearLayout {
 
     boolean startDisappearAnimation(Runnable finishRunnable) {
         return false;
-    }
-
-    void addMotionEventListener(Gefingerpoken listener) {
-        mMotionEventListener.add(listener);
-    }
-
-    void removeMotionEventListener(Gefingerpoken listener) {
-        mMotionEventListener.remove(listener);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return mMotionEventListener.stream().anyMatch(listener -> listener.onTouchEvent(event))
-                || super.onTouchEvent(event);
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
-        return mMotionEventListener.stream().anyMatch(
-                listener -> listener.onInterceptTouchEvent(event))
-                || super.onInterceptTouchEvent(event);
     }
 
     protected AnimatorListenerAdapter getAnimationListener(int cuj) {

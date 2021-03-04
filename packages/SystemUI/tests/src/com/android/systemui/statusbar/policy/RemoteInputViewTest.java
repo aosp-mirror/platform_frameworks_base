@@ -45,6 +45,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -86,6 +87,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 mRemoteInputQuickSettingsDisabler);
         mDependency.injectTestDependency(LightBarController.class,
                 mLightBarController);
+        mDependency.injectMockDependency(NotificationRemoteInputManager.class);
 
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION), null,

@@ -34,6 +34,8 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -83,6 +85,9 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     private KeyguardSecurityViewFlipperController mKeyguardSecurityViewFlipperController;
     @Mock
     private ConfigurationController mConfigurationController;
+    @Mock
+    private KeyguardViewController mKeyguardViewController;
+    private FalsingManager mFalsingManager = new FalsingManagerFake();
 
     private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
 
@@ -96,7 +101,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 mView,  mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                 mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                 mKeyguardStateController, mKeyguardSecurityViewFlipperController,
-                mConfigurationController).create(mSecurityCallback);
+                mConfigurationController, mKeyguardViewController, mFalsingManager)
+                .create(mSecurityCallback);
     }
 
     @Test

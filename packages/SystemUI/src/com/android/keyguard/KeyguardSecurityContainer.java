@@ -58,10 +58,12 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.Gefingerpoken;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class KeyguardSecurityContainer extends FrameLayout {
@@ -97,6 +99,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     private final ViewConfiguration mViewConfiguration;
     private final SpringAnimation mSpringAnimation;
     private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
+    private final List<Gefingerpoken> mMotionEventListeners = new ArrayList<>();
 
     private float mLastTouchY = -1;
     private int mActivePointerId = -1;
@@ -388,6 +391,10 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        boolean result =  mMotionEventListeners.stream().anyMatch(
+                listener -> listener.onInterceptTouchEvent(event))
+                || super.onInterceptTouchEvent(event);
+
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 int pointerIndex = event.getActionIndex();
@@ -418,12 +425,17 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mIsDragging = false;
                 break;
         }
-        return false;
+        return result;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
+
+        boolean result =  mMotionEventListeners.stream()
+                .anyMatch(listener -> listener.onTouchEvent(event))
+                || super.onTouchEvent(event);
+
         switch (action) {
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
@@ -467,6 +479,14 @@ public class KeyguardSecurityContainer extends FrameLayout {
             }
         }
         return true;
+    }
+
+    void addMotionEventListener(Gefingerpoken listener) {
+        mMotionEventListeners.add(listener);
+    }
+
+    void removeMotionEventListener(Gefingerpoken listener) {
+        mMotionEventListeners.remove(listener);
     }
 
     private void handleTap(MotionEvent event) {

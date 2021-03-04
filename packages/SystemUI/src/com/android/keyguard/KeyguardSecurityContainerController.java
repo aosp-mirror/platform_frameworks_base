@@ -33,6 +33,7 @@ import android.metrics.LogMaker;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
+import android.view.MotionEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -46,6 +47,8 @@ import com.android.keyguard.KeyguardSecurityContainer.SwipeListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.settingslib.utils.ThreadUtils;
+import com.android.systemui.Gefingerpoken;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -71,8 +74,43 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
     private final SecurityCallback mSecurityCallback;
     private final ConfigurationController mConfigurationController;
+    private final KeyguardViewController mKeyguardViewController;
+    private final FalsingManager mFalsingManager;
 
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
+
+    private final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
+        private MotionEvent mTouchDown;
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+            return false;
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent ev) {
+            // Do just a bit of our own falsing. People should only be tapping on the input, not
+            // swiping.
+            if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                if (mTouchDown != null) {
+                    mTouchDown.recycle();
+                    mTouchDown = null;
+                }
+                mTouchDown = MotionEvent.obtain(ev);
+            } else if (mTouchDown != null) {
+                boolean tapResult = mFalsingManager.isFalseTap(true, 0.6);
+                if (tapResult
+                        || ev.getActionMasked() == MotionEvent.ACTION_UP
+                        || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                    if (tapResult) {
+                        mKeyguardViewController.reset(true);
+                    }
+                    mTouchDown.recycle();
+                    mTouchDown = null;
+                }
+            }
+            return false;
+        }
+    };
 
     private KeyguardSecurityCallback mKeyguardSecurityCallback = new KeyguardSecurityCallback() {
         public void userActivity() {
@@ -169,7 +207,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             KeyguardStateController keyguardStateController,
             SecurityCallback securityCallback,
             KeyguardSecurityViewFlipperController securityViewFlipperController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            KeyguardViewController keyguardViewController,
+            FalsingManager falsingManager) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -182,6 +222,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mAdminSecondaryLockScreenController = adminSecondaryLockScreenControllerFactory.create(
                 mKeyguardSecurityCallback);
         mConfigurationController = configurationController;
+        mKeyguardViewController = keyguardViewController;
+        mFalsingManager = falsingManager;
     }
 
     @Override
@@ -192,12 +234,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     @Override
     protected void onViewAttached() {
         mView.setSwipeListener(mSwipeListener);
+        mView.addMotionEventListener(mGlobalTouchListener);
         mConfigurationController.addCallback(mConfigurationListener);
     }
 
     @Override
     protected void onViewDetached() {
         mConfigurationController.removeCallback(mConfigurationListener);
+        mView.removeMotionEventListener(mGlobalTouchListener);
     }
 
     /** */
@@ -479,6 +523,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         private final KeyguardStateController mKeyguardStateController;
         private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
         private final ConfigurationController mConfigurationController;
+        private final KeyguardViewController mKeyguardViewController;
+        private final FalsingManager mFalsingManager;
 
         @Inject
         Factory(KeyguardSecurityContainer view,
@@ -491,7 +537,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 UiEventLogger uiEventLogger,
                 KeyguardStateController keyguardStateController,
                 KeyguardSecurityViewFlipperController securityViewFlipperController,
-                ConfigurationController configurationController) {
+                ConfigurationController configurationController,
+                KeyguardViewController keyguardViewController,
+                FalsingManager falsingManager) {
             mView = view;
             mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
             mLockPatternUtils = lockPatternUtils;
@@ -502,6 +550,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mKeyguardStateController = keyguardStateController;
             mSecurityViewFlipperController = securityViewFlipperController;
             mConfigurationController = configurationController;
+            mKeyguardViewController = keyguardViewController;
+            mFalsingManager = falsingManager;
         }
 
         public KeyguardSecurityContainerController create(
@@ -510,7 +560,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                     mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                     mKeyguardStateController, securityCallback, mSecurityViewFlipperController,
-                    mConfigurationController);
+                    mConfigurationController, mKeyguardViewController, mFalsingManager);
         }
 
     }

@@ -24,6 +24,8 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternView
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.classifier.FalsingCollectorFake
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +50,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     private lateinit var mKeyguardSecurityCallback: KeyguardSecurityCallback
     @Mock
     private lateinit var mLatencyTracker: LatencyTracker
+    private var mFalsingCollector: FalsingCollector = FalsingCollectorFake()
     @Mock
     private lateinit
     var mKeyguardMessageAreaControllerFactory: KeyguardMessageAreaController.Factory
@@ -72,7 +75,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
                 .thenReturn(mKeyguardMessageAreaController)
         mKeyguardPatternViewController = KeyguardPatternViewController(mKeyguardPatternView,
         mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
-                mLatencyTracker, mKeyguardMessageAreaControllerFactory)
+                mLatencyTracker, mFalsingCollector, mKeyguardMessageAreaControllerFactory)
     }
 
     @Test
