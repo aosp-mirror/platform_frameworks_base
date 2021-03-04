@@ -316,9 +316,9 @@ public class TransitionTests extends WindowTestsBase {
                 mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */));
         final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
                 "wallpaperWindow");
-        wallpaperWindow.mWallpaperVisible = false;
+        wallpaperWindowToken.setVisibleRequested(false);
         transition.collect(wallpaperWindowToken);
-        wallpaperWindow.mWallpaperVisible = true;
+        wallpaperWindowToken.setVisibleRequested(true);
         wallpaperWindow.mHasSurface = true;
 
         // doesn't matter which order collected since participants is a set

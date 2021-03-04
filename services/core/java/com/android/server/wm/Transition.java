@@ -135,6 +135,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mSyncId = mSyncEngine.startSyncSet(this);
     }
 
+    @VisibleForTesting
+    int getSyncId() {
+        return mSyncId;
+    }
+
     /**
      * Formally starts the transition. Participants can be collected before this is started,
      * but this won't consider itself ready until started -- even if all the participants have
@@ -271,12 +276,17 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // Commit all going-invisible containers
         for (int i = 0; i < mParticipants.size(); ++i) {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
-            if (ar == null || ar.mVisibleRequested) {
-                continue;
+            if (ar != null && !ar.isVisibleRequested()) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "  Commit activity becoming invisible: %s", ar);
+                ar.commitVisibility(false /* visible */, false /* performLayout */);
             }
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                    "  Commit activity becoming invisible: %s", ar);
-            ar.commitVisibility(false /* visible */, false /* performLayout */);
+            final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
+            if (wt != null && !wt.isVisibleRequested()) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "  Commit wallpaper becoming invisible: %s", ar);
+                wt.commitVisibility(false /* visible */);
+            }
         }
     }
 
