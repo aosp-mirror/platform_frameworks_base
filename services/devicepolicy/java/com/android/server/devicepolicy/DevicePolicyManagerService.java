@@ -7591,14 +7591,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void sendActiveAdminCommand(String action, Bundle extras,
             @UserIdInt int userId, ComponentName receiverComponent) {
-        if (VERBOSE_LOG) {
-            Slog.v(LOG_TAG, "sending intent " + action + " to "
-                    + receiverComponent.flattenToShortString() + " on user " + userId);
-        }
         final Intent intent = new Intent(action);
         intent.setComponent(receiverComponent);
         if (extras != null) {
             intent.putExtras(extras);
+        }
+        if (VERBOSE_LOG) {
+            Slog.v(LOG_TAG, "sendActiveAdminCommand(): broadcasting " + action + " to "
+                    + receiverComponent.flattenToShortString() + " on user " + userId);
         }
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
     }
@@ -12437,10 +12437,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             extras.putBoolean(DeviceAdminReceiver.EXTRA_OPERATION_SAFETY_STATE, isSafe);
 
             if (mOwners.hasDeviceOwner()) {
+                if (VERBOSE_LOG) Slog.v(LOG_TAG, "Notifying DO");
                 sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_OPERATION_SAFETY_STATE_CHANGED,
                         extras);
             }
             for (int profileOwnerId : mOwners.getProfileOwnerKeys()) {
+                if (VERBOSE_LOG) Slog.v(LOG_TAG, "Notifying PO for user " + profileOwnerId);
                 sendProfileOwnerCommand(DeviceAdminReceiver.ACTION_OPERATION_SAFETY_STATE_CHANGED,
                         extras, profileOwnerId);
             }
