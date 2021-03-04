@@ -20215,6 +20215,7 @@ package android.media {
     method @NonNull public java.util.List<android.media.AudioDeviceInfo> getAvailableCommunicationDevices();
     method @Nullable public android.media.AudioDeviceInfo getCommunicationDevice();
     method public android.media.AudioDeviceInfo[] getDevices(int);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public int getEncodedSurroundMode();
     method public java.util.List<android.media.MicrophoneInfo> getMicrophones() throws java.io.IOException;
     method public int getMode();
     method public String getParameters(String);
@@ -20237,6 +20238,7 @@ package android.media {
     method public static boolean isOffloadedPlaybackSupported(@NonNull android.media.AudioFormat, @NonNull android.media.AudioAttributes);
     method public boolean isSpeakerphoneOn();
     method public boolean isStreamMute(int);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public boolean isSurroundFormatEnabled(int);
     method public boolean isVolumeFixed();
     method @Deprecated public boolean isWiredHeadsetOn();
     method public void loadSoundEffects();
@@ -20256,6 +20258,7 @@ package android.media {
     method @Deprecated public void setBluetoothA2dpOn(boolean);
     method public void setBluetoothScoOn(boolean);
     method public boolean setCommunicationDevice(@NonNull android.media.AudioDeviceInfo);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public boolean setEncodedSurroundMode(int);
     method public void setMicrophoneMute(boolean);
     method public void setMode(int);
     method public void setParameters(String);
@@ -20265,6 +20268,7 @@ package android.media {
     method @Deprecated public void setStreamMute(int, boolean);
     method @Deprecated public void setStreamSolo(int, boolean);
     method public void setStreamVolume(int, int, int);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public boolean setSurroundFormatEnabled(int, boolean);
     method @Deprecated public void setVibrateSetting(int, int);
     method @Deprecated public void setWiredHeadsetOn(boolean);
     method @Deprecated public boolean shouldVibrate(int);
@@ -20303,6 +20307,10 @@ package android.media {
     field public static final int AUDIOFOCUS_REQUEST_FAILED = 0; // 0x0
     field public static final int AUDIOFOCUS_REQUEST_GRANTED = 1; // 0x1
     field public static final int AUDIO_SESSION_ID_GENERATE = 0; // 0x0
+    field public static final int ENCODED_SURROUND_OUTPUT_ALWAYS = 2; // 0x2
+    field public static final int ENCODED_SURROUND_OUTPUT_AUTO = 0; // 0x0
+    field public static final int ENCODED_SURROUND_OUTPUT_MANUAL = 3; // 0x3
+    field public static final int ENCODED_SURROUND_OUTPUT_NEVER = 1; // 0x1
     field public static final int ERROR = -1; // 0xffffffff
     field public static final int ERROR_DEAD_OBJECT = -6; // 0xfffffffa
     field public static final String EXTRA_AUDIO_PLUG_STATE = "android.media.extra.AUDIO_PLUG_STATE";
