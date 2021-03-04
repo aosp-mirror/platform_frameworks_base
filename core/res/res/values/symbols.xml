@@ -482,6 +482,8 @@
   <java-symbol type="array" name="config_integrityRuleProviderPackages" />
   <java-symbol type="bool" name="config_useAssistantVolume" />
   <java-symbol type="string" name="config_bandwidthEstimateSource" />
+  <java-symbol type="integer" name="config_smartSelectionInitializedTimeoutMillis" />
+  <java-symbol type="integer" name="config_smartSelectionInitializingTimeoutMillis" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
