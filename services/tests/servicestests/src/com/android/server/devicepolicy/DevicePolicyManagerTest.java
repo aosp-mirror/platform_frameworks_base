@@ -107,6 +107,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.test.MoreAsserts; // TODO(b/171932723): replace by Truth
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
@@ -154,6 +155,9 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @Presubmit
 public class DevicePolicyManagerTest extends DpmTestBase {
+
+    private static final String TAG = DevicePolicyManagerTest.class.getSimpleName();
+
     private static final List<String> OWNER_SETUP_PERMISSIONS = Arrays.asList(
             permission.MANAGE_DEVICE_ADMINS, permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
             permission.MANAGE_USERS, permission.INTERACT_ACROSS_USERS_FULL);
@@ -7215,6 +7219,47 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(dpm.isUsbDataSignalingEnabled()).isEqualTo(enabled);
     }
 
+    @Test
+    public void testGetPolicyExemptApps_noPermission() {
+        assertThrows(SecurityException.class, () -> dpm.getPolicyExemptApps());
+    }
+
+    @Test
+    public void testGetPolicyExemptApps_empty() {
+        grantManageDeviceAdmins();
+        mockPolicyExemptApps();
+        mockVendorPolicyExemptApps();
+
+        assertThat(dpm.getPolicyExemptApps()).isEmpty();
+    }
+
+    @Test
+    public void testGetPolicyExemptApps_baseOnly() {
+        grantManageDeviceAdmins();
+        mockPolicyExemptApps("foo");
+        mockVendorPolicyExemptApps();
+
+        assertThat(dpm.getPolicyExemptApps()).containsExactly("foo");
+    }
+
+    @Test
+    public void testGetPolicyExemptApps_vendorOnly() {
+        grantManageDeviceAdmins();
+        mockPolicyExemptApps();
+        mockVendorPolicyExemptApps("bar");
+
+        assertThat(dpm.getPolicyExemptApps()).containsExactly("bar");
+    }
+
+    @Test
+    public void testGetPolicyExemptApps_baseAndVendor() {
+        grantManageDeviceAdmins();
+        mockPolicyExemptApps("4", "23", "15", "42", "8");
+        mockVendorPolicyExemptApps("16", "15", "4");
+
+        assertThat(dpm.getPolicyExemptApps()).containsExactly("4", "8", "15", "16", "23", "42");
+    }
+
     private void setUserUnlocked(int userHandle, boolean unlocked) {
         when(getServices().userManager.isUserUnlocked(eq(userHandle))).thenReturn(unlocked);
     }
@@ -7436,4 +7481,18 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         return new StringParceledListSlice(Arrays.asList(s));
     }
 
+    private void grantManageDeviceAdmins() {
+        Log.d(TAG, "Granting " + permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+    }
+
+    private void mockPolicyExemptApps(String... apps) {
+        Log.d(TAG, "Mocking R.array.policy_exempt_apps to return " + Arrays.toString(apps));
+        when(mContext.resources.getStringArray(R.array.policy_exempt_apps)).thenReturn(apps);
+    }
+
+    private void mockVendorPolicyExemptApps(String... apps) {
+        Log.d(TAG, "Mocking R.array.vendor_policy_exempt_apps to return " + Arrays.toString(apps));
+        when(mContext.resources.getStringArray(R.array.vendor_policy_exempt_apps)).thenReturn(apps);
+    }
 }
