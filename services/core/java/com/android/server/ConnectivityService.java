@@ -7233,7 +7233,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         void addRequestReassignment(@NonNull final RequestReassignment reassignment) {
-            if (!Build.IS_USER) {
+            if (Build.IS_DEBUGGABLE) {
                 // The code is never supposed to add two reassignments of the same request. Make
                 // sure this stays true, but without imposing this expensive check on all
                 // reassignments on all user devices.
