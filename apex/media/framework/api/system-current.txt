@@ -47,12 +47,16 @@ package android.media {
 
   public static final class MediaTranscodeManager.TranscodingSession {
     method public void cancel();
+    method public int getErrorCode();
     method @IntRange(from=0, to=100) public int getProgress();
     method public int getResult();
     method public int getSessionId();
     method public int getStatus();
     method public void setOnProgressUpdateListener(@NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener);
     method public void setOnProgressUpdateListener(int, @NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener);
+    field public static final int ERROR_DROPPED_BY_SERVICE = 1; // 0x1
+    field public static final int ERROR_NONE = 0; // 0x0
+    field public static final int ERROR_SERVICE_DIED = 2; // 0x2
     field public static final int RESULT_CANCELED = 4; // 0x4
     field public static final int RESULT_ERROR = 3; // 0x3
     field public static final int RESULT_NONE = 1; // 0x1
