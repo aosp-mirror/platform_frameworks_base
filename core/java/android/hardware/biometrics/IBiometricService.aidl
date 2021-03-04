@@ -75,4 +75,10 @@ interface IBiometricService {
     long[] getAuthenticatorIds(int callingUserId);
 
     int getCurrentStrength(int sensorId);
+
+    // Returns a bit field of the modality (or modalities) that are will be used for authentication.
+    int getCurrentModality(String opPackageName, int userId, int callingUserId, int authenticators);
+
+    // Returns a bit field of the authentication modalities that are supported by this device.
+    int getSupportedModalities(int authenticators);
 }

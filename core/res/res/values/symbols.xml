@@ -2472,13 +2472,20 @@
   <java-symbol type="string" name="config_keyguardComponent" />
 
   <!-- Biometric messages -->
+  <java-symbol type="string" name="biometric_app_setting_name" />
+  <java-symbol type="string" name="biometric_or_screen_lock_app_setting_name" />
   <java-symbol type="string" name="biometric_dialog_default_title" />
+  <java-symbol type="string" name="biometric_dialog_default_subtitle" />
   <java-symbol type="string" name="biometric_error_hw_unavailable" />
   <java-symbol type="string" name="biometric_error_user_canceled" />
   <java-symbol type="string" name="biometric_not_recognized" />
   <java-symbol type="string" name="biometric_error_canceled" />
   <java-symbol type="string" name="biometric_error_device_not_secured" />
   <java-symbol type="string" name="biometric_error_generic" />
+
+  <!-- Device credential strings for BiometricManager -->
+  <java-symbol type="string" name="screen_lock_app_setting_name" />
+  <java-symbol type="string" name="screen_lock_dialog_default_subtitle" />
 
   <!-- Fingerprint messages -->
   <java-symbol type="string" name="fingerprint_error_unable_to_process" />
@@ -2497,6 +2504,8 @@
   <java-symbol type="string" name="fingerprint_error_lockout" />
   <java-symbol type="string" name="fingerprint_error_lockout_permanent" />
   <java-symbol type="string" name="fingerprint_name_template" />
+  <java-symbol type="string" name="fingerprint_app_setting_name" />
+  <java-symbol type="string" name="fingerprint_or_screen_lock_app_setting_name" />
   <java-symbol type="string" name="fingerprint_dialog_default_subtitle" />
   <java-symbol type="string" name="fingerprint_authenticated" />
   <java-symbol type="string" name="fingerprint_error_no_fingerprints" />
@@ -2544,6 +2553,9 @@
   <java-symbol type="string" name="face_acquired_sensor_dirty" />
   <java-symbol type="array" name="face_acquired_vendor" />
   <java-symbol type="string" name="face_name_template" />
+  <java-symbol type="string" name="face_app_setting_name" />
+  <java-symbol type="string" name="face_or_screen_lock_app_setting_name" />
+  <java-symbol type="string" name="face_dialog_default_subtitle" />
   <java-symbol type="string" name="face_authenticated_no_confirmation_required" />
   <java-symbol type="string" name="face_authenticated_confirmation_required" />
   <java-symbol type="string" name="face_error_security_update_required" />
