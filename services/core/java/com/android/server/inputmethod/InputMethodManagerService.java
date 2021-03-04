@@ -1625,6 +1625,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             mHandler.removeCallbacks(mUserSwitchHandlerTask);
         }
+        // Hide soft input before user switch task since switch task may block main handler a while
+        // and delayed the MSG_HIDE_SOFT_INPUT.
+        hideCurrentInputLocked(
+                mCurFocusedWindow, 0, null, SoftInputShowHideReason.HIDE_SWITCH_USER);
         final UserSwitchHandlerTask task = new UserSwitchHandlerTask(this, userId,
                 clientToBeReset);
         mUserSwitchHandlerTask = task;
@@ -1750,20 +1754,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final boolean initialUserSwitch = TextUtils.isEmpty(defaultImiId);
         mLastSystemLocales = mRes.getConfiguration().getLocales();
 
-        // TODO: Is it really possible that switchUserLocked() happens before system ready?
-        if (mSystemReady) {
-            hideCurrentInputLocked(
-                    mCurFocusedWindow, 0, null, SoftInputShowHideReason.HIDE_SWITCH_USER);
-
-            resetCurrentMethodAndClient(UnbindReason.SWITCH_USER);
-            buildInputMethodListLocked(initialUserSwitch);
-            if (TextUtils.isEmpty(mSettings.getSelectedInputMethod())) {
-                // This is the first time of the user switch and
-                // set the current ime to the proper one.
-                resetDefaultImeLocked(mContext);
-            }
-            updateFromSettingsLocked(true);
+        // The mSystemReady flag is set during boot phase,
+        // and user switch would not happen at that time.
+        resetCurrentMethodAndClient(UnbindReason.SWITCH_USER);
+        buildInputMethodListLocked(initialUserSwitch);
+        if (TextUtils.isEmpty(mSettings.getSelectedInputMethod())) {
+            // This is the first time of the user switch and
+            // set the current ime to the proper one.
+            resetDefaultImeLocked(mContext);
         }
+        updateFromSettingsLocked(true);
 
         if (initialUserSwitch) {
             InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
