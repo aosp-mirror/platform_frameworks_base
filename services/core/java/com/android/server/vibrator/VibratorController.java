@@ -22,8 +22,9 @@ import android.os.Binder;
 import android.os.IVibratorStateListener;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.VibrationEffect;
 import android.os.VibratorInfo;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.PrimitiveSegment;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -156,21 +157,22 @@ final class VibratorController {
      * Update the predefined vibration effect saved with given id. This will remove the saved effect
      * if given {@code effect} is {@code null}.
      */
-    public void updateAlwaysOn(int id, @Nullable VibrationEffect.Prebaked effect) {
+    public void updateAlwaysOn(int id, @Nullable PrebakedSegment prebaked) {
         if (!mVibratorInfo.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
             return;
         }
         synchronized (mLock) {
-            if (effect == null) {
+            if (prebaked == null) {
                 mNativeWrapper.alwaysOnDisable(id);
             } else {
-                mNativeWrapper.alwaysOnEnable(id, effect.getId(), effect.getEffectStrength());
+                mNativeWrapper.alwaysOnEnable(id, prebaked.getEffectId(),
+                        prebaked.getEffectStrength());
             }
         }
     }
 
     /** Set the vibration amplitude. This will NOT affect the state of {@link #isVibrating()}. */
-    public void setAmplitude(int amplitude) {
+    public void setAmplitude(float amplitude) {
         synchronized (mLock) {
             if (mVibratorInfo.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
                 mNativeWrapper.setAmplitude(amplitude);
@@ -199,10 +201,10 @@ final class VibratorController {
      *
      * @return The duration of the effect playing, or 0 if unsupported.
      */
-    public long on(VibrationEffect.Prebaked effect, long vibrationId) {
+    public long on(PrebakedSegment prebaked, long vibrationId) {
         synchronized (mLock) {
-            long duration = mNativeWrapper.perform(effect.getId(), effect.getEffectStrength(),
-                    vibrationId);
+            long duration = mNativeWrapper.perform(prebaked.getEffectId(),
+                    prebaked.getEffectStrength(), vibrationId);
             if (duration > 0) {
                 notifyVibratorOnLocked();
             }
@@ -211,21 +213,18 @@ final class VibratorController {
     }
 
     /**
-     * Plays composited vibration effect, using {@code vibrationId} or completion callback to
-     * {@link OnVibrationCompleteListener}.
+     * Plays a composition of vibration primitives, using {@code vibrationId} or completion callback
+     * to {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
      *
      * @return The duration of the effect playing, or 0 if unsupported.
      */
-    public long on(VibrationEffect.Composed effect, long vibrationId) {
+    public long on(PrimitiveSegment[] primitives, long vibrationId) {
         if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
             return 0;
         }
         synchronized (mLock) {
-            VibrationEffect.Composition.PrimitiveEffect[] primitives =
-                    effect.getPrimitiveEffects().toArray(
-                            new VibrationEffect.Composition.PrimitiveEffect[0]);
             long duration = mNativeWrapper.compose(primitives, vibrationId);
             if (duration > 0) {
                 notifyVibratorOnLocked();
@@ -313,13 +312,13 @@ final class VibratorController {
         private static native boolean isAvailable(long nativePtr);
         private static native void on(long nativePtr, long milliseconds, long vibrationId);
         private static native void off(long nativePtr);
-        private static native void setAmplitude(long nativePtr, int amplitude);
+        private static native void setAmplitude(long nativePtr, float amplitude);
         private static native int[] getSupportedEffects(long nativePtr);
         private static native int[] getSupportedPrimitives(long nativePtr);
-        private static native long performEffect(
-                long nativePtr, long effect, long strength, long vibrationId);
-        private static native long performComposedEffect(long nativePtr,
-                VibrationEffect.Composition.PrimitiveEffect[] effect, long vibrationId);
+        private static native long performEffect(long nativePtr, long effect, long strength,
+                long vibrationId);
+        private static native long performComposedEffect(long nativePtr, PrimitiveSegment[] effect,
+                long vibrationId);
         private static native void setExternalControl(long nativePtr, boolean enabled);
         private static native long getCapabilities(long nativePtr);
         private static native void alwaysOnEnable(long nativePtr, long id, long effect,
@@ -359,7 +358,7 @@ final class VibratorController {
         }
 
         /** Sets the amplitude for the vibrator to run. */
-        public void setAmplitude(int amplitude) {
+        public void setAmplitude(float amplitude) {
             setAmplitude(mNativePtr, amplitude);
         }
 
@@ -379,9 +378,8 @@ final class VibratorController {
         }
 
         /** Turns vibrator on to perform one of the supported composed effects. */
-        public long compose(
-                VibrationEffect.Composition.PrimitiveEffect[] effect, long vibrationId) {
-            return performComposedEffect(mNativePtr, effect, vibrationId);
+        public long compose(PrimitiveSegment[] primitives, long vibrationId) {
+            return performComposedEffect(mNativePtr, primitives, vibrationId);
         }
 
         /** Enabled the device vibrator to be controlled by another service. */

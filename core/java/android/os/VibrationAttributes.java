@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.media.AudioAttributes;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.VibrationEffectSegment;
 import android.util.Slog;
 
 import java.lang.annotation.Retention;
@@ -330,9 +332,9 @@ public final class VibrationAttributes implements Parcelable {
 
         private void applyHapticFeedbackHeuristics(@Nullable VibrationEffect effect) {
             if (effect != null) {
-                if (mUsage == USAGE_UNKNOWN && effect instanceof VibrationEffect.Prebaked) {
-                    VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) effect;
-                    switch (prebaked.getId()) {
+                PrebakedSegment prebaked = extractPrebakedSegment(effect);
+                if (mUsage == USAGE_UNKNOWN && prebaked != null) {
+                    switch (prebaked.getEffectId()) {
                         case VibrationEffect.EFFECT_CLICK:
                         case VibrationEffect.EFFECT_DOUBLE_CLICK:
                         case VibrationEffect.EFFECT_HEAVY_CLICK:
@@ -353,6 +355,20 @@ public final class VibrationAttributes implements Parcelable {
                     mUsage = USAGE_TOUCH;
                 }
             }
+        }
+
+        @Nullable
+        private PrebakedSegment extractPrebakedSegment(VibrationEffect effect) {
+            if (effect instanceof VibrationEffect.Composed) {
+                VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
+                if (composed.getSegments().size() == 1) {
+                    VibrationEffectSegment segment = composed.getSegments().get(0);
+                    if (segment instanceof PrebakedSegment) {
+                        return (PrebakedSegment) segment;
+                    }
+                }
+            }
+            return null;
         }
 
         private void setUsage(@NonNull AudioAttributes audio) {
