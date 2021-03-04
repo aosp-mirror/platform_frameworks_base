@@ -27,12 +27,16 @@ import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioFormat;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SharedMemory;
 import android.util.Log;
+
+import java.util.Locale;
 
 /**
  * Implemented by an application that wants to offer detection for hotword. The system will
@@ -76,6 +80,17 @@ public abstract class HotwordDetectionService extends Service {
                     timeoutMillis,
                     new DspHotwordDetectionCallback(callback)));
         }
+
+        @Override
+        public void setConfig(Bundle options, SharedMemory sharedMemory) throws RemoteException {
+            if (DBG) {
+                Log.d(TAG, "#setConfig");
+            }
+            mHandler.sendMessage(obtainMessage(HotwordDetectionService::onUpdateState,
+                    HotwordDetectionService.this,
+                    options,
+                    sharedMemory));
+        }
     };
 
     @CallSuper
@@ -118,6 +133,25 @@ public abstract class HotwordDetectionService extends Service {
             @NonNull AudioFormat audioFormat,
             @DurationMillisLong long timeoutMillis,
             @NonNull DspHotwordDetectionCallback callback) {
+    }
+
+    /**
+     * Called when the {@link VoiceInteractionService#createAlwaysOnHotwordDetector(String, Locale,
+     * Bundle, SharedMemory, AlwaysOnHotwordDetector.Callback)} or {@link AlwaysOnHotwordDetector#
+     * setHotwordDetectionServiceConfig(Bundle, SharedMemory)} requests an update of the hotword
+     * detection parameters.
+     *
+     * @param options Application configuration data provided by the
+     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
+     * contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob provided by the
+     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * such data to the trusted process.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void onUpdateState(@Nullable Bundle options, @Nullable SharedMemory sharedMemory) {
     }
 
     /**

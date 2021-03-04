@@ -17,7 +17,6 @@
 package android.service.voice;
 
 import android.Manifest;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -36,6 +35,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SharedMemory;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
@@ -47,8 +47,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,32 +69,6 @@ import java.util.Set;
  */
 public class VoiceInteractionService extends Service {
     static final String TAG = VoiceInteractionService.class.getSimpleName();
-
-    /**
-     * Indicates that the given configs have been set successfully after calling
-     * {@link VoiceInteractionService#setHotwordDetectionConfig}.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int HOTWORD_CONFIG_SUCCESS = 0;
-
-    /**
-     * Indicates that the given configs have been set unsuccessfully after calling
-     * {@link VoiceInteractionService#setHotwordDetectionConfig}.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int HOTWORD_CONFIG_FAILURE = 1;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "HOTWORD_CONFIG_" }, value = {
-            HOTWORD_CONFIG_SUCCESS,
-            HOTWORD_CONFIG_FAILURE,
-    })
-    public @interface HotwordConfigResult {}
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -330,35 +302,6 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
-     * Set hotword detection configuration.
-     *
-     * Note: Currently it will trigger hotword detection service after calling this function when
-     * all conditions meet the requirements.
-     *
-     * @param options Config data.
-     * @return {@link VoiceInteractionService#HOTWORD_CONFIG_SUCCESS} in case of success,
-     * {@link VoiceInteractionService#HOTWORD_CONFIG_FAILURE} in case of failure.
-     *
-     * @throws IllegalStateException if the function is called before onReady() is called.
-     *
-     * @hide
-     */
-    @SystemApi
-    @HotwordConfigResult
-    public final int setHotwordDetectionConfig(
-            @SuppressLint("NullableCollection") @Nullable Bundle options) {
-        if (mSystemService == null) {
-            throw new IllegalStateException("Not available until onReady() is called");
-        }
-
-        try {
-            return mSystemService.setHotwordDetectionConfig(options);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Creates an {@link AlwaysOnHotwordDetector} for the given keyphrase and locale.
      * This instance must be retained and used by the client.
      * Calling this a second time invalidates the previously created hotword detector
@@ -374,8 +317,60 @@ public class VoiceInteractionService extends Service {
     @SystemApi
     @NonNull
     public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
-            @SuppressLint("MissingNullability") String keyphrase,  // TODO: annotate nullability properly
+            @SuppressLint("MissingNullability") String keyphrase,  // TODO: nullability properly
             @SuppressLint({"MissingNullability", "UseIcu"}) Locale locale,
+            @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
+        return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
+                /* supportHotwordDetectionService= */ false, /* options= */ null,
+                /* sharedMemory= */ null, callback);
+    }
+
+    /**
+     * Create an {@link AlwaysOnHotwordDetector} and trigger a {@link HotwordDetectionService}
+     * service, then it will also pass the read-only data to hotword detection service.
+     *
+     * Like {@see #createAlwaysOnHotwordDetector(String, Locale, AlwaysOnHotwordDetector.Callback)
+     * }. Before calling this function, you should set a valid hotword detection service with
+     * android:hotwordDetectionService in an android.voice_interaction metadata file and set
+     * android:isolatedProcess="true" in the AndroidManifest.xml of hotword detection service.
+     * Otherwise it will throw IllegalStateException. After calling this function, the system will
+     * also trigger a hotword detection service and pass the read-only data back to it.
+     *
+     * <p>Note: The system will trigger hotword detection service after calling this function when
+     * all conditions meet the requirements.
+     *
+     * @param keyphrase The keyphrase that's being used, for example "Hello Android".
+     * @param locale The locale for which the enrollment needs to be performed.
+     * @param options Application configuration data provided by the
+     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
+     * contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob provided by the
+     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * such data to the trusted process.
+     * @param callback The callback to notify of detection events.
+     * @return An always-on hotword detector for the given keyphrase and locale.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
+            @SuppressLint("MissingNullability") String keyphrase,  // TODO: nullability properly
+            @SuppressLint({"MissingNullability", "UseIcu"}) Locale locale,
+            @Nullable Bundle options,
+            @Nullable SharedMemory sharedMemory,
+            @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
+        return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
+                /* supportHotwordDetectionService= */ true, options,
+                sharedMemory, callback);
+    }
+
+    private AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorInternal(
+            @SuppressLint("MissingNullability") String keyphrase,  // TODO: nullability properly
+            @SuppressLint({"MissingNullability", "UseIcu"}) Locale locale,
+            boolean supportHotwordDetectionService,
+            @Nullable Bundle options,
+            @Nullable SharedMemory sharedMemory,
             @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
         if (mSystemService == null) {
             throw new IllegalStateException("Not available until onReady() is called");
@@ -385,7 +380,8 @@ public class VoiceInteractionService extends Service {
             safelyShutdownHotwordDetector();
             mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale, callback,
                     mKeyphraseEnrollmentInfo, mSystemService,
-                    getApplicationContext().getApplicationInfo().targetSdkVersion);
+                    getApplicationContext().getApplicationInfo().targetSdkVersion,
+                    supportHotwordDetectionService, options, sharedMemory);
         }
         return mHotwordDetector;
     }
@@ -432,7 +428,6 @@ public class VoiceInteractionService extends Service {
     }
 
     private void safelyShutdownHotwordDetector() {
-        // TODO (b/178171906): Need to check if the HotwordDetectionService should be unbound.
         synchronized (mLock) {
             if (mHotwordDetector == null) {
                 return;

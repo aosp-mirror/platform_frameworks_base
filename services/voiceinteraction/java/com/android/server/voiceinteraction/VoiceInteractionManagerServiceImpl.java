@@ -43,11 +43,13 @@ import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SharedMemory;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
+import android.system.OsConstants;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -389,25 +391,48 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return mInfo.getSupportsLocalInteraction();
     }
 
-    public int setHotwordDetectionConfigLocked(Bundle options) {
+    public void setHotwordDetectionServiceConfigLocked(@Nullable Bundle options,
+            @Nullable SharedMemory sharedMemory) {
         if (DEBUG) {
-            Slog.d(TAG, "setHotwordDetectionConfigLocked");
+            Slog.d(TAG, "setHotwordDetectionServiceConfigLocked");
         }
         if (mHotwordDetectionComponentName == null) {
-            Slog.e(TAG, "Calling setHotwordDetectionConfigLocked, but hotword detection service"
-                    + " name not found");
-            return VoiceInteractionService.HOTWORD_CONFIG_FAILURE;
+            Slog.w(TAG, "Hotword detection service name not found");
+            throw new IllegalStateException("Hotword detection service name not found");
         }
         if (!isIsolatedProcessLocked(mHotwordDetectionComponentName)) {
-            return VoiceInteractionService.HOTWORD_CONFIG_FAILURE;
+            Slog.w(TAG, "Hotword detection service not in isolated process");
+            throw new IllegalStateException("Hotword detection service not in isolated process");
         }
         // TODO : Need to check related permissions for hotword detection service
         // TODO : Sanitize for bundle
 
-        mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
-                mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false);
+        if (sharedMemory != null && !sharedMemory.setProtect(OsConstants.PROT_READ)) {
+            Slog.w(TAG, "Can't set sharedMemory to be read-only");
+            throw new IllegalStateException("Can't set sharedMemory to be read-only");
+        }
 
-        return VoiceInteractionService.HOTWORD_CONFIG_SUCCESS;
+        if (mHotwordDetectionConnection == null) {
+            mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
+                    mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
+                    options, sharedMemory);
+        } else {
+            mHotwordDetectionConnection.setConfigLocked(options, sharedMemory);
+        }
+    }
+
+    public void shutdownHotwordDetectionServiceLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "shutdownHotwordDetectionServiceLocked");
+        }
+
+        if (mHotwordDetectionConnection == null) {
+            Slog.w(TAG, "shutdown, but no hotword detection connection");
+            return;
+        }
+
+        mHotwordDetectionConnection.cancelLocked();
+        mHotwordDetectionConnection = null;
     }
 
     public IRecognitionStatusCallback createSoundTriggerCallbackLocked(

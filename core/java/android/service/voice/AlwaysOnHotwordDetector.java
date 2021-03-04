@@ -41,10 +41,12 @@ import android.media.permission.Identity;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SharedMemory;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -287,6 +289,7 @@ public class AlwaysOnHotwordDetector {
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
     private final int mTargetSdkVersion;
+    private final boolean mSupportHotwordDetectionService;
 
     private int mAvailability = STATE_NOT_READY;
 
@@ -488,11 +491,22 @@ public class AlwaysOnHotwordDetector {
      * @param callback A non-null Callback for receiving the recognition events.
      * @param modelManagementService A service that allows management of sound models.
      * @param targetSdkVersion The target SDK version.
+     * @param supportHotwordDetectionService {@code true} if hotword detection service should be
+     * triggered, otherwise {@code false}.
+     * @param options Application configuration data provided by the
+     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
+     * contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob provided by the
+     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * such data to the trusted process.
+     *
      * @hide
      */
     public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
-            IVoiceInteractionManagerService modelManagementService, int targetSdkVersion) {
+            IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
+            boolean supportHotwordDetectionService, @Nullable Bundle options,
+            @Nullable SharedMemory sharedMemory) {
         mText = text;
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
@@ -501,6 +515,10 @@ public class AlwaysOnHotwordDetector {
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
         mTargetSdkVersion = targetSdkVersion;
+        mSupportHotwordDetectionService = supportHotwordDetectionService;
+        if (mSupportHotwordDetectionService) {
+            setHotwordDetectionServiceConfig(options, sharedMemory);
+        }
         try {
             Identity identity = new Identity();
             identity.packageName = ActivityThread.currentOpPackageName();
@@ -510,6 +528,38 @@ public class AlwaysOnHotwordDetector {
             throw e.rethrowAsRuntimeException();
         }
         new RefreshAvailabiltyTask().execute();
+    }
+
+    /**
+     * Set configuration and pass read-only data to hotword detection service.
+     *
+     * @param options Application configuration data provided by the
+     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
+     * contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob provided by the
+     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * such data to the trusted process.
+     *
+     * @throws IllegalStateException if it doesn't support hotword detection service.
+     *
+     * @hide
+     */
+    public final void setHotwordDetectionServiceConfig(@Nullable Bundle options,
+            @Nullable SharedMemory sharedMemory) {
+        if (DBG) {
+            Slog.d(TAG, "setHotwordDetectionServiceConfig()");
+        }
+        if (!mSupportHotwordDetectionService) {
+            throw new IllegalStateException(
+                    "setHotwordDetectionServiceConfig called, but it doesn't support hotword"
+                            + " detection service");
+        }
+
+        try {
+            mModelManagementService.setHotwordDetectionServiceConfig(options, sharedMemory);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -839,6 +889,14 @@ public class AlwaysOnHotwordDetector {
         synchronized (mLock) {
             mAvailability = STATE_INVALID;
             notifyStateChangedLocked();
+
+            if (mSupportHotwordDetectionService) {
+                try {
+                    mModelManagementService.shutdownHotwordDetectionService();
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
         }
     }
 

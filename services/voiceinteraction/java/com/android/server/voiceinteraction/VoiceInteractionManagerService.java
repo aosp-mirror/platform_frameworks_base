@@ -60,6 +60,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.SharedMemory;
 import android.os.ShellCallback;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -982,23 +983,46 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int setHotwordDetectionConfig(Bundle options) {
+        public void setHotwordDetectionServiceConfig(@Nullable Bundle options,
+                @Nullable SharedMemory sharedMemory) {
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
                 if (mImpl == null) {
                     Slog.w(TAG,
-                            "setHotwordDetectionConfig without running voice interaction service");
-                    return VoiceInteractionService.HOTWORD_CONFIG_FAILURE;
+                            "setHotwordDetectionServiceConfig without running voice"
+                                    + " interaction service");
+                    return;
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.setHotwordDetectionConfigLocked(options);
+                    mImpl.setHotwordDetectionServiceConfigLocked(options, sharedMemory);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
             }
         }
+
+        @Override
+        public void shutdownHotwordDetectionService() {
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService();
+
+                if (mImpl == null) {
+                    Slog.w(TAG,
+                            "shutdownHotwordDetectionService without running voice"
+                                    + " interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.shutdownHotwordDetectionServiceLocked();
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
         //----------------- Model management APIs --------------------------------//
 
         @Override
