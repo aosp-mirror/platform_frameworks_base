@@ -45,6 +45,12 @@ static const char* toString(bool value) {
     return value ? "true" : "false";
 }
 
+enum class HandleEventResponse : int {
+    // Allowed return values of 'handleEvent' function as documented in LooperCallback::handleEvent
+    REMOVE_CALLBACK = 0,
+    KEEP_CALLBACK = 1
+};
+
 static struct {
     jclass clazz;
 
@@ -68,6 +74,14 @@ static std::string addPrefix(std::string str, std::string_view prefix) {
         pos += prefixLength + 1;     // advance the position past the newly inserted prefix
     }
     return str;
+}
+
+/**
+ * Convert an enumeration to its underlying type. Replace with std::to_underlying when available.
+ */
+template <class T>
+static std::underlying_type_t<T> toUnderlying(const T& t) {
+    return static_cast<std::underlying_type_t<T>>(t);
 }
 
 class NativeInputEventReceiver : public LooperCallback {
@@ -106,8 +120,15 @@ private:
         return mInputConsumer.getChannel()->getName();
     }
 
-    virtual int handleEvent(int receiveFd, int events, void* data) override;
+    HandleEventResponse processOutboundEvents();
+    // From 'LooperCallback'
+    int handleEvent(int receiveFd, int events, void* data) override;
 };
+
+// Ensure HandleEventResponse underlying type matches the return type of LooperCallback::handleEvent
+static_assert(std::is_same<std::underlying_type_t<HandleEventResponse>,
+                           std::invoke_result_t<decltype(&LooperCallback::handleEvent),
+                                                NativeInputEventReceiver, int, int, void*>>::value);
 
 NativeInputEventReceiver::NativeInputEventReceiver(
         JNIEnv* env, jobject receiverWeak, const std::shared_ptr<InputChannel>& inputChannel,
@@ -179,10 +200,61 @@ void NativeInputEventReceiver::setFdEvents(int events) {
     }
 }
 
+/**
+ * Receiver's primary role is to receive input events, but it has an additional duty of sending
+ * 'ack' for events (using the call 'finishInputEvent').
+ *
+ * If we are looking at the communication between InputPublisher and InputConsumer, we can say that
+ * from the InputConsumer's perspective, InputMessage's that are sent from publisher to consumer are
+ * called 'inbound / incoming' events, and the InputMessage's sent from InputConsumer to
+ * InputPublisher are 'outbound / outgoing' events.
+ *
+ * NativeInputEventReceiver owns (and acts like) an InputConsumer. So the finish events are outbound
+ * from InputEventReceiver (and will be sent to the InputPublisher).
+ *
+ * In this function, send as many events from 'mFinishQueue' as possible across the socket to the
+ * InputPublisher. If no events are remaining, let the looper know so that it doesn't wake up
+ * unnecessarily.
+ */
+HandleEventResponse NativeInputEventReceiver::processOutboundEvents() {
+    while (!mFinishQueue.empty()) {
+        const Finish& finish = *mFinishQueue.begin();
+        status_t status = mInputConsumer.sendFinishedSignal(finish.seq, finish.handled);
+        if (status == OK) {
+            // Successful send. Erase the entry and keep trying to send more
+            mFinishQueue.erase(mFinishQueue.begin());
+            continue;
+        }
+
+        // Publisher is busy, try again later. Keep this entry (do not erase)
+        if (status == WOULD_BLOCK) {
+            if (kDebugDispatchCycle) {
+                ALOGD("channel '%s' ~ Remaining outbound events: %zu.",
+                      getInputChannelName().c_str(), mFinishQueue.size());
+            }
+            return HandleEventResponse::KEEP_CALLBACK; // try again later
+        }
+
+        // Some other error. Give up
+        ALOGW("Failed to send outbound event on channel '%s'.  status=%d",
+              getInputChannelName().c_str(), status);
+        if (status != DEAD_OBJECT) {
+            JNIEnv* env = AndroidRuntime::getJNIEnv();
+            std::string message =
+                    android::base::StringPrintf("Failed to send outbound event.  status=%d",
+                                                status);
+            jniThrowRuntimeException(env, message.c_str());
+            mMessageQueue->raiseAndClearException(env, "finishInputEvent");
+        }
+        return HandleEventResponse::REMOVE_CALLBACK;
+    }
+
+    // The queue is now empty. Tell looper there's no more output to expect.
+    setFdEvents(ALOOPER_EVENT_INPUT);
+    return HandleEventResponse::KEEP_CALLBACK;
+}
+
 int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data) {
-    // Allowed return values of this function as documented in LooperCallback::handleEvent
-    constexpr int REMOVE_CALLBACK = 0;
-    constexpr int KEEP_CALLBACK = 1;
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
         // This error typically occurs when the publisher has closed the input channel
         // as part of removing a window or finishing an IME session, in which case
@@ -191,56 +263,25 @@ int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data)
             ALOGD("channel '%s' ~ Publisher closed input channel or an error occurred.  "
                     "events=0x%x", getInputChannelName().c_str(), events);
         }
-        return REMOVE_CALLBACK;
+        return toUnderlying(HandleEventResponse::REMOVE_CALLBACK);
     }
 
     if (events & ALOOPER_EVENT_INPUT) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         status_t status = consumeEvents(env, false /*consumeBatches*/, -1, nullptr);
         mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
-        return status == OK || status == NO_MEMORY ? KEEP_CALLBACK : REMOVE_CALLBACK;
+        return status == OK || status == NO_MEMORY
+                ? toUnderlying(HandleEventResponse::KEEP_CALLBACK)
+                : toUnderlying(HandleEventResponse::REMOVE_CALLBACK);
     }
 
     if (events & ALOOPER_EVENT_OUTPUT) {
-        for (size_t i = 0; i < mFinishQueue.size(); i++) {
-            const Finish& finish = mFinishQueue[i];
-            status_t status = mInputConsumer.sendFinishedSignal(finish.seq, finish.handled);
-            if (status != OK) {
-                mFinishQueue.erase(mFinishQueue.begin(), mFinishQueue.begin() + i);
-
-                if (status == WOULD_BLOCK) {
-                    if (kDebugDispatchCycle) {
-                        ALOGD("channel '%s' ~ Sent %zu queued finish events; %zu left.",
-                              getInputChannelName().c_str(), i, mFinishQueue.size());
-                    }
-                    return KEEP_CALLBACK; // try again later
-                }
-
-                ALOGW("Failed to send finished signal on channel '%s'.  status=%d",
-                        getInputChannelName().c_str(), status);
-                if (status != DEAD_OBJECT) {
-                    JNIEnv* env = AndroidRuntime::getJNIEnv();
-                    std::string message =
-                            android::base::StringPrintf("Failed to finish input event.  status=%d",
-                                                        status);
-                    jniThrowRuntimeException(env, message.c_str());
-                    mMessageQueue->raiseAndClearException(env, "finishInputEvent");
-                }
-                return REMOVE_CALLBACK;
-            }
-        }
-        if (kDebugDispatchCycle) {
-            ALOGD("channel '%s' ~ Sent %zu queued finish events; none left.",
-                    getInputChannelName().c_str(), mFinishQueue.size());
-        }
-        mFinishQueue.clear();
-        setFdEvents(ALOOPER_EVENT_INPUT);
-        return KEEP_CALLBACK;
+        return toUnderlying(processOutboundEvents());
     }
 
     ALOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
             "events=0x%x", getInputChannelName().c_str(), events);
-    return KEEP_CALLBACK;
+    return toUnderlying(HandleEventResponse::KEEP_CALLBACK);
 }
 
 status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
