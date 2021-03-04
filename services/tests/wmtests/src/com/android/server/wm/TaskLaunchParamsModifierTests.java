@@ -473,6 +473,68 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
                 mDefaultDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
     }
 
+    @Test
+    public void testRecalculateFreeformInitialBoundsWithOverrideDisplayArea() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(freeformDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        secondaryDisplayArea.setBounds(DISPLAY_BOUNDS.width() / 2, 0,
+                        DISPLAY_BOUNDS.width(), DISPLAY_BOUNDS.height());
+        final Task launchRoot = createTaskStackOnTaskDisplayArea(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, secondaryDisplayArea);
+        launchRoot.mCreatedByOrganizer = true;
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FREEFORM },
+                new int[] { ACTIVITY_TYPE_STANDARD });
+        final Rect secondaryDAStableBounds = new Rect();
+        secondaryDisplayArea.getStableRect(secondaryDAStableBounds);
+
+        // Specify the display and provide a layout so that it will be set to freeform bounds.
+        final ActivityOptions options = ActivityOptions.makeBasic()
+                .setLaunchDisplayId(freeformDisplay.getDisplayId());
+        final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
+                .setGravity(Gravity.LEFT).build();
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).setLayout(layout).calculate());
+
+        assertEquals(secondaryDisplayArea, mResult.mPreferredTaskDisplayArea);
+        assertTrue(secondaryDAStableBounds.contains(mResult.mBounds));
+    }
+
+    @Test
+    public void testRecalculateFreeformInitialBoundsWithOverrideDisplayArea_unresizableApp() {
+        mAtm.mSupportsNonResizableMultiWindow = true;
+
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(freeformDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        secondaryDisplayArea.setBounds(DISPLAY_BOUNDS.width() / 2, 0,
+                DISPLAY_BOUNDS.width(), DISPLAY_BOUNDS.height());
+        final Task launchRoot = createTaskStackOnTaskDisplayArea(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, secondaryDisplayArea);
+        launchRoot.mCreatedByOrganizer = true;
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FREEFORM },
+                new int[] { ACTIVITY_TYPE_STANDARD });
+        final Rect secondaryDAStableBounds = new Rect();
+        secondaryDisplayArea.getStableRect(secondaryDAStableBounds);
+
+        // The bounds will get updated for unresizable with opposite orientation on freeform display
+        final Rect displayBounds = new Rect(freeformDisplay.getBounds());
+        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.screenOrientation = displayBounds.width() > displayBounds.height()
+                ? SCREEN_ORIENTATION_PORTRAIT : SCREEN_ORIENTATION_LANDSCAPE;
+        final ActivityOptions options = ActivityOptions.makeBasic()
+                .setLaunchDisplayId(freeformDisplay.getDisplayId());
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
+
+        assertEquals(secondaryDisplayArea, mResult.mPreferredTaskDisplayArea);
+        assertTrue(secondaryDAStableBounds.contains(mResult.mBounds));
+    }
+
     // =====================================
     // Launch Windowing Mode Related Tests
     // =====================================
@@ -1365,8 +1427,8 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         // This test case requires a relatively big app bounds to ensure the default size calculated
         // by letterbox won't be too small to hold the minimum width/height.
         configInsetsState(
-                freeformDisplay.getInsetsStateController().getRawInsetsState(),
-                DISPLAY_BOUNDS, new Rect(10, 10, 1910, 1070));
+                freeformDisplay.getInsetsStateController().getRawInsetsState(), freeformDisplay,
+                new Rect(10, 10, 1910, 1070));
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
@@ -1587,15 +1649,17 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         display.setBounds(DISPLAY_BOUNDS);
         display.getConfiguration().densityDpi = DENSITY_DEFAULT;
         display.getConfiguration().orientation = ORIENTATION_LANDSCAPE;
-        configInsetsState(display.getInsetsStateController().getRawInsetsState(),
-                DISPLAY_BOUNDS, DISPLAY_STABLE_BOUNDS);
+        configInsetsState(display.getInsetsStateController().getRawInsetsState(), display,
+                DISPLAY_STABLE_BOUNDS);
         return display;
     }
 
     /**
      * Creates insets sources so that we can get the expected stable frame.
      */
-    private static void configInsetsState(InsetsState state, Rect displayFrame, Rect stableFrame) {
+    private static void configInsetsState(InsetsState state, DisplayContent display,
+            Rect stableFrame) {
+        final Rect displayFrame = display.getBounds();
         final int dl = displayFrame.left;
         final int dt = displayFrame.top;
         final int dr = displayFrame.right;
@@ -1618,6 +1682,8 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         if (sb < db) {
             state.getSource(ITYPE_NAVIGATION_BAR).setFrame(dl, sb, dr, db);
         }
+        // Recompute config and push to children.
+        display.onRequestedOverrideConfigurationChanged(display.getConfiguration());
     }
 
     private ActivityRecord createSourceActivity(TestDisplayContent display) {
