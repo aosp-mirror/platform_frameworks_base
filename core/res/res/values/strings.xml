@@ -1524,8 +1524,15 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_mediaLocation">Allows the app to read locations from your media collection.</string>
 
+    <!-- Name for an app setting that lets the user authenticate for that app using biometrics (e.g. fingerprint or face). [CHAR LIMIT=30] -->
+    <string name="biometric_app_setting_name">Use biometrics</string>
+    <!-- Name for an app setting that lets the user authenticate for that app using biometrics (e.g. fingerprint or face) or their screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=70] -->
+    <string name="biometric_or_screen_lock_app_setting_name">Use biometrics or screen lock</string>
     <!-- Title shown when the system-provided biometric dialog is shown, asking the user to authenticate. [CHAR LIMIT=40] -->
     <string name="biometric_dialog_default_title">Verify it\u2019s you</string>
+    <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with a biometric (e.g. fingerprint or face). [CHAR LIMIT=70] -->
+    <string name="biometric_dialog_default_subtitle">Use your biometric to continue</string>
+
     <!-- Message shown when biometric hardware is not available [CHAR LIMIT=50] -->
     <string name="biometric_error_hw_unavailable">Biometric hardware unavailable</string>
     <!-- Message shown when biometric authentication was canceled by the user [CHAR LIMIT=50] -->
@@ -1538,6 +1545,11 @@
     <string name="biometric_error_device_not_secured">No pin, pattern, or password set</string>
     <!-- Message returned to applications when an unexpected/unknown error occurs. [CHAR LIMIT=50]-->
     <string name="biometric_error_generic">Error authenticating</string>
+
+    <!-- Name for an app setting that lets the user authenticate for that app with their screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=30] -->
+    <string name="screen_lock_app_setting_name">Use screen lock</string>
+    <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=70] -->
+    <string name="screen_lock_dialog_default_subtitle">Enter your device credential to continue</string>
 
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Partial fingerprint detected. Please try again.</string>
@@ -1585,6 +1597,11 @@
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
+
+    <!-- Name for an app setting that lets the user authenticate for that app with their fingerprint. [CHAR LIMIT=30] -->
+    <string name="fingerprint_app_setting_name">Use fingerprint</string>
+    <!-- Name for an app setting that lets the user authenticate for that app with their fingerprint or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=70] -->
+    <string name="fingerprint_or_screen_lock_app_setting_name">Use fingerprint or screen lock</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their fingerprint. [CHAR LIMIT=70] -->
     <string name="fingerprint_dialog_default_subtitle">Use your fingerprint to continue</string>
 
@@ -1680,6 +1697,13 @@
 
     <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>
+
+    <!-- Name for an app setting that lets the user authenticate for that app with their face. [CHAR LIMIT=30] -->
+    <string name="face_app_setting_name">Use face unlock</string>
+    <!-- Name for an app setting that lets the user authenticate for that app with their face or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=70] -->
+    <string name="face_or_screen_lock_app_setting_name">Use face or screen lock</string>
+    <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their face. [CHAR LIMIT=70] -->
+    <string name="face_dialog_default_subtitle">Use face unlock to continue</string>
 
     <!-- Array containing custom error messages from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="face_error_vendor">
