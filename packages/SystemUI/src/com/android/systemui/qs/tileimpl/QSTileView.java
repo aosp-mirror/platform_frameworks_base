@@ -174,4 +174,8 @@ public class QSTileView extends QSTileBaseView {
         mLabelContainer.setClickable(false);
         mLabelContainer.setLongClickable(false);
     }
+
+    public TextView getAppLabel() {
+        return mSecondLine;
+    }
 }

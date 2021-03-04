@@ -132,7 +132,6 @@ import static com.android.server.wm.ActivityRecordProto.CLIENT_VISIBLE;
 import static com.android.server.wm.ActivityRecordProto.DEFER_HIDING_CLIENT;
 import static com.android.server.wm.ActivityRecordProto.FILLS_PARENT;
 import static com.android.server.wm.ActivityRecordProto.FRONT_OF_TASK;
-import static com.android.server.wm.ActivityRecordProto.FROZEN_BOUNDS;
 import static com.android.server.wm.ActivityRecordProto.IS_ANIMATING;
 import static com.android.server.wm.ActivityRecordProto.IS_WAITING_FOR_TRANSITION_START;
 import static com.android.server.wm.ActivityRecordProto.LAST_ALL_DRAWN;
@@ -344,7 +343,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -732,9 +730,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // windows, where the app hasn't had time to set a value on the window.
     int mRotationAnimationHint = -1;
 
-    ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
-    ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
-
     private AppSaturationInfo mLastAppSaturationInfo;
 
     private final ColorDisplayService.ColorTransformController mColorTransformController =
@@ -1034,10 +1029,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(" startingMoved="); pw.print(startingMoved);
             pw.println(" mVisibleSetFromTransferredStartingWindow="
                     + mVisibleSetFromTransferredStartingWindow);
-        }
-        if (!mFrozenBounds.isEmpty()) {
-            pw.print(prefix); pw.print("mFrozenBounds="); pw.println(mFrozenBounds);
-            pw.print(prefix); pw.print("mFrozenMergedConfig="); pw.println(mFrozenMergedConfig);
         }
         if (mPendingRelaunchCount != 0) {
             pw.print(prefix); pw.print("mPendingRelaunchCount="); pw.println(mPendingRelaunchCount);
@@ -3359,56 +3350,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mPendingRelaunchCount > 0;
     }
 
-    boolean shouldFreezeBounds() {
-        // For freeform windows, we can't freeze the bounds at the moment because this would make
-        // the resizing unresponsive.
-        if (task == null || task.inFreeformWindowingMode()) {
-            return false;
-        }
-
-        // We freeze the bounds while drag resizing to deal with the time between
-        // the divider/drag handle being released, and the handling it's new
-        // configuration. If we are relaunched outside of the drag resizing state,
-        // we need to be careful not to do this.
-        return task.isDragResizing();
-    }
-
     @VisibleForTesting
     void startRelaunching() {
         if (mPendingRelaunchCount == 0) {
             mRelaunchStartTime = SystemClock.elapsedRealtime();
         }
-        if (shouldFreezeBounds()) {
-            freezeBounds();
-        }
-
         clearAllDrawn();
 
         mPendingRelaunchCount++;
     }
 
-    /**
-     * Freezes the task bounds. The size of this task reported the app will be fixed to the bounds
-     * freezed by {@link Task#prepareFreezingBounds} until {@link #unfreezeBounds} gets called, even
-     * if they change in the meantime. If the bounds are already frozen, the bounds will be frozen
-     * with a queue.
-     */
-    private void freezeBounds() {
-        mFrozenBounds.offer(new Rect(task.mPreparedFrozenBounds));
-
-        if (task.mPreparedFrozenMergedConfig.equals(Configuration.EMPTY)) {
-            // We didn't call prepareFreezingBounds on the task, so use the current value.
-            mFrozenMergedConfig.offer(new Configuration(task.getConfiguration()));
-        } else {
-            mFrozenMergedConfig.offer(new Configuration(task.mPreparedFrozenMergedConfig));
-        }
-        // Calling unset() to make it equal to Configuration.EMPTY.
-        task.mPreparedFrozenMergedConfig.unset();
-    }
-
     void finishRelaunching() {
         mTaskSupervisor.getActivityMetricsLogger().notifyActivityRelaunched(this);
-        unfreezeBounds();
 
         if (mPendingRelaunchCount > 0) {
             mPendingRelaunchCount--;
@@ -3430,27 +3383,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mPendingRelaunchCount == 0) {
             return;
         }
-        unfreezeBounds();
         mPendingRelaunchCount = 0;
         mRelaunchStartTime = 0;
-    }
-
-    /**
-     * Unfreezes the previously frozen bounds. See {@link #freezeBounds}.
-     */
-    private void unfreezeBounds() {
-        if (mFrozenBounds.isEmpty()) {
-            return;
-        }
-        mFrozenBounds.remove();
-        if (!mFrozenMergedConfig.isEmpty()) {
-            mFrozenMergedConfig.remove();
-        }
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = mChildren.get(i);
-            win.onUnfreezeBounds();
-        }
-        mWmService.mWindowPlacerLocked.performSurfacePlacement();
     }
 
     /**
@@ -4449,6 +4383,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         mVisibleRequested = visible;
+        setInsetsFrozen(!visible);
         if (app != null) {
             mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
         }
@@ -8214,9 +8149,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(STARTING_MOVED, startingMoved);
         proto.write(VISIBLE_SET_FROM_TRANSFERRED_STARTING_WINDOW,
                 mVisibleSetFromTransferredStartingWindow);
-        for (Rect bounds : mFrozenBounds) {
-            bounds.dumpDebug(proto, FROZEN_BOUNDS);
-        }
 
         proto.write(STATE, mState.toString());
         proto.write(FRONT_OF_TASK, isRootOfTask());

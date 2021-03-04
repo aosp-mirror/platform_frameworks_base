@@ -778,6 +778,12 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     /** Animates away the ringer drawer. */
     private void hideRingerDrawer() {
+
+        // If the ringer drawer isn't present, don't try to hide it.
+        if (mRingerDrawerContainer == null) {
+            return;
+        }
+
         // Hide the drawer icon for the selected ringer - it's visible in the ringer button and we
         // don't want to be able to see it while it animates away.
         getDrawerIconViewForMode(mState.ringerModeInternal).setVisibility(INVISIBLE);

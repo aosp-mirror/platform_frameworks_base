@@ -35,13 +35,13 @@ import com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState
 // Placeholder
 private const val CORNER_RADIUS = 40f
 
-class QSTileViewHorizontal(
+open class QSTileViewHorizontal(
     context: Context,
     icon: QSIconView
 ) : QSTileView(context, icon, false) {
 
-    private var paintDrawable: PaintDrawable? = null
-    private var paintColor = Color.TRANSPARENT
+    protected var paintDrawable: PaintDrawable? = null
+    private var paintColor = Color.WHITE
     private var paintAnimator: ValueAnimator? = null
 
     init {
@@ -103,7 +103,7 @@ class QSTileViewHorizontal(
         mSecondLine.setTextColor(mLabel.textColors)
         mLabelContainer.background = null
 
-        val allowAnimations = animationsEnabled() && paintColor != Color.TRANSPARENT
+        val allowAnimations = animationsEnabled() && paintColor != Color.WHITE
         val newColor = getCircleColor(state.state)
         if (allowAnimations) {
             animateToNewState(newColor)

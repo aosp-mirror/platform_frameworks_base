@@ -16,6 +16,10 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
@@ -33,6 +37,7 @@ import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.os.ParcelUuid;
 import android.os.test.TestLooper;
+import android.util.ArraySet;
 
 import com.android.server.VcnManagementService.VcnCallback;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
@@ -51,6 +56,11 @@ public class VcnTest {
     private static final ParcelUuid TEST_SUB_GROUP = new ParcelUuid(new UUID(0, 0));
     private static final int NETWORK_SCORE = 0;
     private static final int PROVIDER_ID = 5;
+    private static final int[][] TEST_CAPS =
+            new int[][] {
+                new int[] {NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS},
+                new int[] {NET_CAPABILITY_DUN}
+            };
 
     private Context mContext;
     private VcnContext mVcnContext;
@@ -91,13 +101,12 @@ public class VcnTest {
         mGatewayStatusCallbackCaptor = ArgumentCaptor.forClass(VcnGatewayStatusCallback.class);
 
         final VcnConfig.Builder configBuilder = new VcnConfig.Builder(mContext);
-        for (final int capability : VcnGatewayConnectionConfigTest.EXPOSED_CAPS) {
+        for (final int[] caps : TEST_CAPS) {
             configBuilder.addGatewayConnectionConfig(
-                    VcnGatewayConnectionConfigTest.buildTestConfigWithExposedCaps(capability));
+                    VcnGatewayConnectionConfigTest.buildTestConfigWithExposedCaps(caps));
         }
-        configBuilder.addGatewayConnectionConfig(VcnGatewayConnectionConfigTest.buildTestConfig());
-        mConfig = configBuilder.build();
 
+        mConfig = configBuilder.build();
         mVcn =
                 new Vcn(
                         mVcnContext,
@@ -130,8 +139,7 @@ public class VcnTest {
     @Test
     public void testSubscriptionSnapshotUpdatesVcnGatewayConnections() {
         final NetworkRequestListener requestListener = verifyAndGetRequestListener();
-        startVcnGatewayWithCapabilities(
-                requestListener, VcnGatewayConnectionConfigTest.EXPOSED_CAPS);
+        startVcnGatewayWithCapabilities(requestListener, TEST_CAPS[0]);
 
         final Set<VcnGatewayConnection> gatewayConnections = mVcn.getVcnGatewayConnections();
         assertFalse(gatewayConnections.isEmpty());
@@ -153,10 +161,19 @@ public class VcnTest {
         for (final int capability : VcnGatewayConnectionConfigTest.EXPOSED_CAPS) {
             startVcnGatewayWithCapabilities(requestListener, capability);
         }
+    }
 
-        // Each Capability in EXPOSED_CAPS was split into a separate VcnGatewayConnection in #setUp.
-        // Expect one VcnGatewayConnection per capability.
-        final int numExpectedGateways = VcnGatewayConnectionConfigTest.EXPOSED_CAPS.length;
+    private void triggerVcnRequestListeners(NetworkRequestListener requestListener) {
+        for (final int[] caps : TEST_CAPS) {
+            startVcnGatewayWithCapabilities(requestListener, caps);
+        }
+    }
+
+    public Set<VcnGatewayConnection> startGatewaysAndGetGatewayConnections(
+            NetworkRequestListener requestListener) {
+        triggerVcnRequestListeners(requestListener);
+
+        final int numExpectedGateways = TEST_CAPS.length;
 
         final Set<VcnGatewayConnection> gatewayConnections = mVcn.getVcnGatewayConnections();
         assertEquals(numExpectedGateways, gatewayConnections.size());
@@ -168,7 +185,16 @@ public class VcnTest {
                         any(),
                         mGatewayStatusCallbackCaptor.capture());
 
-        // Doesn't matter which callback this gets - any Gateway entering safe mode should shut down
+        return gatewayConnections;
+    }
+
+    @Test
+    public void testGatewayEnteringSafemodeNotifiesVcn() {
+        final NetworkRequestListener requestListener = verifyAndGetRequestListener();
+        final Set<VcnGatewayConnection> gatewayConnections =
+                startGatewaysAndGetGatewayConnections(requestListener);
+
+        // Doesn't matter which callback this gets - any Gateway entering Safemode should shut down
         // all Gateways
         final VcnGatewayStatusCallback statusCallback = mGatewayStatusCallbackCaptor.getValue();
         statusCallback.onEnteredSafeMode();
@@ -180,5 +206,32 @@ public class VcnTest {
         }
         verify(mVcnNetworkProvider).unregisterListener(requestListener);
         verify(mVcnCallback).onEnteredSafeMode();
+    }
+
+    @Test
+    public void testGatewayQuit() {
+        final NetworkRequestListener requestListener = verifyAndGetRequestListener();
+        final Set<VcnGatewayConnection> gatewayConnections =
+                new ArraySet<>(startGatewaysAndGetGatewayConnections(requestListener));
+
+        final VcnGatewayStatusCallback statusCallback = mGatewayStatusCallbackCaptor.getValue();
+        statusCallback.onQuit();
+        mTestLooper.dispatchAll();
+
+        // Verify that the VCN requests the networkRequests be resent
+        assertEquals(1, mVcn.getVcnGatewayConnections().size());
+        verify(mVcnNetworkProvider).resendAllRequests(requestListener);
+
+        // Verify that the VcnGatewayConnection is restarted
+        triggerVcnRequestListeners(requestListener);
+        mTestLooper.dispatchAll();
+        assertEquals(2, mVcn.getVcnGatewayConnections().size());
+        verify(mDeps, times(gatewayConnections.size() + 1))
+                .newVcnGatewayConnection(
+                        eq(mVcnContext),
+                        eq(TEST_SUB_GROUP),
+                        eq(mSubscriptionSnapshot),
+                        any(),
+                        mGatewayStatusCallbackCaptor.capture());
     }
 }

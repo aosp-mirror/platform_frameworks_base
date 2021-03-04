@@ -24,6 +24,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
+import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.transition.Transitions;
@@ -42,6 +43,7 @@ public class ShellInitImpl {
     private final Optional<LegacySplitScreenController> mLegacySplitScreenOptional;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final Optional<AppPairsController> mAppPairsOptional;
+    private final Optional<PipTouchHandler> mPipTouchHandlerOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final ShellExecutor mMainExecutor;
     private final Transitions mTransitions;
@@ -56,6 +58,7 @@ public class ShellInitImpl {
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
             Optional<StartingSurface> startingSurfaceOptional,
+            Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
             ShellExecutor mainExecutor) {
@@ -66,6 +69,7 @@ public class ShellInitImpl {
                 splitScreenOptional,
                 appPairsOptional,
                 startingSurfaceOptional,
+                pipTouchHandlerOptional,
                 fullscreenTaskListener,
                 transitions,
                 mainExecutor).mImpl;
@@ -78,6 +82,7 @@ public class ShellInitImpl {
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
             Optional<StartingSurface> startingSurfaceOptional,
+            Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
             ShellExecutor mainExecutor) {
@@ -88,6 +93,7 @@ public class ShellInitImpl {
         mSplitScreenOptional = splitScreenOptional;
         mAppPairsOptional = appPairsOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
+        mPipTouchHandlerOptional = pipTouchHandlerOptional;
         mTransitions = transitions;
         mMainExecutor = mainExecutor;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -112,6 +118,11 @@ public class ShellInitImpl {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.register(mShellTaskOrganizer);
         }
+
+        // TODO(b/181599115): This should really be the pip controller, but until we can provide the
+        // controller instead of the feature interface, can just initialize the touch handler if
+        // needed
+        mPipTouchHandlerOptional.ifPresent((handler) -> handler.init());
     }
 
     @ExternalThread

@@ -49,6 +49,7 @@ import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -696,6 +697,33 @@ public class StorageManager {
             return true;
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to resolve path: " + rawPath, e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a {@link PendingIntent} that can be used by Apps with
+     * {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} permission
+     * to launch the manageSpaceActivity for any App that implements it, irrespective of its
+     * exported status.
+     * <p>
+     * Caller has the responsibility of supplying a valid packageName which has
+     * manageSpaceActivity implemented.
+     *
+     * @param packageName package name for the App for which manageSpaceActivity is to be launched
+     * @param requestCode for launching the activity
+     * @return PendingIntent to launch the manageSpaceActivity if successful, null if the
+     * packageName doesn't have a manageSpaceActivity.
+     * @throws IllegalArgumentException an invalid packageName is supplied.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+    @Nullable
+    public PendingIntent getManageSpaceActivityIntent(
+            @NonNull String packageName, int requestCode) {
+        try {
+            return mStorageManager.getManageSpaceActivityIntent(packageName,
+                    requestCode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2738,10 +2766,11 @@ public class StorageManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void notifyAppIoBlocked(@NonNull String volumeUuid, int uid, int tid,
+    public void notifyAppIoBlocked(@NonNull UUID volumeUuid, int uid, int tid,
             @AppIoBlockedReason int reason) {
+        Objects.requireNonNull(volumeUuid);
         try {
-            mStorageManager.notifyAppIoBlocked(volumeUuid, uid, tid, reason);
+            mStorageManager.notifyAppIoBlocked(convert(volumeUuid), uid, tid, reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2764,10 +2793,11 @@ public class StorageManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void notifyAppIoResumed(@NonNull String volumeUuid, int uid, int tid,
+    public void notifyAppIoResumed(@NonNull UUID volumeUuid, int uid, int tid,
             @AppIoBlockedReason int reason) {
+        Objects.requireNonNull(volumeUuid);
         try {
-            mStorageManager.notifyAppIoResumed(volumeUuid, uid, tid, reason);
+            mStorageManager.notifyAppIoResumed(convert(volumeUuid), uid, tid, reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

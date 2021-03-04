@@ -97,6 +97,7 @@ java_library_static {
         ":platform-compat-config",
         ":platform-compat-overrides",
         ":display-device-config",
+        ":display-layout-config",
         ":cec-config",
         ":device-state-config",
         "java/com/android/server/EventLogTags.logtags",

@@ -34,12 +34,21 @@ public class UdfpsAnimationFpmOther extends UdfpsAnimation {
     }
 
     @Override
-    void updateColor() {
+    protected void updateColor() {
+
+    }
+
+    @Override
+    protected void onDestroy() {
 
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        if (isIlluminationShowing()) {
+            return;
+        }
+
         mFingerprintDrawable.draw(canvas);
     }
 

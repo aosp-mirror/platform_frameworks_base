@@ -3948,6 +3948,10 @@
          color supplied by the Notification.Builder if present. -->
     <bool name="config_tintNotificationActionButtons">true</bool>
 
+    <!-- Flag indicating that tinted items (actions, expander, etc) are to be tinted using the
+         theme color, rather than the notification color. -->
+    <bool name="config_tintNotificationsWithTheme">true</bool>
+
     <!-- Show area update info settings in CellBroadcastReceiver and information in SIM status in Settings app -->
     <bool name="config_showAreaUpdateInfoSettings">false</bool>
 
@@ -4661,15 +4665,6 @@
 
     <!-- WindowsManager JetPack display features -->
     <string name="config_display_features" translatable="false" />
-
-    <!-- Physical Display IDs of the display-devices that are swapped when a folding device folds.
-         This list is expected to contain two elements: the first is the display to use
-         when the device is folded, the second is the display to use when unfolded. If the array
-         is empty or the display IDs are not recognized, this feature is turned off and the value
-         ignored.
-         TODO: b/170470621 - remove once we can have multiple Internal displays in DMS as
-               well as a notification from DisplayStateManager. -->
-    <string-array name="config_internalFoldedPhysicalDisplayIds" translatable="false" />
 
     <!-- Aspect ratio of task level letterboxing. Values <= 1.0 will be ignored.
          Note: Activity min/max aspect ratio restrictions will still be respected by the

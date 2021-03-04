@@ -80,7 +80,8 @@ public class RecentLocationAccesses {
      * Fills a list of applications which queried location recently within specified time.
      * Apps are sorted by recency. Apps with more recent location accesses are in the front.
      */
-    public List<Access> getAppList() {
+    @VisibleForTesting
+    List<Access> getAppList(boolean showSystemApps) {
         // Retrieve a location usage list from AppOps
         PackageManager pm = mContext.getPackageManager();
         AppOpsManager aoManager =
@@ -108,22 +109,26 @@ public class RecentLocationAccesses {
 
             // Don't show apps that do not have user sensitive location permissions
             boolean showApp = true;
-            for (int op : LOCATION_OPS) {
-                final String permission = AppOpsManager.opToPermission(op);
-                final int permissionFlags = pm.getPermissionFlags(permission, packageName, user);
-                if (PermissionChecker.checkPermissionForPreflight(mContext, permission,
-                        PermissionChecker.PID_UNKNOWN, uid, packageName)
-                                == PermissionChecker.PERMISSION_GRANTED) {
-                    if ((permissionFlags
-                            & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED) == 0) {
-                        showApp = false;
-                        break;
-                    }
-                } else {
-                    if ((permissionFlags
-                            & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED) == 0) {
-                        showApp = false;
-                        break;
+            if (!showSystemApps) {
+                for (int op : LOCATION_OPS) {
+                    final String permission = AppOpsManager.opToPermission(op);
+                    final int permissionFlags = pm.getPermissionFlags(permission, packageName,
+                            user);
+                    if (PermissionChecker.checkPermissionForPreflight(mContext, permission,
+                            PermissionChecker.PID_UNKNOWN, uid, packageName)
+                            == PermissionChecker.PERMISSION_GRANTED) {
+                        if ((permissionFlags
+                                & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED)
+                                == 0) {
+                            showApp = false;
+                            break;
+                        }
+                    } else {
+                        if ((permissionFlags
+                                & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED) == 0) {
+                            showApp = false;
+                            break;
+                        }
                     }
                 }
             }
@@ -137,8 +142,15 @@ public class RecentLocationAccesses {
         return accesses;
     }
 
-    public List<Access> getAppListSorted() {
-        List<Access> accesses = getAppList();
+
+    /**
+     * Gets a list of apps that accessed location recently, sorting by recency.
+     *
+     * @param showSystemApps whether includes system apps in the list.
+     * @return the list of apps that recently accessed location.
+     */
+    public List<Access> getAppListSorted(boolean showSystemApps) {
+        List<Access> accesses = getAppList(showSystemApps);
         // Sort the list of Access by recency. Most recent accesses first.
         Collections.sort(accesses, Collections.reverseOrder(new Comparator<Access>() {
             @Override

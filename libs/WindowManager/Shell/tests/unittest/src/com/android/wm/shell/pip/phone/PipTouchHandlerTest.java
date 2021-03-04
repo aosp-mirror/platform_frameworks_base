@@ -106,6 +106,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
                 mPipBoundsAlgorithm, mPipBoundsState, mPipTaskOrganizer,
                 mMockPipTransitionController, mFloatingContentCoordinator, mPipUiEventLogger,
                 mMainExecutor);
+        mPipTouchHandler.init();
         mMotionHelper = Mockito.spy(mPipTouchHandler.getMotionHelper());
         mPipResizeGestureHandler = Mockito.spy(mPipTouchHandler.getPipResizeGestureHandler());
         mPipTouchHandler.setPipMotionHelper(mMotionHelper);

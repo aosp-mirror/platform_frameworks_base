@@ -18,6 +18,8 @@ package com.android.server.vcn;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -79,10 +81,20 @@ public class VcnGatewayConnectionDisconnectingStateTest extends VcnGatewayConnec
         // Should do nothing; already tearing down.
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
         verifyTeardownTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+        assertTrue(mGatewayConnection.isQuitting());
     }
 
     @Test
     public void testSafeModeTimeoutNotifiesCallback() {
         verifySafeModeTimeoutNotifiesCallback(mGatewayConnection.mDisconnectingState);
+    }
+
+    @Test
+    public void testNonTeardownDisconnectRequest() throws Exception {
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        assertFalse(mGatewayConnection.isQuitting());
     }
 }

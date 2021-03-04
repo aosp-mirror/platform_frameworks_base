@@ -87,7 +87,7 @@ public class PipDismissTargetHandler {
                     SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
     // Allow dragging the PIP to a location to close it
-    private final boolean mEnableDismissDragToEdge;
+    private boolean mEnableDismissDragToEdge;
 
     private int mDismissAreaHeight;
 
@@ -104,67 +104,66 @@ public class PipDismissTargetHandler {
         mMotionHelper = motionHelper;
         mMainExecutor = mainExecutor;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+    }
 
-        Resources res = context.getResources();
+    public void init() {
+        Resources res = mContext.getResources();
         mEnableDismissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
         mDismissAreaHeight = res.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height);
 
-        mMainExecutor.execute(() -> {
-            mTargetView = new DismissCircleView(context);
-            mTargetViewContainer = new FrameLayout(context);
-            mTargetViewContainer.setBackgroundDrawable(
-                    context.getDrawable(R.drawable.floating_dismiss_gradient_transition));
-            mTargetViewContainer.setClipChildren(false);
-            mTargetViewContainer.addView(mTargetView);
+        mTargetView = new DismissCircleView(mContext);
+        mTargetViewContainer = new FrameLayout(mContext);
+        mTargetViewContainer.setBackgroundDrawable(
+                mContext.getDrawable(R.drawable.floating_dismiss_gradient_transition));
+        mTargetViewContainer.setClipChildren(false);
+        mTargetViewContainer.addView(mTargetView);
 
-            mMagnetizedPip = mMotionHelper.getMagnetizedPip();
-            mMagneticTarget = mMagnetizedPip.addTarget(mTargetView, 0);
-            updateMagneticTargetSize();
+        mMagnetizedPip = mMotionHelper.getMagnetizedPip();
+        mMagneticTarget = mMagnetizedPip.addTarget(mTargetView, 0);
+        updateMagneticTargetSize();
 
-            mMagnetizedPip.setAnimateStuckToTarget(
-                    (target, velX, velY, flung, after) -> {
-                        if (mEnableDismissDragToEdge) {
-                            mMotionHelper.animateIntoDismissTarget(target, velX, velY, flung,
-                                    after);
-                        }
-                        return Unit.INSTANCE;
-                    });
-            mMagnetizedPip.setMagnetListener(new MagnetizedObject.MagnetListener() {
-                @Override
-                public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                    // Show the dismiss target, in case the initial touch event occurred within
-                    // the magnetic field radius.
+        mMagnetizedPip.setAnimateStuckToTarget(
+                (target, velX, velY, flung, after) -> {
                     if (mEnableDismissDragToEdge) {
-                        showDismissTargetMaybe();
+                        mMotionHelper.animateIntoDismissTarget(target, velX, velY, flung, after);
                     }
+                    return Unit.INSTANCE;
+                });
+        mMagnetizedPip.setMagnetListener(new MagnetizedObject.MagnetListener() {
+            @Override
+            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                // Show the dismiss target, in case the initial touch event occurred within
+                // the magnetic field radius.
+                if (mEnableDismissDragToEdge) {
+                    showDismissTargetMaybe();
                 }
+            }
 
-                @Override
-                public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
-                        float velX, float velY, boolean wasFlungOut) {
-                    if (wasFlungOut) {
-                        mMotionHelper.flingToSnapTarget(velX, velY, null /* endAction */);
-                        hideDismissTargetMaybe();
-                    } else {
-                        mMotionHelper.setSpringingToTouch(true);
-                    }
+            @Override
+            public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    float velX, float velY, boolean wasFlungOut) {
+                if (wasFlungOut) {
+                    mMotionHelper.flingToSnapTarget(velX, velY, null /* endAction */);
+                    hideDismissTargetMaybe();
+                } else {
+                    mMotionHelper.setSpringingToTouch(true);
                 }
+            }
 
-                @Override
-                public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                    mMainExecutor.executeDelayed(() -> {
-                        mMotionHelper.notifyDismissalPending();
-                        mMotionHelper.animateDismiss();
-                        hideDismissTargetMaybe();
+            @Override
+            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                mMainExecutor.executeDelayed(() -> {
+                    mMotionHelper.notifyDismissalPending();
+                    mMotionHelper.animateDismiss();
+                    hideDismissTargetMaybe();
 
-                        mPipUiEventLogger.log(
-                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
-                    }, 0);
-                }
-            });
-
-            mMagneticTargetAnimator = PhysicsAnimator.getInstance(mTargetView);
+                    mPipUiEventLogger.log(
+                            PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
+                }, 0);
+            }
         });
+
+        mMagneticTargetAnimator = PhysicsAnimator.getInstance(mTargetView);
     }
 
     /**

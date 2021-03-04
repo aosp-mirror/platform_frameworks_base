@@ -66,7 +66,7 @@ public abstract class WindowManagerInternal {
         /**
          * Is trace enabled or not.
          */
-        boolean isEnabled();
+        boolean isAccessibilityTracingEnabled();
 
         /**
          * Add an accessibility trace entry.
@@ -667,4 +667,13 @@ public abstract class WindowManagerInternal {
      * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.
      */
     public abstract void moveWindowTokenToDisplay(IBinder binder, int displayId);
+
+    /**
+     * Checks whether the given window should restore the last IME visibility.
+     *
+     * @param imeTargetWindowToken The token of the (IME target) window
+     * @return {@code true} when the system allows to restore the IME visibility,
+     *         {@code false} otherwise.
+     */
+    public abstract boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken);
 }

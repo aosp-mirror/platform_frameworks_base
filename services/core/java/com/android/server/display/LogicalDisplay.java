@@ -17,11 +17,11 @@
 package com.android.server.display;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
 import android.util.ArraySet;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayEventReceiver;
@@ -64,12 +64,14 @@ import java.util.Objects;
  */
 final class LogicalDisplay {
     private static final String TAG = "LogicalDisplay";
-    private final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
 
     // The layer stack we use when the display has been blanked to prevent any
     // of its content from appearing.
     private static final int BLANK_LAYER_STACK = -1;
 
+    private static final DisplayInfo EMPTY_DISPLAY_INFO = new DisplayInfo();
+
+    private final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
     private final int mDisplayId;
     private final int mLayerStack;
 
@@ -297,7 +299,7 @@ final class LogicalDisplay {
 
         // Check whether logical display has become invalid.
         if (!deviceRepo.containsLocked(mPrimaryDisplayDevice)) {
-            mPrimaryDisplayDevice = null;
+            setPrimaryDisplayDeviceLocked(null);
             return;
         }
 
@@ -684,18 +686,28 @@ final class LogicalDisplay {
      * @param targetDisplay The display with which to swap display-devices.
      * @return {@code true} if the displays were swapped, {@code false} otherwise.
      */
-    public boolean swapDisplaysLocked(@NonNull LogicalDisplay targetDisplay) {
-        final DisplayDevice targetDevice = targetDisplay.getPrimaryDisplayDeviceLocked();
-        if (mPrimaryDisplayDevice == null || targetDevice == null) {
-            Slog.e(TAG, "Missing display device during swap: " + mPrimaryDisplayDevice + " , "
-                    + targetDevice);
-            return false;
-        }
+    public void swapDisplaysLocked(@NonNull LogicalDisplay targetDisplay) {
+        final DisplayDevice oldTargetDevice =
+                targetDisplay.setPrimaryDisplayDeviceLocked(mPrimaryDisplayDevice);
+        setPrimaryDisplayDeviceLocked(oldTargetDevice);
+    }
 
-        final DisplayDevice tmpDevice = mPrimaryDisplayDevice;
-        mPrimaryDisplayDevice = targetDisplay.mPrimaryDisplayDevice;
-        targetDisplay.mPrimaryDisplayDevice = tmpDevice;
-        return true;
+    /**
+     * Sets the primary display device to the specified device.
+     *
+     * @param device The new device to set.
+     * @return The previously set display device.
+     */
+    public DisplayDevice setPrimaryDisplayDeviceLocked(@Nullable DisplayDevice device) {
+        final DisplayDevice old = mPrimaryDisplayDevice;
+        mPrimaryDisplayDevice = device;
+
+        // Reset all our display info data
+        mPrimaryDisplayDeviceInfo = null;
+        mBaseDisplayInfo.copyFrom(EMPTY_DISPLAY_INFO);
+        mInfo.set(null);
+
+        return old;
     }
 
     /**
@@ -718,8 +730,8 @@ final class LogicalDisplay {
 
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
-        pw.println("mLayerStack=" + mLayerStack);
         pw.println("mIsEnabled=" + mIsEnabled);
+        pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
         pw.println("mDesiredDisplayModeSpecs={" + mDesiredDisplayModeSpecs + "}");
         pw.println("mRequestedColorMode=" + mRequestedColorMode);

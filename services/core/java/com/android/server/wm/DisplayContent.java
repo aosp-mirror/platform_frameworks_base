@@ -2943,10 +2943,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return dockFrame.bottom - imeFrame.top;
     }
 
-    void prepareFreezingTaskBounds() {
-        forAllRootTasks(Task::prepareFreezingTaskBounds);
-    }
-
     void rotateBounds(@Rotation int oldRotation, @Rotation int newRotation, Rect inOutBounds) {
         // Get display bounds on oldRotation as parent bounds for the rotation.
         getBounds(mTmpRect, oldRotation);
@@ -3703,8 +3699,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // app.
         assignWindowLayers(true /* setLayoutNeeded */);
         // 3. The z-order of IME might have been changed. Update the above insets state.
-        mInsetsStateController.updateAboveInsetsState(
-                mInputMethodWindow, true /* notifyInsetsChange */);
+        mInsetsStateController.updateAboveInsetsState(mInputMethodWindow,
+                mInsetsStateController.getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
         // 4. Update the IME control target to apply any inset change and animation.
         // 5. Reparent the IME container surface to either the input target app, or the IME window
         // parent.
@@ -4105,13 +4101,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void onWindowAnimationFinished(@NonNull WindowContainer wc, int type) {
         if (type == ANIMATION_TYPE_APP_TRANSITION || type == ANIMATION_TYPE_RECENTS) {
-            // Unfreeze the insets state of the frozen target when the animation finished if exists.
-            final Task task = wc.asTask();
-            if (task != null) {
-                task.forAllWindows(w -> {
-                    w.clearFrozenInsetsState();
-                }, true /* traverseTopToBottom */);
-            }
             removeImeSurfaceImmediately();
         }
     }

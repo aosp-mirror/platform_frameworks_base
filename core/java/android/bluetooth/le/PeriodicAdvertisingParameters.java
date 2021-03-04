@@ -22,7 +22,7 @@ import android.os.Parcelable;
 /**
  * The {@link PeriodicAdvertisingParameters} provide a way to adjust periodic
  * advertising preferences for each Bluetooth LE advertising set. Use {@link
- * AdvertisingSetParameters.Builder} to create an instance of this class.
+ * PeriodicAdvertisingParameters.Builder} to create an instance of this class.
  */
 public final class PeriodicAdvertisingParameters implements Parcelable {
 
