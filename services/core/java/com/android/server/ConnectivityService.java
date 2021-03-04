@@ -3590,11 +3590,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // pendingIntent => NetworkRequestInfo map.
     // This method assumes that every non-null PendingIntent maps to exactly 1 NetworkRequestInfo.
     private NetworkRequestInfo findExistingNetworkRequestInfo(PendingIntent pendingIntent) {
-        Intent intent = pendingIntent.getIntent();
         for (Map.Entry<NetworkRequest, NetworkRequestInfo> entry : mNetworkRequests.entrySet()) {
             PendingIntent existingPendingIntent = entry.getValue().mPendingIntent;
             if (existingPendingIntent != null &&
-                    existingPendingIntent.getIntent().filterEquals(intent)) {
+                    existingPendingIntent.intentFilterEquals(pendingIntent)) {
                 return entry.getValue();
             }
         }
