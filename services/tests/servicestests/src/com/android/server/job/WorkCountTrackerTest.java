@@ -20,8 +20,10 @@ import static com.android.server.job.JobConcurrencyManager.NUM_WORK_TYPES;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BG;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_EJ;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_FGS;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
+import static com.android.server.job.JobConcurrencyManager.workTypeToString;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -54,7 +56,7 @@ public class WorkCountTrackerTest {
 
     private static final double[] EQUAL_PROBABILITY_CDF =
             buildWorkTypeCdf(1.0 / NUM_WORK_TYPES, 1.0 / NUM_WORK_TYPES, 1.0 / NUM_WORK_TYPES,
-                    1.0 / NUM_WORK_TYPES);
+                    1.0 / NUM_WORK_TYPES, 1.0 / NUM_WORK_TYPES);
 
     private Random mRandom;
     private WorkCountTracker mWorkCountTracker;
@@ -66,8 +68,9 @@ public class WorkCountTrackerTest {
     }
 
     @NonNull
-    private static double[] buildWorkTypeCdf(double pTop, double pEj, double pBg, double pBgUser) {
-        return buildCdf(pTop, pEj, pBg, pBgUser);
+    private static double[] buildWorkTypeCdf(
+            double pTop, double pFgs, double pEj, double pBg, double pBgUser) {
+        return buildCdf(pTop, pFgs, pEj, pBg, pBgUser);
     }
 
     @NonNull
@@ -102,10 +105,12 @@ public class WorkCountTrackerTest {
             case 0:
                 return WORK_TYPE_TOP;
             case 1:
-                return WORK_TYPE_EJ;
+                return WORK_TYPE_FGS;
             case 2:
-                return WORK_TYPE_BG;
+                return WORK_TYPE_EJ;
             case 3:
+                return WORK_TYPE_BG;
+            case 4:
                 return WORK_TYPE_BGUSER;
             default:
                 throw new IllegalStateException("Unknown work type");
@@ -224,12 +229,15 @@ public class WorkCountTrackerTest {
 
     private void startPendingJobs(Jobs jobs) {
         while (hasStartablePendingJob(jobs)) {
-            final int startingWorkType =
-                    getRandomWorkType(EQUAL_PROBABILITY_CDF, mRandom.nextDouble());
+            final int workType = getRandomWorkType(EQUAL_PROBABILITY_CDF, mRandom.nextDouble());
 
-            if (jobs.pending.get(startingWorkType) > 0
-                    && mWorkCountTracker.canJobStart(startingWorkType) != WORK_TYPE_NONE) {
-                final int pendingMultiType = getPendingMultiType(jobs, startingWorkType);
+            if (jobs.pending.get(workType) > 0) {
+                final int pendingMultiType = getPendingMultiType(jobs, workType);
+                final int startingWorkType = mWorkCountTracker.canJobStart(pendingMultiType);
+                if (startingWorkType == WORK_TYPE_NONE) {
+                    continue;
+                }
+
                 jobs.removePending(pendingMultiType);
                 jobs.running.put(startingWorkType, jobs.running.get(startingWorkType) + 1);
                 mWorkCountTracker.stageJob(startingWorkType, pendingMultiType);
@@ -304,7 +312,7 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final List<Pair<Integer, Integer>> minLimits = List.of();
         final double probStop = 0.5;
-        final double[] cdf = buildWorkTypeCdf(0.5, 0, 0.5, 0);
+        final double[] cdf = buildWorkTypeCdf(0.5, 0, 0, 0.5, 0);
         final double[] numTypesCdf = buildCdf(.5, .3, .15, .05);
         final double probStart = 0.5;
 
@@ -322,7 +330,7 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.5;
-        final double[] cdf = buildWorkTypeCdf(1.0 / 3, 0, 1.0 / 3, 1.0 / 3);
+        final double[] cdf = buildWorkTypeCdf(1.0 / 3, 0, 0, 1.0 / 3, 1.0 / 3);
         final double[] numTypesCdf = buildCdf(.75, .2, .05);
         final double probStart = 0.5;
 
@@ -340,7 +348,7 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final List<Pair<Integer, Integer>> minLimits = List.of();
         final double probStop = 0.5;
-        final double[] cdf = buildWorkTypeCdf(1.0 / 3, 0, 1.0 / 3, 1.0 / 3);
+        final double[] cdf = buildWorkTypeCdf(1.0 / 3, 0, 0, 1.0 / 3, 1.0 / 3);
         final double[] numTypesCdf = buildCdf(.05, .95);
         final double probStart = 0.5;
 
@@ -358,7 +366,7 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.5;
-        final double[] cdf = buildWorkTypeCdf(0.1, 0, 0.8, .1);
+        final double[] cdf = buildWorkTypeCdf(0.1, 0, 0, 0.8, .1);
         final double[] numTypesCdf = buildCdf(.5, .3, .15, .05);
         final double probStart = 0.5;
 
@@ -376,7 +384,7 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.5;
-        final double[] cdf = buildWorkTypeCdf(0.9, 0, 0.1, 0);
+        final double[] cdf = buildWorkTypeCdf(0.85, 0.05, 0, 0.1, 0);
         final double[] numTypesCdf = buildCdf(1);
         final double probStart = 0.5;
 
@@ -394,7 +402,7 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.4;
-        final double[] cdf = buildWorkTypeCdf(0.1, 0, 0.1, .8);
+        final double[] cdf = buildWorkTypeCdf(0.1, 0, 0, 0.1, .8);
         final double[] numTypesCdf = buildCdf(0.5, 0.5);
         final double probStart = 0.5;
 
@@ -413,7 +421,7 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final double probStop = 0.4;
-        final double[] cdf = buildWorkTypeCdf(0.9, 0, 0.05, 0.05);
+        final double[] cdf = buildWorkTypeCdf(0.8, 0.1, 0, 0.05, 0.05);
         final double[] numTypesCdf = buildCdf(1);
         final double probStart = 0.5;
 
@@ -432,7 +440,7 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final double probStop = 0.5;
-        final double[] cdf = buildWorkTypeCdf(0, 0, 0.5, 0.5);
+        final double[] cdf = buildWorkTypeCdf(0, 0, 0, 0.5, 0.5);
         final double[] numTypesCdf = buildCdf(1);
         final double probStart = 0.5;
 
@@ -451,7 +459,7 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final double probStop = 0.5;
-        final double[] cdf = buildWorkTypeCdf(0, 0, 0.1, 0.9);
+        final double[] cdf = buildWorkTypeCdf(0, 0, 0, 0.1, 0.9);
         final double[] numTypesCdf = buildCdf(0.9, 0.1);
         final double probStart = 0.5;
 
@@ -470,7 +478,7 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final double probStop = 0.5;
-        final double[] cdf = buildWorkTypeCdf(0, 0, 0.9, 0.1);
+        final double[] cdf = buildWorkTypeCdf(0, 0, 0, 0.9, 0.1);
         final double[] numTypesCdf = buildCdf(1);
         final double probStart = 0.5;
 
@@ -488,7 +496,7 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.4;
-        final double[] cdf = buildWorkTypeCdf(0.5, 0.5, 0, 0);
+        final double[] cdf = buildWorkTypeCdf(0.5, 0, 0.5, 0, 0);
         final double[] numTypesCdf = buildCdf(0.1, 0.7, 0.2);
         final double probStart = 0.5;
 
@@ -511,7 +519,7 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 1));
         final double probStop = 0.13;
-        final double[] numTypesCdf = buildCdf(0, 0.05, 0.1, 0.85);
+        final double[] numTypesCdf = buildCdf(0, 0.05, 0.1, 0.8, 0.05);
         final double probStart = 0.87;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
@@ -528,7 +536,7 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_EJ, 5), Pair.create(WORK_TYPE_BG, 4));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.4;
-        final double[] cdf = buildWorkTypeCdf(.1, 0.5, 0.35, 0.05);
+        final double[] cdf = buildWorkTypeCdf(.1, 0, 0.5, 0.35, 0.05);
         final double[] numTypesCdf = buildCdf(1);
         final double probStart = 0.5;
 
@@ -548,7 +556,7 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.4;
-        final double[] cdf = buildWorkTypeCdf(0.01, 0.49, 0.1, 0.4);
+        final double[] cdf = buildWorkTypeCdf(0.01, 0.09, 0.4, 0.1, 0.4);
         final double[] numTypesCdf = buildCdf(0.7, 0.3);
         final double probStart = 0.5;
 
@@ -576,11 +584,13 @@ public class WorkCountTrackerTest {
         startPendingJobs(jobs);
 
         for (Pair<Integer, Integer> run : resultRunning) {
-            assertWithMessage("Incorrect running result for work type " + run.first)
+            assertWithMessage(
+                    "Incorrect running result for work type " + workTypeToString(run.first))
                     .that(jobs.running.get(run.first)).isEqualTo(run.second);
         }
         for (Pair<Integer, Integer> pend : resultPending) {
-            assertWithMessage("Incorrect pending result for work type " + pend.first)
+            assertWithMessage(
+                    "Incorrect pending result for work type " + workTypeToString(pend.first))
                     .that(jobs.pending.get(pend.first)).isEqualTo(pend.second);
         }
     }
@@ -938,10 +948,15 @@ public class WorkCountTrackerTest {
         assertThat(jobs.running.get(WORK_TYPE_TOP)).isEqualTo(6);
         assertThat(jobs.running.get(WORK_TYPE_EJ)).isEqualTo(1);
         assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(1);
-        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(4);
+        // If run the TOP jobs as TOP first, and a TOP|EJ job as EJ, then we'll have 4 TOP jobs
+        // remaining.
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isAtLeast(4);
+        // If we end up running the TOP|EJ jobs as TOP first, then we'll have 5 TOP jobs remaining.
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isAtMost(5);
         // Can't equate pending EJ since some could be running as TOP and BG
         assertThat(jobs.pending.get(WORK_TYPE_EJ)).isAtLeast(2);
-        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(9);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isAtLeast(8);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isAtMost(9);
 
         // Stop all jobs
         jobs.maybeFinishJobs(1);
@@ -975,7 +990,7 @@ public class WorkCountTrackerTest {
         assertThat(jobs.running.get(WORK_TYPE_EJ)).isAtLeast(1);
         assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(1);
         assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(0);
-        assertThat(jobs.pending.get(WORK_TYPE_EJ)).isAtLeast(2);
+        assertThat(jobs.pending.get(WORK_TYPE_EJ)).isAtLeast(1);
         assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(4);
     }
 }

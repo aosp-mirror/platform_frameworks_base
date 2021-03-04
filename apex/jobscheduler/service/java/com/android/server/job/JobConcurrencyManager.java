@@ -73,20 +73,48 @@ class JobConcurrencyManager {
             CONFIG_KEY_PREFIX_CONCURRENCY + "screen_off_adjustment_delay_ms";
     private static final long DEFAULT_SCREEN_OFF_ADJUSTMENT_DELAY_MS = 30_000;
 
-    // Try to give higher priority types lower values.
+    /**
+     * Set of possible execution types that a job can have. The actual type(s) of a job are based
+     * on the {@link JobStatus#lastEvaluatedPriority}, which is typically evaluated right before
+     * execution (when we're trying to determine which jobs to run next) and won't change after the
+     * job has started executing.
+     *
+     * Try to give higher priority types lower values.
+     *
+     * @see #getJobWorkTypes(JobStatus)
+     */
+
+    /** Job shouldn't run or qualify as any other work type. */
     static final int WORK_TYPE_NONE = 0;
+    /** The job is for an app in the TOP state for a currently active user. */
     static final int WORK_TYPE_TOP = 1 << 0;
-    static final int WORK_TYPE_EJ = 1 << 1;
-    static final int WORK_TYPE_BG = 1 << 2;
-    static final int WORK_TYPE_BGUSER = 1 << 3;
+    /**
+     * The job is for an app in a {@link ActivityManager#PROCESS_STATE_FOREGROUND_SERVICE} or higher
+     * state (excluding {@link ActivityManager#PROCESS_STATE_TOP} for a currently active user.
+     */
+    static final int WORK_TYPE_FGS = 1 << 1;
+    /** The job is allowed to run as an expedited job for a currently active user. */
+    static final int WORK_TYPE_EJ = 1 << 2;
+    /**
+     * The job does not satisfy any of the conditions for {@link #WORK_TYPE_TOP},
+     * {@link #WORK_TYPE_FGS}, or {@link #WORK_TYPE_EJ}, but is for a currently active user, so
+     * can run as a background job.
+     */
+    static final int WORK_TYPE_BG = 1 << 3;
+    /**
+     * The job does not satisfy any of the conditions for {@link #WORK_TYPE_TOP},
+     * {@link #WORK_TYPE_FGS}, or {@link #WORK_TYPE_EJ}, but is for a completely background user,
+     * so can run as a background user job.
+     */
+    static final int WORK_TYPE_BGUSER = 1 << 4;
     @VisibleForTesting
-    static final int NUM_WORK_TYPES = 4;
-    private static final int ALL_WORK_TYPES =
-            WORK_TYPE_TOP | WORK_TYPE_EJ | WORK_TYPE_BG | WORK_TYPE_BGUSER;
+    static final int NUM_WORK_TYPES = 5;
+    private static final int ALL_WORK_TYPES = (1 << NUM_WORK_TYPES) - 1;
 
     @IntDef(prefix = {"WORK_TYPE_"}, flag = true, value = {
             WORK_TYPE_NONE,
             WORK_TYPE_TOP,
+            WORK_TYPE_FGS,
             WORK_TYPE_EJ,
             WORK_TYPE_BG,
             WORK_TYPE_BGUSER
@@ -95,12 +123,15 @@ class JobConcurrencyManager {
     public @interface WorkType {
     }
 
-    private static String workTypeToString(@WorkType int workType) {
+    @VisibleForTesting
+    static String workTypeToString(@WorkType int workType) {
         switch (workType) {
             case WORK_TYPE_NONE:
                 return "NONE";
             case WORK_TYPE_TOP:
                 return "TOP";
+            case WORK_TYPE_FGS:
+                return "FGS";
             case WORK_TYPE_EJ:
                 return "EJ";
             case WORK_TYPE_BG:
@@ -131,58 +162,60 @@ class JobConcurrencyManager {
             new WorkConfigLimitsPerMemoryTrimLevel(
                     new WorkTypeConfig("screen_on_normal", 11,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_EJ, 3),
-                                    Pair.create(WORK_TYPE_BG, 2)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_FGS, 1),
+                                    Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, 6), Pair.create(WORK_TYPE_BGUSER, 4))
                     ),
                     new WorkTypeConfig("screen_on_moderate", 9,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 2),
-                                    Pair.create(WORK_TYPE_BG, 2)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
+                                    Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 2)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2))
                     ),
                     new WorkTypeConfig("screen_on_low", 6,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 1),
-                                    Pair.create(WORK_TYPE_BG, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
+                                    Pair.create(WORK_TYPE_EJ, 1)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 1))
                     ),
-                    new WorkTypeConfig("screen_on_critical", 5,
+                    new WorkTypeConfig("screen_on_critical", 6,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
+                                    Pair.create(WORK_TYPE_EJ, 1)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 1))
                     )
             );
     private static final WorkConfigLimitsPerMemoryTrimLevel CONFIG_LIMITS_SCREEN_OFF =
             new WorkConfigLimitsPerMemoryTrimLevel(
-                    new WorkTypeConfig("screen_off_normal", 13,
+                    new WorkTypeConfig("screen_off_normal", 15,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 3),
-                                    Pair.create(WORK_TYPE_BG, 2)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 2),
+                                    Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, 6), Pair.create(WORK_TYPE_BGUSER, 4))
                     ),
-                    new WorkTypeConfig("screen_off_moderate", 13,
+                    new WorkTypeConfig("screen_off_moderate", 15,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_EJ, 3),
-                                    Pair.create(WORK_TYPE_BG, 2)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_FGS, 2),
+                                    Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2))
                     ),
-                    new WorkTypeConfig("screen_off_low", 7,
+                    new WorkTypeConfig("screen_off_low", 9,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 2),
-                                    Pair.create(WORK_TYPE_BG, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
+                                    Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 1)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 1))
                     ),
-                    new WorkTypeConfig("screen_off_critical", 5,
+                    new WorkTypeConfig("screen_off_critical", 6,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
+                                    Pair.create(WORK_TYPE_EJ, 1)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 1))
                     )
@@ -977,10 +1010,11 @@ class JobConcurrencyManager {
 
     int getJobWorkTypes(@NonNull JobStatus js) {
         int classification = 0;
-        // TODO: create dedicated work type for FGS
         if (shouldRunAsFgUserJob(js)) {
             if (js.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
                 classification |= WORK_TYPE_TOP;
+            } else if (js.lastEvaluatedPriority >= JobInfo.PRIORITY_FOREGROUND_SERVICE) {
+                classification |= WORK_TYPE_FGS;
             } else {
                 classification |= WORK_TYPE_BG;
             }
@@ -1001,11 +1035,13 @@ class JobConcurrencyManager {
         private static final String KEY_PREFIX_MAX_TOTAL =
                 CONFIG_KEY_PREFIX_CONCURRENCY + "max_total_";
         private static final String KEY_PREFIX_MAX_TOP = CONFIG_KEY_PREFIX_CONCURRENCY + "max_top_";
+        private static final String KEY_PREFIX_MAX_FGS = CONFIG_KEY_PREFIX_CONCURRENCY + "max_fgs_";
         private static final String KEY_PREFIX_MAX_EJ = CONFIG_KEY_PREFIX_CONCURRENCY + "max_ej_";
         private static final String KEY_PREFIX_MAX_BG = CONFIG_KEY_PREFIX_CONCURRENCY + "max_bg_";
         private static final String KEY_PREFIX_MAX_BGUSER =
                 CONFIG_KEY_PREFIX_CONCURRENCY + "max_bguser_";
         private static final String KEY_PREFIX_MIN_TOP = CONFIG_KEY_PREFIX_CONCURRENCY + "min_top_";
+        private static final String KEY_PREFIX_MIN_FGS = CONFIG_KEY_PREFIX_CONCURRENCY + "min_fgs_";
         private static final String KEY_PREFIX_MIN_EJ = CONFIG_KEY_PREFIX_CONCURRENCY + "min_ej_";
         private static final String KEY_PREFIX_MIN_BG = CONFIG_KEY_PREFIX_CONCURRENCY + "min_bg_";
         private static final String KEY_PREFIX_MIN_BGUSER =
@@ -1053,6 +1089,10 @@ class JobConcurrencyManager {
                     properties.getInt(KEY_PREFIX_MAX_TOP + mConfigIdentifier,
                             mDefaultMaxAllowedSlots.get(WORK_TYPE_TOP, mMaxTotal))));
             mMaxAllowedSlots.put(WORK_TYPE_TOP, maxTop);
+            final int maxFgs = Math.max(1, Math.min(mMaxTotal,
+                    properties.getInt(KEY_PREFIX_MAX_FGS + mConfigIdentifier,
+                            mDefaultMaxAllowedSlots.get(WORK_TYPE_FGS, mMaxTotal))));
+            mMaxAllowedSlots.put(WORK_TYPE_FGS, maxFgs);
             final int maxEj = Math.max(1, Math.min(mMaxTotal,
                     properties.getInt(KEY_PREFIX_MAX_EJ + mConfigIdentifier,
                             mDefaultMaxAllowedSlots.get(WORK_TYPE_EJ, mMaxTotal))));
@@ -1074,6 +1114,12 @@ class JobConcurrencyManager {
                             mDefaultMinReservedSlots.get(WORK_TYPE_TOP))));
             mMinReservedSlots.put(WORK_TYPE_TOP, minTop);
             remaining -= minTop;
+            // Ensure fgs is in the range [0, min(maxFgs, remaining)]
+            final int minFgs = Math.max(0, Math.min(Math.min(maxFgs, remaining),
+                    properties.getInt(KEY_PREFIX_MIN_FGS + mConfigIdentifier,
+                            mDefaultMinReservedSlots.get(WORK_TYPE_FGS))));
+            mMinReservedSlots.put(WORK_TYPE_FGS, minFgs);
+            remaining -= minFgs;
             // Ensure ej is in the range [0, min(maxEj, remaining)]
             final int minEj = Math.max(0, Math.min(Math.min(maxEj, remaining),
                     properties.getInt(KEY_PREFIX_MIN_EJ + mConfigIdentifier,
@@ -1110,6 +1156,10 @@ class JobConcurrencyManager {
             pw.print(KEY_PREFIX_MIN_TOP + mConfigIdentifier, mMinReservedSlots.get(WORK_TYPE_TOP))
                     .println();
             pw.print(KEY_PREFIX_MAX_TOP + mConfigIdentifier, mMaxAllowedSlots.get(WORK_TYPE_TOP))
+                    .println();
+            pw.print(KEY_PREFIX_MIN_FGS + mConfigIdentifier, mMinReservedSlots.get(WORK_TYPE_FGS))
+                    .println();
+            pw.print(KEY_PREFIX_MAX_FGS + mConfigIdentifier, mMaxAllowedSlots.get(WORK_TYPE_FGS))
                     .println();
             pw.print(KEY_PREFIX_MIN_EJ + mConfigIdentifier, mMinReservedSlots.get(WORK_TYPE_EJ))
                     .println();
@@ -1205,6 +1255,7 @@ class JobConcurrencyManager {
         private int mConfigMaxTotal;
         private final SparseIntArray mConfigNumReservedSlots = new SparseIntArray(NUM_WORK_TYPES);
         private final SparseIntArray mConfigAbsoluteMaxSlots = new SparseIntArray(NUM_WORK_TYPES);
+        private final SparseIntArray mRecycledReserved = new SparseIntArray(NUM_WORK_TYPES);
 
         /**
          * Numbers may be lower in this than in {@link #mConfigNumReservedSlots} if there aren't
@@ -1220,11 +1271,14 @@ class JobConcurrencyManager {
             mConfigMaxTotal = workTypeConfig.getMaxTotal();
             mConfigNumReservedSlots.put(WORK_TYPE_TOP,
                     workTypeConfig.getMinReserved(WORK_TYPE_TOP));
+            mConfigNumReservedSlots.put(WORK_TYPE_FGS,
+                    workTypeConfig.getMinReserved(WORK_TYPE_FGS));
             mConfigNumReservedSlots.put(WORK_TYPE_EJ, workTypeConfig.getMinReserved(WORK_TYPE_EJ));
             mConfigNumReservedSlots.put(WORK_TYPE_BG, workTypeConfig.getMinReserved(WORK_TYPE_BG));
             mConfigNumReservedSlots.put(WORK_TYPE_BGUSER,
                     workTypeConfig.getMinReserved(WORK_TYPE_BGUSER));
             mConfigAbsoluteMaxSlots.put(WORK_TYPE_TOP, workTypeConfig.getMax(WORK_TYPE_TOP));
+            mConfigAbsoluteMaxSlots.put(WORK_TYPE_FGS, workTypeConfig.getMax(WORK_TYPE_FGS));
             mConfigAbsoluteMaxSlots.put(WORK_TYPE_EJ, workTypeConfig.getMax(WORK_TYPE_EJ));
             mConfigAbsoluteMaxSlots.put(WORK_TYPE_BG, workTypeConfig.getMax(WORK_TYPE_BG));
             mConfigAbsoluteMaxSlots.put(WORK_TYPE_BGUSER, workTypeConfig.getMax(WORK_TYPE_BGUSER));
@@ -1260,15 +1314,10 @@ class JobConcurrencyManager {
                 // We don't need to adjust reservations if only one work type was modified
                 // because that work type is the one we're using.
 
-                // 0 is WORK_TYPE_NONE.
-                int workType = 1;
-                int rem = workTypes;
-                while (rem > 0) {
-                    if ((rem & 1) != 0) {
+                for (int workType = 1; workType <= workTypes; workType <<= 1) {
+                    if ((workType & workTypes) == workType) {
                         maybeAdjustReservations(workType);
                     }
-                    rem = rem >>> 1;
-                    workType = workType << 1;
                 }
             }
         }
@@ -1280,21 +1329,11 @@ class JobConcurrencyManager {
             int numAdj = 0;
             // We don't know which type we'll classify the job as when we run it yet, so make sure
             // we have space in all applicable slots.
-            if ((workTypes & WORK_TYPE_TOP) == WORK_TYPE_TOP) {
-                mNumPendingJobs.put(WORK_TYPE_TOP, mNumPendingJobs.get(WORK_TYPE_TOP) + adj);
-                numAdj++;
-            }
-            if ((workTypes & WORK_TYPE_EJ) == WORK_TYPE_EJ) {
-                mNumPendingJobs.put(WORK_TYPE_EJ, mNumPendingJobs.get(WORK_TYPE_EJ) + adj);
-                numAdj++;
-            }
-            if ((workTypes & WORK_TYPE_BG) == WORK_TYPE_BG) {
-                mNumPendingJobs.put(WORK_TYPE_BG, mNumPendingJobs.get(WORK_TYPE_BG) + adj);
-                numAdj++;
-            }
-            if ((workTypes & WORK_TYPE_BGUSER) == WORK_TYPE_BGUSER) {
-                mNumPendingJobs.put(WORK_TYPE_BGUSER, mNumPendingJobs.get(WORK_TYPE_BGUSER) + adj);
-                numAdj++;
+            for (int workType = 1; workType <= workTypes; workType <<= 1) {
+                if ((workTypes & workType) == workType) {
+                    mNumPendingJobs.put(workType, mNumPendingJobs.get(workType) + adj);
+                    numAdj++;
+                }
             }
 
             return numAdj;
@@ -1388,105 +1427,45 @@ class JobConcurrencyManager {
             mNumUnspecializedRemaining = mConfigMaxTotal;
 
             // Step 1
-            int runTop = mNumRunningJobs.get(WORK_TYPE_TOP);
-            int resTop = runTop;
-            mNumUnspecializedRemaining -= resTop;
-            int runEj = mNumRunningJobs.get(WORK_TYPE_EJ);
-            int resEj = runEj;
-            mNumUnspecializedRemaining -= resEj;
-            int runBg = mNumRunningJobs.get(WORK_TYPE_BG);
-            int resBg = runBg;
-            mNumUnspecializedRemaining -= resBg;
-            int runBgUser = mNumRunningJobs.get(WORK_TYPE_BGUSER);
-            int resBgUser = runBgUser;
-            mNumUnspecializedRemaining -= resBgUser;
+            for (int workType = 1; workType < ALL_WORK_TYPES; workType <<= 1) {
+                int run = mNumRunningJobs.get(workType);
+                mRecycledReserved.put(workType, run);
+                mNumUnspecializedRemaining -= run;
+            }
 
             // Step 2
-            final int numTop = runTop + mNumPendingJobs.get(WORK_TYPE_TOP);
-            int fillUp = Math.max(0, Math.min(mNumUnspecializedRemaining,
-                    Math.min(numTop, mConfigNumReservedSlots.get(WORK_TYPE_TOP) - resTop)));
-            resTop += fillUp;
-            mNumUnspecializedRemaining -= fillUp;
-            final int numEj = runEj + mNumPendingJobs.get(WORK_TYPE_EJ);
-            fillUp = Math.max(0, Math.min(mNumUnspecializedRemaining,
-                    Math.min(numEj, mConfigNumReservedSlots.get(WORK_TYPE_EJ) - resEj)));
-            resEj += fillUp;
-            mNumUnspecializedRemaining -= fillUp;
-            final int numBg = runBg + mNumPendingJobs.get(WORK_TYPE_BG);
-            fillUp = Math.max(0, Math.min(mNumUnspecializedRemaining,
-                    Math.min(numBg, mConfigNumReservedSlots.get(WORK_TYPE_BG) - resBg)));
-            resBg += fillUp;
-            mNumUnspecializedRemaining -= fillUp;
-            final int numBgUser = runBgUser + mNumPendingJobs.get(WORK_TYPE_BGUSER);
-            fillUp = Math.max(0, Math.min(mNumUnspecializedRemaining,
-                    Math.min(numBgUser,
-                            mConfigNumReservedSlots.get(WORK_TYPE_BGUSER) - resBgUser)));
-            resBgUser += fillUp;
-            mNumUnspecializedRemaining -= fillUp;
+            for (int workType = 1; workType < ALL_WORK_TYPES; workType <<= 1) {
+                int num = mNumRunningJobs.get(workType) + mNumPendingJobs.get(workType);
+                int res = mRecycledReserved.get(workType);
+                int fillUp = Math.max(0, Math.min(mNumUnspecializedRemaining,
+                        Math.min(num, mConfigNumReservedSlots.get(workType) - res)));
+                res += fillUp;
+                mRecycledReserved.put(workType, res);
+                mNumUnspecializedRemaining -= fillUp;
+            }
 
             // Step 3
-            int unspecializedAssigned = Math.max(0,
-                    Math.min(mNumUnspecializedRemaining,
-                            Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_TOP), numTop) - resTop));
-            mNumActuallyReservedSlots.put(WORK_TYPE_TOP, resTop + unspecializedAssigned);
-            mNumUnspecializedRemaining -= unspecializedAssigned;
-
-            unspecializedAssigned = Math.max(0,
-                    Math.min(mNumUnspecializedRemaining,
-                            Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_EJ), numEj) - resEj));
-            mNumActuallyReservedSlots.put(WORK_TYPE_EJ, resEj + unspecializedAssigned);
-            mNumUnspecializedRemaining -= unspecializedAssigned;
-
-            unspecializedAssigned = Math.max(0,
-                    Math.min(mNumUnspecializedRemaining,
-                            Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_BG), numBg) - resBg));
-            mNumActuallyReservedSlots.put(WORK_TYPE_BG, resBg + unspecializedAssigned);
-            mNumUnspecializedRemaining -= unspecializedAssigned;
-
-            unspecializedAssigned = Math.max(0,
-                    Math.min(mNumUnspecializedRemaining,
-                            Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_BGUSER), numBgUser)
-                                    - resBgUser));
-            mNumActuallyReservedSlots.put(WORK_TYPE_BGUSER, resBgUser + unspecializedAssigned);
-            mNumUnspecializedRemaining -= unspecializedAssigned;
+            for (int workType = 1; workType < ALL_WORK_TYPES; workType <<= 1) {
+                int num = mNumRunningJobs.get(workType) + mNumPendingJobs.get(workType);
+                int res = mRecycledReserved.get(workType);
+                int unspecializedAssigned = Math.max(0,
+                        Math.min(mNumUnspecializedRemaining,
+                                Math.min(mConfigAbsoluteMaxSlots.get(workType), num) - res));
+                mNumActuallyReservedSlots.put(workType, res + unspecializedAssigned);
+                mNumUnspecializedRemaining -= unspecializedAssigned;
+            }
         }
 
         int canJobStart(int workTypes) {
-            if ((workTypes & WORK_TYPE_TOP) == WORK_TYPE_TOP) {
-                final int maxAllowed = Math.min(
-                        mConfigAbsoluteMaxSlots.get(WORK_TYPE_TOP),
-                        mNumActuallyReservedSlots.get(WORK_TYPE_TOP) + mNumUnspecializedRemaining);
-                if (mNumRunningJobs.get(WORK_TYPE_TOP) + mNumStartingJobs.get(WORK_TYPE_TOP)
-                        < maxAllowed) {
-                    return WORK_TYPE_TOP;
-                }
-            }
-            if ((workTypes & WORK_TYPE_EJ) == WORK_TYPE_EJ) {
-                final int maxAllowed = Math.min(
-                        mConfigAbsoluteMaxSlots.get(WORK_TYPE_EJ),
-                        mNumActuallyReservedSlots.get(WORK_TYPE_EJ) + mNumUnspecializedRemaining);
-                if (mNumRunningJobs.get(WORK_TYPE_EJ) + mNumStartingJobs.get(WORK_TYPE_EJ)
-                        < maxAllowed) {
-                    return WORK_TYPE_EJ;
-                }
-            }
-            if ((workTypes & WORK_TYPE_BG) == WORK_TYPE_BG) {
-                final int maxAllowed = Math.min(
-                        mConfigAbsoluteMaxSlots.get(WORK_TYPE_BG),
-                        mNumActuallyReservedSlots.get(WORK_TYPE_BG) + mNumUnspecializedRemaining);
-                if (mNumRunningJobs.get(WORK_TYPE_BG) + mNumStartingJobs.get(WORK_TYPE_BG)
-                        < maxAllowed) {
-                    return WORK_TYPE_BG;
-                }
-            }
-            if ((workTypes & WORK_TYPE_BGUSER) == WORK_TYPE_BGUSER) {
-                final int maxAllowed = Math.min(
-                        mConfigAbsoluteMaxSlots.get(WORK_TYPE_BGUSER),
-                        mNumActuallyReservedSlots.get(WORK_TYPE_BGUSER)
-                                + mNumUnspecializedRemaining);
-                if (mNumRunningJobs.get(WORK_TYPE_BGUSER) + mNumStartingJobs.get(WORK_TYPE_BGUSER)
-                        < maxAllowed) {
-                    return WORK_TYPE_BGUSER;
+            for (int workType = 1; workType <= workTypes; workType <<= 1) {
+                if ((workTypes & workType) == workType) {
+                    final int maxAllowed = Math.min(
+                            mConfigAbsoluteMaxSlots.get(workType),
+                            mNumActuallyReservedSlots.get(workType) + mNumUnspecializedRemaining);
+                    if (mNumRunningJobs.get(workType) + mNumStartingJobs.get(workType)
+                            < maxAllowed) {
+                        return workType;
+                    }
                 }
             }
             return WORK_TYPE_NONE;

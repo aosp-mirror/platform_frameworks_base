@@ -3536,6 +3536,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         boolean didStart = false;
 
         InputBindResult res = null;
+        // We shows the IME when the system allows the IME focused target window to restore the
+        // IME visibility (e.g. switching to the app task when last time the IME is visible).
+        if (isTextEditor && mWindowManagerInternal.shouldRestoreImeVisibility(windowToken)) {
+            if (attribute != null) {
+                res = startInputUncheckedLocked(cs, inputContext, missingMethods,
+                        attribute, startInputFlags, startInputReason);
+                showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
+                        SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY);
+            } else {
+                res = InputBindResult.NULL_EDITOR_INFO;
+            }
+            return res;
+        }
+
         switch (softInputMode & LayoutParams.SOFT_INPUT_MASK_STATE) {
             case LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
                 if (!sameWindowFocused && (!isTextEditor || !doAutoShow)) {

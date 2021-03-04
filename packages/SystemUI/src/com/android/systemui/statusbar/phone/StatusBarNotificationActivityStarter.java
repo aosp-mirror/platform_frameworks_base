@@ -427,8 +427,13 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                                 intent.getCreatorPackage(), adapter);
             }
             long eventTime = row.getAndResetLastActionUpTime();
-            Bundle options = eventTime > 0 ? getActivityOptions(adapter,
-                    mKeyguardStateController.isShowing(), eventTime) : getActivityOptions(adapter);
+            Bundle options = eventTime > 0
+                    ? getActivityOptions(
+                            mStatusBar.getDisplayId(),
+                            adapter,
+                            mKeyguardStateController.isShowing(),
+                            eventTime)
+                    : getActivityOptions(mStatusBar.getDisplayId(), adapter);
             int launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                     null, null, options);
             mMainThreadHandler.post(() -> {
@@ -450,6 +455,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 int launchResult = TaskStackBuilder.create(mContext)
                         .addNextIntentWithParentStack(intent)
                         .startActivities(getActivityOptions(
+                                mStatusBar.getDisplayId(),
                                 mActivityLaunchAnimator.getLaunchAnimation(
                                         row, mStatusBar.isOccluded())),
                                 new UserHandle(UserHandle.getUserId(appUid)));

@@ -454,7 +454,7 @@ public class LockTaskControllerTest {
         Settings.Secure.clearProviderForTest();
 
         // AND a password is set
-        when(mLockPatternUtils.isSecure(anyInt()))
+        when(mLockPatternUtils.isSecure(TEST_USER_ID))
                 .thenReturn(true);
 
         // AND there is a task record

@@ -132,8 +132,10 @@ public class PipResizeGestureHandler {
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
         mPhonePipMenuController = menuActivityController;
         mPipUiEventLogger = pipUiEventLogger;
+    }
 
-        context.getDisplay().getRealSize(mMaxSize);
+    public void init() {
+        mContext.getDisplay().getRealSize(mMaxSize);
         reloadResources();
 
         mEnablePinchResize = DeviceConfig.getBoolean(

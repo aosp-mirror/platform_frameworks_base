@@ -16,19 +16,19 @@ package com.android.systemui.qs.customize;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.TextView;
 
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.tileimpl.QSTileView;
 
-public class CustomizeTileView extends QSTileView {
+public class CustomizeTileView extends QSTileView implements TileAdapter.CustomizeView {
     private boolean mShowAppLabel;
 
     public CustomizeTileView(Context context, QSIconView icon) {
         super(context, icon);
     }
 
+    @Override
     public void setShowAppLabel(boolean showAppLabel) {
         mShowAppLabel = showAppLabel;
         mSecondLine.setVisibility(showAppLabel ? View.VISIBLE : View.GONE);
@@ -41,10 +41,6 @@ public class CustomizeTileView extends QSTileView {
         mSecondLine.setVisibility(mShowAppLabel ? View.VISIBLE : View.GONE);
     }
 
-    public TextView getAppLabel() {
-        return mSecondLine;
-    }
-
     @Override
     protected boolean animationsEnabled() {
         return false;
@@ -53,5 +49,10 @@ public class CustomizeTileView extends QSTileView {
     @Override
     public boolean isLongClickable() {
         return false;
+    }
+
+    @Override
+    public void changeState(QSTile.State state) {
+        handleStateChanged(state);
     }
 }

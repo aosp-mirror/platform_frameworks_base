@@ -1135,12 +1135,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                     "Can't set not mCreatedByOrganizer as launch root tr=" + rootTask);
         }
 
-        LaunchRootTaskDef def = null;
-        for (int i = mLaunchRootTasks.size() - 1; i >= 0; --i) {
-            if (mLaunchRootTasks.get(i).task.mTaskId != rootTask.mTaskId) continue;
-            def = mLaunchRootTasks.get(i);
-        }
-
+        LaunchRootTaskDef def = getLaunchRootTaskDef(rootTask);
         if (def != null) {
             // Remove so we add to the end of the list.
             mLaunchRootTasks.remove(def);
@@ -1154,6 +1149,23 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         if (!ArrayUtils.isEmpty(windowingModes) || !ArrayUtils.isEmpty(activityTypes)) {
             mLaunchRootTasks.add(def);
         }
+    }
+
+    void removeLaunchRootTask(Task rootTask) {
+        LaunchRootTaskDef def = getLaunchRootTaskDef(rootTask);
+        if (def != null) {
+            mLaunchRootTasks.remove(def);
+        }
+    }
+
+    private @Nullable LaunchRootTaskDef getLaunchRootTaskDef(Task rootTask) {
+        LaunchRootTaskDef def = null;
+        for (int i = mLaunchRootTasks.size() - 1; i >= 0; --i) {
+            if (mLaunchRootTasks.get(i).task.mTaskId != rootTask.mTaskId) continue;
+            def = mLaunchRootTasks.get(i);
+            break;
+        }
+        return def;
     }
 
     Task getLaunchRootTask(int windowingMode, int activityType, ActivityOptions options) {

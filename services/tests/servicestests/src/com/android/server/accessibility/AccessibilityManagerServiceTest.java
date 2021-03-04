@@ -84,6 +84,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @Mock private AccessibilityServiceInfo mMockServiceInfo;
     @Mock private ResolveInfo mMockResolveInfo;
     @Mock private AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
+    @Mock private WindowManagerInternal.AccessibilityControllerInternal mMockA11yController;
     @Mock private PackageManager mMockPackageManager;
     @Mock private WindowManagerInternal mMockWindowManagerService;
     @Mock private AccessibilitySecurityPolicy mMockSecurityPolicy;
@@ -115,6 +116,9 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
         when(mMockMagnificationController.getWindowMagnificationMgr()).thenReturn(
                 mMockWindowMagnificationMgr);
+        when(mMockWindowManagerService.getAccessibilityController()).thenReturn(
+                mMockA11yController);
+        when(mMockA11yController.isAccessibilityTracingEnabled()).thenReturn(false);
         mA11yms = new AccessibilityManagerService(
             InstrumentationRegistry.getContext(),
             mMockPackageManager,
@@ -153,6 +157,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
                 new Object(),
                 mMockSecurityPolicy,
                 mMockSystemSupport,
+                mA11yms,
                 mMockWindowManagerService,
                 mMockSystemActionPerformer,
                 mMockA11yWindowManager,

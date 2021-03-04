@@ -203,6 +203,9 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
         mCancelled = true;
         removeObservers();
+        if (mListener != null) {
+            mListener.onNotifyCujEvents(mSession, InteractionJankMonitor.ACTION_SESSION_CANCEL);
+        }
     }
 
     @Override

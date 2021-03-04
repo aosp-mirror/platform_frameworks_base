@@ -379,6 +379,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 case MSG_UPDATE_IFACES: {
                     // If no cached states, ignore.
                     if (mLastNetworkStateSnapshots == null) break;
+                    // TODO (b/181642673): Protect mDefaultNetworks from concurrent accessing.
                     updateIfaces(mDefaultNetworks, mLastNetworkStateSnapshots, mActiveIface);
                     break;
                 }
@@ -1266,7 +1267,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * they are combined under a single {@link NetworkIdentitySet}.
      */
     @GuardedBy("mStatsLock")
-    private void updateIfacesLocked(@Nullable Network[] defaultNetworks,
+    private void updateIfacesLocked(@NonNull Network[] defaultNetworks,
             @NonNull NetworkStateSnapshot[] snapshots) {
         if (!mSystemReady) return;
         if (LOGV) Slog.v(TAG, "updateIfacesLocked()");
@@ -1282,10 +1283,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // Rebuild active interfaces based on connected networks
         mActiveIfaces.clear();
         mActiveUidIfaces.clear();
-        if (defaultNetworks != null) {
-            // Caller is ConnectivityService. Update the list of default networks.
-            mDefaultNetworks = defaultNetworks;
-        }
+        // Update the list of default networks.
+        mDefaultNetworks = defaultNetworks;
 
         mLastNetworkStateSnapshots = snapshots;
 

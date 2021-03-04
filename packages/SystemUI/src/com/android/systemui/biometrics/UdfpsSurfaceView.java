@@ -52,6 +52,12 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
     public UdfpsSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        // Make this SurfaceView draw on top of everything else in this window. This allows us to
+        // 1) Always show the HBM circle on top of everything else, and
+        // 2) Properly composite this view with any other animations in the same window no matter
+        //    what contents are added in which order to this view hierarchy.
+        setZOrderOnTop(true);
+
         mHolder = getHolder();
         mHolder.setFormat(PixelFormat.RGBA_8888);
 
@@ -61,7 +67,9 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
         mSensorPaint.setARGB(255, 255, 255, 255);
         mSensorPaint.setStyle(Paint.Style.FILL);
 
-        mIlluminationDotDrawable = canvas -> canvas.drawOval(mSensorRect, mSensorPaint);
+        mIlluminationDotDrawable = canvas -> {
+            canvas.drawOval(mSensorRect, mSensorPaint);
+        };
     }
 
     @Override

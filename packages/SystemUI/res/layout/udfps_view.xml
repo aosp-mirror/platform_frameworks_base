@@ -22,15 +22,10 @@
     android:layout_height="match_parent"
     systemui:sensorTouchAreaCoefficient="0.5">
 
-    <!-- Enrollment progress bar-->
-    <com.android.systemui.biometrics.UdfpsProgressBar
-        android:id="@+id/progress_bar"
+    <com.android.systemui.biometrics.UdfpsSurfaceView
+        android:id="@+id/hbm_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:max="100"
-        android:padding="@dimen/udfps_enroll_progress_thickness"
-        android:progress="0"
-        android:layout_gravity="center"
-        android:visibility="gone"/>
+        android:visibility="invisible"/>
 
 </com.android.systemui.biometrics.UdfpsView>

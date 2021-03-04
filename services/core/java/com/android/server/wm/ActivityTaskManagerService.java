@@ -4042,17 +4042,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
             boolean persistent, int userId) {
 
-        final DisplayContent defaultDisplay =
-                mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY);
-
         mTempConfig.setTo(getGlobalConfiguration());
         final int changes = mTempConfig.updateFrom(values);
         if (changes == 0) {
-            // Since calling to Activity.setRequestedOrientation leads to freezing the window with
-            // setting WindowManagerService.mWaitingForConfig to true, it is important that we call
-            // performDisplayOverrideConfigUpdate in order to send the new display configuration
-            // (even if there are no actual changes) to unfreeze the window.
-            defaultDisplay.performDisplayOverrideConfigUpdate(values);
             return 0;
         }
 

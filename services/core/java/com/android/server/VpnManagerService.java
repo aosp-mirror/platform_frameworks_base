@@ -47,7 +47,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.Credentials;
-import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -60,6 +59,7 @@ import com.android.internal.net.VpnProfile;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.connectivity.Vpn;
+import com.android.server.connectivity.VpnProfileStore;
 import com.android.server.net.LockdownVpnTracker;
 
 import java.io.FileDescriptor;
@@ -83,7 +83,7 @@ public class VpnManagerService extends IVpnManager.Stub {
     private final Dependencies mDeps;
 
     private final ConnectivityManager mCm;
-    private final KeyStore mKeyStore;
+    private final VpnProfileStore mVpnProfileStore;
     private final INetworkManagementService mNMS;
     private final INetd mNetd;
     private final UserManager mUserManager;
@@ -114,9 +114,9 @@ public class VpnManagerService extends IVpnManager.Stub {
             return new HandlerThread("VpnManagerService");
         }
 
-        /** Returns the KeyStore instance to be used by this class. */
-        public KeyStore getKeyStore() {
-            return KeyStore.getInstance();
+        /** Return the VpnProfileStore to be used by this class */
+        public VpnProfileStore getVpnProfileStore() {
+            return new VpnProfileStore();
         }
 
         public INetd getNetd() {
@@ -135,7 +135,7 @@ public class VpnManagerService extends IVpnManager.Stub {
         mHandlerThread = mDeps.makeHandlerThread();
         mHandlerThread.start();
         mHandler = mHandlerThread.getThreadHandler();
-        mKeyStore = mDeps.getKeyStore();
+        mVpnProfileStore = mDeps.getVpnProfileStore();
         mUserAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
         mCm = mContext.getSystemService(ConnectivityManager.class);
         mNMS = mDeps.getINetworkManagementService();
@@ -289,7 +289,7 @@ public class VpnManagerService extends IVpnManager.Stub {
     public boolean provisionVpnProfile(@NonNull VpnProfile profile, @NonNull String packageName) {
         final int user = UserHandle.getUserId(mDeps.getCallingUid());
         synchronized (mVpns) {
-            return mVpns.get(user).provisionVpnProfile(packageName, profile, mKeyStore);
+            return mVpns.get(user).provisionVpnProfile(packageName, profile);
         }
     }
 
@@ -307,7 +307,7 @@ public class VpnManagerService extends IVpnManager.Stub {
     public void deleteVpnProfile(@NonNull String packageName) {
         final int user = UserHandle.getUserId(mDeps.getCallingUid());
         synchronized (mVpns) {
-            mVpns.get(user).deleteVpnProfile(packageName, mKeyStore);
+            mVpns.get(user).deleteVpnProfile(packageName);
         }
     }
 
@@ -325,7 +325,7 @@ public class VpnManagerService extends IVpnManager.Stub {
         final int user = UserHandle.getUserId(mDeps.getCallingUid());
         synchronized (mVpns) {
             throwIfLockdownEnabled();
-            mVpns.get(user).startVpnProfile(packageName, mKeyStore);
+            mVpns.get(user).startVpnProfile(packageName);
         }
     }
 
@@ -358,7 +358,7 @@ public class VpnManagerService extends IVpnManager.Stub {
         }
         synchronized (mVpns) {
             throwIfLockdownEnabled();
-            mVpns.get(user).startLegacyVpn(profile, mKeyStore, null /* underlying */, egress);
+            mVpns.get(user).startLegacyVpn(profile, null /* underlying */, egress);
         }
     }
 
@@ -396,7 +396,7 @@ public class VpnManagerService extends IVpnManager.Stub {
     }
 
     private boolean isLockdownVpnEnabled() {
-        return mKeyStore.contains(Credentials.LOCKDOWN_VPN);
+        return mVpnProfileStore.get(Credentials.LOCKDOWN_VPN) != null;
     }
 
     @Override
@@ -417,14 +417,14 @@ public class VpnManagerService extends IVpnManager.Stub {
                 return true;
             }
 
-            byte[] profileTag = mKeyStore.get(Credentials.LOCKDOWN_VPN);
+            byte[] profileTag = mVpnProfileStore.get(Credentials.LOCKDOWN_VPN);
             if (profileTag == null) {
                 loge("Lockdown VPN configured but cannot be read from keystore");
                 return false;
             }
             String profileName = new String(profileTag);
             final VpnProfile profile = VpnProfile.decode(
-                    profileName, mKeyStore.get(Credentials.VPN + profileName));
+                    profileName, mVpnProfileStore.get(Credentials.VPN + profileName));
             if (profile == null) {
                 loge("Lockdown VPN configured invalid profile " + profileName);
                 setLockdownTracker(null);
@@ -437,7 +437,7 @@ public class VpnManagerService extends IVpnManager.Stub {
                 return false;
             }
             setLockdownTracker(
-                    new LockdownVpnTracker(mContext, mHandler, mKeyStore, vpn,  profile));
+                    new LockdownVpnTracker(mContext, mHandler, vpn,  profile));
         }
 
         return true;
@@ -495,7 +495,7 @@ public class VpnManagerService extends IVpnManager.Stub {
                 return false;
             }
 
-            return vpn.startAlwaysOnVpn(mKeyStore);
+            return vpn.startAlwaysOnVpn();
         }
     }
 
@@ -510,7 +510,7 @@ public class VpnManagerService extends IVpnManager.Stub {
                 logw("User " + userId + " has no Vpn configuration");
                 return false;
             }
-            return vpn.isAlwaysOnPackageSupported(packageName, mKeyStore);
+            return vpn.isAlwaysOnPackageSupported(packageName);
         }
     }
 
@@ -531,11 +531,11 @@ public class VpnManagerService extends IVpnManager.Stub {
                 logw("User " + userId + " has no Vpn configuration");
                 return false;
             }
-            if (!vpn.setAlwaysOnPackage(packageName, lockdown, lockdownAllowlist, mKeyStore)) {
+            if (!vpn.setAlwaysOnPackage(packageName, lockdown, lockdownAllowlist)) {
                 return false;
             }
             if (!startAlwaysOnVpn(userId)) {
-                vpn.setAlwaysOnPackage(null, false, null, mKeyStore);
+                vpn.setAlwaysOnPackage(null, false, null);
                 return false;
             }
         }
@@ -705,7 +705,8 @@ public class VpnManagerService extends IVpnManager.Stub {
                 loge("Starting user already has a VPN");
                 return;
             }
-            userVpn = new Vpn(mHandler.getLooper(), mContext, mNMS, mNetd, userId, mKeyStore);
+            userVpn = new Vpn(mHandler.getLooper(), mContext, mNMS, mNetd, userId,
+                    new VpnProfileStore());
             mVpns.put(userId, userVpn);
             if (mUserManager.getUserInfo(userId).isPrimary() && isLockdownVpnEnabled()) {
                 updateLockdownVpn();
@@ -777,7 +778,7 @@ public class VpnManagerService extends IVpnManager.Stub {
             if (TextUtils.equals(vpn.getAlwaysOnPackage(), packageName)) {
                 log("Restarting always-on VPN package " + packageName + " for user "
                         + userId);
-                vpn.startAlwaysOnVpn(mKeyStore);
+                vpn.startAlwaysOnVpn();
             }
         }
     }
@@ -798,7 +799,7 @@ public class VpnManagerService extends IVpnManager.Stub {
             if (TextUtils.equals(vpn.getAlwaysOnPackage(), packageName) && !isReplacing) {
                 log("Removing always-on VPN package " + packageName + " for user "
                         + userId);
-                vpn.setAlwaysOnPackage(null, false, null, mKeyStore);
+                vpn.setAlwaysOnPackage(null, false, null);
             }
         }
     }
@@ -843,7 +844,7 @@ public class VpnManagerService extends IVpnManager.Stub {
             if (mLockdownEnabled && userId == UserHandle.USER_SYSTEM) {
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    mKeyStore.delete(Credentials.LOCKDOWN_VPN);
+                    mVpnProfileStore.remove(Credentials.LOCKDOWN_VPN);
                     mLockdownEnabled = false;
                     setLockdownTracker(null);
                 } finally {

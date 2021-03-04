@@ -78,7 +78,6 @@ import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -277,8 +276,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final boolean DEBUG = false;
     public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
-    public static final boolean DEBUG_GESTURES = Build.IS_DEBUGGABLE; // TODO(b/178277858)
-    public static final boolean DEBUG_GESTURES_VERBOSE = true;
+    public static final boolean DEBUG_GESTURES = false;
     public static final boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
     public static final boolean DEBUG_CAMERA_LIFT = false;
 
@@ -458,7 +456,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final DisplayMetrics mDisplayMetrics;
 
     // XXX: gesture research
-    private GestureRecorder mGestureRec = null;
+    private final GestureRecorder mGestureRec = DEBUG_GESTURES
+        ? new GestureRecorder("/sdcard/statusbar_gestures.dat")
+        : null;
 
     private final ScreenPinningRequest mScreenPinningRequest;
 
@@ -856,10 +856,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         DateTimeView.setReceiverHandler(timeTickHandler);
-
-        if (DEBUG_GESTURES) {
-            mGestureRec = new GestureRecorder(mContext.getCacheDir() + "/statusbar_gestures.dat");
-        }
     }
 
     @Override
@@ -2271,7 +2267,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public boolean interceptTouchEvent(MotionEvent event) {
         if (DEBUG_GESTURES) {
-            if (DEBUG_GESTURES_VERBOSE || event.getActionMasked() != MotionEvent.ACTION_MOVE) {
+            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
                 EventLog.writeEvent(EventLogTags.SYSUI_STATUSBAR_TOUCH,
                         event.getActionMasked(), (int) event.getX(), (int) event.getY(),
                         mDisabled1, mDisabled2);
@@ -2696,6 +2692,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mDisplay.getRotation();
     }
 
+    int getDisplayId() {
+        return mDisplayId;
+    }
+
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             boolean dismissShade, int flags) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
@@ -2721,7 +2721,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.addFlags(flags);
             int result = ActivityManager.START_CANCELED;
-            ActivityOptions options = new ActivityOptions(getActivityOptions(
+            ActivityOptions options = new ActivityOptions(getActivityOptions(mDisplayId,
                     null /* remoteAnimation */));
             options.setDisallowEnterPictureInPictureWhileLaunching(
                     disallowEnterPictureInPictureWhileLaunching);
@@ -4366,6 +4366,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         executeActionDismissingKeyguard(() -> {
             try {
                 intent.send(null, 0, null, null, null, null, getActivityOptions(
+                        mDisplayId,
                         mActivityLaunchAnimator.getLaunchAnimation(associatedView, isOccluded())));
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.
@@ -4387,15 +4388,38 @@ public class StatusBar extends SystemUI implements DemoMode,
         mMainThreadHandler.post(runnable);
     }
 
-    public static Bundle getActivityOptions(@Nullable RemoteAnimationAdapter animationAdapter) {
+    /**
+     * Returns an ActivityOptions bundle created using the given parameters.
+     *
+     * @param displayId The ID of the display to launch the activity in. Typically this would be the
+     *                  display the status bar is on.
+     * @param animationAdapter The animation adapter used to start this activity, or {@code null}
+     *                         for the default animation.
+     */
+    public static Bundle getActivityOptions(int displayId,
+            @Nullable RemoteAnimationAdapter animationAdapter) {
         return getDefaultActivityOptions(animationAdapter).toBundle();
     }
 
-    public static Bundle getActivityOptions(@Nullable RemoteAnimationAdapter animationAdapter,
-            boolean isKeyguardShowing, long eventTime) {
+    /**
+     * Returns an ActivityOptions bundle created using the given parameters.
+     *
+     * @param displayId The ID of the display to launch the activity in. Typically this would be the
+     *                  display the status bar is on.
+     * @param animationAdapter The animation adapter used to start this activity, or {@code null}
+     *                         for the default animation.
+     * @param isKeyguardShowing Whether keyguard is currently showing.
+     * @param eventTime The event time in milliseconds since boot, not including sleep. See
+     *                  {@link ActivityOptions#setSourceInfo}.
+     */
+    public static Bundle getActivityOptions(int displayId,
+            @Nullable RemoteAnimationAdapter animationAdapter, boolean isKeyguardShowing,
+            long eventTime) {
         ActivityOptions options = getDefaultActivityOptions(animationAdapter);
         options.setSourceInfo(isKeyguardShowing ? ActivityOptions.SourceInfo.TYPE_LOCKSCREEN
                 : ActivityOptions.SourceInfo.TYPE_NOTIFICATION, eventTime);
+        options.setLaunchDisplayId(displayId);
+        options.setCallerDisplayId(displayId);
         return options.toBundle();
     }
 
@@ -4534,5 +4558,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void addExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
         mExpansionChangedListeners.add(listener);
+    }
+
+    public void removeExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
+        mExpansionChangedListeners.remove(listener);
     }
 }

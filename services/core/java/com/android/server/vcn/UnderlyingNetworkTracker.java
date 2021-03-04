@@ -65,7 +65,7 @@ public class UnderlyingNetworkTracker {
     @NonNull private final NetworkCallback mRouteSelectionCallback = new RouteSelectionCallback();
 
     @NonNull private TelephonySubscriptionSnapshot mLastSnapshot;
-    private boolean mIsRunning = true;
+    private boolean mIsQuitting = false;
 
     @Nullable private UnderlyingNetworkRecord mCurrentRecord;
     @Nullable private UnderlyingNetworkRecord.Builder mRecordInProgress;
@@ -151,7 +151,7 @@ public class UnderlyingNetworkTracker {
         mVcnContext.ensureRunningOnLooperThread();
 
         // Don't bother re-filing NetworkRequests if this Tracker has been torn down.
-        if (!mIsRunning) {
+        if (mIsQuitting) {
             return;
         }
 
@@ -205,7 +205,7 @@ public class UnderlyingNetworkTracker {
         }
         mCellBringupCallbacks.clear();
 
-        mIsRunning = false;
+        mIsQuitting = true;
     }
 
     /** Returns whether the currently selected Network matches the given network. */
