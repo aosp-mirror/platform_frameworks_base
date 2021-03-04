@@ -984,6 +984,22 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testFreezeInsets() {
+        final Task stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, stack);
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+
+        // Set visibility to false, verify the main window of the task will be set the frozen
+        // insets state immediately.
+        activity.setVisibility(false);
+        assertNotNull(win.getFrozenInsetsState());
+
+        // Now make it visible again, verify that the insets are immediately unfrozen.
+        activity.setVisibility(true);
+        assertNull(win.getFrozenInsetsState());
+    }
+
+    @Test
     public void testFreezeInsetsStateWhenAppTransition() {
         final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
@@ -996,15 +1012,20 @@ public class WindowContainerTests extends WindowTestsBase {
         sources.add(activity);
 
         // Simulate the task applying the exit transition, verify the main window of the task
-        // will be set the frozen insets state.
+        // will be set the frozen insets state before the animation starts
+        activity.setVisibility(false);
         task.applyAnimation(null, TRANSIT_OLD_TASK_CLOSE, false /* enter */,
                 false /* isVoiceInteraction */, sources);
         verify(win).freezeInsetsState();
 
-        // Simulate the task transition finished, verify the frozen insets state of the window
-        // will be reset.
+        // Simulate the task transition finished.
+        activity.commitVisibility(false, false);
         task.onAnimationFinished(ANIMATION_TYPE_APP_TRANSITION,
                 task.mSurfaceAnimator.getAnimation());
+
+        // Now make it visible again, verify that the insets are immediately unfrozen even before
+        // transition starts.
+        activity.setVisibility(true);
         verify(win).clearFrozenInsetsState();
     }
 

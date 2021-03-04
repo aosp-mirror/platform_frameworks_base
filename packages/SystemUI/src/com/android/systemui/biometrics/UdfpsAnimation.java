@@ -31,15 +31,18 @@ import com.android.systemui.R;
  * sensor area.
  */
 public abstract class UdfpsAnimation extends Drawable {
-    abstract void updateColor();
+    protected abstract void updateColor();
+    protected abstract void onDestroy();
 
     @NonNull protected final Context mContext;
     @NonNull protected final Drawable mFingerprintDrawable;
     @Nullable private View mView;
+    private boolean mIlluminationShowing;
 
     public UdfpsAnimation(@NonNull Context context) {
         mContext = context;
         mFingerprintDrawable = context.getResources().getDrawable(R.drawable.ic_fingerprint, null);
+        mFingerprintDrawable.mutate();
     }
 
     public void onSensorRectUpdated(@NonNull RectF sensorRect) {
@@ -58,6 +61,14 @@ public abstract class UdfpsAnimation extends Drawable {
 
     public void setAnimationView(UdfpsAnimationView view) {
         mView = view;
+    }
+
+    boolean isIlluminationShowing() {
+        return mIlluminationShowing;
+    }
+
+    void setIlluminationShowing(boolean showing) {
+        mIlluminationShowing = showing;
     }
 
     /**

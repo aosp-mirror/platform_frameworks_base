@@ -176,9 +176,6 @@ void SkiaRecordingCanvas::FilterForImage(SkPaint& paint) {
     if (sApiLevel <= 27 && paint.getBlendMode() == SkBlendMode::kClear) {
         paint.setBlendMode(SkBlendMode::kDstOut);
     }
-
-    // disabling AA on bitmap draws matches legacy HWUI behavior
-    paint.setAntiAlias(false);
 }
 
 static SkFilterMode Paint_to_filter(const SkPaint& paint) {

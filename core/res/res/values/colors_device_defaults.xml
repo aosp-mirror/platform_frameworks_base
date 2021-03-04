@@ -42,12 +42,7 @@
     <color name="background_floating_device_default_dark">@color/system_primary_900</color>
     <color name="background_floating_device_default_light">@color/system_primary_100</color>
 
-    <color name="text_color_primary_device_default_light">@color/system_primary_900</color>
-    <color name="text_color_primary_device_default_dark">@color/system_primary_50</color>
-    <color name="text_color_secondary_device_default_light">@color/system_primary_700</color>
-    <color name="text_color_secondary_device_default_dark">@color/system_primary_200</color>
-    <color name="text_color_tertiary_device_default_light">@color/system_primary_500</color>
-    <color name="text_color_tertiary_device_default_dark">@color/system_primary_400</color>
+    <!-- Please refer to text_color_[primary]_device_default_[light].xml for text colors-->
     <color name="foreground_device_default_light">@color/text_color_primary_device_default_light</color>
     <color name="foreground_device_default_dark">@color/text_color_primary_device_default_dark</color>
 

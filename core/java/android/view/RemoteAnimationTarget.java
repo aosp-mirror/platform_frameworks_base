@@ -222,20 +222,20 @@ public class RemoteAnimationTarget implements Parcelable {
     public RemoteAnimationTarget(Parcel in) {
         taskId = in.readInt();
         mode = in.readInt();
-        leash = in.readParcelable(null);
+        leash = in.readTypedObject(SurfaceControl.CREATOR);
         isTranslucent = in.readBoolean();
-        clipRect = in.readParcelable(null);
-        contentInsets = in.readParcelable(null);
+        clipRect = in.readTypedObject(Rect.CREATOR);
+        contentInsets = in.readTypedObject(Rect.CREATOR);
         prefixOrderIndex = in.readInt();
-        position = in.readParcelable(null);
-        localBounds = in.readParcelable(null);
-        sourceContainerBounds = in.readParcelable(null);
-        screenSpaceBounds = in.readParcelable(null);
-        windowConfiguration = in.readParcelable(null);
+        position = in.readTypedObject(Point.CREATOR);
+        localBounds = in.readTypedObject(Rect.CREATOR);
+        sourceContainerBounds = in.readTypedObject(Rect.CREATOR);
+        screenSpaceBounds = in.readTypedObject(Rect.CREATOR);
+        windowConfiguration = in.readTypedObject(WindowConfiguration.CREATOR);
         isNotInRecents = in.readBoolean();
-        startLeash = in.readParcelable(null);
-        startBounds = in.readParcelable(null);
-        pictureInPictureParams = in.readParcelable(null);
+        startLeash = in.readTypedObject(SurfaceControl.CREATOR);
+        startBounds = in.readTypedObject(Rect.CREATOR);
+        pictureInPictureParams = in.readTypedObject(PictureInPictureParams.CREATOR);
     }
 
     @Override
@@ -247,20 +247,20 @@ public class RemoteAnimationTarget implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(taskId);
         dest.writeInt(mode);
-        dest.writeParcelable(leash, 0 /* flags */);
+        dest.writeTypedObject(leash, 0 /* flags */);
         dest.writeBoolean(isTranslucent);
-        dest.writeParcelable(clipRect, 0 /* flags */);
-        dest.writeParcelable(contentInsets, 0 /* flags */);
+        dest.writeTypedObject(clipRect, 0 /* flags */);
+        dest.writeTypedObject(contentInsets, 0 /* flags */);
         dest.writeInt(prefixOrderIndex);
-        dest.writeParcelable(position, 0 /* flags */);
-        dest.writeParcelable(localBounds, 0 /* flags */);
-        dest.writeParcelable(sourceContainerBounds, 0 /* flags */);
-        dest.writeParcelable(screenSpaceBounds, 0 /* flags */);
-        dest.writeParcelable(windowConfiguration, 0 /* flags */);
+        dest.writeTypedObject(position, 0 /* flags */);
+        dest.writeTypedObject(localBounds, 0 /* flags */);
+        dest.writeTypedObject(sourceContainerBounds, 0 /* flags */);
+        dest.writeTypedObject(screenSpaceBounds, 0 /* flags */);
+        dest.writeTypedObject(windowConfiguration, 0 /* flags */);
         dest.writeBoolean(isNotInRecents);
-        dest.writeParcelable(startLeash, 0 /* flags */);
-        dest.writeParcelable(startBounds, 0 /* flags */);
-        dest.writeParcelable(pictureInPictureParams, 0 /* flags */);
+        dest.writeTypedObject(startLeash, 0 /* flags */);
+        dest.writeTypedObject(startBounds, 0 /* flags */);
+        dest.writeTypedObject(pictureInPictureParams, 0 /* flags */);
     }
 
     public void dump(PrintWriter pw, String prefix) {

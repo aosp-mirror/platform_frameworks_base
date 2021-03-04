@@ -304,15 +304,14 @@ static std::array<UsapTableEntry, USAP_POOL_SIZE_MAX_LIMIT> gUsapTable;
 static FileDescriptorTable* gOpenFdTable = nullptr;
 
 // Must match values in com.android.internal.os.Zygote.
-// Note that there are gaps in the constants:
-// This is to further keep the values consistent with IVold.aidl
+// The values should be consistent with IVold.aidl
 enum MountExternalKind {
     MOUNT_EXTERNAL_NONE = 0,
     MOUNT_EXTERNAL_DEFAULT = 1,
-    MOUNT_EXTERNAL_INSTALLER = 5,
-    MOUNT_EXTERNAL_PASS_THROUGH = 7,
-    MOUNT_EXTERNAL_ANDROID_WRITABLE = 8,
-    MOUNT_EXTERNAL_COUNT = 9
+    MOUNT_EXTERNAL_INSTALLER = 2,
+    MOUNT_EXTERNAL_PASS_THROUGH = 3,
+    MOUNT_EXTERNAL_ANDROID_WRITABLE = 4,
+    MOUNT_EXTERNAL_COUNT = 5
 };
 
 // Must match values in com.android.internal.os.Zygote.

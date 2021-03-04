@@ -104,11 +104,10 @@
         <LinearLayout
             android:id="@+id/expand_button_touch_container"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/conversation_expand_button_size"
-            android:paddingStart="@dimen/conversation_expand_button_side_margin"
+            android:layout_height="@dimen/conversation_expand_button_height"
             android:orientation="horizontal"
             android:layout_gravity="end|top"
-            android:paddingEnd="@dimen/conversation_expand_button_side_margin"
+            android:paddingEnd="0dp"
             android:clipToPadding="false"
             android:clipChildren="false"
             >
@@ -118,34 +117,16 @@
                 android:forceHasOverlappingRendering="false"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginEnd="11dp"
+                android:layout_marginStart="@dimen/conversation_image_start_margin"
                 android:spacing="0dp"
                 android:layout_gravity="center"
                 android:clipToPadding="false"
                 android:clipChildren="false"
                 />
-            <!-- Unread Count -->
-            <TextView
-                android:id="@+id/conversation_unread_count"
-                android:layout_width="33sp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="11dp"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:padding="2dp"
-                android:visibility="gone"
-                android:textAppearance="@style/TextAppearance.DeviceDefault.Notification"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                android:background="@drawable/conversation_unread_bg"
-                />
-            <com.android.internal.widget.NotificationExpandButton
-                android:id="@+id/expand_button"
+            <include layout="@layout/notification_expand_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:drawable="@drawable/ic_expand_notification"
-                android:contentDescription="@string/expand_button_content_description_collapsed"
                 />
         </LinearLayout>
     </FrameLayout>

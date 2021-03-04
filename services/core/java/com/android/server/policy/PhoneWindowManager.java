@@ -163,7 +163,6 @@ import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
 import android.util.Log;
-import android.util.LongSparseArray;
 import android.util.MutableBoolean;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -318,29 +317,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private boolean mKeyguardDrawnOnce;
 
-    /* Table of Application Launch keys.  Maps from key codes to intent categories.
-     *
-     * These are special keys that are used to launch particular kinds of applications,
-     * such as a web browser.  HID defines nearly a hundred of them in the Consumer (0x0C)
-     * usage page.  We don't support quite that many yet...
-     */
-    static SparseArray<String> sApplicationLaunchKeyCategories;
-    static {
-        sApplicationLaunchKeyCategories = new SparseArray<String>();
-        sApplicationLaunchKeyCategories.append(
-                KeyEvent.KEYCODE_EXPLORER, Intent.CATEGORY_APP_BROWSER);
-        sApplicationLaunchKeyCategories.append(
-                KeyEvent.KEYCODE_ENVELOPE, Intent.CATEGORY_APP_EMAIL);
-        sApplicationLaunchKeyCategories.append(
-                KeyEvent.KEYCODE_CONTACTS, Intent.CATEGORY_APP_CONTACTS);
-        sApplicationLaunchKeyCategories.append(
-                KeyEvent.KEYCODE_CALENDAR, Intent.CATEGORY_APP_CALENDAR);
-        sApplicationLaunchKeyCategories.append(
-                KeyEvent.KEYCODE_MUSIC, Intent.CATEGORY_APP_MUSIC);
-        sApplicationLaunchKeyCategories.append(
-                KeyEvent.KEYCODE_CALCULATOR, Intent.CATEGORY_APP_CALCULATOR);
-    }
-
     /** Amount of time (in milliseconds) to wait for windows drawn before powering on. */
     static final int WAITING_FOR_DRAWN_TIMEOUT = 1000;
 
@@ -418,8 +394,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     boolean mSafeMode;
     private WindowState mKeyguardCandidate = null;
-
-    private LongSparseArray<IShortcutService> mShortcutKeyServices = new LongSparseArray<>();
 
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
     // This is for car dock and this is updated from resource.
@@ -516,8 +490,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Intent mCarDockIntent;
     Intent mDeskDockIntent;
     Intent mVrHeadsetHomeIntent;
-    boolean mSearchKeyShortcutPending;
-    boolean mConsumeSearchKeyUp;
     boolean mPendingMetaAction;
     boolean mPendingCapsLockToggle;
 
@@ -578,7 +550,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int BRIGHTNESS_STEPS = 10;
 
     SettingsObserver mSettingsObserver;
-    ShortcutManager mShortcutManager;
+    ModifierShortcutManager mModifierShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
     PowerManager.WakeLock mPowerKeyWakeLock;
     boolean mHavePendingMediaKeyRepeatWithWakeLock;
@@ -1772,7 +1744,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWakeGestureListener = new MyWakeGestureListener(mContext, mHandler);
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
-        mShortcutManager = new ShortcutManager(context);
+        mModifierShortcutManager = new ModifierShortcutManager(context);
         mUiMode = context.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultUiModeType);
         mHomeIntent =  new Intent(Intent.ACTION_MAIN, null);
@@ -2574,6 +2546,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPendingCapsLockToggle = false;
         }
 
+        if (isUserSetupComplete() && !keyguardOn) {
+            if (mModifierShortcutManager.interceptKey(event)) {
+                dismissKeyboardShortcutsMenu();
+                mPendingMetaAction = false;
+                mPendingCapsLockToggle = false;
+                return key_consumed;
+            }
+        }
+
         switch(keyCode) {
             case KeyEvent.KEYCODE_HOME:
                 // First we always handle the home key here, so applications
@@ -2599,20 +2580,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 break;
-            case  KeyEvent.KEYCODE_SEARCH:
-                if (down) {
-                    if (repeatCount == 0) {
-                        mSearchKeyShortcutPending = true;
-                        mConsumeSearchKeyUp = false;
-                    }
-                } else {
-                    mSearchKeyShortcutPending = false;
-                    if (mConsumeSearchKeyUp) {
-                        mConsumeSearchKeyUp = false;
-                        return key_consumed;
-                    }
-                }
-                return 0;
             case KeyEvent.KEYCODE_APP_SWITCH:
                 if (!keyguardOn) {
                     if (down && repeatCount == 0) {
@@ -2820,112 +2787,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
         }
 
-        // Shortcuts are invoked through Search+key, so intercept those here
-        // Any printing key that is chorded with Search should be consumed
-        // even if no shortcut was invoked.  This prevents text from being
-        // inadvertently inserted when using a keyboard that has built-in macro
-        // shortcut keys (that emit Search+x) and some of them are not registered.
-        if (mSearchKeyShortcutPending) {
-            final KeyCharacterMap kcm = event.getKeyCharacterMap();
-            if (kcm.isPrintingKey(keyCode)) {
-                mConsumeSearchKeyUp = true;
-                mSearchKeyShortcutPending = false;
-                if (down && repeatCount == 0 && !keyguardOn) {
-                    Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode, metaState);
-                    if (shortcutIntent != null) {
-                        shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        try {
-                            startActivityAsUser(shortcutIntent, UserHandle.CURRENT);
-                            dismissKeyboardShortcutsMenu();
-                        } catch (ActivityNotFoundException ex) {
-                            Slog.w(TAG, "Dropping shortcut key combination because "
-                                    + "the activity to which it is registered was not found: "
-                                    + "SEARCH+" + KeyEvent.keyCodeToString(keyCode), ex);
-                        }
-                    } else {
-                        Slog.i(TAG, "Dropping unregistered shortcut key combination: "
-                                + "SEARCH+" + KeyEvent.keyCodeToString(keyCode));
-                    }
-                }
-                return key_consumed;
-            }
-        }
-
-        // Invoke shortcuts using Meta.
-        if (down && repeatCount == 0 && !keyguardOn
-                && (metaState & KeyEvent.META_META_ON) != 0) {
-            final KeyCharacterMap kcm = event.getKeyCharacterMap();
-            if (kcm.isPrintingKey(keyCode)) {
-                Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode,
-                        metaState & ~(KeyEvent.META_META_ON
-                                | KeyEvent.META_META_LEFT_ON | KeyEvent.META_META_RIGHT_ON));
-                if (shortcutIntent != null) {
-                    shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                        startActivityAsUser(shortcutIntent, UserHandle.CURRENT);
-                        dismissKeyboardShortcutsMenu();
-                    } catch (ActivityNotFoundException ex) {
-                        Slog.w(TAG, "Dropping shortcut key combination because "
-                                + "the activity to which it is registered was not found: "
-                                + "META+" + KeyEvent.keyCodeToString(keyCode), ex);
-                    }
-                    return key_consumed;
-                }
-            }
-        }
-
-        // Handle application launch keys.
-        if (down && repeatCount == 0 && !keyguardOn) {
-            String category = sApplicationLaunchKeyCategories.get(keyCode);
-            if (category != null) {
-                Intent intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                try {
-                    startActivityAsUser(intent, UserHandle.CURRENT);
-                    dismissKeyboardShortcutsMenu();
-                } catch (ActivityNotFoundException ex) {
-                    Slog.w(TAG, "Dropping application launch key because "
-                            + "the activity to which it is registered was not found: "
-                            + "keyCode=" + keyCode + ", category=" + category, ex);
-                }
-                return key_consumed;
-            }
-        }
-
         if (isValidGlobalKey(keyCode)
                 && mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
             return key_consumed;
-        }
-
-        if (down) {
-            long shortcutCode = keyCode;
-            if (event.isCtrlPressed()) {
-                shortcutCode |= ((long) KeyEvent.META_CTRL_ON) << Integer.SIZE;
-            }
-
-            if (event.isAltPressed()) {
-                shortcutCode |= ((long) KeyEvent.META_ALT_ON) << Integer.SIZE;
-            }
-
-            if (event.isShiftPressed()) {
-                shortcutCode |= ((long) KeyEvent.META_SHIFT_ON) << Integer.SIZE;
-            }
-
-            if (event.isMetaPressed()) {
-                shortcutCode |= ((long) KeyEvent.META_META_ON) << Integer.SIZE;
-            }
-
-            IShortcutService shortcutService = mShortcutKeyServices.get(shortcutCode);
-            if (shortcutService != null) {
-                try {
-                    if (isUserSetupComplete()) {
-                        shortcutService.notifyShortcutKeyPressed(shortcutCode);
-                    }
-                } catch (RemoteException e) {
-                    mShortcutKeyServices.delete(shortcutCode);
-                }
-                return key_consumed;
-            }
         }
 
         // Reserve all the META modifier combos for system behavior
@@ -3113,12 +2977,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutService)
             throws RemoteException {
         synchronized (mLock) {
-            IShortcutService service = mShortcutKeyServices.get(shortcutCode);
-            if (service != null && service.asBinder().pingBinder()) {
-                throw new RemoteException("Key already exists.");
-            }
-
-            mShortcutKeyServices.put(shortcutCode, shortcutService);
+            mModifierShortcutManager.registerShortcutKey(shortcutCode, shortcutService);
         }
     }
 
