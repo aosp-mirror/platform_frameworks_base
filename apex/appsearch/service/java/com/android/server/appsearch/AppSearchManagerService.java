@@ -89,7 +89,7 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String packageName,
                 @NonNull String databaseName,
                 @NonNull List<Bundle> schemaBundles,
-                @NonNull List<String> schemasNotPlatformSurfaceable,
+                @NonNull List<String> schemasNotDisplayedBySystem,
                 @NonNull Map<String, List<Bundle>> schemasPackageAccessibleBundles,
                 boolean forceOverride,
                 @UserIdInt int userId,
@@ -125,7 +125,7 @@ public class AppSearchManagerService extends SystemService {
                         packageName,
                         databaseName,
                         schemas,
-                        schemasNotPlatformSurfaceable,
+                        schemasNotDisplayedBySystem,
                         schemasPackageAccessible,
                         forceOverride);
                 invokeCallbackOnResult(

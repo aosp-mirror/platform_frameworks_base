@@ -33,7 +33,7 @@ interface IAppSearchManager {
      * @param packageName The name of the package that owns this schema.
      * @param databaseName  The name of the database where this schema lives.
      * @param schemaBundles List of {@link AppSearchSchema} bundles.
-     * @param schemasNotPlatformSurfaceable Schema types that should not be surfaced on platform
+     * @param schemasNotDisplayedBySystem Schema types that should not be surfaced on platform
      *     surfaces.
      * @param schemasPackageAccessibleBundles Schema types that are visible to the specified
      *     packages. The value List contains PackageIdentifier Bundles.
@@ -47,7 +47,7 @@ interface IAppSearchManager {
         in String packageName,
         in String databaseName,
         in List<Bundle> schemaBundles,
-        in List<String> schemasNotPlatformSurfaceable,
+        in List<String> schemasNotDisplayedBySystem,
         in Map<String, List<Bundle>> schemasPackageAccessibleBundles,
         boolean forceOverride,
         in int userId,
