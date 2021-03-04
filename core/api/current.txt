@@ -52357,6 +52357,7 @@ package android.view.translation {
     method @NonNull public android.util.SparseArray<android.view.translation.TranslationResponseValue> getTranslationResponseValues();
     method public int getTranslationStatus();
     method @NonNull public android.util.SparseArray<android.view.translation.ViewTranslationResponse> getViewTranslationResponses();
+    method public boolean isFinalResponse();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationResponse> CREATOR;
     field public static final int TRANSLATION_STATUS_CONTEXT_UNSUPPORTED = 2; // 0x2
@@ -52367,6 +52368,7 @@ package android.view.translation {
   public static final class TranslationResponse.Builder {
     ctor public TranslationResponse.Builder(int);
     method @NonNull public android.view.translation.TranslationResponse build();
+    method @NonNull public android.view.translation.TranslationResponse.Builder setFinalResponse(boolean);
     method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int, @NonNull android.view.translation.TranslationResponseValue);
     method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationResponseValues(@NonNull android.util.SparseArray<android.view.translation.TranslationResponseValue>);
     method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationStatus(int);
@@ -52408,7 +52410,7 @@ package android.view.translation {
   public class Translator {
     method public void destroy();
     method public boolean isDestroyed();
-    method @Nullable @WorkerThread public android.view.translation.TranslationResponse translate(@NonNull android.view.translation.TranslationRequest);
+    method @Nullable public void translate(@NonNull android.view.translation.TranslationRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.translation.TranslationResponse>);
   }
 
   public final class UiTranslationManager {
