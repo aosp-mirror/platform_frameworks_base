@@ -106,7 +106,6 @@ import com.android.internal.view.InputBindResult;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -413,7 +412,7 @@ public final class InputMethodManager {
      * The InputConnection that was last retrieved from the served view.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    ControlledInputConnectionWrapper mServedInputConnectionWrapper;
+    IInputConnectionWrapper mServedInputConnectionWrapper;
     /**
      * The completions that were last provided by the served view.
      */
@@ -740,8 +739,7 @@ public final class InputMethodManager {
         /**
          * Checks whether the active input connection (if any) is for the given view.
          *
-         * TODO(b/160968797): Remove this method and move mServedInputConnectionWrapper to
-         *  ImeFocusController.
+         * TODO(b/182259171): Clean-up hasActiveConnection to simplify the logic.
          *
          * Note that this method is only intended for restarting input after focus gain
          * (e.g. b/160391516), DO NOT leverage this method to do another check.
@@ -755,7 +753,7 @@ public final class InputMethodManager {
 
                 return mServedInputConnectionWrapper != null
                         && mServedInputConnectionWrapper.isActive()
-                        && mServedInputConnectionWrapper.mServedView.get() == view;
+                        && mServedInputConnectionWrapper.getServedView() == view;
             }
         }
     }
@@ -1022,77 +1020,6 @@ public final class InputMethodManager {
         }
     }
 
-    private static class ControlledInputConnectionWrapper extends IInputConnectionWrapper {
-        private final InputMethodManager mParentInputMethodManager;
-        private final WeakReference<View> mServedView;
-
-        ControlledInputConnectionWrapper(Looper icLooper, InputConnection conn,
-                InputMethodManager inputMethodManager, View servedView) {
-            super(icLooper, conn);
-            mParentInputMethodManager = inputMethodManager;
-            mServedView = new WeakReference<>(servedView);
-        }
-
-        @Override
-        public boolean isActive() {
-            return mParentInputMethodManager.mActive && !isFinished();
-        }
-
-        @Override
-        public InputMethodManager getIMM() {
-            return mParentInputMethodManager;
-        }
-
-        void deactivate() {
-            if (isFinished()) {
-                // This is a small performance optimization.  Still only the 1st call of
-                // reportFinish() will take effect.
-                return;
-            }
-            closeConnection();
-
-            // Notify the app that the InputConnection was closed.
-            final View servedView = mServedView.get();
-            if (servedView != null) {
-                final Handler handler = servedView.getHandler();
-                // The handler is null if the view is already detached. When that's the case, for
-                // now, we simply don't dispatch this callback.
-                if (handler != null) {
-                    if (DEBUG) {
-                        Log.v(TAG, "Calling View.onInputConnectionClosed: view=" + servedView);
-                    }
-                    if (handler.getLooper().isCurrentThread()) {
-                        servedView.onInputConnectionClosedInternal();
-                    } else {
-                        handler.post(servedView::onInputConnectionClosedInternal);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "ControlledInputConnectionWrapper{"
-                    + "connection=" + getInputConnection()
-                    + " finished=" + isFinished()
-                    + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
-                    + " mServedView=" + mServedView.get()
-                    + "}";
-        }
-
-        void dumpDebug(ProtoOutputStream proto, long fieldId) {
-            // Check that the call is initiated in the main thread of the current InputConnection
-            // {@link InputConnection#getHandler} since the messages to IInputConnectionWrapper are
-            // executed on this thread. Otherwise the messages are dispatched to the correct thread
-            // in IInputConnectionWrapper, but this is not wanted while dumpng, for performance
-            // reasons.
-            if (getInputConnection() instanceof DumpableInputConnection && Looper.myLooper()
-                    == getLooper()) {
-                ((DumpableInputConnection) getInputConnection()).dumpDebug(proto, fieldId);
-            }
-        }
-    }
-
     final IInputMethodClient.Stub mClient = new IInputMethodClient.Stub() {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
@@ -1256,8 +1183,7 @@ public final class InputMethodManager {
         mMainLooper = looper;
         mH = new H(looper);
         mDisplayId = displayId;
-        mIInputContext = new ControlledInputConnectionWrapper(looper, mDummyInputConnection, this,
-                null);
+        mIInputContext = new IInputConnectionWrapper(looper, mDummyInputConnection, this, null);
     }
 
     /**
@@ -2063,7 +1989,7 @@ public final class InputMethodManager {
                 mServedInputConnectionWrapper.deactivate();
                 mServedInputConnectionWrapper = null;
             }
-            ControlledInputConnectionWrapper servedContext;
+            IInputConnectionWrapper servedContext;
             final int missingMethodFlags;
             if (ic != null) {
                 mCursorSelStart = tba.initialSelStart;
@@ -2080,7 +2006,7 @@ public final class InputMethodManager {
                 } else {
                     icHandler = ic.getHandler();
                 }
-                servedContext = new ControlledInputConnectionWrapper(
+                servedContext = new IInputConnectionWrapper(
                         icHandler != null ? icHandler.getLooper() : vh.getLooper(), ic, this, view);
             } else {
                 servedContext = null;
