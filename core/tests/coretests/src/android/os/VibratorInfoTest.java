@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import android.hardware.vibrator.IVibrator;
 import android.platform.test.annotations.Presubmit;
 
 import org.junit.Test;
@@ -33,16 +34,16 @@ public class VibratorInfoTest {
     @Test
     public void testHasAmplitudeControl() {
         assertFalse(createInfo(/* capabilities= */ 0).hasAmplitudeControl());
-        assertTrue(createInfo(VibratorInfo.CAPABILITY_COMPOSE_EFFECTS
-                | VibratorInfo.CAPABILITY_AMPLITUDE_CONTROL).hasAmplitudeControl());
+        assertTrue(createInfo(IVibrator.CAP_COMPOSE_EFFECTS
+                | IVibrator.CAP_AMPLITUDE_CONTROL).hasAmplitudeControl());
     }
 
     @Test
     public void testHasCapabilities() {
-        assertTrue(createInfo(VibratorInfo.CAPABILITY_COMPOSE_EFFECTS)
-                .hasCapability(VibratorInfo.CAPABILITY_COMPOSE_EFFECTS));
-        assertFalse(createInfo(VibratorInfo.CAPABILITY_COMPOSE_EFFECTS)
-                .hasCapability(VibratorInfo.CAPABILITY_AMPLITUDE_CONTROL));
+        assertTrue(createInfo(IVibrator.CAP_COMPOSE_EFFECTS)
+                .hasCapability(IVibrator.CAP_COMPOSE_EFFECTS));
+        assertFalse(createInfo(IVibrator.CAP_COMPOSE_EFFECTS)
+                .hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL));
     }
 
     @Test
@@ -59,7 +60,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testIsPrimitiveSupported() {
-        VibratorInfo info = new VibratorInfo(/* id= */ 0, VibratorInfo.CAPABILITY_COMPOSE_EFFECTS,
+        VibratorInfo info = new VibratorInfo(/* id= */ 0, IVibrator.CAP_COMPOSE_EFFECTS,
                 null, new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK});
         assertTrue(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
         assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_TICK));
@@ -73,30 +74,30 @@ public class VibratorInfoTest {
     @Test
     public void testEquals() {
         VibratorInfo empty = new VibratorInfo(1, 0, null, null);
-        VibratorInfo complete = new VibratorInfo(1, VibratorInfo.CAPABILITY_AMPLITUDE_CONTROL,
+        VibratorInfo complete = new VibratorInfo(1, IVibrator.CAP_AMPLITUDE_CONTROL,
                 new int[]{VibrationEffect.EFFECT_CLICK},
                 new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK});
 
         assertEquals(complete, complete);
-        assertEquals(complete, new VibratorInfo(1, VibratorInfo.CAPABILITY_AMPLITUDE_CONTROL,
+        assertEquals(complete, new VibratorInfo(1, IVibrator.CAP_AMPLITUDE_CONTROL,
                 new int[]{VibrationEffect.EFFECT_CLICK},
                 new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK}));
 
         assertFalse(empty.equals(new VibratorInfo(1, 0, new int[]{}, new int[]{})));
-        assertFalse(complete.equals(new VibratorInfo(1, VibratorInfo.CAPABILITY_COMPOSE_EFFECTS,
+        assertFalse(complete.equals(new VibratorInfo(1, IVibrator.CAP_COMPOSE_EFFECTS,
                 new int[]{VibrationEffect.EFFECT_CLICK},
                 new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK})));
-        assertFalse(complete.equals(new VibratorInfo(1, VibratorInfo.CAPABILITY_AMPLITUDE_CONTROL,
+        assertFalse(complete.equals(new VibratorInfo(1, IVibrator.CAP_AMPLITUDE_CONTROL,
                 new int[]{}, new int[]{})));
-        assertFalse(complete.equals(new VibratorInfo(1, VibratorInfo.CAPABILITY_AMPLITUDE_CONTROL,
+        assertFalse(complete.equals(new VibratorInfo(1, IVibrator.CAP_AMPLITUDE_CONTROL,
                 null, new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK})));
-        assertFalse(complete.equals(new VibratorInfo(1, VibratorInfo.CAPABILITY_AMPLITUDE_CONTROL,
+        assertFalse(complete.equals(new VibratorInfo(1, IVibrator.CAP_AMPLITUDE_CONTROL,
                 new int[]{VibrationEffect.EFFECT_CLICK}, null)));
     }
 
     @Test
     public void testSerialization() {
-        VibratorInfo original = new VibratorInfo(1, VibratorInfo.CAPABILITY_COMPOSE_EFFECTS,
+        VibratorInfo original = new VibratorInfo(1, IVibrator.CAP_COMPOSE_EFFECTS,
                 new int[]{VibrationEffect.EFFECT_CLICK}, null);
 
         Parcel parcel = Parcel.obtain();

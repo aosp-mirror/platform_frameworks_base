@@ -503,6 +503,20 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /** @hide */
+    public static String effectStrengthToString(int effectStrength) {
+        switch (effectStrength) {
+            case EFFECT_STRENGTH_LIGHT:
+                return "LIGHT";
+            case EFFECT_STRENGTH_MEDIUM:
+                return "MEDIUM";
+            case EFFECT_STRENGTH_STRONG:
+                return "STRONG";
+            default:
+                return Integer.toString(effectStrength);
+        }
+    }
+
+    /** @hide */
     @TestApi
     public static class OneShot extends VibrationEffect implements Parcelable {
         private final long mDuration;
@@ -936,8 +950,8 @@ public abstract class VibrationEffect implements Parcelable {
 
         @Override
         public String toString() {
-            return "Prebaked{mEffectId=" + mEffectId
-                + ", mEffectStrength=" + mEffectStrength
+            return "Prebaked{mEffectId=" + effectIdToString(mEffectId)
+                + ", mEffectStrength=" + effectStrengthToString(mEffectStrength)
                 + ", mFallback=" + mFallback
                 + ", mFallbackEffect=" + mFallbackEffect
                 + "}";
