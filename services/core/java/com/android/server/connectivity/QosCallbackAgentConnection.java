@@ -27,7 +27,7 @@ import android.net.QosSession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.data.EpsBearerQosSessionAttributes;
-import android.util.Slog;
+import android.util.Log;
 
 import java.util.Objects;
 
@@ -175,18 +175,14 @@ class QosCallbackAgentConnection implements IBinder.DeathRecipient {
     }
 
     private static void log(@NonNull final String msg) {
-        Slog.d(TAG, msg);
+        Log.d(TAG, msg);
     }
 
     private static void logw(@NonNull final String msg) {
-        Slog.w(TAG, msg);
+        Log.w(TAG, msg);
     }
 
     private static void loge(@NonNull final String msg, final Throwable t) {
-        Slog.e(TAG, msg, t);
-    }
-
-    private static void logwtf(@NonNull final String msg) {
-        Slog.wtf(TAG, msg);
+        Log.e(TAG, msg, t);
     }
 }
