@@ -32,6 +32,7 @@ import android.os.ServiceSpecificException;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
+import android.telephony.TelephonyManager;
 import android.telephony.ims.aidl.IImsConfigCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.ims.feature.MmTelFeature;
@@ -1300,7 +1301,7 @@ public class ProvisioningManager {
      * provisioning.
      * <p>
      * Requires Permission: Manifest.permission.MODIFY_PHONE_STATE or that the calling app has
-     * carrier privileges (see {@link #hasCarrierPrivileges}).
+     * carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      * @param config The XML file to be read. ASCII/UTF8 encoded text if not compressed.
      * @param isCompressed The XML file is compressed in gzip format and must be decompressed
      *         before being read.
@@ -1330,7 +1331,7 @@ public class ProvisioningManager {
      * the intent is valid. and {@link #EXTRA_STATUS} to specify RCS VoLTE single registration
      * status.
      */
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_RCS_SINGLE_REGISTRATION_CAPABILITY_UPDATE =
             "android.telephony.ims.action.RCS_SINGLE_REGISTRATION_CAPABILITY_UPDATE";
@@ -1375,7 +1376,7 @@ public class ProvisioningManager {
      * provisioning status events {@link #registerRcsProvisioningChangedCallback}
      * @param rcc RCS client configuration {@link RcsClientConfiguration}
      */
-    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION)
     public void setRcsClientConfiguration(
             @NonNull RcsClientConfiguration rcc) throws ImsException {
         try {
@@ -1390,6 +1391,14 @@ public class ProvisioningManager {
     /**
      * Returns a flag to indicate whether or not the device supports IMS single registration for
      * MMTEL and RCS features as well as if the carrier has provisioned the feature.
+     *
+     * <p> Requires Permission:
+     * <ul>
+     *     <li>{@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE},</li>
+     *     <li>{@link android.Manifest.permission#PERFORM_IMS_SINGLE_REGISTRATION},</li>
+     *     <li>or that the caller has carrier privileges (see
+     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+     * </ul>
      * @return true if IMS single registration is capable at this time, or false otherwise
      * @throws ImsException If the remote ImsService is not available for
      * any reason or the subscription associated with this instance is no
@@ -1398,7 +1407,8 @@ public class ProvisioningManager {
      * @see PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION for whether or not this
      * device supports IMS single registration.
      */
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(anyOf = {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION})
     public boolean isRcsVolteSingleRegistrationCapable() throws ImsException {
         try {
             return getITelephony().isRcsVolteSingleRegistrationCapable(mSubId);
@@ -1408,36 +1418,44 @@ public class ProvisioningManager {
     }
 
    /**
-     * Registers a new {@link RcsProvisioningCallback} to listen to changes to
-     * RCS provisioning xml.
-     *
-     * <p>RCS application must be the default messaging application and must
-     * have already registered its {@link RcsClientConfiguration} by using
-     * {@link #setRcsClientConfiguration} before it registers the provisioning
-     * callback. If ProvisioningManager has a valid RCS configuration at the
-     * time of callback registration and a reconfiguration is not required
-     * due to RCS client parameters change, then the callback shall be invoked
-     * immediately with the xml.
-     * When the subscription associated with this callback is removed (SIM removed,
-     * ESIM swap,etc...), this callback will automatically be removed.
-     *
-     * @param executor The {@link Executor} to call the callback methods on
-     * @param callback The rcs provisioning callback to be registered.
-     * @see #unregisterRcsProvisioningChangedCallback(RcsProvisioningCallback)
-     * @see SubscriptionManager.OnSubscriptionsChangedListener
-     * @throws IllegalArgumentException if the subscription associated with this
-     * callback is not active (SIM is not inserted, ESIM inactive) or the
-     * subscription is invalid.
-     * @throws ImsException if the subscription associated with this callback is
-     * valid, but the {@link ImsService} associated with the subscription is not
-     * available. This can happen if the service crashed, for example.
-     * It shall also throw this exception when the RCS client parameters for the
-     * application are not valid. In that case application must set the client
-     * params (See {@link #setRcsClientConfiguration}) and re register the
-     * callback.
-     * See {@link ImsException#getCode()} for a more detailed reason.
-     */
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    * Registers a new {@link RcsProvisioningCallback} to listen to changes to
+    * RCS provisioning xml.
+    *
+    * <p>RCS application must be the default messaging application and must
+    * have already registered its {@link RcsClientConfiguration} by using
+    * {@link #setRcsClientConfiguration} before it registers the provisioning
+    * callback. If ProvisioningManager has a valid RCS configuration at the
+    * time of callback registration and a reconfiguration is not required
+    * due to RCS client parameters change, then the callback shall be invoked
+    * immediately with the xml.
+    * When the subscription associated with this callback is removed (SIM removed,
+    * ESIM swap,etc...), this callback will automatically be removed.
+    * <p> Requires Permission:
+    * <ul>
+    *     <li>{@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE},</li>
+    *     <li>{@link android.Manifest.permission#PERFORM_IMS_SINGLE_REGISTRATION},</li>
+    *     <li>or that the caller has carrier privileges (see
+    *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+    * </ul>
+    *
+    * @param executor The {@link Executor} to call the callback methods on
+    * @param callback The rcs provisioning callback to be registered.
+    * @see #unregisterRcsProvisioningChangedCallback(RcsProvisioningCallback)
+    * @see SubscriptionManager.OnSubscriptionsChangedListener
+    * @throws IllegalArgumentException if the subscription associated with this
+    * callback is not active (SIM is not inserted, ESIM inactive) or the
+    * subscription is invalid.
+    * @throws ImsException if the subscription associated with this callback is
+    * valid, but the {@link ImsService} associated with the subscription is not
+    * available. This can happen if the service crashed, for example.
+    * It shall also throw this exception when the RCS client parameters for the
+    * application are not valid. In that case application must set the client
+    * params (See {@link #setRcsClientConfiguration}) and re register the
+    * callback.
+    * See {@link ImsException#getCode()} for a more detailed reason.
+    */
+    @RequiresPermission(anyOf = {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION})
     public void registerRcsProvisioningChangedCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull RcsProvisioningCallback callback) throws ImsException {
@@ -1459,13 +1477,22 @@ public class ProvisioningManager {
      * removed, ESIM swap, etc...), this callback will automatically be
      * removed. If this method is called for an inactive subscription, it
      * will result in a no-op.
+     * <p> Requires Permission:
+     * <ul>
+     *     <li>{@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE},</li>
+     *     <li>{@link android.Manifest.permission#PERFORM_IMS_SINGLE_REGISTRATION},</li>
+     *     <li>or that the caller has carrier privileges (see
+     *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
+     * </ul>
+     *
      * @param callback The existing {@link RcsProvisioningCallback} to be
      * removed.
      * @see #registerRcsProvisioningChangedCallback
      * @throws IllegalArgumentException if the subscription associated with this callback is
      * invalid.
      */
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(anyOf = {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION})
     public void unregisterRcsProvisioningChangedCallback(
             @NonNull RcsProvisioningCallback callback) {
         try {
@@ -1480,7 +1507,7 @@ public class ProvisioningManager {
      * Reconfiguration triggered by the RCS application. Most likely cause
      * is the 403 forbidden to a HTTP request.
      */
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION)
     public void triggerRcsReconfiguration() {
         try {
             getITelephony().triggerRcsReconfiguration(mSubId);
