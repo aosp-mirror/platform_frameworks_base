@@ -425,7 +425,8 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    public static final String ACTION_PROMPT_UNVALIDATED = "android.net.conn.PROMPT_UNVALIDATED";
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final String ACTION_PROMPT_UNVALIDATED = "android.net.action.PROMPT_UNVALIDATED";
 
     /**
      * Action used to display a dialog that asks the user whether to avoid a network that is no
@@ -433,8 +434,9 @@ public class ConnectivityManager {
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final String ACTION_PROMPT_LOST_VALIDATION =
-            "android.net.conn.PROMPT_LOST_VALIDATION";
+            "android.net.action.PROMPT_LOST_VALIDATION";
 
     /**
      * Action used to display a dialog that asks the user whether to stay connected to a network
@@ -443,8 +445,9 @@ public class ConnectivityManager {
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final String ACTION_PROMPT_PARTIAL_CONNECTIVITY =
-            "android.net.conn.PROMPT_PARTIAL_CONNECTIVITY";
+            "android.net.action.PROMPT_PARTIAL_CONNECTIVITY";
 
     /**
      * Invalid tethering type.
