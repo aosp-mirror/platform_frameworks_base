@@ -811,6 +811,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
     },
+    "-1159577965": {
+      "message": "Focus requested for input consumer=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/InputMonitor.java"
+    },
     "-1156118957": {
       "message": "Updated config=%s",
       "level": "DEBUG",
@@ -822,12 +828,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/NonAppWindowAnimationAdapter.java"
-    },
-    "-1144293044": {
-      "message": "SURFACE SET FREEZE LAYER: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
     "-1142279614": {
       "message": "Looking for focus: %s, flags=%d, canReceive=%b, reason=%s",

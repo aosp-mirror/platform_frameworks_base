@@ -410,15 +410,19 @@ final class InputMonitor {
             return;
         }
 
+        requestFocus(focusToken, focus.getName());
+    }
+
+    private void requestFocus(IBinder focusToken, String windowName) {
         if (focusToken == mInputFocus) {
             return;
         }
 
         mInputFocus = focusToken;
-        mInputTransaction.setFocusedWindow(mInputFocus, focus.getName(), mDisplayId);
-        EventLog.writeEvent(LOGTAG_INPUT_FOCUS, "Focus request " + focus,
+        mInputTransaction.setFocusedWindow(mInputFocus, windowName, mDisplayId);
+        EventLog.writeEvent(LOGTAG_INPUT_FOCUS, "Focus request " + windowName,
                 "reason=UpdateInputWindows");
-        ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Focus requested for window=%s", focus);
+        ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Focus requested for window=%s", windowName);
     }
 
     void setFocusedAppLw(ActivityRecord newApp) {
@@ -470,6 +474,8 @@ final class InputMonitor {
 
         boolean mInDrag;
 
+        private boolean mRecentsAnimationFocusOverride;
+
         private void updateInputWindows(boolean inDrag) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
 
@@ -485,10 +491,16 @@ final class InputMonitor {
             mInDrag = inDrag;
 
             resetInputConsumers(mInputTransaction);
-
+            mRecentsAnimationFocusOverride = false;
             mDisplayContent.forAllWindows(this, true /* traverseTopToBottom */);
 
-            updateInputFocusRequest();
+            if (mRecentsAnimationFocusOverride) {
+                requestFocus(mRecentsAnimationInputConsumer.mWindowHandle.token,
+                        mRecentsAnimationInputConsumer.mName);
+            } else {
+                updateInputFocusRequest();
+            }
+
 
             if (!mUpdateInputWindowsImmediately) {
                 mDisplayContent.getPendingTransaction().merge(mInputTransaction);
@@ -526,6 +538,7 @@ final class InputMonitor {
                         mRecentsAnimationInputConsumer.mWindowHandle)) {
                     mRecentsAnimationInputConsumer.show(mInputTransaction, w.mActivityRecord);
                     mAddRecentsAnimationInputConsumerHandle = false;
+                    mRecentsAnimationFocusOverride = true;
                 }
             }
 
