@@ -32,6 +32,7 @@ package android {
     field public static final String BATTERY_PREDICTION = "android.permission.BATTERY_PREDICTION";
     field public static final String BIND_ATTENTION_SERVICE = "android.permission.BIND_ATTENTION_SERVICE";
     field public static final String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
+    field public static final String BIND_CALL_DIAGNOSTIC_SERVICE = "android.permission.BIND_CALL_DIAGNOSTIC_SERVICE";
     field public static final String BIND_CELL_BROADCAST_SERVICE = "android.permission.BIND_CELL_BROADCAST_SERVICE";
     field @Deprecated public static final String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
     field public static final String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
@@ -422,6 +423,9 @@ package android.app {
     method @Nullable public static String opToPermission(@NonNull String);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(@NonNull String, int, @Nullable String, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(@NonNull String, int, int);
+    field public static final int HISTORY_FLAGS_ALL = 3; // 0x3
+    field public static final int HISTORY_FLAG_AGGREGATE = 1; // 0x1
+    field public static final int HISTORY_FLAG_DISCRETE = 2; // 0x2
     field public static final String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
     field public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
     field public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
@@ -535,9 +539,14 @@ package android.app {
     method public long getAccessDuration(int, int, int);
     method public long getBackgroundAccessCount(int);
     method public long getBackgroundAccessDuration(int);
+    method @NonNull public java.util.List<android.app.AppOpsManager.AttributedOpEntry> getBackgroundDiscreteAccesses(int);
     method public long getBackgroundRejectCount(int);
+    method @NonNull public android.app.AppOpsManager.AttributedOpEntry getDiscreteAccessAt(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getDiscreteAccessCount();
+    method @NonNull public java.util.List<android.app.AppOpsManager.AttributedOpEntry> getDiscreteAccesses(int, int, int);
     method public long getForegroundAccessCount(int);
     method public long getForegroundAccessDuration(int);
+    method @NonNull public java.util.List<android.app.AppOpsManager.AttributedOpEntry> getForegroundDiscreteAccesses(int);
     method public long getForegroundRejectCount(int);
     method @NonNull public String getOpName();
     method public long getRejectCount(int, int, int);
@@ -564,6 +573,7 @@ package android.app {
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest build();
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setAttributionTag(@Nullable String);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFlags(int);
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setHistoryFlags(int);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setOpNames(@Nullable java.util.List<java.lang.String>);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setPackageName(@Nullable String);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setUid(int);
@@ -1887,11 +1897,18 @@ package android.bluetooth {
     field public static final int ACCESS_REJECTED = 2; // 0x2
     field public static final int ACCESS_UNKNOWN = 0; // 0x0
     field public static final String ACTION_SILENCE_MODE_CHANGED = "android.bluetooth.device.action.SILENCE_MODE_CHANGED";
+    field public static final String DEVICE_TYPE_DEFAULT = "Default";
+    field public static final String DEVICE_TYPE_UNTETHERED_HEADSET = "Untethered Headset";
+    field public static final String DEVICE_TYPE_WATCH = "Watch";
     field public static final int METADATA_COMPANION_APP = 4; // 0x4
+    field public static final int METADATA_DEVICE_TYPE = 17; // 0x11
     field public static final int METADATA_ENHANCED_SETTINGS_UI_URI = 16; // 0x10
     field public static final int METADATA_HARDWARE_VERSION = 3; // 0x3
     field public static final int METADATA_IS_UNTETHERED_HEADSET = 6; // 0x6
+    field public static final int METADATA_MAIN_BATTERY = 18; // 0x12
+    field public static final int METADATA_MAIN_CHARGING = 19; // 0x13
     field public static final int METADATA_MAIN_ICON = 5; // 0x5
+    field public static final int METADATA_MAIN_LOW_BATTERY_THRESHOLD = 20; // 0x14
     field public static final int METADATA_MANUFACTURER_NAME = 0; // 0x0
     field public static final int METADATA_MAX_LENGTH = 2048; // 0x800
     field public static final int METADATA_MODEL_NAME = 1; // 0x1
@@ -1899,12 +1916,15 @@ package android.bluetooth {
     field public static final int METADATA_UNTETHERED_CASE_BATTERY = 12; // 0xc
     field public static final int METADATA_UNTETHERED_CASE_CHARGING = 15; // 0xf
     field public static final int METADATA_UNTETHERED_CASE_ICON = 9; // 0x9
+    field public static final int METADATA_UNTETHERED_CASE_LOW_BATTERY_THRESHOLD = 23; // 0x17
     field public static final int METADATA_UNTETHERED_LEFT_BATTERY = 10; // 0xa
     field public static final int METADATA_UNTETHERED_LEFT_CHARGING = 13; // 0xd
     field public static final int METADATA_UNTETHERED_LEFT_ICON = 7; // 0x7
+    field public static final int METADATA_UNTETHERED_LEFT_LOW_BATTERY_THRESHOLD = 21; // 0x15
     field public static final int METADATA_UNTETHERED_RIGHT_BATTERY = 11; // 0xb
     field public static final int METADATA_UNTETHERED_RIGHT_CHARGING = 14; // 0xe
     field public static final int METADATA_UNTETHERED_RIGHT_ICON = 8; // 0x8
+    field public static final int METADATA_UNTETHERED_RIGHT_LOW_BATTERY_THRESHOLD = 22; // 0x16
   }
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
@@ -10340,6 +10360,16 @@ package android.telecom {
     ctor @Deprecated public Call.Listener();
   }
 
+  public abstract class CallDiagnosticService extends android.app.Service {
+    ctor public CallDiagnosticService();
+    method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onBluetoothCallQualityReportReceived(@NonNull android.telecom.BluetoothCallQualityReport);
+    method public abstract void onCallAudioStateChanged(@NonNull android.telecom.CallAudioState);
+    method @NonNull public abstract android.telecom.DiagnosticCall onInitializeDiagnosticCall(@NonNull android.telecom.Call.Details);
+    method public abstract void onRemoveDiagnosticCall(@NonNull android.telecom.DiagnosticCall);
+    field public static final String SERVICE_INTERFACE = "android.telecom.CallDiagnosticService";
+  }
+
   public static class CallScreeningService.CallResponse.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public android.telecom.CallScreeningService.CallResponse.Builder setShouldScreenCallViaAudioProcessing(boolean);
   }
@@ -10372,6 +10402,9 @@ package android.telecom {
     method public void setTelecomCallId(@NonNull String);
     field public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 2097152; // 0x200000
     field public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 262144; // 0x40000
+    field public static final String EVENT_DEVICE_TO_DEVICE_MESSAGE = "android.telecom.event.DEVICE_TO_DEVICE_MESSAGE";
+    field public static final String EXTRA_DEVICE_TO_DEVICE_MESSAGE_TYPE = "android.telecom.extra.DEVICE_TO_DEVICE_MESSAGE_TYPE";
+    field public static final String EXTRA_DEVICE_TO_DEVICE_MESSAGE_VALUE = "android.telecom.extra.DEVICE_TO_DEVICE_MESSAGE_VALUE";
     field public static final String EXTRA_DISABLE_ADD_CALL = "android.telecom.extra.DISABLE_ADD_CALL";
     field public static final int PROPERTY_EMERGENCY_CALLBACK_MODE = 1; // 0x1
     field public static final int PROPERTY_GENERIC_CONFERENCE = 2; // 0x2
@@ -10395,6 +10428,34 @@ package android.telecom {
 
   public abstract class ConnectionService extends android.app.Service {
     method public final void addExistingConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.Connection, @NonNull android.telecom.Conference);
+  }
+
+  public abstract class DiagnosticCall {
+    ctor public DiagnosticCall();
+    method public final void clearDiagnosticMessage(int);
+    method public final void displayDiagnosticMessage(int, @NonNull CharSequence);
+    method @NonNull public android.telecom.Call.Details getCallDetails();
+    method public abstract void onCallDetailsChanged(@NonNull android.telecom.Call.Details);
+    method @Nullable public abstract CharSequence onCallDisconnected(int, int);
+    method @Nullable public abstract CharSequence onCallDisconnected(@NonNull android.telephony.ims.ImsReasonInfo);
+    method public abstract void onCallQualityReceived(@NonNull android.telephony.CallQuality);
+    method public abstract void onReceiveDeviceToDeviceMessage(int, int);
+    method public final void sendDeviceToDeviceMessage(int, int);
+    field public static final int AUDIO_CODEC_AMR_NB = 3; // 0x3
+    field public static final int AUDIO_CODEC_AMR_WB = 2; // 0x2
+    field public static final int AUDIO_CODEC_EVS = 1; // 0x1
+    field public static final int BATTERY_STATE_CHARGING = 3; // 0x3
+    field public static final int BATTERY_STATE_GOOD = 2; // 0x2
+    field public static final int BATTERY_STATE_LOW = 1; // 0x1
+    field public static final int COVERAGE_GOOD = 2; // 0x2
+    field public static final int COVERAGE_POOR = 1; // 0x1
+    field public static final int MESSAGE_CALL_AUDIO_CODEC = 2; // 0x2
+    field public static final int MESSAGE_CALL_NETWORK_TYPE = 1; // 0x1
+    field public static final int MESSAGE_DEVICE_BATTERY_STATE = 3; // 0x3
+    field public static final int MESSAGE_DEVICE_NETWORK_COVERAGE = 4; // 0x4
+    field public static final int NETWORK_TYPE_IWLAN = 2; // 0x2
+    field public static final int NETWORK_TYPE_LTE = 1; // 0x1
+    field public static final int NETWORK_TYPE_NR = 3; // 0x3
   }
 
   public abstract class InCallService extends android.app.Service {
@@ -14026,9 +14087,13 @@ package android.view.translation {
 
   public final class UiTranslationManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void pauseTranslation(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void pauseTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void resumeTranslation(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void resumeTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, @NonNull android.app.assist.ActivityId);
   }
 
 }

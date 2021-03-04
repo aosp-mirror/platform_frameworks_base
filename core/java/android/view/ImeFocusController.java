@@ -116,8 +116,9 @@ public final class ImeFocusController {
         if (!hasWindowFocus || !mHasImeFocus || isInLocalFocusMode(windowAttribute)) {
             return;
         }
+        View viewForWindowFocus = focusedView != null ? focusedView : mViewRootImpl.mView;
         if (DEBUG) {
-            Log.v(TAG, "onWindowFocus: " + focusedView
+            Log.v(TAG, "onWindowFocus: " + viewForWindowFocus
                     + " softInputMode=" + InputMethodDebug.softInputModeToString(
                     windowAttribute.softInputMode));
         }
@@ -128,8 +129,8 @@ public final class ImeFocusController {
             if (DEBUG) Log.v(TAG, "Restarting due to isRestartOnNextWindowFocus as true");
             forceFocus = true;
         }
+
         // Update mNextServedView when focusedView changed.
-        final View viewForWindowFocus = focusedView != null ? focusedView : mViewRootImpl.mView;
         onViewFocusChanged(viewForWindowFocus, true);
 
         // Starting new input when the next focused view is same as served view but the currently

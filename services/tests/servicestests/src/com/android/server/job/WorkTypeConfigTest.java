@@ -18,7 +18,9 @@ package com.android.server.job;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BG;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_EJ;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_FGS;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
+import static com.android.server.job.JobConcurrencyManager.workTypeToString;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -44,10 +46,12 @@ import java.util.List;
 public class WorkTypeConfigTest {
     private static final String KEY_MAX_TOTAL = "concurrency_max_total_test";
     private static final String KEY_MAX_TOP = "concurrency_max_top_test";
+    private static final String KEY_MAX_FGS = "concurrency_max_fgs_test";
     private static final String KEY_MAX_EJ = "concurrency_max_ej_test";
     private static final String KEY_MAX_BG = "concurrency_max_bg_test";
     private static final String KEY_MAX_BGUSER = "concurrency_max_bguser_test";
     private static final String KEY_MIN_TOP = "concurrency_min_top_test";
+    private static final String KEY_MIN_FGS = "concurrency_min_fgs_test";
     private static final String KEY_MIN_EJ = "concurrency_min_ej_test";
     private static final String KEY_MIN_BG = "concurrency_min_bg_test";
     private static final String KEY_MIN_BGUSER = "concurrency_min_bguser_test";
@@ -59,15 +63,17 @@ public class WorkTypeConfigTest {
 
     private void resetConfig() {
         // DeviceConfig.resetToDefaults() doesn't work here. Need to reset constants manually.
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_TOTAL, "", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_TOP, "", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_EJ, "", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_BG, "", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_BGUSER, "", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_TOP, "", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_EJ, "", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_BG, "", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_BGUSER, "", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_TOTAL, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_TOP, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_FGS, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_EJ, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_BG, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_BGUSER, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_TOP, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_FGS, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_EJ, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_BG, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_BGUSER, null, false);
     }
 
     private void check(@Nullable DeviceConfig.Properties config,
@@ -103,10 +109,12 @@ public class WorkTypeConfigTest {
 
         assertEquals(expectedTotal, counts.getMaxTotal());
         for (Pair<Integer, Integer> min : expectedMinLimits) {
-            assertEquals((int) min.second, counts.getMinReserved(min.first));
+            assertEquals("Incorrect min value for " + workTypeToString(min.first),
+                    (int) min.second, counts.getMinReserved(min.first));
         }
         for (Pair<Integer, Integer> max : expectedMaxLimits) {
-            assertEquals((int) max.second, counts.getMax(max.first));
+            assertEquals("Incorrect max value for " + workTypeToString(max.first),
+                    (int) max.second, counts.getMax(max.first));
         }
     }
 
@@ -193,6 +201,14 @@ public class WorkTypeConfigTest {
                 /* min */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 3),
                         Pair.create(WORK_TYPE_BG, 1)),
                 /* max */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 1)));
+        check(null, /*default*/ 10,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 3), Pair.create(WORK_TYPE_FGS, 2),
+                        Pair.create(WORK_TYPE_EJ, 1), Pair.create(WORK_TYPE_BG, 1)),
+                /* max */ List.of(Pair.create(WORK_TYPE_FGS, 3)),
+                /*expected*/ true, 10,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 3), Pair.create(WORK_TYPE_FGS, 2),
+                        Pair.create(WORK_TYPE_EJ, 1), Pair.create(WORK_TYPE_BG, 1)),
+                /* max */ List.of(Pair.create(WORK_TYPE_FGS, 3)));
         check(null, /*default*/ 15,
                 /* min */ List.of(Pair.create(WORK_TYPE_BG, 15)),
                 /* max */ List.of(Pair.create(WORK_TYPE_BG, 15)),
@@ -289,5 +305,30 @@ public class WorkTypeConfigTest {
                 /*expected*/ true, 16,
                 /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 8)),
                 /* max */ List.of(Pair.create(WORK_TYPE_TOP, 16), Pair.create(WORK_TYPE_BG, 16)));
+
+        check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
+                        .setInt(KEY_MAX_TOTAL, 16)
+                        .setInt(KEY_MAX_TOP, 16)
+                        .setInt(KEY_MIN_TOP, 1)
+                        .setInt(KEY_MAX_FGS, 15)
+                        .setInt(KEY_MIN_FGS, 2)
+                        .setInt(KEY_MAX_EJ, 14)
+                        .setInt(KEY_MIN_EJ, 3)
+                        .setInt(KEY_MAX_BG, 13)
+                        .setInt(KEY_MIN_BG, 4)
+                        .setInt(KEY_MAX_BGUSER, 12)
+                        .setInt(KEY_MIN_BGUSER, 5)
+                        .build(),
+                /*default*/ 9,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /*expected*/ true, 16,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_FGS, 2),
+                        Pair.create(WORK_TYPE_EJ, 3),
+                        Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 5)),
+                /* max */
+                List.of(Pair.create(WORK_TYPE_TOP, 16), Pair.create(WORK_TYPE_FGS, 15),
+                        Pair.create(WORK_TYPE_EJ, 14),
+                        Pair.create(WORK_TYPE_BG, 13), Pair.create(WORK_TYPE_BGUSER, 12)));
     }
 }

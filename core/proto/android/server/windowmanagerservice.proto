@@ -337,7 +337,7 @@ message ActivityRecordProto {
     optional bool starting_displayed = 20;
     optional bool starting_moved = 201;
     optional bool visible_set_from_transferred_starting_window = 22;
-    repeated .android.graphics.RectProto frozen_bounds = 23;
+    repeated .android.graphics.RectProto frozen_bounds = 23 [deprecated=true];
     optional bool visible = 24;
     reserved 25; // configuration_container
     optional IdentifierProto identifier = 26 [deprecated=true];

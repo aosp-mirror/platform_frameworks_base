@@ -498,9 +498,6 @@ class Task extends WindowContainer<WindowContainer> {
     // TODO: Make final
     int mUserId;
 
-    final Rect mPreparedFrozenBounds = new Rect();
-    final Configuration mPreparedFrozenMergedConfig = new Configuration();
-
     // Id of the previous display the root task was on.
     int mPrevDisplayId = INVALID_DISPLAY;
 
@@ -1181,10 +1178,6 @@ class Task extends WindowContainer<WindowContainer> {
             if (!animate) {
                 mTaskSupervisor.mNoAnimActivities.add(topActivity);
             }
-
-            // We might trigger a configuration change. Save the current task bounds for freezing.
-            // TODO: Should this call be moved inside the resize method in WM?
-            toRootTask.prepareFreezingTaskBounds();
 
             if (toRootTaskWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     && moveRootTaskMode == REPARENT_KEEP_ROOT_TASK_AT_FRONT) {
@@ -3363,15 +3356,6 @@ class Task extends WindowContainer<WindowContainer> {
         return isResizeable();
     }
 
-    /**
-     * Prepares the task bounds to be frozen with the current size. See
-     * {@link ActivityRecord#freezeBounds}.
-     */
-    void prepareFreezingBounds() {
-        mPreparedFrozenBounds.set(getBounds());
-        mPreparedFrozenMergedConfig.setTo(getConfiguration());
-    }
-
     @Override
     void getAnimationFrames(Rect outFrame, Rect outInsets, Rect outStableInsets,
             Rect outSurfaceInsets) {
@@ -5058,6 +5042,10 @@ class Task extends WindowContainer<WindowContainer> {
             }
         } else {
             // No longer managed by any organizer.
+            final TaskDisplayArea taskDisplayArea = getDisplayArea();
+            if (taskDisplayArea != null) {
+                taskDisplayArea.removeLaunchRootTask(this);
+            }
             setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
             if (mCreatedByOrganizer) {
                 removeImmediately("setTaskOrganizer");
@@ -7497,10 +7485,6 @@ class Task extends WindowContainer<WindowContainer> {
 
             mTaskSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
         });
-    }
-
-    void prepareFreezingTaskBounds() {
-        forAllLeafTasks(Task::prepareFreezingBounds, true /* traverseTopToBottom */);
     }
 
     private int setBounds(Rect existing, Rect bounds) {

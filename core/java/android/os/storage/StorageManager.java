@@ -2766,10 +2766,11 @@ public class StorageManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void notifyAppIoBlocked(@NonNull String volumeUuid, int uid, int tid,
+    public void notifyAppIoBlocked(@NonNull UUID volumeUuid, int uid, int tid,
             @AppIoBlockedReason int reason) {
+        Objects.requireNonNull(volumeUuid);
         try {
-            mStorageManager.notifyAppIoBlocked(volumeUuid, uid, tid, reason);
+            mStorageManager.notifyAppIoBlocked(convert(volumeUuid), uid, tid, reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2792,10 +2793,11 @@ public class StorageManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void notifyAppIoResumed(@NonNull String volumeUuid, int uid, int tid,
+    public void notifyAppIoResumed(@NonNull UUID volumeUuid, int uid, int tid,
             @AppIoBlockedReason int reason) {
+        Objects.requireNonNull(volumeUuid);
         try {
-            mStorageManager.notifyAppIoResumed(volumeUuid, uid, tid, reason);
+            mStorageManager.notifyAppIoResumed(convert(volumeUuid), uid, tid, reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

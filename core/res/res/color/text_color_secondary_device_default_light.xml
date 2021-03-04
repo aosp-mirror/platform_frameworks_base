@@ -14,8 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.systemui.biometrics.UdfpsAnimationView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/udfps_animation_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+<!-- Please see secondary_text_material_light.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false"
+          android:alpha="?attr/disabledAlpha"
+          android:color="@color/system_primary_700"/>
+    <item android:color="@color/system_primary_700"/>
+</selector>

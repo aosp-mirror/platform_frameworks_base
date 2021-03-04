@@ -70,5 +70,6 @@
         <permission name="android.permission.READ_WIFI_CREDENTIAL" />
         <permission name="android.permission.USE_BACKGROUND_BLUR" />
         <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
+        <permission name="android.permission.FORCE_STOP_PACKAGES" />
     </privapp-permissions>
 </permissions>

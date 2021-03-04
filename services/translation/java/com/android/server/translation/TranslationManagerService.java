@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -171,16 +172,33 @@ public final class TranslationManagerService
         }
 
         @Override
-        public void updateUiTranslationState(@UiTranslationState int state,
+        public void updateUiTranslationStateByTaskId(@UiTranslationState int state,
                 TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
                 int taskId, int userId) {
+            // deprecated
+            enforceCallerHasPermission(MANAGE_UI_TRANSLATION);
+            synchronized (mLock) {
+                final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
+                if (service != null && (isDefaultServiceLocked(userId)
+                        || isCalledByServiceAppLocked(userId,
+                        "updateUiTranslationStateByTaskId"))) {
+                    service.updateUiTranslationStateLocked(state, sourceSpec, destSpec, viewIds,
+                            taskId);
+                }
+            }
+        }
+
+        @Override
+        public void updateUiTranslationState(@UiTranslationState int state,
+                TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
+                IBinder token, int taskId, int userId) {
             enforceCallerHasPermission(MANAGE_UI_TRANSLATION);
             synchronized (mLock) {
                 final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
                 if (service != null && (isDefaultServiceLocked(userId)
                         || isCalledByServiceAppLocked(userId, "updateUiTranslationState"))) {
-                    service.updateUiTranslationState(state, sourceSpec, destSpec, viewIds,
-                            taskId);
+                    service.updateUiTranslationStateLocked(state, sourceSpec, destSpec, viewIds,
+                            token, taskId);
                 }
             }
         }

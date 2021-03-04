@@ -20,6 +20,7 @@
      Make the visibility to "gone" to prevent failures.
  -->
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/add_new_sound_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?android:attr/listPreferredItemHeightSmall"

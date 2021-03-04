@@ -43,7 +43,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -87,12 +86,6 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     protected static final int SECONDARY = 1;
     protected static final int NEUTRAL = 2;
 
-    // If lock screen wallpaper colors should also be considered when selecting the theme.
-    // Doing this has performance impact, given that overlays would need to be swapped when
-    // the device unlocks.
-    @VisibleForTesting
-    static final boolean USE_LOCK_SCREEN_WALLPAPER = false;
-
     private final ThemeOverlayApplier mThemeManager;
     private final UserManager mUserManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -103,7 +96,6 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private final WallpaperManager mWallpaperManager;
     private final KeyguardStateController mKeyguardStateController;
     private final boolean mIsMonetEnabled;
-    private WallpaperColors mLockColors;
     private WallpaperColors mSystemColors;
     // If fabricated overlays were already created for the current theme.
     private boolean mNeedsOverlayCreation;
@@ -117,6 +109,8 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private FabricatedOverlay mSecondaryOverlay;
     // Neutral system colors overlay
     private FabricatedOverlay mNeutralOverlay;
+    // If wallpaper color event will be accepted and change the UI colors.
+    private boolean mAcceptColorEvents = true;
 
     @Inject
     public ThemeOverlayController(Context context, BroadcastDispatcher broadcastDispatcher,
@@ -146,13 +140,20 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
+        filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mBroadcastDispatcher.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
-                reevaluateSystemTheme(true /* forceReload */);
+                if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())
+                        || Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction())) {
+                    if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
+                    reevaluateSystemTheme(true /* forceReload */);
+                } else if (Intent.ACTION_WALLPAPER_CHANGED.equals(intent.getAction())) {
+                    mAcceptColorEvents = true;
+                    Log.i(TAG, "Allowing color events again");
+                }
             }
-        }, filter, mBgExecutor, UserHandle.ALL);
+        }, filter, mMainExecutor, UserHandle.ALL);
         mSecureSettings.registerContentObserverForUser(
                 Settings.Secure.getUriFor(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES),
                 false,
@@ -175,38 +176,22 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
 
         // Upon boot, make sure we have the most up to date colors
         mBgExecutor.execute(() -> {
-            WallpaperColors lockColors = mWallpaperManager.getWallpaperColors(
-                    WallpaperManager.FLAG_LOCK);
             WallpaperColors systemColor = mWallpaperManager.getWallpaperColors(
                     WallpaperManager.FLAG_SYSTEM);
             mMainExecutor.execute(() -> {
-                if (USE_LOCK_SCREEN_WALLPAPER) {
-                    mLockColors = lockColors;
-                }
                 mSystemColors = systemColor;
                 reevaluateSystemTheme(false /* forceReload */);
             });
         });
-        if (USE_LOCK_SCREEN_WALLPAPER) {
-            mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
-                @Override
-                public void onKeyguardShowingChanged() {
-                    if (mLockColors == null) {
-                        return;
-                    }
-                    // It's possible that the user has a lock screen wallpaper. On this case we'll
-                    // end up with different colors after unlocking.
-                    reevaluateSystemTheme(false /* forceReload */);
-                }
-            });
-        }
         mWallpaperManager.addOnColorsChangedListener((wallpaperColors, which) -> {
-            if (USE_LOCK_SCREEN_WALLPAPER && (which & WallpaperManager.FLAG_LOCK) != 0) {
-                mLockColors = wallpaperColors;
-                if (DEBUG) {
-                    Log.d(TAG, "got new lock colors: " + wallpaperColors + " where: " + which);
-                }
+            if (!mAcceptColorEvents) {
+                Log.i(TAG, "Wallpaper color event rejected: " + wallpaperColors);
+                return;
             }
+            if (wallpaperColors != null && mAcceptColorEvents) {
+                mAcceptColorEvents = false;
+            }
+
             if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
                 mSystemColors = wallpaperColors;
                 if (DEBUG) {
@@ -218,10 +203,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     }
 
     private void reevaluateSystemTheme(boolean forceReload) {
-        WallpaperColors currentColors =
-                mKeyguardStateController.isShowing() && mLockColors != null
-                        ? mLockColors : mSystemColors;
-
+        final WallpaperColors currentColors = mSystemColors;
         final int mainColor;
         final int accentCandidate;
         if (currentColors == null) {
@@ -383,8 +365,6 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("USE_LOCK_SCREEN_WALLPAPER=" + USE_LOCK_SCREEN_WALLPAPER);
-        pw.println("mLockColors=" + mLockColors);
         pw.println("mSystemColors=" + mSystemColors);
         pw.println("mMainWallpaperColor=" + Integer.toHexString(mMainWallpaperColor));
         pw.println("mWallpaperAccentColor=" + Integer.toHexString(mWallpaperAccentColor));
@@ -393,5 +373,6 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         pw.println("mNeutralOverlay=" + mNeutralOverlay);
         pw.println("mIsMonetEnabled=" + mIsMonetEnabled);
         pw.println("mNeedsOverlayCreation=" + mNeedsOverlayCreation);
+        pw.println("mAcceptColorEvents=" + mAcceptColorEvents);
     }
 }

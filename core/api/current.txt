@@ -20300,6 +20300,10 @@ package android.media {
     field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_BIT_WIDTH;
     field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_CHANNEL_MASK;
     field @NonNull public static final android.media.AudioMetadata.Key<java.lang.String> KEY_MIME;
+    field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_PRESENTATION_CONTENT_CLASSIFIER;
+    field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_PRESENTATION_ID;
+    field @NonNull public static final android.media.AudioMetadata.Key<java.lang.String> KEY_PRESENTATION_LANGUAGE;
+    field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_PROGRAM_ID;
     field @NonNull public static final android.media.AudioMetadata.Key<java.lang.Integer> KEY_SAMPLE_RATE;
   }
 
@@ -20354,6 +20358,15 @@ package android.media {
     method public boolean hasAudioDescription();
     method public boolean hasDialogueEnhancement();
     method public boolean hasSpokenSubtitles();
+    field public static final int CONTENT_COMMENTARY = 5; // 0x5
+    field public static final int CONTENT_DIALOG = 4; // 0x4
+    field public static final int CONTENT_EMERGENCY = 6; // 0x6
+    field public static final int CONTENT_HEARING_IMPAIRED = 3; // 0x3
+    field public static final int CONTENT_MAIN = 0; // 0x0
+    field public static final int CONTENT_MUSIC_AND_EFFECTS = 1; // 0x1
+    field public static final int CONTENT_UNKNOWN = -1; // 0xffffffff
+    field public static final int CONTENT_VISUALLY_IMPAIRED = 2; // 0x2
+    field public static final int CONTENT_VOICEOVER = 7; // 0x7
     field public static final int MASTERED_FOR_3D = 3; // 0x3
     field public static final int MASTERED_FOR_HEADPHONE = 4; // 0x4
     field public static final int MASTERED_FOR_STEREO = 1; // 0x1
@@ -38980,6 +38993,10 @@ package android.telecom {
     method public void unhold();
     method public void unregisterCallback(android.telecom.Call.Callback);
     field @Deprecated public static final String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
+    field public static final String EVENT_CLEAR_DIAGNOSTIC_MESSAGE = "android.telecom.event.CLEAR_DIAGNOSTIC_MESSAGE";
+    field public static final String EVENT_DISPLAY_DIAGNOSTIC_MESSAGE = "android.telecom.event.DISPLAY_DIAGNOSTIC_MESSAGE";
+    field public static final String EXTRA_DIAGNOSTIC_MESSAGE = "android.telecom.extra.DIAGNOSTIC_MESSAGE";
+    field public static final String EXTRA_DIAGNOSTIC_MESSAGE_ID = "android.telecom.extra.DIAGNOSTIC_MESSAGE_ID";
     field public static final String EXTRA_LAST_EMERGENCY_CALLBACK_TIME_MILLIS = "android.telecom.extra.LAST_EMERGENCY_CALLBACK_TIME_MILLIS";
     field public static final String EXTRA_SILENT_RINGING_REQUESTED = "android.telecom.extra.SILENT_RINGING_REQUESTED";
     field public static final String EXTRA_SUGGESTED_PHONE_ACCOUNTS = "android.telecom.extra.SUGGESTED_PHONE_ACCOUNTS";
@@ -42237,7 +42254,6 @@ package android.telephony {
     field public static final int AUTHTYPE_EAP_SIM = 128; // 0x80
     field public static final int CALL_COMPOSER_STATUS_OFF = 0; // 0x0
     field public static final int CALL_COMPOSER_STATUS_ON = 1; // 0x1
-    field public static final int CALL_COMPOSER_STATUS_ON_NO_PICTURES = 2; // 0x2
     field public static final int CALL_STATE_IDLE = 0; // 0x0
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1
@@ -50071,7 +50087,7 @@ package android.view.accessibility {
     method public boolean canOpenPopup();
     method public int describeContents();
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String);
-    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(String);
+    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(@NonNull String);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public android.view.accessibility.AccessibilityNodeInfo focusSearch(int);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> getActionList();

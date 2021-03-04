@@ -184,13 +184,13 @@ public class RemoteAnimationDefinition implements Parcelable {
         }
 
         private RemoteAnimationAdapterEntry(Parcel in) {
-            adapter = in.readParcelable(RemoteAnimationAdapter.class.getClassLoader());
+            adapter = in.readTypedObject(RemoteAnimationAdapter.CREATOR);
             activityTypeFilter = in.readInt();
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeParcelable(adapter, flags);
+            dest.writeTypedObject(adapter, flags);
             dest.writeInt(activityTypeFilter);
         }
 

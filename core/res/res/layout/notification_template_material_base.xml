@@ -74,14 +74,10 @@
         android:layout_height="match_parent"
         android:layout_gravity="end">
 
-        <com.android.internal.widget.NotificationExpandButton
-            android:id="@+id/expand_button"
-            android:layout_width="@dimen/notification_header_expand_icon_size"
-            android:layout_height="@dimen/notification_header_expand_icon_size"
+        <include layout="@layout/notification_expand_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
-            android:contentDescription="@string/expand_button_content_description_collapsed"
-            android:paddingTop="@dimen/notification_expand_button_padding_top"
-            android:scaleType="center"
             />
 
     </FrameLayout>

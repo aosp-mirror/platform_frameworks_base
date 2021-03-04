@@ -224,6 +224,9 @@ package android.app {
     field public static final int HISTORICAL_MODE_DISABLED = 0; // 0x0
     field public static final int HISTORICAL_MODE_ENABLED_ACTIVE = 1; // 0x1
     field public static final int HISTORICAL_MODE_ENABLED_PASSIVE = 2; // 0x2
+    field public static final int HISTORY_FLAGS_ALL = 3; // 0x3
+    field public static final int HISTORY_FLAG_AGGREGATE = 1; // 0x1
+    field public static final int HISTORY_FLAG_DISCRETE = 2; // 0x2
     field public static final String KEY_BG_STATE_SETTLE_TIME = "bg_state_settle_time";
     field public static final String KEY_FG_SERVICE_STATE_SETTLE_TIME = "fg_service_state_settle_time";
     field public static final String KEY_TOP_STATE_SETTLE_TIME = "top_state_settle_time";
@@ -238,6 +241,7 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalOps implements android.os.Parcelable {
     ctor public AppOpsManager.HistoricalOps(long, long);
+    method public void addDiscreteAccess(int, int, @NonNull String, @Nullable String, int, int, long, long);
     method public void increaseAccessCount(int, int, @NonNull String, @Nullable String, int, int, long);
     method public void increaseAccessDuration(int, int, @NonNull String, @Nullable String, int, int, long);
     method public void increaseRejectCount(int, int, @NonNull String, @Nullable String, int, int, long);

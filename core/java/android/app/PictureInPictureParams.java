@@ -202,7 +202,7 @@ public final class PictureInPictureParams implements Parcelable {
         }
         if (in.readInt() != 0) {
             mUserActions = new ArrayList<>();
-            in.readParcelableList(mUserActions, RemoteAction.class.getClassLoader());
+            in.readTypedList(mUserActions, RemoteAction.CREATOR);
         }
         if (in.readInt() != 0) {
             mSourceRectHint = Rect.CREATOR.createFromParcel(in);
@@ -386,7 +386,7 @@ public final class PictureInPictureParams implements Parcelable {
         }
         if (mUserActions != null) {
             out.writeInt(1);
-            out.writeParcelableList(mUserActions, 0);
+            out.writeTypedList(mUserActions, 0);
         } else {
             out.writeInt(0);
         }

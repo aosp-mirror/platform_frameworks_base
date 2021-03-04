@@ -267,6 +267,64 @@ public final class Call {
     public static final String EVENT_HANDOVER_FAILED =
             "android.telecom.event.HANDOVER_FAILED";
 
+    /**
+     * Event reported from the Telecom stack to report an in-call diagnostic message which the
+     * dialer app may opt to display to the user.  A diagnostic message is used to communicate
+     * scenarios the device has detected which may impact the quality of the ongoing call.
+     * <p>
+     * For example a problem with a bluetooth headset may generate a recommendation for the user to
+     * try using the speakerphone instead, or if the device detects it has entered a poor service
+     * area, the user might be warned so that they can finish their call prior to it dropping.
+     * <p>
+     * A diagnostic message is considered persistent in nature.  When the user enters a poor service
+     * area, for example, the accompanying diagnostic message persists until they leave the area
+     * of poor service.  Each message is accompanied with a {@link #EXTRA_DIAGNOSTIC_MESSAGE_ID}
+     * which uniquely identifies the diagnostic condition being reported.  The framework raises a
+     * call event of type {@link #EVENT_CLEAR_DIAGNOSTIC_MESSAGE} when the condition reported has
+     * been cleared.  The dialer app should display the diagnostic message until it is cleared.
+     * If multiple diagnostic messages are sent with different IDs (which have not yet been cleared)
+     * the dialer app should prioritize the most recently received message, but still provide the
+     * user with a means to review past messages.
+     * <p>
+     * The text of the message is found in {@link #EXTRA_DIAGNOSTIC_MESSAGE} in the form of a human
+     * readable {@link CharSequence} which is intended for display in the call UX.
+     * <p>
+     * The telecom framework audibly notifies the user of the presence of a diagnostic message, so
+     * the dialer app needs only to concern itself with visually displaying the message.
+     * <p>
+     * The dialer app receives this event via
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     */
+    public static final String EVENT_DISPLAY_DIAGNOSTIC_MESSAGE =
+            "android.telecom.event.DISPLAY_DIAGNOSTIC_MESSAGE";
+
+    /**
+     * Event reported from the telecom framework when a diagnostic message previously raised with
+     * {@link #EVENT_DISPLAY_DIAGNOSTIC_MESSAGE} has cleared and is no longer pertinent.
+     * <p>
+     * The {@link #EXTRA_DIAGNOSTIC_MESSAGE_ID} indicates the diagnostic message which has been
+     * cleared.
+     * <p>
+     * The dialer app receives this event via
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     */
+    public static final String EVENT_CLEAR_DIAGNOSTIC_MESSAGE =
+            "android.telecom.event.CLEAR_DIAGNOSTIC_MESSAGE";
+
+    /**
+     * Integer extra representing a message ID for a message posted via
+     * {@link #EVENT_DISPLAY_DIAGNOSTIC_MESSAGE}.  Used to ensure that the dialer app knows when
+     * the message in question has cleared via {@link #EVENT_CLEAR_DIAGNOSTIC_MESSAGE}.
+     */
+    public static final String EXTRA_DIAGNOSTIC_MESSAGE_ID =
+            "android.telecom.extra.DIAGNOSTIC_MESSAGE_ID";
+
+    /**
+     * {@link CharSequence} extra used with {@link #EVENT_DISPLAY_DIAGNOSTIC_MESSAGE}.  This is the
+     * diagnostic message the dialer app should display.
+     */
+    public static final String EXTRA_DIAGNOSTIC_MESSAGE =
+            "android.telecom.extra.DIAGNOSTIC_MESSAGE";
 
     /**
      * Reject reason used with {@link #reject(int)} to indicate that the user is rejecting this

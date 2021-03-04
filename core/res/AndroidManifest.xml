@@ -2371,6 +2371,15 @@
     <permission android:name="android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a {@link android.telecom.CallDiagnosticService},
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_CALL_DIAGNOSTIC_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link android.telecom.CallRedirectionService},
          to ensure that only the system can bind to it.
          <p>Protection level: signature|privileged

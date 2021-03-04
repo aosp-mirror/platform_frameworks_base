@@ -54,6 +54,7 @@ public class PipBoundsAlgorithm {
     private float mMaxAspectRatio;
     private int mDefaultStackGravity;
     private int mDefaultMinSize;
+    private int mOverridableMinSize;
     private Point mScreenEdgeInsets;
 
     public PipBoundsAlgorithm(Context context, @NonNull PipBoundsState pipBoundsState) {
@@ -78,6 +79,8 @@ public class PipBoundsAlgorithm {
                 com.android.internal.R.integer.config_defaultPictureInPictureGravity);
         mDefaultMinSize = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.default_minimal_size_pip_resizable_task);
+        mOverridableMinSize = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.overridable_minimal_size_pip_resizable_task);
         final String screenEdgeInsetsDpString = res.getString(
                 com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets);
         final Size screenEdgeInsetsDp = !screenEdgeInsetsDpString.isEmpty()
@@ -155,7 +158,10 @@ public class PipBoundsAlgorithm {
         // -1 will be populated if an activity specifies defaultWidth/defaultHeight in <layout>
         // without minWidth/minHeight
         if (windowLayout.minWidth > 0 && windowLayout.minHeight > 0) {
-            return new Size(windowLayout.minWidth, windowLayout.minHeight);
+            // If either dimension is smaller than the allowed minimum, adjust them
+            // according to mOverridableMinSize
+            return new Size(Math.max(windowLayout.minWidth, mOverridableMinSize),
+                    Math.max(windowLayout.minHeight, mOverridableMinSize));
         }
         return null;
     }

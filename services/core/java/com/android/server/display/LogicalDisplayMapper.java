@@ -16,14 +16,16 @@
 
 package com.android.server.display;
 
-import android.content.Context;
+import android.hardware.devicestate.DeviceStateManager;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.view.Display;
-import android.view.DisplayEventReceiver;
+import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 
 import com.android.server.display.layout.Layout;
@@ -74,49 +76,79 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final boolean mSingleDisplayDemoMode;
 
     /**
-     * List of all logical displays indexed by logical display id.
+     * Map of all logical displays indexed by logical display id.
      * Any modification to mLogicalDisplays must invalidate the DisplayManagerGlobal cache.
      * TODO: multi-display - Move the aforementioned comment?
      */
     private final SparseArray<LogicalDisplay> mLogicalDisplays =
             new SparseArray<LogicalDisplay>();
 
-    /** A mapping from logical display id to display group. */
-    private final SparseArray<DisplayGroup> mDisplayIdToGroupMap = new SparseArray<>();
+    /** Map of all display groups indexed by display group id. */
+    private final SparseArray<DisplayGroup> mDisplayGroups = new SparseArray<>();
 
     private final DisplayDeviceRepository mDisplayDeviceRepo;
     private final DeviceStateToLayoutMap mDeviceStateToLayoutMap;
     private final Listener mListener;
-    private final int[] mFoldedDeviceStates;
+
+    /**
+     * Has an entry for every logical display that the rest of the system has been notified about.
+     * Any entry in here requires us to send a {@link  LOGICAL_DISPLAY_EVENT_REMOVED} event when it
+     * is deleted or {@link  LOGICAL_DISPLAY_EVENT_CHANGED} when it is changed.
+     */
+    private final SparseBooleanArray mUpdatedLogicalDisplays = new SparseBooleanArray();
+
+    /**
+     * Keeps track of all the display groups that we already told other people about. IOW, if a
+     * display group is in this array, then we *must* send change and remove notifications for it
+     * because other components know about them. Also, what this array stores is a change counter
+     * for each group, so we know if the group itself has changes since we last sent out a
+     * notification.  See {@link DisplayGroup#getChangeCountLocked}.
+     */
+    private final SparseIntArray mUpdatedDisplayGroups = new SparseIntArray();
+
+    /**
+     * Array used in {@link #updateLogicalDisplaysLocked} to track events that need to be sent out.
+     */
+    private final SparseIntArray mLogicalDisplaysToUpdate = new SparseIntArray();
+
+    /**
+     * Array used in {@link #updateLogicalDisplaysLocked} to track events that need to be sent out.
+     */
+    private final SparseIntArray mDisplayGroupsToUpdate = new SparseIntArray();
 
     private int mNextNonDefaultGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
     private Layout mCurrentLayout = null;
-    private boolean mIsFolded = false;
+    private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
 
-    LogicalDisplayMapper(Context context, DisplayDeviceRepository repo, Listener listener) {
+    LogicalDisplayMapper(DisplayDeviceRepository repo, Listener listener) {
         mDisplayDeviceRepo = repo;
         mListener = listener;
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mDisplayDeviceRepo.addListener(this);
-
-        mFoldedDeviceStates = context.getResources().getIntArray(
-                com.android.internal.R.array.config_foldedDeviceStates);
-
-        mDeviceStateToLayoutMap = new DeviceStateToLayoutMap(context);
+        mDeviceStateToLayoutMap = new DeviceStateToLayoutMap();
     }
 
     @Override
     public void onDisplayDeviceEventLocked(DisplayDevice device, int event) {
         switch (event) {
             case DisplayDeviceRepository.DISPLAY_DEVICE_EVENT_ADDED:
+                if (DEBUG) {
+                    Slog.d(TAG, "Display device added: " + device.getDisplayDeviceInfoLocked());
+                }
                 handleDisplayDeviceAddedLocked(device);
                 break;
 
             case DisplayDeviceRepository.DISPLAY_DEVICE_EVENT_CHANGED:
+                if (DEBUG) {
+                    Slog.d(TAG, "Display device changed: " + device.getDisplayDeviceInfoLocked());
+                }
                 updateLogicalDisplaysLocked();
                 break;
 
             case DisplayDeviceRepository.DISPLAY_DEVICE_EVENT_REMOVED:
+                if (DEBUG) {
+                    Slog.d(TAG, "Display device removed: " + device.getDisplayDeviceInfoLocked());
+                }
                 updateLogicalDisplaysLocked();
                 break;
         }
@@ -127,11 +159,11 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         mListener.onTraversalRequested();
     }
 
-    public LogicalDisplay getLocked(int displayId) {
+    public LogicalDisplay getDisplayLocked(int displayId) {
         return mLogicalDisplays.get(displayId);
     }
 
-    public LogicalDisplay getLocked(DisplayDevice device) {
+    public LogicalDisplay getDisplayLocked(DisplayDevice device) {
         final int count = mLogicalDisplays.size();
         for (int i = 0; i < count; i++) {
             LogicalDisplay display = mLogicalDisplays.valueAt(i);
@@ -166,16 +198,25 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
     }
 
-    public DisplayGroup getDisplayGroupLocked(int groupId) {
-        final int size = mDisplayIdToGroupMap.size();
+    public int getDisplayGroupIdFromDisplayIdLocked(int displayId) {
+        final LogicalDisplay display = getDisplayLocked(displayId);
+        if (display == null) {
+            return Display.INVALID_DISPLAY_GROUP;
+        }
+
+        final int size = mDisplayGroups.size();
         for (int i = 0; i < size; i++) {
-            final DisplayGroup displayGroup = mDisplayIdToGroupMap.valueAt(i);
-            if (displayGroup.getGroupId() == groupId) {
-                return displayGroup;
+            final DisplayGroup displayGroup = mDisplayGroups.valueAt(i);
+            if (displayGroup.containsLocked(display)) {
+                return mDisplayGroups.keyAt(i);
             }
         }
 
-        return null;
+        return Display.INVALID_DISPLAY_GROUP;
+    }
+
+    public DisplayGroup getDisplayGroupLocked(int groupId) {
+        return mDisplayGroups.get(groupId);
     }
 
     public void dumpLocked(PrintWriter pw) {
@@ -203,229 +244,334 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     }
 
     void setDeviceStateLocked(int state) {
-        boolean folded = false;
-        for (int i = 0; i < mFoldedDeviceStates.length; i++) {
-            if (state == mFoldedDeviceStates[i]) {
-                folded = true;
-                break;
-            }
+        if (state != mDeviceState) {
+            resetLayoutLocked();
+            mDeviceState = state;
+            applyLayoutLocked();
+            updateLogicalDisplaysLocked();
         }
-        setDeviceFoldedLocked(folded);
-    }
-
-    void setDeviceFoldedLocked(boolean isFolded) {
-        mIsFolded = isFolded;
-
-        // Until we have fully functioning state mapping, use hardcoded states based on isFolded
-        final int state = mIsFolded ? DeviceStateToLayoutMap.STATE_FOLDED
-                : DeviceStateToLayoutMap.STATE_UNFOLDED;
-
-        if (DEBUG) {
-            Slog.d(TAG, "New device state: " + state);
-        }
-
-        final Layout layout = mDeviceStateToLayoutMap.get(state);
-        if (layout == null) {
-            return;
-        }
-        final Layout.Display displayLayout = layout.getById(Display.DEFAULT_DISPLAY);
-        if (displayLayout == null) {
-            return;
-        }
-        final DisplayDevice newDefaultDevice =
-                mDisplayDeviceRepo.getByAddressLocked(displayLayout.getAddress());
-        if (newDefaultDevice == null) {
-            return;
-        }
-
-        final LogicalDisplay defaultDisplay = mLogicalDisplays.get(Display.DEFAULT_DISPLAY);
-        mCurrentLayout = layout;
-
-        // If we're already set up accurately, return early
-        if (defaultDisplay.getPrimaryDisplayDeviceLocked() == newDefaultDevice) {
-            return;
-        }
-
-        // We need to swap the default display's display-device with the one that is supposed
-        // to be the default in the new layout.
-        final LogicalDisplay displayToSwap = getLocked(newDefaultDevice);
-        if (displayToSwap == null) {
-            Slog.w(TAG, "Canceling display swap - unexpected empty second display for: "
-                    + newDefaultDevice);
-            return;
-        }
-        defaultDisplay.swapDisplaysLocked(displayToSwap);
-
-        // We ensure that the non-default Display is always forced to be off. This was likely
-        // already done in a previous iteration, but we do it with each swap in case something in
-        // the underlying LogicalDisplays changed: like LogicalDisplay recreation, for example.
-        defaultDisplay.setEnabled(true);
-        displayToSwap.setEnabled(false);
-
-        // Update the world
-        updateLogicalDisplaysLocked();
     }
 
     private void handleDisplayDeviceAddedLocked(DisplayDevice device) {
         DisplayDeviceInfo deviceInfo = device.getDisplayDeviceInfoLocked();
-        boolean isDefault = (deviceInfo.flags & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0;
-        if (isDefault && mLogicalDisplays.get(Display.DEFAULT_DISPLAY) != null) {
-            Slog.w(TAG, "Ignoring attempt to add a second default display: " + deviceInfo);
-            isDefault = false;
+        // Internal Displays need to have additional initialization.
+        // TODO: b/168208162 - This initializes a default dynamic display layout for INTERNAL
+        // devices, which will eventually just be a fallback in case no static layout definitions
+        // exist or cannot be loaded.
+        if (deviceInfo.type == Display.TYPE_INTERNAL) {
+            initializeInternalDisplayDeviceLocked(device);
         }
 
-        if (!isDefault && mSingleDisplayDemoMode) {
-            Slog.i(TAG, "Not creating a logical display for a secondary display "
-                    + " because single display demo mode is enabled: " + deviceInfo);
-            return;
-        }
+        // Create a logical display for the new display device
+        LogicalDisplay display = createNewLogicalDisplayLocked(
+                device, Layout.assignDisplayIdLocked(false /*isDefault*/));
 
-        final int displayId = Layout.assignDisplayIdLocked(isDefault);
-        final int layerStack = assignLayerStackLocked(displayId);
-
-        final DisplayGroup displayGroup;
-        final boolean addNewDisplayGroup =
-                isDefault || (deviceInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0;
-        if (addNewDisplayGroup) {
-            final int groupId = assignDisplayGroupIdLocked(isDefault);
-            displayGroup = new DisplayGroup(groupId);
-        } else {
-            displayGroup = mDisplayIdToGroupMap.get(Display.DEFAULT_DISPLAY);
-        }
-
-        LogicalDisplay display = new LogicalDisplay(displayId, layerStack, device);
-        display.updateDisplayGroupIdLocked(displayGroup.getGroupId());
-        display.updateLocked(mDisplayDeviceRepo);
-        if (!display.isValidLocked()) {
-            // This should never happen currently.
-            Slog.w(TAG, "Ignoring display device because the logical display "
-                    + "created from it was not considered valid: " + deviceInfo);
-            return;
-        }
-
-        // For foldable devices, we start the internal non-default displays as disabled.
-        // TODO - b/168208162 - this will be removed when we recalculate the layout with each
-        // display-device addition.
-        if (mFoldedDeviceStates.length > 0 && deviceInfo.type == Display.TYPE_INTERNAL
-                && !isDefault) {
-            display.setEnabled(false);
-        }
-
-        mLogicalDisplays.put(displayId, display);
-        displayGroup.addDisplayLocked(display);
-        mDisplayIdToGroupMap.append(displayId, displayGroup);
-
-        if (addNewDisplayGroup) {
-            // Group added events happen before Logical Display added events.
-            mListener.onDisplayGroupEventLocked(displayGroup.getGroupId(),
-                    LogicalDisplayMapper.DISPLAY_GROUP_EVENT_ADDED);
-        }
-
-        mListener.onLogicalDisplayEventLocked(display,
-                LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_ADDED);
-
-        if (!addNewDisplayGroup) {
-            // Group changed events happen after Logical Display added events.
-            mListener.onDisplayGroupEventLocked(displayGroup.getGroupId(),
-                    LogicalDisplayMapper.DISPLAY_GROUP_EVENT_CHANGED);
-        }
-
-        if (DEBUG) {
-            Slog.d(TAG, "New Display added: " + display);
-        }
+        applyLayoutLocked();
+        updateLogicalDisplaysLocked();
     }
 
     /**
-     * Updates all existing logical displays given the current set of display devices.
-     * Removes invalid logical displays. Sends notifications if needed.
+     * Updates the rest of the display system once all the changes are applied for display
+     * devices and logical displays. The includes releasing invalid/empty LogicalDisplays,
+     * creating/adjusting/removing DisplayGroups, and notifying the rest of the system of the
+     * relevant changes.
      */
     private void updateLogicalDisplaysLocked() {
+        // Go through all the displays and figure out if they need to be updated.
+        // Loops in reverse so that displays can be removed during the loop without affecting the
+        // rest of the loop.
         for (int i = mLogicalDisplays.size() - 1; i >= 0; i--) {
             final int displayId = mLogicalDisplays.keyAt(i);
             LogicalDisplay display = mLogicalDisplays.valueAt(i);
 
             mTempDisplayInfo.copyFrom(display.getDisplayInfoLocked());
             display.getNonOverrideDisplayInfoLocked(mTempNonOverrideDisplayInfo);
-            DisplayEventReceiver.FrameRateOverride[] frameRatesOverrides =
-                    display.getFrameRateOverrides();
+
             display.updateLocked(mDisplayDeviceRepo);
-            final DisplayGroup changedDisplayGroup;
+            final DisplayInfo newDisplayInfo = display.getDisplayInfoLocked();
+            final boolean wasPreviouslyUpdated = mUpdatedLogicalDisplays.get(displayId);
+
+            // The display is no longer valid and needs to be removed.
             if (!display.isValidLocked()) {
-                mLogicalDisplays.removeAt(i);
-                final DisplayGroup displayGroup = mDisplayIdToGroupMap.removeReturnOld(displayId);
-                displayGroup.removeDisplayLocked(display);
+                mUpdatedLogicalDisplays.delete(displayId);
 
-                mListener.onLogicalDisplayEventLocked(display,
-                        LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_REMOVED);
-
-                changedDisplayGroup = displayGroup;
-            } else if (!mTempDisplayInfo.equals(display.getDisplayInfoLocked())) {
-                final int flags = display.getDisplayInfoLocked().flags;
-                final DisplayGroup defaultDisplayGroup = mDisplayIdToGroupMap.get(
-                        Display.DEFAULT_DISPLAY);
-                if ((flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0) {
-                    // The display should have its own DisplayGroup.
-                    if (defaultDisplayGroup.removeDisplayLocked(display)) {
-                        final int groupId = assignDisplayGroupIdLocked(false);
-                        final DisplayGroup displayGroup = new DisplayGroup(groupId);
-                        displayGroup.addDisplayLocked(display);
-                        display.updateDisplayGroupIdLocked(groupId);
-                        mDisplayIdToGroupMap.append(display.getDisplayIdLocked(), displayGroup);
-                        mListener.onDisplayGroupEventLocked(displayGroup.getGroupId(),
-                                LogicalDisplayMapper.DISPLAY_GROUP_EVENT_ADDED);
-                        changedDisplayGroup = defaultDisplayGroup;
-                    } else {
-                        changedDisplayGroup = null;
-                    }
-                } else {
-                    // The display should be a part of the default DisplayGroup.
-                    final DisplayGroup displayGroup = mDisplayIdToGroupMap.get(displayId);
-                    if (displayGroup != defaultDisplayGroup) {
-                        displayGroup.removeDisplayLocked(display);
-                        defaultDisplayGroup.addDisplayLocked(display);
-                        display.updateDisplayGroupIdLocked(defaultDisplayGroup.getGroupId());
-                        mListener.onDisplayGroupEventLocked(defaultDisplayGroup.getGroupId(),
-                                LogicalDisplayMapper.DISPLAY_GROUP_EVENT_CHANGED);
-                        mDisplayIdToGroupMap.put(displayId, defaultDisplayGroup);
-                        changedDisplayGroup = displayGroup;
-                    } else {
-                        changedDisplayGroup = null;
-                    }
+                // Remove from group
+                final DisplayGroup displayGroup = getDisplayGroupLocked(
+                        getDisplayGroupIdFromDisplayIdLocked(displayId));
+                if (displayGroup != null) {
+                    displayGroup.removeDisplayLocked(display);
                 }
 
-                final String oldUniqueId = mTempDisplayInfo.uniqueId;
-                final String newUniqueId = display.getDisplayInfoLocked().uniqueId;
-                final int eventMsg = TextUtils.equals(oldUniqueId, newUniqueId)
-                        ? LOGICAL_DISPLAY_EVENT_CHANGED : LOGICAL_DISPLAY_EVENT_SWAPPED;
-                mListener.onLogicalDisplayEventLocked(display, eventMsg);
+                if (wasPreviouslyUpdated) {
+                    // The display isn't actually removed from our internal data structures until
+                    // after the notification is sent; see {@link #sendUpdatesForDisplaysLocked}.
+                    Slog.i(TAG, "Removing display: " + displayId);
+                    mLogicalDisplaysToUpdate.put(displayId, LOGICAL_DISPLAY_EVENT_REMOVED);
+                } else {
+                    // This display never left this class, safe to remove without notification
+                    mLogicalDisplays.removeAt(i);
+                }
+                continue;
+
+            // The display is new.
+            } else if (!wasPreviouslyUpdated) {
+                Slog.i(TAG, "Adding new display: " + displayId + ": " + newDisplayInfo);
+                assignDisplayGroupLocked(display);
+                mLogicalDisplaysToUpdate.put(displayId, LOGICAL_DISPLAY_EVENT_ADDED);
+
+            // Underlying displays device has changed to a different one.
+            } else if (!TextUtils.equals(mTempDisplayInfo.uniqueId, newDisplayInfo.uniqueId)) {
+                // FLAG_OWN_DISPLAY_GROUP could have changed, recalculate just in case
+                assignDisplayGroupLocked(display);
+                mLogicalDisplaysToUpdate.put(displayId, LOGICAL_DISPLAY_EVENT_SWAPPED);
+
+            // Something about the display device has changed.
+            } else if (!mTempDisplayInfo.equals(newDisplayInfo)) {
+                // FLAG_OWN_DISPLAY_GROUP could have changed, recalculate just in case
+                assignDisplayGroupLocked(display);
+                mLogicalDisplaysToUpdate.put(displayId, LOGICAL_DISPLAY_EVENT_CHANGED);
+
+            // Display frame rate overrides changed.
             } else if (!display.getPendingFrameRateOverrideUids().isEmpty()) {
-                mListener.onLogicalDisplayEventLocked(display,
-                        LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED);
-                changedDisplayGroup = null;
+                mLogicalDisplaysToUpdate.put(
+                        displayId, LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED);
+
+            // Non-override display values changed.
             } else {
-                // While applications shouldn't know nor care about the non-overridden info, we
+                // While application shouldn't know nor care about the non-overridden info, we
                 // still need to let WindowManager know so it can update its own internal state for
                 // things like display cutouts.
                 display.getNonOverrideDisplayInfoLocked(mTempDisplayInfo);
                 if (!mTempNonOverrideDisplayInfo.equals(mTempDisplayInfo)) {
-                    mListener.onLogicalDisplayEventLocked(display,
-                            LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_CHANGED);
+                    mLogicalDisplaysToUpdate.put(displayId, LOGICAL_DISPLAY_EVENT_CHANGED);
                 }
-                changedDisplayGroup = null;
             }
 
-            // CHANGED and REMOVED DisplayGroup events should always fire after Display events.
-            if (changedDisplayGroup != null) {
-                final int event = changedDisplayGroup.isEmptyLocked()
-                        ? LogicalDisplayMapper.DISPLAY_GROUP_EVENT_REMOVED
-                        : LogicalDisplayMapper.DISPLAY_GROUP_EVENT_CHANGED;
-                mListener.onDisplayGroupEventLocked(changedDisplayGroup.getGroupId(), event);
+            mUpdatedLogicalDisplays.put(displayId, true);
+        }
+
+        // Go through the groups and do the same thing. We do this after displays since group
+        // information can change in the previous loop.
+        // Loops in reverse so that groups can be removed during the loop without affecting the
+        // rest of the loop.
+        for (int i = mDisplayGroups.size() - 1; i >= 0; i--) {
+            final int groupId = mDisplayGroups.keyAt(i);
+            final DisplayGroup group = mDisplayGroups.valueAt(i);
+            final boolean wasPreviouslyUpdated = mUpdatedDisplayGroups.indexOfKey(groupId) < 0;
+            final int changeCount = group.getChangeCountLocked();
+
+            if (group.isEmptyLocked()) {
+                mUpdatedDisplayGroups.delete(groupId);
+                if (wasPreviouslyUpdated) {
+                    mDisplayGroupsToUpdate.put(groupId, DISPLAY_GROUP_EVENT_REMOVED);
+                }
+                continue;
+            } else if (!wasPreviouslyUpdated) {
+                mDisplayGroupsToUpdate.put(groupId, DISPLAY_GROUP_EVENT_ADDED);
+            } else if (mUpdatedDisplayGroups.get(groupId) != changeCount) {
+                mDisplayGroupsToUpdate.put(groupId, DISPLAY_GROUP_EVENT_CHANGED);
+            }
+            mUpdatedDisplayGroups.put(groupId, changeCount);
+        }
+
+        // Send the display and display group updates in order by message type. This is important
+        // to ensure that addition and removal notifications happen in the right order.
+        sendUpdatesForGroupsLocked(DISPLAY_GROUP_EVENT_ADDED);
+        sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_REMOVED);
+        sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_CHANGED);
+        sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED);
+        sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_ADDED);
+        sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_SWAPPED);
+        sendUpdatesForGroupsLocked(DISPLAY_GROUP_EVENT_CHANGED);
+        sendUpdatesForGroupsLocked(DISPLAY_GROUP_EVENT_REMOVED);
+
+        mLogicalDisplaysToUpdate.clear();
+        mDisplayGroupsToUpdate.clear();
+    }
+
+    /**
+     * Send the specified message for all relevant displays in the specified display-to-message map.
+     */
+    private void sendUpdatesForDisplaysLocked(int msg) {
+        for (int i = mLogicalDisplaysToUpdate.size() - 1; i >= 0; --i) {
+            final int currMsg = mLogicalDisplaysToUpdate.valueAt(i);
+            if (currMsg != msg) {
+                continue;
+            }
+
+            final int id = mLogicalDisplaysToUpdate.keyAt(i);
+            mListener.onLogicalDisplayEventLocked(getDisplayLocked(id), msg);
+            if (msg == LOGICAL_DISPLAY_EVENT_REMOVED) {
+                // We wait until we sent the EVENT_REMOVED event before actually removing the
+                // display.
+                mLogicalDisplays.delete(id);
             }
         }
     }
 
-    private int assignDisplayGroupIdLocked(boolean isDefault) {
-        return isDefault ? Display.DEFAULT_DISPLAY_GROUP : mNextNonDefaultGroupId++;
+    /**
+     * Send the specified message for all relevant display groups in the specified message map.
+     */
+    private void sendUpdatesForGroupsLocked(int msg) {
+        for (int i = mDisplayGroupsToUpdate.size() - 1; i >= 0; --i) {
+            final int currMsg = mDisplayGroupsToUpdate.valueAt(i);
+            if (currMsg != msg) {
+                continue;
+            }
+
+            final int id = mDisplayGroupsToUpdate.keyAt(i);
+            mListener.onDisplayGroupEventLocked(id, msg);
+            if (msg == DISPLAY_GROUP_EVENT_REMOVED) {
+                // We wait until we sent the EVENT_REMOVED event before actually removing the
+                // group.
+                mDisplayGroups.delete(id);
+            }
+        }
+    }
+
+    private void assignDisplayGroupLocked(LogicalDisplay display) {
+        final int displayId = display.getDisplayIdLocked();
+
+        // Get current display group data
+        int groupId = getDisplayGroupIdFromDisplayIdLocked(displayId);
+        final DisplayGroup oldGroup = getDisplayGroupLocked(groupId);
+
+        // Get the new display group if a change is needed
+        final DisplayInfo info = display.getDisplayInfoLocked();
+        final boolean needsOwnDisplayGroup = (info.flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0;
+        final boolean hasOwnDisplayGroup = groupId != Display.DEFAULT_DISPLAY_GROUP;
+        if (groupId == Display.INVALID_DISPLAY_GROUP
+                || hasOwnDisplayGroup != needsOwnDisplayGroup) {
+            groupId = assignDisplayGroupIdLocked(needsOwnDisplayGroup);
+        }
+
+        // Create a new group if needed
+        DisplayGroup newGroup = getDisplayGroupLocked(groupId);
+        if (newGroup == null) {
+            newGroup = new DisplayGroup(groupId);
+            mDisplayGroups.append(groupId, newGroup);
+        }
+        if (oldGroup != newGroup) {
+            if (oldGroup != null) {
+                oldGroup.removeDisplayLocked(display);
+            }
+            newGroup.addDisplayLocked(display);
+            display.updateDisplayGroupIdLocked(groupId);
+            Slog.i(TAG, "Setting new display group " + groupId + " for display "
+                    + displayId + ", from previous group: "
+                    + (oldGroup != null ? oldGroup.getGroupId() : "null"));
+        }
+    }
+
+    /**
+     * Resets the current layout in preparation for a new layout. Layouts can specify if some
+     * displays should be disabled (OFF). When switching from one layout to another, we go
+     * through each of the displays and make sure any displays we might have disabled are
+     * enabled again.
+     */
+    private void resetLayoutLocked() {
+        final Layout layout = mDeviceStateToLayoutMap.get(mDeviceState);
+        for (int i = layout.size() - 1; i >= 0; i--) {
+            final Layout.Display displayLayout = layout.getAt(i);
+            final LogicalDisplay display = getDisplayLocked(displayLayout.getLogicalDisplayId());
+            if (display != null) {
+                enableDisplayLocked(display, true); // Reset all displays back to enabled
+            }
+        }
+    }
+
+
+    /**
+     * Apply (or reapply) the currently selected display layout.
+     */
+    private void applyLayoutLocked() {
+        final Layout layout = mDeviceStateToLayoutMap.get(mDeviceState);
+        mCurrentLayout = layout;
+        Slog.i(TAG, "Applying the display layout for device state(" + mDeviceState
+                + "): " + layout);
+
+        // Go through each of the displays in the current layout set.
+        final int size = layout.size();
+        for (int i = 0; i < size; i++) {
+            final Layout.Display displayLayout = layout.getAt(i);
+
+            // If the underlying display-device we want to use for this display
+            // doesn't exist, then skip it. This can happen at startup as display-devices
+            // trickle in one at a time. When the new display finally shows up, the layout is
+            // recalculated so that the display is properly added to the current layout.
+            final DisplayAddress address = displayLayout.getAddress();
+            final DisplayDevice device = mDisplayDeviceRepo.getByAddressLocked(address);
+            if (device == null) {
+                Slog.w(TAG, "The display device (" + address + "), is not available"
+                        + " for the display state " + mDeviceState);
+                continue;
+            }
+
+            // Now that we have a display-device, we need a LogicalDisplay to map it to. Find the
+            // right one, if it doesn't exist, create a new one.
+            final int logicalDisplayId = displayLayout.getLogicalDisplayId();
+            LogicalDisplay newDisplay = getDisplayLocked(logicalDisplayId);
+            if (newDisplay == null) {
+                newDisplay = createNewLogicalDisplayLocked(
+                        null /*displayDevice*/, logicalDisplayId);
+            }
+
+            // Now swap the underlying display devices between the old display and the new display
+            final LogicalDisplay oldDisplay = getDisplayLocked(device);
+            if (newDisplay != oldDisplay) {
+                newDisplay.swapDisplaysLocked(oldDisplay);
+            }
+            enableDisplayLocked(newDisplay, displayLayout.isEnabled());
+        }
+    }
+
+
+    /**
+     * Creates a new logical display for the specified device and display Id and adds it to the list
+     * of logical displays.
+     *
+     * @param device The device to associate with the LogicalDisplay.
+     * @param displayId The display ID to give the new display. If invalid, a new ID is assigned.
+     * @param isDefault Indicates if we are creating the default display.
+     * @return The new logical display if created, null otherwise.
+     */
+    private LogicalDisplay createNewLogicalDisplayLocked(DisplayDevice device, int displayId) {
+        final int layerStack = assignLayerStackLocked(displayId);
+        final LogicalDisplay display = new LogicalDisplay(displayId, layerStack, device);
+        display.updateLocked(mDisplayDeviceRepo);
+        mLogicalDisplays.put(displayId, display);
+        enableDisplayLocked(display, device != null);
+        return display;
+    }
+
+    private void enableDisplayLocked(LogicalDisplay display, boolean isEnabled) {
+        final int displayId = display.getDisplayIdLocked();
+        final DisplayInfo info = display.getDisplayInfoLocked();
+
+        final boolean disallowSecondaryDisplay = mSingleDisplayDemoMode
+                && (info.type != Display.TYPE_INTERNAL);
+        if (isEnabled && disallowSecondaryDisplay) {
+            Slog.i(TAG, "Not creating a logical display for a secondary display because single"
+                    + " display demo mode is enabled: " + display.getDisplayInfoLocked());
+            isEnabled = false;
+        }
+
+        display.setEnabled(isEnabled);
+    }
+
+    private int assignDisplayGroupIdLocked(boolean isOwnDisplayGroup) {
+        return isOwnDisplayGroup ? mNextNonDefaultGroupId++ : Display.DEFAULT_DISPLAY_GROUP;
+    }
+
+    private void initializeInternalDisplayDeviceLocked(DisplayDevice device) {
+        // We always want to make sure that our default display layout creates a logical
+        // display for every internal display device that is found.
+        // To that end, when we are notified of a new internal display, we add it to
+        // the default definition if it is not already there.
+        final Layout layoutSet = mDeviceStateToLayoutMap.get(DeviceStateToLayoutMap.STATE_DEFAULT);
+        final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+        final boolean isDefault = (info.flags & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0;
+        layoutSet.createDisplayLocked(info.address, isDefault, true /* isEnabled */);
     }
 
     private int assignLayerStackLocked(int displayId) {
