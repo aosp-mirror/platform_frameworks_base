@@ -322,14 +322,6 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     }
 
     /**
-     * Get the height of the keyguard user switcher view when closed.
-     */
-    public int getUserIconHeight() {
-        View firstChild = mListView.getChildAt(0);
-        return firstChild == null ? 0 : firstChild.getHeight();
-    }
-
-    /**
      * Set the visibility of the keyguard user switcher view based on some new state.
      */
     public void setKeyguardUserSwitcherVisibility(
