@@ -47,7 +47,7 @@ public abstract class UdfpsAnimation extends Drawable {
     }
 
     public void onSensorRectUpdated(@NonNull RectF sensorRect) {
-        final int margin =  (int) sensorRect.height() / 5;
+        final int margin =  (int) sensorRect.height() / 8;
 
         final Rect bounds = new Rect((int) sensorRect.left + margin,
                 (int) sensorRect.top + margin,
