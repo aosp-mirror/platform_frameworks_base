@@ -2406,13 +2406,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 final BroadcastOptions opts = BroadcastOptions.makeBasic();
                 opts.setMaxManifestReceiverApiLevel(Build.VERSION_CODES.M);
                 options = opts.toBundle();
-                final IBatteryStats bs = mDeps.getBatteryStatsService();
-                try {
-                    bs.noteConnectivityChanged(intent.getIntExtra(
-                            ConnectivityManager.EXTRA_NETWORK_TYPE, ConnectivityManager.TYPE_NONE),
-                            ni.getState().toString());
-                } catch (RemoteException e) {
-                }
                 intent.addFlags(Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
             }
             try {
