@@ -220,7 +220,7 @@ public class PeopleSpaceUtils {
     }
 
     @Nullable
-    private static PeopleSpaceTile getPeopleSpaceTile(IPeopleManager peopleManager,
+    public static PeopleSpaceTile getPeopleSpaceTile(IPeopleManager peopleManager,
             AppWidgetManager appWidgetManager,
             Context context, int appWidgetId) {
         try {
@@ -230,7 +230,7 @@ public class PeopleSpaceUtils {
             String pkg = widgetSp.getString(PACKAGE_NAME, EMPTY_STRING);
             int userId = widgetSp.getInt(USER_ID, INVALID_USER_ID);
             String shortcutId = widgetSp.getString(SHORTCUT_ID, EMPTY_STRING);
-            if (pkg.isEmpty() || shortcutId.isEmpty() || userId == INVALID_WIDGET_ID) {
+            if (!validKey(shortcutId, pkg, userId)) {
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
                 shortcutId = sp.getString(String.valueOf(appWidgetId), null);
                 if (shortcutId == null) {
@@ -268,6 +268,17 @@ public class PeopleSpaceUtils {
         }
     }
 
+    /** Returns stored widgets for the conversation specified. */
+    public static Set<String> getStoredWidgetIds(SharedPreferences sp, String shortcutId,
+            String packageName, int userId) {
+        if (shortcutId == null || packageName == null) {
+            return new HashSet<>();
+        }
+        String key = PeopleSpaceUtils.getKey(shortcutId, packageName, userId);
+        return new HashSet<>(sp.getStringSet(key, new HashSet<>()));
+    }
+
+
     /** Best-effort attempts to migrate existing users to the new storage format. */
     // TODO: Remove after sufficient time. Temporary migration storage for existing users.
     private static void migrateExistingUsersToNewStorage(Context context, String shortcutId,
@@ -286,7 +297,11 @@ public class PeopleSpaceUtils {
                 if (DEBUG) Log.d(TAG, "Migrate storage for " + entry.get().getUserName());
                 setStorageForTile(context, entry.get(), appWidgetId);
             } else {
-                Log.e(TAG, "Could not migrate user");
+                Log.e(TAG, "Could not migrate user. Delete old storage");
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor editor = sp.edit();
+                editor.remove(String.valueOf(appWidgetId));
+                editor.apply();
             }
         } catch (Exception e) {
             Log.e(TAG, "Could not query conversations");
@@ -320,17 +335,10 @@ public class PeopleSpaceUtils {
     }
 
     /** Removes stored data when tile is deleted. */
-    public static void removeStorageForTile(Context context, int widgetId) {
-        SharedPreferences widgetSp = context.getSharedPreferences(String.valueOf(widgetId),
-                Context.MODE_PRIVATE);
-        String packageName = widgetSp.getString(PACKAGE_NAME, null);
-        String shortcutId = widgetSp.getString(SHORTCUT_ID, null);
-        int userId = widgetSp.getInt(USER_ID, -1);
-
+    public static void removeStorageForTile(Context context, String key, int widgetId) {
         // Delete widgetId mapping to key.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
-        String key = PeopleSpaceUtils.getKey(shortcutId, packageName, userId);
         Set<String> storedWidgetIds = new HashSet<>(sp.getStringSet(key, new HashSet<>()));
         storedWidgetIds.remove(String.valueOf(widgetId));
         editor.putStringSet(key, storedWidgetIds);
@@ -338,26 +346,13 @@ public class PeopleSpaceUtils {
         editor.apply();
 
         // Delete all data specifically mapped to widgetId.
+        SharedPreferences widgetSp = context.getSharedPreferences(String.valueOf(widgetId),
+                Context.MODE_PRIVATE);
         SharedPreferences.Editor widgetEditor = widgetSp.edit();
         widgetEditor.remove(PACKAGE_NAME);
         widgetEditor.remove(USER_ID);
         widgetEditor.remove(SHORTCUT_ID);
         widgetEditor.apply();
-    }
-
-    /**
-     * Returns whether the data mapped to app widget specified by {@code appWidgetId} matches the
-     * requested update data.
-     */
-    public static boolean isCorrectAppWidget(Context context, int appWidgetId, String shortcutId,
-            String packageName, int userId) {
-        SharedPreferences sp = context.getSharedPreferences(String.valueOf(appWidgetId),
-                Context.MODE_PRIVATE);
-        String storedPackage = sp.getString(PACKAGE_NAME, EMPTY_STRING);
-        int storedUserId = sp.getInt(USER_ID, INVALID_USER_ID);
-        String storedShortcutId = sp.getString(SHORTCUT_ID, EMPTY_STRING);
-        return storedPackage.equals(packageName) && storedShortcutId.equals(shortcutId)
-                && storedUserId == userId;
     }
 
     static List<PeopleSpaceTile> augmentTilesFromVisibleNotifications(Context context,
@@ -396,39 +391,8 @@ public class PeopleSpaceUtils {
         return augmentTileFromNotification(context, tile, visibleNotifications.get(key).getSbn());
     }
 
-    /**
-     * If incoming notification changed tile, store the changes in the tile options.
-     */
-    public static void updateWidgetWithNotificationChanged(IPeopleManager peopleManager,
-            Context context,
-            StatusBarNotification sbn,
-            NotificationAction notificationAction, AppWidgetManager appWidgetManager,
-            int appWidgetId) {
-        PeopleSpaceTile storedTile = getPeopleSpaceTile(peopleManager, appWidgetManager, context,
-                appWidgetId);
-        if (storedTile == null) {
-            if (DEBUG) Log.d(TAG, "Could not find stored tile to add notification to");
-            return;
-        }
-        if (notificationAction == PeopleSpaceUtils.NotificationAction.POSTED) {
-            if (DEBUG) Log.i(TAG, "Adding notification to storage, appWidgetId: " + appWidgetId);
-            storedTile = augmentTileFromNotification(context, storedTile, sbn);
-        } else {
-            if (DEBUG) {
-                Log.i(TAG, "Removing notification from storage, appWidgetId: " + appWidgetId);
-            }
-            storedTile = storedTile
-                    .toBuilder()
-                    .setNotificationKey(null)
-                    .setNotificationContent(null)
-                    .setNotificationDataUri(null)
-                    .setNotificationCategory(null)
-                    .build();
-        }
-        updateAppWidgetOptionsAndView(appWidgetManager, context, appWidgetId, storedTile);
-    }
-
-    static PeopleSpaceTile augmentTileFromNotification(Context context, PeopleSpaceTile tile,
+    /** Augments {@code tile} with the notification content from {@code sbn}. */
+    public static PeopleSpaceTile augmentTileFromNotification(Context context, PeopleSpaceTile tile,
             StatusBarNotification sbn) {
         Notification notification = sbn.getNotification();
         if (notification == null) {
@@ -992,7 +956,7 @@ public class PeopleSpaceUtils {
     }
 
     /** Update app widget options and the current view. */
-    private static void updateAppWidgetOptionsAndView(AppWidgetManager appWidgetManager,
+    public static void updateAppWidgetOptionsAndView(AppWidgetManager appWidgetManager,
             Context context, int appWidgetId, PeopleSpaceTile tile) {
         updateAppWidgetOptions(appWidgetManager, appWidgetId, tile);
         RemoteViews views = createRemoteViews(context, tile, appWidgetId);
@@ -1065,8 +1029,17 @@ public class PeopleSpaceUtils {
      *     <li>"a/b/0" + "/" + 0 + "/" + "packageName"</li>
      * </ul>
      */
+    @Nullable
     public static String getKey(String shortcutId, String packageName, int userId) {
+        if (!validKey(shortcutId, packageName, userId)) {
+            return null;
+        }
         return shortcutId + "/" + userId + "/" + packageName;
+    }
+
+    /** Returns whether the key is valid. */
+    public static boolean validKey(String shortcutId, String packageName, int userId) {
+        return !TextUtils.isEmpty(shortcutId) && !TextUtils.isEmpty(packageName) && userId >= 0;
     }
 
     /** Returns the userId associated with a {@link PeopleSpaceTile} */
