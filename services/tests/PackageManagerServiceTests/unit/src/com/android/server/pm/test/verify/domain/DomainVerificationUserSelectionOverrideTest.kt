@@ -16,18 +16,16 @@
 
 package com.android.server.pm.test.verify.domain
 
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.verify.domain.DomainVerificationManager
-import android.content.pm.verify.domain.DomainVerificationUserSelection
+import android.content.pm.verify.domain.DomainVerificationUserState
 import android.os.Build
 import android.os.PatternMatcher
 import android.os.Process
 import android.util.ArraySet
-import androidx.test.InstrumentationRegistry
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.verify.domain.DomainVerificationService
@@ -41,7 +39,7 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import java.util.UUID
 
-class DomainVerificationManagerUserSelectionOverrideTest {
+class DomainVerificationUserStateOverrideTest {
 
     companion object {
         private const val PKG_ONE = "com.test.one"
@@ -50,17 +48,19 @@ class DomainVerificationManagerUserSelectionOverrideTest {
         private val UUID_TWO = UUID.fromString("a3389c16-7f9f-4e86-85e3-500d1249c74c")
 
         private val DOMAIN_ONE =
-            DomainVerificationManagerUserSelectionOverrideTest::class.java.packageName
+            DomainVerificationUserStateOverrideTest::class.java.packageName
 
-        private const val STATE_NONE = DomainVerificationUserSelection.DOMAIN_STATE_NONE
-        private const val STATE_SELECTED = DomainVerificationUserSelection.DOMAIN_STATE_SELECTED
-        private const val STATE_VERIFIED = DomainVerificationUserSelection.DOMAIN_STATE_VERIFIED
+        private const val STATE_NONE = DomainVerificationUserState.DOMAIN_STATE_NONE
+        private const val STATE_SELECTED = DomainVerificationUserState.DOMAIN_STATE_SELECTED
+        private const val STATE_VERIFIED = DomainVerificationUserState.DOMAIN_STATE_VERIFIED
+
+        private const val USER_ID = 0
     }
 
     private val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE)
     private val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO)
 
-    fun makeManager(): DomainVerificationManager =
+    fun makeService() =
         DomainVerificationService(mockThrowOnUnmocked {
             // Assume the test has every permission necessary
             whenever(enforcePermission(anyString(), anyInt(), anyInt(), anyString()))
@@ -88,7 +88,7 @@ class DomainVerificationManagerUserSelectionOverrideTest {
             addPackage(pkg2)
 
             // Starting state for all tests is to have domain 1 enabled for the first package
-            setDomainVerificationUserSelection(UUID_ONE, setOf(DOMAIN_ONE), true)
+            setDomainVerificationUserSelection(UUID_ONE, setOf(DOMAIN_ONE), true, USER_ID)
 
             assertThat(stateFor(PKG_ONE, DOMAIN_ONE)).isEqualTo(STATE_SELECTED)
         }
@@ -138,37 +138,37 @@ class DomainVerificationManagerUserSelectionOverrideTest {
 
     @Test
     fun anotherPackageTakeoverSuccess() {
-        val manager = makeManager()
+        val service = makeService()
 
         // Attempt override by package 2
-        manager.setDomainVerificationUserSelection(UUID_TWO, setOf(DOMAIN_ONE), true)
+        service.setDomainVerificationUserSelection(UUID_TWO, setOf(DOMAIN_ONE), true, USER_ID)
 
         // 1 loses approval
-        assertThat(manager.stateFor(PKG_ONE, DOMAIN_ONE)).isEqualTo(STATE_NONE)
+        assertThat(service.stateFor(PKG_ONE, DOMAIN_ONE)).isEqualTo(STATE_NONE)
 
         // 2 gains approval
-        assertThat(manager.stateFor(PKG_TWO, DOMAIN_ONE)).isEqualTo(STATE_SELECTED)
+        assertThat(service.stateFor(PKG_TWO, DOMAIN_ONE)).isEqualTo(STATE_SELECTED)
 
         // 2 is the only owner
-        assertThat(manager.getOwnersForDomain(DOMAIN_ONE).map { it.packageName })
+        assertThat(service.getOwnersForDomain(DOMAIN_ONE, USER_ID).map { it.packageName })
             .containsExactly(PKG_TWO)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun anotherPackageTakeoverFailure() {
-        val manager = makeManager()
+        val service = makeService()
 
         // Verify 1 to give it a higher approval level
-        manager.setDomainVerificationStatus(UUID_ONE, setOf(DOMAIN_ONE),
+        service.setDomainVerificationStatus(UUID_ONE, setOf(DOMAIN_ONE),
             DomainVerificationManager.STATE_SUCCESS)
-        assertThat(manager.stateFor(PKG_ONE, DOMAIN_ONE)).isEqualTo(STATE_VERIFIED)
-        assertThat(manager.getOwnersForDomain(DOMAIN_ONE).map { it.packageName })
+        assertThat(service.stateFor(PKG_ONE, DOMAIN_ONE)).isEqualTo(STATE_VERIFIED)
+        assertThat(service.getOwnersForDomain(DOMAIN_ONE, USER_ID).map { it.packageName })
             .containsExactly(PKG_ONE)
 
         // Attempt override by package 2
-        manager.setDomainVerificationUserSelection(UUID_TWO, setOf(DOMAIN_ONE), true)
+        service.setDomainVerificationUserSelection(UUID_TWO, setOf(DOMAIN_ONE), true, USER_ID)
     }
 
-    private fun DomainVerificationManager.stateFor(pkgName: String, host: String) =
-        getDomainVerificationUserSelection(pkgName)!!.hostToStateMap[host]
+    private fun DomainVerificationService.stateFor(pkgName: String, host: String) =
+        getDomainVerificationUserState(pkgName, USER_ID)!!.hostToStateMap[host]
 }

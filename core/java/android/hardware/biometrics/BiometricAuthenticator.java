@@ -62,10 +62,13 @@ public interface BiometricAuthenticator {
      * @hide
      */
     int TYPE_FACE = 1 << 3;
-    @IntDef({TYPE_NONE,
+
+    @IntDef(flag = true, value = {
+            TYPE_NONE,
             TYPE_CREDENTIAL,
             TYPE_FINGERPRINT,
-            TYPE_IRIS})
+            TYPE_IRIS
+    })
     @Retention(RetentionPolicy.SOURCE)
     @interface Modality {}
 

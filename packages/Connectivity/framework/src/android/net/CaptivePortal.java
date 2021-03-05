@@ -160,12 +160,11 @@ public class CaptivePortal implements Parcelable {
      * @param eventId one of the CAPTIVE_PORTAL_LOGIN_* constants in metrics_constants.proto.
      * @param packageName captive portal application package name.
      * @hide
+     * @deprecated The event will not be logged in Android S and above. The
+     * caller is migrating to statsd.
      */
+    @Deprecated
     @SystemApi
     public void logEvent(int eventId, @NonNull String packageName) {
-        try {
-            ICaptivePortal.Stub.asInterface(mBinder).logEvent(eventId, packageName);
-        } catch (RemoteException e) {
-        }
     }
 }

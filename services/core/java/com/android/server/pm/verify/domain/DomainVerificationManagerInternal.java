@@ -48,7 +48,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
-public interface DomainVerificationManagerInternal extends DomainVerificationManager {
+public interface DomainVerificationManagerInternal {
 
     UUID DISABLED_ID = new UUID(0, 0);
 
@@ -69,8 +69,8 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      * during the legacy transition period.
      *
      * TODO(b/177923646): The legacy values can be removed once the Settings API changes are
-     *  shipped. These values are not stable, so just deleting the constant and shifting others is
-     *  fine.
+     * shipped. These values are not stable, so just deleting the constant and shifting others is
+     * fine.
      */
     int APPROVAL_LEVEL_LEGACY_ASK = 1;
 
@@ -84,14 +84,15 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
 
     /**
      * The app has been chosen by the user through
-     * {@link #setDomainVerificationUserSelection(UUID, Set, boolean)}, indictag an explicit
-     * choice to use this app to open an unverified domain.
+     * {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set, boolean)},
+     * indicating an explicit choice to use this app to open an unverified domain.
      */
     int APPROVAL_LEVEL_SELECTION = 2;
 
     /**
      * The app is approved through the digital asset link statement being hosted at the domain
-     * it is capturing. This is set through {@link #setDomainVerificationStatus(UUID, Set, int)} by
+     * it is capturing. This is set through
+     * {@link DomainVerificationManager#setDomainVerificationStatus(UUID, Set, int)} by
      * the domain verification agent on device.
      */
     int APPROVAL_LEVEL_VERIFIED = 3;
@@ -102,7 +103,7 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      * declares against the digital asset link statements before allowing it to be installed.
      *
      * The user is still able to disable instant app link handling through
-     * {@link #setDomainVerificationLinkHandlingAllowed(String, boolean)}.
+     * {@link DomainVerificationManager#setDomainVerificationLinkHandlingAllowed(String, boolean)}.
      */
     int APPROVAL_LEVEL_INSTANT_APP = 4;
 
@@ -122,7 +123,17 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
             APPROVAL_LEVEL_VERIFIED,
             APPROVAL_LEVEL_INSTANT_APP
     })
-    @interface ApprovalLevel{}
+    @interface ApprovalLevel {
+    }
+
+    /** @see DomainVerificationManager#getDomainVerificationInfo(String) */
+    @Nullable
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.DOMAIN_VERIFICATION_AGENT,
+            android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
+    })
+    DomainVerificationInfo getDomainVerificationInfo(@NonNull String packageName)
+            throws NameNotFoundException;
 
     /**
      * Generate a new domain set ID to be used for attaching new packages.
@@ -173,9 +184,9 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
     /**
      * Migrates verification state from a previous install to a new one. It is expected that the
      * {@link PackageSetting#getDomainSetId()} already be set to the correct value, usually from
-     * {@link #generateNewId()}. This will preserve {@link #STATE_SUCCESS} domains under the
-     * assumption that the new package will pass the same server side config as the previous
-     * package, as they have matching signatures.
+     * {@link #generateNewId()}. This will preserve {@link DomainVerificationManager#STATE_SUCCESS}
+     * domains under the assumption that the new package will pass the same server side config as
+     * the previous package, as they have matching signatures.
      * <p>
      * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
      * lock. This should never be called from within the domain verification classes themselves.
@@ -229,8 +240,10 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      * tag has already been entered.
      * <p>
      * This is <b>only</b> for restore, and will override package states, ignoring if their {@link
-     * DomainVerificationInfo#getIdentifier()}s match. It's expected that any restored domains marked
-     * as success verify against the server correctly, although the verification agent may decide to
+     * DomainVerificationInfo#getIdentifier()}s match. It's expected that any restored domains
+     * marked
+     * as success verify against the server correctly, although the verification agent may decide
+     * to
      * re-verify them when it gets the chance.
      */
     /*

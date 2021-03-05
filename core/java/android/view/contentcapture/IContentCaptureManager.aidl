@@ -22,6 +22,7 @@ import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.DataRemovalRequest;
 import android.view.contentcapture.DataShareRequest;
 import android.view.contentcapture.IDataShareWriteAdapter;
+import android.view.contentcapture.IContentCaptureOptionsCallback;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 
@@ -101,4 +102,10 @@ oneway interface IContentCaptureManager {
      * Sets whether the default service should be used.
      */
     void setDefaultServiceEnabled(int userId, boolean enabled);
+
+    /**
+     * Registers a listener to handle updates ContentCaptureOptions from server.
+     */
+    void registerContentCaptureOptionsCallback(String packageName,
+                                               in IContentCaptureOptionsCallback callback);
 }

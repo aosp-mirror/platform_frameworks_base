@@ -445,8 +445,7 @@ static bool throwExceptionAsNecessary(
         jniThrowException(env, "android/media/DeniedByServerException", msg);
         return true;
     } else if (err == DEAD_OBJECT) {
-        jniThrowException(env, "android/media/MediaDrmResetException",
-                "mediaserver died");
+        jniThrowException(env, "android/media/MediaDrmResetException", msg);
         return true;
     } else if (isSessionException(err)) {
         throwSessionException(env, msg, err);
@@ -967,10 +966,12 @@ static void android_media_MediaDrm_native_setup(
     status_t err = drm->initCheck();
 
     if (err != OK) {
+        auto logs(DrmUtils::gLogBuf.getLogs());
+        auto msg(DrmUtils::GetExceptionMessage(err, "Failed to instantiate drm object", logs));
         jniThrowException(
                 env,
                 "android/media/UnsupportedSchemeException",
-                "Failed to instantiate drm object.");
+                msg.c_str());
         return;
     }
 

@@ -412,6 +412,9 @@
     <!-- Whether or not child notifications that are part of a group will have shadows. -->
     <bool name="config_enableShadowOnChildNotifications">true</bool>
 
+    <!-- If true, group numbers are shown in the expander instead of via "+N" overflow number -->
+    <bool name="config_showNotificationGroupCountInExpander">true</bool>
+
     <!-- Whether or not a view containing child notifications will have a custom background when
          it has been expanded to reveal its children. -->
     <bool name="config_showGroupNotificationBgWhenExpanded">false</bool>

@@ -457,6 +457,7 @@ public final class ViewRootImpl implements ViewParent,
     FallbackEventHandler mFallbackEventHandler;
     final Choreographer mChoreographer;
     protected final ViewFrameInfo mViewFrameInfo = new ViewFrameInfo();
+    private final InputEventAssigner mInputEventAssigner = new InputEventAssigner();
 
     /**
      * Update the Choreographer's FrameInfo object with the timing information for the current
@@ -8352,16 +8353,7 @@ public final class ViewRootImpl implements ViewParent,
             Trace.traceCounter(Trace.TRACE_TAG_INPUT, mPendingInputEventQueueLengthCounterName,
                     mPendingInputEventCount);
 
-            long eventTime = q.mEvent.getEventTimeNano();
-            long oldestEventTime = eventTime;
-            if (q.mEvent instanceof MotionEvent) {
-                MotionEvent me = (MotionEvent)q.mEvent;
-                if (me.getHistorySize() > 0) {
-                    oldestEventTime = me.getHistoricalEventTimeNano(0);
-                }
-            }
-            mViewFrameInfo.updateOldestInputEvent(oldestEventTime);
-            mViewFrameInfo.updateNewestInputEvent(eventTime);
+            mViewFrameInfo.setInputEvent(mInputEventAssigner.processEvent(q.mEvent));
 
             deliverInputEvent(q);
         }
@@ -8497,6 +8489,11 @@ public final class ViewRootImpl implements ViewParent,
             consumedBatches = false;
         }
         doProcessInputEvents();
+        if (consumedBatches) {
+            // Must be done after we processed the input events, to mark the completion of the frame
+            // from the input point of view
+            mInputEventAssigner.onChoreographerCallback();
+        }
         return consumedBatches;
     }
 

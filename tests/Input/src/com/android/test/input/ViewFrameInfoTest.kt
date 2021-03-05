@@ -17,6 +17,7 @@
 package com.android.test.input
 
 import android.graphics.FrameInfo
+import android.os.IInputConstants.INVALID_INPUT_EVENT_ID
 import android.os.SystemClock
 import android.view.ViewFrameInfo
 import com.google.common.truth.Truth.assertThat
@@ -33,8 +34,7 @@ class ViewFrameInfoTest {
     @Before
     fun setUp() {
         mViewFrameInfo.reset()
-        mViewFrameInfo.updateOldestInputEvent(10)
-        mViewFrameInfo.updateNewestInputEvent(20)
+        mViewFrameInfo.setInputEvent(139)
         mViewFrameInfo.flags = mViewFrameInfo.flags or FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED
         mTimeStarted = SystemClock.uptimeNanos()
         mViewFrameInfo.markDrawStart()
@@ -43,8 +43,6 @@ class ViewFrameInfoTest {
     @Test
     fun testPopulateFields() {
         assertThat(mViewFrameInfo.drawStart).isGreaterThan(mTimeStarted)
-        assertThat(mViewFrameInfo.oldestInputEventTime).isEqualTo(10)
-        assertThat(mViewFrameInfo.newestInputEventTime).isEqualTo(20)
         assertThat(mViewFrameInfo.flags).isEqualTo(FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED)
     }
 
@@ -53,8 +51,6 @@ class ViewFrameInfoTest {
         mViewFrameInfo.reset()
         // Ensure that the original object is reset correctly
         assertThat(mViewFrameInfo.drawStart).isEqualTo(0)
-        assertThat(mViewFrameInfo.oldestInputEventTime).isEqualTo(0)
-        assertThat(mViewFrameInfo.newestInputEventTime).isEqualTo(0)
         assertThat(mViewFrameInfo.flags).isEqualTo(0)
     }
 
@@ -62,12 +58,13 @@ class ViewFrameInfoTest {
     fun testUpdateFrameInfoFromViewFrameInfo() {
         val frameInfo = FrameInfo()
         // By default, all values should be zero
-        // TODO(b/169866723): Use InputEventAssigner and assert INPUT_EVENT_ID
+        assertThat(frameInfo.frameInfo[FrameInfo.INPUT_EVENT_ID]).isEqualTo(INVALID_INPUT_EVENT_ID)
         assertThat(frameInfo.frameInfo[FrameInfo.FLAGS]).isEqualTo(0)
         assertThat(frameInfo.frameInfo[FrameInfo.DRAW_START]).isEqualTo(0)
 
         // The values inside FrameInfo should match those from ViewFrameInfo after we update them
         mViewFrameInfo.populateFrameInfo(frameInfo)
+        assertThat(frameInfo.frameInfo[FrameInfo.INPUT_EVENT_ID]).isEqualTo(139)
         assertThat(frameInfo.frameInfo[FrameInfo.FLAGS]).isEqualTo(
                 FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED)
         assertThat(frameInfo.frameInfo[FrameInfo.DRAW_START]).isGreaterThan(mTimeStarted)

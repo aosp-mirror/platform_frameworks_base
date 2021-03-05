@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IVold;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -112,4 +113,10 @@ public abstract class StorageManagerInternal {
      * @param bytes number of bytes which need to be freed
      */
     public abstract void freeCache(@Nullable String volumeUuid, long bytes);
+
+    /**
+     * Returns the {@link VolumeInfo#getId()} values for the volumes matching
+     * {@link VolumeInfo#isPrimary()}
+     */
+    public abstract List<String> getPrimaryVolumeIds();
 }

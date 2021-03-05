@@ -29,9 +29,9 @@ import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
-import com.android.server.pm.verify.domain.models.DomainVerificationUserState;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -216,21 +216,22 @@ class DomainVerificationSettings {
             }
         }
 
-        SparseArray<DomainVerificationUserState> oldSelectionStates =
-                oldState.getUserSelectionStates();
+        SparseArray<DomainVerificationInternalUserState> oldSelectionStates =
+                oldState.getUserStates();
 
-        SparseArray<DomainVerificationUserState> newSelectionStates =
-                newState.getUserSelectionStates();
+        SparseArray<DomainVerificationInternalUserState> newSelectionStates =
+                newState.getUserStates();
 
-        DomainVerificationUserState newUserState = newSelectionStates.get(UserHandle.USER_SYSTEM);
+        DomainVerificationInternalUserState newUserState =
+                newSelectionStates.get(UserHandle.USER_SYSTEM);
         if (newUserState != null) {
             ArraySet<String> newEnabledHosts = newUserState.getEnabledHosts();
-            DomainVerificationUserState oldUserState =
+            DomainVerificationInternalUserState oldUserState =
                     oldSelectionStates.get(UserHandle.USER_SYSTEM);
 
             boolean linkHandlingAllowed = newUserState.isLinkHandlingAllowed();
             if (oldUserState == null) {
-                oldUserState = new DomainVerificationUserState(UserHandle.USER_SYSTEM,
+                oldUserState = new DomainVerificationInternalUserState(UserHandle.USER_SYSTEM,
                         newEnabledHosts, linkHandlingAllowed);
                 oldSelectionStates.put(UserHandle.USER_SYSTEM, oldUserState);
             } else {

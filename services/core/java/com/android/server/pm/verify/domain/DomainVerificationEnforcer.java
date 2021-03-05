@@ -132,6 +132,21 @@ public class DomainVerificationEnforcer {
     /**
      * Enforced when mutating user selection state inside an exposed API method.
      */
+    public boolean assertApprovedUserStateQuerent(int callingUid, @UserIdInt int callingUserId,
+            @NonNull String packageName, @UserIdInt int targetUserId) throws SecurityException {
+        if (callingUserId != targetUserId) {
+            mContext.enforcePermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS,
+                    Binder.getCallingPid(), callingUid,
+                    "Caller is not allowed to edit other users");
+        }
+
+        return !mCallback.filterAppAccess(packageName, callingUid, targetUserId);
+    }
+
+    /**
+     * Enforced when mutating user selection state inside an exposed API method.
+     */
     public boolean assertApprovedUserSelector(int callingUid, @UserIdInt int callingUserId,
             @Nullable String packageName, @UserIdInt int targetUserId) throws SecurityException {
         if (callingUserId != targetUserId) {
