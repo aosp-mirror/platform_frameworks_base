@@ -30,5 +30,8 @@ java_library {
         "guava",
         "truth-prebuilt",
     ],
-    visibility: ["//cts/tests/appsearch"],
+    visibility: [
+        "//cts/tests/appsearch",
+        "//vendor:__subpackages__",
+    ],
 }
