@@ -294,8 +294,10 @@
     <string name="screenrecord_share_label">Share</string>
     <!-- A toast message shown after successfully canceling a screen recording [CHAR LIMIT=NONE] -->
     <string name="screenrecord_cancel_success">Screen recording canceled</string>
-    <!-- Notification text shown after saving a screen recording to prompt the user to view it [CHAR LIMIT=100] -->
-    <string name="screenrecord_save_message">Screen recording saved, tap to view</string>
+    <!-- Notification text shown after saving a screen recording [CHAR LIMIT=100] -->
+    <string name="screenrecord_save_title">Screen recording saved</string>
+    <!-- Subtext for a notification shown after saving a screen recording to prompt the user to view it [CHAR_LIMIT=100] -->
+    <string name="screenrecord_save_text">Tap to view</string>
     <!-- A toast message shown when there is an error deleting a screen recording [CHAR LIMIT=NONE] -->
     <string name="screenrecord_delete_error">Error deleting screen recording</string>
     <!-- A toast message shown when the screen recording cannot be started due to insufficient permissions [CHAR LIMIT=NONE] -->
