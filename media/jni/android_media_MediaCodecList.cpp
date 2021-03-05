@@ -105,6 +105,7 @@ static const JavaMediaCodecListWrapper *getCodecList(JNIEnv *env) {
             // This should never happen unless something is really wrong
             jniThrowException(
                         env, "java/lang/RuntimeException", "cannot get MediaCodecList");
+            return NULL;
         }
 
         sListWrapper.reset(new JavaMediaCodecListWrapper(mcl));
