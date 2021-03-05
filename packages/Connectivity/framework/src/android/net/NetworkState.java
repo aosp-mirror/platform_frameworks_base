@@ -115,7 +115,8 @@ public class NetworkState implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final @android.annotation.NonNull Creator<NetworkState> CREATOR = new Creator<NetworkState>() {
+    @NonNull
+    public static final Creator<NetworkState> CREATOR = new Creator<NetworkState>() {
         @Override
         public NetworkState createFromParcel(Parcel in) {
             return new NetworkState(in);
