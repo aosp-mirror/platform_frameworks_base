@@ -62,7 +62,10 @@ public abstract class UdfpsAnimationView extends FrameLayout implements DozeRece
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        getUdfpsAnimation().onDestroy();
+
+        if (getUdfpsAnimation() != null) {
+            getUdfpsAnimation().onDestroy();
+        }
     }
 
     private int expansionToAlpha(float expansion) {
@@ -78,11 +81,19 @@ public abstract class UdfpsAnimationView extends FrameLayout implements DozeRece
     }
 
     void onIlluminationStarting() {
+        if (getUdfpsAnimation() == null) {
+            return;
+        }
+
         getUdfpsAnimation().setIlluminationShowing(true);
         postInvalidate();
     }
 
     void onIlluminationStopped() {
+        if (getUdfpsAnimation() == null) {
+            return;
+        }
+
         getUdfpsAnimation().setIlluminationShowing(false);
         postInvalidate();
     }
