@@ -2822,7 +2822,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 result.highestApprovalLevel = Math.max(mDomainVerificationManager
                         .approvalLevelForDomain(ps, intent, resultTargetUser, flags,
-                                riTargetUser.targetUserId), result.highestApprovalLevel);
+                                parentUserId), result.highestApprovalLevel);
             }
             if (result != null && result.highestApprovalLevel
                     <= DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
