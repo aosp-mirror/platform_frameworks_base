@@ -613,6 +613,10 @@ public interface WindowManager extends ViewManager {
      * For example, for activities in multi-window mode, the metrics returned are based on the
      * current bounds that the user has selected for the {@link android.app.Activity Activity}'s
      * task.
+     * <p>
+     * In most scenarios, {@link #getCurrentWindowMetrics()} rather than
+     * {@link #getMaximumWindowMetrics()} is the correct API to use, since it ensures values reflect
+     * window size when the app is not fullscreen.
      *
      * @see #getMaximumWindowMetrics()
      * @see WindowMetrics
@@ -624,26 +628,27 @@ public interface WindowManager extends ViewManager {
     /**
      * Returns the largest {@link WindowMetrics} an app may expect in the current system state.
      * <p>
-     * The metrics describe the size of the largest potential area the window might occupy with
-     * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}
-     * such a window would have.
-     * <p>
      * The value of this is based on the largest <b>potential</b> windowing state of the system.
      *
      * For example, for activities in multi-window mode, the metrics returned are based on the
      * what the bounds would be if the user expanded the {@link android.app.Activity Activity}'s
      * task to cover the entire screen.
-     *
+     * <p>
+     * The metrics describe the size of the largest potential area the window might occupy with
+     * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}
+     * such a window would have.
+     * <p>
      * Note that this might still be smaller than the size of the physical display if certain areas
      * of the display are not available to windows created in this {@link Context}.
-     * <p>
+     *
      * For example, given that there's a device which have a multi-task mode to limit activities
      * to a half screen. In this case, {@link #getMaximumWindowMetrics()} reports the bounds of
-     * the half screen which the activity is located, while {@link Display#getRealSize(Point)} still
-     * reports the bounds of the whole physical display.
-     *
-     * Despite this, {@link #getMaximumWindowMetrics()} and {@link Display#getRealSize(Point)}
-     * reports the same bounds in general.
+     * the half screen which the activity is located.
+     * <p>
+     * <b>Generally {@link #getCurrentWindowMetrics()} is the correct API to use</b> for choosing
+     * UI layouts. {@link #getMaximumWindowMetrics()} are only appropriate when the application
+     * needs to know the largest possible size it can occupy if the user expands/maximizes it on the
+     * screen.
      *
      * @see #getCurrentWindowMetrics()
      * @see WindowMetrics
