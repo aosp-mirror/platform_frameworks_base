@@ -1598,10 +1598,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
             mSafetyChecker = safetyChecker;
         }
-
-        void dumpPerUserData(IndentingPrintWriter pw, @UserIdInt int userId) {
-            PersonalAppsSuspensionHelper.forUser(mContext, userId).dump(pw);
-        }
     }
 
     /**
@@ -9166,15 +9162,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void dumpPerUserData(IndentingPrintWriter pw) {
         int userCount = mUserData.size();
-        for (int userId = 0; userId < userCount; userId++) {
-            DevicePolicyData policy = getUserData(mUserData.keyAt(userId));
+        for (int i = 0; i < userCount; i++) {
+            int userId = mUserData.keyAt(i);
+            DevicePolicyData policy = getUserData(userId);
             policy.dump(pw);
             pw.println();
 
-            pw.increaseIndent();
-            mInjector.dumpPerUserData(pw, userId);
-            pw.decreaseIndent();
-            pw.println();
+            if (userId == UserHandle.USER_SYSTEM) {
+                pw.increaseIndent();
+                PersonalAppsSuspensionHelper.forUser(mContext, userId).dump(pw);
+                pw.decreaseIndent();
+                pw.println();
+            } else {
+                // pm.getUnsuspendablePackages() will fail if it's called for a different user;
+                // as this dump is mostly useful for system user anyways, we can just ignore the
+                // others (rather than changing the permission check in the PM method)
+                Slog.d(LOG_TAG, "skipping PersonalAppsSuspensionHelper.dump() for user " + userId);
+            }
         }
     }
 
