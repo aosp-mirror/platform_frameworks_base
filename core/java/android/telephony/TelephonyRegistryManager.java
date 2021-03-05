@@ -25,9 +25,6 @@ import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Handler;
-import android.os.HandlerExecutor;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.Annotation.CallState;
@@ -802,6 +799,22 @@ public class TelephonyRegistryManager {
         }
     }
 
+    /**
+     * Notify emergency number list changed on certain subscription.
+     *
+     * @param subId for which emergency number list changed.
+     * @param slotIndex for which emergency number list changed. Can be derived from subId except
+     * when subId is invalid.
+     */
+    public void notifyAllowedNetworkTypesChanged(int subId, int slotIndex,
+            Map<Integer, Long> allowedNetworkTypeList) {
+        try {
+            sRegistry.notifyAllowedNetworkTypesChanged(slotIndex, subId, allowedNetworkTypeList);
+        } catch (RemoteException ex) {
+            // system process is dead
+        }
+    }
+
     public @NonNull Set<Integer> getEventsFromListener(@NonNull PhoneStateListener listener) {
 
         Set<Integer> eventList = new ArraySet<>();
@@ -928,6 +941,10 @@ public class TelephonyRegistryManager {
 
         if (listener instanceof PhoneStateListener.DataEnabledChangedListener) {
             eventList.add(PhoneStateListener.EVENT_DATA_ENABLED_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.AllowedNetworkTypesChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED);
         }
 
         return eventList;
