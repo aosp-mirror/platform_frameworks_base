@@ -3850,7 +3850,7 @@ package android.app {
     method @Deprecated public void onTabUnselected(android.app.ActionBar.Tab, android.app.FragmentTransaction);
   }
 
-  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     ctor public Activity();
     method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void closeContextMenu();
@@ -4766,9 +4766,9 @@ package android.app {
   }
 
   public class Dialog implements android.content.DialogInterface android.view.KeyEvent.Callback android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
-    ctor public Dialog(@NonNull android.content.Context);
-    ctor public Dialog(@NonNull android.content.Context, @StyleRes int);
-    ctor protected Dialog(@NonNull android.content.Context, boolean, @Nullable android.content.DialogInterface.OnCancelListener);
+    ctor public Dialog(@NonNull @UiContext android.content.Context);
+    ctor public Dialog(@NonNull @UiContext android.content.Context, @StyleRes int);
+    ctor protected Dialog(@NonNull @UiContext android.content.Context, boolean, @Nullable android.content.DialogInterface.OnCancelListener);
     method public void addContentView(@NonNull android.view.View, @Nullable android.view.ViewGroup.LayoutParams);
     method public void cancel();
     method public void closeOptionsMenu();
@@ -4782,7 +4782,7 @@ package android.app {
     method public boolean dispatchTrackballEvent(@NonNull android.view.MotionEvent);
     method public <T extends android.view.View> T findViewById(@IdRes int);
     method @Nullable public android.app.ActionBar getActionBar();
-    method @NonNull public final android.content.Context getContext();
+    method @NonNull @UiContext public final android.content.Context getContext();
     method @Nullable public android.view.View getCurrentFocus();
     method @NonNull public android.view.LayoutInflater getLayoutInflater();
     method @Nullable public final android.app.Activity getOwnerActivity();
@@ -10328,10 +10328,10 @@ package android.content {
     method public abstract android.content.Context createConfigurationContext(@NonNull android.content.res.Configuration);
     method public abstract android.content.Context createContextForSplit(String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.Context createDeviceProtectedStorageContext();
-    method public abstract android.content.Context createDisplayContext(@NonNull android.view.Display);
+    method @DisplayContext public abstract android.content.Context createDisplayContext(@NonNull android.view.Display);
     method public abstract android.content.Context createPackageContext(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @NonNull public android.content.Context createWindowContext(int, @Nullable android.os.Bundle);
-    method @NonNull public android.content.Context createWindowContext(@NonNull android.view.Display, int, @Nullable android.os.Bundle);
+    method @NonNull @UiContext public android.content.Context createWindowContext(int, @Nullable android.os.Bundle);
+    method @NonNull @UiContext public android.content.Context createWindowContext(@NonNull android.view.Display, int, @Nullable android.os.Bundle);
     method public abstract String[] databaseList();
     method public abstract boolean deleteDatabase(String);
     method public abstract boolean deleteFile(String);
@@ -10494,7 +10494,7 @@ package android.content {
     field public static final String JOB_SCHEDULER_SERVICE = "jobscheduler";
     field public static final String KEYGUARD_SERVICE = "keyguard";
     field public static final String LAUNCHER_APPS_SERVICE = "launcherapps";
-    field public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
+    field @UiContext public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     field public static final String LOCATION_SERVICE = "location";
     field public static final String MEDIA_COMMUNICATION_SERVICE = "media_communication";
     field public static final String MEDIA_METRICS_SERVICE = "media_metrics";
@@ -10539,12 +10539,12 @@ package android.content {
     field public static final String VIBRATOR_MANAGER_SERVICE = "vibrator_manager";
     field public static final String VIBRATOR_SERVICE = "vibrator";
     field public static final String VPN_MANAGEMENT_SERVICE = "vpn_management";
-    field public static final String WALLPAPER_SERVICE = "wallpaper";
+    field @UiContext public static final String WALLPAPER_SERVICE = "wallpaper";
     field public static final String WIFI_AWARE_SERVICE = "wifiaware";
     field public static final String WIFI_P2P_SERVICE = "wifip2p";
     field public static final String WIFI_RTT_RANGING_SERVICE = "wifirtt";
     field public static final String WIFI_SERVICE = "wifi";
-    field public static final String WINDOW_SERVICE = "window";
+    field @UiContext public static final String WINDOW_SERVICE = "window";
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -18975,7 +18975,7 @@ package android.inputmethodservice {
     method public void startInternalChanges();
   }
 
-  public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
+  @UiContext public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
     ctor public InputMethodService();
     method @Deprecated public boolean enableHardwareAcceleration();
     method public int getBackDisposition();
@@ -46461,9 +46461,9 @@ package android.view {
   public class GestureDetector {
     ctor @Deprecated public GestureDetector(android.view.GestureDetector.OnGestureListener, android.os.Handler);
     ctor @Deprecated public GestureDetector(android.view.GestureDetector.OnGestureListener);
-    ctor public GestureDetector(android.content.Context, android.view.GestureDetector.OnGestureListener);
-    ctor public GestureDetector(android.content.Context, android.view.GestureDetector.OnGestureListener, android.os.Handler);
-    ctor public GestureDetector(android.content.Context, android.view.GestureDetector.OnGestureListener, android.os.Handler, boolean);
+    ctor public GestureDetector(@UiContext android.content.Context, android.view.GestureDetector.OnGestureListener);
+    ctor public GestureDetector(@UiContext android.content.Context, android.view.GestureDetector.OnGestureListener, android.os.Handler);
+    ctor public GestureDetector(@UiContext android.content.Context, android.view.GestureDetector.OnGestureListener, android.os.Handler, boolean);
     method public boolean isLongpressEnabled();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onTouchEvent(android.view.MotionEvent);
@@ -47152,7 +47152,7 @@ package android.view {
     method public abstract android.view.LayoutInflater cloneInContext(android.content.Context);
     method public final android.view.View createView(String, String, android.util.AttributeSet) throws java.lang.ClassNotFoundException, android.view.InflateException;
     method @Nullable public final android.view.View createView(@NonNull android.content.Context, @NonNull String, @Nullable String, @Nullable android.util.AttributeSet) throws java.lang.ClassNotFoundException, android.view.InflateException;
-    method public static android.view.LayoutInflater from(android.content.Context);
+    method public static android.view.LayoutInflater from(@UiContext android.content.Context);
     method public android.content.Context getContext();
     method public final android.view.LayoutInflater.Factory getFactory();
     method public final android.view.LayoutInflater.Factory2 getFactory2();
@@ -48046,7 +48046,7 @@ package android.view {
     method public final boolean getClipToOutline();
     method @Nullable public final android.view.contentcapture.ContentCaptureSession getContentCaptureSession();
     method public CharSequence getContentDescription();
-    method public final android.content.Context getContext();
+    method @UiContext public final android.content.Context getContext();
     method protected android.view.ContextMenu.ContextMenuInfo getContextMenuInfo();
     method public final boolean getDefaultFocusHighlightEnabled();
     method public static int getDefaultSize(int, int);
@@ -48845,7 +48845,7 @@ package android.view {
 
   public class ViewConfiguration {
     ctor @Deprecated public ViewConfiguration();
-    method public static android.view.ViewConfiguration get(android.content.Context);
+    method public static android.view.ViewConfiguration get(@UiContext android.content.Context);
     method @Deprecated @FloatRange(from=1.0) public static float getAmbiguousGestureMultiplier();
     method public static long getDefaultActionModeHideDuration();
     method public static int getDoubleTapTimeout();
@@ -49403,7 +49403,7 @@ package android.view {
   }
 
   public abstract class Window {
-    ctor public Window(android.content.Context);
+    ctor public Window(@UiContext android.content.Context);
     method public abstract void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void addFlags(int);
     method public final void addOnFrameMetricsAvailableListener(@NonNull android.view.Window.OnFrameMetricsAvailableListener, android.os.Handler);
@@ -49418,7 +49418,7 @@ package android.view {
     method public int getColorMode();
     method public final android.view.Window getContainer();
     method public android.transition.Scene getContentScene();
-    method public final android.content.Context getContext();
+    method @UiContext public final android.content.Context getContext();
     method @Nullable public abstract android.view.View getCurrentFocus();
     method @NonNull public abstract android.view.View getDecorView();
     method public static int getDefaultFeatures(android.content.Context);

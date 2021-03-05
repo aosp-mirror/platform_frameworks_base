@@ -87,7 +87,7 @@ package android.animation {
 
 package android.app {
 
-  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public void onMovedToDisplay(int, android.content.res.Configuration);
   }
 
@@ -1169,7 +1169,7 @@ package android.hardware.soundtrigger {
 
 package android.inputmethodservice {
 
-  public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
+  @UiContext public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
     field public static final long FINISH_INPUT_NO_FALLBACK_CONNECTION = 156215187L; // 0x94fa793L
   }
 
