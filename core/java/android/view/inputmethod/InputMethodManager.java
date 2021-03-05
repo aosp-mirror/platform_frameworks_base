@@ -1373,7 +1373,9 @@ public final class InputMethodManager {
      * @return {@link List} of {@link InputMethodInfo}.
      * @hide
      */
+    @TestApi
     @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
+    @NonNull
     public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
         try {
             final Completable.InputMethodInfoList value = Completable.createInputMethodInfoList();

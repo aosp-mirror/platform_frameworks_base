@@ -2695,6 +2695,7 @@ package android.view.inputmethod {
 
   public final class InputMethodManager {
     method public int getDisplayId();
+    method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodListAsUser(int);
     method public boolean hasActiveInputConnection(@Nullable android.view.View);
     method public boolean isInputMethodPickerShown();
   }
