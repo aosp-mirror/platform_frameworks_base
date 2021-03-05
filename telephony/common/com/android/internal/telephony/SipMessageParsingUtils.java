@@ -65,6 +65,11 @@ public class SipMessageParsingUtils {
     // compact form of the via header key
     private static final String VIA_SIP_HEADER_KEY_COMPACT = "v";
 
+    // call-id header key
+    private static final String CALL_ID_SIP_HEADER_KEY = "call-id";
+    // compact form of the call-id header key
+    private static final String CALL_ID_SIP_HEADER_KEY_COMPACT = "i";
+
     /**
      * @return true if the SIP message start line is considered a request (based on known request
      * methods).
@@ -122,6 +127,17 @@ public class SipMessageParsingUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Return the call-id header key's associated value.
+     * @param headerString The string containing the headers of the SIP message.
+     */
+    public static String getCallId(String headerString) {
+        // search for the call-Id header, there should only be one in the header.
+        List<Pair<String, String>> headers = parseHeaders(headerString, true,
+                CALL_ID_SIP_HEADER_KEY, CALL_ID_SIP_HEADER_KEY_COMPACT);
+        return !headers.isEmpty() ? headers.get(0).second : null;
     }
 
     private static String[] splitStartLineAndVerify(String startLine) {
