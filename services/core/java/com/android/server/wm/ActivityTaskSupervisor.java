@@ -1504,7 +1504,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Prevent recursion.
             return;
         }
-        mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, task);
+        if (task.isVisible()) {
+            mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, task);
+        } else {
+            // Removing a non-visible task doesn't require a transition, but if there is one
+            // collecting, this should be a member just in case.
+            mService.getTransitionController().collect(task);
+        }
         task.mInRemoveTask = true;
         try {
             task.performClearTask(reason);
