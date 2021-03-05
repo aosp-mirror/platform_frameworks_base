@@ -1277,7 +1277,7 @@ public final class PowerManager {
     })
     public void userActivity(long when, int event, int flags) {
         try {
-            mService.userActivity(when, event, flags);
+            mService.userActivity(mContext.getDisplayId(), when, event, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
