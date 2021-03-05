@@ -41511,29 +41511,29 @@ package android.telephony {
     field public static final char WILD = 78; // 0x004e 'N'
   }
 
-  public class PhoneStateListener {
-    ctor public PhoneStateListener();
+  @Deprecated public class PhoneStateListener {
+    ctor @Deprecated public PhoneStateListener();
     ctor @Deprecated public PhoneStateListener(@NonNull java.util.concurrent.Executor);
-    method public void onActiveDataSubscriptionIdChanged(int);
-    method public void onBarringInfoChanged(@NonNull android.telephony.BarringInfo);
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallDisconnectCauseChanged(int, int);
-    method public void onCallForwardingIndicatorChanged(boolean);
-    method public void onCallStateChanged(int, String);
-    method public void onCellInfoChanged(java.util.List<android.telephony.CellInfo>);
-    method public void onCellLocationChanged(android.telephony.CellLocation);
-    method public void onDataActivity(int);
-    method public void onDataConnectionStateChanged(int);
-    method public void onDataConnectionStateChanged(int, int);
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onDisplayInfoChanged(@NonNull android.telephony.TelephonyDisplayInfo);
-    method public void onEmergencyNumberListChanged(@NonNull java.util.Map<java.lang.Integer,java.util.List<android.telephony.emergency.EmergencyNumber>>);
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onImsCallDisconnectCauseChanged(@NonNull android.telephony.ims.ImsReasonInfo);
-    method public void onMessageWaitingIndicatorChanged(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPreciseDataConnectionStateChanged(@NonNull android.telephony.PreciseDataConnectionState);
-    method public void onRegistrationFailed(@NonNull android.telephony.CellIdentity, @NonNull String, int, int, int);
-    method public void onServiceStateChanged(android.telephony.ServiceState);
+    method @Deprecated public void onActiveDataSubscriptionIdChanged(int);
+    method @Deprecated public void onBarringInfoChanged(@NonNull android.telephony.BarringInfo);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallDisconnectCauseChanged(int, int);
+    method @Deprecated public void onCallForwardingIndicatorChanged(boolean);
+    method @Deprecated public void onCallStateChanged(int, String);
+    method @Deprecated public void onCellInfoChanged(java.util.List<android.telephony.CellInfo>);
+    method @Deprecated public void onCellLocationChanged(android.telephony.CellLocation);
+    method @Deprecated public void onDataActivity(int);
+    method @Deprecated public void onDataConnectionStateChanged(int);
+    method @Deprecated public void onDataConnectionStateChanged(int, int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onDisplayInfoChanged(@NonNull android.telephony.TelephonyDisplayInfo);
+    method @Deprecated public void onEmergencyNumberListChanged(@NonNull java.util.Map<java.lang.Integer,java.util.List<android.telephony.emergency.EmergencyNumber>>);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onImsCallDisconnectCauseChanged(@NonNull android.telephony.ims.ImsReasonInfo);
+    method @Deprecated public void onMessageWaitingIndicatorChanged(boolean);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPreciseDataConnectionStateChanged(@NonNull android.telephony.PreciseDataConnectionState);
+    method @Deprecated public void onRegistrationFailed(@NonNull android.telephony.CellIdentity, @NonNull String, int, int, int);
+    method @Deprecated public void onServiceStateChanged(android.telephony.ServiceState);
     method @Deprecated public void onSignalStrengthChanged(int);
-    method public void onSignalStrengthsChanged(android.telephony.SignalStrength);
-    method public void onUserMobileDataStateChanged(boolean);
+    method @Deprecated public void onSignalStrengthsChanged(android.telephony.SignalStrength);
+    method @Deprecated public void onUserMobileDataStateChanged(boolean);
     field @Deprecated public static final int LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE = 4194304; // 0x400000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_BARRING_INFO = -2147483648; // 0x80000000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
@@ -41547,97 +41547,13 @@ package android.telephony {
     field @Deprecated public static final int LISTEN_EMERGENCY_NUMBER_LIST = 16777216; // 0x1000000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES = 134217728; // 0x8000000
     field @Deprecated public static final int LISTEN_MESSAGE_WAITING_INDICATOR = 4; // 0x4
-    field public static final int LISTEN_NONE = 0; // 0x0
+    field @Deprecated public static final int LISTEN_NONE = 0; // 0x0
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_REGISTRATION_FAILURE = 1073741824; // 0x40000000
     field @Deprecated public static final int LISTEN_SERVICE_STATE = 1; // 0x1
     field @Deprecated public static final int LISTEN_SIGNAL_STRENGTH = 2; // 0x2
     field @Deprecated public static final int LISTEN_SIGNAL_STRENGTHS = 256; // 0x100
     field @Deprecated public static final int LISTEN_USER_MOBILE_DATA_STATE = 524288; // 0x80000
-  }
-
-  public static interface PhoneStateListener.ActiveDataSubscriptionIdChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onActiveDataSubscriptionIdChanged(int);
-  }
-
-  public static interface PhoneStateListener.AlwaysReportedSignalStrengthChangedListener {
-    method @RequiresPermission("android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH") public void onSignalStrengthsChanged(@NonNull android.telephony.SignalStrength);
-  }
-
-  public static interface PhoneStateListener.BarringInfoChangedListener {
-    method @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void onBarringInfoChanged(@NonNull android.telephony.BarringInfo);
-  }
-
-  public static interface PhoneStateListener.CallDisconnectCauseChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallDisconnectCauseChanged(int, int);
-  }
-
-  public static interface PhoneStateListener.CallForwardingIndicatorChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onCallForwardingIndicatorChanged(boolean);
-  }
-
-  public static interface PhoneStateListener.CallStateChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_CALL_LOG) public void onCallStateChanged(int, @Nullable String);
-  }
-
-  public static interface PhoneStateListener.CarrierNetworkChangeListener {
-    method public void onCarrierNetworkChange(boolean);
-  }
-
-  public static interface PhoneStateListener.CellInfoChangedListener {
-    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void onCellInfoChanged(@NonNull java.util.List<android.telephony.CellInfo>);
-  }
-
-  public static interface PhoneStateListener.CellLocationChangedListener {
-    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void onCellLocationChanged(@NonNull android.telephony.CellLocation);
-  }
-
-  public static interface PhoneStateListener.DataActivationStateChangedListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onDataActivationStateChanged(int);
-  }
-
-  public static interface PhoneStateListener.DataActivityListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onDataActivity(int);
-  }
-
-  public static interface PhoneStateListener.DataConnectionStateChangedListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onDataConnectionStateChanged(int, int);
-  }
-
-  public static interface PhoneStateListener.DisplayInfoChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onDisplayInfoChanged(@NonNull android.telephony.TelephonyDisplayInfo);
-  }
-
-  public static interface PhoneStateListener.EmergencyNumberListChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onEmergencyNumberListChanged(@NonNull java.util.Map<java.lang.Integer,java.util.List<android.telephony.emergency.EmergencyNumber>>);
-  }
-
-  public static interface PhoneStateListener.ImsCallDisconnectCauseChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onImsCallDisconnectCauseChanged(@NonNull android.telephony.ims.ImsReasonInfo);
-  }
-
-  public static interface PhoneStateListener.MessageWaitingIndicatorChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onMessageWaitingIndicatorChanged(boolean);
-  }
-
-  public static interface PhoneStateListener.PreciseDataConnectionStateChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPreciseDataConnectionStateChanged(@NonNull android.telephony.PreciseDataConnectionState);
-  }
-
-  public static interface PhoneStateListener.RegistrationFailedListener {
-    method @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void onRegistrationFailed(@NonNull android.telephony.CellIdentity, @NonNull String, int, int, int);
-  }
-
-  public static interface PhoneStateListener.ServiceStateChangedListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onServiceStateChanged(@NonNull android.telephony.ServiceState);
-  }
-
-  public static interface PhoneStateListener.SignalStrengthsChangedListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onSignalStrengthsChanged(@NonNull android.telephony.SignalStrength);
-  }
-
-  public static interface PhoneStateListener.UserMobileDataStateChangedListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onUserMobileDataStateChanged(boolean);
   }
 
   public final class PhysicalChannelConfig implements android.os.Parcelable {
@@ -42121,6 +42037,94 @@ package android.telephony {
     method public android.telephony.SubscriptionPlan.Builder setTitle(@Nullable CharSequence);
   }
 
+  public class TelephonyCallback {
+    ctor public TelephonyCallback();
+  }
+
+  public static interface TelephonyCallback.ActiveDataSubscriptionIdListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onActiveDataSubscriptionIdChanged(int);
+  }
+
+  public static interface TelephonyCallback.AlwaysReportedSignalStrengthListener {
+    method @RequiresPermission("android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH") public void onSignalStrengthsChanged(@NonNull android.telephony.SignalStrength);
+  }
+
+  public static interface TelephonyCallback.BarringInfoListener {
+    method @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void onBarringInfoChanged(@NonNull android.telephony.BarringInfo);
+  }
+
+  public static interface TelephonyCallback.CallDisconnectCauseListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallDisconnectCauseChanged(int, int);
+  }
+
+  public static interface TelephonyCallback.CallForwardingIndicatorListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onCallForwardingIndicatorChanged(boolean);
+  }
+
+  public static interface TelephonyCallback.CallStateListener {
+    method @RequiresPermission(android.Manifest.permission.READ_CALL_LOG) public void onCallStateChanged(int, @Nullable String);
+  }
+
+  public static interface TelephonyCallback.CarrierNetworkListener {
+    method public void onCarrierNetworkChange(boolean);
+  }
+
+  public static interface TelephonyCallback.CellInfoListener {
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void onCellInfoChanged(@NonNull java.util.List<android.telephony.CellInfo>);
+  }
+
+  public static interface TelephonyCallback.CellLocationListener {
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void onCellLocationChanged(@NonNull android.telephony.CellLocation);
+  }
+
+  public static interface TelephonyCallback.DataActivationStateListener {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onDataActivationStateChanged(int);
+  }
+
+  public static interface TelephonyCallback.DataActivityListener {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onDataActivity(int);
+  }
+
+  public static interface TelephonyCallback.DataConnectionStateListener {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onDataConnectionStateChanged(int, int);
+  }
+
+  public static interface TelephonyCallback.DisplayInfoListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onDisplayInfoChanged(@NonNull android.telephony.TelephonyDisplayInfo);
+  }
+
+  public static interface TelephonyCallback.EmergencyNumberListListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onEmergencyNumberListChanged(@NonNull java.util.Map<java.lang.Integer,java.util.List<android.telephony.emergency.EmergencyNumber>>);
+  }
+
+  public static interface TelephonyCallback.ImsCallDisconnectCauseListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onImsCallDisconnectCauseChanged(@NonNull android.telephony.ims.ImsReasonInfo);
+  }
+
+  public static interface TelephonyCallback.MessageWaitingIndicatorListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onMessageWaitingIndicatorChanged(boolean);
+  }
+
+  public static interface TelephonyCallback.PreciseDataConnectionStateListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPreciseDataConnectionStateChanged(@NonNull android.telephony.PreciseDataConnectionState);
+  }
+
+  public static interface TelephonyCallback.RegistrationFailedListener {
+    method @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void onRegistrationFailed(@NonNull android.telephony.CellIdentity, @NonNull String, int, int, int);
+  }
+
+  public static interface TelephonyCallback.ServiceStateListener {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onServiceStateChanged(@NonNull android.telephony.ServiceState);
+  }
+
+  public static interface TelephonyCallback.SignalStrengthsListener {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onSignalStrengthsChanged(@NonNull android.telephony.SignalStrength);
+  }
+
+  public static interface TelephonyCallback.UserMobileDataStateListener {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onUserMobileDataStateChanged(boolean);
+  }
+
   public final class TelephonyDisplayInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getNetworkType();
@@ -42233,7 +42237,7 @@ package android.telephony {
     method public boolean isVoicemailVibrationEnabled(android.telecom.PhoneAccountHandle);
     method public boolean isWorldPhone();
     method @Deprecated public void listen(android.telephony.PhoneStateListener, int);
-    method public void registerPhoneStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.PhoneStateListener);
+    method public void registerTelephonyCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void requestCellInfoUpdate(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, java.util.concurrent.Executor, android.telephony.TelephonyScanManager.NetworkScanCallback);
     method public void sendDialerSpecialCode(String);
@@ -42257,7 +42261,7 @@ package android.telephony {
     method @Deprecated public void setVoicemailRingtoneUri(android.telecom.PhoneAccountHandle, android.net.Uri);
     method @Deprecated public void setVoicemailVibrationEnabled(android.telecom.PhoneAccountHandle, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void switchMultiSimConfig(int);
-    method public void unregisterPhoneStateListener(@NonNull android.telephony.PhoneStateListener);
+    method public void unregisterTelephonyCallback(@NonNull android.telephony.TelephonyCallback);
     method public void updateAvailableNetworks(@NonNull java.util.List<android.telephony.AvailableNetworkInfo>, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method public void uploadCallComposerPicture(@NonNull java.nio.file.Path, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.ParcelUuid,android.telephony.TelephonyManager.CallComposerException>);
     method public void uploadCallComposerPicture(@NonNull java.io.InputStream, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.ParcelUuid,android.telephony.TelephonyManager.CallComposerException>);

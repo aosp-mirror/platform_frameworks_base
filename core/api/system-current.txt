@@ -11074,51 +11074,16 @@ package android.telephony {
     method public static boolean isVoiceMailNumber(@NonNull android.content.Context, int, @Nullable String);
   }
 
-  public class PhoneStateListener {
-    method public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
+  @Deprecated public class PhoneStateListener {
+    method @Deprecated public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
     method @Deprecated public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber);
-    method public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
+    method @Deprecated public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
     method @Deprecated public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
-    method public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
-    method public void onRadioPowerStateChanged(int);
-    method public void onSrvccStateChanged(int);
-    method public void onVoiceActivationStateChanged(int);
-    field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED = 23; // 0x17
-    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED = 35; // 0x23
-    field @RequiresPermission("android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH") public static final int EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED = 10; // 0xa
-    field @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int EVENT_BARRING_INFO_CHANGED = 32; // 0x20
-    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_CALL_ATTRIBUTES_CHANGED = 27; // 0x1b
-    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_CALL_DISCONNECT_CAUSE_CHANGED = 26; // 0x1a
-    field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_CALL_FORWARDING_INDICATOR_CHANGED = 4; // 0x4
-    field @RequiresPermission(android.Manifest.permission.READ_CALL_LOG) public static final int EVENT_CALL_STATE_CHANGED = 6; // 0x6
-    field public static final int EVENT_CARRIER_NETWORK_CHANGED = 17; // 0x11
-    field @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public static final int EVENT_CELL_INFO_CHANGED = 11; // 0xb
-    field @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public static final int EVENT_CELL_LOCATION_CHANGED = 5; // 0x5
-    field public static final int EVENT_DATA_ACTIVATION_STATE_CHANGED = 19; // 0x13
-    field public static final int EVENT_DATA_ACTIVITY_CHANGED = 8; // 0x8
-    field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_DATA_CONNECTION_REAL_TIME_INFO_CHANGED = 14; // 0xe
-    field public static final int EVENT_DATA_CONNECTION_STATE_CHANGED = 7; // 0x7
-    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_DATA_ENABLED_CHANGED = 34; // 0x22
-    field public static final int EVENT_DISPLAY_INFO_CHANGED = 21; // 0x15
-    field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_EMERGENCY_NUMBER_LIST_CHANGED = 25; // 0x19
-    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_IMS_CALL_DISCONNECT_CAUSE_CHANGED = 28; // 0x1c
-    field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_MESSAGE_WAITING_INDICATOR_CHANGED = 3; // 0x3
-    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_OEM_HOOK_RAW = 15; // 0xf
-    field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int EVENT_OUTGOING_EMERGENCY_CALL = 29; // 0x1d
-    field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int EVENT_OUTGOING_EMERGENCY_SMS = 30; // 0x1e
-    field public static final int EVENT_PHONE_CAPABILITY_CHANGED = 22; // 0x16
-    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED = 33; // 0x21
-    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_PRECISE_CALL_STATE_CHANGED = 12; // 0xc
-    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED = 13; // 0xd
-    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_RADIO_POWER_STATE_CHANGED = 24; // 0x18
-    field @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int EVENT_REGISTRATION_FAILURE = 31; // 0x1f
-    field public static final int EVENT_SERVICE_STATE_CHANGED = 1; // 0x1
-    field public static final int EVENT_SIGNAL_STRENGTHS_CHANGED = 9; // 0x9
-    field public static final int EVENT_SIGNAL_STRENGTH_CHANGED = 2; // 0x2
-    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_SRVCC_STATE_CHANGED = 16; // 0x10
-    field public static final int EVENT_USER_MOBILE_DATA_STATE_CHANGED = 20; // 0x14
-    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_VOICE_ACTIVATION_STATE_CHANGED = 18; // 0x12
+    method @Deprecated public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
+    method @Deprecated public void onRadioPowerStateChanged(int);
+    method @Deprecated public void onSrvccStateChanged(int);
+    method @Deprecated public void onVoiceActivationStateChanged(int);
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_CALL = 268435456; // 0x10000000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_SMS = 536870912; // 0x20000000
@@ -11126,50 +11091,6 @@ package android.telephony {
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_SRVCC_STATE_CHANGED = 16384; // 0x4000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
-  }
-
-  public static interface PhoneStateListener.AllowedNetworkTypesChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onAllowedNetworkTypesChanged(@NonNull java.util.Map<java.lang.Integer,java.lang.Long>);
-  }
-
-  public static interface PhoneStateListener.CallAttributesChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
-  }
-
-  public static interface PhoneStateListener.DataEnabledChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onDataEnabledChanged(boolean, int);
-  }
-
-  public static interface PhoneStateListener.OutgoingEmergencyCallListener {
-    method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
-  }
-
-  public static interface PhoneStateListener.OutgoingEmergencySmsListener {
-    method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
-  }
-
-  public static interface PhoneStateListener.PhoneCapabilityChangedListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
-  }
-
-  public static interface PhoneStateListener.PhysicalChannelConfigChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPhysicalChannelConfigChanged(@NonNull java.util.List<android.telephony.PhysicalChannelConfig>);
-  }
-
-  public static interface PhoneStateListener.PreciseCallStateChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
-  }
-
-  public static interface PhoneStateListener.RadioPowerStateChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onRadioPowerStateChanged(int);
-  }
-
-  public static interface PhoneStateListener.SrvccStateChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onSrvccStateChanged(int);
-  }
-
-  public static interface PhoneStateListener.VoiceActivationStateChangedListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onVoiceActivationStateChanged(int);
   }
 
   public final class PinResult implements android.os.Parcelable {
@@ -11507,6 +11428,88 @@ package android.telephony {
     method @Deprecated public static android.telephony.SubscriptionPlan.Builder createRecurringDaily(java.time.ZonedDateTime);
     method @Deprecated public static android.telephony.SubscriptionPlan.Builder createRecurringMonthly(java.time.ZonedDateTime);
     method @Deprecated public static android.telephony.SubscriptionPlan.Builder createRecurringWeekly(java.time.ZonedDateTime);
+  }
+
+  public class TelephonyCallback {
+    field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED = 23; // 0x17
+    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED = 35; // 0x23
+    field @RequiresPermission("android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH") public static final int EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED = 10; // 0xa
+    field @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int EVENT_BARRING_INFO_CHANGED = 32; // 0x20
+    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_CALL_ATTRIBUTES_CHANGED = 27; // 0x1b
+    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_CALL_DISCONNECT_CAUSE_CHANGED = 26; // 0x1a
+    field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_CALL_FORWARDING_INDICATOR_CHANGED = 4; // 0x4
+    field @RequiresPermission(android.Manifest.permission.READ_CALL_LOG) public static final int EVENT_CALL_STATE_CHANGED = 6; // 0x6
+    field public static final int EVENT_CARRIER_NETWORK_CHANGED = 17; // 0x11
+    field @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public static final int EVENT_CELL_INFO_CHANGED = 11; // 0xb
+    field @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public static final int EVENT_CELL_LOCATION_CHANGED = 5; // 0x5
+    field public static final int EVENT_DATA_ACTIVATION_STATE_CHANGED = 19; // 0x13
+    field public static final int EVENT_DATA_ACTIVITY_CHANGED = 8; // 0x8
+    field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_DATA_CONNECTION_REAL_TIME_INFO_CHANGED = 14; // 0xe
+    field public static final int EVENT_DATA_CONNECTION_STATE_CHANGED = 7; // 0x7
+    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_DATA_ENABLED_CHANGED = 34; // 0x22
+    field public static final int EVENT_DISPLAY_INFO_CHANGED = 21; // 0x15
+    field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_EMERGENCY_NUMBER_LIST_CHANGED = 25; // 0x19
+    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_IMS_CALL_DISCONNECT_CAUSE_CHANGED = 28; // 0x1c
+    field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_MESSAGE_WAITING_INDICATOR_CHANGED = 3; // 0x3
+    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_OEM_HOOK_RAW = 15; // 0xf
+    field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int EVENT_OUTGOING_EMERGENCY_CALL = 29; // 0x1d
+    field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int EVENT_OUTGOING_EMERGENCY_SMS = 30; // 0x1e
+    field public static final int EVENT_PHONE_CAPABILITY_CHANGED = 22; // 0x16
+    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED = 33; // 0x21
+    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_PRECISE_CALL_STATE_CHANGED = 12; // 0xc
+    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED = 13; // 0xd
+    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_RADIO_POWER_STATE_CHANGED = 24; // 0x18
+    field @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int EVENT_REGISTRATION_FAILURE = 31; // 0x1f
+    field public static final int EVENT_SERVICE_STATE_CHANGED = 1; // 0x1
+    field public static final int EVENT_SIGNAL_STRENGTHS_CHANGED = 9; // 0x9
+    field public static final int EVENT_SIGNAL_STRENGTH_CHANGED = 2; // 0x2
+    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_SRVCC_STATE_CHANGED = 16; // 0x10
+    field public static final int EVENT_USER_MOBILE_DATA_STATE_CHANGED = 20; // 0x14
+    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_VOICE_ACTIVATION_STATE_CHANGED = 18; // 0x12
+  }
+
+  public static interface TelephonyCallback.AllowedNetworkTypesListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onAllowedNetworkTypesChanged(@NonNull java.util.Map<java.lang.Integer,java.lang.Long>);
+  }
+
+  public static interface TelephonyCallback.CallAttributesListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
+  }
+
+  public static interface TelephonyCallback.DataEnabledListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onDataEnabledChanged(boolean, int);
+  }
+
+  public static interface TelephonyCallback.OutgoingEmergencyCallListener {
+    method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
+  }
+
+  public static interface TelephonyCallback.OutgoingEmergencySmsListener {
+    method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
+  }
+
+  public static interface TelephonyCallback.PhoneCapabilityListener {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
+  }
+
+  public static interface TelephonyCallback.PhysicalChannelConfigListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPhysicalChannelConfigChanged(@NonNull java.util.List<android.telephony.PhysicalChannelConfig>);
+  }
+
+  public static interface TelephonyCallback.PreciseCallStateListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
+  }
+
+  public static interface TelephonyCallback.RadioPowerStateListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onRadioPowerStateChanged(int);
+  }
+
+  public static interface TelephonyCallback.SrvccStateListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onSrvccStateChanged(int);
+  }
+
+  public static interface TelephonyCallback.VoiceActivationStateListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onVoiceActivationStateChanged(int);
   }
 
   public final class TelephonyHistogram implements android.os.Parcelable {
