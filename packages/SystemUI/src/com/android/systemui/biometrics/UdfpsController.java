@@ -231,6 +231,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
     @Override
     public void dozeTimeTick() {
+        if (mView == null) {
+            return;
+        }
         mView.dozeTimeTick();
     }
 
