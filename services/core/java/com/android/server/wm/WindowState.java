@@ -5205,7 +5205,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mIsDimming = true;
             final float dimAmount = (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? mAttrs.dimAmount : 0;
             final int blurRadius = shouldDrawBlurBehind() ? mAttrs.getBlurBehindRadius() : 0;
-            getDimmer().dimBelow(getSyncTransaction(), this, mAttrs.dimAmount, blurRadius);
+            getDimmer().dimBelow(getSyncTransaction(), this, dimAmount, blurRadius);
         }
     }
 
