@@ -18,9 +18,11 @@
 
 #include "utils/MathUtils.h"
 
+#include <SkImage.h>
+#include <SkImageFilter.h>
 #include <SkPoint.h>
 #include <SkRect.h>
-#include <SkImageFilter.h>
+#include <SkRuntimeEffect.h>
 
 namespace android::uirenderer {
 
@@ -31,13 +33,25 @@ public:
         SmoothStep,
     };
 
+    StretchEffect(const SkRect& area, const SkVector& direction, float maxStretchAmount)
+            : stretchArea(area), maxStretchAmount(maxStretchAmount), mStretchDirection(direction) {}
+
+    StretchEffect() {}
+
     bool isEmpty() const {
-        return MathUtils::isZero(stretchDirection.x())
-                && MathUtils::isZero(stretchDirection.y());
+        return MathUtils::isZero(mStretchDirection.x()) && MathUtils::isZero(mStretchDirection.y());
     }
 
     void setEmpty() {
         *this = StretchEffect{};
+    }
+
+    StretchEffect& operator=(const StretchEffect& other) {
+        this->stretchArea = other.stretchArea;
+        this->mStretchDirection = other.mStretchDirection;
+        this->mStretchFilter = nullptr;
+        this->maxStretchAmount = other.maxStretchAmount;
+        return *this;
     }
 
     void mergeWith(const StretchEffect& other) {
@@ -48,7 +62,7 @@ public:
             *this = other;
             return;
         }
-        stretchDirection += other.stretchDirection;
+        setStretchDirection(mStretchDirection + other.mStretchDirection);
         if (isEmpty()) {
             return setEmpty();
         }
@@ -56,11 +70,23 @@ public:
         maxStretchAmount = std::max(maxStretchAmount, other.maxStretchAmount);
     }
 
-    sk_sp<SkImageFilter> getImageFilter() const;
+    sk_sp<SkImageFilter> getImageFilter(const sk_sp<SkImage>& snapshotImage) const;
 
     SkRect stretchArea {0, 0, 0, 0};
-    SkVector stretchDirection {0, 0};
     float maxStretchAmount = 0;
+
+    void setStretchDirection(const SkVector& direction) {
+        mStretchFilter = nullptr;
+        mStretchDirection = direction;
+    }
+
+    const SkVector getStretchDirection() const { return mStretchDirection; }
+
+private:
+    static sk_sp<SkRuntimeEffect> getStretchEffect();
+    mutable SkVector mStretchDirection{0, 0};
+    mutable std::unique_ptr<SkRuntimeShaderBuilder> mBuilder;
+    mutable sk_sp<SkImageFilter> mStretchFilter;
 };
 
 } // namespace android::uirenderer

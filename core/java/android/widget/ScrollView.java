@@ -281,6 +281,26 @@ public class ScrollView extends FrameLayout {
     }
 
     /**
+     * API used for prototyping stretch effect parameters in framework sample apps
+     * @hide
+     */
+    public void setEdgeEffectIntensity(float intensity) {
+        mEdgeGlowTop.setMaxStretchIntensity(intensity);
+        mEdgeGlowBottom.setMaxStretchIntensity(intensity);
+        invalidate();
+    }
+
+    /**
+     * API used for prototyping stretch effect parameters in the framework sample apps
+     * @hide
+     */
+    public void setStretchDistance(float distance) {
+        mEdgeGlowTop.setStretchDistance(distance);
+        mEdgeGlowBottom.setStretchDistance(distance);
+        invalidate();
+    }
+
+    /**
      * Sets the bottom edge effect color.
      *
      * @param color The color for the bottom edge effect.

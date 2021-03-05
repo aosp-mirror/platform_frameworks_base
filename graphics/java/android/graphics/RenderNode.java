@@ -719,11 +719,11 @@ public final class RenderNode {
     /** @hide */
     public boolean stretch(float left, float top, float right, float bottom,
             float vecX, float vecY, float maxStretchAmount) {
-        if (1.0 < vecX || vecX < -1.0) {
-            throw new IllegalArgumentException("vecX must be in the range [-1, 1], was " + vecX);
+        if (Float.isInfinite(vecX) || Float.isNaN(vecX)) {
+            throw new IllegalArgumentException("vecX must be a finite, non-NaN value " + vecX);
         }
-        if (1.0 < vecY || vecY < -1.0) {
-            throw new IllegalArgumentException("vecY must be in the range [-1, 1], was " + vecY);
+        if (Float.isInfinite(vecY) || Float.isNaN(vecY)) {
+            throw new IllegalArgumentException("vecY must be a finite, non-NaN value " + vecY);
         }
         if (top >= bottom || left >= right) {
             throw new IllegalArgumentException(
@@ -734,7 +734,16 @@ public final class RenderNode {
             throw new IllegalArgumentException(
                     "The max stretch amount must be >0, got " + maxStretchAmount);
         }
-        return nStretch(mNativeRenderNode, left, top, right, bottom, vecX, vecY, maxStretchAmount);
+        return nStretch(
+                mNativeRenderNode,
+                left,
+                top,
+                right,
+                bottom,
+                vecX,
+                vecY,
+                maxStretchAmount
+        );
     }
 
     /**
