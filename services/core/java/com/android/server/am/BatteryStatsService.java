@@ -16,12 +16,17 @@
 
 package com.android.server.am;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
+
+import android.annotation.NonNull;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.INetworkManagementEventObserver;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
@@ -67,6 +72,7 @@ import com.android.internal.os.RpmStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
+import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.server.LocalServices;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.net.BaseNetworkObserver;
@@ -218,6 +224,23 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    private ConnectivityManager.NetworkCallback mNetworkCallback =
+            new ConnectivityManager.NetworkCallback() {
+        @Override
+        public void onCapabilitiesChanged(@NonNull Network network,
+                @NonNull NetworkCapabilities networkCapabilities) {
+            final String state = networkCapabilities.hasCapability(NET_CAPABILITY_NOT_SUSPENDED)
+                    ? "CONNECTED" : "SUSPENDED";
+            noteConnectivityChanged(NetworkCapabilitiesUtils.getDisplayTransport(
+                    networkCapabilities.getTransportTypes()), state);
+        }
+
+        @Override
+        public void onLost(Network network) {
+            noteConnectivityChanged(-1, "DISCONNECTED");
+        }
+    };
+
     BatteryStatsService(Context context, File systemDir, Handler handler) {
         // BatteryStatsImpl expects the ActivityManagerService handler, so pass that one through.
         mContext = context;
@@ -252,8 +275,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void systemServicesReady() {
         final INetworkManagementService nms = INetworkManagementService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
+        final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
         try {
             nms.registerObserver(mActivityChangeObserver);
+            cm.registerDefaultNetworkCallback(mNetworkCallback);
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not register INetworkManagement event observer " + e);
         }
