@@ -310,6 +310,18 @@ public class ViewConfiguration {
      */
     private static final float AMBIGUOUS_GESTURE_MULTIPLIER = 2f;
 
+    /**
+     * The timeout value in milliseconds to adjust the selection span and actions for the selected
+     * text when TextClassifier has been initialized.
+     */
+    private static final int SMART_SELECTION_INITIALIZED_TIMEOUT_IN_MILLISECOND = 200;
+
+    /**
+     * The timeout value in milliseconds to adjust the selection span and actions for the selected
+     * text when TextClassifier has not been initialized.
+     */
+    private static final int SMART_SELECTION_INITIALIZING_TIMEOUT_IN_MILLISECOND = 500;
+
     private final boolean mConstructedWithContext;
     private final int mEdgeSlop;
     private final int mFadingEdgeLength;
@@ -335,6 +347,8 @@ public class ViewConfiguration {
     private final float mHorizontalScrollFactor;
     private final boolean mShowMenuShortcutsWhenKeyboardPresent;
     private final long mScreenshotChordKeyTimeout;
+    private final int mSmartSelectionInitializedTimeout;
+    private final int mSmartSelectionInitializingTimeout;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768915)
     private boolean sHasPermanentMenuKey;
@@ -378,6 +392,8 @@ public class ViewConfiguration {
         // Getter throws if mConstructedWithContext is false so doesn't matter what
         // this value is.
         mMinScalingSpan = 0;
+        mSmartSelectionInitializedTimeout = SMART_SELECTION_INITIALIZED_TIMEOUT_IN_MILLISECOND;
+        mSmartSelectionInitializingTimeout = SMART_SELECTION_INITIALIZING_TIMEOUT_IN_MILLISECOND;
     }
 
     /**
@@ -488,6 +504,11 @@ public class ViewConfiguration {
 
         mScreenshotChordKeyTimeout = res.getInteger(
                 com.android.internal.R.integer.config_screenshotChordKeyTimeout);
+
+        mSmartSelectionInitializedTimeout = res.getInteger(
+                com.android.internal.R.integer.config_smartSelectionInitializedTimeoutMillis);
+        mSmartSelectionInitializingTimeout = res.getInteger(
+                com.android.internal.R.integer.config_smartSelectionInitializingTimeoutMillis);
     }
 
     /**
@@ -1066,6 +1087,24 @@ public class ViewConfiguration {
     @UnsupportedAppUsage
     public boolean isFadingMarqueeEnabled() {
         return mFadingMarqueeEnabled;
+    }
+
+    /**
+     * @return the timeout value in milliseconds to adjust the selection span and actions for the
+     *         selected text when TextClassifier has been initialized.
+     * @hide
+     */
+    public int getSmartSelectionInitializedTimeout() {
+        return mSmartSelectionInitializedTimeout;
+    }
+
+    /**
+     * @return the timeout value in milliseconds to adjust the selection span and actions for the
+     *         selected text when TextClassifier has not been initialized.
+     * @hide
+     */
+    public int getSmartSelectionInitializingTimeout() {
+        return mSmartSelectionInitializingTimeout;
     }
 
     /**

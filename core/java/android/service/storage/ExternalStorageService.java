@@ -239,14 +239,13 @@ public abstract class ExternalStorageService extends Service {
         }
 
         @Override
-        public void notifyAnrDelayStarted(String packageName, int uid, int tid, int reason,
-                RemoteCallback callback) throws RemoteException {
+        public void notifyAnrDelayStarted(String packageName, int uid, int tid, int reason)
+                throws RemoteException {
             mHandler.post(() -> {
                 try {
                     onAnrDelayStarted(packageName, uid, tid, reason);
-                    sendResult(packageName, null /* throwable */, callback);
                 } catch (Throwable t) {
-                    sendResult(packageName, t, callback);
+                    // Ignored
                 }
             });
         }

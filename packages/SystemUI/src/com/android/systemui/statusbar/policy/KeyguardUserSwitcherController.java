@@ -205,7 +205,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     protected void onViewAttached() {
         if (DEBUG) Log.d(TAG, "onViewAttached");
         mAdapter.registerDataSetObserver(mDataSetObserver);
-        mDataSetObserver.onChanged();
+        mAdapter.notifyDataSetChanged();
         mKeyguardUpdateMonitor.registerCallback(mInfoCallback);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mScreenLifecycle.addObserver(mScreenObserver);
@@ -373,14 +373,13 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
      * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
      */
     private void setDarkAmount(float darkAmount) {
-        boolean isAwake = darkAmount != 0;
+        boolean isFullyDozed = darkAmount == 1;
         if (darkAmount == mDarkAmount) {
             return;
         }
         mDarkAmount = darkAmount;
         mListView.setDarkAmount(darkAmount);
-        mView.setVisibility(isAwake ? View.VISIBLE : View.GONE);
-        if (!isAwake) {
+        if (isFullyDozed) {
             closeSwitcherIfOpenAndNotSimple(false);
         }
     }

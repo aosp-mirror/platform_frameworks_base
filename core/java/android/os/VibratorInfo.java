@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.vibrator.IVibrator;
 import android.util.SparseBooleanArray;
 
 import java.util.ArrayList;
@@ -33,20 +34,7 @@ import java.util.Objects;
  * @hide
  */
 public final class VibratorInfo implements Parcelable {
-
-    /**
-     * Capability to set amplitude values to vibrations.
-     * @hide
-     */
-    // Internally this maps to the HAL constant IVibrator::CAP_AMPLITUDE_CONTROL
-    public static final int CAPABILITY_AMPLITUDE_CONTROL = 4;
-
-    /**
-     * Capability to compose primitives into a single effect.
-     * @hide
-     */
-    // Internally this maps to the HAL constant IVibrator::CAP_COMPOSE_EFFECTS
-    public static final int CAPABILITY_COMPOSE_EFFECTS = 32;
+    private static final String TAG = "VibratorInfo";
 
     private final int mId;
     private final long mCapabilities;
@@ -108,7 +96,7 @@ public final class VibratorInfo implements Parcelable {
         return "VibratorInfo{"
                 + "mId=" + mId
                 + ", mCapabilities=" + Arrays.toString(getCapabilitiesNames())
-                + ", mCapabilities flags=" + mCapabilities
+                + ", mCapabilities flags=" + Long.toBinaryString(mCapabilities)
                 + ", mSupportedEffects=" + Arrays.toString(getSupportedEffectsNames())
                 + ", mSupportedPrimitives=" + Arrays.toString(getSupportedPrimitivesNames())
                 + '}';
@@ -125,7 +113,7 @@ public final class VibratorInfo implements Parcelable {
      * @return True if the hardware can control the amplitude of the vibrations, otherwise false.
      */
     public boolean hasAmplitudeControl() {
-        return hasCapability(CAPABILITY_AMPLITUDE_CONTROL);
+        return hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL);
     }
 
     /**
@@ -153,7 +141,7 @@ public final class VibratorInfo implements Parcelable {
      * @return Whether the primitive is supported.
      */
     public boolean isPrimitiveSupported(@VibrationEffect.Composition.Primitive int primitiveId) {
-        return hasCapability(CAPABILITY_COMPOSE_EFFECTS) && mSupportedPrimitives != null
+        return hasCapability(IVibrator.CAP_COMPOSE_EFFECTS) && mSupportedPrimitives != null
                 && mSupportedPrimitives.get(primitiveId, false);
     }
 
@@ -170,11 +158,26 @@ public final class VibratorInfo implements Parcelable {
 
     private String[] getCapabilitiesNames() {
         List<String> names = new ArrayList<>();
-        if (hasCapability(CAPABILITY_AMPLITUDE_CONTROL)) {
+        if (hasCapability(IVibrator.CAP_ON_CALLBACK)) {
+            names.add("ON_CALLBACK");
+        }
+        if (hasCapability(IVibrator.CAP_PERFORM_CALLBACK)) {
+            names.add("PERFORM_CALLBACK");
+        }
+        if (hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
+            names.add("COMPOSE_EFFECTS");
+        }
+        if (hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
+            names.add("ALWAYS_ON_CONTROL");
+        }
+        if (hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
             names.add("AMPLITUDE_CONTROL");
         }
-        if (hasCapability(CAPABILITY_COMPOSE_EFFECTS)) {
-            names.add("COMPOSE_EFFECTS");
+        if (hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
+            names.add("EXTERNAL_CONTROL");
+        }
+        if (hasCapability(IVibrator.CAP_EXTERNAL_AMPLITUDE_CONTROL)) {
+            names.add("EXTERNAL_AMPLITUDE_CONTROL");
         }
         return names.toArray(new String[names.size()]);
     }

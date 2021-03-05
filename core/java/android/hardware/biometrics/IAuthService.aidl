@@ -68,4 +68,16 @@ interface IAuthService {
     // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore
     // land as SIDs, and are used during key generation.
     long[] getAuthenticatorIds();
+
+    // Provides a localized string that may be used as the label for a button that invokes
+    // BiometricPrompt.
+    CharSequence getButtonLabel(int userId, String opPackageName, int authenticators);
+
+    // Provides a localized string that may be shown while the user is authenticating with
+    // BiometricPrompt.
+    CharSequence getPromptMessage(int userId, String opPackageName, int authenticators);
+
+    // Provides a localized string that may be shown as the title for an app setting that enables
+    // biometric authentication.
+    CharSequence getSettingName(int userId, String opPackageName, int authenticators);
 }

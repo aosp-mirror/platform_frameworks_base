@@ -23,6 +23,7 @@ import static android.Manifest.permission.WRITE_DEVICE_CONFIG;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -193,15 +194,15 @@ public class BiometricManager {
         int DEVICE_CREDENTIAL = 1 << 15;
     }
 
-    private final Context mContext;
-    private final IAuthService mService;
+    @NonNull private final Context mContext;
+    @NonNull private final IAuthService mService;
 
     /**
      * @hide
      * @param context
      * @param service
      */
-    public BiometricManager(Context context, IAuthService service) {
+    public BiometricManager(@NonNull Context context, @NonNull IAuthService service) {
         mContext = context;
         mService = service;
     }
@@ -274,7 +275,8 @@ public class BiometricManager {
      */
     @Deprecated
     @RequiresPermission(USE_BIOMETRIC)
-    public @BiometricError int canAuthenticate() {
+    @BiometricError
+    public int canAuthenticate() {
         return canAuthenticate(Authenticators.BIOMETRIC_WEAK);
     }
 
@@ -304,7 +306,8 @@ public class BiometricManager {
      *     authenticators can currently be used (enrolled and available).
      */
     @RequiresPermission(USE_BIOMETRIC)
-    public @BiometricError int canAuthenticate(@Authenticators.Types int authenticators) {
+    @BiometricError
+    public int canAuthenticate(@Authenticators.Types int authenticators) {
         return canAuthenticate(mContext.getUserId(), authenticators);
     }
 
@@ -312,8 +315,10 @@ public class BiometricManager {
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public @BiometricError int canAuthenticate(int userId,
-            @Authenticators.Types int authenticators) {
+    @BiometricError
+    public int canAuthenticate(
+            int userId, @Authenticators.Types int authenticators) {
+
         if (mService != null) {
             try {
                 final String opPackageName = mContext.getOpPackageName();
@@ -322,7 +327,7 @@ public class BiometricManager {
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Slog.w(TAG, "hasEnrolledBiometrics(): Service not connected");
+            Slog.w(TAG, "canAuthenticate(): Service not connected");
             return BIOMETRIC_ERROR_HW_UNAVAILABLE;
         }
     }
@@ -404,5 +409,115 @@ public class BiometricManager {
         }
     }
 
+    /**
+     * Provides a localized string that may be used as the label for a button that invokes
+     * {@link BiometricPrompt}.
+     *
+     * <p>When possible, this method should use the given authenticator requirements to more
+     * precisely specify the authentication type that will be used. For example, if
+     * <strong>Class 3</strong> biometric authentication is requested on a device with a
+     * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor, the
+     * returned string should indicate that fingerprint authentication will be used.
+     *
+     * <p>This method should also try to specify which authentication method(s) will be used in
+     * practice when multiple authenticators meet the given requirements. For example, if biometric
+     * authentication is requested on a device with both face and fingerprint sensors but the user
+     * has selected face as their preferred method, the returned string should indicate that face
+     * authentication will be used.
+     *
+     * @param authenticators A bit field representing the types of {@link Authenticators} that may
+     *                       be used for authentication.
+     * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
+     */
+    @RequiresPermission(USE_BIOMETRIC)
+    @Nullable
+    public CharSequence getButtonLabel(@Authenticators.Types int authenticators) {
+        if (mService != null) {
+            final int userId = mContext.getUserId();
+            final String opPackageName = mContext.getOpPackageName();
+            try {
+                return mService.getButtonLabel(userId, opPackageName, authenticators);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "getButtonLabel(): Service not connected");
+            return null;
+        }
+    }
+
+    /**
+     * Provides a localized string that may be shown while the user is authenticating with
+     * {@link BiometricPrompt}.
+     *
+     * <p>When possible, this method should use the given authenticator requirements to more
+     * precisely specify the authentication type that will be used. For example, if
+     * <strong>Class 3</strong> biometric authentication is requested on a device with a
+     * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor, the
+     * returned string should indicate that fingerprint authentication will be used.
+     *
+     * <p>This method should also try to specify which authentication method(s) will be used in
+     * practice when multiple authenticators meet the given requirements. For example, if biometric
+     * authentication is requested on a device with both face and fingerprint sensors but the user
+     * has selected face as their preferred method, the returned string should indicate that face
+     * authentication will be used.
+     *
+     * @param authenticators A bit field representing the types of {@link Authenticators} that may
+     *                       be used for authentication.
+     * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
+     */
+    @RequiresPermission(USE_BIOMETRIC)
+    @Nullable
+    public CharSequence getPromptMessage(@Authenticators.Types int authenticators) {
+        if (mService != null) {
+            final int userId = mContext.getUserId();
+            final String opPackageName = mContext.getOpPackageName();
+            try {
+                return mService.getPromptMessage(userId, opPackageName, authenticators);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "getPromptMessage(): Service not connected");
+            return null;
+        }
+    }
+
+    /**
+     * Provides a localized string that may be shown as the title for an app setting that enables
+     * biometric authentication.
+     *
+     * <p>When possible, this method should use the given authenticator requirements to more
+     * precisely specify the authentication type that will be used. For example, if
+     * <strong>Class 3</strong> biometric authentication is requested on a device with a
+     * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor, the
+     * returned string should indicate that fingerprint authentication will be used.
+     *
+     * <p>This method should <em>not</em> try to specify which authentication method(s) will be used
+     * in practice when multiple authenticators meet the given requirements. For example, if
+     * biometric authentication is requested on a device with both face and fingerprint sensors, the
+     * returned string should indicate that either face or fingerprint authentication may be used,
+     * regardless of whether the user has enrolled or selected either as their preferred method.
+     *
+     * @param authenticators A bit field representing the types of {@link Authenticators} that may
+     *                       be used for authentication.
+     * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
+     */
+    @RequiresPermission(USE_BIOMETRIC)
+    @Nullable
+    public CharSequence getSettingName(@Authenticators.Types int authenticators) {
+        if (mService != null) {
+            final int userId = mContext.getUserId();
+            final String opPackageName = mContext.getOpPackageName();
+            try {
+                return mService.getSettingName(userId, opPackageName, authenticators);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "getSettingName(): Service not connected");
+            return null;
+        }
+    }
 }
 

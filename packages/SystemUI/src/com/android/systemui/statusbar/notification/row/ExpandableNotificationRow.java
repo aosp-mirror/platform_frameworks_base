@@ -2052,8 +2052,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mNotificationLaunchHeight,
                 zProgress);
         setTranslationZ(translationZ);
-        float extraWidthForClipping = params.getWidth() - getWidth()
-                + MathUtils.lerp(0, mOutlineRadius * 2, params.getProgress());
+        float extraWidthForClipping = params.getWidth() - getWidth();
         setExtraWidthForClipping(extraWidthForClipping);
         int top = params.getTop();
         float interpolation = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(params.getProgress());

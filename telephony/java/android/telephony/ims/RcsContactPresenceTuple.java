@@ -24,9 +24,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +43,8 @@ import java.util.List;
  */
 @SystemApi
 public final class RcsContactPresenceTuple implements Parcelable {
+
+    private static final String LOG_TAG = "RcsContactPresenceTuple";
 
     /**
      * The service ID used to indicate that service discovery via presence is available.
@@ -370,7 +377,8 @@ public final class RcsContactPresenceTuple implements Parcelable {
         }
 
         /**
-         * The optional SIP Contact URI associated with the PIDF tuple element.
+         * The optional SIP Contact URI associated with the PIDF tuple element if the network
+         * expects the user to use the URI instead of the contact URI to contact it.
          */
         public @NonNull Builder setContactUri(@NonNull Uri contactUri) {
             mPresenceTuple.mContactUri = contactUri;
@@ -381,8 +389,24 @@ public final class RcsContactPresenceTuple implements Parcelable {
          * The optional timestamp indicating the data and time of the status change of this tuple.
          * Per RFC3863 section 4.1.7, the timestamp is formatted as an IMPP datetime format
          * string per RFC3339.
+         * @hide
          */
         public @NonNull Builder setTimestamp(@NonNull String timestamp) {
+            try {
+                mPresenceTuple.mTimestamp =
+                        DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from);
+            } catch (DateTimeParseException e) {
+                Log.d(LOG_TAG, "Parse timestamp failed " + e);
+            }
+            return this;
+        }
+
+        /**
+         * The optional timestamp indicating the data and time of the status change of this tuple.
+         * Per RFC3863 section 4.1.7, the timestamp is formatted as an IMPP datetime format
+         * string per RFC3339.
+         */
+        public @NonNull Builder setTime(@NonNull Instant timestamp) {
             mPresenceTuple.mTimestamp = timestamp;
             return this;
         }
@@ -414,7 +438,7 @@ public final class RcsContactPresenceTuple implements Parcelable {
     }
 
     private Uri mContactUri;
-    private String mTimestamp;
+    private Instant mTimestamp;
     private @BasicStatus String mStatus;
 
     // The service information in the service-description element.
@@ -433,7 +457,7 @@ public final class RcsContactPresenceTuple implements Parcelable {
 
     private RcsContactPresenceTuple(Parcel in) {
         mContactUri = in.readParcelable(Uri.class.getClassLoader());
-        mTimestamp = in.readString();
+        mTimestamp = convertStringFormatTimeToInstant(in.readString());
         mStatus = in.readString();
         mServiceId = in.readString();
         mServiceVersion = in.readString();
@@ -444,7 +468,7 @@ public final class RcsContactPresenceTuple implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeParcelable(mContactUri, flags);
-        out.writeString(mTimestamp);
+        out.writeString(convertInstantToStringFormat(mTimestamp));
         out.writeString(mStatus);
         out.writeString(mServiceId);
         out.writeString(mServiceVersion);
@@ -470,6 +494,26 @@ public final class RcsContactPresenceTuple implements Parcelable {
                 }
             };
 
+    // Convert the Instant to the string format
+    private String convertInstantToStringFormat(Instant instant) {
+        if (instant == null) {
+            return "";
+        }
+        return instant.toString();
+    }
+
+    // Convert the time string format to Instant
+    private @Nullable Instant convertStringFormatTimeToInstant(String timestamp) {
+        if (TextUtils.isEmpty(timestamp)) {
+            return null;
+        }
+        try {
+            return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
+
     /** @return the status of the tuple element. */
     public @NonNull @BasicStatus String getStatus() {
         return mStatus;
@@ -490,8 +534,16 @@ public final class RcsContactPresenceTuple implements Parcelable {
         return mContactUri;
     }
 
-    /** @return the timestamp element contained in the tuple if it exists */
+    /**
+     * @return the timestamp element contained in the tuple if it exists
+     * @hide
+     */
     public @Nullable String getTimestamp() {
+        return (mTimestamp == null) ? null : mTimestamp.toString();
+    }
+
+    /** @return the timestamp element contained in the tuple if it exists */
+    public @Nullable Instant getTime() {
         return mTimestamp;
     }
 

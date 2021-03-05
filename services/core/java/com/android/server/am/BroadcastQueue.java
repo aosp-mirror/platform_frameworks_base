@@ -29,6 +29,7 @@ import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
+import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.IIntentReceiver;
@@ -52,6 +53,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.permission.IPermissionManager;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -1632,6 +1634,13 @@ public final class BroadcastQueue {
                     brOptions.getTemporaryAppAllowlistType(),
                     brOptions.getTemporaryAppAllowlistReasonCode(),
                     brOptions.getTemporaryAppAllowlistReason());
+        }
+
+        // Report that a component is used for explicit broadcasts.
+        if (!r.intent.isExcludingStopped() && r.curComponent != null
+                && !TextUtils.equals(r.curComponent.getPackageName(), r.callerPackage)) {
+            mService.mUsageStatsService.reportEvent(
+                    r.curComponent.getPackageName(), r.userId, Event.APP_COMPONENT_USED);
         }
 
         // Broadcast is being executed, its package can't be stopped.

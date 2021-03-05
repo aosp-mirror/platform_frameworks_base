@@ -505,6 +505,22 @@ public final class DeviceConfig {
             "connectivity_thermal_power_manager";
 
     /**
+     * Namespace for all statsd java features that can be applied immediately.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STATSD_JAVA = "statsd_java";
+
+    /**
+     * Namespace for all statsd java features that are applied on boot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STATSD_JAVA_BOOT = "statsd_java_boot";
+
+    /**
      * Namespace for all statsd native features that can be applied immediately.
      *
      * @hide

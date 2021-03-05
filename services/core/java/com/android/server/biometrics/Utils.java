@@ -153,6 +153,16 @@ public class Utils {
     /**
      * Checks if any of the publicly defined strengths are set.
      *
+     * @param authenticators composed of one or more values from {@link Authenticators}
+     * @return true if biometric authentication is allowed.
+     */
+    static boolean isBiometricRequested(@Authenticators.Types int authenticators) {
+        return getPublicBiometricStrength(authenticators) != 0;
+    }
+
+    /**
+     * Checks if any of the publicly defined strengths are set.
+     *
      * @param promptInfo should be first processed by
      * {@link #combineAuthenticatorBundles(PromptInfo)}
      * @return true if biometric authentication is allowed.

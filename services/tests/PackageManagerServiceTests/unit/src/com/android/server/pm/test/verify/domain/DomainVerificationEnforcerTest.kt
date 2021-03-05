@@ -155,6 +155,15 @@ class DomainVerificationEnforcerTest {
                     assertApprovedVerifier(it.callingUid, it.proxy)
                 },
                 enforcer(
+                    Type.SELECTION_QUERENT,
+                    "approvedUserStateQuerent"
+                ) {
+                    assertApprovedUserStateQuerent(
+                        it.callingUid, it.callingUserId,
+                        it.targetPackageName, it.userId
+                    )
+                },
+                enforcer(
                     Type.SELECTOR,
                     "approvedUserSelector"
                 ) {
@@ -170,7 +179,7 @@ class DomainVerificationEnforcerTest {
                         ArraySet(setOf("example.com"))
                     )
                 },
-                service(Type.INTERNAL, "setUserSelectionInternal") {
+                service(Type.INTERNAL, "setUserStateInternal") {
                     setDomainVerificationUserSelectionInternal(
                         it.userId,
                         it.targetPackageName,
@@ -184,11 +193,11 @@ class DomainVerificationEnforcerTest {
                 service(Type.INTERNAL, "clearState") {
                     clearDomainVerificationState(listOf(it.targetPackageName))
                 },
-                service(Type.INTERNAL, "clearUserSelections") {
-                    clearUserSelections(listOf(it.targetPackageName), it.userId)
+                service(Type.INTERNAL, "clearUserStates") {
+                    clearUserStates(listOf(it.targetPackageName), it.userId)
                 },
-                service(Type.VERIFIER, "getPackageNames") {
-                    validVerificationPackageNames
+                service(Type.VERIFIER, "queryValidPackageNames") {
+                    queryValidVerificationPackageNames()
                 },
                 service(Type.QUERENT, "getInfo") {
                     getDomainVerificationInfo(it.targetPackageName)
@@ -208,26 +217,13 @@ class DomainVerificationEnforcerTest {
                         DomainVerificationManager.STATE_SUCCESS
                     )
                 },
-                service(Type.SELECTOR, "setLinkHandlingAllowed") {
-                    setDomainVerificationLinkHandlingAllowed(it.targetPackageName, true)
-                },
                 service(Type.SELECTOR_USER, "setLinkHandlingAllowedUserId") {
                     setDomainVerificationLinkHandlingAllowed(it.targetPackageName, true, it.userId)
                 },
-                service(Type.SELECTOR, "getUserSelection") {
-                    getDomainVerificationUserSelection(it.targetPackageName)
+                service(Type.SELECTION_QUERENT, "getUserStateUserId") {
+                    getDomainVerificationUserState(it.targetPackageName, it.userId)
                 },
-                service(Type.SELECTOR_USER, "getUserSelectionUserId") {
-                    getDomainVerificationUserSelection(it.targetPackageName, it.userId)
-                },
-                service(Type.SELECTOR, "setUserSelection") {
-                    setDomainVerificationUserSelection(
-                        it.targetDomainSetId,
-                        setOf("example.com"),
-                        true
-                    )
-                },
-                service(Type.SELECTOR_USER, "setUserSelectionUserId") {
+                service(Type.SELECTOR_USER, "setUserStateUserId") {
                     setDomainVerificationUserSelection(
                         it.targetDomainSetId,
                         setOf("example.com"),
@@ -243,10 +239,6 @@ class DomainVerificationEnforcerTest {
                 },
                 service(Type.LEGACY_QUERENT, "getLegacyUserState") {
                     getLegacyState(it.targetPackageName, it.userId)
-                },
-                service(Type.OWNER_QUERENT, "getOwnersForDomain") {
-                    // Re-use package name, since the result itself isn't relevant
-                    getOwnersForDomain(it.targetPackageName)
                 },
                 service(Type.OWNER_QUERENT_USER, "getOwnersForDomainUserId") {
                     // Re-use package name, since the result itself isn't relevant
@@ -362,6 +354,7 @@ class DomainVerificationEnforcerTest {
             Type.INTERNAL -> internal()
             Type.QUERENT -> approvedQuerent()
             Type.VERIFIER -> approvedVerifier()
+            Type.SELECTION_QUERENT -> approvedUserStateQuerent(verifyCrossUser = true)
             Type.SELECTOR -> approvedUserSelector(verifyCrossUser = false)
             Type.SELECTOR_USER -> approvedUserSelector(verifyCrossUser = true)
             Type.LEGACY_QUERENT -> legacyQuerent()
@@ -371,7 +364,7 @@ class DomainVerificationEnforcerTest {
         }.run { /*exhaust*/ }
     }
 
-    fun internal() {
+    private fun internal() {
         val context: Context = mockThrowOnUnmocked()
         val target = params.construct(context)
 
@@ -385,13 +378,13 @@ class DomainVerificationEnforcerTest {
         }
     }
 
-    fun approvedQuerent() {
-        val allowUserSelection = AtomicBoolean(false)
+    private fun approvedQuerent() {
+        val allowUserState = AtomicBoolean(false)
         val allowPreferredApps = AtomicBoolean(false)
         val allowQueryAll = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
             initPermission(
-                allowUserSelection,
+                allowUserState,
                 android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
             )
             initPermission(
@@ -418,7 +411,7 @@ class DomainVerificationEnforcerTest {
 
         assertFails { runMethod(target, NON_VERIFIER_UID) }
 
-        allowUserSelection.set(true)
+        allowUserState.set(true)
 
         assertFails { runMethod(target, NON_VERIFIER_UID) }
 
@@ -427,7 +420,7 @@ class DomainVerificationEnforcerTest {
         runMethod(target, NON_VERIFIER_UID)
     }
 
-    fun approvedVerifier() {
+    private fun approvedVerifier() {
         val allowDomainVerificationAgent = AtomicBoolean(false)
         val allowIntentVerificationAgent = AtomicBoolean(false)
         val allowQueryAll = AtomicBoolean(false)
@@ -469,12 +462,61 @@ class DomainVerificationEnforcerTest {
         assertFails { runMethod(target, NON_VERIFIER_UID) }
     }
 
-    fun approvedUserSelector(verifyCrossUser: Boolean) {
-        val allowUserSelection = AtomicBoolean(false)
+    private fun approvedUserStateQuerent(verifyCrossUser: Boolean) {
         val allowInteractAcrossUsers = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
             initPermission(
-                allowUserSelection,
+                allowInteractAcrossUsers,
+                android.Manifest.permission.INTERACT_ACROSS_USERS
+            )
+        }
+        val target = params.construct(context)
+
+        fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
+            // User selector makes no distinction by UID
+            val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
+            if (throws) {
+                allUids.forEach {
+                    assertFails {
+                        runMethod(target, it, visible = true, callingUserId, targetUserId)
+                    }
+                }
+            } else {
+                allUids.forEach {
+                    runMethod(target, it, visible = true, callingUserId, targetUserId)
+                }
+            }
+
+            // User selector doesn't use QUERY_ALL, so the invisible package should always fail
+            allUids.forEach {
+                assertFails {
+                    runMethod(target, it, visible = false, callingUserId, targetUserId)
+                }
+            }
+        }
+
+        val callingUserId = 0
+        val notCallingUserId = 1
+
+        runTestCases(callingUserId, callingUserId, throws = false)
+        if (verifyCrossUser) {
+            runTestCases(callingUserId, notCallingUserId, throws = true)
+        }
+
+        allowInteractAcrossUsers.set(true)
+
+        runTestCases(callingUserId, callingUserId, throws = false)
+        if (verifyCrossUser) {
+            runTestCases(callingUserId, notCallingUserId, throws = false)
+        }
+    }
+
+    private fun approvedUserSelector(verifyCrossUser: Boolean) {
+        val allowUserState = AtomicBoolean(false)
+        val allowInteractAcrossUsers = AtomicBoolean(false)
+        val context: Context = mockThrowOnUnmocked {
+            initPermission(
+                allowUserState,
                 android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
             )
             initPermission(
@@ -515,7 +557,7 @@ class DomainVerificationEnforcerTest {
             runTestCases(callingUserId, notCallingUserId, throws = true)
         }
 
-        allowUserSelection.set(true)
+        allowUserState.set(true)
 
         runTestCases(callingUserId, callingUserId, throws = false)
         if (verifyCrossUser) {
@@ -641,7 +683,7 @@ class DomainVerificationEnforcerTest {
 
     private fun ownerQuerent(verifyCrossUser: Boolean) {
         val allowQueryAll = AtomicBoolean(false)
-        val allowUserSelection = AtomicBoolean(false)
+        val allowUserState = AtomicBoolean(false)
         val allowInteractAcrossUsers = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
             initPermission(
@@ -649,7 +691,7 @@ class DomainVerificationEnforcerTest {
                 android.Manifest.permission.QUERY_ALL_PACKAGES
             )
             initPermission(
-                allowUserSelection,
+                allowUserState,
                 android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
             )
             initPermission(
@@ -690,7 +732,7 @@ class DomainVerificationEnforcerTest {
             runTestCases(callingUserId, notCallingUserId, throws = true)
         }
 
-        allowUserSelection.set(true)
+        allowUserState.set(true)
 
         runTestCases(callingUserId, callingUserId, throws = false)
         if (verifyCrossUser) {
@@ -768,6 +810,9 @@ class DomainVerificationEnforcerTest {
 
         // INTERNAL || domain verification agent
         VERIFIER,
+
+        // No permissions, allows all apps to view domain state for visible packages
+        SELECTION_QUERENT,
 
         // Holding the user setting permission
         SELECTOR,
