@@ -17,17 +17,30 @@
 package com.android.server.wm.flicker.rotation
 
 import android.app.Instrumentation
+import android.platform.test.annotations.Presubmit
+import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
+import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import org.junit.Test
 
 abstract class RotationTransition(protected val testSpec: FlickerTestParameter) {
     protected abstract val testApp: StandardAppHelper
@@ -61,6 +74,84 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             transition(testSpec.config)
+        }
+    }
+
+    @Presubmit
+    @Test
+    open fun navBarWindowIsAlwaysVisible() {
+        testSpec.navBarWindowIsAlwaysVisible()
+    }
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    open fun navBarLayerIsAlwaysVisible() {
+        testSpec.navBarLayerIsAlwaysVisible()
+    }
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    open fun navBarLayerRotatesAndScales() {
+        testSpec.navBarLayerRotatesAndScales(
+            testSpec.config.startRotation, testSpec.config.endRotation)
+    }
+
+    @Presubmit
+    @Test
+    open fun statusBarWindowIsAlwaysVisible() {
+        testSpec.statusBarWindowIsAlwaysVisible()
+    }
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    open fun statusBarLayerIsAlwaysVisible() {
+        testSpec.statusBarLayerIsAlwaysVisible()
+    }
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    open fun statusBarLayerRotatesScales() {
+        testSpec.statusBarLayerRotatesScales(
+            testSpec.config.startRotation, testSpec.config.endRotation)
+    }
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    open fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @Presubmit
+    @Test
+    open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
+
+    @Presubmit
+    @Test
+    open fun noUncoveredRegions() {
+        testSpec.noUncoveredRegions(testSpec.config.startRotation,
+            testSpec.config.endRotation, allStates = false)
+    }
+
+    @FlakyTest(bugId = 151179149)
+    @Test
+    open fun focusDoesNotChange() {
+        testSpec.focusDoesNotChange()
+    }
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    open fun appLayerRotates_StartingPos() {
+        testSpec.assertLayersStart {
+            this.coversExactly(startingPos, testApp.getPackage())
+        }
+    }
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    open fun appLayerRotates_EndingPos() {
+        testSpec.assertLayersEnd {
+            this.coversExactly(endingPos, testApp.getPackage())
         }
     }
 }
