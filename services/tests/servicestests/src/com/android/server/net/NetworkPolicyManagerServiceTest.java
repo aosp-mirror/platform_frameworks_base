@@ -115,7 +115,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicy;
-import android.net.NetworkPolicyManager;
 import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
@@ -386,8 +385,7 @@ public class NetworkPolicyManagerServiceTest {
                 Log.d(TAG, "set mUidObserver to " + mUidObserver);
                 return null;
             }
-        }).when(mActivityManager).registerUidObserver(any(), anyInt(),
-                eq(NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE), any(String.class));
+        }).when(mActivityManager).registerUidObserver(any(), anyInt(), anyInt(), any(String.class));
 
         mFutureIntent = newRestrictBackgroundChangedFuture();
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager,
