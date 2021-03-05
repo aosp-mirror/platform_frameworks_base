@@ -13298,10 +13298,12 @@ package android.telephony.ims {
   public final class SipMessage implements android.os.Parcelable {
     ctor public SipMessage(@NonNull String, @NonNull String, @NonNull byte[]);
     method public int describeContents();
+    method @Nullable public String getCallIdParameter();
     method @NonNull public byte[] getContent();
     method @NonNull public byte[] getEncodedMessage();
     method @NonNull public String getHeaderSection();
     method @NonNull public String getStartLine();
+    method @Nullable public String getViaBranchParameter();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipMessage> CREATOR;
   }
