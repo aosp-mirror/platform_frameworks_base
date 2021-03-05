@@ -9716,7 +9716,7 @@ package android.companion {
   }
 
   public final class CompanionDeviceManager {
-    method public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
+    method @RequiresPermission(value=android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
     method public void disassociate(@NonNull String);
     method @NonNull public java.util.List<java.lang.String> getAssociations();
     method public boolean hasNotificationAccess(android.content.ComponentName);
