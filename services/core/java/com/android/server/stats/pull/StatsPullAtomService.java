@@ -42,6 +42,9 @@ import static android.util.MathUtils.constrain;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__NOT_OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__OPPORTUNISTIC;
+import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__GEO;
+import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__MANUAL;
+import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__TELEPHONY;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
@@ -174,6 +177,8 @@ import com.android.server.stats.pull.netstats.NetworkStatsExt;
 import com.android.server.stats.pull.netstats.SubInfo;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
+import com.android.server.timezonedetector.MetricsTimeZoneDetectorState;
+import com.android.server.timezonedetector.TimeZoneDetectorInternal;
 
 import libcore.io.IoUtils;
 
@@ -398,6 +403,7 @@ public class StatsPullAtomService extends SystemService {
     private final Object mBuildInformationLock = new Object();
     private final Object mRoleHolderLock = new Object();
     private final Object mTimeZoneDataInfoLock = new Object();
+    private final Object mTimeZoneDetectionInfoLock = new Object();
     private final Object mExternalStorageInfoLock = new Object();
     private final Object mAppsOnExternalStorageInfoLock = new Object();
     private final Object mFaceSettingsLock = new Object();
@@ -629,6 +635,10 @@ public class StatsPullAtomService extends SystemService {
                         synchronized (mTimeZoneDataInfoLock) {
                             return pullTimeZoneDataInfoLocked(atomTag, data);
                         }
+                    case FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE:
+                        synchronized (mTimeZoneDetectionInfoLock) {
+                            return pullTimeZoneDetectorStateLocked(atomTag, data);
+                        }
                     case FrameworkStatsLog.EXTERNAL_STORAGE_INFO:
                         synchronized (mExternalStorageInfoLock) {
                             return pullExternalStorageInfoLocked(atomTag, data);
@@ -833,6 +843,7 @@ public class StatsPullAtomService extends SystemService {
         registerBuildInformation();
         registerRoleHolder();
         registerTimeZoneDataInfo();
+        registerTimeZoneDetectorState();
         registerExternalStorageInfo();
         registerAppsOnExternalStorageInfo();
         registerFaceSettings();
@@ -3132,6 +3143,57 @@ public class StatsPullAtomService extends SystemService {
 
         pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, tzDbVersion));
         return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerTimeZoneDetectorState() {
+        int tagId = FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullTimeZoneDetectorStateLocked(int atomTag, List<StatsEvent> pulledData) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            TimeZoneDetectorInternal timeZoneDetectorInternal =
+                    LocalServices.getService(TimeZoneDetectorInternal.class);
+            MetricsTimeZoneDetectorState metricsState =
+                    timeZoneDetectorInternal.generateMetricsState();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                    metricsState.isTelephonyDetectionSupported(),
+                    metricsState.isGeoDetectionSupported(),
+                    metricsState.isUserLocationEnabled(),
+                    metricsState.getAutoDetectionEnabledSetting(),
+                    metricsState.getGeoDetectionEnabledSetting(),
+                    convertToMetricsDetectionMode(metricsState.getDetectionMode()),
+                    metricsState.getDeviceTimeZoneIdOrdinal(),
+                    metricsState.getLatestManualSuggestionProtoBytes(),
+                    metricsState.getLatestTelephonySuggestionProtoBytes(),
+                    metricsState.getLatestGeolocationSuggestionProtoBytes()
+            ));
+        } catch (RuntimeException e) {
+            Slog.e(TAG, "Getting time zone detection state failed: ", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private int convertToMetricsDetectionMode(int detectionMode) {
+        switch (detectionMode) {
+            case MetricsTimeZoneDetectorState.DETECTION_MODE_MANUAL:
+                return TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__MANUAL;
+            case MetricsTimeZoneDetectorState.DETECTION_MODE_GEO:
+                return TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__GEO;
+            case MetricsTimeZoneDetectorState.DETECTION_MODE_TELEPHONY:
+                return TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__TELEPHONY;
+            default:
+                throw new IllegalArgumentException("" + detectionMode);
+        }
     }
 
     private void registerExternalStorageInfo() {
