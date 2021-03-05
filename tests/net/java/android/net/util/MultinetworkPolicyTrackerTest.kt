@@ -21,7 +21,7 @@ import android.content.res.Resources
 import android.net.ConnectivityManager.MULTIPATH_PREFERENCE_HANDOVER
 import android.net.ConnectivityManager.MULTIPATH_PREFERENCE_PERFORMANCE
 import android.net.ConnectivityManager.MULTIPATH_PREFERENCE_RELIABILITY
-import android.net.util.MultinetworkPolicyTracker.ActiveDataSubscriptionIdChangedListener
+import android.net.util.MultinetworkPolicyTracker.ActiveDataSubscriptionIdListener
 import android.provider.Settings
 import android.provider.Settings.Global.NETWORK_AVOID_BAD_WIFI
 import android.provider.Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE
@@ -120,9 +120,9 @@ class MultinetworkPolicyTrackerTest {
                 MULTIPATH_PREFERENCE_PERFORMANCE.toString())
 
         val listenerCaptor = ArgumentCaptor.forClass(
-                ActiveDataSubscriptionIdChangedListener::class.java)
+                ActiveDataSubscriptionIdListener::class.java)
         verify(telephonyManager, times(1))
-                .registerPhoneStateListener(any(), listenerCaptor.capture())
+                .registerTelephonyCallback(any(), listenerCaptor.capture())
         val listener = listenerCaptor.value
         listener.onActiveDataSubscriptionIdChanged(testSubId)
 
