@@ -20,7 +20,10 @@ import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -29,6 +32,8 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.SystemClock;
+import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -110,10 +115,13 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     private static class ServerRequest {
         // Reason the overlay has been requested. See IUdfpsOverlayController for definitions.
         final int mRequestReason;
+        @NonNull final IUdfpsOverlayControllerCallback mCallback;
         @Nullable final UdfpsEnrollHelper mEnrollHelper;
 
-        ServerRequest(int requestReason, @Nullable UdfpsEnrollHelper enrollHelper) {
+        ServerRequest(int requestReason, @NonNull IUdfpsOverlayControllerCallback callback,
+                @Nullable UdfpsEnrollHelper enrollHelper) {
             mRequestReason = requestReason;
+            mCallback = callback;
             mEnrollHelper = enrollHelper;
         }
 
@@ -128,11 +136,20 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 mEnrollHelper.onEnrollmentHelp();
             }
         }
+
+        void onUserCanceled() {
+            try {
+                mCallback.onUserCanceled();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote exception", e);
+            }
+        }
     }
 
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
         @Override
-        public void showUdfpsOverlay(int sensorId, int reason) {
+        public void showUdfpsOverlay(int sensorId, int reason,
+                @NonNull IUdfpsOverlayControllerCallback callback) {
             final UdfpsEnrollHelper enrollHelper;
             if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
                     || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
@@ -141,7 +158,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 enrollHelper = null;
             }
 
-            mServerRequest = new ServerRequest(reason, enrollHelper);
+            mServerRequest = new ServerRequest(reason, callback, enrollHelper);
             updateOverlay();
         }
 
@@ -194,6 +211,19 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         final float vy = tracker.getYVelocity(pointerId);
         return (float) Math.sqrt(Math.pow(vx, 2.0) + Math.pow(vy, 2.0));
     }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mServerRequest != null
+                    && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received");
+                mServerRequest.onUserCanceled();
+                mServerRequest = null;
+                updateOverlay();
+            }
+        }
+    };
 
     @SuppressLint("ClickableViewAccessibility")
     private final UdfpsView.OnTouchListener mOnTouchListener = (view, event) -> {
@@ -310,6 +340,10 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mCoreLayoutParams.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
         mFingerprintManager.setUdfpsOverlayController(new UdfpsOverlayController());
+
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        context.registerReceiver(mBroadcastReceiver, filter);
     }
 
     @Nullable
