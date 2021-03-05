@@ -1305,7 +1305,7 @@ public class AppTransition implements Dump {
         if (isTransitionSet()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_REMOTE;
-            mRemoteAnimationController = new RemoteAnimationController(mService, mDisplayContent,
+            mRemoteAnimationController = new RemoteAnimationController(mService,
                     remoteAnimationAdapter, mHandler);
         }
     }

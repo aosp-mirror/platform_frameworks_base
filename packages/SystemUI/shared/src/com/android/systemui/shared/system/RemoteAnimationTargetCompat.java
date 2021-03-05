@@ -16,8 +16,6 @@
 
 package com.android.systemui.shared.system;
 
-import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
-
 import android.app.PictureInPictureParams;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
@@ -45,9 +43,6 @@ public class RemoteAnimationTargetCompat {
     public static final int ACTIVITY_TYPE_RECENTS = WindowConfiguration.ACTIVITY_TYPE_RECENTS;
     public static final int ACTIVITY_TYPE_ASSISTANT = WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
     public final int activityType;
-
-    public static final int TYPE_NAVIGATION_BAR = WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-    public final int windowType;
 
     public final int taskId;
     public final SurfaceControlCompat leash;
@@ -79,7 +74,6 @@ public class RemoteAnimationTargetCompat {
         contentInsets = app.contentInsets;
         activityType = app.windowConfiguration.getActivityType();
         pictureInPictureParams = app.pictureInPictureParams;
-        windowType = app.windowType;
 
         mStartLeash = app.startLeash;
     }
@@ -120,7 +114,6 @@ public class RemoteAnimationTargetCompat {
             activityType = ACTIVITY_TYPE_UNDEFINED;
         }
         pictureInPictureParams = null;
-        windowType = INVALID_WINDOW_TYPE;
         mStartLeash = null;
     }
 
