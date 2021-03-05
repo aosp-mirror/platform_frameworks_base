@@ -9638,6 +9638,7 @@ package android.telephony {
     method public void onSrvccStateChanged(int);
     method public void onVoiceActivationStateChanged(int);
     field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED = 23; // 0x17
+    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED = 35; // 0x23
     field @RequiresPermission("android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH") public static final int EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED = 10; // 0xa
     field @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int EVENT_BARRING_INFO_CHANGED = 32; // 0x20
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_CALL_ATTRIBUTES_CHANGED = 27; // 0x1b
@@ -9678,6 +9679,10 @@ package android.telephony {
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_SRVCC_STATE_CHANGED = 16384; // 0x4000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
+  }
+
+  public static interface PhoneStateListener.AllowedNetworkTypesChangedListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onAllowedNetworkTypesChanged(@NonNull java.util.Map<java.lang.Integer,java.lang.Long>);
   }
 
   public static interface PhoneStateListener.CallAttributesChangedListener {
@@ -10082,7 +10087,9 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void enableVideoCalling(boolean);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getAidForAppType(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypes();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypes();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypesBitmask();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypesForReason(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.ComponentName getAndUpdateDefaultRespondViaMessageApplication();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getCallForwarding(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CallForwardingInfoCallback);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getCallWaitingStatus(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
@@ -10116,7 +10123,7 @@ package android.telephony {
     method public int getMaxNumberOfSimultaneouslyActiveSims();
     method public static long getMaxNumberVerificationTimeoutMillis();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getMergedImsisFromGroup();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getPreferredNetworkTypeBitmask();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getPreferredNetworkTypeBitmask();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public int getRadioPowerState();
     method public int getSimApplicationState();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSimApplicationState(int);
@@ -10171,7 +10178,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL) public void resetSettings();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int sendThermalMitigationRequest(@NonNull android.telephony.ThermalMitigationRequest);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAllowedNetworkTypesForReason(int, long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallForwarding(@NonNull android.telephony.CallForwardingInfo, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallWaitingEnabled(boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
@@ -10186,7 +10194,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultiSimCarrierRestriction(boolean);
     method public int setNrDualConnectivityState(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunisticNetworkState(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setPreferredNetworkTypeBitmask(long);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setPreferredNetworkTypeBitmask(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadio(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setRadioEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadioPower(boolean);
@@ -10220,6 +10228,9 @@ package android.telephony {
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
+    field public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2; // 0x2
+    field public static final int ALLOWED_NETWORK_TYPES_REASON_POWER = 1; // 0x1
+    field public static final int ALLOWED_NETWORK_TYPES_REASON_USER = 0; // 0x0
     field public static final int CALL_WAITING_STATUS_DISABLED = 2; // 0x2
     field public static final int CALL_WAITING_STATUS_ENABLED = 1; // 0x1
     field public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4; // 0x4
