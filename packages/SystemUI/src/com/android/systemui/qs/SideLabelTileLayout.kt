@@ -33,4 +33,15 @@ open class SideLabelTileLayout(
     override fun isFull(): Boolean {
         return mRecords.size >= maxTiles()
     }
+
+    /**
+     * Return the position from the top of the layout of the tile with this index.
+     *
+     * This will return a position even for indices that go beyond [maxTiles], continuing the rows
+     * beyond that.
+     */
+    fun getPhantomTopPosition(index: Int): Int {
+        val row = index / mColumns
+        return getRowTop(row)
+    }
 }

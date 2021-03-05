@@ -236,7 +236,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         layoutTileRecords(mRecords.size());
     }
 
-    private int getRowTop(int row) {
+    protected int getRowTop(int row) {
         return row * (mCellHeight + mCellMarginVertical) + mCellMarginTop;
     }
 
