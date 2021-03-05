@@ -354,7 +354,7 @@ static void NativeDestroy(void* ptr) {
 }
 
 static jlong NativeGetFinalizer(JNIEnv* /*env*/, jclass /*clazz*/) {
-  return static_cast<jlong>(reinterpret_cast<uintptr_t>(&NativeDestroy));
+  return reinterpret_cast<jlong>(&NativeDestroy);
 }
 
 static jstring NativeGetAssetPath(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
