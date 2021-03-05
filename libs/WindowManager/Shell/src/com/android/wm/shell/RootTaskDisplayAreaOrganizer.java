@@ -119,7 +119,7 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 listeners.get(i).onDisplayAreaAppeared(displayAreaInfo);
             }
         }
-        applyConfigChangesToContext(displayId, displayAreaInfo.configuration);
+        applyConfigChangesToContext(displayAreaInfo);
     }
 
     @Override
@@ -161,24 +161,27 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 listeners.get(i).onDisplayAreaInfoChanged(displayAreaInfo);
             }
         }
-        applyConfigChangesToContext(displayId, displayAreaInfo.configuration);
+        applyConfigChangesToContext(displayAreaInfo);
     }
 
     /**
-     * Applies the {@link Configuration} to the {@link DisplayAreaContext} specified by
-     * {@code displayId}.
-     *
-     * @param displayId The ID of the {@link Display} which the {@link DisplayAreaContext} is
-     *                  associated with
-     * @param newConfig The propagated configuration
+     * Applies the {@link DisplayAreaInfo} to the {@link DisplayAreaContext} specified by
+     * {@link DisplayAreaInfo#displayId}.
      */
-    private void applyConfigChangesToContext(int displayId, @NonNull Configuration newConfig) {
+    private void applyConfigChangesToContext(@NonNull DisplayAreaInfo displayAreaInfo) {
+        final int displayId = displayAreaInfo.displayId;
+        final Display display = mContext.getSystemService(DisplayManager.class)
+                .getDisplay(displayId);
+        if (display == null) {
+            throw new UnsupportedOperationException("The display #" + displayId + " is invalid."
+                    + "displayAreaInfo:" + displayAreaInfo);
+        }
         DisplayAreaContext daContext = mDisplayAreaContexts.get(displayId);
         if (daContext == null) {
-            daContext = new DisplayAreaContext(mContext, displayId);
+            daContext = new DisplayAreaContext(mContext, display);
             mDisplayAreaContexts.put(displayId, daContext);
         }
-        daContext.updateConfigurationChanges(newConfig);
+        daContext.updateConfigurationChanges(displayAreaInfo.configuration);
     }
 
     /**
@@ -228,10 +231,8 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
         private final IBinder mToken = new Binder();
         private final ResourcesManager mResourcesManager = ResourcesManager.getInstance();
 
-        public DisplayAreaContext(@NonNull Context context, int displayId) {
+        public DisplayAreaContext(@NonNull Context context, @NonNull Display display) {
             super(null);
-            final Display display = context.getSystemService(DisplayManager.class)
-                    .getDisplay(displayId);
             attachBaseContext(context.createTokenContext(mToken, display));
         }
 

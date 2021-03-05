@@ -2566,9 +2566,7 @@ class ContextImpl extends Context {
     @Override
     public Context createTokenContext(@NonNull IBinder token, @NonNull Display display) {
         if (display == null) {
-            throw new UnsupportedOperationException("Token context can only be created from "
-                    + "other visual contexts, such as Activity or one created with "
-                    + "Context#createDisplayContext(Display)");
+            throw new IllegalArgumentException("Display must not be null");
         }
         final ContextImpl tokenContext = createBaseWindowContext(token, display);
         tokenContext.setResources(createWindowContextResources());
