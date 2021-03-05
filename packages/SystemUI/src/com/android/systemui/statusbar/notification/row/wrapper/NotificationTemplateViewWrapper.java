@@ -51,7 +51,8 @@ import com.android.systemui.statusbar.notification.row.HybridNotificationView;
 public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapper {
 
     private final int mFullHeaderTranslation;
-    protected ImageView mPicture;
+    protected ImageView mRightIcon;
+    protected ImageView mLeftIcon;
     private ProgressBar mProgressBar;
     private TextView mTitle;
     private TextView mText;
@@ -140,9 +141,14 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     }
 
     private void resolveTemplateViews(StatusBarNotification notification) {
-        mPicture = mView.findViewById(com.android.internal.R.id.right_icon);
-        if (mPicture != null) {
-            mPicture.setTag(ImageTransformState.ICON_TAG,
+        mRightIcon = mView.findViewById(com.android.internal.R.id.right_icon);
+        if (mRightIcon != null) {
+            mRightIcon.setTag(ImageTransformState.ICON_TAG,
+                    notification.getNotification().getLargeIcon());
+        }
+        mLeftIcon = mView.findViewById(com.android.internal.R.id.left_icon);
+        if (mLeftIcon != null) {
+            mLeftIcon.setTag(ImageTransformState.ICON_TAG,
                     notification.getNotification().getLargeIcon());
         }
         mTitle = mView.findViewById(com.android.internal.R.id.title);
@@ -240,9 +246,9 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         resolveTemplateViews(row.getEntry().getSbn());
         super.onContentUpdated(row);
         // With the modern templates, a large icon visually overlaps the header, so we can't
-        // simply hide the header -- just show the
+        // hide the header, we must show it.
         mCanHideHeader = mNotificationHeader != null
-                && (mPicture == null || mPicture.getVisibility() != VISIBLE);
+                && (mRightIcon == null || mRightIcon.getVisibility() != VISIBLE);
         if (row.getHeaderVisibleAmount() != DEFAULT_HEADER_VISIBLE_AMOUNT) {
             setHeaderVisibleAmount(row.getHeaderVisibleAmount());
         }
@@ -260,14 +266,15 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TEXT,
                     mText);
         }
-        if (mPicture != null) {
+        if (mRightIcon != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_IMAGE,
-                    mPicture);
+                    mRightIcon);
         }
         if (mProgressBar != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_PROGRESS,
                     mProgressBar);
         }
+        addViewsTransformingToSimilar(mLeftIcon);
     }
 
     @Override
