@@ -43,6 +43,7 @@ per-file android_os_HwRemoteBinder* = file:platform/system/libhwbinder:/OWNERS
 per-file EphemeralStorage* = file:platform/system/libhwbinder:/OWNERS
 
 per-file *Zygote* = file:/ZYGOTE_OWNERS
+per-file fd_utils.* = file:/ZYGOTE_OWNERS
 per-file Android.bp = file:platform/build/soong:/OWNERS
 per-file android_animation_* = file:/core/java/android/animation/OWNERS
 per-file android_app_admin_* = file:/core/java/android/app/admin/OWNERS
