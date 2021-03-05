@@ -4668,11 +4668,11 @@
     <!-- WindowsManager JetPack display features -->
     <string name="config_display_features" translatable="false" />
 
-    <!-- Aspect ratio of task level letterboxing. Values <= 1.0 will be ignored.
-         Note: Activity min/max aspect ratio restrictions will still be respected by the
-         activity-level letterboxing (size-compat mode). Therefore this override can control the
-         maximum screen area that can be occupied by the app in the letterbox mode. -->
-    <item name="config_taskLetterboxAspectRatio" format="float" type="dimen">0.0</item>
+    <!-- Aspect ratio of letterboxing for fixed orientation. Values <= 1.0 will be ignored.
+         Note: Activity min/max aspect ratio restrictions will still be respected.
+         Therefore this override can control the maximum screen area that can be occupied by
+         the app in the letterbox mode. -->
+    <item name="config_fixedOrientationLetterboxAspectRatio" format="float" type="dimen">0.0</item>
 
     <!-- Corners radius for activity presented the letterbox mode. Values < 0 will be ignored and
          corners of the activity won't be rounded. -->
