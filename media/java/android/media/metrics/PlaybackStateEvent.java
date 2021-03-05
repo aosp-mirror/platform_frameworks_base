@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -136,9 +137,11 @@ public final class PlaybackStateEvent extends Event implements Parcelable {
      */
     public PlaybackStateEvent(
             int state,
-            long timeSinceCreatedMillis) {
+            long timeSinceCreatedMillis,
+            Bundle extras) {
         this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
         this.mState = state;
+        this.mExtras = extras.deepCopy();
     }
 
     /**
@@ -174,8 +177,12 @@ public final class PlaybackStateEvent extends Event implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        byte flg = 0;
+        if (mExtras != null) flg |= 0x1;
+        dest.writeByte(flg);
         dest.writeInt(mState);
         dest.writeLong(mTimeSinceCreatedMillis);
+        if (mExtras != null) dest.writeBundle(mExtras);
     }
 
     @Override
@@ -185,11 +192,14 @@ public final class PlaybackStateEvent extends Event implements Parcelable {
 
     /** @hide */
     /* package-private */ PlaybackStateEvent(@NonNull Parcel in) {
+        byte flg = in.readByte();
         int state = in.readInt();
         long timeSinceCreatedMillis = in.readLong();
+        Bundle extras = (flg & 0x1) == 0 ? null : in.readBundle();
 
         this.mState = state;
         this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
+        this.mExtras = extras;
     }
 
     public static final @NonNull Parcelable.Creator<PlaybackStateEvent> CREATOR =
@@ -211,6 +221,7 @@ public final class PlaybackStateEvent extends Event implements Parcelable {
     public static final class Builder {
         private int mState = STATE_NOT_STARTED;
         private long mTimeSinceCreatedMillis = -1;
+        private Bundle mExtras;
 
         /**
          * Creates a new Builder.
@@ -236,11 +247,22 @@ public final class PlaybackStateEvent extends Event implements Parcelable {
             return this;
         }
 
+        /**
+         * Set extras for compatibility.
+         * <p>Should be used by support library only.
+         * @hide
+         */
+        public @NonNull Builder setExtras(@NonNull Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
         /** Builds the instance. */
         public @NonNull PlaybackStateEvent build() {
             PlaybackStateEvent o = new PlaybackStateEvent(
                     mState,
-                    mTimeSinceCreatedMillis);
+                    mTimeSinceCreatedMillis,
+                    mExtras);
             return o;
         }
     }
