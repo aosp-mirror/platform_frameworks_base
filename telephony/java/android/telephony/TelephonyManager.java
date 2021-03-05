@@ -14932,6 +14932,13 @@ public class TelephonyManager {
     public static final String CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING =
             "CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING";
 
+    /**
+     * Indicates whether {@link #getNetworkSlicingConfiguration} is supported. See comments on
+     * respective methods for more information.
+     */
+    public static final String CAPABILITY_SLICING_CONFIG_SUPPORTED =
+            "CAPABILITY_SLICING_CONFIG_SUPPORTED";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = "CAPABILITY_", value = {
@@ -14939,6 +14946,7 @@ public class TelephonyManager {
             CAPABILITY_ALLOWED_NETWORK_TYPES_USED,
             CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE,
             CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING,
+            CAPABILITY_SLICING_CONFIG_SUPPORTED,
     })
     public @interface RadioInterfaceCapability {}
 
@@ -15584,9 +15592,15 @@ public class TelephonyManager {
      *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      * </ul>
      *
+     * This will be invalid if the device does not support
+     * android.telephony.TelephonyManager#CAPABILITY_SLICING_CONFIG_SUPPORTED.
+     *
      * @param executor the executor on which callback will be invoked.
      * @param callback a callback to receive the current slicing configuration.
      */
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_SLICING_CONFIG_SUPPORTED)
     @SuppressAutoDoc // No support for carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getNetworkSlicingConfiguration(
