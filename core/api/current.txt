@@ -6983,6 +6983,7 @@ package android.app.admin {
     method public void onBugreportShared(@NonNull android.content.Context, @NonNull android.content.Intent, @NonNull String);
     method public void onBugreportSharingDeclined(@NonNull android.content.Context, @NonNull android.content.Intent);
     method @Nullable public String onChoosePrivateKeyAlias(@NonNull android.content.Context, @NonNull android.content.Intent, int, @Nullable android.net.Uri, @Nullable String);
+    method public void onComplianceAcknowledgementRequired(@NonNull android.content.Context, @NonNull android.content.Intent);
     method @Nullable public CharSequence onDisableRequested(@NonNull android.content.Context, @NonNull android.content.Intent);
     method public void onDisabled(@NonNull android.content.Context, @NonNull android.content.Intent);
     method public void onEnabled(@NonNull android.content.Context, @NonNull android.content.Intent);
@@ -7037,6 +7038,7 @@ package android.app.admin {
   }
 
   public class DevicePolicyManager {
+    method public void acknowledgeDeviceCompliant();
     method public void addCrossProfileIntentFilter(@NonNull android.content.ComponentName, android.content.IntentFilter, int);
     method public boolean addCrossProfileWidgetProvider(@NonNull android.content.ComponentName, String);
     method public int addOverrideApn(@NonNull android.content.ComponentName, @NonNull android.telephony.data.ApnSetting);
@@ -7155,6 +7157,7 @@ package android.app.admin {
     method public boolean isBackupServiceEnabled(@NonNull android.content.ComponentName);
     method @Deprecated public boolean isCallerApplicationRestrictionsManagingPackage();
     method public boolean isCommonCriteriaModeEnabled(@Nullable android.content.ComponentName);
+    method public boolean isComplianceAcknowledgementRequired();
     method public boolean isDeviceIdAttestationSupported();
     method public boolean isDeviceOwnerApp(String);
     method public boolean isEphemeralUser(@NonNull android.content.ComponentName);
