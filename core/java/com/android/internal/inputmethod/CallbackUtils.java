@@ -225,4 +225,31 @@ public final class CallbackUtils {
             callback.onResult();
         } catch (RemoteException ignored) { }
     }
+
+    /**
+     * A utility method using given {@link IIInputContentUriTokenResultCallback} to callback the
+     * result.
+     *
+     * @param callback {@link IIInputContentUriTokenResultCallback} to be called back.
+     * @param resultSupplier the supplier from which the result is provided.
+     */
+    public static void onResult(@NonNull IIInputContentUriTokenResultCallback callback,
+            @NonNull Supplier<IInputContentUriToken> resultSupplier) {
+        IInputContentUriToken result = null;
+        Throwable exception = null;
+
+        try {
+            result = resultSupplier.get();
+        } catch (Throwable throwable) {
+            exception = throwable;
+        }
+
+        try {
+            if (exception != null) {
+                callback.onError(ThrowableHolder.of(exception));
+                return;
+            }
+            callback.onResult(result);
+        } catch (RemoteException ignored) { }
+    }
 }

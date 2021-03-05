@@ -159,6 +159,7 @@ import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.CallbackUtils;
 import com.android.internal.inputmethod.IBooleanResultCallback;
+import com.android.internal.inputmethod.IIInputContentUriTokenResultCallback;
 import com.android.internal.inputmethod.IInputBindResultResultCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodInfoListResultCallback;
@@ -5883,87 +5884,102 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void setImeWindowStatus(int vis, int backDisposition) {
-            mImms.setImeWindowStatus(mToken, vis, backDisposition);
+        public void setImeWindowStatus(int vis, int backDisposition,
+                IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback,
+                    () -> mImms.setImeWindowStatus(mToken, vis, backDisposition));
         }
 
         @BinderThread
         @Override
-        public void reportStartInput(IBinder startInputToken) {
-            mImms.reportStartInput(mToken, startInputToken);
+        public void reportStartInput(IBinder startInputToken, IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback,
+                    () -> mImms.reportStartInput(mToken, startInputToken));
         }
 
         @BinderThread
         @Override
-        public IInputContentUriToken createInputContentUriToken(Uri contentUri,
-                String packageName) {
-            return mImms.createInputContentUriToken(mToken, contentUri, packageName);
+        public void createInputContentUriToken(Uri contentUri, String packageName,
+                IIInputContentUriTokenResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback,
+                    () -> mImms.createInputContentUriToken(mToken, contentUri, packageName));
         }
 
         @BinderThread
         @Override
-        public void reportFullscreenMode(boolean fullscreen) {
-            mImms.reportFullscreenMode(mToken, fullscreen);
+        public void reportFullscreenMode(boolean fullscreen, IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback,
+                    () -> mImms.reportFullscreenMode(mToken, fullscreen));
         }
 
         @BinderThread
         @Override
-        public void setInputMethod(String id) {
-            mImms.setInputMethod(mToken, id);
+        public void setInputMethod(String id, IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback, () -> mImms.setInputMethod(mToken, id));
         }
 
         @BinderThread
         @Override
-        public void setInputMethodAndSubtype(String id, InputMethodSubtype subtype) {
-            mImms.setInputMethodAndSubtype(mToken, id, subtype);
+        public void setInputMethodAndSubtype(String id, InputMethodSubtype subtype,
+                IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback,
+                    () -> mImms.setInputMethodAndSubtype(mToken, id, subtype));
         }
 
         @BinderThread
         @Override
-        public void hideMySoftInput(int flags) {
-            mImms.hideMySoftInput(mToken, flags);
+        public void hideMySoftInput(int flags, IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback, () -> mImms.hideMySoftInput(mToken, flags));
         }
 
         @BinderThread
         @Override
-        public void showMySoftInput(int flags) {
-            mImms.showMySoftInput(mToken, flags);
+        public void showMySoftInput(int flags, IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback, () -> mImms.showMySoftInput(mToken, flags));
         }
 
         @BinderThread
         @Override
-        public void updateStatusIcon(String packageName, @DrawableRes int iconId) {
-            mImms.updateStatusIcon(mToken, packageName, iconId);
+        public void updateStatusIcon(String packageName, @DrawableRes int iconId,
+                IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback,
+                    () -> mImms.updateStatusIcon(mToken, packageName, iconId));
         }
 
         @BinderThread
         @Override
-        public boolean switchToPreviousInputMethod() {
-            return mImms.switchToPreviousInputMethod(mToken);
+        public void switchToPreviousInputMethod(IBooleanResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback, () -> mImms.switchToPreviousInputMethod(mToken));
         }
 
         @BinderThread
         @Override
-        public boolean switchToNextInputMethod(boolean onlyCurrentIme) {
-            return mImms.switchToNextInputMethod(mToken, onlyCurrentIme);
+        public void switchToNextInputMethod(boolean onlyCurrentIme,
+                IBooleanResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback,
+                    () -> mImms.switchToNextInputMethod(mToken, onlyCurrentIme));
         }
 
         @BinderThread
         @Override
-        public boolean shouldOfferSwitchingToNextInputMethod() {
-            return mImms.shouldOfferSwitchingToNextInputMethod(mToken);
+        public void shouldOfferSwitchingToNextInputMethod(
+                IBooleanResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback,
+                    () -> mImms.shouldOfferSwitchingToNextInputMethod(mToken));
         }
 
         @BinderThread
         @Override
-        public void notifyUserAction() {
-            mImms.notifyUserAction(mToken);
+        public void notifyUserAction(IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback, () -> mImms.notifyUserAction(mToken));
         }
 
         @BinderThread
         @Override
-        public void applyImeVisibility(IBinder windowToken, boolean setVisible) {
-            mImms.applyImeVisibility(mToken, windowToken, setVisible);
+        public void applyImeVisibility(IBinder windowToken, boolean setVisible,
+                IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback,
+                    () -> mImms.applyImeVisibility(mToken, windowToken, setVisible));
         }
     }
 }
