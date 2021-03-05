@@ -180,7 +180,7 @@ public class NavigationBarController implements Callbacks,
             }
         } else {
             for (int i = 0; i < mNavigationBars.size(); i++) {
-                mNavigationBars.get(i).onConfigurationChanged(newConfig);
+                mNavigationBars.valueAt(i).onConfigurationChanged(newConfig);
             }
         }
     }
@@ -193,7 +193,7 @@ public class NavigationBarController implements Callbacks,
                 if (navBar == null) {
                     continue;
                 }
-                NavigationBarView view = (NavigationBarView) mNavigationBars.get(i).getView();
+                NavigationBarView view = (NavigationBarView) navBar.getView();
                 if (view != null) {
                     view.updateStates();
                 }
@@ -399,7 +399,7 @@ public class NavigationBarController implements Callbacks,
             if (i > 0) {
                 pw.println();
             }
-            mNavigationBars.get(i).dump(pw);
+            mNavigationBars.valueAt(i).dump(pw);
         }
     }
 }
