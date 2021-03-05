@@ -269,8 +269,6 @@ public final class JobServiceContext implements ServiceConnection {
             try {
                 final int bindFlags;
                 if (job.shouldTreatAsExpeditedJob()) {
-                    // TODO(171305774): The job should run on the little cores. We'll probably need
-                    // another binding flag for that.
                     bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
                             | Context.BIND_ALMOST_PERCEPTIBLE
                             | Context.BIND_ALLOW_NETWORK_ACCESS
@@ -355,13 +353,8 @@ public final class JobServiceContext implements ServiceConnection {
 
     /** Called externally when a job that was scheduled for execution should be cancelled. */
     @GuardedBy("mLock")
-    void cancelExecutingJobLocked(int reason, String debugReason) {
+    void cancelExecutingJobLocked(int reason, @NonNull String debugReason) {
         doCancelLocked(reason, debugReason);
-    }
-
-    @GuardedBy("mLock")
-    void preemptExecutingJobLocked(@NonNull String reason) {
-        doCancelLocked(JobParameters.REASON_PREEMPT, reason);
     }
 
     int getPreferredUid() {
@@ -620,7 +613,7 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     @GuardedBy("mLock")
-    private void doCancelLocked(int stopReasonCode, String debugReason) {
+    private void doCancelLocked(int stopReasonCode, @Nullable String debugReason) {
         if (mVerb == VERB_FINISHED) {
             if (DEBUG) {
                 Slog.d(TAG,
@@ -733,7 +726,7 @@ public final class JobServiceContext implements ServiceConnection {
      *     _ENDING     -> No point in doing anything here, so we ignore.
      */
     @GuardedBy("mLock")
-    private void handleCancelLocked(String reason) {
+    private void handleCancelLocked(@Nullable String reason) {
         if (JobSchedulerService.DEBUG) {
             Slog.d(TAG, "Handling cancel for: " + mRunningJob.getJobId() + " "
                     + VERB_STRINGS[mVerb]);
@@ -817,7 +810,7 @@ public final class JobServiceContext implements ServiceConnection {
      * VERB_STOPPING.
      */
     @GuardedBy("mLock")
-    private void sendStopMessageLocked(String reason) {
+    private void sendStopMessageLocked(@Nullable String reason) {
         removeOpTimeOutLocked();
         if (mVerb != VERB_EXECUTING) {
             Slog.e(TAG, "Sending onStopJob for a job that isn't started. " + mRunningJob);
@@ -843,7 +836,7 @@ public final class JobServiceContext implements ServiceConnection {
      * we want to clean up internally.
      */
     @GuardedBy("mLock")
-    private void closeAndCleanupJobLocked(boolean reschedule, String reason) {
+    private void closeAndCleanupJobLocked(boolean reschedule, @Nullable String reason) {
         final JobStatus completedJob;
         if (mVerb == VERB_FINISHED) {
             return;
@@ -889,7 +882,7 @@ public final class JobServiceContext implements ServiceConnection {
         mJobConcurrencyManager.onJobCompletedLocked(this, completedJob, workType);
     }
 
-    private void applyStoppedReasonLocked(String reason) {
+    private void applyStoppedReasonLocked(@Nullable String reason) {
         if (reason != null && mStoppedReason == null) {
             mStoppedReason = reason;
             mStoppedTime = sElapsedRealtimeClock.millis();
