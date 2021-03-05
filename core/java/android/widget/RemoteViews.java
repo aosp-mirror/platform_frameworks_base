@@ -358,6 +358,13 @@ public class RemoteViews implements Parcelable, Filter {
     @ApplyFlags
     private int mApplyFlags = 0;
 
+    /**
+     * Id to use to override the ID of the top-level view in this RemoteViews.
+     *
+     * Only used if this RemoteViews is defined from a XML layout value.
+     */
+    private int mViewId = View.NO_ID;
+
     /** Class cookies of the Parcel this instance was read from. */
     private Map<Class, Object> mClassCookies;
 
@@ -4768,6 +4775,9 @@ public class RemoteViews implements Parcelable, Filter {
         inflater = inflater.cloneInContext(inflationContext);
         inflater.setFilter(shouldUseStaticFilter() ? INFLATER_FILTER : this);
         View v = inflater.inflate(rv.getLayoutId(), parent, false);
+        if (mViewId != View.NO_ID) {
+            v.setId(mViewId);
+        }
         v.setTagInternal(R.id.widget_frame, rv.getLayoutId());
         return v;
     }
@@ -5714,5 +5724,26 @@ public class RemoteViews implements Parcelable, Filter {
             return false;
         }
         return true;
+    }
+
+    /**
+     *  Set the ID of the top-level view of the XML layout.
+     *
+     *  Set to {@link View#NO_ID} to reset and simply keep the id defined in the XML layout.
+     *
+     * @throws UnsupportedOperationException if the method is called on a RemoteViews defined in
+     * term of other RemoteViews (e.g. {@link #RemoteViews(RemoteViews, RemoteViews)}).
+     */
+    public void setViewId(@IdRes int viewId) {
+        if (hasMultipleLayouts()) {
+            throw new UnsupportedOperationException(
+                    "The viewId can only be set on RemoteViews defined from a XML layout.");
+        }
+        mViewId = viewId;
+    }
+
+    /** Get the ID of the top-level view of the XML layout, as set by {@link #setViewId}. */
+    public @IdRes int getViewId() {
+        return mViewId;
     }
 }
