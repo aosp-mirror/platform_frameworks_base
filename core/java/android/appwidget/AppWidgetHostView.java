@@ -39,6 +39,7 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SizeF;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Gravity;
@@ -56,7 +57,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -93,7 +93,7 @@ public class AppWidgetHostView extends FrameLayout {
     int mLayoutId = -1;
     private InteractionHandler mInteractionHandler;
     private boolean mOnLightBackground;
-    private PointF mCurrentSize = null;
+    private SizeF mCurrentSize = null;
     private RemoteViews.ColorResources mColorResources = null;
     // Stores the last remote views last inflated.
     private RemoteViews mLastInflatedRemoteViews = null;
@@ -253,9 +253,33 @@ public class AppWidgetHostView extends FrameLayout {
         }
     }
 
+    private SizeF computeSizeFromLayout(int left, int top, int right, int bottom) {
+        Rect padding = getDefaultPadding();
+        float density = getResources().getDisplayMetrics().density;
+        return new SizeF(
+                (right - left - padding.right - padding.left) / density,
+                (bottom - top - padding.bottom - padding.top) / density
+        );
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         try {
+            SizeF oldSize = mCurrentSize;
+            SizeF newSize = computeSizeFromLayout(left, top, right, bottom);
+            mCurrentSize = newSize;
+            if (mLastInflatedRemoteViews != null) {
+                RemoteViews toApply = mLastInflatedRemoteViews.getRemoteViewsToApplyIfDifferent(
+                        oldSize, newSize);
+                if (toApply != null) {
+                    applyRemoteViews(toApply, false);
+                    measureChildWithMargins(mView,
+                            MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
+                            0 /* widthUsed */,
+                            MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY),
+                            0 /* heightUsed */);
+                }
+            }
             super.onLayout(changed, left, top, right, bottom);
         } catch (final RuntimeException e) {
             Log.e(TAG, "Remote provider threw runtime exception, using error view instead.", e);
@@ -309,7 +333,7 @@ public class AppWidgetHostView extends FrameLayout {
      *              again. Typically, this will be size of the widget in landscape and portrait.
      *              On some foldables, this might include the size on the outer and inner screens.
      */
-    public void updateAppWidgetSize(@NonNull Bundle newOptions, @NonNull List<PointF> sizes) {
+    public void updateAppWidgetSize(@NonNull Bundle newOptions, @NonNull List<SizeF> sizes) {
         AppWidgetManager widgetManager = AppWidgetManager.getInstance(mContext);
 
         Rect padding = getDefaultPadding();
@@ -318,20 +342,20 @@ public class AppWidgetHostView extends FrameLayout {
         float xPaddingDips = (padding.left + padding.right) / density;
         float yPaddingDips = (padding.top + padding.bottom) / density;
 
-        ArrayList<PointF> paddedSizes = new ArrayList<>(sizes.size());
+        ArrayList<SizeF> paddedSizes = new ArrayList<>(sizes.size());
         float minWidth = Float.MAX_VALUE;
         float maxWidth = 0;
         float minHeight = Float.MAX_VALUE;
         float maxHeight = 0;
         for (int i = 0; i < sizes.size(); i++) {
-            PointF size = sizes.get(i);
-            PointF paddedPoint = new PointF(Math.max(0.f, size.x - xPaddingDips),
-                    Math.max(0.f, size.y - yPaddingDips));
-            paddedSizes.add(paddedPoint);
-            minWidth = Math.min(minWidth, paddedPoint.x);
-            maxWidth = Math.max(maxWidth, paddedPoint.x);
-            minHeight = Math.min(minHeight, paddedPoint.y);
-            maxHeight = Math.max(maxHeight, paddedPoint.y);
+            SizeF size = sizes.get(i);
+            SizeF paddedSize = new SizeF(Math.max(0.f, size.getWidth() - xPaddingDips),
+                    Math.max(0.f, size.getHeight() - yPaddingDips));
+            paddedSizes.add(paddedSize);
+            minWidth = Math.min(minWidth, paddedSize.getWidth());
+            maxWidth = Math.max(maxWidth, paddedSize.getWidth());
+            minHeight = Math.min(minHeight, paddedSize.getHeight());
+            maxHeight = Math.max(maxHeight, paddedSize.getHeight());
         }
         if (paddedSizes.equals(
                 widgetManager.getAppWidgetOptions(mAppWidgetId).<PointF>getParcelableArrayList(
@@ -345,35 +369,6 @@ public class AppWidgetHostView extends FrameLayout {
         options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, (int) maxHeight);
         options.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES, paddedSizes);
         updateAppWidgetOptions(options);
-    }
-
-    /**
-     * Set the current size of the widget. This should be the full area the AppWidgetHostView is
-     * given. Padding added by the framework will be accounted for automatically.
-     *
-     * This size will be used to choose the appropriate layout the next time the {@link RemoteViews}
-     * is re-inflated, if it was created with {@link RemoteViews#RemoteViews(Map)} .
-     */
-    public void setCurrentSize(@NonNull PointF size) {
-        Rect padding = getDefaultPadding();
-        float density = getResources().getDisplayMetrics().density;
-        float xPaddingDips = (padding.left + padding.right) / density;
-        float yPaddingDips = (padding.top + padding.bottom) / density;
-        PointF newSize = new PointF(size.x - xPaddingDips, size.y - yPaddingDips);
-        if (!newSize.equals(mCurrentSize)) {
-            mCurrentSize = newSize;
-            reapplyLastRemoteViews();
-        }
-    }
-
-    /**
-     * Clear the current size, indicating it is not currently known.
-     */
-    public void clearCurrentSize() {
-        if (mCurrentSize != null) {
-            mCurrentSize = null;
-            reapplyLastRemoteViews();
-        }
     }
 
     /**
@@ -514,23 +509,22 @@ public class AppWidgetHostView extends FrameLayout {
             mLayoutId = -1;
             mViewMode = VIEW_MODE_DEFAULT;
         } else {
+            // Select the remote view we are actually going to apply.
+            RemoteViews rvToApply = remoteViews.getRemoteViewsToApply(mContext, mCurrentSize);
             if (mOnLightBackground) {
-                remoteViews = remoteViews.getDarkTextViews();
+                rvToApply = rvToApply.getDarkTextViews();
             }
 
             if (mAsyncExecutor != null && useAsyncIfPossible) {
-                inflateAsync(remoteViews);
+                inflateAsync(rvToApply);
                 return;
             }
-            // Prepare a local reference to the remote Context so we're ready to
-            // inflate any requested LayoutParams.
-            mRemoteContext = getRemoteContext();
-            int layoutId = remoteViews.getLayoutId();
+            int layoutId = rvToApply.getLayoutId();
             // If our stale view has been prepared to match active, and the new
             // layout matches, try recycling it
             if (content == null && layoutId == mLayoutId) {
                 try {
-                    remoteViews.reapply(mContext, mView, mInteractionHandler, mCurrentSize,
+                    rvToApply.reapply(mContext, mView, mInteractionHandler, mCurrentSize,
                             mColorResources);
                     content = mView;
                     recycled = true;
@@ -543,7 +537,7 @@ public class AppWidgetHostView extends FrameLayout {
             // Try normal RemoteView inflation
             if (content == null) {
                 try {
-                    content = remoteViews.apply(mContext, this, mInteractionHandler,
+                    content = rvToApply.apply(mContext, this, mInteractionHandler,
                             mCurrentSize, mColorResources);
                     if (LOGD) Log.d(TAG, "had to inflate new layout");
                 } catch (RuntimeException e) {

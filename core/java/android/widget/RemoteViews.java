@@ -51,7 +51,6 @@ import android.content.res.loader.ResourcesProvider;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Outline;
-import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -76,6 +75,7 @@ import android.util.DisplayMetrics;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SizeF;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.util.TypedValue.ComplexDimensionUnit;
@@ -353,7 +353,7 @@ public class RemoteViews implements Parcelable, Filter {
      * Only to be used on children views used in a {@link RemoteViews} with
      * {@link RemoteViews#hasSizedRemoteViews()}.
      */
-    private PointF mIdealSize = null;
+    private SizeF mIdealSize = null;
 
     @ApplyFlags
     private int mApplyFlags = 0;
@@ -3042,11 +3042,11 @@ public class RemoteViews implements Parcelable, Filter {
         return mSizedRemoteViews != null;
     }
 
-    private @Nullable PointF getIdealSize() {
+    private @Nullable SizeF getIdealSize() {
         return mIdealSize;
     }
 
-    private void setIdealSize(@Nullable PointF size) {
+    private void setIdealSize(@Nullable SizeF size) {
         mIdealSize = size;
     }
 
@@ -3094,13 +3094,18 @@ public class RemoteViews implements Parcelable, Filter {
      * Create a new RemoteViews object that will inflate the layout with the closest size
      * specification.
      *
-     * The default remote views in that case is always the smallest one provided.
+     * The default remote views in that case is always the one with the smallest area.
+     *
+     * If the {@link RemoteViews} host provides the size of the view, the layout with the largest
+     * area that fits entirely in the provided size will be used (i.e. the width and height of
+     * the layout must be less than the size of the view, with a 1dp margin to account for
+     * rounding). If no layout fits in the view, the layout with the smallest area will be used.
      *
      * @param remoteViews Mapping of size to layout.
      * @throws IllegalArgumentException if the map is empty, there are more than
      *   MAX_INIT_VIEW_COUNT layouts or the remote views are not all from the same application.
      */
-    public RemoteViews(@NonNull Map<PointF, RemoteViews> remoteViews) {
+    public RemoteViews(@NonNull Map<SizeF, RemoteViews> remoteViews) {
         if (remoteViews.isEmpty()) {
             throw new IllegalArgumentException("The set of RemoteViews cannot be empty");
         }
@@ -3135,8 +3140,8 @@ public class RemoteViews implements Parcelable, Filter {
         RemoteViews smallestView = null;
         while (remoteViews.hasNext()) {
             RemoteViews view = remoteViews.next();
-            PointF size = view.getIdealSize();
-            float newViewArea = size.x * size.y;
+            SizeF size = view.getIdealSize();
+            float newViewArea = size.getWidth() * size.getHeight();
             if (smallestView != null && !view.hasSameAppInfo(smallestView.mApplication)) {
                 throw new IllegalArgumentException(
                         "All RemoteViews must share the same package and user");
@@ -3239,7 +3244,7 @@ public class RemoteViews implements Parcelable, Filter {
         if (mode == MODE_NORMAL) {
             mApplication = parcel.readInt() == 0 ? info :
                     ApplicationInfo.CREATOR.createFromParcel(parcel);
-            mIdealSize = parcel.readInt() == 0 ? null : PointF.CREATOR.createFromParcel(parcel);
+            mIdealSize = parcel.readInt() == 0 ? null : SizeF.CREATOR.createFromParcel(parcel);
             mLayoutId = parcel.readInt();
             mLightBackgroundLayoutId = parcel.readInt();
 
@@ -4625,9 +4630,9 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * This is particularly useful when we only care about the ordering of the distances.
      */
-    private static float squareDistance(PointF p1, PointF p2) {
-        float dx = p1.x - p2.x;
-        float dy = p1.y - p2.y;
+    private static float squareDistance(SizeF p1, SizeF p2) {
+        float dx = p1.getWidth() - p2.getWidth();
+        float dy = p1.getHeight() - p2.getHeight();
         return dx * dx + dy * dy;
     }
 
@@ -4637,31 +4642,17 @@ public class RemoteViews implements Parcelable, Filter {
      * A layout fits on a widget if the widget size is known (i.e. not null) and both dimensions
      * are smaller than the ones of the widget, adding some padding to account for rounding errors.
      */
-    private static boolean fitsIn(PointF sizeLayout, @Nullable PointF sizeWidget) {
-        return sizeWidget != null && (Math.ceil(sizeWidget.x) + 1 > sizeLayout.x)
-                && (Math.ceil(sizeWidget.y) + 1 > sizeLayout.y);
+    private static boolean fitsIn(SizeF sizeLayout, @Nullable SizeF sizeWidget) {
+        return sizeWidget != null && (Math.ceil(sizeWidget.getWidth()) + 1 > sizeLayout.getWidth())
+                && (Math.ceil(sizeWidget.getHeight()) + 1 > sizeLayout.getHeight());
     }
 
-    /**
-     * Returns the most appropriate {@link RemoteViews} given the context and, if not null, the
-     * size of the widget.
-     *
-     * If {@link RemoteViews#hasSizedRemoteViews()} returns true, the most appropriate view is
-     * the one that fits in the widget (according to {@link RemoteViews#fitsIn}) and has the
-     * diagonal the most similar to the widget. If no layout fits or the size of the widget is
-     * not specified, the one with the smallest area will be chosen.
-     */
-    private RemoteViews getRemoteViewsToApply(@NonNull Context context,
-            @Nullable PointF widgetSize) {
-        if (!hasSizedRemoteViews()) {
-            // If there isn't multiple remote views, fall back on the previous methods.
-            return getRemoteViewsToApply(context);
-        }
+    private RemoteViews findBestFitLayout(@NonNull SizeF widgetSize) {
         // Find the better remote view
         RemoteViews bestFit = null;
         float bestSqDist = Float.MAX_VALUE;
         for (RemoteViews layout : mSizedRemoteViews) {
-            PointF layoutSize = layout.getIdealSize();
+            SizeF layoutSize = layout.getIdealSize();
             if (fitsIn(layoutSize, widgetSize)) {
                 if (bestFit == null) {
                     bestFit = layout;
@@ -4680,6 +4671,46 @@ public class RemoteViews implements Parcelable, Filter {
             return findSmallestRemoteView();
         }
         return bestFit;
+    }
+
+    /**
+     * Returns the most appropriate {@link RemoteViews} given the context and, if not null, the
+     * size of the widget.
+     *
+     * If {@link RemoteViews#hasSizedRemoteViews()} returns true, the most appropriate view is
+     * the one that fits in the widget (according to {@link RemoteViews#fitsIn}) and has the
+     * diagonal the most similar to the widget. If no layout fits or the size of the widget is
+     * not specified, the one with the smallest area will be chosen.
+     *
+     * @hide
+     */
+    public RemoteViews getRemoteViewsToApply(@NonNull Context context,
+            @Nullable SizeF widgetSize) {
+        if (!hasSizedRemoteViews()) {
+            // If there isn't multiple remote views, fall back on the previous methods.
+            return getRemoteViewsToApply(context);
+        }
+        return findBestFitLayout(widgetSize);
+    }
+
+    /**
+     * Checks whether the change of size will lead to using a different {@link RemoteViews}.
+     *
+     * @hide
+     */
+    @Nullable
+    public RemoteViews getRemoteViewsToApplyIfDifferent(@Nullable SizeF oldSize,
+            @NonNull SizeF newSize) {
+        if (!hasSizedRemoteViews()) {
+            return null;
+        }
+        RemoteViews oldBestFit = oldSize == null ? findSmallestRemoteView() : findBestFitLayout(
+                oldSize);
+        RemoteViews newBestFit = findBestFitLayout(newSize);
+        if (oldBestFit != newBestFit) {
+            return newBestFit;
+        }
+        return null;
     }
 
 
@@ -4705,7 +4736,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /** @hide */
     public View apply(@NonNull Context context, @NonNull ViewGroup parent,
-            @Nullable InteractionHandler handler, @Nullable PointF size) {
+            @Nullable InteractionHandler handler, @Nullable SizeF size) {
         RemoteViews rvToApply = getRemoteViewsToApply(context, size);
 
         View result = inflateView(context, rvToApply, parent);
@@ -4722,7 +4753,7 @@ public class RemoteViews implements Parcelable, Filter {
     /** @hide */
     public View applyWithTheme(@NonNull Context context, @NonNull ViewGroup parent,
             @Nullable InteractionHandler handler, @StyleRes int applyThemeResId,
-            @Nullable PointF size) {
+            @Nullable SizeF size) {
         RemoteViews rvToApply = getRemoteViewsToApply(context, size);
 
         View result = inflateView(context, rvToApply, parent, applyThemeResId, null);
@@ -4732,7 +4763,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /** @hide */
     public View apply(Context context, ViewGroup parent, InteractionHandler handler,
-            @NonNull PointF size, @Nullable ColorResources colorResources) {
+            @NonNull SizeF size, @Nullable ColorResources colorResources) {
         RemoteViews rvToApply = getRemoteViewsToApply(context, size);
 
         View result = inflateView(context, rvToApply, parent, 0, colorResources);
@@ -4828,21 +4859,21 @@ public class RemoteViews implements Parcelable, Filter {
     /** @hide */
     public CancellationSignal applyAsync(Context context, ViewGroup parent,
             Executor executor, OnViewAppliedListener listener, InteractionHandler handler,
-            PointF size) {
+            SizeF size) {
         return getAsyncApplyTask(context, parent, listener, handler, size, null /* themeColors */)
                 .startTaskOnExecutor(executor);
     }
 
     /** @hide */
     public CancellationSignal applyAsync(Context context, ViewGroup parent, Executor executor,
-            OnViewAppliedListener listener, InteractionHandler handler, PointF size,
+            OnViewAppliedListener listener, InteractionHandler handler, SizeF size,
             ColorResources colorResources) {
         return getAsyncApplyTask(context, parent, listener, handler, size, colorResources)
                 .startTaskOnExecutor(executor);
     }
 
     private AsyncApplyTask getAsyncApplyTask(Context context, ViewGroup parent,
-            OnViewAppliedListener listener, InteractionHandler handler, PointF size,
+            OnViewAppliedListener listener, InteractionHandler handler, SizeF size,
             ColorResources colorResources) {
         return new AsyncApplyTask(getRemoteViewsToApply(context, size), parent, context, listener,
                 handler, colorResources, null /* result */);
@@ -4968,7 +4999,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /** @hide */
-    public void reapply(Context context, View v, InteractionHandler handler, PointF size,
+    public void reapply(Context context, View v, InteractionHandler handler, SizeF size,
             ColorResources colorResources) {
         RemoteViews rvToApply = getRemoteViewsToApply(context, size);
 
@@ -5012,7 +5043,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /** @hide */
     public CancellationSignal reapplyAsync(Context context, View v, Executor executor,
-            OnViewAppliedListener listener, InteractionHandler handler, PointF size,
+            OnViewAppliedListener listener, InteractionHandler handler, SizeF size,
             ColorResources colorResources) {
         RemoteViews rvToApply = getRemoteViewsToApply(context, size);
 

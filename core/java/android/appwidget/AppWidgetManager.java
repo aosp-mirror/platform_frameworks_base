@@ -219,7 +219,7 @@ public class AppWidgetManager {
     public static final String OPTION_APPWIDGET_MAX_HEIGHT = "appWidgetMaxHeight";
 
     /**
-     * A bundle extra ({@code List<PointF>}) that contains the list of possible sizes, in dips, a
+     * A bundle extra ({@code List<SizeF>}) that contains the list of possible sizes, in dips, a
      * widget instance can take.
      */
     public static final String OPTION_APPWIDGET_SIZES = "appWidgetSizes";
