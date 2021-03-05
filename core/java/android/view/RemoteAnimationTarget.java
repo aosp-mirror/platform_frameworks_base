@@ -31,6 +31,7 @@ import static android.view.RemoteAnimationTargetProto.START_BOUNDS;
 import static android.view.RemoteAnimationTargetProto.START_LEASH;
 import static android.view.RemoteAnimationTargetProto.TASK_ID;
 import static android.view.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
+import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 
 import android.annotation.IntDef;
 import android.app.PictureInPictureParams;
@@ -195,12 +196,30 @@ public class RemoteAnimationTarget implements Parcelable {
      */
     public PictureInPictureParams pictureInPictureParams;
 
+    /**
+     * The {@link android.view.WindowManager.LayoutParams.WindowType} of this window. It's only used
+     * for non-app window.
+     */
+    public final @WindowManager.LayoutParams.WindowType int windowType;
+
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
             Rect localBounds, Rect screenSpaceBounds,
             WindowConfiguration windowConfig, boolean isNotInRecents,
             SurfaceControl startLeash, Rect startBounds,
             PictureInPictureParams pictureInPictureParams) {
+        this(taskId, mode, leash, isTranslucent, clipRect, contentInsets, prefixOrderIndex,
+                position, localBounds, screenSpaceBounds, windowConfig, isNotInRecents, startLeash,
+                startBounds, pictureInPictureParams, INVALID_WINDOW_TYPE);
+    }
+
+    public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
+            Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
+            Rect localBounds, Rect screenSpaceBounds,
+            WindowConfiguration windowConfig, boolean isNotInRecents,
+            SurfaceControl startLeash, Rect startBounds,
+            PictureInPictureParams pictureInPictureParams,
+            @WindowManager.LayoutParams.WindowType int windowType) {
         this.mode = mode;
         this.taskId = taskId;
         this.leash = leash;
@@ -217,6 +236,7 @@ public class RemoteAnimationTarget implements Parcelable {
         this.startLeash = startLeash;
         this.startBounds = startBounds == null ? null : new Rect(startBounds);
         this.pictureInPictureParams = pictureInPictureParams;
+        this.windowType = windowType;
     }
 
     public RemoteAnimationTarget(Parcel in) {
@@ -236,6 +256,7 @@ public class RemoteAnimationTarget implements Parcelable {
         startLeash = in.readTypedObject(SurfaceControl.CREATOR);
         startBounds = in.readTypedObject(Rect.CREATOR);
         pictureInPictureParams = in.readTypedObject(PictureInPictureParams.CREATOR);
+        windowType = in.readInt();
     }
 
     @Override
@@ -261,6 +282,7 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeTypedObject(startLeash, 0 /* flags */);
         dest.writeTypedObject(startBounds, 0 /* flags */);
         dest.writeTypedObject(pictureInPictureParams, 0 /* flags */);
+        dest.writeInt(windowType);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -274,6 +296,7 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(" sourceContainerBounds="); sourceContainerBounds.printShortString(pw);
         pw.print(" screenSpaceBounds="); screenSpaceBounds.printShortString(pw);
         pw.print(" localBounds="); localBounds.printShortString(pw);
+        pw.print(" windowType="); pw.print(windowType);
         pw.println();
         pw.print(prefix); pw.print("windowConfiguration="); pw.println(windowConfiguration);
         pw.print(prefix); pw.print("leash="); pw.println(leash);
