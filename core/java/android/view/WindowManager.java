@@ -3435,7 +3435,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Specifies that the window should be considered a trusted system overlay. Trusted system
          * overlays are ignored when considering whether windows are obscured during input
-         * dispatch. Requires the {@link android.Manifest.permission.INTERNAL_SYSTEM_WINDOW}
+         * dispatch. Requires the {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW}
          * permission.
          *
          * {@see android.view.MotionEvent#FLAG_WINDOW_IS_OBSCURED}
@@ -3467,7 +3467,7 @@ public interface WindowManager extends ViewManager {
          * @see LayoutParams#setSystemApplicationOverlay(boolean)
          *
          * <p>Note: the owner of the window must hold
-         * {@link android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY} for this to have any
+         * {@link android.Manifest.permission#SYSTEM_APPLICATION_OVERLAY} for this to have any
          * effect.
          * @hide
          */
