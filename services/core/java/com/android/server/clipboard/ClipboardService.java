@@ -57,6 +57,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.autofill.AutofillManagerInternal;
 import android.widget.Toast;
 
@@ -272,6 +273,9 @@ public class ClipboardService extends SystemService {
         int primaryClipUid = android.os.Process.NOBODY_UID;
         /** Package of the app that set {@link #primaryClip}. */
         String mPrimaryClipPackage;
+
+        /** Uids that have already triggered a toast notification for {@link #primaryClip} */
+        final SparseBooleanArray mNotifiedUids = new SparseBooleanArray();
 
         final HashSet<String> activePermissionOwners
                 = new HashSet<String>();
@@ -648,6 +652,7 @@ public class ClipboardService extends SystemService {
             return;
         }
         clipboard.primaryClip = clip;
+        clipboard.mNotifiedUids.clear();
         if (clip != null) {
             clipboard.primaryClipUid = uid;
             clipboard.mPrimaryClipPackage = sourcePackage;
@@ -938,6 +943,11 @@ public class ClipboardService extends SystemService {
                 && mAutofillInternal.isAugmentedAutofillServiceForUser(uid, userId)) {
             return;
         }
+        // Don't notify if already notified for this uid and clip.
+        if (clipboard.mNotifiedUids.get(uid)) {
+            return;
+        }
+        clipboard.mNotifiedUids.put(uid, true);
 
         // Retrieve the app label of the source of the clip data
         CharSequence sourceAppLabel = null;
