@@ -2291,7 +2291,8 @@ public final class NetworkCapabilities implements Parcelable {
          * For example {@code TRANSPORT_WIFI} and {@code TRANSPORT_ETHERNET} added to a
          * {@code NetworkCapabilities} would cause either a Wi-Fi network or an Ethernet network
          * to be selected. This is logically different than
-         * {@code NetworkCapabilities.NET_CAPABILITY_*}.
+         * {@code NetworkCapabilities.NET_CAPABILITY_*}. Also note that multiple networks with the
+         * same transport type may be active concurrently.
          *
          * @param transportType the transport type to be added or removed.
          * @return this builder
