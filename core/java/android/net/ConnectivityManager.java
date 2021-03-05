@@ -3115,9 +3115,9 @@ public class ConnectivityManager {
     }
 
     /**
-     * Set sign in error notification to visible or in visible
+     * Set sign in error notification to visible or invisible
      *
-     * {@hide}
+     * @hide
      * @deprecated Doesn't properly deal with multiple connected networks of the same type.
      */
     @Deprecated

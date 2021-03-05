@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Breytilegt kerfi er tilbúið. Endurræstu tækið til að byrja að nota það."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Uppsetning stendur yfir"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Uppsetning mistókst"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Ekki tókst að staðfesta mynd. Hættu við uppsetninguna."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Ekki tókst að staðfesta diskmynd. Hættu við uppsetninguna."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Tækið keyrir á breytilegu kerfi. Endurræstu til að nota upprunalega Android útgáfu."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Hætta við"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Fleygja"</string>

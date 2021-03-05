@@ -28,15 +28,15 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> verbleibend"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Noch <xliff:g id="PERCENTAGE">%1$s</xliff:g> übrig; bei deinem Nutzungsmuster hast du noch ca. <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> ausstehend; noch ca. <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Noch <xliff:g id="PERCENTAGE">%s</xliff:g>. Der Stromsparmodus ist aktiviert."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Noch <xliff:g id="PERCENTAGE">%s</xliff:g>. Der Energiesparmodus ist aktiviert."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"Aufladen über USB nicht möglich. Verwende das mit dem Gerät gelieferte Ladegerät."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Aufladen über USB nicht möglich"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Verwende das mit dem Gerät gelieferte Ladegerät"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Einstellungen"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Stromsparmodus aktivieren?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Über den Stromsparmodus"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Energiesparmodus aktivieren?"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Über den Energiesparmodus"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Aktivieren"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Stromsparmodus aktivieren"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Energiesparmodus aktivieren"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Einstellungen"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"WLAN"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Bildschirm automatisch drehen"</string>
@@ -419,7 +419,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"An um <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Bis <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Dunkles Design"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Stromsparmodus"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Energiesparmodus"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"An bei Sonnenuntergang"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Bis Sonnenaufgang"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"An um <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -497,9 +497,9 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Nutzer entfernen?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Alle Apps und Daten dieses Nutzers werden gelöscht."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Entfernen"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Stromsparmodus ist aktiviert"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Energiesparmodus ist aktiviert"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduzierung der Leistung und Hintergrunddaten"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Stromsparmodus deaktivieren"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Energiesparmodus deaktivieren"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Die App \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise angezeigte Passwörter und Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Der Anbieter dieser App erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise Passwörter, Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Aufnahme oder Stream starten?"</string>
@@ -765,8 +765,8 @@
       <item quantity="one">%d Minute</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Akkunutzung"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Der Stromsparmodus ist beim Aufladen nicht verfügbar."</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Stromsparmodus"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Der Energiesparmodus ist beim Aufladen nicht verfügbar."</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Energiesparmodus"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Reduzierung der Leistung und Hintergrunddaten"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Taste <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Pos1"</string>
@@ -981,11 +981,11 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g> darf Teile aus jeder beliebigen App anzeigen"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Zulassen"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Ablehnen"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Tippen zum Planen des Stromsparmodus"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Tippen zum Planen des Energiesparmodus"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktivieren, wenn der Akku wahrscheinlich nicht mehr lange hält"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nein danke"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Geplanter Stromsparmodus aktiviert"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Der Stromsparmodus wird bei einem Akkustand von <xliff:g id="PERCENTAGE">%d</xliff:g> %% automatisch aktiviert."</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Geplanter Energiesparmodus aktiviert"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Der Energiesparmodus wird bei einem Akkustand von <xliff:g id="PERCENTAGE">%d</xliff:g> %% automatisch aktiviert."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Einstellungen"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Ok"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Empfehlungen werden geladen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medien"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Du kannst die aktuelle Sitzung ausblenden."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Aktuelle Sitzung kann nicht verborgen werden."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ablehnen"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Zum Anzeigen der Karten für neue Geräte Ein-/Aus-Taste gedrückt halten"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Steuerelemente hinzufügen"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Steuerelemente bearbeiten"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Ausgabegeräte hinzufügen"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Gruppe"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Ein Gerät ausgewählt"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> Geräte ausgewählt"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (nicht verbunden)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Verbindung nicht möglich. Versuch es noch einmal."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Neues Gerät koppeln"</string>
 </resources>

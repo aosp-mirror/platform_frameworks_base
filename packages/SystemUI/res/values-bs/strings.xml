@@ -649,9 +649,9 @@
     <string name="quick_settings" msgid="6211774484997470203">"Brze postavke"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusna traka"</string>
     <string name="overview" msgid="3522318590458536816">"Pregled"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Način demonstracije Sistemskog UI-a"</string>
-    <string name="enable_demo_mode" msgid="3180345364745966431">"Omogući način demonstracije"</string>
-    <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži način demonstracije"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Način rada za demonstraciju Sistemskog UI-a"</string>
+    <string name="enable_demo_mode" msgid="3180345364745966431">"Omogući način rada za demonstraciju"</string>
+    <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži način rada za demonstraciju"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil za posao"</string>
@@ -724,7 +724,7 @@
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nema nedavnih oblačića"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Nedavni i odbačeni oblačići će se pojaviti ovdje"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ta obavještenja se ne mogu izmijeniti."</string>
-    <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ovdje nije moguće konfigurirati ovu grupu obavještenja"</string>
+    <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ovu grupu obavještenja nije moguće konfigurirati ovdje"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Obavještenje preko proksi servera"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Sva obavještenja aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Prikaži više"</string>
@@ -1080,6 +1080,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Učitavanje preporuka"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Mediji"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Sakrijte trenutnu sesiju."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Nije moguće sakriti trenutnu sesiju."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odbaci"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Postavke"</string>
@@ -1095,4 +1096,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Zadržite dugme za uključivanje da vidite nove kontrole"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrole"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Uredi kontrole"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodajte izlaze"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupa"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Odabran je 1 uređaj"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Broj odabranih uređaja: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (veza je prekinuta)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Povezivanje nije uspjelo. Pokušajte ponovo."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Uparite novi uređaj"</string>
 </resources>

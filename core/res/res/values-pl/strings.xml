@@ -186,10 +186,10 @@
       <item quantity="one">Urząd certyfikacji został zainstalowany</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Przez nieznany podmiot zewnętrzny"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Przez administratora Twojego profilu do pracy"</string>
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Przez administratora Twojego profilu służbowego"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Przez <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5891181538182009328">"Usunięto profil służbowy"</string>
-    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Brakuje aplikacji administratora profilu do pracy lub jest ona uszkodzona. Dlatego Twój profil służbowy i związane z nim dane zostały usunięte. Skontaktuj się ze swoim administratorem, by uzyskać pomoc."</string>
+    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Brakuje aplikacji administratora profilu służbowego lub jest ona uszkodzona. Dlatego Twój profil służbowy i związane z nim dane zostały usunięte. Skontaktuj się ze swoim administratorem, by uzyskać pomoc."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Twój profil służbowy nie jest już dostępny na tym urządzeniu"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Zbyt wiele prób podania hasła"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator odstąpił urządzenie do użytku osobistego"</string>
@@ -204,8 +204,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Twoje urządzenie zostanie wyczyszczone"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Nie można użyć aplikacji administratora. Dane z urządzenia zostaną wykasowane.\n\nJeśli masz pytania, skontaktuj się z administratorem organizacji."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drukowanie wyłączone przez: <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Włącz profil do pracy"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Zablokowano aplikacje osobiste do czasu włączenia profilu do pracy"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Włącz profil służbowy"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Zablokowano aplikacje osobiste do czasu włączenia profilu służbowego"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Aplikacje osobiste zostaną zablokowane <xliff:g id="DATE">%1$s</xliff:g> o <xliff:g id="TIME">%2$s</xliff:g>. Administrator IT nie pozwala na wyłączenie profilu służbowego na dłużej niż <xliff:g id="NUMBER">%3$d</xliff:g> dni."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Włącz"</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
@@ -709,7 +709,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Dom"</item>
     <item msgid="7740243458912727194">"Komórka"</item>
-    <item msgid="8526146065496663766">"Praca"</item>
+    <item msgid="8526146065496663766">"Służbowy"</item>
     <item msgid="8150904584178569699">"Faks w pracy"</item>
     <item msgid="4537253139152229577">"Faks domowy"</item>
     <item msgid="6751245029698664340">"Pager"</item>
@@ -718,24 +718,24 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"Dom"</item>
-    <item msgid="435564470865989199">"Praca"</item>
+    <item msgid="435564470865989199">"Służbowy"</item>
     <item msgid="4199433197875490373">"Inne"</item>
     <item msgid="3233938986670468328">"Niestandardowy"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="3861463339764243038">"Dom"</item>
-    <item msgid="5472578890164979109">"Praca"</item>
+    <item msgid="5472578890164979109">"Służbowy"</item>
     <item msgid="5718921296646594739">"Inny"</item>
     <item msgid="5523122236731783179">"Niestandardowy"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"Dom"</item>
-    <item msgid="5503060422020476757">"Praca"</item>
+    <item msgid="5503060422020476757">"Służbowy"</item>
     <item msgid="2530391194653760297">"Inne"</item>
     <item msgid="7640927178025203330">"Niestandardowy"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="6144047813304847762">"Praca"</item>
+    <item msgid="6144047813304847762">"Służbowy"</item>
     <item msgid="7402720230065674193">"Inne"</item>
     <item msgid="808230403067569648">"Niestandardowy"</item>
   </string-array>
@@ -1453,8 +1453,8 @@
     <string name="deny" msgid="6632259981847676572">"Odmów"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Prośba o pozwolenie"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Prośba o pozwolenie\ndotyczące konta <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Używasz tej aplikacji poza profilem do pracy"</string>
-    <string name="forward_intent_to_work" msgid="3620262405636021151">"Używasz tej aplikacji w swoim profilu do pracy"</string>
+    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Używasz tej aplikacji poza profilem służbowym"</string>
+    <string name="forward_intent_to_work" msgid="3620262405636021151">"Używasz tej aplikacji w swoim profilu służbowym"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Sposób wprowadzania tekstu"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Synchronizacja"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Ułatwienia dostępu"</string>
@@ -1591,7 +1591,7 @@
     <string name="SetupCallDefault" msgid="5581740063237175247">"Odebrać połączenie?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Zawsze"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Tylko raz"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s nie obsługuje profilu do pracy"</string>
+    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s nie obsługuje profilu służbowego"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Telewizor"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
@@ -1828,7 +1828,7 @@
     <string name="select_day" msgid="2060371240117403147">"Wybierz miesiąc i dzień"</string>
     <string name="select_year" msgid="1868350712095595393">"Wybierz rok"</string>
     <string name="deleted_key" msgid="9130083334943364001">"<xliff:g id="KEY">%1$s</xliff:g> usunięte"</string>
-    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (praca)"</string>
+    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (służbowy)"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> – praca 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> – praca 3"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Podaj PIN, aby odpiąć"</string>
@@ -1838,8 +1838,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Aby wydłużyć czas pracy na baterii, funkcja Oszczędzanie baterii:\n\n•włącza tryb ciemny,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n\n• włącza tryb ciemny,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Aby wydłużyć czas pracy na baterii, funkcja Oszczędzanie baterii:\n\n• włącza ciemny motyw,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n\n• włącza ciemny motyw,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Włącz"</string>
@@ -1950,8 +1950,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacja <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie jest teraz dostępna. Zarządza tym aplikacja <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Więcej informacji"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Wznów działanie aplikacji"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Włączyć profil do pracy?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Aplikacje do pracy, powiadomienia, dane i inne funkcje profilu do pracy zostaną włączone"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"Włączyć profil służbowy?"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Aplikacje służbowe, powiadomienia, dane i inne funkcje profilu służbowego zostaną włączone"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Włącz"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacja jest niedostępna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>

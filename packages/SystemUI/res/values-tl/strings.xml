@@ -28,15 +28,15 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> na lang ang natitira"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> na lang ang natitira, humigit-kumulang <xliff:g id="TIME">%2$s</xliff:g> ang natitira batay sa iyong paggamit"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> na lang ang natitira, humigit-kumulang <xliff:g id="TIME">%2$s</xliff:g> ang natitira"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> na lang ang natitira. Naka-on ang Pangtipid sa Baterya."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> na lang ang natitira. Naka-on ang Pantipid ng Baterya."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"Hindi makapag-charge sa pamamagitan ng USB. Gamitin ang charger na kasama ng iyong device."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Hindi makapag-charge sa pamamagitan ng USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Gamitin ang charger na kasama ng iyong device"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Mga Setting"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"I-on ang Pangtipid sa Baterya?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Tungkol sa Pangtipid sa Baterya"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"I-on ang Pantipid ng Baterya?"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Tungkol sa Pantipid ng Baterya"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"I-on"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"I-on ang Pangtipid sa Baterya"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"I-on ang Pantipid ng Baterya"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Mga Setting"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"I-auto rotate ang screen"</string>
@@ -419,7 +419,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Mao-on sa ganap na <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Hanggang <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Madilim na tema"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Pangtipid sa Baterya"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Pantipid ng Baterya"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Mao-on sa sunset"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Hanggang sunrise"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Ma-o-on nang <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -497,9 +497,9 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Gusto mo bang alisin ang user?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Made-delete ang lahat ng app at data ng user na ito."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Alisin"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Naka-on ang Pangtipid sa Baterya"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Naka-on ang Pantipid ng Baterya"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Binabawasan ang performance at data sa background"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"I-off ang Pangtipid sa Baterya"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"I-off ang Pantipid ng Baterya"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Magkakaroon ng access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa lahat ng impormasyong nakikita sa iyong screen o pine-play mula sa device mo habang nagre-record o nagka-cast. Kasama rito ang impormasyong tulad ng mga password, detalye ng pagbabayad, larawan, mensahe, at audio na pine-play mo."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Ang serbisyong nagbibigay ng function na ito ay magkakaroon ng access sa lahat ng impormasyong nakikita sa iyong screen o pine-play mula sa device mo habang nagre-record o nagka-cast. Kasama rito ang impormasyong tulad ng mga password, detalye ng pagbabayad, larawan, mensahe, at audio na pine-play mo."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Magsimulang mag-record o mag-cast?"</string>
@@ -765,8 +765,8 @@
       <item quantity="other">%d na minuto</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Paggamit ng baterya"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Hindi available ang Pangtipid sa Baterya kapag nagcha-charge"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Pangtipid sa Baterya"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Hindi available ang Pantipid ng Baterya kapag nagcha-charge"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Pantipid ng Baterya"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Binabawasan ang performance at data sa background"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Button na <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
@@ -981,11 +981,11 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Payagan ang <xliff:g id="APP">%1$s</xliff:g> na ipakita ang mga slice mula sa anumang app"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Payagan"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Tanggihan"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"I-tap para iiskedyul ang Pangtipid sa Baterya"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"I-tap para iiskedyul ang Pantipid ng Baterya"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"I-on kapag malamang na maubos ang baterya"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Hindi, salamat na lang"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Na-on ang iskedyul ng Pangtipid sa Baterya"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Awtomatikong mao-on ang Pangtipid sa Baterya kapag mas mababa na sa <xliff:g id="PERCENTAGE">%d</xliff:g>%% ang baterya."</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Na-on ang iskedyul ng Pantipid ng Baterya"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Awtomatikong mao-on ang Pantipid ng Baterya kapag mas mababa na sa <xliff:g id="PERCENTAGE">%d</xliff:g>%% ang baterya."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Mga Setting"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Nilo-load ang rekomendasyon"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Itago ang kasalukuyang session."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Hindi maitatago ang kasalukuyang session."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"I-dismiss"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Ituloy"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Mga Setting"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Pindutin nang matagal ang Power button para makita ang mga bagong kontrol"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Magdagdag ng mga kontrol"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Mag-edit ng mga kontrol"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Magdagdag ng mga output"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupo"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 device ang napili"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> (na) device ang napili"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (nakadiskonekta)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Hindi makakonekta. Subukan ulit."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Magpares ng bagong device"</string>
 </resources>

@@ -334,6 +334,7 @@ void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
 }
 
 int StatsPullerManager::ForceClearPullerCache() {
+    std::lock_guard<std::mutex> _l(mLock);
     int totalCleared = 0;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
         totalCleared += pulledAtom.second->ForceClearCache();
@@ -342,6 +343,7 @@ int StatsPullerManager::ForceClearPullerCache() {
 }
 
 int StatsPullerManager::ClearPullerCacheIfNecessary(int64_t timestampNs) {
+    std::lock_guard<std::mutex> _l(mLock);
     int totalCleared = 0;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
         totalCleared += pulledAtom.second->ClearCacheIfNecessary(timestampNs);

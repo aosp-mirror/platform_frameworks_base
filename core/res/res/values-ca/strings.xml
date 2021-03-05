@@ -312,7 +312,7 @@
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registres de trucades"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"llegir i editar el registre de trucades del telèfon"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telèfon"</string>
-    <string name="permgroupdesc_phone" msgid="270048070781478204">"fer i gestionar trucades"</string>
+    <string name="permgroupdesc_phone" msgid="270048070781478204">"fer i gestionar trucades telefòniques"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensors corporals"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accedir a les dades del sensor sobre els signes vitals"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar el contingut de la finestra"</string>
@@ -325,7 +325,7 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controla el nivell i la posició del zoom de la pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Fer gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Permet tocar, lliscar, pinçar i fer altres gestos."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos d\'empremtes dactilars"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos d\'empremtes digitals"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura gestos realitzats en el sensor d\'empremtes dactilars del dispositiu."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fes una captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pots fer una captura de la pantalla."</string>
@@ -341,8 +341,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permet que l\'aplicació suprimeixi les dreceres de la pantalla d\'inici sense la intervenció de l\'usuari."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"desviació de les trucades sortints"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Permet que l\'aplicació vegi el número que s\'està marcant durant una trucada sortint, amb l\'opció de redirigir la trucada a un altre número o bé de cancel·lar-la completament."</string>
-    <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"contestar a trucades"</string>
-    <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Permet que l\'aplicació contesti a una trucada entrant."</string>
+    <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"contestar a trucades telefòniques"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Permet que l\'aplicació contesti a una trucada telefònica entrant."</string>
     <string name="permlab_receiveSms" msgid="505961632050451881">"recepció de missatges de text (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="1797345626687832285">"Permet que l\'aplicació rebi i processi missatges SMS. Això vol dir que l\'aplicació pot controlar o suprimir missatges que s\'han enviat al teu dispositiu sense mostrar-te\'ls."</string>
     <string name="permlab_receiveMms" msgid="4000650116674380275">"recepció de missatges de text (MMS)"</string>
@@ -947,7 +947,7 @@
     <string name="autofill_district" msgid="6428712062213557327">"Districte"</string>
     <string name="autofill_department" msgid="9047276226873531529">"Departament"</string>
     <string name="autofill_prefecture" msgid="7267397763720241872">"Prefectura"</string>
-    <string name="autofill_parish" msgid="6847960518334530198">"Districte"</string>
+    <string name="autofill_parish" msgid="6847960518334530198">"Parròquia"</string>
     <string name="autofill_area" msgid="8289022370678448983">"Àrea"</string>
     <string name="autofill_emirate" msgid="2544082046790551168">"Emirat"</string>
     <string name="permlab_readHistoryBookmarks" msgid="9102293913842539697">"lectura dels marcadors i l\'historial web"</string>
@@ -1219,8 +1219,8 @@
     <string name="volume_music" msgid="7727274216734955095">"Volum de multimèdia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"S\'està reproduint per Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"S\'ha establert el so de silenci"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Volum en trucada"</string>
-    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volum en trucada per Bluetooth"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Volum a la trucada"</string>
+    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volum a la trucada per Bluetooth"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Volum d\'alarma"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Volum de notificacions"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volum"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Per allargar la durada de la bateria, la funció Estalvi de bateria fa el següent:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\".\n\n"<annotation id="url">"Més informació"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Per allargar la durada de la bateria, la funció Estalvi de bateria fa el següent:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Per allargar la durada de la bateria, la funció Estalvi de bateria:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\".\n\n"<annotation id="url">"Més informació"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Per allargar la durada de la bateria, la funció Estalvi de bateria:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar l\'Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>

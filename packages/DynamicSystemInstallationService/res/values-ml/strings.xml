@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"ഡെെനാമിക് സിസ്റ്റം തയ്യാറാണ്. അത് ഉപയോഗിച്ച് തുടങ്ങാൻ നിങ്ങളുടെ ഉപകരണം റീസ്റ്റാർട്ട് ചെയ്യുക."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ഇൻസ്‌റ്റാൾ ചെയ്യൽ പുരോഗതിയിലാണ്"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"ഇൻസ്‌റ്റാൾ ചെയ്യാനായില്ല"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ചിത്രത്തിന്റെ മൂല്യനിർണ്ണയം നടത്താനായില്ല. ഇൻസ്‌റ്റലേഷൻ റദ്ദാക്കുക."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ഇമേജ് മൂല്യനിർണ്ണയം നടത്താനായില്ല. ഇൻസ്‌റ്റലേഷൻ റദ്ദാക്കുക."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"നിലവിൽ ഒരു ഡെെനാമിക് സിസ്റ്റം റൺ ചെയ്യുന്നുണ്ട്. ഒറിജിനൽ Android പതിപ്പ് ഉപയോഗിക്കാൻ റീസ്റ്റാർട്ട് ചെയ്യുക."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"റദ്ദാക്കുക"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"നിരസിക്കുക"</string>

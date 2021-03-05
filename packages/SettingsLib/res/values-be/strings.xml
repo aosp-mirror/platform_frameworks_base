@@ -81,7 +81,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Узровень зараду: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Л: акумулятар: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, П: акумулятар: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Уключана"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аўдыё медыяпрылады"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аўдыя медыяфайлаў"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Тэлефонныя выклікі"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Перадача файлаў"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Прылада ўводу"</string>
@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Засталося <xliff:g id="TIME">%1$s</xliff:g> да поўнай зарадкі"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> да поўнай зарадкі"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Аптымізацыя стану акумулятара"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Невядома"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарадка"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Хуткая зарадка"</string>

@@ -442,7 +442,7 @@ message Atom {
         AudioPowerUsageDataReported audio_power_usage_data_reported = 275;
         TvTunerStateChanged tv_tuner_state_changed = 276 [(module) = "framework"];
         MediaOutputOpSwitchReported mediaoutput_op_switch_reported =
-            277 [(module) = "settings"];
+            277 [(module) = "sysui"];
         CellBroadcastMessageFiltered cb_message_filtered =
             278 [(module) = "cellbroadcast"];
         TvTunerDvrStatus tv_tuner_dvr_status = 279 [(module) = "framework"];
@@ -485,6 +485,8 @@ message Atom {
         NetworkTetheringReported  network_tethering_reported =
             303 [(module) = "network_tethering"];
         ImeTouchReported ime_touch_reported = 304 [(module) = "sysui"];
+
+        MediametricsMediaParserReported mediametrics_mediaparser_reported = 316;
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -3036,6 +3038,9 @@ message BackGesture {
     optional int32 end_y = 7;  // Y coordinate for ACTION_MOVE event.
     optional int32 left_boundary = 8;  // left edge width + left inset
     optional int32 right_boundary = 9;  // screen width - (right edge width + right inset)
+    // The score between 0 and 1 which is the prediction output for the Back Gesture model.
+    optional float ml_model_score = 10;
+    optional string package_name = 11;  // The name of the top 100 most used package by all users.
 
     enum WindowHorizontalLocation {
         DEFAULT_LOCATION = 0;
@@ -3656,6 +3661,12 @@ message AppStartFullyDrawn {
 
     // App startup time (until call to Activity#reportFullyDrawn()).
     optional int64 app_startup_time_millis = 6;
+
+    // The compiler filter used when when the package was optimized.
+    optional int32 package_optimization_compilation_filter = 7;
+
+    // The reason why the package was optimized.
+    optional int32 package_optimization_compilation_reason = 8;
 }
 
 /**
@@ -4440,7 +4451,7 @@ message PrivacyIndicatorsInteracted {
         UNKNOWN = 0;
         CHIP_VIEWED = 1;
         CHIP_CLICKED = 2;
-        reserved 3; // Used only in beta builds, never shipped 
+        reserved 3; // Used only in beta builds, never shipped
         DIALOG_DISMISS = 4;
         DIALOG_LINE_ITEM = 5;
     }
@@ -7919,6 +7930,72 @@ message MediametricsExtractorReported {
 }
 
 /**
+ * Track MediaParser (parsing video/audio streams from containers) usage
+ * Logged from:
+ *
+ *   frameworks/av/services/mediametrics/statsd_mediaparser.cpp
+ *   frameworks/base/apex/media/framework/jni/android_media_MediaParserJNI.cpp
+ */
+message MediametricsMediaParserReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+
+    // MediaParser specific data.
+    /**
+     * The name of the parser selected for parsing the media, or an empty string
+     * if no parser was selected.
+     */
+    optional string parser_name = 4;
+    /**
+     * Whether the parser was created by name. 1 represents true, and 0
+     * represents false.
+     */
+    optional int32 created_by_name = 5;
+    /**
+     * The parser names in the sniffing pool separated by "|".
+     */
+    optional string parser_pool = 6;
+    /**
+     * The fully qualified name of the last encountered exception, or an empty
+     * string if no exception was encountered.
+     */
+    optional string last_exception = 7;
+    /**
+     * The size of the parsed media in bytes, or -1 if unknown. Note this value
+     * contains intentional random error to prevent media content
+     * identification.
+     */
+    optional int64 resource_byte_count = 8;
+    /**
+     * The duration of the media in milliseconds, or -1 if unknown. Note this
+     * value contains intentional random error to prevent media content
+     * identification.
+     */
+    optional int64 duration_millis = 9;
+    /**
+     * The MIME types of the tracks separated by "|".
+     */
+    optional string track_mime_types = 10;
+    /**
+     * The tracks' RFC 6381 codec strings separated by "|".
+     */
+    optional string track_codecs = 11;
+    /**
+     * Concatenation of the parameters altered by the client, separated by "|".
+     */
+    optional string altered_parameters = 12;
+    /**
+     * The video width in pixels, or -1 if unknown or not applicable.
+     */
+    optional int32 video_width = 13;
+    /**
+     * The video height in pixels, or -1 if unknown or not applicable.
+     */
+    optional int32 video_height = 14;
+}
+
+/**
  * Track how we arbitrate between microphone/input requests.
  * Logged from
  *   frameworks/av/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
@@ -10712,7 +10789,7 @@ message BytesTransferByTagAndMetered {
  * Logs when the Media Output Switcher finishes a media switch operation.
  *
  * Logged from:
- *  packages/apps/Settings/src/com/android/settings/media/MediaOutputSliceWorker.java
+ *  packages/SystemUI/src/com/android/systemui/media/dialog/MediaOutputMetricLogger.java
  */
 message MediaOutputOpSwitchReported {
     // Source medium type before switching.

@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"המערכת הדינמית מוכנה. כדי להתחיל להשתמש בה, יש להפעיל מחדש את המכשיר."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ההתקנה מתבצעת"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"ההתקנה נכשלה"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"אימות התמונה נכשל. יש לבטל את ההתקנה."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"האימות של קובץ האימג\' נכשל. ההתקנה תבוטל."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"‏בשלב זה פועלת מערכת דינמית. כדי להשתמש בגרסת Android המקורית, יש לבצע הפעלה מחדש."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"ביטול"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"סגירה"</string>

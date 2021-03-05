@@ -1793,7 +1793,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Kerfisstjóri eyddi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Í lagi"</string>
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Til að auka rafhlöðuendingu gerir rafhlöðusparnaður eftirfarandi:\n\n•·Kveikir á dökku þema\n•·Slekkur á eða takmarkar bakgrunnsvirkni, tilteknar myndbrellur og aðra eiginleika eins og „Ok Google“\n\n"<annotation id="url">"Frekari upplýsingar"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Til að auka rafhlöðuendingu gerir rafhlöðusparnaður eftirfarandi:\n\n•·Kveikir á dökku þema\n•·Slekkur á eða takmarkar bakgrunnsvirkni, tilteknar myndbrellur og aðra eiginleika eins og „Ok Google“"</string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Til að auka rafhlöðuendingu gerir rafhlöðusparnaður eftirfarandi:\n\n• Kveikir á dökku þema\n• Slekkur á eða takmarkar bakgrunnsvirkni, tilteknar myndbrellur og aðra eiginleika eins og „Ok Google“"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan getur verið, svo dæmi sé tekið, að myndir eru ekki birtar fyrr en þú ýtir á þær."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Kveikja á gagnasparnaði?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Kveikja"</string>

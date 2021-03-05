@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"නිර්දේශ පූරණය කරමින්"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"මාධ්‍ය"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"වත්මන් සැසිය සඟවන්න."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"වත්මන් සැසිය සැඟවිය නොහැකිය."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ඉවත ලන්න"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"නැවත පටන් ගන්න"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"සැකසීම්"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"නව පාලන බැලීමට බල බොත්තම අල්ලාගෙන සිටින්න"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"පාලන එක් කරන්න"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"පාලන සංස්කරණය කරන්න"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"ප්‍රතිදාන එක් කරන්න"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"සමූහය"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"උපාංග 1ක් තෝරන ලදී"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"උපාංග <xliff:g id="COUNT">%1$d</xliff:g>ක් තෝරන ලදී"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (විසන්ධි විය)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"සම්බන්ධ වීමට නොහැකි විය. නැවත උත්සාහ කරන්න."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"නව උපාංගය යුගල කරන්න"</string>
 </resources>

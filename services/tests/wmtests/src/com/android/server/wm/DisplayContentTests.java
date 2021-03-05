@@ -32,6 +32,7 @@ import static android.view.Display.FLAG_PRIVATE;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -102,6 +103,7 @@ import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl.Transaction;
@@ -1113,6 +1115,17 @@ public class DisplayContentTests extends WindowTestsBase {
                 ANIMATION_TYPE_FIXED_TRANSFORM));
         assertTrue(mNavBarWindow.getParent().isAnimating(WindowContainer.AnimationFlags.PARENTS,
                 ANIMATION_TYPE_FIXED_TRANSFORM));
+
+        // If the visibility of insets state is changed, the rotated state should be updated too.
+        final InsetsState rotatedState = app.getFixedRotationTransformInsetsState();
+        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
+        assertEquals(state.getSource(ITYPE_STATUS_BAR).isVisible(),
+                rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+        state.getSource(ITYPE_STATUS_BAR).setVisible(
+                !rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+        mDisplayContent.getInsetsStateController().notifyInsetsChanged();
+        assertEquals(state.getSource(ITYPE_STATUS_BAR).isVisible(),
+                rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
 
         final Rect outFrame = new Rect();
         final Rect outInsets = new Rect();

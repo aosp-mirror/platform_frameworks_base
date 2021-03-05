@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"ଡାଇନାମିକ୍ ସିଷ୍ଟମ୍ ପ୍ରସ୍ତୁତ ଅଛି। ଏହାକୁ ବ୍ୟବହାର କରିବା ଆରମ୍ଭ କରିବାକୁ, ଆପଣଙ୍କ ଡିଭାଇସକୁ ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ।"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ଇନଷ୍ଟଲ୍ ହେଉଛି"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"ଇନଷ୍ଟଲ୍ କରିବା ବିଫଳ ହୋଇଛି"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ଛବି ବୈଧକରଣ ବିଫଳ ହୋଇଛି। ଇନଷ୍ଟଲେସନ୍ ରଦ୍ଦ କରନ୍ତୁ।"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ଇମେଜ୍ ବୈଧକରଣ ବିଫଳ ହୋଇଛି। ଇନଷ୍ଟଲେସନ୍ ରଦ୍ଦ କରନ୍ତୁ।"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"ବର୍ତ୍ତମାନ ଏକ ଡାଇନାମିକ୍ ସିଷ୍ଟମ୍ ଚାଲୁଛି। ମୂଳ Android ସଂସ୍କରଣ ବ୍ୟବହାର କରିବାକୁ ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ।"</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"ବାତିଲ୍ କରନ୍ତୁ"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"ଖାରଜ କରନ୍ତୁ"</string>

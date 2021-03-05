@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Φόρτωση προτάσεων"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Μέσα"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Απόκρυψη της τρέχουσας περιόδου λειτουργίας."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Δεν είναι δυνατή η απόκρυψη της τρέχουσας περιόδου λειτουργίας."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Παράβλεψη"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Συνέχιση"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ρυθμίσεις"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Πατήστε το κουμπί λειτουργίας για να δείτε νέα στοιχεία ελέγχου."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Προσθήκη στοιχείων ελέγχου"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Επεξεργασία στοιχείων ελέγχου"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Προσθήκη εξόδων"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Ομάδα"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Επιλέχτηκε 1 συσκευή"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Επιλέχτηκαν <xliff:g id="COUNT">%1$d</xliff:g> συσκευές"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (αποσυνδέθηκε)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Δεν ήταν δυνατή η σύνδεση. Δοκιμάστε ξανά."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Σύζευξη νέας συσκευής"</string>
 </resources>

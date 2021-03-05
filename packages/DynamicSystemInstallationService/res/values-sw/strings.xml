@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Dynamic system iko tayari. Ili uanze kuitumia, zima kisha uwashe kifaa chako."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Inasakinisha"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Imeshindwa kusakinisha"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Imeshindwa kuthibitisha picha. Ghairi usakinishaji."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Imeshindwa kuthibitisha nakala. Ghairi usakinishaji."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Inatumia Dynamic System kwa sasa. Zima kisha uwashe ili utumie toleo halisi la Android."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Ghairi"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Ondoa"</string>

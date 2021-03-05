@@ -853,7 +853,7 @@
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"הרצועה הקודמת"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"הרצועה הבאה"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"השהה"</string>
-    <string name="lockscreen_transport_play_description" msgid="106868788691652733">"הפעל"</string>
+    <string name="lockscreen_transport_play_description" msgid="106868788691652733">"הפעלה"</string>
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"הפסק"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"הרץ אחורה"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"הרץ קדימה"</string>
@@ -1842,7 +1842,7 @@
     <string name="battery_saver_description" msgid="6794188153647295212">"‏כדי להאריך את חיי הסוללה, התכונה \'חיסכון בסוללה\':\n\n• מפעילה עיצוב כהה\n• מכבה או מגבילה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות כמו Ok Google"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה נעשה שימוש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"להפעיל את חוסך הנתונים?"</string>
-    <string name="data_saver_enable_button" msgid="4399405762586419726">"הפעל"</string>
+    <string name="data_saver_enable_button" msgid="4399405762586419726">"הפעלה"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="two">‏למשך %d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">‏למשך %1$d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1952,7 +1952,7 @@
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ביטול ההשהיה של האפליקציה"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"להפעיל את פרופיל העבודה?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"אפליקציות העבודה, התראות, נתונים ותכונות נוספות של פרופיל העבודה יופעלו"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"הפעל"</string>
+    <string name="work_mode_turn_on" msgid="3662561662475962285">"הפעלה"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"האפליקציה לא זמינה"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא זמינה בשלב זה."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏האפליקציה הזו עוצבה לגרסה ישנה יותר של Android וייתכן שלא תפעל כראוי. ניתן לבדוק אם יש עדכונים או ליצור קשר עם המפתח."</string>

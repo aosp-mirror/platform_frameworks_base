@@ -727,10 +727,14 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                                        "compiled_trace.pb");
             try {
                 boolean exists =  Files.exists(tracePath);
-                Log.d(TAG, tracePath.toString() + (exists? " exists" : " doesn't exist"));
+                if (DEBUG) {
+                    Log.d(TAG, tracePath.toString() + (exists? " exists" : " doesn't exist"));
+                }
                 if (exists) {
                     long bytes = Files.size(tracePath);
-                    Log.d(TAG, tracePath.toString() + " size is " + Long.toString(bytes));
+                    if (DEBUG) {
+                        Log.d(TAG, tracePath.toString() + " size is " + Long.toString(bytes));
+                    }
                     return bytes > 0L;
                 }
                 return exists;

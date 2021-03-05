@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Пуни се"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Брзо се пуни"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Споро се пуни"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Оптимизује се ради доброг стања батерије"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"Прикључите пуњач."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Притисните Мени да бисте откључали."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Мрежа је закључана"</string>

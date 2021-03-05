@@ -325,7 +325,7 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Contrôle le niveau de zoom et le positionnement de l\'écran."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Effectuer des gestes"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Permet d\'appuyer sur l\'écran, de le balayer, de le pincer et d\'effectuer d\'autres gestes."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestes avec l\'empreinte digitale"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestes d\'empreinte digitale"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Peut enregistrer des gestes effectués sur le lecteur d\'empreinte digitale de l\'appareil."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Prendre une capture d\'écran"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Peut prendre des captures d\'écran."</string>
@@ -1231,7 +1231,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Sonnerie par défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Aucun(e)"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Aucun"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Sonneries"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Sons de l\'alarme"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Sons de notification"</string>
@@ -1792,7 +1792,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n\n·• active le thème sombre ;\n·• désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Hey Google\".\n\n"<annotation id="url">"En savoir plus"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n\n • active le thème sombre ;\n • désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Hey Google\".\n\n"<annotation id="url">"En savoir plus"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n\n• active le thème sombre ;\n • désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Hey Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation de données, l\'économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Ainsi, les applications que vous utilisez peuvent toujours accéder aux données, mais pas en permanence. Par exemple, il se peut que les images ne s\'affichent pas tant que vous n\'appuyez pas dessus."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'économiseur de données ?"</string>

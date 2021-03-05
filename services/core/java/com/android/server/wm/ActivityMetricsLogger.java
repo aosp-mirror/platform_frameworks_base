@@ -129,7 +129,6 @@ class ActivityMetricsLogger {
      */
     private static final int IGNORE_CALLER = -1;
     private static final int INVALID_DELAY = -1;
-    private static final int INVALID_TRANSITION_TYPE = -1;
 
     // Preallocated strings we are sending to tron, so we don't have to allocate a new one every
     // time we log.
@@ -224,21 +223,18 @@ class ActivityMetricsLogger {
         static TransitionInfo create(@NonNull ActivityRecord r,
                 @NonNull LaunchingState launchingState, boolean processRunning,
                 boolean processSwitch, int startResult) {
-            int transitionType = INVALID_TRANSITION_TYPE;
+            if (startResult != START_SUCCESS && startResult != START_TASK_TO_FRONT) {
+                return null;
+            }
+            final int transitionType;
             if (processRunning) {
-                if (startResult == START_SUCCESS) {
-                    transitionType = TYPE_TRANSITION_WARM_LAUNCH;
-                } else if (startResult == START_TASK_TO_FRONT) {
-                    transitionType = TYPE_TRANSITION_HOT_LAUNCH;
-                }
-            } else if (startResult == START_SUCCESS || startResult == START_TASK_TO_FRONT) {
+                transitionType = r.attachedToProcess()
+                        ? TYPE_TRANSITION_HOT_LAUNCH
+                        : TYPE_TRANSITION_WARM_LAUNCH;
+            } else {
                 // Task may still exist when cold launching an activity and the start result will be
                 // set to START_TASK_TO_FRONT. Treat this as a COLD launch.
                 transitionType = TYPE_TRANSITION_COLD_LAUNCH;
-            }
-            if (transitionType == INVALID_TRANSITION_TYPE) {
-                // That means the startResult is neither START_SUCCESS nor START_TASK_TO_FRONT.
-                return null;
             }
             return new TransitionInfo(r, launchingState, transitionType, processRunning,
                     processSwitch);
@@ -375,6 +371,13 @@ class ActivityMetricsLogger {
                 default:
                     return -1;
             }
+        }
+
+        PackageOptimizationInfo getPackageOptimizationInfo(ArtManagerInternal artManagerInternal) {
+            return artManagerInternal == null || launchedActivityAppRecordRequiredAbi == null
+                    ? PackageOptimizationInfo.createWithNoInfo()
+                    : artManagerInternal.getPackageOptimizationInfo(applicationInfo,
+                            launchedActivityAppRecordRequiredAbi, launchedActivityName);
         }
     }
 
@@ -836,14 +839,8 @@ class ActivityMetricsLogger {
                     info.bindApplicationDelayMs);
         }
         builder.addTaggedData(APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS, info.windowsDrawnDelayMs);
-        final ArtManagerInternal artManagerInternal = getArtManagerInternal();
         final PackageOptimizationInfo packageOptimizationInfo =
-                (artManagerInternal == null) || (info.launchedActivityAppRecordRequiredAbi == null)
-                ? PackageOptimizationInfo.createWithNoInfo()
-                : artManagerInternal.getPackageOptimizationInfo(
-                        info.applicationInfo,
-                        info.launchedActivityAppRecordRequiredAbi,
-                        info.launchedActivityName);
+                info.getPackageOptimizationInfo(getArtManagerInternal());
         builder.addTaggedData(PACKAGE_OPTIMIZATION_COMPILATION_REASON,
                 packageOptimizationInfo.getCompilationReason());
         builder.addTaggedData(PACKAGE_OPTIMIZATION_COMPILATION_FILTER,
@@ -962,6 +959,8 @@ class ActivityMetricsLogger {
         builder.addTaggedData(APP_TRANSITION_PROCESS_RUNNING,
                 info.mProcessRunning ? 1 : 0);
         mMetricsLogger.write(builder);
+        final PackageOptimizationInfo packageOptimizationInfo =
+                infoSnapshot.getPackageOptimizationInfo(getArtManagerInternal());
         FrameworkStatsLog.write(
                 FrameworkStatsLog.APP_START_FULLY_DRAWN,
                 info.mLastLaunchedActivity.info.applicationInfo.uid,
@@ -971,7 +970,9 @@ class ActivityMetricsLogger {
                         : FrameworkStatsLog.APP_START_FULLY_DRAWN__TYPE__WITHOUT_BUNDLE,
                 info.mLastLaunchedActivity.info.name,
                 info.mProcessRunning,
-                startupTimeMs);
+                startupTimeMs,
+                packageOptimizationInfo.getCompilationReason(),
+                packageOptimizationInfo.getCompilationFilter());
 
         // Ends the trace started at the beginning of this function. This is located here to allow
         // the trace slice to have a noticable duration.

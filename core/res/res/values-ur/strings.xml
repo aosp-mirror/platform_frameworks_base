@@ -272,8 +272,8 @@
     <string name="notification_channel_security" msgid="8516754650348238057">"سیکیورٹی"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"کار وضع"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"اکاؤنٹ اسٹیٹس"</string>
-    <string name="notification_channel_developer" msgid="1691059964407549150">"ڈیولپر کے پیغامات"</string>
-    <string name="notification_channel_developer_important" msgid="7197281908918789589">"اہم ڈیولپر پیغامات"</string>
+    <string name="notification_channel_developer" msgid="1691059964407549150">"ڈویلپر کے پیغامات"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"اہم ڈویلپر پیغامات"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"اپ ڈیٹس"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"نیٹ ورک اسٹیٹس"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"نیٹ ورک الرٹس"</string>
@@ -818,7 +818,7 @@
     <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"‏PUK اور نیا PIN کوڈ ٹائپ کریں"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="2825313071899938305">"‏PUK کوڈ"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"‏نیا PIN کوڈ"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"پاسورڈ ٹائپ کرنے کیلئے تھپتھپائیں"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"پاس ورڈ ٹائپ کرنے کیلئے تھپتھپائیں"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"غیر مقفل کرنے کیلئے پاس ورڈ ٹائپ کریں"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"‏غیر مقفل کرنے کیلئے PIN ٹائپ کریں"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"‏غلط PIN کوڈ۔"</string>
@@ -1211,7 +1211,7 @@
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> ہیپ ڈمپ تیار ہے"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"ہیپ ڈمپ جمع ہو گیا ہے۔ اشتراک کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"ہیپ ڈمپ کا اشتراک کریں؟"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> کارروائی اپنی میموری کی حد <xliff:g id="SIZE">%2$s</xliff:g> سے تجاوز کر گئی ہے۔ آپ کے لیے ایک ہیپ ڈمپ اس کے ڈیولپر کے ساتھ اشتراک کرنے کے لیے دستیاب ہے۔ محتاط رہیں: اس ہیپ ڈمپ میں آپ کی کوئی ایسی ذاتی معلومات بھی شامل ہو سکتی ہے جس تک ایپلیکیشن کو رسائی حاصل ہے۔"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> کارروائی اپنی میموری کی حد <xliff:g id="SIZE">%2$s</xliff:g> سے تجاوز کر گئی ہے۔ آپ کے لیے ایک ہیپ ڈمپ اس کے ڈویلپر کے ساتھ اشتراک کرنے کے لیے دستیاب ہے۔ محتاط رہیں: اس ہیپ ڈمپ میں آپ کی کوئی ایسی ذاتی معلومات بھی شامل ہو سکتی ہے جس تک ایپلیکیشن کو رسائی حاصل ہے۔"</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> پروسیس نے اپنی میموری کی حد <xliff:g id="SIZE">%2$s</xliff:g> سے بڑھا لی ہے۔ آپ کے اشتراک کرنے کے لیے ہیپ ڈمپ دستیاب ہے۔ محتاط رہیں: اس ہیپ ڈمپ میں حساس ذاتی معلومات ہو سکتی ہے، جس میں آپ کے ذریعے ٹائپ کردہ چیزیں شامل ہو سکتی ہیں، جس تک پروسیس کو رسائی حاصل ہو سکتی ہے۔"</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> کے پروسیس کا ہیپ ڈمپ آپ کے اشتراک کے لیے دستیاب ہے۔ محتاط رہیں: اس ہیپ ڈمپ میں ممکنہ طور پر حساس ذاتی معلومات ہو سکتی ہے، جس میں آپ کے ذریعے ٹائپ کردہ چیزیں شامل ہو سکتی ہیں، جس تک پروسیس کو رسائی حاصل ہو سکتی ہے۔"</string>
     <string name="sendText" msgid="493003724401350724">"متن کیلئے ایک کارروائی منتخب کریں"</string>
@@ -1891,7 +1891,7 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"آن کریں"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ایپ دستیاب نہیں ہے"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ابھی دستیاب نہیں ہے۔"</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏یہ ایپ Android کے پرانے ورژن کے لئے بنائی گئی ہے اور ہو سکتا ہے صحیح طور پر کام نہ کرے۔ اپ ڈیٹس چیک کر کے آزمائیں یا ڈیولپر سے رابطہ کریں۔"</string>
+    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏یہ ایپ Android کے پرانے ورژن کے لئے بنائی گئی ہے اور ہو سکتا ہے صحیح طور پر کام نہ کرے۔ اپ ڈیٹس چیک کر کے آزمائیں یا ڈویلپر سے رابطہ کریں۔"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"اپ ڈیٹ چیک کریں"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"آپ کے پاس نئے پیغامات ہیں"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"‏دیکھنے کیلئے SMS ایپ کھولیں"</string>
@@ -2071,7 +2071,7 @@
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏SIM نیٹ ورک غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"‏SIM نیٹ ورک سب سیٹ کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"‏SIM کارپوریٹ کو غیر مقفل کرنے کا PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"‏SIM کے خدمت کے فراہم کنندہ کو غیر مقفل کرنے کا PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"‏SIM کے سروس فراہم کنندہ کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"‏SIM کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"‏PUK درج کریں"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"‏PUK درج کریں"</string>
@@ -2082,7 +2082,7 @@
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"‏RUIM network2 کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"‏RUIM hrpd کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"‏RUIM کارپوریٹ کو غیر مقفل کرنے کا PIN"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"‏RUIM خدمت کے فراہم کنندہ کو غیر مقفل کرنے کا PIN"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"‏RUIM سروس فراہم کنندہ کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"‏RUIM کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"‏PUK درج کریں"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"‏PUK درج کریں"</string>
@@ -2094,10 +2094,10 @@
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"‏SP Equivalent Home PLMN کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"‏ICCID کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"‏IMPI کو غیر مقفل کرنے کا PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"‏نیٹ ورک سب سیٹ خدمت کے فراہم کنندہ کو غیر مقفل کرنے کا PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"‏نیٹ ورک سب سیٹ سروس فراہم کنندہ کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"‏SIM نیٹ ورک کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"‏SIM نیٹ ورک سب سیٹ کو غیر مقفل کرنے کی درخواست کی جا رہی ہے …"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"‏SIM کے خدمت کے فراہم کنندہ کو غیر مقفل کرنے کی درخواست کی جار ہی ہے…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"‏SIM کے سروس فراہم کنندہ کو غیر مقفل کرنے کی درخواست کی جار ہی ہے…"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"‏SIM کارپوریٹ کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"‏PUK کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"‏PUK کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
@@ -2108,13 +2108,13 @@
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"‏RUIM network1 کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"‏RUIM network2 کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"‏RUIM hrpd کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"‏RUIM خدمت کے فراہم کنندہ کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"‏RUIM سروس فراہم کنندہ کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"‏RUIM کارپوریٹ کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"‏SPN کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"‏Requesting SP Equivalent Home کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"‏ICCID کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"‏IMPI کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"نیٹ ورک سب سیٹ کے خدمت کے فراہم کنندہ کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"نیٹ ورک سب سیٹ کے سروس فراہم کنندہ کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"‏RUIM کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"‏PUK کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"‏PUK کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
@@ -2124,14 +2124,14 @@
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"‏PUK کو غیر مقفل کرنے کی درخواست کی جا رہی ہے…"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"‏SIM نیٹ ورک کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"‏SIM نیٹ ورک سب سیٹ کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"‏SIM کے خدمت کے فراہم کنندہ کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"‏SIM کے سروس فراہم کنندہ کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"‏SIM کارپوریٹ کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"‏SIM کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"‏RUIM Network1 کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"‏RUIM Network2 غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"‏RUIM Hrpd کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"‏RUIM کارپوریٹ کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"‏RUIM خدمت کے فراہم کنندہ کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"‏RUIM سروس فراہم کنندہ کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"‏RUIM کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"‏PUK غیر مقفل نہیں ہو سکا۔"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"‏PUK غیر مقفل نہیں ہو سکا۔"</string>
@@ -2148,16 +2148,16 @@
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"‏SP Equivalent Home PLMN کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"‏ICCID کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"‏IMPI کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"نیٹ ورک سب سیٹ خدمت کے فراہم کنندہ کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"نیٹ ورک سب سیٹ سروس فراہم کنندہ کو غیر مقفل کرنے کی درخواست ناکام ہو گئی۔"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"‏SIM نیٹ ورک غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"‏SIM نیٹ ورک سب سیٹ غیر مقفل ہو گیا۔"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"‏SIM کے خدمت کا فراہم کنندہ غیر مقفل ہو گیا۔"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"‏SIM کے سروس فراہم کنندہ غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"‏SIM کارپوریٹ غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"‏SIM غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"‏RUIM Network1 غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"‏RUIM Network2 غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"‏RUIM Hrpd غیر مقفل ہو گیا۔"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"‏RUIM خدمت کا فراہم کنندہ غیر مقفل ہو گیا۔"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"‏RUIM سروس فراہم کنندہ غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"‏RUIM کارپوریٹ غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"‏RUIM غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"‏PUK غیر مقفل ہو گیا۔"</string>
@@ -2175,7 +2175,7 @@
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"‏SP Equivalent Home PLMN غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"‏ICCID غیر مقفل ہو گیا۔"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"‏IMPI غیر مقفل ہو گیا۔"</string>
-    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"نیٹ ورک سب سیٹ کے خدمت کا فراہم کنندہ غیر مقفل ہو گیا۔"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"نیٹ ورک سب سیٹ کے سروس فراہم کنندہ غیر مقفل ہو گیا۔"</string>
     <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>

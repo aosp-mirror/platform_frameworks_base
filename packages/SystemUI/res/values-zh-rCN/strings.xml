@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"正在加载推荐内容"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"媒体"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"隐藏当前会话。"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"无法隐藏当前会话。"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"关闭"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"继续播放"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"设置"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"按住电源按钮即可查看新控件"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"添加控件"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"修改控件"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"添加输出设备"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"群组"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"已选择 1 个设备"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"已选择 <xliff:g id="COUNT">%1$d</xliff:g> 个设备"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>（已断开连接）"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"无法连接。请重试。"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"与新设备配对"</string>
 </resources>

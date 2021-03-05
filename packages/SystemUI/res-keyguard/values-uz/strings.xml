@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quvvat olmoqda"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Tezkor quvvat olmoqda"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sekin quvvat olmoqda"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Batareya quvvati muvozanatlanmoqda"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"Quvvatlash moslamasini ulang."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Qulfdan chiqarish uchun Menyu tugmasini bosing."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Tarmoq qulflangan"</string>
@@ -101,9 +102,9 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Aloqa yo‘q."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Matn kiritish usulini almashtirish"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Parvoz rejimi"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Qurilma o‘chirib yoqilgandan keyin grafik kalit talab qilinadi"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Qurilma o‘chirib yoqilgandan keyin PIN kod talab qilinadi"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Qurilma o‘chirib yoqilgandan keyin parol talab qilinadi"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Qurilma qayta ishga tushganidan keyin grafik kalitni kiritish zarur"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Qurilma qayta ishga tushganidan keyin PIN kodni kiritish zarur"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Qurilma qayta ishga tushganidan keyin parolni kiritish zarur"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Qo‘shimcha xavfsizlik chorasi sifatida grafik kalit talab qilinadi"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Qo‘shimcha xavfsizlik chorasi sifatida PIN kod talab qilinadi"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Qo‘shimcha xavfsizlik chorasi sifatida parol talab qilinadi"</string>

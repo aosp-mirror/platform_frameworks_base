@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Дынамічная сістэма гатовая. Каб пачаць выкарыстоўваць яе, перазапусціце прыладу."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Ідзе ўсталёўка"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Збой усталёўкі"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Збой пры праверцы відарыса. Усталёўка спынена."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Збой пры праверцы вобраза дыска. Усталёўка спынена."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Цяпер запушчана дынамічная сістэма. Перазапусціце, каб скарыстаць арыгінальную версію Android."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Скасаваць"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Адхіліць"</string>

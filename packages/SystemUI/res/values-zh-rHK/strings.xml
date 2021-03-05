@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"正在載入建議"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"媒體"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"隱藏目前的工作階段。"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"無法隱藏目前的工作階段。"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"關閉"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"繼續播放"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"按住「開關」按鈕以查看新控制項"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"新增控制項"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"編輯控制項"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"新增輸出裝置"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"群組"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"已選取 1 部裝置"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"已選取 <xliff:g id="COUNT">%1$d</xliff:g> 部裝置"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (已中斷連線)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"無法連線，請再試一次。"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"配對新裝置"</string>
 </resources>

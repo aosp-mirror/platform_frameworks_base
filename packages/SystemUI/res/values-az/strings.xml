@@ -789,7 +789,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Yuxarı Səhifə"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Aşağı Səhifə"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Silin"</string>
-    <string name="keyboard_key_move_home" msgid="3496502501803911971">"Əsas səhifə"</string>
+    <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Son"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Daxil edin"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Nömrələr"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Tövsiyələr yüklənir"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Cari sessiyanı gizlədin."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Cari sessiyanı gizlətmək olmur."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"İmtina edin"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Davam edin"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ayarlar"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Yeni nizamlayıcıları görmək üçün yandırıb-söndürmə düyməsinə basıb saxlayın"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Nizamlayıcılar əlavə edin"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Nizamlayıcıları redaktə edin"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Nəticələri əlavə edin"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Qrup"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 cihaz seçilib"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> cihaz seçilib"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (bağlantı kəsilib)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Qoşulmaq alınmadı. Yenə cəhd edin."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Yeni cihazı qoşalaşdırın"</string>
 </resources>

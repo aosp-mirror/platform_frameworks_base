@@ -305,6 +305,9 @@ droidstubs {
 java_defaults {
     name: "android_defaults_stubs_current",
     libs: [ "stub-annotations" ],
+    static_libs: [
+        "framework-res-package-jar", // Export package of framework-res
+    ],
     errorprone: {
         javacflags: [
             "-XepDisableAllChecks",

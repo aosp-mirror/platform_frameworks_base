@@ -24,6 +24,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <unordered_set>
 #include <vector>
 
@@ -386,7 +387,8 @@ class StreamManager : public StreamMap {
 public:
     // Note: the SoundPool pointer is only used for stream initialization.
     // It is not stored in StreamManager.
-    StreamManager(int32_t streams, size_t threads, const audio_attributes_t* attributes);
+    StreamManager(int32_t streams, size_t threads, const audio_attributes_t* attributes,
+            std::string opPackageName);
     ~StreamManager();
 
     // Returns positive streamID on success, 0 on failure.  This is locked.
@@ -399,6 +401,8 @@ public:
     // Called from soundpool::Stream
 
     const audio_attributes_t* getAttributes() const { return &mAttributes; }
+
+    const std::string& getOpPackageName() const { return mOpPackageName; }
 
     // Moves the stream to the restart queue (called upon BUFFER_END of the static track)
     // this is locked internally.
@@ -473,6 +477,8 @@ private:
     // The paired stream may be active or restarting.
     // No particular order.
     std::unordered_set<Stream*> mProcessingStreams GUARDED_BY(mStreamManagerLock);
+
+    const std::string           mOpPackageName;
 };
 
 } // namespace android::soundpool

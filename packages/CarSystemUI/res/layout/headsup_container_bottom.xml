@@ -45,14 +45,13 @@
         app:layout_constraintBottom_toBottomOf="@+id/gradient_edge"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <FrameLayout
+    <com.android.car.notification.headsup.HeadsUpContainerView
         android:id="@+id/headsup_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/headsup_notification_top_margin"
         app:layout_constraintEnd_toStartOf="parent"
         app:layout_constraintStart_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-    />
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

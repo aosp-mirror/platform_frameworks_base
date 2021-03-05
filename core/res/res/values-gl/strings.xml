@@ -1587,7 +1587,7 @@
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Debuxa o teu padrón"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Introduce o PIN da tarxeta SIM"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Introduce o PIN"</string>
-    <string name="kg_password_instructions" msgid="7179782578809398050">"Insire o teu contrasinal"</string>
+    <string name="kg_password_instructions" msgid="7179782578809398050">"Escribe o teu contrasinal"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"Agora a tarxeta SIM está desactivada. Introduce o código PUK para continuar. Ponte en contacto co operador para obter información detallada."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Introduce o código PIN desexado"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Confirma o código PIN desexado"</string>

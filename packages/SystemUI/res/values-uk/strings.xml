@@ -28,7 +28,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"На основі використання залишилося <xliff:g id="PERCENTAGE">%1$s</xliff:g> – близько <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Залишилося <xliff:g id="PERCENTAGE">%1$s</xliff:g> – близько <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>. Увімкнено режим економії заряду акумулятора."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>. Увімкнено режим енергозбереження."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"Не вдається зарядити через USB. Використовуйте зарядний пристрій, який входить у комплект пристрою."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Не вдається зарядити через USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Використовуйте зарядний пристрій, який входить у комплект пристрою"</string>
@@ -36,7 +36,7 @@
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Увімкнути режим енергозбереження?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Про режим енергозбереження"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Увімкнути"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Увімкнути режим економії заряду акумулятора"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Увімкнути режим енергозбереження"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Налаштування"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Автообертання екрана"</string>
@@ -505,7 +505,7 @@
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Видалити"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Режим енергозбереження ввімкнено"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Знижується продуктивність і обмежуються фонові дані"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Вимкнути режим економії заряду акумулятора"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Вимкнути режим енергозбереження"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Додаток <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> матиме доступ до всієї інформації, яка з\'являється на екрані або відтворюється на пристрої під час запису чи трансляції, зокрема до паролів, інформації про платежі, фотографій, повідомлень і аудіофайлів."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Сервіс, що надає цю функцію, матиме доступ до всієї інформації, яка з\'являється на екрані або відтворюється на пристрої під час запису чи трансляції, зокрема до паролів, інформації про платежі, фотографій, повідомлень і аудіофайлів."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Почати запис або трансляцію?"</string>
@@ -991,11 +991,11 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Дозволити додатку <xliff:g id="APP">%1$s</xliff:g> показувати фрагменти будь-якого додатка"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Дозволити"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Заборонити"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Торкніться, щоб увімкнути автоматичний режим економії заряду акумулятора"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Торкніться, щоб налаштувати режим енергозбереження"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Вмикати, коли заряд акумулятора закінчується"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ні, дякую"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Автоматичний перехід у режим енергозбереження ввімкнено"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Режим економії заряду акумулятора вмикається автоматично, коли рівень заряду нижчий за <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Режим енергозбереження вмикається автоматично, коли рівень заряду нижчий за <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Налаштування"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
@@ -1086,6 +1086,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Завантаження рекомендацій"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медіа"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Приховати поточний сеанс."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Поточний сеанс не можна приховати."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Закрити"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Відновити"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Налаштування"</string>
@@ -1101,4 +1102,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Утримуйте кнопку живлення, щоб переглянути нові елементи керування"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Додати елементи керування"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Змінити елементи керування"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Додати пристрої виводу"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Група"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Вибрано 1 пристрій"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Вибрано пристроїв: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (відключено)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Не вдалося підключитися. Повторіть спробу."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Підключити новий пристрій"</string>
 </resources>

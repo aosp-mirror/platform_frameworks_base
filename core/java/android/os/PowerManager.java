@@ -2127,6 +2127,27 @@ public final class PowerManager {
     }
 
     /**
+     * Returns true if ambient display is suppressed by the given {@code appUid} with the given
+     * {@code token}.
+     *
+     * <p>This method will return false if {@link #isAmbientDisplayAvailable()} is false.
+     *
+     * @param token The identifier of the ambient display suppression.
+     * @param appUid The uid of the app that suppressed ambient display.
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.READ_DREAM_STATE,
+            android.Manifest.permission.READ_DREAM_SUPPRESSION })
+    public boolean isAmbientDisplaySuppressedForTokenByApp(@NonNull String token, int appUid) {
+        try {
+            return mService.isAmbientDisplaySuppressedForTokenByApp(token, appUid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the reason the phone was last shutdown. Calling app must have the
      * {@link android.Manifest.permission#DEVICE_POWER} permission to request this information.
      * @return Reason for shutdown as an int, {@link #SHUTDOWN_REASON_UNKNOWN} if the file could

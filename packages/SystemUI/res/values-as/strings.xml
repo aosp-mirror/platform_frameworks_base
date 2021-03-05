@@ -951,7 +951,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"সাধাৰণ বার্তাসমূহ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"সঞ্চয়াগাৰ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ইংগিতবোৰ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"তাৎক্ষণিক এপসমূহ"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> চলি আছে"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে। অধিক জানিবলৈ টিপক।"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"চুপাৰিছসমূহ ল’ড কৰি থকা হৈছে"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"মিডিয়া"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"বৰ্তমানৰ ছেশ্বনটো লুকুৱাওক।"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"বৰ্তমান ছেশ্বনটো লুকুৱাব নোৱাৰি।"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"অগ্ৰাহ্য কৰক"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"পুনৰ আৰম্ভ কৰক"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ছেটিংসমূহ"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"নতুন নিয়ন্ত্ৰণসমূহ চাবলৈ পাৱাৰৰ বুটামটো ধৰি ৰাখক"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"নিয়ন্ত্ৰণসমূহ যোগ দিয়ক"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"নিয়ন্ত্ৰণসমূহ সম্পাদনা কৰক"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"আউটপুটসমূহ যোগ দিয়ক"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"গোট"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"১ টা ডিভাইচ বাছনি কৰা হৈছে"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> টা ডিভাইচ বাছনি কৰা হৈছে"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (সংযোগ বিচ্ছিন্ন হৈছে)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"সংযোগ কৰিব পৰা নগ’ল। পুনৰ চেষ্টা কৰক।"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"নতুন ডিভাইচ পেয়াৰ কৰক"</string>
 </resources>

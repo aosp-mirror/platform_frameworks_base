@@ -1091,7 +1091,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"Merk alt"</string>
     <string name="cut" msgid="2561199725874745819">"Klipp ut"</string>
-    <string name="copy" msgid="5472512047143665218">"Kopier"</string>
+    <string name="copy" msgid="5472512047143665218">"Kopiér"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Kunne ikke kopiere til utklippstavlen"</string>
     <string name="paste" msgid="461843306215520225">"Lim inn"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Lim inn som ren tekst"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Oppdatert av administratoren din"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Slettet av administratoren din"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"For å forlenge batterilevetiden gjør Batterisparing dette:\n\n• Slår på mørkt tema\n• Slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner, for eksempel «Hey Google»\n\n"<annotation id="url">"Finn ut mer"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"For å forlenge batterilevetiden gjør Batterisparing dette:\n\n• Slår på mørkt tema\n• Slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner, for eksempel «Hey Google»"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"For å forlenge batterilevetiden gjør Batterisparing dette:\n\n• slår på mørkt tema\n• slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner, for eksempel «Hey Google»\n\n"<annotation id="url">"Finn ut mer"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"For å forlenge batterilevetiden gjør Batterisparing dette:\n\n• slår på mørkt tema\n• slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner, for eksempel «Hey Google»"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datasparing hindrer noen apper fra å sende og motta data i bakgrunnen, for å redusere dataforbruket. Aktive apper kan bruke data, men kanskje ikke så mye som ellers – for eksempel vises ikke bilder før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vil du slå på Datasparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Slå på"</string>

@@ -94,7 +94,7 @@
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Статус мобилних података"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS-ови"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Поруке говорне поште"</string>
-    <string name="notification_channel_wfc" msgid="9048240466765169038">"Позивање преко Wi-Fi мреже"</string>
+    <string name="notification_channel_wfc" msgid="9048240466765169038">"Позивање преко WiFi мреже"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"Статус SIM-а"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"Обавештења SIM картице са статусом „висок приоритет“"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"Корисник захтева ПОТПУН режим TTY"</string>
@@ -123,30 +123,30 @@
     <string name="roamingText11" msgid="5245687407203281407">"Банер роминга је укључен"</string>
     <string name="roamingText12" msgid="673537506362152640">"Банер роминга је искључен"</string>
     <string name="roamingTextSearching" msgid="5323235489657753486">"Претраживање услуге"</string>
-    <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Подешавање позивања преко Wi-Fi-ја није успело"</string>
+    <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Подешавање позивања преко WiFi-а није успело"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"Да бисте упућивали позиве и слали поруке преко Wi-Fi-ја, прво затражите од мобилног оператера да вам омогући ову услугу. Затим у Подешавањима поново укључите Позивање преко Wi-Fi-ја. (кôд грешке: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"Да бисте упућивали позиве и слали поруке преко WiFi-а, прво затражите од мобилног оператера да вам омогући ову услугу. Затим у Подешавањима поново укључите Позивање преко WiFi-а. (кôд грешке: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="4795145070505729156">"Проблем у вези са регистровањем позивања преко Wi‑Fi-ја код мобилног оператера: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
-    <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"<xliff:g id="SPN">%s</xliff:g> позивање преко Wi-Fi-ја"</string>
-    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"<xliff:g id="SPN">%s</xliff:g> – позивање преко Wi-Fi-ја"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"<xliff:g id="SPN">%s</xliff:g> позивање преко WiFi-а"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"<xliff:g id="SPN">%s</xliff:g> – позивање преко WiFi-а"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="4895315549916165700">"WLAN позив"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="255919245825481510">"<xliff:g id="SPN">%s</xliff:g> WLAN позив"</string>
-    <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
-    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Позивање преко Wi-Fi-ја | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"<xliff:g id="SPN">%s</xliff:g> WiFi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Позивање преко WiFi-а | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Позивање преко Wi-Fi-ја"</string>
-    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
-    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Позивање преко Wi-Fi-ја"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Позивање преко WiFi-а"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"WiFi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Позивање преко WiFi-а"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Искључено"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Позивање преко Wi-Fi-ја"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Позивање преко WiFi-а"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Позив преко мобилне мреже"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Само Wi-Fi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Само WiFi"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Није прослеђено"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> након <xliff:g id="TIME_DELAY">{2}</xliff:g> секунде/и"</string>
@@ -495,14 +495,14 @@
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"Дозвољава апликацији да мења статус повезивања са мрежом."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"промена повезивања привезивањем"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Дозвољава апликацији да мења статус везе са привезаном мрежом."</string>
-    <string name="permlab_accessWifiState" msgid="5552488500317911052">"преглед Wi-Fi веза"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Дозвољава апликацији да прегледа информације о Wi-Fi умрежавању, као што су информације о томе да ли је Wi-Fi омогућен и називи повезаних Wi-Fi уређаја."</string>
-    <string name="permlab_changeWifiState" msgid="7947824109713181554">"повезивање и прекид везе са Wi-Fi мрежом"</string>
-    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Дозвољава апликацији да се повезује са приступним тачкама за Wi-Fi и прекида везу са њима, као и да уноси промене у конфигурацију уређаја за Wi-Fi мреже."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"омогућавање пријема вишесмерног Wi-Fi саобраћаја"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Дозвољава апликацији да прима пакете који се шаљу на све уређаје на Wi-Fi мрежи помоћу вишесмерних адреса, а не само на таблет. Користи више напајања од режима једносмерног саобраћаја."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Дозвољава апликацији да прима пакете који се шаљу на све уређаје на Wi-Fi мрежи помоћу вишесмерних адреса, а не само на Android TV уређај. Користи више енергије од режима без вишесмерног слања."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Дозвољава апликацији да прима пакете који се шаљу на све уређаје на Wi-Fi мрежи помоћу вишесмерних адреса, а не само на телефон. Користи више напајања од режима једносмерног саобраћаја."</string>
+    <string name="permlab_accessWifiState" msgid="5552488500317911052">"преглед WiFi веза"</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Дозвољава апликацији да прегледа информације о WiFi умрежавању, као што су информације о томе да ли је WiFi омогућен и називи повезаних WiFi уређаја."</string>
+    <string name="permlab_changeWifiState" msgid="7947824109713181554">"повезивање и прекид везе са WiFi мрежом"</string>
+    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Дозвољава апликацији да се повезује са приступним тачкама за WiFi и прекида везу са њима, као и да уноси промене у конфигурацију уређаја за WiFi мреже."</string>
+    <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"омогућавање пријема вишесмерног WiFi саобраћаја"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Дозвољава апликацији да прима пакете који се шаљу на све уређаје на WiFi мрежи помоћу вишесмерних адреса, а не само на таблет. Користи више напајања од режима једносмерног саобраћаја."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Дозвољава апликацији да прима пакете који се шаљу на све уређаје на WiFi мрежи помоћу вишесмерних адреса, а не само на Android TV уређај. Користи више енергије од режима без вишесмерног слања."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Дозвољава апликацији да прима пакете који се шаљу на све уређаје на WiFi мрежи помоћу вишесмерних адреса, а не само на телефон. Користи више напајања од режима једносмерног саобраћаја."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"приступ Bluetooth подешавањима"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Дозвољава апликацији да конфигурише локални Bluetooth таблет, као и да открије даљинске уређаје и упари се са њима."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Дозвољава апликацији да конфигурише Bluetooth на Android TV уређају и да открије удаљене уређаје и упари се са њима."</string>
@@ -923,7 +923,7 @@
     <string name="granularity_label_link" msgid="9007852307112046526">"линк"</string>
     <string name="granularity_label_line" msgid="376204904280620221">"ред"</string>
     <string name="factorytest_failed" msgid="3190979160945298006">"Фабричко тестирање није успело"</string>
-    <string name="factorytest_not_system" msgid="5658160199925519869">"Радња FACTORY_TEST је подржана само за пакете инсталиране у директоријуму /system/app."</string>
+    <string name="factorytest_not_system" msgid="5658160199925519869">"Радња FACTORY_TEST је подржана само за пакете инсталиране у фолдеру /system/app."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"Није пронађен ниједан пакет који обезбеђује радњу FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"Рестартуј"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"На страници на адреси „<xliff:g id="TITLE">%s</xliff:g>“ пише:"</string>
@@ -1256,7 +1256,7 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Звуци аларма"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Звуци обавештења"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Непознато"</string>
-    <string name="wifi_available_sign_in" msgid="381054692557675237">"Пријављивање на Wi-Fi мрежу"</string>
+    <string name="wifi_available_sign_in" msgid="381054692557675237">"Пријављивање на WiFi мрежу"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"Пријавите се на мрежу"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
@@ -1272,7 +1272,7 @@
     <string name="network_switch_metered_toast" msgid="501662047275723743">"Прешли сте са типа мреже <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> на тип мреже <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"мобилни подаци"</item>
-    <item msgid="5520925862115353992">"Wi-Fi"</item>
+    <item msgid="5520925862115353992">"WiFi"</item>
     <item msgid="1055487873974272842">"Bluetooth"</item>
     <item msgid="1616528372438698248">"Етернет"</item>
     <item msgid="9177085807664964627">"VPN"</item>
@@ -1538,10 +1538,10 @@
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Упозорење на потрошњу података"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"Потрошили сте <xliff:g id="APP">%s</xliff:g> података"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Достигли сте ограничење података"</string>
-    <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Нема више Wi-Fi података"</string>
+    <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Нема више WiFi података"</string>
     <string name="data_usage_limit_body" msgid="3567699582000085710">"Подаци су паузирани током остатка циклуса"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="101888478915677895">"Потрошили сте мобилне податке"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="1622359254521960508">"Потрошили сте Wi-Fi податке"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="1622359254521960508">"Потрошили сте WiFi податке"</string>
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Прекорачили сте <xliff:g id="SIZE">%s</xliff:g> од подешеног ограничења"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Позадински подаци су ограничени"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Додирните за уклањање ограничења."</string>
@@ -2038,7 +2038,7 @@
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Батерија телефона је довољно напуњена. Функције више нису ограничене."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Батерија таблета је довољно напуњена. Функције више нису ограничене."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Батерија уређаја је довољно напуњена. Функције више нису ограничене."</string>
-    <string name="mime_type_folder" msgid="2203536499348787650">"Директоријум"</string>
+    <string name="mime_type_folder" msgid="2203536499348787650">"Фолдер"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android апликација"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Датотека"</string>
     <string name="mime_type_generic_ext" msgid="9220220924380909486">"<xliff:g id="EXTENSION">%1$s</xliff:g> датотека"</string>

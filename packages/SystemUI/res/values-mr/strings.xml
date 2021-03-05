@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"अनुमती द्या"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB डीबग करण्‍यास अनुमती नाही"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"सध्‍या या डीव्हाइसमध्‍ये साइन इन केलेला वापरकर्ता USB डीबग करणे सुरू करू शकत नाही. हे वैशिष्‍ट्य वापरण्‍यासाठी, प्राथमिक वापरकर्त्‍यावर स्विच करा."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"या नेटवर्कवर वायरलेस डीबगिंग करण्याला अनुमती द्यायची का?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"या नेटवर्कवर वायरलेस डीबगिंग करण्यासाठी अनुमती द्यायची का?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्कचे नाव (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nवाय-फाय ॲड्रेस (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"या नेटवर्कवर नेहमी अनुमती द्या"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"अनुमती द्या"</string>
@@ -113,10 +113,10 @@
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रीन रेकॉर्डिंग हटवताना एरर आली"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"परवानग्या मिळवता आल्या नाहीत"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रीन रेकॉर्डिंग सुरू करताना एरर आली"</string>
-    <string name="usb_preference_title" msgid="1439924437558480718">"USB फाईल स्थानांतरण पर्याय"</string>
+    <string name="usb_preference_title" msgid="1439924437558480718">"USB फाइल स्थानांतरण पर्याय"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"मीडिया प्लेअर म्हणून माउंट करा (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"कॅमेरा म्हणून माउंट करा (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="5499998592841984743">"Mac साठी Android फाईल स्थानांतर अ‍ॅप इंस्टॉल करा"</string>
+    <string name="installer_cd_button_title" msgid="5499998592841984743">"Mac साठी Android फाइल स्थानांतर अ‍ॅप इंस्टॉल करा"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"मागे"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"होम"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"मेनू"</string>
@@ -265,7 +265,7 @@
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wifi बंद झाले."</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wifi सुरू झाले."</string>
-    <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"मोबाईल <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"मोबाइल <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"बॅटरी <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"विमान मोड बंद."</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"विमान मोड सुरू."</string>
@@ -288,7 +288,7 @@
     <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"स्थान अहवाल बंद केला."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"स्थान अहवाल सुरू केला."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g> साठी अलार्म सेट केला."</string>
-    <string name="accessibility_quick_settings_close" msgid="2974895537860082341">"पॅनेल बंद करा."</string>
+    <string name="accessibility_quick_settings_close" msgid="2974895537860082341">"पॅनल बंद करा."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"अधिक वेळ."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"कमी वेळ."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="7606563260714825190">"फ्लॅशलाइट बंद."</string>
@@ -298,8 +298,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"फ्लॅशलाइट सुरू केला."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"रंग उत्क्रमण बंद केले."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"रंग उत्क्रमण सुरू केले."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"मोबाईल हॉटस्पॉट बंद केला."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"मोबाईल हॉटस्पॉट सुरू केला."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"मोबाइल हॉटस्पॉट बंद केला."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"मोबाइल हॉटस्पॉट सुरू केला."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"स्क्रीन कास्ट करणे थांबले."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"कार्य मोड बंद."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"कार्य मोड सुरू."</string>
@@ -624,10 +624,10 @@
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"फोन व्हायब्रेटवर आहे"</string>
     <string name="qs_status_phone_muted" msgid="3763664791309544103">"फोन म्यूट केला"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. सशब्द करण्यासाठी टॅप करा."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा. प्रवेशयोग्यता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
-    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. नि:शब्द करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा. प्रवेशयोग्यता सेवा म्यूट केल्या जाऊ शकतात."</string>
+    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. म्यूट करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा म्यूट केल्या जाऊ शकतात."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. नि:शब्द करण्यासाठी टॅप करा."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. म्यूट करण्यासाठी टॅप करा."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"म्यूट करा"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"म्यूट काढून टाका"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"व्हायब्रेट करा"</string>
@@ -721,7 +721,7 @@
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"अलीकडील कोणतेही बबल नाहीत"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"अलीकडील बबल आणि डिसमिस केलेले बबल येथे दिसतील"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
-    <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
+    <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉंफिगर केला जाऊ शकत नाही"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी केलेल्या सूचना"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"सर्व <xliff:g id="APP_NAME">%1$s</xliff:g> वरील सूचना"</string>
     <string name="see_more_title" msgid="7409317011708185729">"आणखी पाहा"</string>
@@ -951,7 +951,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"सर्वसाधारण मेसेज"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"स्टोरेज"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"सूचना"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"इन्सटंट अ‍ॅप्स"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> रन होत आहे"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"इंस्टॉल केल्याशिवाय अ‍ॅप उघडले."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"इंस्टॉल केल्याशिवाय अ‍ॅप उघडले. अधिक जाणून घेण्यासाठी टॅप करा."</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"शिफारशी लोड करत आहे"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मीडिया"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"सध्याचे सेशन लपवा."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"सध्याचे सेशन लपवता येणार नाही."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"डिसमिस करा"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"पुन्हा सुरू करा"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग्ज"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नवीन नियंत्रणे पाहण्यासाठी पॉवर बटण धरून ठेवा"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"नियंत्रणे जोडा"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"नियंत्रणे व्यवस्थापित करा"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"आउटपुट जोडा"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"गट"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"एक डिव्हाइस निवडले"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> डिव्हाइस निवडली आहेत"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (डिस्कनेक्ट केले)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"कनेक्ट करू शकलो नाही. पुन्हा प्रयत्न करा."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नवीन डिव्हाइससोबत पेअर करा"</string>
 </resources>

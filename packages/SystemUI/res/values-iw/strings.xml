@@ -35,7 +35,7 @@
     <string name="battery_low_why" msgid="2056750982959359863">"הגדרות"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"להפעיל את תכונת החיסכון בסוללה?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"מידע על מצב החיסכון בסוללה"</string>
-    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"הפעל"</string>
+    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"הפעלה"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"הפעלת תכונת החיסכון בסוללה"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"הגדרות"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
@@ -298,8 +298,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"הפנס הופעל."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"היפוך צבעים כבוי."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"היפוך צבעים מופעל."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"נקודה לשיתוף אינטרנט בנייד כבויה."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"נקודה לשיתוף אינטרנט בנייד מופעלת."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"‏נקודת האינטרנט (hotspot) כבויה."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"‏נקודת האינטרנט (hotspot) מופעלת."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"העברת המסך הופסקה."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="562749867895549696">"מצב עבודה כבוי."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"מצב עבודה מופעל."</string>
@@ -397,7 +397,7 @@
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"מחובר, הסוללה ב-<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"מתחבר..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"שיתוף אינטרנט בין ניידים"</string>
-    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"נקודה לשיתוף אינטרנט"</string>
+    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"‏נקודת אינטרנט (hotspot)"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"ההפעלה מתבצעת…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"חוסך הנתונים פועל"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
@@ -666,7 +666,7 @@
     <string name="alarm_template" msgid="2234991538018805736">"בשעה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"ב-<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"הגדרות מהירות, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"נקודה לשיתוף אינטרנט"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"‏נקודת אינטרנט (hotspot)"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"פרופיל עבודה"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"מהנה בשביל חלק מהאנשים, אבל לא בשביל כולם"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‏System UI Tuner מספק לך דרכים נוספות להתאים אישית את ממשק המשתמש של Android. התכונות הניסיוניות האלה עשויות להשתנות, להתקלקל או להיעלם בגרסאות עתידיות. המשך בזהירות."</string>
@@ -683,7 +683,7 @@
     <string name="experimental" msgid="3549865454812314826">"ניסיוני"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"‏האם להפעיל את ה-Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"‏כדי לחבר את המקלדת לטאבלט, תחילה עליך להפעיל את ה-Bluetooth."</string>
-    <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"הפעל"</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"הפעלה"</string>
     <string name="show_silently" msgid="5629369640872236299">"הצגת התראות בלי להשמיע צליל"</string>
     <string name="block" msgid="188483833983476566">"חסימת כל ההתראות"</string>
     <string name="do_not_silence" msgid="4982217934250511227">"לא להשתיק"</string>
@@ -961,7 +961,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"הודעות כלליות"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"אחסון"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"טיפים"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"אפליקציות אינסטנט"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"אפליקציות ללא התקנה"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> פועלת"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"האפליקציה נפתחת בלי התקנה."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"האפליקציה נפתחת בלי התקנה. אפשר להקיש כדי לקבל מידע נוסף."</string>
@@ -1086,6 +1086,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"בטעינת המלצות"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"מדיה"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"הסתרת הסשן הנוכחי."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"לא ניתן להסתיר את הסשן הנוכחי."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"סגירה"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"המשך"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"הגדרות"</string>
@@ -1101,4 +1102,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"ניתן ללחוץ על לחצן ההפעלה כדי להציג פקדים חדשים"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"הוספת פקדים"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"עריכת פקדים"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"הוספת מכשירי פלט"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"קבוצה"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"נבחר מכשיר אחד"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"נבחרו <xliff:g id="COUNT">%1$d</xliff:g> מכשירים"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (מנותק)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"לא ניתן היה להתחבר. יש לנסות שוב."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"התאמה של מכשיר חדש"</string>
 </resources>

@@ -422,7 +422,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do wschodu słońca"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Włącz o <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tryb ciemny"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Ciemny motyw"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Oszczędzanie baterii"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Włącz o zachodzie"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Do wschodu słońca"</string>
@@ -533,8 +533,8 @@
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Właściciel tego urządzenia: <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"To urządzenie należy do Twojej organizacji i jest połączone z sieciami VPN"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"To urządzenie należy do organizacji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i jest połączone z sieciami VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Twoja organizacja może monitorować ruch w sieci w Twoim profilu do pracy"</string>
-    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Organizacja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> może monitorować ruch w sieci w Twoim profilu do pracy"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Twoja organizacja może monitorować ruch w sieci w Twoim profilu służbowym"</string>
+    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Organizacja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> może monitorować ruch w sieci w Twoim profilu służbowym"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Sieć może być monitorowana"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"To urządzenie jest połączone z sieciami VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Twój profil służbowy jest połączony z siecią <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -552,7 +552,7 @@
     <string name="monitoring_description_named_management" msgid="505833016545056036">"To urządzenie należy do organizacji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nAdministrator IT może monitorować ustawienia, firmowe uprawnienia dostępu, aplikacje, dane dotyczące urządzenia i lokalizacji oraz nimi zarządzać.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem IT."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"To urządzenie należy do Twojej organizacji.\n\nAdministrator IT może monitorować ustawienia, firmowe uprawnienia dostępu, aplikacje, dane dotyczące urządzenia i lokalizacji oraz nimi zarządzać.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Twoja organizacja zainstalowała urząd certyfikacji na tym urządzeniu. Zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
-    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Twoja organizacja zainstalowała urząd certyfikacji w Twoim profilu do pracy. Zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Twoja organizacja zainstalowała urząd certyfikacji w Twoim profilu służbowym. Zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Urząd certyfikacji zainstalowany na tym urządzeniu. Twój zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Łączysz się z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
@@ -571,13 +571,13 @@
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Otwórz zaufane certyfikaty"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Aplikacja otrzymała od Ciebie uprawnienia do konfigurowania połączenia VPN.\n\nMoże ona monitorować Twoją aktywność na urządzeniu i w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Twoim profilem do pracy zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem.\n\nŁączysz się też z siecią VPN, która może monitorować Twoją aktywność w sieci."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Twoim profilem służbowym zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem.\n\nŁączysz się też z siecią VPN, która może monitorować Twoją aktywność w sieci."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Łączysz się z aplikacją <xliff:g id="APPLICATION">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Masz połączenie z aplikacją <xliff:g id="APPLICATION">%1$s</xliff:g>, która może monitorować Twoją prywatną aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"Masz połączenie z aplikacją <xliff:g id="APPLICATION">%1$s</xliff:g>, która może monitorować Twoją prywatną aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
-    <string name="monitoring_description_app_work" msgid="3713084153786663662">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem do pracy. Profil jest połączony z aplikacją <xliff:g id="APPLICATION">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nSkontaktuj się z administratorem, aby uzyskać więcej informacji."</string>
-    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem do pracy. Profil jest połączony z aplikacją <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nMasz też połączenie z aplikacją <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, która może monitorować Twoją osobistą aktywność w sieci."</string>
+    <string name="monitoring_description_app_work" msgid="3713084153786663662">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem służbowym. Profil jest połączony z aplikacją <xliff:g id="APPLICATION">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nSkontaktuj się z administratorem, aby uzyskać więcej informacji."</string>
+    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem służbowym. Profil jest połączony z aplikacją <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nMasz też połączenie z aplikacją <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, która może monitorować Twoją osobistą aktywność w sieci."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Blokada anulowana przez agenta zaufania"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Urządzenie pozostanie zablokowane, aż odblokujesz je ręcznie"</string>
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
@@ -1086,6 +1086,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Wczytuję rekomendacje"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ukryj bieżącą sesję."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Nie można ukryć bieżącej sesji."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odrzuć"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Wznów"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ustawienia"</string>
@@ -1101,4 +1102,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Przytrzymaj przycisk zasilania, by zobaczyć nowe elementy sterujące"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj elementy sterujące"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Edytuj elementy sterujące"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodaj urządzenia wyjściowe"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupa"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Wybrano 1 urządzenie"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Wybrane urządzenia: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (rozłączono)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Nie udało się połączyć. Spróbuj ponownie."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Sparuj nowe urządzenie"</string>
 </resources>

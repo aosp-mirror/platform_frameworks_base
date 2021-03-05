@@ -26,7 +26,7 @@
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"Eslatmalar"</string>
     <string name="battery_low_title" msgid="6891106956328275225">"Batareya tez orada tugaydi"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> (joriy holatda taxminan <xliff:g id="TIME">%2$s</xliff:g> qoldi)"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Batareya qivvati – <xliff:g id="PERCENTAGE">%1$s</xliff:g>, tugashiga taxminan <xliff:g id="TIME">%2$s</xliff:g> qoldi"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> (taxminan <xliff:g id="TIME">%2$s</xliff:g> qoldi)"</string>
     <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi. Quvvat tejash rejimi yoniq."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"USB orqali quvvatlash imkonsiz. Qurilmangiz bilan kelgan quvvatlash moslamasidan foydalaning."</string>
@@ -700,13 +700,13 @@
     <string name="inline_block_button" msgid="479892866568378793">"Bloklash"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Ha"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Kichraytirish"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Tovushsiz"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Sokin"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Ovozsiz qolsin"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Ogohlantirish"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Signal berishda davom etilsin"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Bildirishnoma kelmasin"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Bu ilovadan keladigan bildirishnomalar chiqaversinmi?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Tovushsiz"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Sokin"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Standart"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Pufaklar"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Tovush yoki tebranishsiz"</string>
@@ -718,8 +718,8 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Sozlamalar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Muhim"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasida suhbat funksiyalari ishlamaydi"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Avvalgi bulutchalar topilmadi"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bu yerda oxirgi va yopilgan bulutcha shaklidagi bildirishnomalar chiqadi"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Hech qanday bulutcha topilmadi"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Eng oxirgi va yopilgan bulutchali chatlar shu yerda chiqadi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ushbu bildirishnomalar guruhi bu yerda sozlanmaydi"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Ishonchli bildirishnoma"</string>
@@ -766,7 +766,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Batareya sarfi"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Quvvat tejash rejimidan quvvatlash vaqtida foydalanib bo‘lmaydi"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Quvvat tejash rejimi"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Quvvat tejash"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Unumdorlik pasayadi va fonda internetdan foydalanish cheklanadi"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> tugmasi"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Bosh ekran"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Tavsiyalar yuklanmoqda"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Joriy seans berkitilsin."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Joriy seansni berkitish imkonsiz."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Yopish"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Davom etish"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Sozlamalar"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Yangi boshqaruv elementlari bilan tanishish uchun quvvat tugmasini bosib turing"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Element kiritish"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Elementlarni tahrirlash"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Chiquvchi qurilmani kiritish"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Guruh"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 ta qurilma tanlandi"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> ta qurilma tanlandi"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (uzilgan)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Ulanmadi. Qayta urining."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Yangi qurilmani ulash"</string>
 </resources>

@@ -138,15 +138,15 @@
     <item msgid="1333279807604675720">"สเตอริโอ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="1241278021345116816">"เพิ่มประสิทธิภาพสำหรับคุณภาพเสียง (990 kbps/909 kbps)"</item>
+    <item msgid="1241278021345116816">"เพิ่มประสิทธิภาพเพื่อคุณภาพเสียง (990 kbps/909 kbps)"</item>
     <item msgid="3523665555859696539">"คุณภาพเสียงและการเชื่อมต่อที่สมดุล (660 kbps/606 kbps)"</item>
-    <item msgid="886408010459747589">"เพิ่มประสิทธิภาพสำหรับคุณภาพการเชื่อมต่อ (330 kbps/303 kbps)"</item>
+    <item msgid="886408010459747589">"เพิ่มประสิทธิภาพเพื่อคุณภาพการเชื่อมต่อ (330 kbps/303 kbps)"</item>
     <item msgid="3808414041654351577">"ดีที่สุดเท่าที่ทำได้ (ปรับอัตราบิตอัตโนมัติ)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="804499336721569838">"เพิ่มประสิทธิภาพสำหรับคุณภาพเสียง"</item>
+    <item msgid="804499336721569838">"เพิ่มประสิทธิภาพเพื่อคุณภาพเสียง"</item>
     <item msgid="7451422070435297462">"คุณภาพเสียงและการเชื่อมต่อที่สมดุล"</item>
-    <item msgid="6173114545795428901">"เพิ่มประสิทธิภาพสำหรับคุณภาพการเชื่อมต่อ"</item>
+    <item msgid="6173114545795428901">"เพิ่มประสิทธิภาพเพื่อคุณภาพการเชื่อมต่อ"</item>
     <item msgid="4349908264188040530">"ดีที่สุดเท่าที่ทำได้ (ปรับอัตราบิตอัตโนมัติ)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
