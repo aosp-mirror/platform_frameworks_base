@@ -73,8 +73,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
@@ -4108,7 +4108,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         synchronized (this) {
             if (mSplashScreenGlobal != null) {
-                mSplashScreenGlobal.dispatchOnExitAnimation(r.token, v);
+                mSplashScreenGlobal.handOverSplashScreenView(r.token, v);
             }
         }
     }

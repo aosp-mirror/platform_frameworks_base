@@ -372,6 +372,7 @@ public class StartingSurfaceDrawer {
         if (preView != null && preView.mContentView != null
                 && preView.mContentView.isCopyable()) {
             parcelable = new SplashScreenViewParcelable(preView.mContentView);
+            preView.mContentView.onCopied();
         } else {
             parcelable = null;
         }
