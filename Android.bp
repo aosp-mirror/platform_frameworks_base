@@ -526,6 +526,7 @@ java_library {
         "android.security.apc-java",
         "android.security.authorization-java",
         "android.security.usermanager-java",
+        "android.security.vpnprofilestore-java",
         "android.system.keystore2-V1-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
