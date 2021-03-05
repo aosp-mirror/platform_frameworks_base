@@ -5,3 +5,6 @@ per-file IntentFilter.java = toddke@google.com
 per-file IntentFilter.java = patb@google.com
 per-file Intent.java = toddke@google.com
 per-file Intent.java = patb@google.com
+per-file AutofillOptions* = file:/core/java/android/service/autofill/OWNERS
+per-file ContentCaptureOptions* = file:/core/java/android/service/contentcapture/OWNERS
+per-file LocusId* = file:/core/java/android/service/contentcapture/OWNERS
