@@ -26794,8 +26794,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (permissions != null) {
                 permissions.takeTransient();
             }
-            final ContentInfo payload = new ContentInfo.Builder(
-                    event.getClipData(), SOURCE_DRAG_AND_DROP).build();
+            final ContentInfo payload =
+                    new ContentInfo.Builder(event.getClipData(), SOURCE_DRAG_AND_DROP)
+                            .setDragAndDropPermissions(permissions)
+                            .build();
             ContentInfo remainingPayload = performReceiveContent(payload);
             // Return true unless none of the payload was consumed.
             return remainingPayload != payload;
