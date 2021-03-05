@@ -20,6 +20,7 @@ import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
 import static android.net.NetworkRequest.Type.REQUEST;
+import static android.net.NetworkRequest.Type.TRACK_BEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
 import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 import static android.net.QosCallback.QosCallbackRegistrationException;
@@ -4187,6 +4188,18 @@ public class ConnectivityManager {
         CallbackHandler cbHandler = new CallbackHandler(handler);
         sendRequestForNetwork(null /* NetworkCapabilities need */, networkCallback, 0,
                 TRACK_SYSTEM_DEFAULT, TYPE_NONE, cbHandler);
+    }
+
+    /**
+     * @hide
+     */
+    // TODO: Make it public api.
+    @SuppressLint("ExecutorRegistration")
+    public void registerBestMatchingNetworkCallback(@NonNull NetworkRequest request,
+            @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
+        final NetworkCapabilities nc = request.networkCapabilities;
+        final CallbackHandler cbHandler = new CallbackHandler(handler);
+        sendRequestForNetwork(nc, networkCallback, 0, TRACK_BEST, TYPE_NONE, cbHandler);
     }
 
     /**
