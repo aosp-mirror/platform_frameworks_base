@@ -22,13 +22,9 @@ cc_binary {
 
     multilib: {
         lib32: {
-            // TODO(b/142944043): Remove version script when libsigchain is a DSO.
-            version_script: "version-script32.txt",
             suffix: "32",
         },
         lib64: {
-            // TODO(b/142944043): Remove version script when libsigchain is a DSO.
-            version_script: "version-script64.txt",
             suffix: "64",
         },
     },
@@ -43,6 +39,13 @@ cc_binary {
         "libhidlbase",
         "liblog",
         "libnativeloader",
+
+        // Even though app_process doesn't call into libsigchain, we need to
+        // make sure it's in the DT list of app_process, as we want all code
+        // in app_process and the libraries it loads to find libsigchain
+        // symbols before libc symbols.
+        "libsigchain",
+
         "libutils",
 
         // This is a list of libraries that need to be included in order to avoid
@@ -51,8 +54,6 @@ cc_binary {
         // See b/21032018 for more details.
         "libwilhelm",
     ],
-
-    whole_static_libs: ["libsigchain"],
 
     compile_multilib: "both",
 
