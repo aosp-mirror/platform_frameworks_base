@@ -359,6 +359,7 @@ package android {
     field public static final int config_systemGallery = 17039399; // 0x1040027
     field public static final int config_systemShell = 17039402; // 0x104002a
     field public static final int config_systemSpeechRecognizer = 17039406; // 0x104002e
+    field public static final int config_systemTelevisionNotificationHandler = 17039409; // 0x1040031
     field public static final int config_systemWellbeing = 17039408; // 0x1040030
     field public static final int config_systemWifiCoexManager = 17039407; // 0x104002f
   }
