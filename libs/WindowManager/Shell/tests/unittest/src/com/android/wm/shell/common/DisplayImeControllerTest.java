@@ -29,6 +29,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
@@ -119,7 +120,8 @@ public class DisplayImeControllerTest {
 
     private InsetsSourceControl[] insetsSourceControl() {
         return new InsetsSourceControl[]{
-                new InsetsSourceControl(ITYPE_IME, mock(SurfaceControl.class), new Point(0, 0))
+                new InsetsSourceControl(
+                        ITYPE_IME, mock(SurfaceControl.class), new Point(0, 0), Insets.NONE)
         };
     }
 

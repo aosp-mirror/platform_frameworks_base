@@ -1100,6 +1100,7 @@ public final class ViewRootImpl implements ViewParent,
                             mTempControls);
                     if (mTranslator != null) {
                         mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
+                        mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls);
                     }
                 } catch (RemoteException e) {
                     mAdded = false;
@@ -7699,6 +7700,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mTranslator != null) {
             mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
             mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
+            mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls);
         }
         setFrame(mTmpFrames.frame);
         mInsetsController.onStateChanged(mTempInsets);
@@ -8158,6 +8160,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (mTranslator != null) {
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
+            mTranslator.translateSourceControlsInScreenToAppWindow(activeControls);
         }
         if (insetsState != null && insetsState.getSource(ITYPE_IME).isVisible()) {
             ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsControlChanged",
