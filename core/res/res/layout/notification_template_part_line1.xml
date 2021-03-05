@@ -15,18 +15,14 @@
   ~ limitations under the License
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/line1"
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/title"
+    android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.BigTitle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    >
-    <TextView android:id="@+id/title"
-        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.BigTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:fadingEdge="horizontal"
-        android:textAlignment="viewStart"
-        />
-</FrameLayout>
+    android:singleLine="true"
+    android:ellipsize="marquee"
+    android:fadingEdge="horizontal"
+    android:textAlignment="viewStart"
+    />

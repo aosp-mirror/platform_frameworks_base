@@ -5211,7 +5211,7 @@ public class Notification implements Parcelable
             } else {
                 // views in states with a header (big states)
                 result.mHeadingExtraMarginSet.applyToView(contentView, R.id.notification_header);
-                result.mTitleMarginSet.applyToView(contentView, R.id.line1);
+                result.mTitleMarginSet.applyToView(contentView, R.id.title);
             }
         }
 
@@ -7015,9 +7015,9 @@ public class Notification implements Parcelable
                     result);
 
             if (mBigContentTitle != null && mBigContentTitle.equals("")) {
-                contentView.setViewVisibility(R.id.line1, View.GONE);
+                contentView.setViewVisibility(R.id.title, View.GONE);
             } else {
-                contentView.setViewVisibility(R.id.line1, View.VISIBLE);
+                contentView.setViewVisibility(R.id.title, View.VISIBLE);
             }
 
             return contentView;
@@ -9084,7 +9084,7 @@ public class Notification implements Parcelable
 
         private void handleImage(RemoteViews contentView) {
             if (mBuilder.mN.hasLargeIcon()) {
-                contentView.setViewLayoutMarginDimen(R.id.line1, RemoteViews.MARGIN_END, 0);
+                contentView.setViewLayoutMarginDimen(R.id.title, RemoteViews.MARGIN_END, 0);
                 contentView.setViewLayoutMarginDimen(R.id.text, RemoteViews.MARGIN_END, 0);
             }
         }
