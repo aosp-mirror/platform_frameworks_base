@@ -1038,6 +1038,14 @@
         android:description="@string/permdesc_accessImsCallService"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows an application to perform IMS Single Registration related actions.
+         Only granted if the application is a system app AND is in the Default SMS Role.
+         The permission is revoked when the app is taken out of the Default SMS Role.
+        <p>Protection level: signature|privileged
+    -->
+    <permission android:name="android.permission.PERFORM_IMS_SINGLE_REGISTRATION"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows an application to read the user's call log.
          <p class="note"><strong>Note:</strong> If your app uses the
          {@link #READ_CONTACTS} permission and <em>both</em> your <a
