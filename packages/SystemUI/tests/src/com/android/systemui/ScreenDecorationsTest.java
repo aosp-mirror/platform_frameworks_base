@@ -63,6 +63,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R.dimen;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
@@ -94,6 +95,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private PrivacyDotViewController mDotViewController;
 
     @Before
     public void setup() {
@@ -116,7 +119,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mContext.addMockSystemService(DisplayManager.class, mDisplayManager);
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mMainHandler, mSecureSettings,
-                mBroadcastDispatcher, mTunerService, mUserTracker) {
+                mBroadcastDispatcher, mTunerService, mUserTracker, mDotViewController) {
             @Override
             public void start() {
                 super.start();
