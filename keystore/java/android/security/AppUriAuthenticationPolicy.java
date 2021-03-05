@@ -238,4 +238,21 @@ public final class AppUriAuthenticationPolicy implements Parcelable {
         return aliases;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof AppUriAuthenticationPolicy)) {
+            return false;
+        }
+        AppUriAuthenticationPolicy other = (AppUriAuthenticationPolicy) obj;
+        return Objects.equals(mAppToUris, other.mAppToUris);
+    }
+
+    @Override
+    public int hashCode() {
+        return mAppToUris.hashCode();
+    }
+
 }
