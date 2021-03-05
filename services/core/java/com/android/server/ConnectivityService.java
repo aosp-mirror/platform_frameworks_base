@@ -1886,24 +1886,46 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    // TODO: Consider delete this function or turn it into a no-op method.
     @Override
     public NetworkState[] getAllNetworkState() {
         // This contains IMSI details, so make sure the caller is privileged.
         PermissionUtils.enforceNetworkStackPermission(mContext);
 
         final ArrayList<NetworkState> result = new ArrayList<>();
-        for (Network network : getAllNetworks()) {
-            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
-            // TODO: Consider include SUSPENDED networks.
+        for (NetworkStateSnapshot snapshot : getAllNetworkStateSnapshot()) {
+            // NetworkStateSnapshot doesn't contain NetworkInfo, so need to fetch it from the
+            // NetworkAgentInfo.
+            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(snapshot.network);
             if (nai != null && nai.networkInfo.isConnected()) {
-                // TODO (b/73321673) : NetworkState contains a copy of the
-                // NetworkCapabilities, which may contain UIDs of apps to which the
-                // network applies. Should the UIDs be cleared so as not to leak or
-                // interfere ?
-                result.add(nai.getNetworkState());
+                result.add(new NetworkState(new NetworkInfo(nai.networkInfo),
+                        snapshot.linkProperties, snapshot.networkCapabilities, snapshot.network,
+                        snapshot.subscriberId));
             }
         }
         return result.toArray(new NetworkState[result.size()]);
+    }
+
+    @Override
+    @NonNull
+    public List<NetworkStateSnapshot> getAllNetworkStateSnapshot() {
+        // This contains IMSI details, so make sure the caller is privileged.
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+
+        final ArrayList<NetworkStateSnapshot> result = new ArrayList<>();
+        for (Network network : getAllNetworks()) {
+            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+            // TODO: Consider include SUSPENDED networks, which should be considered as
+            //  temporary shortage of connectivity of a connected network.
+            if (nai != null && nai.networkInfo.isConnected()) {
+                // TODO (b/73321673) : NetworkStateSnapshot contains a copy of the
+                // NetworkCapabilities, which may contain UIDs of apps to which the
+                // network applies. Should the UIDs be cleared so as not to leak or
+                // interfere ?
+                result.add(nai.getNetworkStateSnapshot());
+            }
+        }
+        return result;
     }
 
     @Override
