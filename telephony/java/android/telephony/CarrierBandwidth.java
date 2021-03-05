@@ -101,7 +101,7 @@ public final class CarrierBandwidth implements Parcelable {
     }
 
     /**
-     * Retrieves the upstream bandwidth for the primary network in Kbps.  This always only refers to
+     * Retrieves the upstream bandwidth for the primary network in kbps.  This always only refers to
      * the estimated first hop transport bandwidth.
      * This will be {@link #INVALID} if the network is not connected
      *
@@ -112,7 +112,7 @@ public final class CarrierBandwidth implements Parcelable {
     }
 
     /**
-     * Retrieves the downstream bandwidth for the primary network in Kbps.  This always only refers
+     * Retrieves the downstream bandwidth for the primary network in kbps.  This always only refers
      * to the estimated first hop transport bandwidth.
      * This will be {@link #INVALID} if the network is not connected
      *
@@ -123,7 +123,7 @@ public final class CarrierBandwidth implements Parcelable {
     }
 
     /**
-     * Retrieves the upstream bandwidth for the secondary network in Kbps.  This always only refers
+     * Retrieves the upstream bandwidth for the secondary network in kbps.  This always only refers
      * to the estimated first hop transport bandwidth.
      * <p/>
      * This will be {@link #INVALID} if either are the case:
@@ -143,7 +143,7 @@ public final class CarrierBandwidth implements Parcelable {
     }
 
     /**
-     * Retrieves the downstream bandwidth for the secondary network in Kbps.  This always only
+     * Retrieves the downstream bandwidth for the secondary network in kbps.  This always only
      * refers to the estimated first hop transport bandwidth.
      * <p/>
      * This will be {@link #INVALID} if either are the case:
