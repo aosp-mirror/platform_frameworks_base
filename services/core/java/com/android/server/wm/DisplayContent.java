@@ -5675,16 +5675,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     }
                     return false; /* continue */
                 }
-                if (taskId != INVALID_TASK_ID) {
+                if (taskId == INVALID_TASK_ID) {
+                    if (!nextWindow.canReceiveKeys()) {
+                        return false; /* continue */
+                    }
+                } else {
                     Task task = nextWindow.getTask();
                     if (task == null || !task.isTaskId(taskId)) {
                         return false; /* continue */
                     }
                 }
-                if (!nextWindow.canReceiveKeys()) {
-                    return false; /* continue */
-                }
-                return true; /* stop */
+
+                return true; /* stop, match found */
             }
         });
     }

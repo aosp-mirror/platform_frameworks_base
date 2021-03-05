@@ -117,6 +117,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -1679,11 +1680,38 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testFindScrollCaptureTargetWindow_cantReceiveKeys() {
+        DisplayContent display = createNewDisplay();
+        Task stack = createTaskStackOnDisplay(display);
+        Task task = createTaskInStack(stack, 0 /* userId */);
+        WindowState activityWindow = createAppWindow(task, TYPE_APPLICATION, "App Window");
+        WindowState invisible = createWindow(null, TYPE_APPLICATION, "invisible");
+        invisible.mViewVisibility = View.INVISIBLE;  // make canReceiveKeys return false
+
+        WindowState result = display.findScrollCaptureTargetWindow(null,
+                ActivityTaskManager.INVALID_TASK_ID);
+        assertEquals(activityWindow, result);
+    }
+
+    @Test
     public void testFindScrollCaptureTargetWindow_taskId() {
         DisplayContent display = createNewDisplay();
         Task stack = createTaskStackOnDisplay(display);
         Task task = createTaskInStack(stack, 0 /* userId */);
         WindowState window = createAppWindow(task, TYPE_APPLICATION, "App Window");
+        WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
+
+        WindowState result = display.findScrollCaptureTargetWindow(null, task.mTaskId);
+        assertEquals(window, result);
+    }
+
+    @Test
+    public void testFindScrollCaptureTargetWindow_taskIdCantReceiveKeys() {
+        DisplayContent display = createNewDisplay();
+        Task stack = createTaskStackOnDisplay(display);
+        Task task = createTaskInStack(stack, 0 /* userId */);
+        WindowState window = createAppWindow(task, TYPE_APPLICATION, "App Window");
+        window.mViewVisibility = View.INVISIBLE;  // make canReceiveKeys return false
         WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
 
         WindowState result = display.findScrollCaptureTargetWindow(null, task.mTaskId);
