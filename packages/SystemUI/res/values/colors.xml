@@ -183,7 +183,9 @@
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
 
     <!-- UDFPS colors -->
-    <color name="udfps_enroll_icon">#000000</color> <!-- 100% black -->
+    <color name="udfps_enroll_icon">#000000</color>                         <!-- 100% black -->
+    <color name="udfps_moving_target_fill">#cc4285f4</color>                <!-- 80% blue -->
+    <color name="udfps_moving_target_stroke">#ff669DF6</color>              <!-- 100% blue -->
 
     <!-- Logout button -->
     <color name="logout_button_bg_color">#ccffffff</color>
