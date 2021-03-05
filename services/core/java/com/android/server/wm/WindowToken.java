@@ -745,9 +745,4 @@ class WindowToken extends WindowContainer<WindowState> {
             forAllWindows(WindowState::clearFrozenInsetsState, true /* traverseTopToBottom */);
         }
     }
-
-    @Override
-    @WindowManager.LayoutParams.WindowType int getWindowType() {
-        return windowType;
-    }
 }

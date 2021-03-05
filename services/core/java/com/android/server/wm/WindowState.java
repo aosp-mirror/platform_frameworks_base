@@ -5818,9 +5818,4 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         outSize.inset(-attrs.surfaceInsets.left, -attrs.surfaceInsets.top,
                 -attrs.surfaceInsets.right, -attrs.surfaceInsets.bottom);
     }
-
-    @Override
-    @WindowManager.LayoutParams.WindowType int getWindowType() {
-        return mAttrs.type;
-    }
 }

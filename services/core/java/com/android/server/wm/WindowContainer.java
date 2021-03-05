@@ -29,7 +29,6 @@ import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
-import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
@@ -3299,9 +3298,5 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void unregisterWindowContainerListener(WindowContainerListener listener) {
         mListeners.remove(listener);
         unregisterConfigurationChangeListener(listener);
-    }
-
-    @WindowManager.LayoutParams.WindowType int getWindowType() {
-        return INVALID_WINDOW_TYPE;
     }
 }
