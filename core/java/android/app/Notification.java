@@ -92,7 +92,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.contentcapture.ContentCaptureContext;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
@@ -4970,8 +4969,6 @@ public class Notification implements Parcelable
             contentView.setTextViewText(R.id.title, null);
             contentView.setViewVisibility(R.id.text, View.GONE);
             contentView.setTextViewText(R.id.text, null);
-            contentView.setViewVisibility(R.id.text_line_1, View.GONE);
-            contentView.setTextViewText(R.id.text_line_1, null);
         }
 
         /**
@@ -5001,6 +4998,7 @@ public class Notification implements Parcelable
                 TemplateBindResult result) {
             p.headerless(resId == getBaseLayoutResource()
                     || resId == getHeadsUpBaseLayoutResource());
+            p.allowTextWithProgress(resId == getBigBaseLayoutResource());
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
             resetStandardTemplate(contentView);
@@ -5015,14 +5013,10 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
                 contentView.setTextViewText(R.id.title, processTextSpans(p.title));
                 setTextViewColorPrimary(contentView, R.id.title, p);
-                contentView.setViewLayoutWidth(R.id.title, showProgress
-                        ? ViewGroup.LayoutParams.WRAP_CONTENT
-                        : ViewGroup.LayoutParams.MATCH_PARENT,
-                        TypedValue.COMPLEX_UNIT_PX);
             }
-            if (p.text != null && p.text.length() != 0) {
-                int textId = showProgress ? com.android.internal.R.id.text_line_1
-                        : com.android.internal.R.id.text;
+            if (p.text != null && p.text.length() != 0
+                    && (!showProgress || p.mAllowTextWithProgress)) {
+                int textId = com.android.internal.R.id.text;
                 contentView.setTextViewText(textId, processTextSpans(p.text));
                 setTextViewColorSecondary(contentView, textId, p);
                 contentView.setViewVisibility(textId, View.VISIBLE);
@@ -5746,7 +5740,6 @@ public class Notification implements Parcelable
             }
             if (mStyle != null) {
                 result = mStyle.makeBigContentView();
-                hideLine1Text(result);
                 if (fullyCustomViewRequiresDecoration(true /* fromStyle */)) {
                     result = minimallyDecoratedBigContentView(result);
                 }
@@ -5827,12 +5820,6 @@ public class Notification implements Parcelable
                 return headsUpContentView;
             }
             return createContentView();
-        }
-
-        private void hideLine1Text(RemoteViews result) {
-            if (result != null) {
-                result.setViewVisibility(R.id.text_line_1, View.GONE);
-            }
         }
 
         /**
@@ -12070,6 +12057,7 @@ public class Notification implements Parcelable
         boolean mHideSnoozeButton;
         boolean mPromotePicture;
         boolean mAllowActionIcons;
+        boolean mAllowTextWithProgress;
         CharSequence title;
         CharSequence text;
         CharSequence headerTextSecondary;
@@ -12088,6 +12076,7 @@ public class Notification implements Parcelable
             mHideSnoozeButton = false;
             mPromotePicture = false;
             mAllowActionIcons = false;
+            mAllowTextWithProgress = false;
             title = null;
             text = null;
             summaryText = null;
@@ -12129,6 +12118,11 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams allowActionIcons(boolean allowActionIcons) {
             this.mAllowActionIcons = allowActionIcons;
+            return this;
+        }
+
+        final StandardTemplateParams allowTextWithProgress(boolean allowTextWithProgress) {
+            this.mAllowTextWithProgress = allowTextWithProgress;
             return this;
         }
 

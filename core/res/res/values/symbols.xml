@@ -2902,7 +2902,6 @@
   <java-symbol type="id" name="time_divider" />
   <java-symbol type="id" name="header_text_divider" />
   <java-symbol type="id" name="header_text_secondary_divider" />
-  <java-symbol type="id" name="text_line_1" />
   <java-symbol type="drawable" name="ic_expand_notification" />
   <java-symbol type="drawable" name="ic_collapse_notification" />
   <java-symbol type="drawable" name="ic_expand_bundle" />
