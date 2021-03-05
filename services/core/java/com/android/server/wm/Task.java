@@ -3626,7 +3626,6 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     void resetSurfacePositionForAnimationLeash(SurfaceControl.Transaction t) {
-        if (isOrganized()) return;
         super.resetSurfacePositionForAnimationLeash(t);
     }
 
