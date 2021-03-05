@@ -16,6 +16,9 @@
 
 package com.android.keyguard;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -26,11 +29,14 @@ import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,7 +52,7 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
 
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock
+
     private KeyguardHostView mKeyguardHostView;
     @Mock
     private AudioManager mAudioManager;
@@ -66,6 +72,10 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mContext.ensureTestableResources();
+
+        mKeyguardHostView = new KeyguardHostView(mContext);
+
         when(mKeyguardSecurityContainerControllerFactory.create(any(
                 KeyguardSecurityContainer.SecurityCallback.class)))
                 .thenReturn(mKeyguardSecurityContainerController);
@@ -76,15 +86,42 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testHasDismissActions() {
-        Assert.assertFalse("Action not set yet", mKeyguardHostViewController.hasDismissActions());
+        assertFalse("Action not set yet", mKeyguardHostViewController.hasDismissActions());
         mKeyguardHostViewController.setOnDismissAction(mock(OnDismissAction.class),
                 null /* cancelAction */);
-        Assert.assertTrue("Action should exist", mKeyguardHostViewController.hasDismissActions());
+        assertTrue("Action should exist", mKeyguardHostViewController.hasDismissActions());
     }
 
     @Test
     public void testOnStartingToHide() {
         mKeyguardHostViewController.onStartingToHide();
         verify(mKeyguardSecurityContainerController).onStartingToHide();
+    }
+
+    @Test
+    public void testGravityReappliedOnConfigurationChange() {
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        mKeyguardHostView.setLayoutParams(lp);
+
+        // Set initial gravity
+        mContext.getOrCreateTestableResources().addOverride(R.integer.keyguard_host_view_gravity,
+                Gravity.CENTER);
+
+        // Kick off the initial pass...
+        mKeyguardHostViewController.init();
+        assertEquals(
+                ((FrameLayout.LayoutParams) mKeyguardHostView.getLayoutParams()).gravity,
+                Gravity.CENTER);
+
+        // Now simulate a config change
+        mContext.getOrCreateTestableResources().addOverride(R.integer.keyguard_host_view_gravity,
+                Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
+
+        mKeyguardHostViewController.updateResources();
+        assertEquals(
+                ((FrameLayout.LayoutParams) mKeyguardHostView.getLayoutParams()).gravity,
+                Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
     }
 }

@@ -533,6 +533,17 @@ public class KeyguardBouncer {
         }
     }
 
+    /**
+     * Apply keyguard configuration from the currently active resources. This can be called when the
+     * device configuration changes, to re-apply some resources that are qualified on the device
+     * configuration.
+     */
+    public void updateResources() {
+        if (mKeyguardViewController != null) {
+            mKeyguardViewController.updateResources();
+        }
+    }
+
     public void dump(PrintWriter pw) {
         pw.println("KeyguardBouncer");
         pw.println("  isShowing(): " + isShowing());

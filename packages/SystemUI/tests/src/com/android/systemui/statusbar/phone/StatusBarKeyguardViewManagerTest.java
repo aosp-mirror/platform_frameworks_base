@@ -276,4 +276,11 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         verify(action).onDismiss();
         verify(cancelAction, never()).run();
     }
+
+    @Test
+    public void testUpdateResources_delegatesToBouncer() {
+        mStatusBarKeyguardViewManager.updateResources();
+
+        verify(mBouncer).updateResources();
+    }
 }

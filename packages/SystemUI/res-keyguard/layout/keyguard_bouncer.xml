@@ -22,7 +22,6 @@
     android:clipToPadding="false">
 
     <include
-        style="@style/BouncerSecurityContainer"
         layout="@layout/keyguard_host_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

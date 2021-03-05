@@ -1050,6 +1050,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 || mBouncer.isFullscreenBouncer();
     }
 
+    /**
+     * Apply keyguard configuration from the currently active resources. This can be called when the
+     * device configuration changes, to re-apply some resources that are qualified on the device
+     * configuration.
+     */
+    public void updateResources() {
+        if (mBouncer != null) {
+            mBouncer.updateResources();
+        }
+    }
+
     public void dump(PrintWriter pw) {
         pw.println("StatusBarKeyguardViewManager:");
         pw.println("  mShowing: " + mShowing);
