@@ -18,10 +18,13 @@ package android.service.autofill;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -44,6 +47,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@link ServiceInfo} and meta-data about an {@link AutofillService}.
@@ -236,6 +241,30 @@ public final class AutofillServiceInfo {
 
     public boolean isInlineSuggestionsEnabled() {
         return mInlineSuggestionsEnabled;
+    }
+
+    /**
+     * Queries the valid autofill services available for the user.
+     */
+    public static List<AutofillServiceInfo> getAvailableServices(
+            Context context, @UserIdInt int user) {
+        final List<AutofillServiceInfo> services = new ArrayList<>();
+
+        final List<ResolveInfo> resolveInfos =
+                context.getPackageManager().queryIntentServicesAsUser(
+                        new Intent(AutofillService.SERVICE_INTERFACE),
+                        PackageManager.GET_META_DATA,
+                        user);
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            try {
+                services.add(new AutofillServiceInfo(context, serviceInfo));
+            } catch (SecurityException e) {
+                // Service does not declare the proper permission, ignore it.
+                Log.w(TAG, "Error getting info for " + serviceInfo + ": " + e);
+            }
+        }
+        return services;
     }
 
     @Override
