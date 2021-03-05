@@ -226,8 +226,6 @@ void AssetManager2::BuildDynamicRefTable() {
 }
 
 void AssetManager2::DumpToLog() const {
-  base::ScopedLogSeverity _log(base::INFO);
-
   LOG(INFO) << base::StringPrintf("AssetManager2(this=%p)", this);
 
   std::string list;
@@ -1721,7 +1719,6 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& o) {
 }
 
 void Theme::Dump() const {
-  base::ScopedLogSeverity _log(base::INFO);
   LOG(INFO) << base::StringPrintf("Theme(this=%p, AssetManager2=%p)", this, asset_manager_);
 
   for (int p = 0; p < packages_.size(); p++) {
