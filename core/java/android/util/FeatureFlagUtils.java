@@ -49,6 +49,8 @@ public class FeatureFlagUtils {
     /** @hide */
     public static final String SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES
             = "settings_use_new_backup_eligibility_rules";
+    /** @hide */
+    public static final String SETTINGS_ENABLE_SECURITY_HUB = "settings_enable_security_hub";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -72,6 +74,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_contextual_home", "false");
         DEFAULT_FLAGS.put(SETTINGS_PROVIDER_MODEL, "false");
         DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
