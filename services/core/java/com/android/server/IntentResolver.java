@@ -839,23 +839,34 @@ public abstract class IntentResolver<F, R extends Object> {
         }
     };
 
+    // Helper method to copy some of the maps.
+    private static <E> void copyInto(ArrayMap<String, E[]> l, ArrayMap<String, E[]> r) {
+        final int end = r.size();
+        l.ensureCapacity(end);
+        for (int i = 0; i < end; i++) {
+            final E[] val = r.valueAt(i);
+            final String key = r.keyAt(i);
+            l.put(key, Arrays.copyOf(val, val.length));
+        }
+    }
+
     // Make <this> a copy of <orig>.  The presumption is that <this> is empty but all
     // arrays are cleared out explicitly, just to be sure.
     protected void copyFrom(IntentResolver orig) {
         mFilters.clear();
         mFilters.addAll(orig.mFilters);
         mTypeToFilter.clear();
-        mTypeToFilter.putAll(orig.mTypeToFilter);
+        copyInto(mTypeToFilter, orig.mTypeToFilter);
         mBaseTypeToFilter.clear();
-        mBaseTypeToFilter.putAll(orig.mBaseTypeToFilter);
+        copyInto(mBaseTypeToFilter, orig.mBaseTypeToFilter);
         mWildTypeToFilter.clear();
-        mWildTypeToFilter.putAll(orig.mWildTypeToFilter);
+        copyInto(mWildTypeToFilter, orig.mWildTypeToFilter);
         mSchemeToFilter.clear();
-        mSchemeToFilter.putAll(orig.mSchemeToFilter);
+        copyInto(mSchemeToFilter, orig.mSchemeToFilter);
         mActionToFilter.clear();
-        mActionToFilter.putAll(orig.mActionToFilter);
+        copyInto(mActionToFilter, orig.mActionToFilter);
         mTypedActionToFilter.clear();
-        mTypedActionToFilter.putAll(orig.mTypedActionToFilter);
+        copyInto(mTypedActionToFilter, orig.mTypedActionToFilter);
     }
 
     /**
