@@ -85,7 +85,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
-import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.pm.UserManagerInternal;
 
