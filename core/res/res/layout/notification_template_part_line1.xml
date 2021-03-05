@@ -21,8 +21,7 @@
     android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.BigTitle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:singleLine="true"
-    android:ellipsize="marquee"
-    android:fadingEdge="horizontal"
+    android:maxLines="2"
+    android:ellipsize="end"
     android:textAlignment="viewStart"
     />
