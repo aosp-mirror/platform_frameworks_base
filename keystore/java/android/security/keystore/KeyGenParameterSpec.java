@@ -279,8 +279,10 @@ import javax.security.auth.x500.X500Principal;
  * }
  */
 public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAuthArgs {
-    private static final X500Principal DEFAULT_CERT_SUBJECT =
+    private static final X500Principal DEFAULT_ATTESTATION_CERT_SUBJECT =
             new X500Principal("CN=Android Keystore Key");
+    private static final X500Principal DEFAULT_SELF_SIGNED_CERT_SUBJECT =
+            new X500Principal("CN=Fake");
     private static final BigInteger DEFAULT_CERT_SERIAL_NUMBER = new BigInteger("1");
     private static final Date DEFAULT_CERT_NOT_BEFORE = new Date(0L); // Jan 1 1970
     private static final Date DEFAULT_CERT_NOT_AFTER = new Date(2461449600000L); // Jan 1 2048
@@ -366,7 +368,11 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         if (certificateSubject == null) {
-            certificateSubject = DEFAULT_CERT_SUBJECT;
+            if (attestationChallenge == null) {
+                certificateSubject = DEFAULT_SELF_SIGNED_CERT_SUBJECT;
+            } else {
+                certificateSubject = DEFAULT_ATTESTATION_CERT_SUBJECT;
+            }
         }
         if (certificateNotBefore == null) {
             certificateNotBefore = DEFAULT_CERT_NOT_BEFORE;

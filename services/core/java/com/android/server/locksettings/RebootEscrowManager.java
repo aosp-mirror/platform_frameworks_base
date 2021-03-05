@@ -193,6 +193,17 @@ class RebootEscrowManager {
                     0);
         }
 
+        public int getLoadEscrowDataRetryLimit() {
+            return DeviceConfig.getInt(DeviceConfig.NAMESPACE_OTA,
+                    "load_escrow_data_retry_count", DEFAULT_LOAD_ESCROW_DATA_RETRY_COUNT);
+        }
+
+        public int getLoadEscrowDataRetryIntervalSeconds() {
+            return DeviceConfig.getInt(DeviceConfig.NAMESPACE_OTA,
+                    "load_escrow_data_retry_interval_seconds",
+                    DEFAULT_LOAD_ESCROW_DATA_RETRY_INTERVAL_SECONDS);
+        }
+
         public void reportMetric(boolean success) {
             // TODO(b/179105110) design error code; and report the true value for other fields.
             FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, 0, 1, 1,
@@ -251,11 +262,8 @@ class RebootEscrowManager {
             List<UserInfo> users, List<UserInfo> rebootEscrowUsers) {
         Objects.requireNonNull(retryHandler);
 
-        final int retryLimit = DeviceConfig.getInt(DeviceConfig.NAMESPACE_OTA,
-                "load_escrow_data_retry_count", DEFAULT_LOAD_ESCROW_DATA_RETRY_COUNT);
-        final int retryIntervalInSeconds = DeviceConfig.getInt(DeviceConfig.NAMESPACE_OTA,
-                "load_escrow_data_retry_interval_seconds",
-                DEFAULT_LOAD_ESCROW_DATA_RETRY_INTERVAL_SECONDS);
+        final int retryLimit = mInjector.getLoadEscrowDataRetryLimit();
+        final int retryIntervalInSeconds = mInjector.getLoadEscrowDataRetryIntervalSeconds();
 
         if (attemptNumber < retryLimit) {
             Slog.i(TAG, "Scheduling loadRebootEscrowData retry number: " + attemptNumber);

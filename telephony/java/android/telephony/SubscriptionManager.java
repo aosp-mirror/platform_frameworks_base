@@ -907,7 +907,8 @@ public class SubscriptionManager {
      * Indicate which network type is allowed. By default it's enabled.
      * @hide
      */
-    public static final String ALLOWED_NETWORK_TYPES = SimInfo.COLUMN_ALLOWED_NETWORK_TYPES;
+    public static final String ALLOWED_NETWORK_TYPES =
+            SimInfo.COLUMN_ALLOWED_NETWORK_TYPES_FOR_REASONS;
 
     /**
      * Broadcast Action: The user has changed one of the default subs related to
