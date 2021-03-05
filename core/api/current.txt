@@ -10326,6 +10326,7 @@ package android.content {
     method @Deprecated public abstract void clearWallpaper() throws java.io.IOException;
     method @NonNull public android.content.Context createAttributionContext(@Nullable String);
     method public abstract android.content.Context createConfigurationContext(@NonNull android.content.res.Configuration);
+    method @NonNull public android.content.Context createContext(@NonNull android.content.ContextParams);
     method public abstract android.content.Context createContextForSplit(String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.Context createDeviceProtectedStorageContext();
     method public abstract android.content.Context createDisplayContext(@NonNull android.view.Display);
@@ -10545,6 +10546,19 @@ package android.content {
     field public static final String WIFI_RTT_RANGING_SERVICE = "wifirtt";
     field public static final String WIFI_SERVICE = "wifi";
     field public static final String WINDOW_SERVICE = "window";
+  }
+
+  public final class ContextParams {
+    method @Nullable public String getAttributionTag();
+    method @Nullable public String getReceiverAttributionTag();
+    method @Nullable public String getReceiverPackage();
+  }
+
+  public static final class ContextParams.Builder {
+    ctor public ContextParams.Builder();
+    method @NonNull public android.content.ContextParams build();
+    method @NonNull public android.content.ContextParams.Builder setAttributionTag(@NonNull String);
+    method @NonNull public android.content.ContextParams.Builder setReceiverPackage(@NonNull String, @Nullable String);
   }
 
   public class ContextWrapper extends android.content.Context {
