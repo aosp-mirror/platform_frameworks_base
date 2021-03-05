@@ -64,8 +64,12 @@
     <string name="wifi_security_eap" translatable="false">WPA/WPA2/WPA3-Enterprise</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA 802.1x EAP security -->
     <string name="wifi_security_eap_wpa" translatable="false">WPA-Enterprise</string>
+    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP security -->
+    <string name="wifi_security_eap_wpa_wpa2" translatable="false">WPA/WPA2-Enterprise</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 802.1x EAP security -->
     <string name="wifi_security_eap_wpa2_wpa3" translatable="false">WPA2/WPA3-Enterprise</string>
+    <!-- Do not translate.  Concise terminology for wifi with WPA3 802.1x EAP security -->
+    <string name="wifi_security_eap_wpa3" translatable="false">WPA3-Enterprise</string>
     <!-- Do not translate.  Concise terminology for Passpoint network -->
     <string name="wifi_security_passpoint" translatable="false">Passpoint</string>
     <!-- Do not translate.  Terminology for wifi with WPA3 security -->
