@@ -69,7 +69,7 @@
             android:id="@+id/qs_edge_guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            systemui:layout_constraintGuide_percent="0.4"
+            systemui:layout_constraintGuide_percent="0.5"
             android:orientation="vertical"/>
 
         <com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
