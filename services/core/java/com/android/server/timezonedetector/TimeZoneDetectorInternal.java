@@ -50,4 +50,8 @@ public interface TimeZoneDetectorInternal extends Dumpable.Container {
      * available, and so on. This method may be implemented asynchronously.
      */
     void suggestGeolocationTimeZone(@NonNull GeolocationTimeZoneSuggestion timeZoneSuggestion);
+
+    /** Generates a state snapshot for metrics. */
+    @NonNull
+    MetricsTimeZoneDetectorState generateMetricsState();
 }

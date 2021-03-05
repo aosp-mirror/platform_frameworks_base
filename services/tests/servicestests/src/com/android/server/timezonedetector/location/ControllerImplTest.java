@@ -79,15 +79,18 @@ public class ControllerImplTest {
         // For simplicity, the TestThreadingDomain uses the test's main thread. To execute posted
         // runnables, the test must call methods on mTestThreadingDomain otherwise those runnables
         // will never get a chance to execute.
+        LocationTimeZoneProvider.ProviderMetricsLogger stubbedProviderMetricsLogger = stateEnum -> {
+            // Stubbed.
+        };
         mTestThreadingDomain = new TestThreadingDomain();
         mTestCallback = new TestCallback(mTestThreadingDomain);
         mTimeZoneAvailabilityChecker = new FakeTimeZoneIdValidator();
-        mTestPrimaryLocationTimeZoneProvider =
-                new TestLocationTimeZoneProvider(
-                        mTestThreadingDomain, "primary", mTimeZoneAvailabilityChecker);
-        mTestSecondaryLocationTimeZoneProvider =
-                new TestLocationTimeZoneProvider(
-                        mTestThreadingDomain, "secondary", mTimeZoneAvailabilityChecker);
+        mTestPrimaryLocationTimeZoneProvider = new TestLocationTimeZoneProvider(
+                stubbedProviderMetricsLogger, mTestThreadingDomain, "primary",
+                mTimeZoneAvailabilityChecker);
+        mTestSecondaryLocationTimeZoneProvider = new TestLocationTimeZoneProvider(
+                stubbedProviderMetricsLogger, mTestThreadingDomain, "secondary",
+                mTimeZoneAvailabilityChecker);
     }
 
     @Test
@@ -1181,10 +1184,11 @@ public class ControllerImplTest {
         /**
          * Creates the instance.
          */
-        TestLocationTimeZoneProvider(ThreadingDomain threadingDomain,
-                String providerName,
+        TestLocationTimeZoneProvider(ProviderMetricsLogger providerMetricsLogger,
+                ThreadingDomain threadingDomain, String providerName,
                 TimeZoneIdValidator timeZoneIdValidator) {
-            super(threadingDomain, providerName, timeZoneIdValidator);
+            super(providerMetricsLogger, threadingDomain, providerName,
+                    timeZoneIdValidator);
         }
 
         public void setFailDuringInitialization(boolean failInitialization) {
