@@ -884,9 +884,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
             try {
+                // TODO: There shouldn't be a need to receive callback for all changes.
                 mActivityManager.registerUidObserver(mUidObserver,
                         ActivityManager.UID_OBSERVER_PROCSTATE|ActivityManager.UID_OBSERVER_GONE,
-                        NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE, "android");
+                        ActivityManager.PROCESS_STATE_UNKNOWN, "android");
                 mNetworkManager.registerObserver(mAlertObserver);
             } catch (RemoteException e) {
                 // ignored; both services live in system_server
