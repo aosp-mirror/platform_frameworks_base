@@ -2338,13 +2338,12 @@ interface ITelephony {
     /**
      * Register RCS provisioning callback.
      */
-    void registerRcsProvisioningChangedCallback(int subId,
-            IRcsConfigCallback callback);
+    void registerRcsProvisioningCallback(int subId, IRcsConfigCallback callback);
 
     /**
      * Unregister RCS provisioning callback.
      */
-    void unregisterRcsProvisioningChangedCallback(int subId, IRcsConfigCallback callback);
+    void unregisterRcsProvisioningCallback(int subId, IRcsConfigCallback callback);
 
     /**
      * trigger RCS reconfiguration.
