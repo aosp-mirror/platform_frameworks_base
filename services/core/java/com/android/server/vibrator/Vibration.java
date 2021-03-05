@@ -120,7 +120,9 @@ final class Vibration {
         if (newEffect.equals(mEffect)) {
             return;
         }
-        mOriginalEffect = mEffect;
+        if (mOriginalEffect == null) {
+            mOriginalEffect = mEffect;
+        }
         mEffect = newEffect;
     }
 

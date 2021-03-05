@@ -30,7 +30,8 @@
         android:id="@+id/left_icon"
         android:layout_width="@dimen/notification_left_icon_size"
         android:layout_height="@dimen/notification_left_icon_size"
-        android:layout_gravity="center_vertical|start"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/notification_left_icon_start"
         android:background="@drawable/notification_large_icon_outline"
         android:clipToOutline="true"
@@ -43,7 +44,8 @@
         android:id="@+id/icon"
         android:layout_width="@dimen/notification_icon_circle_size"
         android:layout_height="@dimen/notification_icon_circle_size"
-        android:layout_gravity="center_vertical|start"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/notification_icon_circle_start"
         android:background="@drawable/notification_icon_circle"
         android:padding="@dimen/notification_icon_circle_padding"
@@ -55,10 +57,12 @@
         android:id="@+id/notification_top_line"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/expand_button"
+        android:layout_alignWithParentIfMissing="true"
         android:clipChildren="false"
         android:gravity="center_vertical"
-        android:paddingEnd="@dimen/notification_heading_margin_end"
         android:paddingStart="@dimen/notification_content_margin_start"
         android:theme="@style/Theme.DeviceDefault.Notification"
         >
@@ -71,14 +75,15 @@
         android:id="@+id/alternate_expand_target"
         android:layout_width="@dimen/notification_content_margin_start"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
+        android:layout_alignParentStart="true"
         android:importantForAccessibility="no"
         />
 
     <include layout="@layout/notification_expand_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
         />
 
 </NotificationHeaderView>

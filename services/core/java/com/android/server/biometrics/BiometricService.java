@@ -666,14 +666,9 @@ public class BiometricService extends SystemService {
                 throw new SecurityException("Invalid authenticator configuration");
             }
 
-            final PromptInfo promptInfo = new PromptInfo();
-            promptInfo.setAuthenticators(authenticators);
-
             try {
-                PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager,
-                        mDevicePolicyManager, mSettingObserver, mSensors, userId, promptInfo,
-                        opPackageName,
-                        false /* checkDevicePolicyManager */);
+                final PreAuthInfo preAuthInfo =
+                        createPreAuthInfo(opPackageName, userId, authenticators);
                 return preAuthInfo.getCanAuthenticateResult();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
@@ -807,6 +802,64 @@ public class BiometricService extends SystemService {
             return Authenticators.EMPTY_SET;
         }
 
+        @Override // Binder call
+        public int getCurrentModality(
+                String opPackageName,
+                int userId,
+                int callingUserId,
+                @Authenticators.Types int authenticators) {
+
+            checkInternalPermission();
+
+            Slog.d(TAG, "getCurrentModality: User=" + userId
+                    + ", Caller=" + callingUserId
+                    + ", Authenticators=" + authenticators);
+
+            if (!Utils.isValidAuthenticatorConfig(authenticators)) {
+                throw new SecurityException("Invalid authenticator configuration");
+            }
+
+            try {
+                final PreAuthInfo preAuthInfo =
+                        createPreAuthInfo(opPackageName, userId, authenticators);
+                return preAuthInfo.getPreAuthenticateStatus().first;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+                return BiometricAuthenticator.TYPE_NONE;
+            }
+        }
+
+        @Override // Binder call
+        public int getSupportedModalities(@Authenticators.Types int authenticators) {
+            checkInternalPermission();
+
+            Slog.d(TAG, "getSupportedModalities: Authenticators=" + authenticators);
+
+            if (!Utils.isValidAuthenticatorConfig(authenticators)) {
+                throw new SecurityException("Invalid authenticator configuration");
+            }
+
+            @BiometricAuthenticator.Modality int modality =
+                    Utils.isCredentialRequested(authenticators)
+                            ? BiometricAuthenticator.TYPE_CREDENTIAL
+                            : BiometricAuthenticator.TYPE_NONE;
+
+            if (Utils.isBiometricRequested(authenticators)) {
+                @Authenticators.Types final int requestedStrength =
+                        Utils.getPublicBiometricStrength(authenticators);
+
+                // Add modalities of all biometric sensors that meet the authenticator requirements.
+                for (final BiometricSensor sensor : mSensors) {
+                    @Authenticators.Types final int sensorStrength = sensor.getCurrentStrength();
+                    if (Utils.isAtLeastStrength(sensorStrength, requestedStrength)) {
+                        modality |= sensor.modality;
+                    }
+                }
+            }
+
+            return modality;
+        }
+
         @Override
         protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
@@ -843,6 +896,19 @@ public class BiometricService extends SystemService {
     private void checkInternalPermission() {
         getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL,
                 "Must have USE_BIOMETRIC_INTERNAL permission");
+    }
+
+    @NonNull
+    private PreAuthInfo createPreAuthInfo(
+            @NonNull String opPackageName,
+            int userId,
+            @Authenticators.Types int authenticators) throws RemoteException {
+
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(authenticators);
+
+        return PreAuthInfo.create(mTrustManager, mDevicePolicyManager, mSettingObserver, mSensors,
+                userId, promptInfo, opPackageName, false /* checkDevicePolicyManager */);
     }
 
     /**

@@ -370,6 +370,15 @@ public abstract class Context {
     /***********    Hidden flags below this line ***********/
 
     /**
+     * Flag for {@link #bindService}: This flag is only intended to be used by the system to
+     * indicate that a service binding is not considered as real package component usage and should
+     * not generate a {@link android.app.usage.UsageEvents.Event#APP_COMPONENT_USED} event in usage
+     * stats.
+     * @hide
+     */
+    public static final int BIND_NOT_APP_COMPONENT_USAGE = 0x00008000;
+
+    /**
      * Flag for {@link #bindService}: allow the process hosting the target service to be treated
      * as if it's as important as a perceptible app to the user and avoid the oom killer killing
      * this process in low memory situations until there aren't any other processes left but the

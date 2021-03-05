@@ -136,7 +136,7 @@ public class FontListParser {
                 customization.getAdditionalNamedFamilies();
 
         parser.require(XmlPullParser.START_TAG, null, "familyset");
-        while (parser.next() != XmlPullParser.END_TAG) {
+        while (keepReading(parser)) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
             if (tag.equals("family")) {
@@ -158,6 +158,12 @@ public class FontListParser {
         return new FontConfig(families, aliases, lastModifiedDate, configVersion);
     }
 
+    private static boolean keepReading(XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        int next = parser.next();
+        return next != XmlPullParser.END_TAG && next != XmlPullParser.END_DOCUMENT;
+    }
+
     /**
      * Read family tag in fonts.xml or oem_customization.xml
      */
@@ -168,7 +174,7 @@ public class FontListParser {
         final String lang = parser.getAttributeValue("", "lang");
         final String variant = parser.getAttributeValue(null, "variant");
         final List<FontConfig.Font> fonts = new ArrayList<>();
-        while (parser.next() != XmlPullParser.END_TAG) {
+        while (keepReading(parser)) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             final String tag = parser.getName();
             if (tag.equals(TAG_FONT)) {
@@ -232,7 +238,7 @@ public class FontListParser {
         boolean isItalic = STYLE_ITALIC.equals(parser.getAttributeValue(null, ATTR_STYLE));
         String fallbackFor = parser.getAttributeValue(null, ATTR_FALLBACK_FOR);
         StringBuilder filename = new StringBuilder();
-        while (parser.next() != XmlPullParser.END_TAG) {
+        while (keepReading(parser)) {
             if (parser.getEventType() == XmlPullParser.TEXT) {
                 filename.append(parser.getText());
             }
@@ -359,6 +365,8 @@ public class FontListParser {
                 case XmlPullParser.END_TAG:
                     depth--;
                     break;
+                case XmlPullParser.END_DOCUMENT:
+                    return;
             }
         }
     }

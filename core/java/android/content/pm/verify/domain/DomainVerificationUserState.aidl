@@ -16,4 +16,4 @@
 
 package android.content.pm.verify.domain;
 
-parcelable DomainVerificationUserSelection;
+parcelable DomainVerificationUserState;

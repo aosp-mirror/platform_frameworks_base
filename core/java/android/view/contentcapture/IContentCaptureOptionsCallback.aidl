@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, The Android Open Source Project
+ * Copyright (c) 2021, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package android.net;
+package android.view.contentcapture;
+
+import android.content.ContentCaptureOptions;
 
 /**
- * Interface to inform NetworkMonitor of decisions of app handling captive portal.
- * @hide
- */
-oneway interface ICaptivePortal {
-    void appRequest(int request);
-    void appResponse(int response);
+  * Callback for changes to content capture options made by ContentCaptureService.
+  * Callback interface used by IContentCaptureManager to send asynchronous
+  * notifications back to its clients.  Note that this is a
+  * one-way interface so the server does not block waiting for the client.
+  *
+  * @hide
+  */
+oneway interface IContentCaptureOptionsCallback {
+    void setContentCaptureOptions(in ContentCaptureOptions options);
 }

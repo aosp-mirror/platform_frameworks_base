@@ -405,14 +405,19 @@ public class KeyguardSliceView extends LinearLayout {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
+        /**
+         * Set the amount (ratio) that the device has transitioned to doze.
+         *
+         * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
+         */
         public void setDarkAmount(float darkAmount) {
-            boolean isAwake = darkAmount != 0;
-            boolean wasAwake = mDarkAmount != 0;
-            if (isAwake == wasAwake) {
+            boolean isDozing = darkAmount != 0;
+            boolean wasDozing = mDarkAmount != 0;
+            if (isDozing == wasDozing) {
                 return;
             }
             mDarkAmount = darkAmount;
-            setLayoutAnimationListener(isAwake ? null : mKeepAwakeListener);
+            setLayoutAnimationListener(isDozing ? null : mKeepAwakeListener);
         }
 
         @Override

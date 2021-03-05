@@ -327,6 +327,10 @@ public class BubbleController {
         return mImpl;
     }
 
+    public ShellExecutor getMainExecutor() {
+        return mMainExecutor;
+    }
+
     /**
      * Hides the current input method, wherever it may be focused, via InputMethodManagerInternal.
      */

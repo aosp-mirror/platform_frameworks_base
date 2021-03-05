@@ -99,6 +99,8 @@ public class FullBackup {
     public static final String FLAG_REQUIRED_DEVICE_TO_DEVICE_TRANSFER = "deviceToDeviceTransfer";
     public static final String FLAG_REQUIRED_FAKE_CLIENT_SIDE_ENCRYPTION =
             "fakeClientSideEncryption";
+    private static final String FLAG_DISABLE_IF_NO_ENCRYPTION_CAPABILITIES
+            = "disableIfNoEncryptionCapabilities";
 
     /**
      * When  this change is enabled, include / exclude rules specified via
@@ -307,6 +309,10 @@ public class FullBackup {
         // lazy initialized, only when needed
         private StorageVolume[] mVolumes = null;
 
+        // Properties the transport must have (e.g. encryption) for the operation to go ahead.
+        @Nullable private Integer mRequiredTransportFlags;
+        @Nullable private Boolean mIsUsingNewScheme;
+
         /**
          * Parse out the semantic domains into the correct physical location.
          */
@@ -453,6 +459,35 @@ public class FullBackup {
             }
         }
 
+        boolean isFullBackupEnabled(int transportFlags) {
+            try {
+                if (isUsingNewScheme()) {
+                    int requiredTransportFlags = getRequiredTransportFlags();
+                    // All bits that are set in requiredTransportFlags must be set in
+                    // transportFlags.
+                    return (transportFlags & requiredTransportFlags) == requiredTransportFlags;
+                }
+            } catch (IOException | XmlPullParserException e) {
+                Slog.w(TAG, "Failed to interpret the backup scheme: " + e);
+                return false;
+            }
+
+            return isFullBackupContentEnabled();
+        }
+
+        boolean isFullRestoreEnabled() {
+            try {
+                if (isUsingNewScheme()) {
+                    return true;
+                }
+            } catch (IOException | XmlPullParserException e) {
+                Slog.w(TAG, "Failed to interpret the backup scheme: " + e);
+                return false;
+            }
+
+            return isFullBackupContentEnabled();
+        }
+
         boolean isFullBackupContentEnabled() {
             if (mFullBackupContent < 0) {
                 // android:fullBackupContent="false", bail.
@@ -491,10 +526,30 @@ public class FullBackup {
             return mExcludes;
         }
 
+        private synchronized int getRequiredTransportFlags()
+                throws IOException, XmlPullParserException {
+            if (mRequiredTransportFlags == null) {
+                maybeParseBackupSchemeLocked();
+            }
+
+            return mRequiredTransportFlags;
+        }
+
+        private synchronized boolean isUsingNewScheme()
+                throws IOException, XmlPullParserException {
+            if (mIsUsingNewScheme == null) {
+                maybeParseBackupSchemeLocked();
+            }
+
+            return mIsUsingNewScheme;
+        }
+
         private void maybeParseBackupSchemeLocked() throws IOException, XmlPullParserException {
             // This not being null is how we know that we've tried to parse the xml already.
             mIncludes = new ArrayMap<String, Set<PathWithRequiredFlags>>();
             mExcludes = new ArraySet<PathWithRequiredFlags>();
+            mRequiredTransportFlags = 0;
+            mIsUsingNewScheme = false;
 
             if (mFullBackupContent == 0 && mDataExtractionRules == 0) {
                 // No scheme specified via either new or legacy config, will copy everything.
@@ -535,12 +590,14 @@ public class FullBackup {
                 }
                 if (!mExcludes.isEmpty() || !mIncludes.isEmpty()) {
                     // Found configuration in the new config, we will use it.
+                    mIsUsingNewScheme = true;
                     return;
                 }
             }
 
             if (operationType == OperationType.MIGRATION
                     && CompatChanges.isChangeEnabled(IGNORE_FULL_BACKUP_CONTENT_IN_D2D)) {
+                mIsUsingNewScheme = true;
                 return;
             }
 
@@ -584,11 +641,22 @@ public class FullBackup {
                     continue;
                 }
 
-                // TODO(b/180523028): Parse required attributes for rules (e.g. encryption).
+                parseRequiredTransportFlags(parser, configSection);
                 parseRules(parser, excludes, includes, Optional.of(0), configSection);
             }
 
             logParsingResults(excludes, includes);
+        }
+
+        private void parseRequiredTransportFlags(XmlPullParser parser,
+                @ConfigSection String configSection) {
+            if (ConfigSection.CLOUD_BACKUP.equals(configSection)) {
+                String encryptionAttribute = parser.getAttributeValue(/* namespace */ null,
+                        FLAG_DISABLE_IF_NO_ENCRYPTION_CAPABILITIES);
+                if ("true".equals(encryptionAttribute)) {
+                    mRequiredTransportFlags = BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED;
+                }
+            }
         }
 
         @VisibleForTesting
