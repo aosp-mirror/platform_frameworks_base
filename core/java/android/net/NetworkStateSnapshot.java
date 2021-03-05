@@ -24,6 +24,8 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.net.module.util.NetworkIdentityUtils;
+
 import java.util.Objects;
 
 /**
@@ -123,5 +125,16 @@ public final class NetworkStateSnapshot implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(network, networkCapabilities, linkProperties, subscriberId, legacyType);
+    }
+
+    @Override
+    public String toString() {
+        return "NetworkStateSnapshot{"
+                + "network=" + network
+                + ", networkCapabilities=" + networkCapabilities
+                + ", linkProperties=" + linkProperties
+                + ", subscriberId='" + NetworkIdentityUtils.scrubSubscriberId(subscriberId) + '\''
+                + ", legacyType=" + legacyType
+                + '}';
     }
 }
