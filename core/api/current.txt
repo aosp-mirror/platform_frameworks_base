@@ -20078,6 +20078,14 @@ package android.media {
     method public android.media.AudioAttributes.Builder setUsage(int);
   }
 
+  public class AudioDescriptor {
+    method @NonNull public byte[] getDescriptor();
+    method public int getEncapsulationType();
+    method public int getStandard();
+    field public static final int STANDARD_EDID = 1; // 0x1
+    field public static final int STANDARD_NONE = 0; // 0x0
+  }
+
   public abstract class AudioDeviceCallback {
     ctor public AudioDeviceCallback();
     method public void onAudioDevicesAdded(android.media.AudioDeviceInfo[]);
@@ -20086,6 +20094,7 @@ package android.media {
 
   public final class AudioDeviceInfo {
     method @NonNull public String getAddress();
+    method @NonNull public java.util.List<android.media.AudioDescriptor> getAudioDescriptors();
     method @NonNull public java.util.List<android.media.AudioProfile> getAudioProfiles();
     method @NonNull public int[] getChannelCounts();
     method @NonNull public int[] getChannelIndexMasks();
@@ -20540,8 +20549,11 @@ package android.media {
   public class AudioProfile {
     method @NonNull public int[] getChannelIndexMasks();
     method @NonNull public int[] getChannelMasks();
+    method public int getEncapsulationType();
     method public int getFormat();
     method @NonNull public int[] getSampleRates();
+    field public static final int AUDIO_ENCAPSULATION_TYPE_IEC61937 = 1; // 0x1
+    field public static final int AUDIO_ENCAPSULATION_TYPE_NONE = 0; // 0x0
   }
 
   public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {

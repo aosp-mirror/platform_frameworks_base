@@ -60,10 +60,11 @@ public class AudioDevicePort extends AudioPort {
 
     AudioDevicePort(AudioHandle handle, String deviceName, List<AudioProfile> profiles,
             AudioGain[] gains, int type, String address, int[] encapsulationModes,
-              @AudioTrack.EncapsulationMetadataType int[] encapsulationMetadataTypes) {
+            @AudioTrack.EncapsulationMetadataType int[] encapsulationMetadataTypes,
+            List<AudioDescriptor> descriptors) {
         super(handle,
                 AudioManager.isInputDevice(type) ? AudioPort.ROLE_SOURCE : AudioPort.ROLE_SINK,
-                deviceName, profiles, gains);
+                deviceName, profiles, gains, descriptors);
         mType = type;
         mAddress = address;
         mEncapsulationModes = encapsulationModes;
