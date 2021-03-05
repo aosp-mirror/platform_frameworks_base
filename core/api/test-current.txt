@@ -82,7 +82,7 @@ package android.app {
     method public static boolean isHighEndGfx();
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
-    field public static final int PROCESS_CAPABILITY_ALL = 15; // 0xf
+    field public static final int PROCESS_CAPABILITY_ALL = 7; // 0x7
     field public static final int PROCESS_CAPABILITY_ALL_EXPLICIT = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_ALL_IMPLICIT = 6; // 0x6
     field public static final int PROCESS_CAPABILITY_FOREGROUND_CAMERA = 2; // 0x2
