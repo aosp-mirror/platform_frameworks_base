@@ -97,7 +97,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         public void showUdfpsOverlay(int sensorId, int reason) {
             if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
                     || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
-                mEnrollHelper = new UdfpsEnrollHelper(reason);
+                mEnrollHelper = new UdfpsEnrollHelper(mContext, reason);
             } else {
                 mEnrollHelper = null;
             }
