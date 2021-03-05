@@ -1225,21 +1225,6 @@ public class NotificationChildrenContainer extends ViewGroup {
         return 0;
     }
 
-    public void setShelfIconVisible(boolean iconVisible) {
-        if (mNotificationHeaderWrapper != null) {
-            CachingIconView icon = mNotificationHeaderWrapper.getIcon();
-            if (icon != null) {
-                icon.setForceHidden(iconVisible);
-            }
-        }
-        if (mNotificationHeaderWrapperLowPriority != null) {
-            CachingIconView icon = mNotificationHeaderWrapperLowPriority.getIcon();
-            if (icon != null) {
-                icon.setForceHidden(iconVisible);
-            }
-        }
-    }
-
     public void setClipBottomAmount(int clipBottomAmount) {
         mClipBottomAmount = clipBottomAmount;
         updateChildrenClipping();

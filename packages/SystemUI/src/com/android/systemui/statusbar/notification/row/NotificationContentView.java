@@ -169,7 +169,6 @@ public class NotificationContentView extends FrameLayout {
     private int mContentHeightAtAnimationStart = UNDEFINED;
     private boolean mFocusOnVisibilityChange;
     private boolean mHeadsUpAnimatingAway;
-    private boolean mShelfIconVisible;
     private int mClipBottomAmount;
     private boolean mIsLowPriority;
     private boolean mIsContentExpandable;
@@ -1727,23 +1726,6 @@ public class NotificationContentView extends FrameLayout {
 
     public void setFocusOnVisibilityChange() {
         mFocusOnVisibilityChange = true;
-    }
-
-    public void setShelfIconVisible(boolean iconsVisible) {
-        mShelfIconVisible = iconsVisible;
-        updateIconVisibilities();
-    }
-
-    private void updateIconVisibilities() {
-        if (mContractedWrapper != null) {
-            mContractedWrapper.setShelfIconVisible(mShelfIconVisible);
-        }
-        if (mHeadsUpWrapper != null) {
-            mHeadsUpWrapper.setShelfIconVisible(mShelfIconVisible);
-        }
-        if (mExpandedWrapper != null) {
-            mExpandedWrapper.setShelfIconVisible(mShelfIconVisible);
-        }
     }
 
     @Override

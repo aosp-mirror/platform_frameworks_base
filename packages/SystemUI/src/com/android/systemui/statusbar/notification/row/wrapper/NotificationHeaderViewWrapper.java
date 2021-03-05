@@ -313,12 +313,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public void setShelfIconVisible(boolean visible) {
-        super.setShelfIconVisible(visible);
-        mIcon.setForceHidden(visible);
-    }
-
-    @Override
     public TransformState getCurrentState(int fadingView) {
         return mTransformationHelper.getCurrentState(fadingView);
     }
