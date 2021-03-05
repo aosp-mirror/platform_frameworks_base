@@ -167,7 +167,6 @@ import android.net.NetworkIdentity;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkPolicyManager.UidState;
-import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
@@ -884,9 +883,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
             try {
+                // TODO: There shouldn't be a need to receive callback for all changes.
                 mActivityManager.registerUidObserver(mUidObserver,
                         ActivityManager.UID_OBSERVER_PROCSTATE|ActivityManager.UID_OBSERVER_GONE,
-                        NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE, "android");
+                        ActivityManager.PROCESS_STATE_UNKNOWN, "android");
                 mNetworkManager.registerObserver(mAlertObserver);
             } catch (RemoteException e) {
                 // ignored; both services live in system_server
@@ -3164,14 +3164,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    @Override
-    @Deprecated
-    public NetworkQuotaInfo getNetworkQuotaInfo(NetworkState state) {
-        Log.w(TAG, "Shame on UID " + Binder.getCallingUid()
-                + " for calling the hidden API getNetworkQuotaInfo(). Shame!");
-        return new NetworkQuotaInfo();
     }
 
     private void enforceSubscriptionPlanAccess(int subId, int callingUid, String callingPackage) {

@@ -39099,6 +39099,9 @@ package android.telephony {
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
     method public void notifyConfigChangedForSubId(int);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
+    field public static final int CARRIER_NR_AVAILABILITY_NONE = 0; // 0x0
+    field public static final int CARRIER_NR_AVAILABILITY_NSA = 1; // 0x1
+    field public static final int CARRIER_NR_AVAILABILITY_SA = 2; // 0x2
     field public static final int DATA_CYCLE_THRESHOLD_DISABLED = -2; // 0xfffffffe
     field public static final int DATA_CYCLE_USE_PLATFORM_DEFAULT = -1; // 0xffffffff
     field public static final String ENABLE_EAP_METHOD_PREFIX_BOOL = "enable_eap_method_prefix_bool";
@@ -39157,6 +39160,7 @@ package android.telephony {
     field public static final String KEY_CARRIER_INSTANT_LETTERING_LENGTH_LIMIT_INT = "carrier_instant_lettering_length_limit_int";
     field public static final String KEY_CARRIER_NAME_OVERRIDE_BOOL = "carrier_name_override_bool";
     field public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
+    field public static final String KEY_CARRIER_NR_AVAILABILITY_INT = "carrier_nr_availability_int";
     field public static final String KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL = "carrier_rcs_provisioning_required_bool";
     field public static final String KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING = "carrier_settings_activity_component_name_string";
     field public static final String KEY_CARRIER_SETTINGS_ENABLE_BOOL = "carrier_settings_enable_bool";

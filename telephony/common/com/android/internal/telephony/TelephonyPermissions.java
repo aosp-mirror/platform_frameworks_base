@@ -640,6 +640,67 @@ public final class TelephonyPermissions {
     }
 
     /**
+     * Given a list of permissions, check to see if the caller has at least one of them. If the
+     * caller has none of these permissions, throw a SecurityException.
+     */
+    public static void enforceAnyPermissionGranted(Context context, int uid, String message,
+            String... permissions) {
+        if (permissions.length == 0) return;
+        boolean isGranted = false;
+        for (String perm : permissions) {
+            if (context.checkCallingOrSelfPermission(perm) == PERMISSION_GRANTED) {
+                isGranted = true;
+                break;
+            }
+        }
+
+        if (isGranted) return;
+
+        StringBuilder b = new StringBuilder(message);
+        b.append(": Neither user ");
+        b.append(uid);
+        b.append(" nor current process has ");
+        b.append(permissions[0]);
+        for (int i = 1; i < permissions.length; i++) {
+            b.append(" or ");
+            b.append(permissions[i]);
+        }
+        throw new SecurityException(b.toString());
+    }
+
+    /**
+     * Given a list of permissions, check to see if the caller has at least one of them granted. If
+     * not, check to see if the caller has carrier privileges. If the caller does not have any  of
+     * these permissions, throw a SecurityException.
+     */
+    public static void enforceAnyPermissionGrantedOrCarrierPrivileges(Context context, int subId,
+            int uid, String message, String... permissions) {
+        if (permissions.length == 0) return;
+        boolean isGranted = false;
+        for (String perm : permissions) {
+            if (context.checkCallingOrSelfPermission(perm) == PERMISSION_GRANTED) {
+                isGranted = true;
+                break;
+            }
+        }
+
+        if (isGranted) return;
+        if (checkCarrierPrivilegeForSubId(context, subId)) return;
+
+        StringBuilder b = new StringBuilder(message);
+        b.append(": Neither user ");
+        b.append(uid);
+        b.append(" nor current process has ");
+        b.append(permissions[0]);
+        for (int i = 1; i < permissions.length; i++) {
+            b.append(" or ");
+            b.append(permissions[i]);
+        }
+        b.append(" or carrier privileges");
+        throw new SecurityException(b.toString());
+    }
+
+    /**
      * Throws if the caller is not of a shell (or root) UID.
      *
      * @param callingUid pass Binder.callingUid().
