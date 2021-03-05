@@ -140,9 +140,10 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
-    public int createInputStream(int width, int height, int format) throws CameraAccessException {
+    public int createInputStream(int width, int height, int format, boolean isMultiResolution)
+            throws CameraAccessException {
         try {
-            return mRemoteDevice.createInputStream(width, height, format);
+            return mRemoteDevice.createInputStream(width, height, format, isMultiResolution);
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
             throw new UnsupportedOperationException("Unexpected exception", t);
