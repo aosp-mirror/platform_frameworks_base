@@ -1121,9 +1121,6 @@
     <!-- Name for a freshly added user [CHAR LIMIT=30] -->
     <string name="user_new_user_name">New user</string>
 
-    <!-- Label for button that exits guest session and clears the guest user data [CHAR LIMIT=50]-->
-    <string name="guest_exit_button">End guest session</string>
-
     <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_title">Remove guest?</string>
 
