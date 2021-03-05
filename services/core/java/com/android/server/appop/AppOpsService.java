@@ -848,10 +848,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     proxyAttributionTag, uidState, flags);
 
             mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
-                    tag, uidState, flags);
-
-            mHistoricalRegistry.mDiscreteRegistry.recordDiscreteAccess(parent.uid,
-                    parent.packageName, parent.op, tag, flags, uidState, accessTime, -1);
+                    tag, uidState, flags, accessTime);
         }
 
         /**
@@ -955,9 +952,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mInProgressEvents = new ArrayMap<>(1);
             }
 
+            long startTime = System.currentTimeMillis();
             InProgressStartOpEvent event = mInProgressEvents.get(clientId);
             if (event == null) {
-                event = mInProgressStartOpEventPool.acquire(System.currentTimeMillis(),
+                event = mInProgressStartOpEventPool.acquire(startTime,
                         SystemClock.elapsedRealtime(), clientId,
                         PooledLambda.obtainRunnable(AppOpsService::onClientDeath, this, clientId),
                         proxyUid, proxyPackageName, proxyAttributionTag, uidState, flags);
@@ -971,7 +969,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             event.numUnfinishedStarts++;
 
             mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
-                    tag, uidState, flags);
+                    tag, uidState, flags, startTime);
         }
 
         /**
@@ -1017,11 +1015,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
                         parent.packageName, tag, event.getUidState(),
-                        event.getFlags(), finishedEvent.getDuration());
-
-                mHistoricalRegistry.mDiscreteRegistry.recordDiscreteAccess(parent.uid,
-                        parent.packageName, parent.op, tag, event.getFlags(), event.getUidState(),
-                        event.getStartTime(), accessDurationMillis);
+                        event.getFlags(), finishedEvent.getNoteTime(), finishedEvent.getDuration());
 
                 mInProgressStartOpEventPool.release(event);
 
@@ -4769,7 +4763,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mFile.failWrite(stream);
             }
         }
-        mHistoricalRegistry.mDiscreteRegistry.writeAndClearAccessHistory();
+        mHistoricalRegistry.writeAndClearDiscreteHistory();
     }
 
     static class Shell extends ShellCommand {
@@ -6125,8 +6119,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
                 "clearHistory");
         // Must not hold the appops lock
-        mHistoricalRegistry.clearHistory();
-        mHistoricalRegistry.mDiscreteRegistry.clearHistory();
+        mHistoricalRegistry.clearAllHistory();
     }
 
     @Override
