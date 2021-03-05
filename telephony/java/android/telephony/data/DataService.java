@@ -295,6 +295,8 @@ public abstract class DataService extends Service {
          *
          * @param cid The identifier of the data call which is provided in {@link DataCallResponse}
          * @param callback The result callback for this request.
+         *
+         * @hide
          */
         public void startHandover(int cid, @NonNull DataServiceCallback callback) {
             // The default implementation is to return unsupported.
@@ -315,6 +317,8 @@ public abstract class DataService extends Service {
          *
          * @param cid The identifier of the data call which is provided in {@link DataCallResponse}
          * @param callback The result callback for this request.
+         *
+         * @hide
          */
         public void cancelHandover(int cid, @NonNull DataServiceCallback callback) {
             // The default implementation is to return unsupported.

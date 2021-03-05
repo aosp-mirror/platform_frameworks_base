@@ -10550,7 +10550,6 @@ package android.telephony.data {
 
   public abstract class DataService.DataServiceProvider implements java.lang.AutoCloseable {
     ctor public DataService.DataServiceProvider(int);
-    method public void cancelHandover(int, @NonNull android.telephony.data.DataServiceCallback);
     method public abstract void close();
     method public void deactivateDataCall(int, int, @Nullable android.telephony.data.DataServiceCallback);
     method public final int getSlotIndex();
@@ -10561,15 +10560,12 @@ package android.telephony.data {
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @NonNull android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.SliceInfo, @Nullable android.telephony.data.TrafficDescriptor, boolean, @NonNull android.telephony.data.DataServiceCallback);
-    method public void startHandover(int, @NonNull android.telephony.data.DataServiceCallback);
   }
 
   public class DataServiceCallback {
     method public void onApnUnthrottled(@NonNull String);
     method public void onDataCallListChanged(@NonNull java.util.List<android.telephony.data.DataCallResponse>);
     method public void onDeactivateDataCallComplete(int);
-    method public void onHandoverCancelled(int);
-    method public void onHandoverStarted(int);
     method public void onRequestDataCallListComplete(int, @NonNull java.util.List<android.telephony.data.DataCallResponse>);
     method public void onSetDataProfileComplete(int);
     method public void onSetInitialAttachApnComplete(int);
