@@ -220,7 +220,9 @@ public class NotificationExpandButton extends FrameLayout {
      */
     @RemotableViewMethod
     public void setNumber(int number) {
-        mNumber = number;
-        updateNumber();
+        if (mNumber != number) {
+            mNumber = number;
+            updateNumber();
+        }
     }
 }

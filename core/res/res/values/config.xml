@@ -4696,6 +4696,14 @@
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
 
+    <!-- The timeout value in milliseconds used by SelectionActionModeHelper for each selections
+     when TextClassifier has been initialized. -->
+    <integer name="config_smartSelectionInitializedTimeoutMillis">200</integer>
+
+    <!-- The timeout value in milliseconds used by SelectionActionModeHelper for each selections
+         when TextClassifier has not been initialized. -->
+    <integer name="config_smartSelectionInitializingTimeoutMillis">500</integer>
+
     <!-- Indicates that default fitness tracker app needs to request sensor and location permissions. -->
     <bool name="config_trackerAppNeedsPermissions">false</bool>
 

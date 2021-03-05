@@ -7017,7 +7017,7 @@ public abstract class PackageManager {
      * domain to an application, use
      * {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set, boolean)},
      * passing in all of the domains returned inside
-     * {@link DomainVerificationManager#getDomainVerificationUserSelection(String)}.
+     * {@link DomainVerificationManager#getDomainVerificationUserState(String)}.
      *
      * @hide
      */

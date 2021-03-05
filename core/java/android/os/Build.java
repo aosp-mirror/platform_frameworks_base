@@ -1288,10 +1288,12 @@ public class Build {
     public static final String HOST = getString("ro.build.host");
 
     /**
-     * Returns true if we are running a debug build such as "user-debug" or "eng".
-     * @hide
+     * Returns true if the device is running a debuggable build such as "userdebug" or "eng".
+     *
+     * Debuggable builds allow users to gain root access via local shell, attach debuggers to any
+     * application regardless of whether they have the "debuggable" attribute set, or downgrade
+     * selinux into "permissive" mode in particular.
      */
-    @UnsupportedAppUsage
     public static final boolean IS_DEBUGGABLE =
             SystemProperties.getInt("ro.debuggable", 0) == 1;
 

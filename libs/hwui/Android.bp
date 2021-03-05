@@ -421,7 +421,6 @@ cc_defaults {
                 "libstatspull",
                 "libstatssocket",
                 "libpdfium",
-                "libbinder_ndk",
             ],
             static_libs: [
                 "libgif",

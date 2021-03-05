@@ -16,23 +16,29 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
 
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
@@ -51,11 +57,17 @@ import java.util.List;
 /** Tests for {@link AccessibilityFloatingMenuView}. */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
     private AccessibilityFloatingMenuView mMenuView;
 
     @Mock
     private WindowManager mWindowManager;
+
+    @Mock
+    private ViewPropertyAnimator mAnimator;
+
+    private RecyclerView mListView;
 
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
 
@@ -69,6 +81,7 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
 
         mTargets.add(mock(AccessibilityTarget.class));
+        mListView = spy(new RecyclerView(mContext));
         mMenuView = new AccessibilityFloatingMenuView(mContext);
     }
 
@@ -117,10 +130,10 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
     @Test
     public void updateListViewRadius_singleTarget_matchResult() {
         final float radius =
-                getContext().getResources().getDimension(
-                        R.dimen.accessibility_floating_menu_single_radius);
+                getContext().getResources().getDimensionPixelSize(
+                        R.dimen.accessibility_floating_menu_small_single_radius);
         final float[] expectedRadii =
-                new float[] {radius, radius, 0.0f, 0.0f, 0.0f, 0.0f, radius, radius};
+                new float[]{radius, radius, 0.0f, 0.0f, 0.0f, 0.0f, radius, radius};
 
         mMenuView.onTargetsChanged(mTargets);
         final View view = mMenuView.getChildAt(0);
@@ -130,5 +143,38 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         final float[] actualRadii = gradientDrawable.getCornerRadii();
 
         assertThat(actualRadii).isEqualTo(expectedRadii);
+    }
+
+    @Test
+    public void setSizeType_largeSize_matchResult() {
+        final int shapeType = 2;
+        final float radius = getContext().getResources().getDimensionPixelSize(
+                R.dimen.accessibility_floating_menu_large_single_radius);
+        final float[] expectedRadii =
+                new float[]{radius, radius, 0.0f, 0.0f, 0.0f, 0.0f, radius, radius};
+        final Drawable listViewBackground =
+                mContext.getDrawable(R.drawable.accessibility_floating_menu_background);
+        mListView = spy(new RecyclerView(mContext));
+        mListView.setBackground(listViewBackground);
+
+        mMenuView = new AccessibilityFloatingMenuView(mContext, mListView);
+        mMenuView.setSizeType(shapeType);
+        final LayerDrawable layerDrawable =
+                (LayerDrawable) mListView.getBackground();
+        final GradientDrawable gradientDrawable =
+                (GradientDrawable) layerDrawable.getDrawable(0);
+
+        assertThat(gradientDrawable.getCornerRadii()).isEqualTo(expectedRadii);
+    }
+
+    @Test
+    public void setShapeType_halfCircle_translationX() {
+        final int shapeType = 2;
+        doReturn(mAnimator).when(mListView).animate();
+
+        mMenuView = new AccessibilityFloatingMenuView(mContext, mListView);
+        mMenuView.setShapeType(shapeType);
+
+        verify(mAnimator).translationX(anyFloat());
     }
 }

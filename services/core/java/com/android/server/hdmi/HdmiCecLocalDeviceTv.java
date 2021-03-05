@@ -665,8 +665,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         mSelectRequestBuffer.process();
                         resetSelectRequestBuffer();
 
-                        addAndStartAction(new HotplugDetectionAction(HdmiCecLocalDeviceTv.this));
-                        addAndStartAction(new PowerStatusMonitorAction(HdmiCecLocalDeviceTv.this));
+                        List<HotplugDetectionAction> hotplugActions
+                                = getActions(HotplugDetectionAction.class);
+                        if (hotplugActions.isEmpty()) {
+                            addAndStartAction(
+                                    new HotplugDetectionAction(HdmiCecLocalDeviceTv.this));
+                        }
+
+                        List<PowerStatusMonitorAction> powerStatusActions
+                                = getActions(PowerStatusMonitorAction.class);
+                        if (powerStatusActions.isEmpty()) {
+                            addAndStartAction(
+                                    new PowerStatusMonitorAction(HdmiCecLocalDeviceTv.this));
+                        }
 
                         HdmiDeviceInfo avr = getAvrDeviceInfo();
                         if (avr != null) {

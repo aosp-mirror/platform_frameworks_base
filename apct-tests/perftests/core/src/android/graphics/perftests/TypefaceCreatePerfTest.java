@@ -44,7 +44,7 @@ import java.io.OutputStream;
 @RunWith(AndroidJUnit4.class)
 public class TypefaceCreatePerfTest {
     // A font file name in asset directory.
-    private static final String TEST_FONT_NAME = "DancingScript-Regular.ttf";
+    private static final String TEST_FONT_NAME = "DancingScript.ttf";
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();

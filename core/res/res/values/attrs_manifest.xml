@@ -1773,6 +1773,8 @@
             <enum name="maps" value="6" />
             <!-- Apps which are primarily productivity apps, such as cloud storage or workplace apps. -->
             <enum name="productivity" value="7" />
+            <!-- Apps which are primarily accessibility apps, such as screen-readers. -->
+            <enum name="accessibility" value="8" />
         </attr>
 
         <!-- Declares the kind of classloader this application's classes must be loaded with -->

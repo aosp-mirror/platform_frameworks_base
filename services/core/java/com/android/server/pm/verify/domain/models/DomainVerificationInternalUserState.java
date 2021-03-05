@@ -29,7 +29,7 @@ import java.util.Set;
  * when a web URL Intent is sent and the application is the highest priority for that domain.
  */
 @DataClass(genSetters = true, genEqualsHashCode = true, genToString = true, genBuilder = false)
-public class DomainVerificationUserState {
+public class DomainVerificationInternalUserState {
 
     @UserIdInt
     private final int mUserId;
@@ -43,32 +43,32 @@ public class DomainVerificationUserState {
      */
     private boolean mLinkHandlingAllowed = true;
 
-    public DomainVerificationUserState(@UserIdInt int userId) {
+    public DomainVerificationInternalUserState(@UserIdInt int userId) {
         mUserId = userId;
         mEnabledHosts = new ArraySet<>();
     }
 
-    public DomainVerificationUserState addHosts(@NonNull ArraySet<String> newHosts) {
+    public DomainVerificationInternalUserState addHosts(@NonNull ArraySet<String> newHosts) {
         mEnabledHosts.addAll(newHosts);
         return this;
     }
 
-    public DomainVerificationUserState addHosts(@NonNull Set<String> newHosts) {
+    public DomainVerificationInternalUserState addHosts(@NonNull Set<String> newHosts) {
         mEnabledHosts.addAll(newHosts);
         return this;
     }
 
-    public DomainVerificationUserState removeHost(String host) {
+    public DomainVerificationInternalUserState removeHost(String host) {
         mEnabledHosts.remove(host);
         return this;
     }
 
-    public DomainVerificationUserState removeHosts(@NonNull ArraySet<String> newHosts) {
+    public DomainVerificationInternalUserState removeHosts(@NonNull ArraySet<String> newHosts) {
         mEnabledHosts.removeAll(newHosts);
         return this;
     }
 
-    public DomainVerificationUserState removeHosts(@NonNull Set<String> newHosts) {
+    public DomainVerificationInternalUserState removeHosts(@NonNull Set<String> newHosts) {
         mEnabledHosts.removeAll(newHosts);
         return this;
     }
@@ -81,8 +81,7 @@ public class DomainVerificationUserState {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/services/core/java/com/android/server/pm
-    // /verify/domain/models/DomainVerificationUserState.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/services/core/java/com/android/server/pm/verify/domain/models/DomainVerificationInternalUserState.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -90,7 +89,7 @@ public class DomainVerificationUserState {
 
 
     /**
-     * Creates a new DomainVerificationUserState.
+     * Creates a new DomainVerificationInternalUserState.
      *
      * @param enabledHosts
      *   List of domains which have been enabled by the user. *
@@ -98,7 +97,7 @@ public class DomainVerificationUserState {
      *   Whether to allow this package to automatically open links by auto verification.
      */
     @DataClass.Generated.Member
-    public DomainVerificationUserState(
+    public DomainVerificationInternalUserState(
             @UserIdInt int userId,
             @NonNull ArraySet<String> enabledHosts,
             boolean linkHandlingAllowed) {
@@ -138,7 +137,7 @@ public class DomainVerificationUserState {
      * Whether to allow this package to automatically open links by auto verification.
      */
     @DataClass.Generated.Member
-    public @NonNull DomainVerificationUserState setLinkHandlingAllowed( boolean value) {
+    public @NonNull DomainVerificationInternalUserState setLinkHandlingAllowed( boolean value) {
         mLinkHandlingAllowed = value;
         return this;
     }
@@ -149,7 +148,7 @@ public class DomainVerificationUserState {
         // You can override field toString logic by defining methods like:
         // String fieldNameToString() { ... }
 
-        return "DomainVerificationUserState { " +
+        return "DomainVerificationInternalUserState { " +
                 "userId = " + mUserId + ", " +
                 "enabledHosts = " + mEnabledHosts + ", " +
                 "linkHandlingAllowed = " + mLinkHandlingAllowed +
@@ -160,13 +159,13 @@ public class DomainVerificationUserState {
     @DataClass.Generated.Member
     public boolean equals(@android.annotation.Nullable Object o) {
         // You can override field equality logic by defining either of the methods like:
-        // boolean fieldNameEquals(DomainVerificationUserState other) { ... }
+        // boolean fieldNameEquals(DomainVerificationInternalUserState other) { ... }
         // boolean fieldNameEquals(FieldType otherValue) { ... }
 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         @SuppressWarnings("unchecked")
-        DomainVerificationUserState that = (DomainVerificationUserState) o;
+        DomainVerificationInternalUserState that = (DomainVerificationInternalUserState) o;
         //noinspection PointlessBooleanExpression
         return true
                 && mUserId == that.mUserId
@@ -188,10 +187,10 @@ public class DomainVerificationUserState {
     }
 
     @DataClass.Generated(
-            time = 1612894390039L,
+            time = 1614714563905L,
             codegenVersion = "1.0.22",
-            sourceFile = "frameworks/base/services/core/java/com/android/server/pm/verify/domain/models/DomainVerificationUserState.java",
-            inputSignatures = "private final @android.annotation.UserIdInt int mUserId\nprivate final @android.annotation.NonNull android.util.ArraySet<java.lang.String> mEnabledHosts\nprivate  boolean mLinkHandlingAllowed\npublic  com.android.server.pm.verify.domain.models.DomainVerificationUserState addHosts(android.util.ArraySet<java.lang.String>)\npublic  com.android.server.pm.verify.domain.models.DomainVerificationUserState addHosts(java.util.Set<java.lang.String>)\npublic  com.android.server.pm.verify.domain.models.DomainVerificationUserState removeHosts(android.util.ArraySet<java.lang.String>)\npublic  com.android.server.pm.verify.domain.models.DomainVerificationUserState removeHosts(java.util.Set<java.lang.String>)\nclass DomainVerificationUserState extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genSetters=true, genEqualsHashCode=true, genToString=true, genBuilder=false)")
+            sourceFile = "frameworks/base/services/core/java/com/android/server/pm/verify/domain/models/DomainVerificationInternalUserState.java",
+            inputSignatures = "private final @android.annotation.UserIdInt int mUserId\nprivate final @android.annotation.NonNull android.util.ArraySet<java.lang.String> mEnabledHosts\nprivate  boolean mLinkHandlingAllowed\npublic  com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState addHosts(android.util.ArraySet<java.lang.String>)\npublic  com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState addHosts(java.util.Set<java.lang.String>)\npublic  com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState removeHost(java.lang.String)\npublic  com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState removeHosts(android.util.ArraySet<java.lang.String>)\npublic  com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState removeHosts(java.util.Set<java.lang.String>)\nclass DomainVerificationInternalUserState extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genSetters=true, genEqualsHashCode=true, genToString=true, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 

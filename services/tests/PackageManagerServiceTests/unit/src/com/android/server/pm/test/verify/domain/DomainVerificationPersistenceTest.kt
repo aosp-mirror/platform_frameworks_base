@@ -22,9 +22,9 @@ import android.util.TypedXmlPullParser
 import android.util.TypedXmlSerializer
 import android.util.Xml
 import com.android.server.pm.verify.domain.DomainVerificationPersistence
+import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap
-import com.android.server.pm.verify.domain.models.DomainVerificationUserState
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Rule
@@ -102,14 +102,14 @@ class DomainVerificationPersistenceTest {
             // A domain without a written state falls back to default
             stateMap["missing-state.com"] = DomainVerificationManager.STATE_NO_RESPONSE
 
-            userSelectionStates[1] = DomainVerificationUserState(1).apply {
+            userStates[1] = DomainVerificationInternalUserState(1).apply {
                 addHosts(setOf("example-user1.com", "example-user1.org"))
                 isLinkHandlingAllowed = true
             }
         }
         val stateOne = mockEmptyPkgState(1).apply {
             // It's valid to have a user selection without any autoVerify domains
-            userSelectionStates[1] = DomainVerificationUserState(1).apply {
+            userStates[1] = DomainVerificationInternalUserState(1).apply {
                 addHosts(setOf("example-user1.com", "example-user1.org"))
                 isLinkHandlingAllowed = false
             }
@@ -214,7 +214,7 @@ class DomainVerificationPersistenceTest {
 
     private fun mockPkgState(id: Int) = mockEmptyPkgState(id).apply {
         stateMap["$packageName.com"] = id
-        userSelectionStates[id] = DomainVerificationUserState(id).apply {
+        userStates[id] = DomainVerificationInternalUserState(id).apply {
             addHosts(setOf("$packageName-user.com"))
             isLinkHandlingAllowed = true
         }

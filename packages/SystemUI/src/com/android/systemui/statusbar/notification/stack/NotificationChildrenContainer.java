@@ -20,10 +20,12 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.Pair;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -33,6 +35,7 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.CachingIconView;
+import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationGroupingUtil;
@@ -103,6 +106,8 @@ public class NotificationChildrenContainer extends ViewGroup {
     private ViewGroup mCurrentHeader;
     private boolean mIsConversation;
 
+    private boolean mTintWithThemeAccent;
+    private boolean mShowGroupCountInExpander;
     private boolean mShowDividersWhenExpanded;
     private boolean mHideDividersDuringExpand;
     private int mTranslationForHeader;
@@ -145,6 +150,10 @@ public class NotificationChildrenContainer extends ViewGroup {
                 com.android.internal.R.dimen.notification_content_margin);
         mEnableShadowOnChildNotifications =
                 res.getBoolean(R.bool.config_enableShadowOnChildNotifications);
+        mTintWithThemeAccent =
+                res.getBoolean(com.android.internal.R.bool.config_tintNotificationsWithTheme);
+        mShowGroupCountInExpander =
+                res.getBoolean(R.bool.config_showNotificationGroupCountInExpander);
         mShowDividersWhenExpanded =
                 res.getBoolean(R.bool.config_showDividersWhenGroupNotificationExpanded);
         mHideDividersDuringExpand =
@@ -229,7 +238,6 @@ public class NotificationChildrenContainer extends ViewGroup {
             mNotificationHeader.measure(widthMeasureSpec, headerHeightSpec);
         }
         if (mNotificationHeaderLowPriority != null) {
-            headerHeightSpec = MeasureSpec.makeMeasureSpec(mHeaderHeight, MeasureSpec.EXACTLY);
             mNotificationHeaderLowPriority.measure(widthMeasureSpec, headerHeightSpec);
         }
 
@@ -397,7 +405,20 @@ public class NotificationChildrenContainer extends ViewGroup {
         mGroupingUtil.updateChildrenAppearance();
     }
 
+    private void setExpandButtonNumber(NotificationViewWrapper wrapper) {
+        View expandButton = wrapper == null
+                ? null : wrapper.getExpandButton();
+        if (expandButton instanceof NotificationExpandButton) {
+            ((NotificationExpandButton) expandButton).setNumber(mUntruncatedChildCount);
+        }
+    }
+
     public void updateGroupOverflow() {
+        if (mShowGroupCountInExpander) {
+            setExpandButtonNumber(mNotificationHeaderWrapper);
+            setExpandButtonNumber(mNotificationHeaderWrapperLowPriority);
+            return;
+        }
         int maxAllowedVisibleChildren = getMaxAllowedVisibleChildren(true /* likeCollapsed */);
         if (mUntruncatedChildCount > maxAllowedVisibleChildren) {
             int number = mUntruncatedChildCount - maxAllowedVisibleChildren;
@@ -1201,8 +1222,21 @@ public class NotificationChildrenContainer extends ViewGroup {
     }
 
     public void onNotificationUpdated() {
-        mHybridGroupManager.setOverflowNumberColor(mOverflowNumber,
-                mContainingNotification.getNotificationColor());
+        if (mShowGroupCountInExpander) {
+            // The overflow number is not used, so its color is irrelevant; skip this
+            return;
+        }
+        int color = mContainingNotification.getNotificationColor();
+        if (mTintWithThemeAccent) {
+            // We're using the theme accent, color with the accent color instead of the notif color
+            Resources.Theme theme = new ContextThemeWrapper(mContext,
+                    com.android.internal.R.style.Theme_DeviceDefault_DayNight).getTheme();
+            TypedArray ta = theme.obtainStyledAttributes(
+                    new int[]{com.android.internal.R.attr.colorAccent});
+            color = ta.getColor(0, color);
+            ta.recycle();
+        }
+        mHybridGroupManager.setOverflowNumberColor(mOverflowNumber, color);
     }
 
     public int getPositionInLinearLayout(View childInGroup) {

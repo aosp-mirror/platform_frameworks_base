@@ -21,9 +21,9 @@
     <item android:id="@+id/menu_background_item">
         <shape android:shape="rectangle">
             <corners
-                android:bottomLeftRadius="@dimen/accessibility_floating_menu_single_radius"
+                android:bottomLeftRadius="@dimen/accessibility_floating_menu_small_single_radius"
                 android:bottomRightRadius="0dp"
-                android:topLeftRadius="@dimen/accessibility_floating_menu_single_radius"
+                android:topLeftRadius="@dimen/accessibility_floating_menu_small_single_radius"
                 android:topRightRadius="0dp"/>
             <solid
                 android:color="@color/accessibility_floating_menu_background"/>

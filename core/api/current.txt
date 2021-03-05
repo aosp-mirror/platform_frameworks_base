@@ -11768,6 +11768,7 @@ package android.content.pm {
     method public boolean isResourceOverlay();
     method public boolean isVirtualPreload();
     method public CharSequence loadDescription(android.content.pm.PackageManager);
+    field public static final int CATEGORY_ACCESSIBILITY = 8; // 0x8
     field public static final int CATEGORY_AUDIO = 1; // 0x1
     field public static final int CATEGORY_GAME = 0; // 0x0
     field public static final int CATEGORY_IMAGE = 3; // 0x3
@@ -12943,6 +12944,27 @@ package android.content.pm {
     method @Deprecated public int getVersionCode();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.VersionedPackage> CREATOR;
+  }
+
+}
+
+package android.content.pm.verify.domain {
+
+  public final class DomainVerificationManager {
+    method @Nullable public android.content.pm.verify.domain.DomainVerificationUserState getDomainVerificationUserState(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
+  }
+
+  public final class DomainVerificationUserState implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Map<java.lang.String,java.lang.Integer> getHostToStateMap();
+    method @NonNull public String getPackageName();
+    method @NonNull public android.os.UserHandle getUser();
+    method @NonNull public boolean isLinkHandlingAllowed();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.verify.domain.DomainVerificationUserState> CREATOR;
+    field public static final int DOMAIN_STATE_NONE = 0; // 0x0
+    field public static final int DOMAIN_STATE_SELECTED = 1; // 0x1
+    field public static final int DOMAIN_STATE_VERIFIED = 2; // 0x2
   }
 
 }
@@ -17535,6 +17557,9 @@ package android.hardware.biometrics {
   public class BiometricManager {
     method @Deprecated @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public int canAuthenticate();
     method @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public int canAuthenticate(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getButtonLabel(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getPromptMessage(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getSettingName(int);
     field public static final int BIOMETRIC_ERROR_HW_UNAVAILABLE = 1; // 0x1
     field public static final int BIOMETRIC_ERROR_NONE_ENROLLED = 11; // 0xb
     field public static final int BIOMETRIC_ERROR_NO_HARDWARE = 12; // 0xc
@@ -30272,6 +30297,7 @@ package android.os {
     field public static final String HARDWARE;
     field public static final String HOST;
     field public static final String ID;
+    field public static final boolean IS_DEBUGGABLE;
     field public static final String MANUFACTURER;
     field public static final String MODEL;
     field @NonNull public static final String ODM_SKU;
@@ -30430,17 +30456,8 @@ package android.os {
   public abstract class CombinedVibrationEffect implements android.os.Parcelable {
     method @NonNull public static android.os.CombinedVibrationEffect createSynced(@NonNull android.os.VibrationEffect);
     method public int describeContents();
-    method @NonNull public static android.os.CombinedVibrationEffect.SequentialCombination startSequential();
     method @NonNull public static android.os.CombinedVibrationEffect.SyncedCombination startSynced();
     field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibrationEffect> CREATOR;
-  }
-
-  public static final class CombinedVibrationEffect.SequentialCombination {
-    method @NonNull public android.os.CombinedVibrationEffect.SequentialCombination addNext(int, @NonNull android.os.VibrationEffect);
-    method @NonNull public android.os.CombinedVibrationEffect.SequentialCombination addNext(int, @NonNull android.os.VibrationEffect, int);
-    method @NonNull public android.os.CombinedVibrationEffect.SequentialCombination addNext(@NonNull android.os.CombinedVibrationEffect);
-    method @NonNull public android.os.CombinedVibrationEffect.SequentialCombination addNext(@NonNull android.os.CombinedVibrationEffect, int);
-    method @NonNull public android.os.CombinedVibrationEffect combine();
   }
 
   public static final class CombinedVibrationEffect.SyncedCombination {

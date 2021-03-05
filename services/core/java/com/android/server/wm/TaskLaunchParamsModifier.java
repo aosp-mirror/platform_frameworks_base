@@ -165,6 +165,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // hasInitialBounds is set if either activity options or layout has specified bounds. If
         // that's set we'll skip some adjustments later to avoid overriding the initial bounds.
         boolean hasInitialBounds = false;
+        // hasInitialBoundsForSuggestedDisplayAreaInFreeformWindow is set if the outParams.mBounds
+        // is set with the suggestedDisplayArea. If it is set, but the eventual TaskDisplayArea is
+        // different, we should recalculating the bounds.
+        boolean hasInitialBoundsForSuggestedDisplayAreaInFreeformWindow = false;
         final boolean canApplyFreeformPolicy = canApplyFreeformWindowPolicy(display, launchMode);
         if (mSupervisor.canUseActivityOptionsLaunchBounds(options)
                 && (canApplyFreeformPolicy || canApplyPipWindowPolicy(launchMode))) {
@@ -181,11 +185,12 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             if (DEBUG) appendLog("activity-options-fullscreen=" + outParams.mBounds);
         } else if (layout != null && canApplyFreeformPolicy) {
             mTmpBounds.set(currentParams.mBounds);
-            getLayoutBounds(display, root, layout, mTmpBounds);
+            getLayoutBounds(suggestedDisplayArea, root, layout, mTmpBounds);
             if (!mTmpBounds.isEmpty()) {
                 launchMode = WINDOWING_MODE_FREEFORM;
                 outParams.mBounds.set(mTmpBounds);
                 hasInitialBounds = true;
+                hasInitialBoundsForSuggestedDisplayAreaInFreeformWindow = true;
                 if (DEBUG) appendLog("bounds-from-layout=" + outParams.mBounds);
             } else {
                 if (DEBUG) appendLog("empty-window-layout");
@@ -241,6 +246,11 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // such as orientation. Otherwise, the app is forcefully launched in maximized. The rest of
         // this step is to define the default policy when there is no initial bounds or a fully
         // resolved current params from callers.
+
+        // hasInitialBoundsForSuggestedDisplayAreaInFreeformDisplay is set if the outParams.mBounds
+        // is set with the suggestedDisplayArea. If it is set, but the eventual TaskDisplayArea is
+        // different, we should recalcuating the bounds.
+        boolean hasInitialBoundsForSuggestedDisplayAreaInFreeformDisplay = false;
         if (display.inFreeformWindowingMode()) {
             if (launchMode == WINDOWING_MODE_PINNED) {
                 if (DEBUG) appendLog("picture-in-picture");
@@ -248,8 +258,9 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 if (shouldLaunchUnresizableAppInFreeform(root, suggestedDisplayArea)) {
                     launchMode = WINDOWING_MODE_FREEFORM;
                     if (outParams.mBounds.isEmpty()) {
-                        getTaskBounds(root, display, layout, launchMode, hasInitialBounds,
-                                outParams.mBounds);
+                        getTaskBounds(root, suggestedDisplayArea, layout, launchMode,
+                                hasInitialBounds, outParams.mBounds);
+                        hasInitialBoundsForSuggestedDisplayAreaInFreeformDisplay = true;
                     }
                     if (DEBUG) appendLog("unresizable-freeform");
                 } else {
@@ -288,6 +299,20 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 mTmpDisplayArea = displayArea;
                 return true;
             });
+            // We may need to recalculate the bounds if the new TaskDisplayArea is different from
+            // the suggested one we used to calculate the bounds.
+            if (mTmpDisplayArea != null && mTmpDisplayArea != suggestedDisplayArea) {
+                if (hasInitialBoundsForSuggestedDisplayAreaInFreeformWindow) {
+                    outParams.mBounds.setEmpty();
+                    getLayoutBounds(mTmpDisplayArea, root, layout, outParams.mBounds);
+                    hasInitialBounds = !outParams.mBounds.isEmpty();
+                } else if (hasInitialBoundsForSuggestedDisplayAreaInFreeformDisplay) {
+                    outParams.mBounds.setEmpty();
+                    getTaskBounds(root, mTmpDisplayArea, layout, launchMode,
+                            hasInitialBounds, outParams.mBounds);
+                }
+            }
+
             if (mTmpDisplayArea != null) {
                 taskDisplayArea = mTmpDisplayArea;
                 mTmpDisplayArea = null;
@@ -303,7 +328,6 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         if (phase == PHASE_DISPLAY_AREA) {
             return RESULT_CONTINUE;
         }
-        // TODO(b/152116619): Update the usages of display to use taskDisplayArea below.
 
         // STEP 4: Determine final launch bounds based on resolved windowing mode and activity
         // requested orientation. We set bounds to empty for fullscreen mode and keep bounds as is
@@ -313,13 +337,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // We skip making adjustments if the params are fully resolved from previous results.
         if (fullyResolvedCurrentParam) {
             if (resolvedMode == WINDOWING_MODE_FREEFORM) {
-                // Make sure bounds are in the display if it's possibly in a different display/area.
+                // Make sure bounds are in the displayArea.
                 if (currentParams.mPreferredTaskDisplayArea != taskDisplayArea) {
-                    adjustBoundsToFitInDisplay(display, outParams.mBounds);
+                    adjustBoundsToFitInDisplayArea(taskDisplayArea, outParams.mBounds);
                 }
                 // Even though we want to keep original bounds, we still don't want it to stomp on
                 // an existing task.
-                adjustBoundsToAvoidConflictInDisplay(display, outParams.mBounds);
+                adjustBoundsToAvoidConflictInDisplayArea(taskDisplayArea, outParams.mBounds);
             }
         } else if (taskDisplayArea.inFreeformWindowingMode()) {
             if (source != null && source.inFreeformWindowingMode()
@@ -328,9 +352,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                     && source.getDisplayArea() == taskDisplayArea) {
                 // Set bounds to be not very far from source activity.
                 cascadeBounds(source.getConfiguration().windowConfiguration.getBounds(),
-                        display, outParams.mBounds);
+                        taskDisplayArea, outParams.mBounds);
             }
-            getTaskBounds(root, display, layout, resolvedMode, hasInitialBounds, outParams.mBounds);
+            getTaskBounds(root, taskDisplayArea, layout, resolvedMode, hasInitialBounds,
+                    outParams.mBounds);
         }
         return RESULT_CONTINUE;
     }
@@ -500,7 +525,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 && launchMode == WINDOWING_MODE_PINNED;
     }
 
-    private void getLayoutBounds(@NonNull DisplayContent display, @NonNull ActivityRecord root,
+    private void getLayoutBounds(@NonNull TaskDisplayArea displayArea, @NonNull ActivityRecord root,
             @NonNull ActivityInfo.WindowLayout windowLayout, @NonNull Rect inOutBounds) {
         final int verticalGravity = windowLayout.gravity & Gravity.VERTICAL_GRAVITY_MASK;
         final int horizontalGravity = windowLayout.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
@@ -511,10 +536,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
         // Use stable frame instead of raw frame to avoid launching freeform windows on top of
         // stable insets, which usually are system widgets such as sysbar & navbar.
-        final Rect displayStableBounds = mTmpStableBounds;
-        display.getStableRect(displayStableBounds);
-        final int defaultWidth = displayStableBounds.width();
-        final int defaultHeight = displayStableBounds.height();
+        final Rect stableBounds = mTmpStableBounds;
+        displayArea.getStableRect(stableBounds);
+        final int defaultWidth = stableBounds.width();
+        final int defaultHeight = stableBounds.height();
 
         int width;
         int height;
@@ -525,7 +550,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 width = inOutBounds.width();
                 height = inOutBounds.height();
             } else {
-                getTaskBounds(root, display, windowLayout, WINDOWING_MODE_FREEFORM,
+                getTaskBounds(root, displayArea, windowLayout, WINDOWING_MODE_FREEFORM,
                         /* hasInitialBounds */ false, inOutBounds);
                 width = inOutBounds.width();
                 height = inOutBounds.height();
@@ -571,7 +596,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         inOutBounds.set(0, 0, width, height);
-        inOutBounds.offset(displayStableBounds.left, displayStableBounds.top);
+        inOutBounds.offset(stableBounds.left, stableBounds.top);
         final int xOffset = (int) (fractionOfHorizontalOffset * (defaultWidth - width));
         final int yOffset = (int) (fractionOfVerticalOffset * (defaultHeight - height));
         inOutBounds.offset(xOffset, yOffset);
@@ -582,13 +607,9 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         if (!mSupervisor.mService.mSupportsNonResizableMultiWindow || activity.isResizeable()) {
             return false;
         }
-        final DisplayContent display = displayArea.getDisplayContent();
-        if (display == null) {
-            return false;
-        }
 
         final int displayOrientation = orientationFromBounds(displayArea.getBounds());
-        final int activityOrientation = resolveOrientation(activity, display,
+        final int activityOrientation = resolveOrientation(activity, displayArea,
                 displayArea.getBounds());
         if (displayArea.getWindowingMode() == WINDOWING_MODE_FREEFORM
                 && displayOrientation != activityOrientation) {
@@ -638,19 +659,19 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return orientation;
     }
 
-    private void cascadeBounds(@NonNull Rect srcBounds, @NonNull DisplayContent display,
+    private void cascadeBounds(@NonNull Rect srcBounds, @NonNull TaskDisplayArea displayArea,
             @NonNull Rect outBounds) {
         outBounds.set(srcBounds);
-        float density = (float) display.getConfiguration().densityDpi / DENSITY_DEFAULT;
+        float density = (float) displayArea.getConfiguration().densityDpi / DENSITY_DEFAULT;
         final int defaultOffset = (int) (CASCADING_OFFSET_DP * density + 0.5f);
 
-        display.getBounds(mTmpBounds);
+        displayArea.getBounds(mTmpBounds);
         final int dx = Math.min(defaultOffset, Math.max(0, mTmpBounds.right - srcBounds.right));
         final int dy = Math.min(defaultOffset, Math.max(0, mTmpBounds.bottom - srcBounds.bottom));
         outBounds.offset(dx, dy);
     }
 
-    private void getTaskBounds(@NonNull ActivityRecord root, @NonNull DisplayContent display,
+    private void getTaskBounds(@NonNull ActivityRecord root, @NonNull TaskDisplayArea displayArea,
             @NonNull ActivityInfo.WindowLayout layout, int resolvedMode, boolean hasInitialBounds,
             @NonNull Rect inOutBounds) {
         if (resolvedMode == WINDOWING_MODE_FULLSCREEN) {
@@ -669,7 +690,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             return;
         }
 
-        final int orientation = resolveOrientation(root, display, inOutBounds);
+        final int orientation = resolveOrientation(root, displayArea, inOutBounds);
         if (orientation != SCREEN_ORIENTATION_PORTRAIT
                 && orientation != SCREEN_ORIENTATION_LANDSCAPE) {
             throw new IllegalStateException(
@@ -678,7 +699,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         // First we get the default size we want.
-        getDefaultFreeformSize(display, layout, orientation, mTmpBounds);
+        getDefaultFreeformSize(displayArea, layout, orientation, mTmpBounds);
         if (hasInitialBounds || sizeMatches(inOutBounds, mTmpBounds)) {
             // We're here because either input parameters specified initial bounds, or the suggested
             // bounds have the same size of the default freeform size. We should use the suggested
@@ -688,22 +709,24 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 if (DEBUG) appendLog("freeform-size-orientation-match=" + inOutBounds);
             } else {
                 // Meh, orientation doesn't match. Let's rotate inOutBounds in-place.
-                centerBounds(display, inOutBounds.height(), inOutBounds.width(), inOutBounds);
+                centerBounds(displayArea, inOutBounds.height(), inOutBounds.width(),
+                        inOutBounds);
                 if (DEBUG) appendLog("freeform-orientation-mismatch=" + inOutBounds);
             }
         } else {
             // We are here either because there is no suggested bounds, or the suggested bounds is
             // a cascade from source activity. We should use the default freeform size and center it
-            // to the center of suggested bounds (or the display if no suggested bounds). The
-            // default size might be too big to center to source activity bounds in display, so we
-            // may need to move it back to the display.
-            centerBounds(display, mTmpBounds.width(), mTmpBounds.height(), inOutBounds);
-            adjustBoundsToFitInDisplay(display, inOutBounds);
+            // to the center of suggested bounds (or the displayArea if no suggested bounds). The
+            // default size might be too big to center to source activity bounds in displayArea, so
+            // we may need to move it back to the displayArea.
+            centerBounds(displayArea, mTmpBounds.width(), mTmpBounds.height(),
+                    inOutBounds);
+            adjustBoundsToFitInDisplayArea(displayArea, inOutBounds);
             if (DEBUG) appendLog("freeform-size-mismatch=" + inOutBounds);
         }
 
         // Lastly we adjust bounds to avoid conflicts with other tasks as much as possible.
-        adjustBoundsToAvoidConflictInDisplay(display, inOutBounds);
+        adjustBoundsToAvoidConflictInDisplayArea(displayArea, inOutBounds);
     }
 
     private int convertOrientationToScreenOrientation(int orientation) {
@@ -717,13 +740,14 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
     }
 
-    private int resolveOrientation(@NonNull ActivityRecord root, @NonNull DisplayContent display,
-            @NonNull Rect bounds) {
+    private int resolveOrientation(@NonNull ActivityRecord root,
+            @NonNull TaskDisplayArea displayArea, @NonNull Rect bounds) {
         int orientation = resolveOrientation(root);
 
         if (orientation == SCREEN_ORIENTATION_LOCKED) {
             orientation = bounds.isEmpty()
-                    ? convertOrientationToScreenOrientation(display.getConfiguration().orientation)
+                    ? convertOrientationToScreenOrientation(
+                            displayArea.getConfiguration().orientation)
                     : orientationFromBounds(bounds);
             if (DEBUG) {
                 appendLog(bounds.isEmpty() ? "locked-orientation-from-display=" + orientation
@@ -743,19 +767,17 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return orientation;
     }
 
-    private void getDefaultFreeformSize(@NonNull DisplayContent display,
+    private void getDefaultFreeformSize(@NonNull TaskDisplayArea displayArea,
             @NonNull ActivityInfo.WindowLayout layout, int orientation, @NonNull Rect bounds) {
-        // Default size, which is letterboxing/pillarboxing in display. That's to say the large
-        // dimension of default size is the small dimension of display size, and the small dimension
-        // of default size is calculated to keep the same aspect ratio as the display's. Here we use
-        // stable bounds of displays because that indicates the area that isn't occupied by system
-        // widgets (e.g. sysbar and navbar).
-        final Rect displayStableBounds = mTmpStableBounds;
-        display.getStableRect(displayStableBounds);
-        final int portraitHeight =
-                Math.min(displayStableBounds.width(), displayStableBounds.height());
-        final int otherDimension =
-                Math.max(displayStableBounds.width(), displayStableBounds.height());
+        // Default size, which is letterboxing/pillarboxing in displayArea. That's to say the large
+        // dimension of default size is the small dimension of displayArea size, and the small
+        // dimension of default size is calculated to keep the same aspect ratio as the
+        // displayArea's. Here we use stable bounds of displayArea because that indicates the area
+        // that isn't occupied by system widgets (e.g. sysbar and navbar).
+        final Rect stableBounds = mTmpStableBounds;
+        displayArea.getStableRect(stableBounds);
+        final int portraitHeight = Math.min(stableBounds.width(), stableBounds.height());
+        final int otherDimension = Math.max(stableBounds.width(), stableBounds.height());
         final int portraitWidth = (portraitHeight * portraitHeight) / otherDimension;
         final int defaultWidth = (orientation == SCREEN_ORIENTATION_LANDSCAPE) ? portraitHeight
                 : portraitWidth;
@@ -764,7 +786,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
         // Get window size based on Nexus 5x screen, we assume that this is enough to show content
         // of activities.
-        final float density = (float) display.getConfiguration().densityDpi / DENSITY_DEFAULT;
+        final float density = (float) displayArea.getConfiguration().densityDpi / DENSITY_DEFAULT;
         final int phonePortraitWidth = (int) (DEFAULT_PORTRAIT_PHONE_WIDTH_DP * density + 0.5f);
         final int phonePortraitHeight = (int) (DEFAULT_PORTRAIT_PHONE_HEIGHT_DP * density + 0.5f);
         final int phoneWidth = (orientation == SCREEN_ORIENTATION_LANDSCAPE) ? phonePortraitHeight
@@ -781,83 +803,83 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         final int height = Math.min(defaultHeight, Math.max(phoneHeight, layoutMinHeight));
 
         bounds.set(0, 0, width, height);
-        bounds.offset(displayStableBounds.left, displayStableBounds.top);
+        bounds.offset(stableBounds.left, stableBounds.top);
     }
 
     /**
      * Gets centered bounds of width x height. If inOutBounds is not empty, the result bounds
-     * centers at its center or display's app bounds center if inOutBounds is empty.
+     * centers at its center or displayArea's app bounds center if inOutBounds is empty.
      */
-    private void centerBounds(@NonNull DisplayContent display, int width, int height,
+    private void centerBounds(@NonNull TaskDisplayArea displayArea, int width, int height,
             @NonNull Rect inOutBounds) {
         if (inOutBounds.isEmpty()) {
-            display.getStableRect(inOutBounds);
+            displayArea.getStableRect(inOutBounds);
         }
         final int left = inOutBounds.centerX() - width / 2;
         final int top = inOutBounds.centerY() - height / 2;
         inOutBounds.set(left, top, left + width, top + height);
     }
 
-    private void adjustBoundsToFitInDisplay(@NonNull DisplayContent display,
+    private void adjustBoundsToFitInDisplayArea(@NonNull TaskDisplayArea displayArea,
             @NonNull Rect inOutBounds) {
-        final Rect displayStableBounds = mTmpStableBounds;
-        display.getStableRect(displayStableBounds);
+        final Rect stableBounds = mTmpStableBounds;
+        displayArea.getStableRect(stableBounds);
 
-        if (displayStableBounds.width() < inOutBounds.width()
-                || displayStableBounds.height() < inOutBounds.height()) {
-            // There is no way for us to fit the bounds in the display without changing width
-            // or height. Just move the start to align with the display.
+        if (stableBounds.width() < inOutBounds.width()
+                || stableBounds.height() < inOutBounds.height()) {
+            // There is no way for us to fit the bounds in the displayArea without changing width
+            // or height. Just move the start to align with the displayArea.
             final int layoutDirection =
                     mSupervisor.mRootWindowContainer.getConfiguration().getLayoutDirection();
             final int left = layoutDirection == View.LAYOUT_DIRECTION_RTL
-                    ? displayStableBounds.right - inOutBounds.right + inOutBounds.left
-                    : displayStableBounds.left;
-            inOutBounds.offsetTo(left, displayStableBounds.top);
+                    ? stableBounds.right - inOutBounds.right + inOutBounds.left
+                    : stableBounds.left;
+            inOutBounds.offsetTo(left, stableBounds.top);
             return;
         }
 
         final int dx;
-        if (inOutBounds.right > displayStableBounds.right) {
-            // Right edge is out of display.
-            dx = displayStableBounds.right - inOutBounds.right;
-        } else if (inOutBounds.left < displayStableBounds.left) {
-            // Left edge is out of display.
-            dx = displayStableBounds.left - inOutBounds.left;
+        if (inOutBounds.right > stableBounds.right) {
+            // Right edge is out of displayArea.
+            dx = stableBounds.right - inOutBounds.right;
+        } else if (inOutBounds.left < stableBounds.left) {
+            // Left edge is out of displayArea.
+            dx = stableBounds.left - inOutBounds.left;
         } else {
-            // Vertical edges are all in display.
+            // Vertical edges are all in displayArea.
             dx = 0;
         }
 
         final int dy;
-        if (inOutBounds.top < displayStableBounds.top) {
-            // Top edge is out of display.
-            dy = displayStableBounds.top - inOutBounds.top;
-        } else if (inOutBounds.bottom > displayStableBounds.bottom) {
-            // Bottom edge is out of display.
-            dy = displayStableBounds.bottom - inOutBounds.bottom;
+        if (inOutBounds.top < stableBounds.top) {
+            // Top edge is out of displayArea.
+            dy = stableBounds.top - inOutBounds.top;
+        } else if (inOutBounds.bottom > stableBounds.bottom) {
+            // Bottom edge is out of displayArea.
+            dy = stableBounds.bottom - inOutBounds.bottom;
         } else {
-            // Horizontal edges are all in display.
+            // Horizontal edges are all in displayArea.
             dy = 0;
         }
         inOutBounds.offset(dx, dy);
     }
 
     /**
-     * Adjusts input bounds to avoid conflict with existing tasks in the display.
+     * Adjusts input bounds to avoid conflict with existing tasks in the displayArea.
      *
      * If the input bounds conflict with existing tasks, this method scans the bounds in a series of
-     * directions to find a location where the we can put the bounds in display without conflict
+     * directions to find a location where the we can put the bounds in displayArea without conflict
      * with any other tasks.
      *
-     * It doesn't try to adjust bounds that's not fully in the given display.
+     * It doesn't try to adjust bounds that's not fully in the given displayArea.
      *
-     * @param display the display which tasks are to check
+     * @param displayArea the displayArea which tasks are to check
      * @param inOutBounds the bounds used to input initial bounds and output result bounds
      */
-    private void adjustBoundsToAvoidConflictInDisplay(@NonNull DisplayContent display,
+    private void adjustBoundsToAvoidConflictInDisplayArea(@NonNull TaskDisplayArea displayArea,
             @NonNull Rect inOutBounds) {
         final List<Rect> taskBoundsToCheck = new ArrayList<>();
-        display.forAllRootTasks(task -> {
+        displayArea.forAllRootTasks(task -> {
             if (!task.inFreeformWindowingMode()) {
                 return;
             }
@@ -866,28 +888,28 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 taskBoundsToCheck.add(task.getChildAt(j).getBounds());
             }
         }, false /* traverseTopToBottom */);
-        adjustBoundsToAvoidConflict(display.getBounds(), taskBoundsToCheck, inOutBounds);
+        adjustBoundsToAvoidConflict(displayArea.getBounds(), taskBoundsToCheck, inOutBounds);
     }
 
     /**
-     * Adjusts input bounds to avoid conflict with provided display bounds and list of tasks bounds
-     * for the display.
+     * Adjusts input bounds to avoid conflict with provided displayArea bounds and list of tasks
+     * bounds for the displayArea.
      *
      * Scans the bounds in directions to find a candidate location that does not conflict with the
-     * provided list of task bounds. If starting bounds are outside the display bounds or if no
+     * provided list of task bounds. If starting bounds are outside the displayArea bounds or if no
      * suitable candidate bounds are found, the method returns the input bounds.
      *
-     * @param displayBounds display bounds used to restrict the candidate bounds
+     * @param displayAreaBounds displayArea bounds used to restrict the candidate bounds
      * @param taskBoundsToCheck list of task bounds to check for conflict
      * @param inOutBounds the bounds used to input initial bounds and output result bounds
      */
     @VisibleForTesting
-    void adjustBoundsToAvoidConflict(@NonNull Rect displayBounds,
+    void adjustBoundsToAvoidConflict(@NonNull Rect displayAreaBounds,
             @NonNull List<Rect> taskBoundsToCheck,
             @NonNull Rect inOutBounds) {
-        if (!displayBounds.contains(inOutBounds)) {
-            // The initial bounds are already out of display. The scanning algorithm below doesn't
-            // work so well with them.
+        if (!displayAreaBounds.contains(inOutBounds)) {
+            // The initial bounds are already out of displayArea. The scanning algorithm below
+            // doesn't work so well with them.
             return;
         }
 
@@ -897,7 +919,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             return;
         }
 
-        calculateCandidateShiftDirections(displayBounds, inOutBounds);
+        calculateCandidateShiftDirections(displayAreaBounds, inOutBounds);
         for (int direction : mTmpDirections) {
             if (direction == Gravity.NO_GRAVITY) {
                 // We exhausted candidate directions, give up.
@@ -906,12 +928,12 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
             mTmpBounds.set(inOutBounds);
             while (boundsConflict(taskBoundsToCheck, mTmpBounds)
-                    && displayBounds.contains(mTmpBounds)) {
-                shiftBounds(direction, displayBounds, mTmpBounds);
+                    && displayAreaBounds.contains(mTmpBounds)) {
+                shiftBounds(direction, displayAreaBounds, mTmpBounds);
             }
 
             if (!boundsConflict(taskBoundsToCheck, mTmpBounds)
-                    && displayBounds.contains(mTmpBounds)) {
+                    && displayAreaBounds.contains(mTmpBounds)) {
                 // Found a candidate. Just use this.
                 inOutBounds.set(mTmpBounds);
                 if (DEBUG) appendLog("avoid-bounds-conflict=" + inOutBounds);

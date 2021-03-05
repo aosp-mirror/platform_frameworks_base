@@ -334,10 +334,19 @@ public final class UsageEvents implements Parcelable {
         public static final int LOCUS_ID_SET = 30;
 
         /**
+         * An event type denoting that a component in the package has been used (e.g. broadcast
+         * receiver, service, content provider). This generally matches up with usage that would
+         * cause an app to leave force stop. The component itself is not provided as we are only
+         * interested in whether the package is used, not the component itself.
+         * @hide
+         */
+        public static final int APP_COMPONENT_USED = 31;
+
+        /**
          * Keep in sync with the greatest event type value.
          * @hide
          */
-        public static final int MAX_EVENT_TYPE = 30;
+        public static final int MAX_EVENT_TYPE = 31;
 
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
