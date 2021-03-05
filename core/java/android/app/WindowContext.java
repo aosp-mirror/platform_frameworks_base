@@ -20,8 +20,11 @@ import static android.view.WindowManagerImpl.createWindowContextWindowManager;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
+import android.content.ComponentCallbacks;
+import android.content.ComponentCallbacksController;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -49,6 +52,8 @@ public class WindowContext extends ContextWrapper {
     private final IWindowManager mWms;
     private final WindowTokenClient mToken;
     private boolean mListenerRegistered;
+    private final ComponentCallbacksController mCallbacksController =
+            new ComponentCallbacksController();
 
     /**
      * Default constructor. Will generate a {@link WindowTokenClient} and attach this context to
@@ -131,8 +136,24 @@ public class WindowContext extends ContextWrapper {
     }
 
     void destroy() {
+        mCallbacksController.clearCallbacks();
         final ContextImpl impl = (ContextImpl) getBaseContext();
         impl.scheduleFinalCleanup(getClass().getName(), "WindowContext");
         Reference.reachabilityFence(this);
+    }
+
+    @Override
+    public void registerComponentCallbacks(@NonNull ComponentCallbacks callback) {
+        mCallbacksController.registerCallbacks(callback);
+    }
+
+    @Override
+    public void unregisterComponentCallbacks(@NonNull ComponentCallbacks callback) {
+        mCallbacksController.unregisterCallbacks(callback);
+    }
+
+    /** Dispatch {@link Configuration} to each {@link ComponentCallbacks}. */
+    void dispatchConfigurationChanged(@NonNull Configuration newConfig) {
+        mCallbacksController.dispatchConfigurationChanged(newConfig);
     }
 }

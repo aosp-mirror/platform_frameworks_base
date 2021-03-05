@@ -655,12 +655,21 @@ public abstract class Context {
     /**
      * Add a new {@link ComponentCallbacks} to the base application of the
      * Context, which will be called at the same times as the ComponentCallbacks
-     * methods of activities and other components are called.  Note that you
+     * methods of activities and other components are called. Note that you
      * <em>must</em> be sure to use {@link #unregisterComponentCallbacks} when
      * appropriate in the future; this will not be removed for you.
+     * <p>
+     * After {@link Build.VERSION_CODES#S}, Registering the ComponentCallbacks to Context created
+     * via {@link #createWindowContext(int, Bundle)} or
+     * {@link #createWindowContext(Display, int, Bundle)} will receive
+     * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from Window Context rather
+     * than its base application. It is helpful if you want to handle UI components that
+     * associated with the Window Context when the Window Context has configuration changes.</p>
      *
      * @param callback The interface to call.  This can be either a
      * {@link ComponentCallbacks} or {@link ComponentCallbacks2} interface.
+     *
+     * @see Context#createWindowContext(int, Bundle)
      */
     public void registerComponentCallbacks(ComponentCallbacks callback) {
         getApplicationContext().registerComponentCallbacks(callback);
@@ -6344,6 +6353,16 @@ public abstract class Context {
      * // configuration changes from the node associated with the provided token.
      * windowContext.getSystemService(WindowManager.class).addView(overlayView, mParams);
      * </pre>
+     * <p>
+     * After {@link Build.VERSION_CODES#S}, window context provides the capability to listen to its
+     * {@link Configuration} changes by calling
+     * {@link #registerComponentCallbacks(ComponentCallbacks)}, while other kinds of {@link Context}
+     * will register the {@link ComponentCallbacks} to {@link #getApplicationContext() its
+     * Application context}. Note that window context only propagate
+     * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} callback.
+     * {@link ComponentCallbacks#onLowMemory()} or other callbacks in {@link ComponentCallbacks2}
+     * won't be invoked.
+     * </p>
      * <p>
      * Note that using {@link android.app.Application} or {@link android.app.Service} context for
      * UI-related queries may result in layout or continuity issues on devices with variable screen
