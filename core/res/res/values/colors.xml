@@ -171,7 +171,7 @@
     <color name="accessibility_focus_highlight_color">#bf39b500</color>
     <color name="autofilled_highlight">#4dffeb3b</color>
 
-    <color name="system_notification_accent_color">#ff607D8B</color>
+    <color name="system_notification_accent_color">#00000000</color>
 
     <!-- Default user icon colors -->
     <color name="user_icon_1">#ff00bcd4</color><!-- cyan 500 -->
