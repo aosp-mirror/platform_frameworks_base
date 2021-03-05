@@ -361,23 +361,29 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         switch (reason) {
             case IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR:
             case IUdfpsOverlayController.REASON_ENROLL_ENROLLING: {
-                final UdfpsAnimationViewEnroll animation = (UdfpsAnimationViewEnroll)
+                final UdfpsAnimationViewEnroll view = (UdfpsAnimationViewEnroll)
                         inflater.inflate(R.layout.udfps_animation_view_enroll, null, false);
-                animation.setEnrollHelper(mEnrollHelper);
-                return animation;
+                view.setEnrollHelper(mEnrollHelper);
+                return view;
+            }
+
+            case IUdfpsOverlayController.REASON_AUTH_BP: {
+                final UdfpsAnimationViewBp view = (UdfpsAnimationViewBp)
+                        inflater.inflate(R.layout.udfps_animation_view_bp, null, false);
+                return view;
             }
 
             case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD: {
-                final UdfpsAnimationViewKeyguard animation = (UdfpsAnimationViewKeyguard)
+                final UdfpsAnimationViewKeyguard view = (UdfpsAnimationViewKeyguard)
                         inflater.inflate(R.layout.udfps_animation_view_keyguard, null, false);
-                animation.setStatusBarStateController(mStatusBarStateController);
-                return animation;
+                view.setStatusBarStateController(mStatusBarStateController);
+                return view;
             }
 
             case IUdfpsOverlayController.REASON_AUTH_FPM_OTHER: {
-                final UdfpsAnimationViewFpmOther animation = (UdfpsAnimationViewFpmOther)
+                final UdfpsAnimationViewFpmOther view = (UdfpsAnimationViewFpmOther)
                         inflater.inflate(R.layout.udfps_animation_view_fpm_other, null, false);
-                return animation;
+                return view;
             }
 
             default:
