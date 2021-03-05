@@ -5188,16 +5188,13 @@ public class Notification implements Parcelable
             final boolean ind = ex.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
             if (!p.mHideProgress && (max != 0 || ind)) {
                 contentView.setViewVisibility(com.android.internal.R.id.progress, View.VISIBLE);
-                contentView.setProgressBar(
-                        R.id.progress, max, progress, ind);
-                contentView.setProgressBackgroundTintList(
-                        R.id.progress, ColorStateList.valueOf(mContext.getColor(
-                                R.color.notification_progress_background_color)));
-                if (getRawColor(p) != COLOR_DEFAULT) {
-                    int color = getAccentColor(p);
-                    ColorStateList colorStateList = ColorStateList.valueOf(color);
-                    contentView.setProgressTintList(R.id.progress, colorStateList);
-                    contentView.setProgressIndeterminateTintList(R.id.progress, colorStateList);
+                contentView.setProgressBar(R.id.progress, max, progress, ind);
+                contentView.setProgressBackgroundTintList(R.id.progress,
+                        mContext.getColorStateList(R.color.notification_progress_background_color));
+                if (mTintWithThemeAccent || getRawColor(p) != COLOR_DEFAULT) {
+                    ColorStateList progressTint = ColorStateList.valueOf(getAccentColor(p));
+                    contentView.setProgressTintList(R.id.progress, progressTint);
+                    contentView.setProgressIndeterminateTintList(R.id.progress, progressTint);
                 }
                 return true;
             } else {

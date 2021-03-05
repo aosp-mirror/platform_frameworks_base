@@ -151,7 +151,7 @@
 
     <color name="notification_action_button_text_color">@color/notification_default_color</color>
 
-    <color name="notification_progress_background_color">@color/secondary_text_material_light</color>
+    <color name="notification_progress_background_color">@color/notification_secondary_text_color_current</color>
 
     <color name="notification_action_list">#ffeeeeee</color>
 
