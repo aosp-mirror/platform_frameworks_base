@@ -35,6 +35,7 @@ import android.security.Scrypt;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -906,7 +907,7 @@ public class SyntheticPasswordManager {
         if (!tokenMap.containsKey(userId)) {
             return Collections.emptySet();
         }
-        return tokenMap.get(userId).keySet();
+        return new ArraySet<>(tokenMap.get(userId).keySet());
     }
 
     public boolean removePendingToken(long handle, int userId) {
