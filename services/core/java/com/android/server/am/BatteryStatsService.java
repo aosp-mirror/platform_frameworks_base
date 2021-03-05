@@ -27,6 +27,7 @@ import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Parcel;
@@ -67,6 +68,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
 import com.android.server.LocalServices;
+import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.net.BaseNetworkObserver;
 
 import java.io.File;
@@ -113,6 +115,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private ByteBuffer mUtf8BufferStat = ByteBuffer.allocateDirect(MAX_LOW_POWER_STATS_SIZE);
     private CharBuffer mUtf16BufferStat = CharBuffer.allocate(MAX_LOW_POWER_STATS_SIZE);
     private static final int MAX_LOW_POWER_STATS_SIZE = 4096;
+    private final HandlerThread mHandlerThread;
+    private final Handler mHandler;
 
     @GuardedBy("mStats")
     private int mLastPowerStateFromRadio = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
@@ -227,6 +231,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 return (umi != null) ? umi.getUserIds() : null;
             }
         };
+        mHandlerThread = new HandlerThread("batterystats-handler");
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
+
         mStats = new BatteryStatsImpl(systemDir, handler, this,
                 this, mUserManagerUserInfoProvider);
         mWorker = new BatteryExternalStatsWorker(context, mStats);
@@ -250,6 +258,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             Slog.e(TAG, "Could not register INetworkManagement event observer " + e);
         }
         mStats.systemServicesReady(mContext);
+
+        final DataConnectionStats dataConnectionStats = new DataConnectionStats(mContext, mHandler);
+        dataConnectionStats.startMonitoring();
     }
 
     private final class LocalService extends BatteryStatsInternal {
