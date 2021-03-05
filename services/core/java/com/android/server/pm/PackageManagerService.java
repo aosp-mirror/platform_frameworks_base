@@ -9991,6 +9991,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         false /*includeInstantApps*/,
                         isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, parent.id,
                                 resolvedType, 0));
+                flags |= PackageManager.MATCH_DEFAULT_ONLY;
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, flags, sourceUserId, parent.id);
                 return xpDomainInfo != null;
