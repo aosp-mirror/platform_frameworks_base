@@ -72,6 +72,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_RCS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_SUPL;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
@@ -5574,7 +5575,7 @@ public class ConnectivityServiceTest {
         reset(mStatsManager);
 
         // Temp metered change shouldn't update ifaces
-        mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED);
+        mCellNetworkAgent.addCapability(NET_CAPABILITY_TEMPORARILY_NOT_METERED);
         waitForIdle();
         verify(mStatsManager, never()).notifyNetworkStatus(eq(Arrays.asList(onlyCell)),
                 any(List.class), eq(MOBILE_IFNAME), any(List.class));
@@ -10647,7 +10648,7 @@ public class ConnectivityServiceTest {
                 null,
                 null);
 
-        // default NCs will be unregistered in tearDown
+        // default callbacks will be unregistered in tearDown
     }
 
     /**
@@ -10704,7 +10705,7 @@ public class ConnectivityServiceTest {
                 null,
                 mService.mNoServiceNetwork.network());
 
-        // default NCs will be unregistered in tearDown
+        // default callbacks will be unregistered in tearDown
     }
 
     /**
@@ -10763,7 +10764,7 @@ public class ConnectivityServiceTest {
                 null,
                 mService.mNoServiceNetwork.network());
 
-        // default NCs will be unregistered in tearDown
+        // default callbacks will be unregistered in tearDown
     }
 
     /**
@@ -10822,7 +10823,28 @@ public class ConnectivityServiceTest {
                 null,
                 mService.mNoServiceNetwork.network());
 
-        // default NCs will be unregistered in tearDown
+        // default callbacks will be unregistered in tearDown
+    }
+
+    @Test
+    public void testCapabilityWithOemNetworkPreference() throws Exception {
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
+        setupMultipleDefaultNetworksForOemNetworkPreferenceNotCurrentUidTest(networkPref);
+        registerDefaultNetworkCallbacks();
+
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_CELLULAR, true);
+
+        mSystemDefaultNetworkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        mDefaultNetworkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+
+        mCellNetworkAgent.addCapability(NET_CAPABILITY_TEMPORARILY_NOT_METERED);
+        mSystemDefaultNetworkCallback.expectCapabilitiesThat(mCellNetworkAgent, nc ->
+                nc.hasCapability(NET_CAPABILITY_TEMPORARILY_NOT_METERED));
+        mDefaultNetworkCallback.expectCapabilitiesThat(mCellNetworkAgent, nc ->
+                nc.hasCapability(NET_CAPABILITY_TEMPORARILY_NOT_METERED));
+
+        // default callbacks will be unregistered in tearDown
     }
 
     @Test
