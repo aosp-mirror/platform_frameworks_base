@@ -157,7 +157,6 @@ class ConnectivityServiceIntegrationTest {
         doReturn(IntArray(0)).`when`(systemConfigManager).getSystemPermissionUids(anyString())
 
         networkStackClient = TestNetworkStackClient(realContext)
-        networkStackClient.init()
         networkStackClient.start()
 
         service = TestConnectivityService(makeDependencies())
