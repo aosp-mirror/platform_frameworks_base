@@ -246,6 +246,33 @@ public final class TransitionInfo implements Parcelable {
         return sb.toString();
     }
 
+    /**
+     * Indication that `change` is independent of parents (ie. it has a different type of
+     * transition vs. "going along for the ride")
+     */
+    public static boolean isIndependent(TransitionInfo.Change change, TransitionInfo info) {
+        // If the change has no parent (it is root), then it is independent
+        if (change.getParent() == null) return true;
+
+        // non-visibility changes will just be folded into the parent change, so they aren't
+        // independent either.
+        if (change.getMode() == TRANSIT_CHANGE) return false;
+
+        TransitionInfo.Change parentChg = info.getChange(change.getParent());
+        while (parentChg != null) {
+            // If the parent is a visibility change, it will include the results of all child
+            // changes into itself, so none of its children can be independent.
+            if (parentChg.getMode() != TRANSIT_CHANGE) return false;
+
+            // If there are no more parents left, then all the parents, so far, have not been
+            // visibility changes which means this change is indpendent.
+            if (parentChg.getParent() == null) return true;
+
+            parentChg = info.getChange(parentChg.getParent());
+        }
+        return false;
+    }
+
     /** Represents the change a WindowContainer undergoes during a transition */
     public static final class Change implements Parcelable {
         private final WindowContainerToken mContainer;

@@ -139,8 +139,8 @@ public final class TransitionFilter implements Parcelable {
         boolean matches(@NonNull TransitionInfo info) {
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
-                if (change.getParent() != null) {
-                    // Only look at the top animating windows.
+                if (!TransitionInfo.isIndependent(change, info)) {
+                    // Only look at independent animating windows.
                     continue;
                 }
                 if (mActivityType != ACTIVITY_TYPE_UNDEFINED) {
