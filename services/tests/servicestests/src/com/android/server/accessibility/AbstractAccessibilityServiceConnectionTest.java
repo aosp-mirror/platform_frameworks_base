@@ -495,7 +495,8 @@ public class AbstractAccessibilityServiceConnectionTest {
         mServiceConnection.performAccessibilityAction(PIP_WINDOWID, ROOT_NODE_ID,
                 ACTION_ACCESSIBILITY_FOCUS, null, INTERACTION_ID, mMockCallback, TID);
 
-        verify(mMockIPowerManager).userActivity(anyLong(), anyInt(), anyInt());
+        verify(mMockIPowerManager).userActivity(eq(Display.DEFAULT_DISPLAY), anyLong(), anyInt(),
+                anyInt());
         verify(mMockIA11yInteractionConnection).performAccessibilityAction(eq(ROOT_NODE_ID),
                 eq(ACTION_ACCESSIBILITY_FOCUS), any(), eq(INTERACTION_ID), eq(mMockCallback),
                 anyInt(), eq(PID), eq(TID));
