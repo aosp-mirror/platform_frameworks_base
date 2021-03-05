@@ -19,25 +19,31 @@ package com.android.internal.inputmethod;
 import android.net.Uri;
 import android.view.inputmethod.InputMethodSubtype;
 
+import com.android.internal.inputmethod.IBooleanResultCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
+import com.android.internal.inputmethod.IIInputContentUriTokenResultCallback;
+import com.android.internal.inputmethod.IVoidResultCallback;
 
 /**
  * Defines priviledged operations that only the current IME is allowed to call.
  * Actual operations are implemented and handled by InputMethodManagerService.
  */
-interface IInputMethodPrivilegedOperations {
-    void setImeWindowStatus(int vis, int backDisposition);
-    void reportStartInput(in IBinder startInputToken);
-    IInputContentUriToken createInputContentUriToken(in Uri contentUri, in String packageName);
-    void reportFullscreenMode(boolean fullscreen);
-    void setInputMethod(String id);
-    void setInputMethodAndSubtype(String id, in InputMethodSubtype subtype);
-    void hideMySoftInput(int flags);
-    void showMySoftInput(int flags);
-    void updateStatusIcon(String packageName, int iconId);
-    boolean switchToPreviousInputMethod();
-    boolean switchToNextInputMethod(boolean onlyCurrentIme);
-    boolean shouldOfferSwitchingToNextInputMethod();
-    void notifyUserAction();
-    void applyImeVisibility(IBinder showOrHideInputToken, boolean setVisible);
+oneway interface IInputMethodPrivilegedOperations {
+    void setImeWindowStatus(int vis, int backDisposition, in IVoidResultCallback resultCallback);
+    void reportStartInput(in IBinder startInputToken, in IVoidResultCallback resultCallback);
+    void createInputContentUriToken(in Uri contentUri, in String packageName,
+            in IIInputContentUriTokenResultCallback resultCallback);
+    void reportFullscreenMode(boolean fullscreen, in IVoidResultCallback resultCallback);
+    void setInputMethod(String id, in IVoidResultCallback resultCallback);
+    void setInputMethodAndSubtype(String id, in InputMethodSubtype subtype,
+            in IVoidResultCallback resultCallback);
+    void hideMySoftInput(int flags, in IVoidResultCallback resultCallback);
+    void showMySoftInput(int flags, in IVoidResultCallback resultCallback);
+    void updateStatusIcon(String packageName, int iconId, in IVoidResultCallback resultCallback);
+    void switchToPreviousInputMethod(in IBooleanResultCallback resultCallback);
+    void switchToNextInputMethod(boolean onlyCurrentIme, in IBooleanResultCallback resultCallback);
+    void shouldOfferSwitchingToNextInputMethod(in IBooleanResultCallback resultCallback);
+    void notifyUserAction(in IVoidResultCallback resultCallback);
+    void applyImeVisibility(IBinder showOrHideInputToken, boolean setVisible,
+            in IVoidResultCallback resultCallback);
 }
