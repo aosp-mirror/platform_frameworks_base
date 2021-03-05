@@ -552,8 +552,8 @@ public:
 
     bool promotedToLayer() const {
         return mLayerProperties.mType == LayerType::None && fitsOnLayer() &&
-               (mComputedFields.mNeedLayerForFunctors ||
-                mLayerProperties.mImageFilter != nullptr ||
+               (mComputedFields.mNeedLayerForFunctors || mLayerProperties.mImageFilter != nullptr ||
+                !mLayerProperties.getStretchEffect().isEmpty() ||
                 (!MathUtils::isZero(mPrimitiveFields.mAlpha) && mPrimitiveFields.mAlpha < 1 &&
                  mPrimitiveFields.mHasOverlappingRendering));
     }
