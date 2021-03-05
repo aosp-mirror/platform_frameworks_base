@@ -797,24 +797,15 @@ interface ITelephony {
      * @return {@code true} on success; {@code false} on any failure.
      */
     boolean rebootModem(int slotIndex);
-    /*
-     * Get the calculated preferred network type.
-     * Used for device configuration by some CDMA operators.
-     * @param callingPackage The package making the call.
-     * @param callingFeatureId The feature in the package.
-     *
-     * @return the calculated preferred network type, defined in RILConstants.java.
-     */
-    int getCalculatedPreferredNetworkType(String callingPackage, String callingFeatureId);
 
     /*
-     * Get the preferred network type.
+     * Get the allowed network type.
      * Used for device configuration by some CDMA operators.
      *
      * @param subId the id of the subscription to query.
-     * @return the preferred network type, defined in RILConstants.java.
+     * @return the allowed network type bitmask, defined in RILConstants.java.
      */
-    int getPreferredNetworkType(int subId);
+    int getAllowedNetworkTypesBitmask(int subId);
 
     /**
      * Check whether DUN APN is required for tethering with subId.
@@ -940,23 +931,6 @@ interface ITelephony {
             int subId, in OperatorInfo operatorInfo, boolean persisSelection);
 
     /**
-     * Get the allowed network types that store in the telephony provider.
-     *
-     * @param subId the id of the subscription.
-     * @return allowedNetworkTypes the allowed network types.
-     */
-    long getAllowedNetworkTypes(int subId);
-
-    /**
-     * Set the allowed network types.
-     *
-     * @param subId the id of the subscription.
-     * @param allowedNetworkTypes the allowed network types.
-     * @return true on success; false on any failure.
-     */
-    boolean setAllowedNetworkTypes(int subId, long allowedNetworkTypes);
-
-    /**
      * Get the allowed network types for certain reason.
      *
      * @param subId the id of the subscription.
@@ -964,16 +938,6 @@ interface ITelephony {
      * @return allowedNetworkTypes the allowed network types.
      */
     long getAllowedNetworkTypesForReason(int subId, int reason);
-
-    /**
-     * Get the effective allowed network types on the device. This API will
-     * return an intersection of allowed network types for all reasons,
-     * including the configuration done through setAllowedNetworkTypes
-     *
-     * @param subId the id of the subscription.
-     * @return allowedNetworkTypes the allowed network types.
-     */
-     long getEffectiveAllowedNetworkTypes(int subId);
 
     /**
      * Set the allowed network types and provide the reason triggering the allowed network change.
@@ -984,16 +948,6 @@ interface ITelephony {
      * @return true on success; false on any failure.
      */
     boolean setAllowedNetworkTypesForReason(int subId, int reason, long allowedNetworkTypes);
-
-    /**
-     * Set the preferred network type.
-     * Used for device configuration by some CDMA operators.
-     *
-     * @param subId the id of the subscription to update.
-     * @param networkType the preferred network type, defined in RILConstants.java.
-     * @return true on success; false on any failure.
-     */
-    boolean setPreferredNetworkType(int subId, int networkType);
 
     /**
      * Get the user enabled state of Mobile Data.

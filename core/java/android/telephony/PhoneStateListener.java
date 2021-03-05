@@ -1020,6 +1020,19 @@ public class PhoneStateListener {
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public static final int EVENT_DATA_ENABLED_CHANGED = 34;
 
+    /**
+     * Event for changes to allowed network list based on all active subscriptions.
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
+     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * @hide
+     * @see AllowedNetworkTypesChangedListener#onAllowedNetworkTypesChanged
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public static final int EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED = 35;
+
     /** @hide */
     @IntDef(prefix = { "EVENT_" }, value = {
             EVENT_SERVICE_STATE_CHANGED,
@@ -1055,7 +1068,8 @@ public class PhoneStateListener {
             EVENT_REGISTRATION_FAILURE,
             EVENT_BARRING_INFO_CHANGED,
             EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED,
-            EVENT_DATA_ENABLED_CHANGED
+            EVENT_DATA_ENABLED_CHANGED,
+            EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {}
@@ -1800,6 +1814,41 @@ public class PhoneStateListener {
         public void onRegistrationFailed(@NonNull CellIdentity cellIdentity,
                                          @NonNull String chosenPlmn, @Domain int domain,
                                          int causeCode, int additionalCauseCode);
+    }
+
+    /**
+     * Interface for the current allowed network type list listener. This list involves values of
+     * allowed network type for each of reasons.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface AllowedNetworkTypesChangedListener {
+        /**
+         * Callback invoked when the current allowed network type list has changed on the
+         * registered subscription.
+         * Note, the registered subscription is associated with {@link TelephonyManager} object
+         * on which
+         * {@link TelephonyManager#registerPhoneStateListener(Executor, PhoneStateListener)}
+         * was called.
+         * If this TelephonyManager object was created with
+         * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+         * given subscription ID. Otherwise, this callback applies to
+         * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+         *
+         * @param allowedNetworkTypesList Map associating all allowed network type reasons
+         * ({@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER},
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_POWER}, and
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER}) with reason's allowed
+         * network type values.
+         * For example:
+         * map{{TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER, long type value},
+         *     {TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_POWER, long type value},
+         *     {TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER, long type value}}
+         */
+        @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+        void onAllowedNetworkTypesChanged(
+                @NonNull Map<Integer, Long> allowedNetworkTypesList);
     }
 
     /**
@@ -2810,6 +2859,16 @@ public class PhoneStateListener {
                 Binder.withCleanCallingIdentity(
                         () -> mExecutor.execute(() -> listener.onDataEnabledChanged(
                                 enabled, reason)));
+        }
+
+        public void onAllowedNetworkTypesChanged(Map allowedNetworkTypesList) {
+            AllowedNetworkTypesChangedListener listener =
+                    (AllowedNetworkTypesChangedListener) mPhoneStateListenerWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> listener.onAllowedNetworkTypesChanged(allowedNetworkTypesList)));
         }
     }
 
