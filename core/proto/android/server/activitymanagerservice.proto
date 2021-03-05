@@ -628,6 +628,7 @@ message ActivityManagerServiceDumpProcessesProto {
         optional string tag = 3;
         optional int32 type = 4;
         optional int32 reason_code = 5;
+        optional int32 calling_uid = 6;
     }
     repeated PendingTempWhitelist pending_temp_whitelist = 26;
 
