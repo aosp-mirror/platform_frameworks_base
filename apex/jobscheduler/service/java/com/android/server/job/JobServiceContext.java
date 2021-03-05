@@ -273,10 +273,12 @@ public final class JobServiceContext implements ServiceConnection {
                     // another binding flag for that.
                     bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
                             | Context.BIND_ALMOST_PERCEPTIBLE
-                            | Context.BIND_ALLOW_NETWORK_ACCESS;
+                            | Context.BIND_ALLOW_NETWORK_ACCESS
+                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
                 } else {
                     bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                            | Context.BIND_NOT_PERCEPTIBLE;
+                            | Context.BIND_NOT_PERCEPTIBLE
+                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
                 }
                 binding = mContext.bindServiceAsUser(intent, this, bindFlags,
                         UserHandle.of(job.getUserId()));

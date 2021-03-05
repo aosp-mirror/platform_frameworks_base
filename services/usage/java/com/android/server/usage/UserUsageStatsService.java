@@ -303,7 +303,9 @@ class UserUsageStatsService {
                 // FLUSH_TO_DISK is a private event.
                 && event.mEventType != Event.FLUSH_TO_DISK
                 // DEVICE_SHUTDOWN is added to event list after reboot.
-                && event.mEventType != Event.DEVICE_SHUTDOWN) {
+                && event.mEventType != Event.DEVICE_SHUTDOWN
+                // We aren't interested in every instance of the APP_COMPONENT_USED event.
+                && event.mEventType != Event.APP_COMPONENT_USED) {
             currentDailyStats.addEvent(event);
         }
 
@@ -1176,6 +1178,8 @@ class UserUsageStatsService {
                 return "USER_STOPPED";
             case Event.LOCUS_ID_SET:
                 return "LOCUS_ID_SET";
+            case Event.APP_COMPONENT_USED:
+                return "APP_COMPONENT_USED";
             default:
                 return "UNKNOWN_TYPE_" + eventType;
         }

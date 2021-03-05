@@ -60,6 +60,10 @@ public final class AssociationRequest implements Parcelable {
     /**
      * Device profile: watch.
      *
+     * If specified, the current request may have a modified UI to highlight that the device being
+     * set up is a specific kind of device, and some extra permissions may be granted to the app
+     * as a result.
+     *
      * @see AssociationRequest.Builder#setDeviceProfile
      */
     public static final String DEVICE_PROFILE_WATCH =

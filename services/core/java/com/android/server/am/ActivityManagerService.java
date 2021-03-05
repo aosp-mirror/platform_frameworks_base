@@ -2684,6 +2684,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (mUsageStatsService != null) {
             mUsageStatsService.reportEvent(activity, userId, event, appToken.hashCode(), taskRoot);
+            if (event == Event.ACTIVITY_RESUMED) {
+                // Report component usage as an activity is an app component
+                mUsageStatsService.reportEvent(
+                        activity.getPackageName(), userId, Event.APP_COMPONENT_USED);
+            }
         }
         ContentCaptureManagerInternal contentCaptureService = mContentCaptureService;
         if (contentCaptureService != null && (event == Event.ACTIVITY_PAUSED
@@ -6098,6 +6103,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             updateLruProcessLocked(app, false, null);
             updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN);
         }
+
+        // Report usage as process is persistent and being started.
+        mUsageStatsService.reportEvent(info.packageName, UserHandle.getUserId(app.uid),
+                Event.APP_COMPONENT_USED);
 
         // This package really, really can not be stopped.
         try {
