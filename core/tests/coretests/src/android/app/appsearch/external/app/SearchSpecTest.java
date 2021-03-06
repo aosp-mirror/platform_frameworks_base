@@ -21,6 +21,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Bundle;
 
+import com.google.common.collect.ImmutableList;
+
 import org.junit.Test;
 
 import java.util.List;
@@ -67,9 +69,9 @@ public class SearchSpecTest {
         SearchSpec searchSpec =
                 new SearchSpec.Builder()
                         .setTermMatch(SearchSpec.TERM_MATCH_PREFIX)
-                        .addProjection("TypeA", "field1", "field2.subfield2")
-                        .addProjection("TypeB", "field7")
-                        .addProjection("TypeC")
+                        .addProjection("TypeA", ImmutableList.of("field1", "field2.subfield2"))
+                        .addProjection("TypeB", ImmutableList.of("field7"))
+                        .addProjection("TypeC", ImmutableList.of())
                         .build();
 
         Map<String, List<String>> typePropertyPathMap = searchSpec.getProjections();

@@ -47,7 +47,7 @@ class PrivacyDialog(
     context: Context,
     private val list: List<PrivacyElement>,
     activityStarter: (String, Int) -> Unit
-) : SystemUIDialog(context, R.style.ScreenRecord) {
+) : SystemUIDialog(context, R.style.PrivacyDialog) {
 
     private val dismissListeners = mutableListOf<WeakReference<OnDialogDismissed>>()
     private val dismissed = AtomicBoolean(false)

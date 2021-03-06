@@ -24,6 +24,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -49,7 +51,9 @@ import android.view.Gravity;
 import android.view.InsetsState;
 import android.view.RoundedCorners;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.ITransitionPlayer;
 
 import androidx.test.filters.SmallTest;
 
@@ -135,7 +139,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
         int expectedWidth = (int) (wallpaperWidth * (displayHeight / (double) wallpaperHeight));
 
         // Check that the wallpaper is correctly scaled
-        assertEquals(new Rect(0, 0, expectedWidth, displayHeight), wallpaperWindow.getFrame());
+        assertEquals(expectedWidth, wallpaperWindow.getFrame().width());
+        assertEquals(displayHeight, wallpaperWindow.getFrame().height());
         Rect portraitFrame = wallpaperWindow.getFrame();
 
         // Rotate the display
@@ -295,6 +300,46 @@ public class WallpaperControllerTests extends WindowTestsBase {
         mDisplayContent.mWallpaperController.adjustWallpaperWindows();
 
         assertFalse(mAppWindow.mActivityRecord.hasFixedRotationTransform());
+    }
+
+    @Test
+    public void testWallpaperTokenVisibility() {
+        final DisplayContent dc = mWm.mRoot.getDefaultDisplay();
+        final WallpaperWindowToken token = new WallpaperWindowToken(mWm, mock(IBinder.class),
+                true, dc, true /* ownerCanManageAppTokens */);
+        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, token,
+                "wallpaperWindow");
+        wallpaperWindow.setHasSurface(true);
+
+        // Set-up mock shell transitions
+        final IBinder mockBinder = mock(IBinder.class);
+        final ITransitionPlayer mockPlayer = mock(ITransitionPlayer.class);
+        doReturn(mockBinder).when(mockPlayer).asBinder();
+        mWm.mAtmService.getTransitionController().registerTransitionPlayer(mockPlayer);
+
+        Transition transit =
+                mWm.mAtmService.getTransitionController().createTransition(TRANSIT_OPEN);
+
+        // wallpaper windows are immediately visible when set to visible even during a transition
+        token.setVisibility(true);
+        assertTrue(wallpaperWindow.isVisible());
+        assertTrue(token.isVisibleRequested());
+        assertTrue(token.isVisible());
+        mWm.mAtmService.getTransitionController().abort(transit);
+
+        // In a transition, setting invisible should ONLY set requestedVisible false; otherwise
+        // wallpaper should remain "visible" until transition is over.
+        transit = mWm.mAtmService.getTransitionController().createTransition(TRANSIT_CLOSE);
+        transit.start();
+        token.setVisibility(false);
+        assertTrue(wallpaperWindow.isVisible());
+        assertFalse(token.isVisibleRequested());
+        assertTrue(token.isVisible());
+
+        transit.onTransactionReady(transit.getSyncId(), mock(SurfaceControl.Transaction.class));
+        transit.finishTransition();
+        assertFalse(wallpaperWindow.isVisible());
+        assertFalse(token.isVisible());
     }
 
     private WindowState createWallpaperTargetWindow(DisplayContent dc) {

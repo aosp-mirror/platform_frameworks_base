@@ -50,7 +50,6 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.PowerWhitelistManager.REASON_SYSTEM_ALLOW_LISTED;
-import static android.os.PowerWhitelistManager.REASON_UNKNOWN;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
@@ -92,6 +91,7 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
@@ -104,7 +104,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
@@ -1178,14 +1177,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         final String tag;
         final int type;
         final @ReasonCode int reasonCode;
+        final int callingUid;
 
         PendingTempAllowlist(int targetUid, long duration, @ReasonCode int reasonCode, String tag,
-                int type) {
+                int type, int callingUid) {
             this.targetUid = targetUid;
             this.duration = duration;
             this.tag = tag;
             this.type = type;
             this.reasonCode = reasonCode;
+            this.callingUid = callingUid;
         }
 
         void dumpDebug(ProtoOutputStream proto, long fieldId) {
@@ -1198,6 +1199,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.TYPE, type);
             proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.REASON_CODE,
                     reasonCode);
+            proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.CALLING_UID,
+                    callingUid);
             proto.end(token);
         }
     }
@@ -4968,7 +4971,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public List<ResolveInfo> queryIntentComponentsForIntentSender(
+    public ParceledListSlice<ResolveInfo> queryIntentComponentsForIntentSender(
             IIntentSender pendingResult, int matchFlags) {
         enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
                 "queryIntentComponentsForIntentSender()");
@@ -4986,15 +4989,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int userId = res.key.userId;
         switch (res.key.type) {
             case ActivityManager.INTENT_SENDER_ACTIVITY:
-                return mContext.getPackageManager().queryIntentActivitiesAsUser(
-                        intent, matchFlags, userId);
+                return new ParceledListSlice<>(mContext.getPackageManager()
+                        .queryIntentActivitiesAsUser(intent, matchFlags, userId));
             case ActivityManager.INTENT_SENDER_SERVICE:
             case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
-                return mContext.getPackageManager().queryIntentServicesAsUser(
-                        intent, matchFlags, userId);
+                return new ParceledListSlice<>(mContext.getPackageManager()
+                        .queryIntentServicesAsUser(intent, matchFlags, userId));
             case ActivityManager.INTENT_SENDER_BROADCAST:
-                return mContext.getPackageManager().queryBroadcastReceiversAsUser(
-                        intent, matchFlags, userId);
+                return new ParceledListSlice<>(mContext.getPackageManager()
+                        .queryBroadcastReceiversAsUser(intent, matchFlags, userId));
             default: // ActivityManager.INTENT_SENDER_ACTIVITY_RESULT
                 throw new IllegalStateException("Unsupported intent sender type: " + res.key.type);
         }
@@ -9231,6 +9234,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.print(ptw.type);
                     pw.print(" ");
                     pw.print(ptw.reasonCode);
+                    pw.print(" ");
+                    pw.print(ptw.callingUid);
                 }
             }
         }
@@ -10785,9 +10790,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print(" unmapped + ");
                         pw.print(stringifyKBSize(ionPool));
                         pw.println(" pools)");
+                kernelUsed += ionUnmapped;
                 // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
-                // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
-                kernelUsed += ionHeap;
+                // set on ION VMAs, however it might be included by the memtrack HAL.
+                // Replace memtrack HAL reported Graphics category with mapped dmabufs
+                ss[INDEX_TOTAL_PSS] -= ss[INDEX_TOTAL_MEMTRACK_GRAPHICS];
+                ss[INDEX_TOTAL_PSS] += dmabufMapped;
             } else {
                 final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
                 if (totalExportedDmabuf >= 0) {
@@ -14510,7 +14518,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             String reason, int type, int callingUid) {
         synchronized (mProcLock) {
             mPendingTempAllowlist.put(targetUid,
-                    new PendingTempAllowlist(targetUid, duration, reasonCode, reason, type));
+                    new PendingTempAllowlist(targetUid, duration, reasonCode, reason, type,
+                            callingUid));
             setUidTempAllowlistStateLSP(targetUid, true);
             mUiHandler.obtainMessage(PUSH_TEMP_ALLOWLIST_UI_MSG).sendToTarget();
 
@@ -14541,7 +14550,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i = 0; i < N; i++) {
                 PendingTempAllowlist ptw = list[i];
                 mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(ptw.targetUid,
-                        ptw.duration, ptw.type, true, ptw.reasonCode, ptw.tag);
+                        ptw.duration, ptw.type, true, ptw.reasonCode, ptw.tag,
+                        ptw.callingUid);
             }
         }
 

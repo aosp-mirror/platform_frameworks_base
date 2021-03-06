@@ -17,6 +17,7 @@
 <com.android.systemui.util.NeverExactlyLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:minHeight="48dp"
     android:clickable="true"
     android:paddingBottom="@dimen/qs_tile_padding_top"
     android:paddingTop="@dimen/qs_tile_padding_top"

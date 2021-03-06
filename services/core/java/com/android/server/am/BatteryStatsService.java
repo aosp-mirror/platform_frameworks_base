@@ -371,6 +371,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
 
         Watchdog.getInstance().addMonitor(this);
+
+        final DataConnectionStats dataConnectionStats = new DataConnectionStats(mContext, mHandler);
+        dataConnectionStats.startMonitoring();
     }
 
     private final class LocalService extends BatteryStatsInternal {

@@ -32,8 +32,6 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.telephony.SipMessageParsingUtils;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Executor;
@@ -268,7 +266,7 @@ public class SipDelegateConnectionAidlWrapper implements SipDelegateConnection,
     }
 
     private void notifyLocalMessageFailedToSend(SipMessage m, int reason) {
-        String transactionId = SipMessageParsingUtils.getTransactionId(m.getHeaderSection());
+        String transactionId = m.getViaBranchParameter();
         if (TextUtils.isEmpty(transactionId)) {
             Log.w(LOG_TAG, "sendMessage detected a malformed SipMessage and can not get a "
                     + "transaction ID.");

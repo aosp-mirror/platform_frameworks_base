@@ -146,7 +146,7 @@ public final class AppSearchSession implements Closeable {
                     mPackageName,
                     mDatabaseName,
                     schemaBundles,
-                    new ArrayList<>(request.getSchemasNotVisibleToSystemUi()),
+                    new ArrayList<>(request.getSchemasNotDisplayedBySystem()),
                     schemasPackageAccessibleBundles,
                     request.isForceOverride(),
                     mUserId,

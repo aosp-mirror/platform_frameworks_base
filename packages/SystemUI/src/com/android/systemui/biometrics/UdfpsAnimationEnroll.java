@@ -22,13 +22,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
-import android.util.Log;
+import android.graphics.drawable.Drawable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 /**
@@ -40,9 +41,13 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
     private static final float SHADOW_RADIUS = 5.f;
     private static final float PROGRESS_BAR_RADIUS = 140.f;
 
-    @Nullable private RectF mSensorRect;
+    @NonNull private final Drawable mMovingTargetFpIcon;
     @NonNull private final Paint mSensorPaint;
-    private final int mNotificationShadeColor;
+    @NonNull private final Paint mBlueFill;
+    @NonNull private final Paint mBlueStroke;;
+
+    @Nullable private RectF mSensorRect;
+    @Nullable private UdfpsEnrollHelper mEnrollHelper;
 
     UdfpsAnimationEnroll(@NonNull Context context) {
         super(context);
@@ -53,8 +58,24 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
         mSensorPaint.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
         mSensorPaint.setStyle(Paint.Style.FILL);
 
-        mNotificationShadeColor = Utils.getColorAttr(context,
-                android.R.attr.colorBackgroundFloating).getDefaultColor();
+        mBlueFill = new Paint(0 /* flags */);
+        mBlueFill.setAntiAlias(true);
+        mBlueFill.setColor(context.getColor(R.color.udfps_moving_target_fill));
+        mBlueFill.setStyle(Paint.Style.FILL);
+
+        mBlueStroke = new Paint(0 /* flags */);
+        mBlueStroke.setAntiAlias(true);
+        mBlueStroke.setColor(context.getColor(R.color.udfps_moving_target_stroke));
+        mBlueStroke.setStyle(Paint.Style.STROKE);
+        mBlueStroke.setStrokeWidth(12);
+
+        mMovingTargetFpIcon = context.getResources().getDrawable(R.drawable.ic_fingerprint, null);
+        mMovingTargetFpIcon.setTint(Color.WHITE);
+        mMovingTargetFpIcon.mutate();
+    }
+
+    void setEnrollHelper(@NonNull UdfpsEnrollHelper helper) {
+        mEnrollHelper = helper;
     }
 
     @Override
@@ -74,6 +95,12 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
     }
 
     @Override
+    protected void updateFingerprintIconBounds(@NonNull Rect bounds) {
+        super.updateFingerprintIconBounds(bounds);
+        mMovingTargetFpIcon.setBounds(bounds);
+    }
+
+    @Override
     public void draw(@NonNull Canvas canvas) {
         if (isIlluminationShowing()) {
             return;
@@ -87,6 +114,24 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
             }
         }
         mFingerprintDrawable.draw(canvas);
+
+        // Draw moving target
+        if (mEnrollHelper.isCenterEnrollmentComplete()) {
+            mFingerprintDrawable.setAlpha(64);
+
+            canvas.save();
+            final PointF point = mEnrollHelper.getNextGuidedEnrollmentPoint();
+            canvas.translate(point.x, point.y);
+            if (mSensorRect != null) {
+                canvas.drawOval(mSensorRect, mBlueFill);
+                canvas.drawOval(mSensorRect, mBlueStroke);
+            }
+
+            mMovingTargetFpIcon.draw(canvas);
+            canvas.restore();
+        } else {
+            mFingerprintDrawable.setAlpha(255);
+        }
     }
 
     @Override

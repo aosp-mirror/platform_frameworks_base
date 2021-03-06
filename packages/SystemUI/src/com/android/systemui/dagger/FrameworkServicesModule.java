@@ -25,6 +25,7 @@ import android.app.IActivityTaskManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
+import android.app.StatsManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.role.RoleManager;
@@ -317,6 +318,12 @@ public class FrameworkServicesModule {
     @Singleton
     static ShortcutManager provideShortcutManager(Context context) {
         return context.getSystemService(ShortcutManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static StatsManager provideStatsManager(Context context) {
+        return context.getSystemService(StatsManager.class);
     }
 
     @Provides

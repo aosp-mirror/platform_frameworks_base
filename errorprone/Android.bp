@@ -36,11 +36,12 @@ java_library_host {
 
 java_test_host {
     name: "error_prone_android_framework_test",
-    test_suites: ["general-tests"],
     srcs: ["tests/java/**/*.java"],
     java_resource_dirs: ["tests/res"],
     java_resources: [":error_prone_android_framework_testdata"],
     static_libs: [
+        "truth-prebuilt",
+        "kxml2-2.3.0",
         "error_prone_android_framework_lib",
         "error_prone_test_helpers",
         "hamcrest-library",
@@ -48,6 +49,9 @@ java_test_host {
         "platform-test-annotations",
         "junit",
     ],
+    test_options: {
+        unit_test: true,
+    },
 }
 
 filegroup {

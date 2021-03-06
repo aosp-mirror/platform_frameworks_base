@@ -225,7 +225,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     }
 
     private void onStageChildTaskStatusChanged(
-            StageListenerImpl stageListener, int taskId, boolean present) {
+            StageListenerImpl stageListener, int taskId, boolean present, boolean visible) {
 
         int stage;
         if (present) {
@@ -236,7 +236,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
         }
 
         for (int i = mListeners.size() - 1; i >= 0; --i) {
-            mListeners.get(i).onTaskStageChanged(taskId, stage);
+            mListeners.get(i).onTaskStageChanged(taskId, stage, visible);
         }
     }
 
@@ -495,8 +495,8 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
         }
 
         @Override
-        public void onChildTaskStatusChanged(int taskId, boolean present) {
-            StageCoordinator.this.onStageChildTaskStatusChanged(this, taskId, present);
+        public void onChildTaskStatusChanged(int taskId, boolean present, boolean visible) {
+            StageCoordinator.this.onStageChildTaskStatusChanged(this, taskId, present, visible);
         }
 
         @Override

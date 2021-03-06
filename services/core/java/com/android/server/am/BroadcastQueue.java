@@ -930,6 +930,8 @@ public final class BroadcastQueue {
         } else if (r.intent.getData() != null) {
             b.append(r.intent.getData());
         }
+        b.append(",reason:");
+        b.append(reason);
         if (DEBUG_BROADCAST) {
             Slog.v(TAG, "Broadcast temp allowlist uid=" + uid + " duration=" + duration
                     + " type=" + type + " : " + b.toString());

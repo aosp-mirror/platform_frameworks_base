@@ -113,17 +113,6 @@ public class RemoteAnimationAdapterCompat {
                 // TODO(bc-unlock): Build wrapped object for non-apps target.
                 final RemoteAnimationTargetCompat[] nonAppsCompat =
                         new RemoteAnimationTargetCompat[0];
-                final Runnable animationFinishedCallback = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            finishCallback.onTransitionFinished(null /* wct */);
-                        } catch (RemoteException e) {
-                            Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"
-                                    + " finished callback", e);
-                        }
-                    }
-                };
 
                 // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
                 boolean isReturnToHome = false;
@@ -143,8 +132,8 @@ public class RemoteAnimationAdapterCompat {
                         final TransitionInfo.Change change = info.getChanges().get(i);
                         final SurfaceControl leash = change.getLeash();
                         final int mode = info.getChanges().get(i).getMode();
-                        // Only deal with roots
-                        if (change.getParent() != null) continue;
+                        // Only deal with independent layers
+                        if (!TransitionInfo.isIndependent(change, info)) continue;
                         if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
                             t.setLayer(leash, info.getChanges().size() * 3 - i);
                         }
@@ -156,6 +145,18 @@ public class RemoteAnimationAdapterCompat {
                     }
                 }
                 t.apply();
+
+                final Runnable animationFinishedCallback = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            finishCallback.onTransitionFinished(null /* wct */);
+                        } catch (RemoteException e) {
+                            Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"
+                                    + " finished callback", e);
+                        }
+                    }
+                };
                 // TODO(bc-unlcok): Pass correct transit type.
                 remoteAnimationAdapter.onAnimationStart(
                         TRANSIT_OLD_NONE,

@@ -317,7 +317,7 @@ public class AppSearchManager {
                     getPackageName(),
                     DEFAULT_DATABASE_NAME,
                     schemaBundles,
-                    new ArrayList<>(request.getSchemasNotVisibleToSystemUi()),
+                    new ArrayList<>(request.getSchemasNotDisplayedBySystem()),
                     /*schemasPackageAccessible=*/ Collections.emptyMap(),
                     request.isForceOverride(),
                     mContext.getUserId(),

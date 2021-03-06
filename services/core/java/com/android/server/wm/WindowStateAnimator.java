@@ -57,7 +57,6 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.os.Debug;
 import android.os.Trace;
 import android.util.Slog;
@@ -575,10 +574,7 @@ class WindowStateAnimator {
 
         setSurfaceBoundariesLocked(t);
 
-        if (mIsWallpaper && !w.mWallpaperVisible) {
-            // Wallpaper is no longer visible and there is no wp target => hide it.
-            hide(t, "prepareSurfaceLocked");
-        } else if (w.isParentWindowHidden() || !w.isOnScreen()) {
+        if (w.isParentWindowHidden() || !w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");
             mWallpaperControllerLocked.hideWallpapers(w);
 
@@ -631,9 +627,6 @@ class WindowStateAnimator {
                     if (showSurfaceRobustlyLocked(t)) {
                         mAnimator.requestRemovalOfReplacedWindows(w);
                         mLastHidden = false;
-                        if (mIsWallpaper) {
-                            w.dispatchWallpaperVisibility(true);
-                        }
                         final DisplayContent displayContent = w.getDisplayContent();
                         if (!displayContent.getLastHasContent()) {
                             // This draw means the difference between unique content and mirroring.
