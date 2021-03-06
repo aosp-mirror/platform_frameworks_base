@@ -50924,6 +50924,7 @@ package android.view.autofill {
     field public static final String EXTRA_AUTHENTICATION_RESULT = "android.view.autofill.extra.AUTHENTICATION_RESULT";
     field public static final String EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET = "android.view.autofill.extra.AUTHENTICATION_RESULT_EPHEMERAL_DATASET";
     field public static final String EXTRA_CLIENT_STATE = "android.view.autofill.extra.CLIENT_STATE";
+    field public static final String EXTRA_INLINE_SUGGESTIONS_REQUEST = "android.view.autofill.extra.INLINE_SUGGESTIONS_REQUEST";
   }
 
   public abstract static class AutofillManager.AutofillCallback {
