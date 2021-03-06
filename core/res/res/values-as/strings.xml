@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"এপক আপোনাৰ ফট’ সংগ্ৰহ সালসলনি কৰিবলৈ দিয়ে।"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"আপোনাৰ মিডিয়া সংগ্ৰহৰ অৱস্থান পঢ়িবলৈ"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"এপক আপোনাৰ মিডিয়া সংগ্ৰহৰ অৱস্থান পঢ়িবলৈ দিয়ে।"</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"এইয়া আপুনিয়েই বুলি সত্যাপন কৰক"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"বায়োমেট্ৰিক হাৰ্ডৱেৰ উপলব্ধ নহয়"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"বিশ্বাসযোগ্যতাৰ প্ৰমাণীকৰণ বাতিল কৰা হৈছে"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"বিশ্বাসযোগ্যতাৰ প্ৰমাণীকৰণ বাতিল কৰা হৈছে"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"কোনো পিন, আৰ্হি বা পাছৱৰ্ড ছেট কৰা নাই"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"আসোঁৱাহৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰি থকা হৈছে"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"ফিংগাৰপ্ৰিণ্ট আংশিকভাৱে চিনাক্ত কৰা হৈছে। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ফিগাৰপ্ৰিণ্টৰ প্ৰক্ৰিয়া সম্পাদন কৰিবপৰা নগ\'ল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো লেতেৰা হৈ আছে। অনুগ্ৰহ কৰি পৰিষ্কাৰ কৰি আকৌ চেষ্টা কৰক।"</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইচটোত ফিংগাৰপ্ৰিণ্ট ছেন্সৰ নাই।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ছেন্সৰটো সাময়িকভাৱে অক্ষম হৈ আছে।"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> আঙুলি"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"অব্যাহত ৰাখিবলৈ আপোনাৰ ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰক"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"মুখমণ্ডল আৰু চিনাক্ত কৰিব নোৱাৰি। আকৌ চেষ্টা কৰক।"</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"একে ধৰণৰ হৈছে, অনুগ্ৰহ কৰি আপোনাৰ প’জটো সলনি কৰক।"</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"আপোনাৰ মূৰটো সামান্য কমকৈ ঘূৰাওক।"</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"আপোনাৰ মূৰটো অলপ কমকৈ হেলনীয়া কৰক।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"আপোনাৰ মূৰটো সামান্য কমকৈ ঘূৰাওক।"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"আপোনাৰ মুখখন ঢাকি ৰখা বস্তুবোৰ আঁতৰাওক।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ক’লা বাৰডালকে ধৰি আপোনাৰ স্ক্রীণৰ ওপৰৰ অংশ চাফা কৰক"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"এই ডিভাইচটোত মুখাৱয়বৰদ্বাৰা আনলক কৰা সুবিধাটো নচলে।"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ছেন্সৰটো সাময়িকভাৱে অক্ষম হৈ আছে।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"মুখমণ্ডল <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"মুখমণ্ডলৰ আইকন"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"শ্বৰ্টকাট ব্যৱহাৰ কৰক"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ৰং বিপৰীতকৰণ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ৰং শুধৰণী"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"উজ্জ্বলতা কমাওক"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কীসমূহ ধৰি ৰাখক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধৰি ৰাখিছিল। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অফ কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ব্যৱহাৰ কৰিবলৈ দুয়োটা ভলিউম বুটাম তিনি ছেকেণ্ডৰ বাবে হেঁচি ৰাখক"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ফিশ্বিঙৰ সতৰ্কবাৰ্তা"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"সতৰ্ক কৰা হ’ল"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"সত্যাপিত"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"বিস্তাৰ কৰক"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"সংকুচিত কৰক"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"সম্প্ৰসাৰণ ট’গল কৰক"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"বাতৰি আৰু আলোচনী"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"মেপ আৰু দিক্-নিৰ্দেশনা"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"উৎপাদনশীলতা"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ডিভাইচৰ সঞ্চয়াগাৰ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"ইউএছবি ডিবাগিং"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ঘণ্টা"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"অব্যাহত ৰাখিবলৈ &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;এ আপোনাৰ ডিভাইচৰ কেমেৰা এক্সেছ কৰাৰ আৱশ্যক।"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"অন কৰক"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ছেন্সৰ সম্পৰ্কীয় গোপনীয়তাৰ নীতি"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"এপ্লিকেশ্বনৰ চিহ্ন"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"এপ্লিকেশ্বনৰ ব্ৰেণ্ডৰ প্ৰতিচ্ছবি"</string>
 </resources>

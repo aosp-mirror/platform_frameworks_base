@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"写真コレクションの変更をアプリに許可します。"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"メディア コレクションの位置情報の読み取り"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"メディア コレクションの位置情報の読み取りをアプリに許可します。"</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"本人確認"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"生体認証ハードウェアが利用できません"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"認証をキャンセルしました"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"認識されませんでした"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"認証をキャンセルしました"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN、パターン、パスワードが設定されていません"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"エラー認証"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"指紋を一部しか検出できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"指紋を処理できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"指紋認証センサーに汚れがあります。汚れを落としてもう一度お試しください。"</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"このデバイスには指紋認証センサーがありません。"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"センサーが一時的に無効になっています。"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"指紋 <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"続行するには指紋認証を使用してください"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"顔を認識できなくなりました。もう一度お試しください。"</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"似すぎています。ポーズを変えてください。"</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"顔の向きを少し戻してください。"</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"顔を少し傾けてください。"</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"顔の向きを少し戻してください。"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"顔を隠しているものをすべて外してください"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"黒いバーを含め、画面の上部をきれいにしてください"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"このデバイスでは、顔認証はご利用いただけません。"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"センサーが一時的に無効になっています。"</string>
     <string name="face_name_template" msgid="3877037340223318119">"顔 <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"顔アイコン"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ショートカットを使用"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色反転"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"色補正"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"明るさを下げる"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が ON になりました。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が OFF になりました。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を使用するには、音量大と音量小の両方のボタンを 3 秒間長押ししてください"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"フィッシングに関する警告"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"仕事用プロファイル"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"アラートとして送信済み"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"確認済み"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"展開"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"折りたたむ"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"展開の切り替え"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"ニュース＆雑誌"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"地図＆ナビ"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"仕事効率化"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"デバイスのストレージ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB デバッグ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"時"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"続行するには、&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; にデバイスのカメラへのアクセスを許可する必要があります。"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ON にする"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"センサー プライバシー"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"アプリのアイコン"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"アプリのブランド イメージ"</string>
 </resources>

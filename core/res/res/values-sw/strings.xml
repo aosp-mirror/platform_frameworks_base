@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Inaruhusu programu kubadilisha mkusanyiko wa picha zako."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"kusoma maeneo kwenye mkusanyiko wa vipengee vyako"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Inaruhusu programu kusoma maeneo kwenye mkusanyiko wa vipengee vyako."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Thibitisha kuwa ni wewe"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Maunzi ya bayometriki hayapatikani"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Imeghairi uthibitishaji"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Hayatambuliki"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Imeghairi uthibitishaji"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Hujaweka pin, mchoro au nenosiri"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Hitilafu imetokea wakati wa uthibitishaji"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Kitambua alama kimetambua sehemu ya alama. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Imeshindwa kuchakata alama ya kidole. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Kitambua alama ya kidole ni kichafu. Tafadhali kisafishe na ujaribu tena."</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Kifaa hiki hakina kitambua alama ya kidole."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Kitambuzi kimezimwa kwa muda."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Kidole cha <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Tumia alama ya kidole chako ili uendelee"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Haiwezi tena kutambua uso. Jaribu tena."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Inafanana sana, tafadhali badilisha mkao wako."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Geuza kichwa chako kidogo."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Inamisha kichwa chako kiasi."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Geuza kichwa chako kidogo."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Ondoa kitu chochote kinachoficha uso wako."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Safisha sehemu ya juu ya skrini yako, ikiwa ni pamoja na upau mweusi"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Kufungua kwa uso hakutumiki kwenye kifaa hiki."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Kitambuzi kimezimwa kwa muda."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Uso wa <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Aikoni ya uso"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Tumia Njia ya Mkato"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ugeuzaji rangi"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Usahihishaji wa rangi"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Punguza ung\'aavu"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Vitufe vya sauti vilivyoshikiliwa. Umewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Vitufe vya sauti vimeshikiliwa. Umezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Bonyeza na ushikilie vitufe vyote viwili vya sauti kwa sekunde tatu ili utumie <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Arifa ya wizi wa data binafsi"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Wasifu wa kazini"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Imearifu"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Imethibitishwa"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Panua"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Kunja"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"geuza upanuzi"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"Habari na Magazeti"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Ramani na Maelekezo"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Uzalishaji"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Hifadhi ya kifaa"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Utatuzi wa USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"saa"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Ili uendelee, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; inahitaji ruhusa ya kufikia kamera ya kifaa chako."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Washa"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Faragha ya Kitambuzi"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Aikoni ya programu"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Picha ya kuweka chapa kwenye programu"</string>
 </resources>

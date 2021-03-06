@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"એપને તમારો ફોટો સંગ્રહ સંશોધિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"આપના મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવા"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"એપને તમારા મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવાની મંજૂરી આપે છે."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"તે તમે જ છો એ ચકાસો"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"પ્રમાણીકરણ રદ કર્યું"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"ઓળખાયેલ નથી"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"પ્રમાણીકરણ રદ કર્યું"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"કોઈ પિન, પૅટર્ન અથવા પાસવર્ડ સેટ કરેલો નથી"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"પ્રમાણિત કરવામાં ભૂલ આવી"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"આંશિક ફિંગરપ્રિન્ટ મળી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ફિંગરપ્રિન્ટ પ્રક્રિયા કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ફિંગરપ્રિન્ટ સેન્સર ગંદું છે. કૃપા કરીને સાફ કરો અને ફરી પ્રયાસ કરો."</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"આ ડિવાઇસમાં કોઈ ફિંગરપ્રિન્ટ સેન્સર નથી."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"સેન્સર હંગામી રૂપે બંધ કર્યું છે."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"આંગળી <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ચાલુ રાખવા માટે તમારી ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"ચહેરો ઓળખી શકાતો નથી. ફરી પ્રયાસ કરો."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"ઘણી સમાનતા ધરાવે છે, કૃપા કરીને તમારો પોઝ બદલો."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"તમારું માથું થોડું ફેરવો."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"તમારું માથું થોડું ઓછું ટિલ્ટ કરો."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"તમારું માથું થોડું ઓછું ફેરવો."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"તમારા ચહેરાને છુપાવતી કંઈપણ વસ્તુ દૂર કરો."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"કાળી પટ્ટી સહિત, તમારી સ્ક્રીનની ટોચ સાફ કરો"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"આ ડિવાઇસ પર ફેસ અનલૉક કરવાની સુવિધા નથી."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"સેન્સર હંગામી રૂપે બંધ કર્યું છે."</string>
     <string name="face_name_template" msgid="3877037340223318119">"ચહેરાનું <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"ચહેરા આઇકન"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"શૉર્ટકટનો ઉપયોગ કરો"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"વિપરીત રંગમાં બદલવું"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"રંગ સુધારણા"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"બ્રાઇટનેસ ઘટાડો"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"વૉલ્યૂમ કી દબાવી રાખો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ચાલુ કરી."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"વૉલ્યૂમ કી દબાવી રાખો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> બંધ કરી."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>નો ઉપયોગ કરવા માટે બન્ને વૉલ્યૂમ કીને ત્રણ સેકન્ડ સુધી દબાવી રાખો"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ફિશિંગ અલર્ટ"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ઑફિસની પ્રોફાઇલ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"અલર્ટ કરેલ"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"ચકાસેલું"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"વિસ્તૃત કરો"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"સંકુચિત કરો"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"વિસ્તરણ ટૉગલ કરો"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"સમાચાર અને સામાયિકો"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Maps અને નેવિગેશન"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ઉત્પાદકતા"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ડિવાઇસ સ્ટૉરેજ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB ડિબગિંગ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"કલાક"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ચાલુ રાખવા માટે, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;ને તમારા ડિવાઇસના કૅમેરાના ઍક્સેસની જરૂર છે."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ચાલુ કરો"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"સેન્સર પ્રાઇવસી સંબંધિત નોટિફિકેશન"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ઍપ્લિકેશનનું આઇકન"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ઍપ્લિકેશનની બ્રાંડિંગ છબી"</string>
 </resources>
