@@ -1038,11 +1038,20 @@ package android.hardware.biometrics {
   }
 
   public class SensorProperties {
+    method @NonNull public java.util.List<android.hardware.biometrics.SensorProperties.ComponentInfo> getComponentInfo();
     method public int getSensorId();
     method public int getSensorStrength();
     field public static final int STRENGTH_CONVENIENCE = 0; // 0x0
     field public static final int STRENGTH_STRONG = 2; // 0x2
     field public static final int STRENGTH_WEAK = 1; // 0x1
+  }
+
+  public static final class SensorProperties.ComponentInfo {
+    method @NonNull public String getComponentId();
+    method @NonNull public String getFirmwareVersion();
+    method @NonNull public String getHardwareVersion();
+    method @NonNull public String getSerialNumber();
+    method @NonNull public String getSoftwareVersion();
   }
 
 }

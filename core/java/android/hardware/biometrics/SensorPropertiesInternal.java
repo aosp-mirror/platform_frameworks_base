@@ -20,6 +20,9 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The base class containing all modality-agnostic information. This is a superset of the
  * {@link android.hardware.biometrics.common.CommonProps}, and provides backwards-compatible
@@ -31,21 +34,23 @@ public class SensorPropertiesInternal implements Parcelable {
     public final int sensorId;
     @SensorProperties.Strength public final int sensorStrength;
     public final int maxEnrollmentsPerUser;
+    public final List<ComponentInfoInternal> componentInfo;
     public final boolean resetLockoutRequiresHardwareAuthToken;
     public final boolean resetLockoutRequiresChallenge;
 
     public static SensorPropertiesInternal from(@NonNull SensorPropertiesInternal prop) {
         return new SensorPropertiesInternal(prop.sensorId, prop.sensorStrength,
-                prop.maxEnrollmentsPerUser, prop.resetLockoutRequiresHardwareAuthToken,
-                prop.resetLockoutRequiresChallenge);
+                prop.maxEnrollmentsPerUser, prop.componentInfo,
+                prop.resetLockoutRequiresHardwareAuthToken, prop.resetLockoutRequiresChallenge);
     }
 
     protected SensorPropertiesInternal(int sensorId, @SensorProperties.Strength int sensorStrength,
-            int maxEnrollmentsPerUser, boolean resetLockoutRequiresHardwareAuthToken,
-            boolean resetLockoutRequiresChallenge) {
+            int maxEnrollmentsPerUser, @NonNull List<ComponentInfoInternal> componentInfo,
+            boolean resetLockoutRequiresHardwareAuthToken, boolean resetLockoutRequiresChallenge) {
         this.sensorId = sensorId;
         this.sensorStrength = sensorStrength;
         this.maxEnrollmentsPerUser = maxEnrollmentsPerUser;
+        this.componentInfo = componentInfo;
         this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
         this.resetLockoutRequiresChallenge = resetLockoutRequiresChallenge;
     }
@@ -54,6 +59,8 @@ public class SensorPropertiesInternal implements Parcelable {
         sensorId = in.readInt();
         sensorStrength = in.readInt();
         maxEnrollmentsPerUser = in.readInt();
+        componentInfo = new ArrayList<>();
+        in.readList(componentInfo, ComponentInfoInternal.class.getClassLoader());
         resetLockoutRequiresHardwareAuthToken = in.readBoolean();
         resetLockoutRequiresChallenge = in.readBoolean();
     }
@@ -81,13 +88,23 @@ public class SensorPropertiesInternal implements Parcelable {
         dest.writeInt(sensorId);
         dest.writeInt(sensorStrength);
         dest.writeInt(maxEnrollmentsPerUser);
+        dest.writeList(componentInfo);
         dest.writeBoolean(resetLockoutRequiresHardwareAuthToken);
         dest.writeBoolean(resetLockoutRequiresChallenge);
     }
 
     @Override
     public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("[ ");
+        for (ComponentInfoInternal info : componentInfo) {
+            sb.append("[").append(info.toString());
+            sb.append("] ");
+        }
+        sb.append("]");
+
         return "ID: " + sensorId + ", Strength: " + sensorStrength
-                + ", MaxEnrollmentsPerUser: " + maxEnrollmentsPerUser;
+                + ", MaxEnrollmentsPerUser: " + maxEnrollmentsPerUser
+                + ", ComponentInfo: " + sb.toString();
     }
 }

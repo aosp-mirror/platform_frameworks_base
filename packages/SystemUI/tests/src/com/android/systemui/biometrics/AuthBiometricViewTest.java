@@ -26,6 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.fingerprint.FingerprintSensorProperties;
@@ -48,6 +49,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -341,8 +345,18 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         final int sensorLocationX = 540;
         final int sensorLocationY = 1600;
         final int sensorRadius = 100;
+
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */, "" /* softwareVersion */));
+        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */));
+
         final FingerprintSensorPropertiesInternal props = new FingerprintSensorPropertiesInternal(
                 0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
+                componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                 true /* resetLockoutRequiresHardwareAuthToken */, sensorLocationX, sensorLocationY,
                 sensorRadius);
@@ -379,8 +393,18 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         final int sensorLocationX = 540;
         final int sensorLocationY = 1600;
         final int sensorRadius = 100;
+
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */, "" /* softwareVersion */));
+        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */));
+
         final FingerprintSensorPropertiesInternal props = new FingerprintSensorPropertiesInternal(
                 0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
+                componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                 true /* resetLockoutRequiresHardwareAuthToken */, sensorLocationX, sensorLocationY,
                 sensorRadius);

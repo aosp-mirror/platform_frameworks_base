@@ -28,6 +28,7 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
@@ -355,7 +356,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
         mSensorProperties = new FingerprintSensorPropertiesInternal(context, sensorId,
                 Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,
-                sensorType, resetLockoutRequiresHardwareAuthToken);
+                new ArrayList<ComponentInfoInternal>() /* componentInfo */, sensorType,
+                resetLockoutRequiresHardwareAuthToken);
     }
 
     public static Fingerprint21 newInstance(@NonNull Context context, int sensorId, int strength,
