@@ -996,7 +996,7 @@
       <item quantity="other">Акыркы <xliff:g id="COUNT_1">%d</xliff:g> күн</item>
       <item quantity="one">Акыркы <xliff:g id="COUNT_0">%d</xliff:g> күн</item>
     </plurals>
-    <string name="last_month" msgid="1528906781083518683">"Өткөн ай"</string>
+    <string name="last_month" msgid="1528906781083518683">"Акыркы ай"</string>
     <string name="older" msgid="1645159827884647400">"Эскирээк"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g> күнү"</string>
     <string name="preposition_for_time" msgid="4336835286453822053">"саат <xliff:g id="TIME">%s</xliff:g>"</string>
