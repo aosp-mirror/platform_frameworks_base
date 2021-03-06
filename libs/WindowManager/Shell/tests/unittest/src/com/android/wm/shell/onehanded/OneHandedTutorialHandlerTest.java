@@ -65,7 +65,6 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     @Mock
     OneHandedUiEventLogger mMockUiEventLogger;
 
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -73,7 +72,8 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
 
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
         mOneHandedController = new OneHandedController(
-                getContext(),
+                mContext,
+                mWindowManager,
                 mMockDisplayController,
                 mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,

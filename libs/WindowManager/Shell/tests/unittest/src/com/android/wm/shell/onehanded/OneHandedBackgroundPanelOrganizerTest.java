@@ -69,7 +69,7 @@ public class OneHandedBackgroundPanelOrganizerTest extends OneHandedTestCase {
         mDisplayAreaInfo = new DisplayAreaInfo(mToken, DEFAULT_DISPLAY,
                 FEATURE_ONE_HANDED_BACKGROUND_PANEL);
 
-        mBackgroundPanelOrganizer = new OneHandedBackgroundPanelOrganizer(mContext,
+        mBackgroundPanelOrganizer = new OneHandedBackgroundPanelOrganizer(mContext, mWindowManager,
                 mMockDisplayController, Runnable::run);
     }
 
