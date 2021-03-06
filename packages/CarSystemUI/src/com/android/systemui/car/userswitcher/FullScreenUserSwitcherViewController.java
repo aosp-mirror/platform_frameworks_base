@@ -76,7 +76,7 @@ public class FullScreenUserSwitcherViewController extends OverlayViewController 
             }
 
             if (event.getAction() == KeyEvent.ACTION_UP && getLayout().isVisibleToUser()) {
-                getLayout().setVisibility(View.GONE);
+                stop();
             }
             return true;
         });
@@ -89,6 +89,11 @@ public class FullScreenUserSwitcherViewController extends OverlayViewController 
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(mUserSelectionListener);
         registerCarUserManagerIfPossible();
+    }
+
+    @Override
+    protected int getFocusAreaViewId() {
+        return R.id.user_switcher_container;
     }
 
     @Override

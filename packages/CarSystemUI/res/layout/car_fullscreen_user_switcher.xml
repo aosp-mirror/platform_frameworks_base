@@ -14,29 +14,36 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.systemui.car.userswitcher.UserSwitcherContainer
+
+<com.android.car.ui.FocusArea
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/container"
+    android:id="@+id/user_switcher_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/car_user_switcher_background_color"
-    android:orientation="vertical">
-
-    <include
-        layout="@layout/car_status_bar_header"
-        android:layout_alignParentTop="true"
-        android:theme="@android:style/Theme"/>
-
-
-    <FrameLayout
+    android:gravity="center">
+    <com.android.systemui.car.userswitcher.UserSwitcherContainer
+        android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <com.android.systemui.car.userswitcher.UserGridRecyclerView
-            android:id="@+id/user_grid"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginTop="@dimen/car_user_switcher_margin_top"/>
-    </FrameLayout>
+        android:layout_height="match_parent"
+        android:background="@color/car_user_switcher_background_color"
+        android:orientation="vertical">
 
-</com.android.systemui.car.userswitcher.UserSwitcherContainer>
+        <include
+            layout="@layout/car_status_bar_header"
+            android:layout_alignParentTop="true"
+            android:theme="@android:style/Theme"/>
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <com.android.systemui.car.userswitcher.UserGridRecyclerView
+                android:id="@+id/user_grid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="@dimen/car_user_switcher_margin_top"/>
+        </FrameLayout>
+
+    </com.android.systemui.car.userswitcher.UserSwitcherContainer>
+</com.android.car.ui.FocusArea>

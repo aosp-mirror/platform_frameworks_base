@@ -219,6 +219,11 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     }
 
     @Override
+    protected int getFocusAreaViewId() {
+        return R.id.notification_container;
+    }
+
+    @Override
     protected boolean shouldShowNavigationBarInsets() {
         return true;
     }
