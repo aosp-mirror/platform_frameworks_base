@@ -28,22 +28,29 @@ oneway interface ISoundTriggerCallback {
      * Invoked whenever a recognition event is triggered (typically, on recognition, but also in
      * case of external aborting of a recognition or a forced recognition event - see the status
      * code in the event for determining).
+     * In case of abortion, the caller may retry after the next onRecognitionAvailabilityChange()
+     * callback.
      */
     void onRecognition(int modelHandle, in RecognitionEvent event);
      /**
       * Invoked whenever a phrase recognition event is triggered (typically, on recognition, but
       * also in case of external aborting of a recognition or a forced recognition event - see the
       * status code in the event for determining).
+      * In case of abortion, the caller may retry after the next onRecognitionAvailabilityChange()
+      * callback.
       */
     void onPhraseRecognition(int modelHandle, in PhraseRecognitionEvent event);
     /**
-     * Notifies the client the recognition has become available after previously having been
-     * unavailable, or vice versa. This method will always be invoked once immediately after
-     * attachment, and then every time there is a change in availability.
-     * When availability changes from available to unavailable, all active recognitions are aborted,
-     * and this event will be sent in addition to the abort event.
+     * Notifies the client that some start/load operations that have previously failed for resource
+     * reasons (threw a ServiceSpecificException(RESOURCE_CONTENTION) or have been preempted) may
+     * now succeed. This is not a guarantee, but a hint for the client to retry.
      */
-    void onRecognitionAvailabilityChange(boolean available);
+    void onResourcesAvailable();
+    /**
+     * Notifies the client that a model had been preemptively unloaded by the service.
+     * The caller may retry after the next onRecognitionAvailabilityChange() callback.
+     */
+    void onModelUnloaded(int modelHandle);
     /**
      * Notifies the client that the associated module has crashed and restarted. The module instance
      * is no longer usable and will throw a ServiceSpecificException with a Status.DEAD_OBJECT code

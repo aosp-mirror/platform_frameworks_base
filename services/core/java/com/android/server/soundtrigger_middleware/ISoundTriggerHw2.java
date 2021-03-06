@@ -17,12 +17,16 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.hardware.soundtrigger.V2_3.ModelParameterRange;
+import android.hardware.soundtrigger.V2_3.Properties;
+import android.hardware.soundtrigger.V2_3.RecognitionConfig;
+import android.hardware.soundtrigger.V2_4.ISoundTriggerHw;
+import android.hardware.soundtrigger.V2_4.ISoundTriggerHwCallback;
+import android.hardware.soundtrigger.V2_4.ISoundTriggerHwGlobalCallback;
 import android.hidl.base.V1_0.IBase;
 import android.os.IHwBinder;
 
 /**
- * This interface mimics android.hardware.soundtrigger.V2_x.ISoundTriggerHw and
- * android.hardware.soundtrigger.V2_x.ISoundTriggerHwCallback, with a few key differences:
+ * This interface mimics ISoundTriggerHw and ISoundTriggerHwCallback, with a few key differences:
  * <ul>
  * <li>Methods in the original interface generally have a status return value and potentially a
  * second return value which is the actual return value. This is reflected via a synchronous
@@ -51,74 +55,78 @@ import android.os.IHwBinder;
  * so that clients have access to the entire functionality without having to burden themselves with
  * compatibility, as much as possible.
  */
-public interface ISoundTriggerHw2 {
+interface ISoundTriggerHw2 {
     /**
-     * @see android.hardware.soundtrigger.V2_3.ISoundTriggerHw#getPropertiesEx(
-     * android.hardware.soundtrigger.V2_3.ISoundTriggerHw.getPropertiesExCallback)
+     * Kill and restart the HAL instance. This is typically a last resort for error recovery and may
+     * result in other related services being killed.
      */
-    android.hardware.soundtrigger.V2_3.Properties getProperties();
+    void reboot();
 
     /**
-     * @see android.hardware.soundtrigger.V2_2.ISoundTriggerHw#loadSoundModel_2_1(android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel,
-     * android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback, int,
-     * android.hardware.soundtrigger.V2_1.ISoundTriggerHw.loadSoundModel_2_1Callback)
+     * Called when this interface is guaranteed to no longer be used and can free up any resources
+     * used.
      */
-    int loadSoundModel(
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel soundModel,
-            SoundTriggerHw2Compat.Callback callback, int cookie);
+    void detach();
 
     /**
-     * @see android.hardware.soundtrigger.V2_2.ISoundTriggerHw#loadPhraseSoundModel_2_1(android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel,
-     * android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback, int,
-     * android.hardware.soundtrigger.V2_1.ISoundTriggerHw.loadPhraseSoundModel_2_1Callback)
+     * @see ISoundTriggerHw#getProperties_2_3(ISoundTriggerHw.getProperties_2_3Callback)
      */
-    int loadPhraseSoundModel(
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel soundModel,
-            SoundTriggerHw2Compat.Callback callback, int cookie);
+    Properties getProperties();
 
     /**
-     * @see android.hardware.soundtrigger.V2_2.ISoundTriggerHw#unloadSoundModel(int)
+     * @see ISoundTriggerHw#registerGlobalCallback(ISoundTriggerHwGlobalCallback)
+     */
+    void registerCallback(GlobalCallback callback);
+
+    /**
+     * @see ISoundTriggerHw#loadSoundModel_2_4(
+     *              ISoundTriggerHw.SoundModel,
+     *              ISoundTriggerHwCallback,
+     *              ISoundTriggerHw.loadSoundModel_2_4Callback)
+     */
+    int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, ModelCallback callback);
+
+    /**
+     * @see ISoundTriggerHw#loadPhraseSoundModel_2_4(
+     *              ISoundTriggerHw.PhraseSoundModel,
+     *              ISoundTriggerHwCallback,
+     *              ISoundTriggerHw.loadPhraseSoundModel_2_4Callback)
+     */
+    int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel, ModelCallback callback);
+
+    /**
+     * @see ISoundTriggerHw#unloadSoundModel(int)
      */
     void unloadSoundModel(int modelHandle);
 
     /**
-     * @see android.hardware.soundtrigger.V2_2.ISoundTriggerHw#stopRecognition(int)
+     * @see ISoundTriggerHw#stopRecognition(int)
      */
     void stopRecognition(int modelHandle);
 
     /**
-     * @see android.hardware.soundtrigger.V2_2.ISoundTriggerHw#stopAllRecognitions()
+     * @see ISoundTriggerHw#startRecognition_2_4(int, RecognitionConfig)
      */
-    void stopAllRecognitions();
+    void startRecognition(int modelHandle, RecognitionConfig config);
 
     /**
-     * @see android.hardware.soundtrigger.V2_3.ISoundTriggerHw#startRecognition_2_3(int,
-     * android.hardware.soundtrigger.V2_3.RecognitionConfig,
-     * android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback, int)
-     */
-    void startRecognition(int modelHandle,
-            android.hardware.soundtrigger.V2_3.RecognitionConfig config,
-            SoundTriggerHw2Compat.Callback callback, int cookie);
-
-    /**
-     * @see android.hardware.soundtrigger.V2_2.ISoundTriggerHw#getModelState(int)
+     * @see ISoundTriggerHw#getModelState(int)
      */
     void getModelState(int modelHandle);
 
     /**
-     * @see android.hardware.soundtrigger.V2_3.ISoundTriggerHw#getParameter(int, int,
-     * ISoundTriggerHw.getParameterCallback)
+     * @see ISoundTriggerHw#getParameter(int, int, ISoundTriggerHw.getParameterCallback)
      */
     int getModelParameter(int modelHandle, int param);
 
     /**
-     * @see android.hardware.soundtrigger.V2_3.ISoundTriggerHw#setParameter(int, int, int)
+     * @see ISoundTriggerHw#setParameter(int, int, int)
      */
     void setModelParameter(int modelHandle, int param, int value);
 
     /**
      * @return null if not supported.
-     * @see android.hardware.soundtrigger.V2_3.ISoundTriggerHw#queryParameter(int, int,
+     * @see ISoundTriggerHw#queryParameter(int, int,
      * ISoundTriggerHw.queryParameterCallback)
      */
     ModelParameterRange queryParameter(int modelHandle, int param);
@@ -138,21 +146,45 @@ public interface ISoundTriggerHw2 {
      */
     String interfaceDescriptor() throws android.os.RemoteException;
 
-    interface Callback {
+    /*
+     * This is only useful for testing decorators and doesn't actually do anything with the real
+     * HAL. This method would block until all callbacks that were previously generated have been
+     * invoked. For most decorators, this merely flushes the delegate, but for delegates that may
+     * additional buffers for callbacks this should flush them.
+     */
+    void flushCallbacks();
+
+    /**
+     * Callback interface for model-related events.
+     */
+    interface ModelCallback {
         /**
-         * @see android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback#recognitionCallback_2_1(android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.RecognitionEvent,
-         * int)
+         * @see ISoundTriggerHwCallback#recognitionCallback_2_1(
+         *              ISoundTriggerHwCallback.RecognitionEvent,
+         *              int)
          */
-        void recognitionCallback(
-                android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.RecognitionEvent event,
-                int cookie);
+        void recognitionCallback(ISoundTriggerHwCallback.RecognitionEvent event);
 
         /**
-         * @see android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback#phraseRecognitionCallback_2_1(android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.PhraseRecognitionEvent,
-         * int)
+         * @see ISoundTriggerHwCallback#phraseRecognitionCallback_2_1(
+         *              ISoundTriggerHwCallback.PhraseRecognitionEvent,
+         *              int)
          */
-        void phraseRecognitionCallback(
-                android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.PhraseRecognitionEvent event,
-                int cookie);
+        void phraseRecognitionCallback(ISoundTriggerHwCallback.PhraseRecognitionEvent event);
+
+        /**
+         * @see ISoundTriggerHwCallback#modelUnloaded(int)
+         */
+        void modelUnloaded(int modelHandle);
+    }
+
+    /**
+     * Callback interface for global events.
+     */
+    interface GlobalCallback {
+        /**
+         * @see ISoundTriggerHwGlobalCallback#onResourcesAvailable()
+         */
+        void onResourcesAvailable();
     }
 }
