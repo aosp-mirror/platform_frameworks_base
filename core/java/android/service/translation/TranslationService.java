@@ -34,14 +34,21 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.translation.ITranslationDirectManager;
+import android.view.translation.TranslationCapability;
+import android.view.translation.TranslationContext;
 import android.view.translation.TranslationManager;
 import android.view.translation.TranslationRequest;
 import android.view.translation.TranslationResponse;
 import android.view.translation.TranslationSpec;
 
 import com.android.internal.os.IResultReceiver;
+
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Service for translating text.
@@ -92,10 +99,20 @@ public abstract class TranslationService extends Service {
         }
 
         @Override
-        public void onCreateTranslationSession(TranslationSpec sourceSpec, TranslationSpec destSpec,
+        public void onCreateTranslationSession(TranslationContext translationContext,
                 int sessionId, IResultReceiver receiver) throws RemoteException {
             mHandler.sendMessage(obtainMessage(TranslationService::handleOnCreateTranslationSession,
-                    TranslationService.this, sourceSpec, destSpec, sessionId, receiver));
+                    TranslationService.this, translationContext, sessionId, receiver));
+        }
+
+        @Override
+        public void onTranslationCapabilitiesRequest(@TranslationSpec.DataFormat int sourceFormat,
+                @TranslationSpec.DataFormat int targetFormat,
+                @NonNull ResultReceiver resultReceiver) throws RemoteException {
+            mHandler.sendMessage(
+                    obtainMessage(TranslationService::handleOnTranslationCapabilitiesRequest,
+                            TranslationService.this, sourceFormat, targetFormat,
+                            resultReceiver));
         }
     };
 
@@ -194,14 +211,13 @@ public abstract class TranslationService extends Service {
     /**
      * TODO: fill in javadoc.
      *
-     * @param sourceSpec
-     * @param destSpec
+     * @param translationContext
      * @param sessionId
      */
     // TODO(b/176464808): the session id won't be unique cross client/server process. Need to find
     // solution to make it's safe.
-    public abstract void onCreateTranslationSession(@NonNull TranslationSpec sourceSpec,
-            @NonNull TranslationSpec destSpec, int sessionId);
+    public abstract void onCreateTranslationSession(@NonNull TranslationContext translationContext,
+            int sessionId);
 
     /**
      * TODO: fill in javadoc.
@@ -222,12 +238,27 @@ public abstract class TranslationService extends Service {
             @NonNull CancellationSignal cancellationSignal,
             @NonNull OnTranslationResultCallback callback);
 
+    /**
+     * TODO: fill in javadoc
+     * TODO: make this abstract again once aiai is ready.
+     *
+     * <p>Must call {@code callback.accept} to pass back the set of translation capabilities.</p>
+     *
+     * @param sourceFormat
+     * @param targetFormat
+     * @param callback
+     */
+    public abstract void onTranslationCapabilitiesRequest(
+            @TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int targetFormat,
+            @NonNull Consumer<Set<TranslationCapability>> callback);
+
     // TODO(b/176464808): Need to handle client dying case
 
-    // TODO(b/176464808): Need to handle the failure case. e.g. if the specs does not support
+    // TODO(b/176464808): Need to handle the failure case. e.g. if the context is not supported.
 
-    private void handleOnCreateTranslationSession(@NonNull TranslationSpec sourceSpec,
-            @NonNull TranslationSpec destSpec, int sessionId, IResultReceiver resultReceiver) {
+    private void handleOnCreateTranslationSession(@NonNull TranslationContext translationContext,
+            int sessionId, IResultReceiver resultReceiver) {
         try {
             final Bundle extras = new Bundle();
             extras.putBinder(EXTRA_SERVICE_BINDER, mClientInterface.asBinder());
@@ -236,6 +267,24 @@ public abstract class TranslationService extends Service {
         } catch (RemoteException e) {
             Log.w(TAG, "RemoteException sending client interface: " + e);
         }
-        onCreateTranslationSession(sourceSpec, destSpec, sessionId);
+        onCreateTranslationSession(translationContext, sessionId);
+    }
+
+    private void handleOnTranslationCapabilitiesRequest(
+            @TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int targetFormat,
+            @NonNull ResultReceiver resultReceiver) {
+        onTranslationCapabilitiesRequest(sourceFormat, targetFormat,
+                new Consumer<Set<TranslationCapability>>() {
+                    @Override
+                    public void accept(Set<TranslationCapability> values) {
+                        final ArraySet<TranslationCapability> capabilities = new ArraySet<>(values);
+                        final Bundle bundle = new Bundle();
+                        bundle.putParcelableArray(TranslationManager.EXTRA_CAPABILITIES,
+                                capabilities.toArray(new TranslationCapability[0]));
+                        resultReceiver.send(TranslationManager.STATUS_SYNC_CALL_SUCCESS, bundle);
+                    }
+                });
+
     }
 }

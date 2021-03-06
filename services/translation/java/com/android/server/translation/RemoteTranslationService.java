@@ -20,9 +20,11 @@ import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.ResultReceiver;
 import android.service.translation.ITranslationService;
 import android.service.translation.TranslationService;
 import android.util.Slog;
+import android.view.translation.TranslationContext;
 import android.view.translation.TranslationSpec;
 
 import com.android.internal.infra.AbstractRemoteService;
@@ -80,8 +82,14 @@ final class RemoteTranslationService extends ServiceConnector.Impl<ITranslationS
         return mIdleUnbindTimeoutMs;
     }
 
-    public void onSessionCreated(@NonNull TranslationSpec sourceSpec,
-            @NonNull TranslationSpec destSpec, int sessionId, IResultReceiver resultReceiver) {
-        run((s) -> s.onCreateTranslationSession(sourceSpec, destSpec, sessionId, resultReceiver));
+    public void onSessionCreated(@NonNull TranslationContext translationContext, int sessionId,
+            IResultReceiver resultReceiver) {
+        run((s) -> s.onCreateTranslationSession(translationContext, sessionId, resultReceiver));
+    }
+
+    public void onTranslationCapabilitiesRequest(@TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int targetFormat,
+            @NonNull ResultReceiver resultReceiver) {
+        run((s) -> s.onTranslationCapabilitiesRequest(sourceFormat, targetFormat, resultReceiver));
     }
 }

@@ -21,24 +21,27 @@ import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.SystemService;
 import android.annotation.WorkerThread;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.service.translation.TranslationService;
+import android.os.SynchronousResultReceiver;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.SyncResultReceiver;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -55,9 +58,9 @@ public final class TranslationManager {
     private static final String TAG = "TranslationManager";
 
     /**
-     * Timeout for calls to system_server.
+     * Timeout for calls to system_server, default 1 minute.
      */
-    static final int SYNC_CALLS_TIMEOUT_MS = 5000;
+    static final int SYNC_CALLS_TIMEOUT_MS = 60_000;
     /**
      * The result code from result receiver success.
      * @hide
@@ -68,6 +71,17 @@ public final class TranslationManager {
      * @hide
      */
     public static final int STATUS_SYNC_CALL_FAIL = 2;
+
+    /**
+     * Name of the extra used to pass the translation capabilities.
+     * @hide
+     */
+    public static final String EXTRA_CAPABILITIES = "translation_capabilities";
+
+    // TODO: implement update listeners and propagate updates.
+    @GuardedBy("mLock")
+    private final ArrayMap<Pair<Integer, Integer>, ArrayList<PendingIntent>>
+            mTranslationCapabilityUpdateListeners = new ArrayMap<>();
 
     private static final Random ID_GENERATOR = new Random();
     private final Object mLock = new Object();
@@ -87,7 +101,7 @@ public final class TranslationManager {
 
     @NonNull
     @GuardedBy("mLock")
-    private final ArrayMap<Pair<TranslationSpec, TranslationSpec>, Integer> mTranslatorIds =
+    private final ArrayMap<TranslationContext, Integer> mTranslatorIds =
             new ArrayMap<>();
 
     @NonNull
@@ -110,23 +124,20 @@ public final class TranslationManager {
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
      *
-     * @param sourceSpec {@link TranslationSpec} for the data to be translated.
-     * @param destSpec {@link TranslationSpec} for the translated data.
+     * @param translationContext {@link TranslationContext} containing the specs for creating the
+     *                                                     Translator.
      * @return a {@link Translator} to be used for calling translation APIs.
      */
     @Nullable
     @WorkerThread
-    public Translator createTranslator(@NonNull TranslationSpec sourceSpec,
-            @NonNull TranslationSpec destSpec) {
-        Objects.requireNonNull(sourceSpec, "sourceSpec cannot be null");
-        Objects.requireNonNull(sourceSpec, "destSpec cannot be null");
+    public Translator createTranslator(@NonNull TranslationContext translationContext) {
+        Objects.requireNonNull(translationContext, "translationContext cannot be null");
 
         synchronized (mLock) {
             // TODO(b/176464808): Disallow multiple Translator now, it will throw
             //  IllegalStateException. Need to discuss if we can allow multiple Translators.
-            final Pair<TranslationSpec, TranslationSpec> specs = new Pair<>(sourceSpec, destSpec);
-            if (mTranslatorIds.containsKey(specs)) {
-                return mTranslators.get(mTranslatorIds.get(specs));
+            if (mTranslatorIds.containsKey(translationContext)) {
+                return mTranslators.get(mTranslatorIds.get(translationContext));
             }
 
             int translatorId;
@@ -134,7 +145,7 @@ public final class TranslationManager {
                 translatorId = Math.abs(ID_GENERATOR.nextInt());
             } while (translatorId == 0 || mTranslators.indexOfKey(translatorId) >= 0);
 
-            final Translator newTranslator = new Translator(mContext, sourceSpec, destSpec,
+            final Translator newTranslator = new Translator(mContext, translationContext,
                     translatorId, this, mHandler, mService);
             // Start the Translator session and wait for the result
             newTranslator.start();
@@ -143,7 +154,7 @@ public final class TranslationManager {
                     return null;
                 }
                 mTranslators.put(translatorId, newTranslator);
-                mTranslatorIds.put(specs, translatorId);
+                mTranslatorIds.put(translationContext, translatorId);
                 return newTranslator;
             } catch (Translator.ServiceBinderReceiver.TimeoutException e) {
                 // TODO(b/176464808): maybe make SyncResultReceiver.TimeoutException constructor
@@ -155,31 +166,102 @@ public final class TranslationManager {
     }
 
     /**
-     * Returns a list of locales supported by the {@link TranslationService}.
+     * Returns a set of {@link TranslationCapability}s describing the capabilities for
+     * {@link Translator}s.
+     *
+     * <p>These translation capabilities contains a source and target {@link TranslationSpec}
+     * representing the data expected for both ends of translation process. The capabilities
+     * provides the information and limitations for generating a {@link TranslationContext}.
+     * The context object can then be used by {@link #createTranslator(TranslationContext)} to
+     * obtain a {@link Translator} for translations.</p>
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
      *
-     * TODO: Change to correct language/locale format
+     * @param sourceFormat data format for the input data to be translated.
+     * @param targetFormat data format for the expected translated output data.
+     * @return A set of {@link TranslationCapability}s.
      */
     @NonNull
     @WorkerThread
-    public List<String> getSupportedLocales() {
+    public Set<TranslationCapability> getTranslationCapabilities(
+            @TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int targetFormat) {
         try {
-            // TODO: implement it
-            final SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-            mService.getSupportedLocales(receiver, mContext.getUserId());
-            int resutCode = receiver.getIntResult();
-            if (resutCode != STATUS_SYNC_CALL_SUCCESS) {
-                return Collections.emptyList();
+            final SynchronousResultReceiver receiver = new SynchronousResultReceiver();
+            mService.onTranslationCapabilitiesRequest(sourceFormat, targetFormat, receiver,
+                    mContext.getUserId());
+            final SynchronousResultReceiver.Result result =
+                    receiver.awaitResult(SYNC_CALLS_TIMEOUT_MS);
+            if (result.resultCode != STATUS_SYNC_CALL_SUCCESS) {
+                return Collections.emptySet();
             }
-            return receiver.getParcelableResult();
+            return new ArraySet<>(
+                    (TranslationCapability[]) result.bundle.getParcelableArray(EXTRA_CAPABILITIES));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        } catch (SyncResultReceiver.TimeoutException e) {
-            Log.e(TAG, "Timed out getting supported locales: " + e);
-            return Collections.emptyList();
+        } catch (TimeoutException e) {
+            Log.e(TAG, "Timed out getting supported translation capabilities: " + e);
+            return Collections.emptySet();
         }
     }
+
+    /**
+     * Registers a {@link PendingIntent} to listen for updates on states of
+     * {@link TranslationCapability}s.
+     *
+     * <p>IMPORTANT: the pending intent must be called to start a service, or a broadcast if it is
+     * an explicit intent.</p>
+     *
+     * @param sourceFormat data format for the input data to be translated.
+     * @param targetFormat data format for the expected translated output data.
+     * @param pendingIntent the pending intent to invoke when updates are received.
+     */
+    public void addTranslationCapabilityUpdateListener(
+            @TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int targetFormat,
+            @NonNull PendingIntent pendingIntent) {
+        Objects.requireNonNull(pendingIntent, "pending intent should not be null");
+
+        synchronized (mLock) {
+            final Pair<Integer, Integer> formatPair = new Pair<>(sourceFormat, targetFormat);
+            mTranslationCapabilityUpdateListeners.computeIfAbsent(formatPair,
+                    (formats) -> new ArrayList<>()).add(pendingIntent);
+        }
+    }
+
+    /**
+     * Unregisters a {@link PendingIntent} to listen for updates on states of
+     * {@link TranslationCapability}s.
+     *
+     * @param sourceFormat data format for the input data to be translated.
+     * @param targetFormat data format for the expected translated output data.
+     * @param pendingIntent the pending intent to unregister
+     */
+    public void removeTranslationCapabilityUpdateListener(
+            @TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int targetFormat,
+            @NonNull PendingIntent pendingIntent) {
+        Objects.requireNonNull(pendingIntent, "pending intent should not be null");
+
+        synchronized (mLock) {
+            final Pair<Integer, Integer> formatPair = new Pair<>(sourceFormat, targetFormat);
+            if (mTranslationCapabilityUpdateListeners.containsKey(formatPair)) {
+                final ArrayList<PendingIntent> intents =
+                        mTranslationCapabilityUpdateListeners.get(formatPair);
+                if (intents.contains(pendingIntent)) {
+                    intents.remove(pendingIntent);
+                } else {
+                    Log.w(TAG, "pending intent=" + pendingIntent + " does not exist in "
+                            + "mTranslationCapabilityUpdateListeners");
+                }
+            } else {
+                Log.w(TAG, "format pair=" + formatPair + " does not exist in "
+                        + "mTranslationCapabilityUpdateListeners");
+            }
+        }
+    }
+
+    //TODO: Add method to propagate updates to mTCapabilityUpdateListeners
 
     void removeTranslator(int id) {
         synchronized (mLock) {
