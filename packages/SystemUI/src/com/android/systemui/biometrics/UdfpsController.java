@@ -91,11 +91,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     private long mTouchLogTime;
 
     @Nullable private UdfpsView mView;
-    // Indicates whether the overlay has been requested.
-    private boolean mIsOverlayRequested;
-    // Reason the overlay has been requested. See IUdfpsOverlayController for definitions.
-    private int mRequestReason;
-    @Nullable UdfpsEnrollHelper mEnrollHelper;
+    // The current request from FingerprintService. Null if no current request.
+    @Nullable ServerRequest mServerRequest;
 
     // The fingerprint AOD trigger doesn't provide an ACTION_UP/ACTION_CANCEL event to tell us when
     // to turn off high brightness mode. To get around this limitation, the state of the AOD
@@ -104,39 +101,72 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     private boolean mIsAodInterruptActive;
     @Nullable private Runnable mCancelAodTimeoutAction;
 
+    /**
+     * Keeps track of state within a single FingerprintService request. Note that this state
+     * persists across configuration changes, etc, since it is considered a single request.
+     *
+     * TODO: Perhaps we can move more global variables into here
+     */
+    private static class ServerRequest {
+        // Reason the overlay has been requested. See IUdfpsOverlayController for definitions.
+        final int mRequestReason;
+        @Nullable final UdfpsEnrollHelper mEnrollHelper;
+
+        ServerRequest(int requestReason, @Nullable UdfpsEnrollHelper enrollHelper) {
+            mRequestReason = requestReason;
+            mEnrollHelper = enrollHelper;
+        }
+
+        void onEnrollmentProgress(int remaining) {
+            if (mEnrollHelper != null) {
+                mEnrollHelper.onEnrollmentProgress(remaining);
+            }
+        }
+
+        void onEnrollmentHelp() {
+            if (mEnrollHelper != null) {
+                mEnrollHelper.onEnrollmentHelp();
+            }
+        }
+    }
+
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
         @Override
         public void showUdfpsOverlay(int sensorId, int reason) {
+            final UdfpsEnrollHelper enrollHelper;
             if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
                     || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
-                mEnrollHelper = new UdfpsEnrollHelper(mContext, reason);
+                enrollHelper = new UdfpsEnrollHelper(mContext, reason);
             } else {
-                mEnrollHelper = null;
+                enrollHelper = null;
             }
-            UdfpsController.this.showOverlay(reason);
+
+            mServerRequest = new ServerRequest(reason, enrollHelper);
+            updateOverlay();
         }
 
         @Override
         public void hideUdfpsOverlay(int sensorId) {
-            UdfpsController.this.hideOverlay();
+            mServerRequest = null;
+            updateOverlay();
         }
 
         @Override
         public void onEnrollmentProgress(int sensorId, int remaining) {
-            if (mEnrollHelper == null) {
-                Log.e(TAG, "onEnrollProgress received but helper is null");
+            if (mServerRequest == null) {
+                Log.e(TAG, "onEnrollProgress received but serverRequest is null");
                 return;
             }
-            mEnrollHelper.onEnrollmentProgress(remaining);
+            mServerRequest.onEnrollmentProgress(remaining);
         }
 
         @Override
         public void onEnrollmentHelp(int sensorId) {
-            if (mEnrollHelper == null) {
-                Log.e(TAG, "onEnrollmentHelp received but helper is null");
+            if (mServerRequest == null) {
+                Log.e(TAG, "onEnrollmentHelp received but serverRequest is null");
                 return;
             }
-            mEnrollHelper.onEnrollmentHelp();
+            mServerRequest.onEnrollmentHelp();
         }
 
         @Override
@@ -314,27 +344,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 mSensorProps.sensorLocationY + mSensorProps.sensorRadius);
     }
 
-    private void showOverlay(int reason) {
-        if (mIsOverlayRequested) {
-            return;
-        }
-        mIsOverlayRequested = true;
-        mRequestReason = reason;
-        updateOverlay();
-    }
-
-    private void hideOverlay() {
-        if (!mIsOverlayRequested) {
-            return;
-        }
-        mIsOverlayRequested = false;
-        mRequestReason = IUdfpsOverlayController.REASON_UNKNOWN;
-        updateOverlay();
-    }
-
     private void updateOverlay() {
-        if (mIsOverlayRequested) {
-            showUdfpsOverlay(mRequestReason);
+        if (mServerRequest != null) {
+            showUdfpsOverlay(mServerRequest.mRequestReason);
         } else {
             hideUdfpsOverlay();
         }
@@ -427,7 +439,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             case IUdfpsOverlayController.REASON_ENROLL_ENROLLING: {
                 final UdfpsAnimationViewEnroll view = (UdfpsAnimationViewEnroll)
                         inflater.inflate(R.layout.udfps_animation_view_enroll, null, false);
-                view.setEnrollHelper(mEnrollHelper);
+                view.setEnrollHelper(mServerRequest.mEnrollHelper);
                 return view;
             }
 
