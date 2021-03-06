@@ -2104,26 +2104,28 @@ public class AppOpsService extends IAppOpsService.Stub {
         ensureHistoricalOpRequestIsValid(uid, packageName, attributionTag, opNames, filter,
                 beginTimeMillis, endTimeMillis, flags);
         Objects.requireNonNull(callback, "callback cannot be null");
-
         ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
-        boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(Binder.getCallingUid());
-        boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
-        boolean isCallerPermissionController;
-        try {
-            isCallerPermissionController = pm.getPackageUid(
-                    mContext.getPackageManager().getPermissionControllerPackageName(), 0)
-                    == Binder.getCallingUid();
-        } catch (PackageManager.NameNotFoundException doesNotHappen) {
-            return;
-        }
+        boolean isSelfRequest = (filter & FILTER_BY_UID) != 0 && uid == Binder.getCallingUid();
+        if (!isSelfRequest) {
+            boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(Binder.getCallingUid());
+            boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
+            boolean isCallerPermissionController;
+            try {
+                isCallerPermissionController = pm.getPackageUid(
+                        mContext.getPackageManager().getPermissionControllerPackageName(), 0)
+                        == Binder.getCallingUid();
+            } catch (PackageManager.NameNotFoundException doesNotHappen) {
+                return;
+            }
 
-        if (!isCallerSystem && !isCallerInstrumented && !isCallerPermissionController) {
-            mHandler.post(() -> callback.sendResult(new Bundle()));
-            return;
-        }
+            if (!isCallerSystem && !isCallerInstrumented && !isCallerPermissionController) {
+                mHandler.post(() -> callback.sendResult(new Bundle()));
+                return;
+            }
 
-        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
-                Binder.getCallingPid(), Binder.getCallingUid(), "getHistoricalOps");
+            mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
+                    Binder.getCallingPid(), Binder.getCallingUid(), "getHistoricalOps");
+        }
 
         final String[] opNamesArray = (opNames != null)
                 ? opNames.toArray(new String[opNames.size()]) : null;
