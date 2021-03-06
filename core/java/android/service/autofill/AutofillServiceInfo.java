@@ -23,6 +23,7 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -38,6 +39,7 @@ import android.util.Log;
 import android.util.Xml;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.XmlUtils;
@@ -231,6 +233,39 @@ public final class AutofillServiceInfo {
         }
 
         return compatibilityPackages;
+    }
+
+    /**
+     * Used by {@link TestDataBuilder}.
+     */
+    private AutofillServiceInfo(String passwordsActivity) {
+        mServiceInfo = new ServiceInfo();
+        mServiceInfo.applicationInfo = new ApplicationInfo();
+        mServiceInfo.packageName = "com.android.test";
+        mSettingsActivity = null;
+        mPasswordsActivity = passwordsActivity;
+        mCompatibilityPackages = null;
+        mInlineSuggestionsEnabled = false;
+    }
+
+    /**
+     * Builds test data for unit tests.
+     */
+    @VisibleForTesting
+    public static final class TestDataBuilder {
+        private String mPasswordsActivity;
+
+        public TestDataBuilder() {
+        }
+
+        public TestDataBuilder setPasswordsActivity(String passwordsActivity) {
+            mPasswordsActivity = passwordsActivity;
+            return this;
+        }
+
+        public AutofillServiceInfo build() {
+            return new AutofillServiceInfo(mPasswordsActivity);
+        }
     }
 
     @NonNull
