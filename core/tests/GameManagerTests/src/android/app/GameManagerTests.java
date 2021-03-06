@@ -16,13 +16,13 @@
 
 package android.app;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static junit.framework.Assert.assertEquals;
 
-import android.app.GameManager.GameMode;
-import android.util.ArrayMap;
-import android.util.Pair;
+import android.content.Context;
+import android.platform.test.annotations.Presubmit;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -35,22 +35,43 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public final class GameManagerTests {
     private static final String PACKAGE_NAME_0 = "com.android.app0";
     private static final String PACKAGE_NAME_1 = "com.android.app1";
 
-    private TestGameManagerService mService;
+    protected Context mContext;
     private GameManager mGameManager;
+    private String mPackageName;
 
     @Before
     public void setUp() {
-        mService = new TestGameManagerService();
-        mGameManager = new GameManager(
-                InstrumentationRegistry.getContext(), mService);
+        mContext = getInstrumentation().getContext();
+        mGameManager = mContext.getSystemService(GameManager.class);
+        mPackageName = mContext.getPackageName();
+
+        // Reset the Game Mode for the test app, since it persists across invocations.
+        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_UNSUPPORTED);
+        mGameManager.setGameMode(PACKAGE_NAME_0, GameManager.GAME_MODE_UNSUPPORTED);
+        mGameManager.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_UNSUPPORTED);
     }
 
     @Test
-    public void testGameModeGetterSetter() {
+    public void testPublicApiGameModeGetterSetter() {
+        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
+                mGameManager.getGameMode());
+
+        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD);
+        assertEquals(GameManager.GAME_MODE_STANDARD,
+                mGameManager.getGameMode());
+
+        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE);
+        assertEquals(GameManager.GAME_MODE_PERFORMANCE,
+                mGameManager.getGameMode());
+    }
+
+    @Test
+    public void testPrivilegedGameModeGetterSetter() {
         assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
                 mGameManager.getGameMode(PACKAGE_NAME_0));
 
@@ -61,23 +82,5 @@ public final class GameManagerTests {
         mGameManager.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_PERFORMANCE);
         assertEquals(GameManager.GAME_MODE_PERFORMANCE,
                 mGameManager.getGameMode(PACKAGE_NAME_1));
-    }
-
-    private final class TestGameManagerService extends IGameManagerService.Stub {
-        private final ArrayMap<Pair<String, Integer>, Integer> mGameModes = new ArrayMap<>();
-
-        @Override
-        public @GameMode int getGameMode(String packageName, int userId) {
-            final Pair key = Pair.create(packageName, userId);
-            if (mGameModes.containsKey(key)) {
-                return mGameModes.get(key);
-            }
-            return GameManager.GAME_MODE_UNSUPPORTED;
-        }
-
-        @Override
-        public void setGameMode(String packageName, @GameMode int gameMode, int userId) {
-            mGameModes.put(Pair.create(packageName, userId), gameMode);
-        }
     }
 }
