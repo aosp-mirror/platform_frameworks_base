@@ -4998,7 +4998,6 @@ public class Notification implements Parcelable
                 TemplateBindResult result) {
             p.headerless(resId == getBaseLayoutResource()
                     || resId == getHeadsUpBaseLayoutResource());
-            p.allowTextWithProgress(resId == getBigBaseLayoutResource());
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
             resetStandardTemplate(contentView);
@@ -5748,6 +5747,7 @@ public class Notification implements Parcelable
                 if (bigContentViewRequired()) {
                     StandardTemplateParams p = mParams.reset()
                             .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                            .allowTextWithProgress(true)
                             .fillTextsFrom(this);
                     result = applyStandardTemplateWithActions(getBigBaseLayoutResource(), p,
                             null /* result */);
@@ -9393,6 +9393,7 @@ public class Notification implements Parcelable
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
                     .allowActionIcons(true)
+                    .allowTextWithProgress(true)
                     .hideLargeIcon(true)
                     .text(text)
                     .summaryText(mBuilder.processLegacyText(mVerificationText));
