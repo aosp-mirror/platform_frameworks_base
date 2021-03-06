@@ -1326,7 +1326,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"आपके एडमिन ने इस डिवाइस की समस्या को हल करने में सहायता के लिए एक गड़बड़ी की रिपोर्ट का अनुरोध किया है. ऐप्लिकेशन और डेटा शेयर किए जा सकते हैं."</string>
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"शेयर करें"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"अस्वीकार करें"</string>
-    <string name="select_input_method" msgid="3971267998568587025">"इनपुट पद्धति चुनें"</string>
+    <string name="select_input_method" msgid="3971267998568587025">"इनपुट का तरीका चुनें"</string>
     <string name="show_ime" msgid="6406112007347443383">"सामान्य कीबोर्ड के सक्रिय होने के दौरान इसे स्‍क्रीन पर बनाए रखें"</string>
     <string name="hardware" msgid="1800597768237606953">"वर्चुअल कीबोर्ड दिखाएं"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"सामान्य कीबोर्ड कॉन्फ़िगर करें"</string>
