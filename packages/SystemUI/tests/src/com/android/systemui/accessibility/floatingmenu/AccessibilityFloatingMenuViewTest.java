@@ -82,7 +82,7 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
 
         mTargets.add(mock(AccessibilityTarget.class));
         mListView = spy(new RecyclerView(mContext));
-        mMenuView = new AccessibilityFloatingMenuView(mContext);
+        mMenuView = spy(new AccessibilityFloatingMenuView(mContext));
     }
 
     @Test
@@ -176,5 +176,22 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         mMenuView.setShapeType(shapeType);
 
         verify(mAnimator).translationX(anyFloat());
+    }
+
+    @Test
+    public void onTargetsChanged_fadeInOut() {
+        mMenuView.onTargetsChanged(mTargets);
+
+        verify(mMenuView).fadeIn();
+        verify(mMenuView).fadeOut();
+    }
+
+    @Test
+    public void setSizeType_fadeInOut() {
+        final int smallSize = 0;
+        mMenuView.setSizeType(smallSize);
+
+        verify(mMenuView).fadeIn();
+        verify(mMenuView).fadeOut();
     }
 }

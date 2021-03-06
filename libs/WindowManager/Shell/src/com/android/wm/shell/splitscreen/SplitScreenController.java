@@ -30,6 +30,7 @@ import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -171,12 +172,13 @@ public class SplitScreenController implements DragAndDropPolicy.Starter {
         }
     }
 
-    public void startIntent(PendingIntent intent, @SplitScreen.StageType int stage,
+    public void startIntent(PendingIntent intent, Context context,
+            Intent fillInIntent, @SplitScreen.StageType int stage,
             @SplitScreen.StagePosition int position, @Nullable Bundle options) {
         options = resolveStartStage(stage, position, options);
 
         try {
-            intent.send(null, 0, null, null, null, null, options);
+            intent.send(context, 0, fillInIntent, null, null, null, options);
         } catch (PendingIntent.CanceledException e) {
             Slog.e(TAG, "Failed to launch activity", e);
         }
@@ -348,10 +350,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter {
         }
 
         @Override
-        public void startIntent(PendingIntent intent, int stage, int position,
-                @Nullable Bundle options) {
+        public void startIntent(PendingIntent intent, Context context, Intent fillInIntent,
+                int stage, int position, @Nullable Bundle options) {
             mMainExecutor.execute(() -> {
-                SplitScreenController.this.startIntent(intent, stage, position, options);
+                SplitScreenController.this.startIntent(intent, context, fillInIntent, stage,
+                        position, options);
             });
         }
     }

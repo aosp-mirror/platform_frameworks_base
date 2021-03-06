@@ -32,7 +32,6 @@ import com.android.server.pm.SettingsXml;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Reads and writes the old {@link android.content.pm.IntentFilterVerificationInfo} so that it can

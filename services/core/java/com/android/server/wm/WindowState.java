@@ -141,11 +141,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_STATE_BLAST_SYNC_TIMEOUT;
@@ -358,7 +356,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mForceHideNonSystemOverlayWindow;
     boolean mAppFreezing;
     boolean mHidden = true;    // Used to determine if to show child windows.
-    boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
     private boolean mDragResizing;
     private boolean mDragResizingChangeReported = true;
     private int mResizeMode;
@@ -1715,7 +1712,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean isVisibleRequested() {
-        return isVisible() && (mActivityRecord == null || mActivityRecord.isVisibleRequested());
+        if (mToken != null && (mActivityRecord != null || mToken.asWallpaperToken() != null)) {
+            // Currently only ActivityRecord and WallpaperToken support visibleRequested.
+            return isVisible() && mToken.isVisibleRequested();
+        }
+        return isVisible();
     }
 
     /**
@@ -1745,8 +1746,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      *         {@code false} otherwise.
      */
     boolean wouldBeVisibleIfPolicyIgnored() {
-        return mHasSurface && !isParentWindowHidden()
-                && !mAnimatingExit && !mDestroying && (!mIsWallpaper || mWallpaperVisible);
+        if (!mHasSurface || isParentWindowHidden() || mAnimatingExit || mDestroying) {
+            return false;
+        }
+        final boolean isWallpaper = mToken != null && mToken.asWallpaperToken() != null;
+        return !isWallpaper || mToken.isVisible();
     }
 
     /**
@@ -1803,6 +1807,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (atoken != null) {
             return ((!isParentWindowHidden() && atoken.isVisible())
                     || isAnimating(TRANSITION | PARENTS));
+        }
+        final WallpaperWindowToken wtoken = mToken.asWallpaperToken();
+        if (wtoken != null) {
+            return !isParentWindowHidden() && wtoken.isVisible();
         }
         return !isParentWindowHidden() || isAnimating(TRANSITION | PARENTS);
     }
@@ -1943,8 +1951,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // When there is keyguard, wallpaper could be placed over the secure app
         // window but invisible. We need to check wallpaper visibility explicitly
         // to determine if it's occluding apps.
-        return ((!mIsWallpaper && mAttrs.format == PixelFormat.OPAQUE)
-                || (mIsWallpaper && mWallpaperVisible))
+        final boolean isWallpaper = mToken != null && mToken.asWallpaperToken() != null;
+        return ((!isWallpaper && mAttrs.format == PixelFormat.OPAQUE)
+                || (isWallpaper && mToken.isVisible()))
                 && isDrawn() && !isAnimating(TRANSITION | PARENTS);
     }
 
@@ -3224,7 +3233,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void sendAppVisibilityToClients() {
         super.sendAppVisibilityToClients();
 
-        final boolean clientVisible = mActivityRecord.isClientVisible();
+        if (mToken == null) return;
+
+        final boolean clientVisible = mToken.isClientVisible();
+        // TODO(shell-transitions): This is currently only applicable to app windows, BUT we
+        //                          want to extend the "starting" concept to other windows.
         if (mAttrs.type == TYPE_APPLICATION_STARTING && !clientVisible) {
             // Don't hide the starting window.
             return;
@@ -3608,9 +3621,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mActivityRecord != null && mActivityRecord.isRelaunching()) {
             return;
         }
-        // If the activity is invisible or going invisible, don't report either since it is going
-        // away. This is likely during a transition so we want to preserve the original state.
-        if (mActivityRecord != null && !mActivityRecord.isVisibleRequested()) {
+        // If this is an activity or wallpaper and is invisible or going invisible, don't report
+        // either since it is going away. This is likely during a transition so we want to preserve
+        // the original state.
+        if ((mActivityRecord != null || mToken.asWallpaperToken() != null)
+                && !mToken.isVisibleRequested()) {
             return;
         }
 
@@ -4024,8 +4039,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mIsImWindow || mIsWallpaper || mIsFloatingLayer) {
             pw.println(prefix + "mIsImWindow=" + mIsImWindow
                     + " mIsWallpaper=" + mIsWallpaper
-                    + " mIsFloatingLayer=" + mIsFloatingLayer
-                    + " mWallpaperVisible=" + mWallpaperVisible);
+                    + " mIsFloatingLayer=" + mIsFloatingLayer);
         }
         if (dumpAll) {
             pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
@@ -4839,61 +4853,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
     }
 
-    void hideWallpaperWindow(boolean wasDeferred, String reason) {
-        for (int j = mChildren.size() - 1; j >= 0; --j) {
-            final WindowState c = mChildren.get(j);
-            c.hideWallpaperWindow(wasDeferred, reason);
-        }
-        if (!mWinAnimator.mLastHidden || wasDeferred) {
-            mWinAnimator.hide(getGlobalTransaction(), reason);
-            getDisplayContent().mWallpaperController.mDeferredHideWallpaper = null;
-            dispatchWallpaperVisibility(false);
-            final DisplayContent displayContent = getDisplayContent();
-            if (displayContent != null) {
-                displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-                if (DEBUG_LAYOUT_REPEATS) {
-                    mWmService.mWindowPlacerLocked.debugLayoutRepeats("hideWallpaperWindow " + this,
-                            displayContent.pendingLayoutChanges);
-                }
-            }
-        }
-    }
-
-    /**
-     * Check wallpaper window for visibility change and notify window if so.
-     * @param visible Current visibility.
-     */
-    void dispatchWallpaperVisibility(final boolean visible) {
-        final boolean hideAllowed =
-                getDisplayContent().mWallpaperController.mDeferredHideWallpaper == null;
-
-        // Only send notification if the visibility actually changed and we are not trying to hide
-        // the wallpaper when we are deferring hiding of the wallpaper.
-        if (mWallpaperVisible != visible && (hideAllowed || visible)) {
-            mWallpaperVisible = visible;
-            try {
-                if (DEBUG_VISIBILITY || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                        "Updating vis of wallpaper " + this
-                                + ": " + visible + " from:\n" + Debug.getCallers(4, "  "));
-                mClient.dispatchAppVisibility(visible);
-            } catch (RemoteException e) {
-            }
-        }
-    }
-
-    boolean hasVisibleNotDrawnWallpaper() {
-        if (mWallpaperVisible && !isDrawn()) {
-            return true;
-        }
-        for (int j = mChildren.size() - 1; j >= 0; --j) {
-            final WindowState c = mChildren.get(j);
-            if (c.hasVisibleNotDrawnWallpaper()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     void updateReportedVisibility(UpdateReportedVisibilityResults results) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState c = mChildren.get(i);
@@ -5246,7 +5205,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mIsDimming = true;
             final float dimAmount = (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? mAttrs.dimAmount : 0;
             final int blurRadius = shouldDrawBlurBehind() ? mAttrs.getBlurBehindRadius() : 0;
-            getDimmer().dimBelow(getSyncTransaction(), this, mAttrs.dimAmount, blurRadius);
+            getDimmer().dimBelow(getSyncTransaction(), this, dimAmount, blurRadius);
         }
     }
 

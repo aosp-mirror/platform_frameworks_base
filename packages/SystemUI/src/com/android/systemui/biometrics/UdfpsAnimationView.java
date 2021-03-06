@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
@@ -62,7 +63,10 @@ public abstract class UdfpsAnimationView extends FrameLayout implements DozeRece
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        getUdfpsAnimation().onDestroy();
+
+        if (getUdfpsAnimation() != null) {
+            getUdfpsAnimation().onDestroy();
+        }
     }
 
     private int expansionToAlpha(float expansion) {
@@ -78,11 +82,19 @@ public abstract class UdfpsAnimationView extends FrameLayout implements DozeRece
     }
 
     void onIlluminationStarting() {
+        if (getUdfpsAnimation() == null) {
+            return;
+        }
+
         getUdfpsAnimation().setIlluminationShowing(true);
         postInvalidate();
     }
 
     void onIlluminationStopped() {
+        if (getUdfpsAnimation() == null) {
+            return;
+        }
+
         getUdfpsAnimation().setIlluminationShowing(false);
         postInvalidate();
     }
@@ -130,5 +142,15 @@ public abstract class UdfpsAnimationView extends FrameLayout implements DozeRece
             return 0;
         }
         return getUdfpsAnimation().getPaddingY();
+    }
+
+    /**
+     * @return the amount of translation needed if the view currently requires the user to touch
+     *         somewhere other than the exact center of the sensor. For example, this can happen
+     *         during guided enrollment.
+     */
+    @NonNull
+    PointF getTouchTranslation() {
+        return new PointF(0, 0);
     }
 }

@@ -3168,6 +3168,8 @@
     <public name="config_customMediaSessionPolicyProvider" />
     <!-- @hide @SystemApi -->
     <public name="config_systemSpeechRecognizer" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemWifiCoexManager" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">

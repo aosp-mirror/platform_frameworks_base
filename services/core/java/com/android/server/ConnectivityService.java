@@ -1886,24 +1886,46 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    // TODO: Consider delete this function or turn it into a no-op method.
     @Override
     public NetworkState[] getAllNetworkState() {
         // This contains IMSI details, so make sure the caller is privileged.
         PermissionUtils.enforceNetworkStackPermission(mContext);
 
         final ArrayList<NetworkState> result = new ArrayList<>();
-        for (Network network : getAllNetworks()) {
-            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
-            // TODO: Consider include SUSPENDED networks.
+        for (NetworkStateSnapshot snapshot : getAllNetworkStateSnapshot()) {
+            // NetworkStateSnapshot doesn't contain NetworkInfo, so need to fetch it from the
+            // NetworkAgentInfo.
+            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(snapshot.network);
             if (nai != null && nai.networkInfo.isConnected()) {
-                // TODO (b/73321673) : NetworkState contains a copy of the
-                // NetworkCapabilities, which may contain UIDs of apps to which the
-                // network applies. Should the UIDs be cleared so as not to leak or
-                // interfere ?
-                result.add(nai.getNetworkState());
+                result.add(new NetworkState(new NetworkInfo(nai.networkInfo),
+                        snapshot.linkProperties, snapshot.networkCapabilities, snapshot.network,
+                        snapshot.subscriberId));
             }
         }
         return result.toArray(new NetworkState[result.size()]);
+    }
+
+    @Override
+    @NonNull
+    public List<NetworkStateSnapshot> getAllNetworkStateSnapshot() {
+        // This contains IMSI details, so make sure the caller is privileged.
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+
+        final ArrayList<NetworkStateSnapshot> result = new ArrayList<>();
+        for (Network network : getAllNetworks()) {
+            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+            // TODO: Consider include SUSPENDED networks, which should be considered as
+            //  temporary shortage of connectivity of a connected network.
+            if (nai != null && nai.networkInfo.isConnected()) {
+                // TODO (b/73321673) : NetworkStateSnapshot contains a copy of the
+                // NetworkCapabilities, which may contain UIDs of apps to which the
+                // network applies. Should the UIDs be cleared so as not to leak or
+                // interfere ?
+                result.add(nai.getNetworkStateSnapshot());
+            }
+        }
+        return result;
     }
 
     @Override
@@ -7161,7 +7183,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         toUidRangeStableParcels(nri.getUids()));
             }
         } catch (RemoteException | ServiceSpecificException e) {
-            loge("Exception setting OEM network preference default network", e);
+            loge("Exception setting app default network", e);
         }
     }
 
@@ -7248,7 +7270,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         void addRequestReassignment(@NonNull final RequestReassignment reassignment) {
-            if (!Build.IS_USER) {
+            if (Build.IS_DEBUGGABLE) {
                 // The code is never supposed to add two reassignments of the same request. Make
                 // sure this stays true, but without imposing this expensive check on all
                 // reassignments on all user devices.
@@ -9046,7 +9068,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         final ArraySet<NetworkRequestInfo> nris =
                 new OemNetworkRequestFactory().createNrisFromOemNetworkPreferences(preference);
-        updateDefaultNetworksForOemNetworkPreference(nris);
+        replaceDefaultNetworkRequestsForPreference(nris);
         mOemNetworkPreferences = preference;
         // TODO http://b/176496396 persist data to shared preferences.
 
@@ -9059,7 +9081,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void updateDefaultNetworksForOemNetworkPreference(
+    private void replaceDefaultNetworkRequestsForPreference(
             @NonNull final Set<NetworkRequestInfo> nris) {
         // Pass in a defensive copy as this collection will be updated on remove.
         handleRemoveNetworkRequests(new ArraySet<>(mDefaultNetworkRequests));
@@ -9145,6 +9167,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return callbackRequestsToRegister;
     }
 
+    private static void setNetworkRequestUids(@NonNull final List<NetworkRequest> requests,
+            @NonNull final Set<UidRange> uids) {
+        final Set<UidRange> ranges = new ArraySet<>(uids);
+        for (final NetworkRequest req : requests) {
+            req.networkCapabilities.setUids(ranges);
+        }
+    }
+
     /**
      * Class used to generate {@link NetworkRequestInfo} based off of {@link OemNetworkPreferences}.
      */
@@ -9221,7 +9251,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             + " called with invalid preference of " + preference);
             }
 
-            setOemNetworkRequestUids(requests, uids);
+            final ArraySet ranges = new ArraySet<Integer>();
+            for (final int uid : uids) {
+                ranges.add(new UidRange(uid, uid));
+            }
+            setNetworkRequestUids(requests, ranges);
             return new NetworkRequestInfo(requests);
         }
 
@@ -9253,17 +9287,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             netCap.addCapability(NET_CAPABILITY_INTERNET);
             netCap.setRequestorUidAndPackageName(Process.myUid(), mContext.getPackageName());
             return netCap;
-        }
-
-        private void setOemNetworkRequestUids(@NonNull final List<NetworkRequest> requests,
-                @NonNull final Set<Integer> uids) {
-            final Set<UidRange> ranges = new ArraySet<>();
-            for (final int uid : uids) {
-                ranges.add(new UidRange(uid, uid));
-            }
-            for (final NetworkRequest req : requests) {
-                req.networkCapabilities.setUids(ranges);
-            }
         }
     }
 }

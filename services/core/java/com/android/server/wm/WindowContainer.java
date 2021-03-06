@@ -3060,6 +3060,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /** Cheap way of doing cast and instanceof. */
+    WallpaperWindowToken asWallpaperToken() {
+        return null;
+    }
+
+    /** Cheap way of doing cast and instanceof. */
     DisplayArea asDisplayArea() {
         return null;
     }

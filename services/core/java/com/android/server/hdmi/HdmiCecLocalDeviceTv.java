@@ -1072,7 +1072,21 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // Ignore this message.
             return true;
         }
-        setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message));
+        boolean tvSystemAudioMode = isSystemAudioControlFeatureEnabled();
+        boolean avrSystemAudioMode = HdmiUtils.parseCommandParamSystemAudioStatus(message);
+        // Set System Audio Mode according to TV's settings.
+        // Handle <System Audio Mode Status> here only when
+        // SystemAudioAutoInitiationAction timeout
+        HdmiDeviceInfo avr = getAvrDeviceInfo();
+        if (avr == null) {
+            setSystemAudioMode(false);
+        } else if (avrSystemAudioMode != tvSystemAudioMode) {
+            addAndStartAction(new SystemAudioActionFromTv(this, avr.getLogicalAddress(),
+                    tvSystemAudioMode, null));
+        } else {
+            setSystemAudioMode(tvSystemAudioMode);
+        }
+
         return true;
     }
 

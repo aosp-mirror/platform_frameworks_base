@@ -265,7 +265,7 @@ class ZygoteConnection {
                             fdsToClose, fdsToIgnore, parsedArgs.mStartChildZygote,
                             parsedArgs.mInstructionSet, parsedArgs.mAppDataDir,
                             parsedArgs.mIsTopApp, parsedArgs.mPkgDataInfoList,
-                            parsedArgs.mWhitelistedDataInfoList, parsedArgs.mBindMountAppDataDirs,
+                            parsedArgs.mAllowlistedDataInfoList, parsedArgs.mBindMountAppDataDirs,
                             parsedArgs.mBindMountAppStorageDirs);
 
                     try {

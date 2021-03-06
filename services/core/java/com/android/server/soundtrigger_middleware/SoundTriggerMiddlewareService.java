@@ -34,6 +34,7 @@ import android.media.soundtrigger_middleware.RecognitionConfig;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.server.SystemService;
@@ -69,6 +70,8 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
     static private final String TAG = "SoundTriggerMiddlewareService";
 
     private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
+    private static final @NonNull ICaptureStateNotifier mCaptureStateNotifier =
+            new ExternalCaptureStateTracker();
     private final @NonNull Context mContext;
 
     /**
@@ -79,13 +82,6 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             @NonNull Context context) {
         mDelegate = Objects.requireNonNull(delegate);
         mContext = context;
-        new ExternalCaptureStateTracker(active -> {
-            try {
-                mDelegate.setCaptureState(active);
-            } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
-            }
-        });
     }
 
     @Override
@@ -235,7 +231,12 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             HalFactory[] factories = new HalFactory[]{() -> {
                 try {
                     Log.d(TAG, "Connecting to default ISoundTriggerHw");
-                    return ISoundTriggerHw.getService(true);
+                    return SoundTriggerHw2Compat.create(ISoundTriggerHw.getService(true),
+                            () -> {
+                                // This property needs to be defined in an init.rc script and
+                                // trigger a HAL reboot.
+                                SystemProperties.set("sys.audio.restart.hal", "1");
+                            }, mCaptureStateNotifier);
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }

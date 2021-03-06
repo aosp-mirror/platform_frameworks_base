@@ -25,6 +25,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.UserSwitchObserver;
 import android.app.job.JobInfo;
+import android.app.job.JobParameters;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -469,7 +470,7 @@ class JobConcurrencyManager {
         // Update the priorities of jobs that aren't running, and also count the pending work types.
         // Do this before the following loop to hopefully reduce the cost of
         // shouldStopRunningJobLocked().
-        updateNonRunningPriorities(pendingJobs, true);
+        updateNonRunningPrioritiesLocked(pendingJobs, true);
 
         for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; i++) {
             final JobServiceContext js = activeServices.get(i);
@@ -585,7 +586,8 @@ class JobConcurrencyManager {
                                 + activeServices.get(i).getRunningJobLocked());
                     }
                     // preferredUid will be set to uid of currently running job.
-                    activeServices.get(i).preemptExecutingJobLocked(preemptReasonForContext[i]);
+                    activeServices.get(i).cancelExecutingJobLocked(
+                            JobParameters.REASON_PREEMPT, preemptReasonForContext[i]);
                     preservePreferredUid = true;
                 } else {
                     final JobStatus pendingJob = contextIdToJobMap[i];
@@ -610,7 +612,8 @@ class JobConcurrencyManager {
                 mWorkCountTracker.getRunningJobCount(WORK_TYPE_TOP));
     }
 
-    private void updateNonRunningPriorities(@NonNull final List<JobStatus> pendingJobs,
+    @GuardedBy("mLock")
+    private void updateNonRunningPrioritiesLocked(@NonNull final List<JobStatus> pendingJobs,
             boolean updateCounter) {
         for (int i = 0; i < pendingJobs.size(); i++) {
             final JobStatus pending = pendingJobs.get(i);
@@ -628,6 +631,7 @@ class JobConcurrencyManager {
         }
     }
 
+    @GuardedBy("mLock")
     private void startJobLocked(@NonNull JobServiceContext worker, @NonNull JobStatus jobStatus,
             @WorkType final int workType) {
         final List<StateController> controllers = mService.mControllers;
@@ -647,6 +651,7 @@ class JobConcurrencyManager {
         }
     }
 
+    @GuardedBy("mLock")
     void onJobCompletedLocked(@NonNull JobServiceContext worker, @NonNull JobStatus jobStatus,
             @WorkType final int workType) {
         mWorkCountTracker.onJobFinished(workType);
@@ -655,7 +660,7 @@ class JobConcurrencyManager {
         if (worker.getPreferredUid() != JobServiceContext.NO_PREFERRED_UID) {
             updateCounterConfigLocked();
             // Preemption case needs special care.
-            updateNonRunningPriorities(pendingJobs, false);
+            updateNonRunningPrioritiesLocked(pendingJobs, false);
 
             JobStatus highestPriorityJob = null;
             int highPriWorkType = workType;
@@ -726,7 +731,7 @@ class JobConcurrencyManager {
             }
         } else if (pendingJobs.size() > 0) {
             updateCounterConfigLocked();
-            updateNonRunningPriorities(pendingJobs, false);
+            updateNonRunningPrioritiesLocked(pendingJobs, false);
 
             // This slot is now free and we have pending jobs. Start the highest priority job we
             // find.
@@ -775,6 +780,7 @@ class JobConcurrencyManager {
      * another job to run, or if system state suggests the job should stop.
      */
     @Nullable
+    @GuardedBy("mLock")
     String shouldStopRunningJobLocked(@NonNull JobServiceContext context) {
         final JobStatus js = context.getRunningJobLocked();
         if (js == null) {
@@ -881,6 +887,7 @@ class JobConcurrencyManager {
         return s.toString();
     }
 
+    @GuardedBy("mLock")
     void updateConfigLocked() {
         DeviceConfig.Properties properties =
                 DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER);

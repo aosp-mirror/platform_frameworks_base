@@ -19,6 +19,7 @@ package android.hardware.soundtrigger;
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.SOUNDTRIGGER_DELEGATE_IDENTITY;
+import static android.system.OsConstants.EBUSY;
 import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.ENODEV;
 import static android.system.OsConstants.ENOSYS;
@@ -91,6 +92,8 @@ public class SoundTrigger {
     public static final int STATUS_DEAD_OBJECT = -EPIPE;
     /** @hide */
     public static final int STATUS_INVALID_OPERATION = -ENOSYS;
+    /** @hide */
+    public static final int STATUS_BUSY = -EBUSY;
 
     /*****************************************************************************
      * A ModuleProperties describes a given sound trigger hardware module
@@ -1835,120 +1838,6 @@ public class SoundTrigger {
         }
     }
 
-    /**
-     *  Status codes for {@link SoundModelEvent}
-     */
-    /**
-     * Sound Model was updated
-     *
-     * @hide
-     */
-    public static final int SOUNDMODEL_STATUS_UPDATED = 0;
-
-    /**
-     *  A SoundModelEvent is provided by the
-     *  {@link StatusListener#onSoundModelUpdate(SoundModelEvent)}
-     *  callback when a sound model has been updated by the implementation
-     *
-     *  @hide
-     */
-    public static class SoundModelEvent implements Parcelable {
-        /** Status e.g {@link #SOUNDMODEL_STATUS_UPDATED} */
-        public final int status;
-        /** The updated sound model handle */
-        public final int soundModelHandle;
-        /** New sound model data */
-        @NonNull
-        public final byte[] data;
-
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        SoundModelEvent(int status, int soundModelHandle, @Nullable byte[] data) {
-            this.status = status;
-            this.soundModelHandle = soundModelHandle;
-            this.data = data != null ? data : new byte[0];
-        }
-
-        public static final @android.annotation.NonNull Parcelable.Creator<SoundModelEvent> CREATOR
-                = new Parcelable.Creator<SoundModelEvent>() {
-            public SoundModelEvent createFromParcel(Parcel in) {
-                return SoundModelEvent.fromParcel(in);
-            }
-
-            public SoundModelEvent[] newArray(int size) {
-                return new SoundModelEvent[size];
-            }
-        };
-
-        private static SoundModelEvent fromParcel(Parcel in) {
-            int status = in.readInt();
-            int soundModelHandle = in.readInt();
-            byte[] data = in.readBlob();
-            return new SoundModelEvent(status, soundModelHandle, data);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(status);
-            dest.writeInt(soundModelHandle);
-            dest.writeBlob(data);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + Arrays.hashCode(data);
-            result = prime * result + soundModelHandle;
-            result = prime * result + status;
-            return result;
-        }
-
-        @Override
-        public boolean equals(@Nullable Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            SoundModelEvent other = (SoundModelEvent) obj;
-            if (!Arrays.equals(data, other.data))
-                return false;
-            if (soundModelHandle != other.soundModelHandle)
-                return false;
-            if (status != other.status)
-                return false;
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "SoundModelEvent [status=" + status + ", soundModelHandle=" + soundModelHandle
-                    + ", data=" + (data == null ? 0 : data.length) + "]";
-        }
-    }
-
-    /**
-     *  Native service state. {@link StatusListener#onServiceStateChange(int)}
-     */
-    // Keep in sync with system/core/include/system/sound_trigger.h
-    /**
-     * Sound trigger service is enabled
-     *
-     * @hide
-     */
-    public static final int SERVICE_STATE_ENABLED = 0;
-    /**
-     * Sound trigger service is disabled
-     *
-     * @hide
-     */
-    public static final int SERVICE_STATE_DISABLED = 1;
     private static Object mServiceLock = new Object();
     private static ISoundTriggerMiddlewareService mService;
 
@@ -1975,6 +1864,8 @@ public class SoundTrigger {
                     return STATUS_DEAD_OBJECT;
                 case Status.INTERNAL_ERROR:
                     return STATUS_ERROR;
+                case Status.RESOURCE_CONTENTION:
+                    return STATUS_BUSY;
             }
             return STATUS_ERROR;
         }
@@ -2224,27 +2115,28 @@ public class SoundTrigger {
      *
      * @hide
      */
-    public static interface StatusListener {
+    public interface StatusListener {
         /**
          * Called when recognition succeeds of fails
          */
-        public abstract void onRecognition(RecognitionEvent event);
+        void onRecognition(RecognitionEvent event);
 
         /**
-         * Called when a sound model has been updated
+         * Called when a sound model has been preemptively unloaded by the underlying
+         * implementation.
          */
-        public abstract void onSoundModelUpdate(SoundModelEvent event);
+        void onModelUnloaded(int modelHandle);
 
         /**
-         * Called when the sound trigger native service state changes.
-         * @param state Native service state. One of {@link SoundTrigger#SERVICE_STATE_ENABLED},
-         * {@link SoundTrigger#SERVICE_STATE_DISABLED}
+         * Called whenever underlying conditions change, such that load/start operations that have
+         * previously failed or got preempted may now succeed. This is not a guarantee, merely a
+         * hint that the client may want to retry operations.
          */
-        public abstract void onServiceStateChange(int state);
+        void onResourcesAvailable();
 
         /**
          * Called when the sound trigger native service dies
          */
-        public abstract void onServiceDied();
+        void onServiceDied();
     }
 }

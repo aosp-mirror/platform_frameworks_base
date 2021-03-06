@@ -24,13 +24,11 @@ import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.ModelParameterRange;
 import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
 import android.media.soundtrigger_middleware.PhraseSoundModel;
 import android.media.soundtrigger_middleware.RecognitionConfig;
 import android.media.soundtrigger_middleware.RecognitionEvent;
 import android.media.soundtrigger_middleware.RecognitionStatus;
 import android.media.soundtrigger_middleware.SoundModel;
-import android.media.soundtrigger_middleware.SoundModelType;
 import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
 import android.media.soundtrigger_middleware.Status;
 import android.os.IBinder;
@@ -41,7 +39,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,15 +85,13 @@ import java.util.Set;
  *
  * @hide
  */
-class SoundTriggerModule implements IHwBinder.DeathRecipient {
+class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.GlobalCallback {
     static private final String TAG = "SoundTriggerModule";
-    @NonNull private HalFactory mHalFactory;
+    @NonNull private final HalFactory mHalFactory;
     @NonNull private ISoundTriggerHw2 mHalService;
     @NonNull private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider;
     private final Set<Session> mActiveSessions = new HashSet<>();
-    private int mNumLoadedModels = 0;
-    private SoundTriggerModuleProperties mProperties;
-    private boolean mRecognitionAvailable;
+    private final SoundTriggerModuleProperties mProperties;
 
     /**
      * Ctor.
@@ -111,8 +106,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         attachToHal();
         mProperties = ConversionUtil.hidl2aidlProperties(mHalService.getProperties());
-        // We conservatively assume that external capture is active until explicitly told otherwise.
-        mRecognitionAvailable = mProperties.concurrentCapture;
     }
 
     /**
@@ -144,46 +137,9 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
         return mProperties;
     }
 
-    /**
-     * Notify the module that external capture has started / finished, using the same input device
-     * used for recognition.
-     * If the underlying driver does not support recognition while capturing, capture will be
-     * aborted, and the recognition callback will receive and abort event. In addition, all active
-     * clients will be notified of the change in state.
-     *
-     * @param active true iff external capture is active.
-     */
-    void setExternalCaptureState(boolean active) {
-        // We should never invoke callbacks while holding the lock, since this may deadlock with
-        // forward calls. Thus, we first gather all the callbacks we need to invoke while holding
-        // the lock, but invoke them after releasing it.
-        List<Runnable> callbacks = new LinkedList<>();
-
-        synchronized (this) {
-            if (mProperties.concurrentCapture) {
-                // If we support concurrent capture, we don't care about any of this.
-                return;
-            }
-            mRecognitionAvailable = !active;
-            if (!mRecognitionAvailable) {
-                // Our module does not support recognition while a capture is active -
-                // need to abort all active recognitions.
-                for (Session session : mActiveSessions) {
-                    session.abortActiveRecognitions(callbacks);
-                }
-            }
-        }
-        for (Runnable callback : callbacks) {
-            callback.run();
-        }
-        for (Session session : mActiveSessions) {
-            session.notifyRecognitionAvailability();
-        }
-    }
-
     @Override
     public void serviceDied(long cookie) {
-        Log.w(TAG, String.format("Underlying HAL driver died."));
+        Log.w(TAG, "Underlying HAL driver died.");
         List<ISoundTriggerCallback> callbacks;
         synchronized (this) {
             callbacks = new ArrayList<>(mActiveSessions.size());
@@ -207,10 +163,8 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
      * Resets the transient state of this object.
      */
     private void reset() {
+        mHalService.detach();
         attachToHal();
-        // We conservatively assume that external capture is active until explicitly told otherwise.
-        mRecognitionAvailable = mProperties.concurrentCapture;
-        mNumLoadedModels = 0;
     }
 
     /**
@@ -218,9 +172,9 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
      */
     private void attachToHal() {
         mHalService = new SoundTriggerHw2Enforcer(
-                new SoundTriggerHw2Watchdog(
-                        new SoundTriggerHw2Compat(mHalFactory.create())));
+                new SoundTriggerHw2Watchdog(mHalFactory.create()));
         mHalService.linkToDeath(this, 0);
+        mHalService.registerCallback(this);
     }
 
     /**
@@ -230,6 +184,25 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
      */
     private void removeSession(@NonNull Session session) {
         mActiveSessions.remove(session);
+    }
+
+    @Override
+    public void onResourcesAvailable() {
+        List<ISoundTriggerCallback> callbacks;
+        synchronized (this) {
+            callbacks = new ArrayList<>(mActiveSessions.size());
+            for (Session session : mActiveSessions) {
+                callbacks.add(session.mCallback);
+            }
+        }
+        // Trigger the callbacks outside of the lock to avoid deadlocks.
+        for (ISoundTriggerCallback callback : callbacks) {
+            try {
+                callback.onResourcesAvailable();
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        }
     }
 
     /** State of a single sound model. */
@@ -249,7 +222,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
      */
     private class Session implements ISoundTriggerModule {
         private ISoundTriggerCallback mCallback;
-        private Map<Integer, Model> mLoadedModels = new HashMap<>();
+        private final Map<Integer, Model> mLoadedModels = new HashMap<>();
 
         /**
          * Ctor.
@@ -258,7 +231,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
          */
         private Session(@NonNull ISoundTriggerCallback callback) {
             mCallback = callback;
-            notifyRecognitionAvailability();
         }
 
         @Override
@@ -274,95 +246,65 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         @Override
         public int loadModel(@NonNull SoundModel model) {
-            // We must do this outside the lock, to avoid possible deadlocks with the remote process
-            // that provides the audio sessions, which may also be calling into us.
-            SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
-                    mAudioSessionProvider.acquireSession();
-
-            try {
-                synchronized (SoundTriggerModule.this) {
-                    checkValid();
-                    if (mNumLoadedModels == mProperties.maxSoundModels) {
-                        throw new RecoverableException(Status.RESOURCE_CONTENTION,
-                                "Maximum number of models loaded.");
-                    }
-                    Model loadedModel = new Model();
-                    int result = loadedModel.load(model, audioSession);
-                    ++mNumLoadedModels;
-                    return result;
-                }
-            } catch (Exception e) {
-                // We must do this outside the lock, to avoid possible deadlocks with the remote
-                // process that provides the audio sessions, which may also be calling into us.
+            synchronized (SoundTriggerModule.this) {
+                SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
+                        mAudioSessionProvider.acquireSession();
                 try {
-                    mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
-                } catch (Exception ee) {
-                    Log.e(TAG, "Failed to release session.", ee);
+                    checkValid();
+                    Model loadedModel = new Model();
+                    return loadedModel.load(model, audioSession);
+                } catch (Exception e) {
+                    // We must do this outside the lock, to avoid possible deadlocks with the remote
+                    // process that provides the audio sessions, which may also be calling into us.
+                    try {
+                        mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
+                    } catch (Exception ee) {
+                        Log.e(TAG, "Failed to release session.", ee);
+                    }
+                    throw e;
                 }
-                throw e;
             }
         }
 
         @Override
         public int loadPhraseModel(@NonNull PhraseSoundModel model) {
-            // We must do this outside the lock, to avoid possible deadlocks with the remote process
-            // that provides the audio sessions, which may also be calling into us.
-            SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
-                    mAudioSessionProvider.acquireSession();
-
-            try {
-                synchronized (SoundTriggerModule.this) {
+            synchronized (SoundTriggerModule.this) {
+                SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
+                        mAudioSessionProvider.acquireSession();
+                try {
                     checkValid();
-                    if (mNumLoadedModels == mProperties.maxSoundModels) {
-                        throw new RecoverableException(Status.RESOURCE_CONTENTION,
-                                "Maximum number of models loaded.");
-                    }
                     Model loadedModel = new Model();
                     int result = loadedModel.load(model, audioSession);
-                    ++mNumLoadedModels;
                     Log.d(TAG, String.format("loadPhraseModel()->%d", result));
                     return result;
+                } catch (Exception e) {
+                    // We must do this outside the lock, to avoid possible deadlocks with the remote
+                    // process that provides the audio sessions, which may also be calling into us.
+                    try {
+                        mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
+                    } catch (Exception ee) {
+                        Log.e(TAG, "Failed to release session.", ee);
+                    }
+                    throw e;
                 }
-            } catch (Exception e) {
-                // We must do this outside the lock, to avoid possible deadlocks with the remote
-                // process that provides the audio sessions, which may also be calling into us.
-                try {
-                    mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
-                } catch (Exception ee) {
-                    Log.e(TAG, "Failed to release session.", ee);
-                }
-                throw e;
             }
         }
 
         @Override
         public void unloadModel(int modelHandle) {
-            int sessionId;
             synchronized (SoundTriggerModule.this) {
+                int sessionId;
                 checkValid();
                 sessionId = mLoadedModels.get(modelHandle).unload();
-                --mNumLoadedModels;
+                mAudioSessionProvider.releaseSession(sessionId);
             }
-
-            // We must do this outside the lock, to avoid possible deadlocks with the remote process
-            // that provides the audio sessions, which may also be calling into us.
-            mAudioSessionProvider.releaseSession(sessionId);
         }
 
         @Override
         public void startRecognition(int modelHandle, @NonNull RecognitionConfig config) {
-            // We should never invoke callbacks while holding the lock, since this may deadlock with
-            // forward calls. Thus, we first gather all the callbacks we need to invoke while holding
-            // the lock, but invoke them after releasing it.
-            List<Runnable> callbacks = new LinkedList<>();
-
             synchronized (SoundTriggerModule.this) {
                 checkValid();
-                mLoadedModels.get(modelHandle).startRecognition(config, callbacks);
-            }
-
-            for (Runnable callback : callbacks) {
-                callback.run();
+                mLoadedModels.get(modelHandle).startRecognition(config);
             }
         }
 
@@ -407,27 +349,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
         }
 
         /**
-         * Abort all currently active recognitions.
-         * @param callbacks Will be appended with a list of callbacks that need to be invoked
-         *                  after this method returns, without holding the module lock.
-         */
-        private void abortActiveRecognitions(@NonNull List<Runnable> callbacks) {
-            for (Model model : mLoadedModels.values()) {
-                model.abortActiveRecognition(callbacks);
-            }
-        }
-
-        private void notifyRecognitionAvailability() {
-            try {
-                mCallback.onRecognitionAvailabilityChange(mRecognitionAvailable);
-            } catch (RemoteException e) {
-                // Dead client will be handled by binderDied() - no need to handle here.
-                // In any case, client callbacks are considered best effort.
-                Log.e(TAG, "Client callback execption.", e);
-            }
-        }
-
-        /**
          * The underlying module HAL is dead.
          * @return The client callback that needs to be invoked to notify the client.
          */
@@ -455,10 +376,9 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
          *
          * All model-based operations are delegated to this class and implemented here.
          */
-        private class Model implements ISoundTriggerHw2.Callback {
+        private class Model implements ISoundTriggerHw2.ModelCallback {
             public int mHandle;
             private ModelState mState = ModelState.INIT;
-            private int mModelType = SoundModelType.UNKNOWN;
             private SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession mSession;
 
             private @NonNull
@@ -473,11 +393,10 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
             private int load(@NonNull SoundModel model,
                     SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
-                mModelType = model.type;
                 mSession = audioSession;
                 ISoundTriggerHw.SoundModel hidlModel = ConversionUtil.aidl2hidlSoundModel(model);
 
-                mHandle = mHalService.loadSoundModel(hidlModel, this, 0);
+                mHandle = mHalService.loadSoundModel(hidlModel, this);
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
                 return mHandle;
@@ -485,12 +404,11 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
             private int load(@NonNull PhraseSoundModel model,
                     SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
-                mModelType = model.common.type;
                 mSession = audioSession;
                 ISoundTriggerHw.PhraseSoundModel hidlModel =
                         ConversionUtil.aidl2hidlPhraseSoundModel(model);
 
-                mHandle = mHalService.loadPhraseSoundModel(hidlModel, this, 0);
+                mHandle = mHalService.loadPhraseSoundModel(hidlModel, this);
 
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
@@ -507,18 +425,12 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                 return mSession.mSessionHandle;
             }
 
-            private void startRecognition(@NonNull RecognitionConfig config,
-                    @NonNull List<Runnable> callbacks) {
-                if (!mRecognitionAvailable) {
-                    // Recognition is unavailable - send an abort event immediately.
-                    callbacks.add(this::notifyAbort);
-                    return;
-                }
+            private void startRecognition(@NonNull RecognitionConfig config) {
                 android.hardware.soundtrigger.V2_3.RecognitionConfig hidlConfig =
                         ConversionUtil.aidl2hidlRecognitionConfig(config);
                 hidlConfig.base.header.captureDevice = mSession.mDeviceHandle;
                 hidlConfig.base.header.captureHandle = mSession.mIoHandle;
-                mHalService.startRecognition(mHandle, hidlConfig, this, 0);
+                mHalService.startRecognition(mHandle, hidlConfig);
                 setState(ModelState.ACTIVE);
             }
 
@@ -558,62 +470,10 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                                 ConversionUtil.aidl2hidlModelParameter(modelParam)));
             }
 
-            /**
-             * Abort the recognition, if active.
-             * @param callbacks Will be appended with a list of callbacks that need to be invoked
-             *                  after this method returns, without holding the module lock.
-             */
-            private void abortActiveRecognition(List<Runnable> callbacks) {
-                // If we're inactive, do nothing.
-                if (getState() != ModelState.ACTIVE) {
-                    return;
-                }
-                // Stop recognition.
-                stopRecognition();
-
-                // Notify the client that recognition has been aborted.
-                callbacks.add(this::notifyAbort);
-            }
-
-            /** Notify the client that recognition has been aborted. */
-            private void notifyAbort() {
-                try {
-                    switch (mModelType) {
-                        case SoundModelType.GENERIC: {
-                            android.media.soundtrigger_middleware.RecognitionEvent event =
-                                    newEmptyRecognitionEvent();
-                            event.status =
-                                    android.media.soundtrigger_middleware.RecognitionStatus.ABORTED;
-                            event.type = SoundModelType.GENERIC;
-                            mCallback.onRecognition(mHandle, event);
-                        }
-                        break;
-
-                        case SoundModelType.KEYPHRASE: {
-                            android.media.soundtrigger_middleware.PhraseRecognitionEvent event =
-                                    newEmptyPhraseRecognitionEvent();
-                            event.common.status =
-                                    android.media.soundtrigger_middleware.RecognitionStatus.ABORTED;
-                            event.common.type = SoundModelType.KEYPHRASE;
-                            mCallback.onPhraseRecognition(mHandle, event);
-                        }
-                        break;
-
-                        default:
-                            Log.e(TAG, "Unknown model type: " + mModelType);
-
-                    }
-                } catch (RemoteException e) {
-                    // Dead client will be handled by binderDied() - no need to handle here.
-                    // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback execption.", e);
-                }
-            }
-
             @Override
             public void recognitionCallback(
-                    @NonNull ISoundTriggerHwCallback.RecognitionEvent recognitionEvent,
-                    int cookie) {
+                    @NonNull ISoundTriggerHwCallback.RecognitionEvent recognitionEvent) {
+                ISoundTriggerCallback callback;
                 RecognitionEvent aidlEvent =
                         ConversionUtil.hidl2aidlRecognitionEvent(recognitionEvent);
                 aidlEvent.captureSession = mSession.mSessionHandle;
@@ -621,10 +481,13 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                     if (aidlEvent.status != RecognitionStatus.FORCED) {
                         setState(ModelState.LOADED);
                     }
+                    callback = mCallback;
                 }
                 // The callback must be invoked outside of the lock.
                 try {
-                    mCallback.onRecognition(mHandle, aidlEvent);
+                    if (callback != null) {
+                        callback.onRecognition(mHandle, aidlEvent);
+                    }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.
                     throw e.rethrowAsRuntimeException();
@@ -633,8 +496,8 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
             @Override
             public void phraseRecognitionCallback(
-                    @NonNull ISoundTriggerHwCallback.PhraseRecognitionEvent phraseRecognitionEvent,
-                    int cookie) {
+                    @NonNull ISoundTriggerHwCallback.PhraseRecognitionEvent phraseRecognitionEvent) {
+                ISoundTriggerCallback callback;
                 PhraseRecognitionEvent aidlEvent =
                         ConversionUtil.hidl2aidlPhraseRecognitionEvent(phraseRecognitionEvent);
                 aidlEvent.common.captureSession = mSession.mSessionHandle;
@@ -643,45 +506,37 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                     if (aidlEvent.common.status != RecognitionStatus.FORCED) {
                         setState(ModelState.LOADED);
                     }
+                    callback = mCallback;
                 }
 
                 // The callback must be invoked outside of the lock.
                 try {
-                    mCallback.onPhraseRecognition(mHandle, aidlEvent);
+                    if (callback != null) {
+                        mCallback.onPhraseRecognition(mHandle, aidlEvent);
+                    }
+                } catch (RemoteException e) {
+                    // We're not expecting any exceptions here.
+                    throw e.rethrowAsRuntimeException();
+                }
+            }
+
+            @Override
+            public void modelUnloaded(int modelHandle) {
+                ISoundTriggerCallback callback;
+                synchronized (SoundTriggerModule.this) {
+                    callback = mCallback;
+                }
+
+                // The callback must be invoked outside of the lock.
+                try {
+                    if (callback != null) {
+                        callback.onModelUnloaded(modelHandle);
+                    }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.
                     throw e.rethrowAsRuntimeException();
                 }
             }
         }
-    }
-
-    /**
-     * Creates a default-initialized recognition event.
-     *
-     * Non-nullable object fields are default constructed.
-     * Non-nullable array fields are initialized to 0 length.
-     *
-     * @return The event.
-     */
-    private static RecognitionEvent newEmptyRecognitionEvent() {
-        RecognitionEvent result = new RecognitionEvent();
-        result.data = new byte[0];
-        return result;
-    }
-
-    /**
-     * Creates a default-initialized phrase recognition event.
-     *
-     * Non-nullable object fields are default constructed.
-     * Non-nullable array fields are initialized to 0 length.
-     *
-     * @return The event.
-     */
-    private static PhraseRecognitionEvent newEmptyPhraseRecognitionEvent() {
-        PhraseRecognitionEvent result = new PhraseRecognitionEvent();
-        result.common = newEmptyRecognitionEvent();
-        result.phraseExtras = new PhraseRecognitionExtra[0];
-        return result;
     }
 }

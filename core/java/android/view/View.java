@@ -22188,9 +22188,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * and hardware acceleration.
      */
     boolean draw(Canvas canvas, ViewGroup parent, long drawingTime) {
-        // Clear the overscroll effect:
-        // TODO: Use internal API instead of overriding the existing RenderEffect
-        setRenderEffect(null);
 
         final boolean hardwareAcceleratedCanvas = canvas.isHardwareAccelerated();
         /* If an attached view draws to a HW canvas, it may use its RenderNode + DisplayList.
