@@ -227,7 +227,7 @@
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Naghahandang i-update…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Pinoproseso ang package ng update…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Nagre-restart…"</string>
-    <string name="reboot_to_reset_title" msgid="2226229680017882787">"I-reset ang data ng factory"</string>
+    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Pag-reset sa factory data"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Nagre-restart…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Nagsa-shut down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Mag-shut down ang iyong tablet."</string>
@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Pinapayagan ang app na baguhin ang iyong koleksyon ng larawan."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"basahin ang mga lokasyon mula sa iyong koleksyon ng media"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Pinapayagan ang app na basahin ang mga lokasyon mula sa iyong koleksyon ng media."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"I-verify na ikaw ito"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Walang biometric hardware"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Nakansela ang pag-authenticate"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Hindi nakilala"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Nakansela ang pag-authenticate"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Walang itinakdang pin, pattern, o password"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Nagkaroon ng error sa pag-authenticate"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Hindi buo ang natukoy na fingerprint. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Hindi maproseso ang fingerprint. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Marumi ang sensor ng fingerprint. Pakilinis at subukang muli."</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Walang sensor ng fingerprint ang device na ito."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Pansamantalang na-disable ang sensor."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Daliri <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Gamitin ang iyong fingerprint para magpatuloy"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Hindi na makilala ang mukha. Subukang muli."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Masyadong magkatulad, pakibago ang pose mo."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Huwag masyadong lumingon."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Bawasan ang pag-tilt ng iyong ulo."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Huwag masyadong lumingon."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Alisin ang anumang humaharang sa iyong mukha."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Linisin ang itaas ng iyong screen, kasama ang itim na bar"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Hindi sinusuportahan ang face unlock sa device na ito."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Pansamantalang na-disable ang sensor."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Mukha <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Face icon"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gamitin ang Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Pag-invert ng Kulay"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Pagwawasto ng Kulay"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Bawasan ang liwanag"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pinindot nang matagal ang volume keys. Na-on ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pinindot nang matagal ang volume keys. Na-off ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Pindutin nang matagal ang parehong volume key sa loob ng tatlong segundo para magamit ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Alerto sa phishing"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Profile sa trabaho"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Naalertuhan"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Na-verify"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Palawakin"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"I-collapse"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"i-toggle ang pagpapalawak"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"Balita at Mga Magazine"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Mga Mapa at Navigation"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Productivity"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Storage ng device"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Pag-debug ng USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"oras"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Para magpatuloy, kailangan ng &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ng access sa camera ng iyong device."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"I-on"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privacy ng Sensor"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Icon ng application"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Representasyon ng brand ng application"</string>
 </resources>

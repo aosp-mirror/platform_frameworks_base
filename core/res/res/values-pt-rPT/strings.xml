@@ -261,7 +261,7 @@
       <item quantity="one">A tirar uma captura de ecrã do relatório de erro dentro de <xliff:g id="NUMBER_0">%d</xliff:g> segundo…</item>
     </plurals>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Captura de ecrã tirada com o relatório de erro."</string>
-    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Falha ao tirar captura de ecrã com o relatório de erro."</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Falha ao fazer captura de ecrã com o relatório de erro."</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Som desativado"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"O som está ativado"</string>
@@ -335,7 +335,7 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"É possível tocar, deslizar rapidamente, juntar os dedos e realizar outros gestos"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos de impressão digital"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pode capturar gestos realizados no sensor de impressões digitais do dispositivo."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Tirar captura de ecrã"</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fazer captura de ecrã"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"É possível tirar uma captura de ecrã."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desativar ou modificar barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite à app desativar a barra de estado ou adicionar e remover ícones do sistema."</string>
@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Permite que a app modifique a sua coleção de fotos."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ler as localizações a partir da sua coleção de multimédia"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permite que a app leia as localizações a partir da sua coleção de multimédia."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Confirme a sua identidade"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biométrico indisponível."</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autenticação cancelada"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Não reconhecido."</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autenticação cancelada"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nenhum PIN, padrão ou palavra-passe definidos."</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erro ao autenticar."</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Impressão digital parcial detetada. Tente novamente."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Não foi possível processar a impressão digital. Tente novamente."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"O sensor de impressões digitais está sujo. Limpe-o e tente novamente."</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo não tem sensor de impressões digitais."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor temporariamente desativado."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utilize a sua impressão digital para continuar."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Impossível reconhecer o rosto. Tente novamente."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Muito parecida, mude de pose."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Rode a cabeça um pouco menos."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Incline a cabeça um pouco menos."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Rode a cabeça um pouco menos."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Remova tudo o que esteja a ocultar o seu rosto."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpe a parte superior do ecrã, incluindo a barra preta."</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Desbloqueio facial não suportado neste dispositivo."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor temporariamente desativado."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ícone de rosto"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar atalho"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correção da cor"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Reduza o brilho"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas do volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Prima sem soltar as teclas de volume durante três segundos para utilizar o serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Alerta de phishing."</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Perfil de trabalho"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Alertado"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Validada"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Expandir"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Reduzir"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"ativar/desativar expansão"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"Notícias e revistas"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Mapas e navegação"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Produtividade"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Armazenamento do dispositivo"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Depuração USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"hora"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Para continuar, a app &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; precisa de acesso à câmara do dispositivo."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Ativar"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privacidade dos sensores"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ícone de aplicação."</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imagem de branding da aplicação."</string>
 </resources>
