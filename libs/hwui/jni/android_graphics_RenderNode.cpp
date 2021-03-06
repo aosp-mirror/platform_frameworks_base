@@ -180,14 +180,13 @@ static jboolean android_view_RenderNode_clearStretch(CRITICAL_JNI_PARAMS_COMMA j
 }
 
 static jboolean android_view_RenderNode_stretch(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr,
-        jfloat left, jfloat top, jfloat right, jfloat bottom, jfloat vX, jfloat vY, jfloat max) {
+                                                jfloat left, jfloat top, jfloat right,
+                                                jfloat bottom, jfloat vX, jfloat vY, jfloat max) {
+    StretchEffect effect =
+            StretchEffect(SkRect::MakeLTRB(left, top, right, bottom), {.fX = vX, .fY = vY}, max);
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     renderNode->mutateStagingProperties().mutateLayerProperties().mutableStretchEffect().mergeWith(
-            StretchEffect{
-        .stretchArea = SkRect::MakeLTRB(left, top, right, bottom),
-        .stretchDirection = {.fX = vX, .fY = vY},
-        .maxStretchAmount = max
-    });
+            effect);
     renderNode->setPropertyFieldsDirty(RenderNode::GENERIC);
     return true;
 }
@@ -659,10 +658,11 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 return;
             }
 #ifdef __ANDROID__  // Layoutlib does not support CanvasContext
+            SkVector stretchDirection = effect->getStretchDirection();
             env->CallVoidMethod(localref, gPositionListener_ApplyStretchMethod,
                                 info.canvasContext.getFrameNumber(), area.left, area.top,
-                                area.right, area.bottom, effect->stretchDirection.fX,
-                                effect->stretchDirection.fY, effect->maxStretchAmount);
+                                area.right, area.bottom, stretchDirection.fX, stretchDirection.fY,
+                                effect->maxStretchAmount);
 #endif
             env->DeleteLocalRef(localref);
         }
@@ -702,106 +702,110 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 const char* const kClassPathName = "android/graphics/RenderNode";
 
 static const JNINativeMethod gMethods[] = {
-// ----------------------------------------------------------------------------
-// Regular JNI
-// ----------------------------------------------------------------------------
-    { "nCreate",               "(Ljava/lang/String;)J", (void*) android_view_RenderNode_create },
-    { "nGetNativeFinalizer",   "()J",    (void*) android_view_RenderNode_getNativeFinalizer },
-    { "nOutput",               "(J)V",    (void*) android_view_RenderNode_output },
-    { "nGetUsageSize",         "(J)I",    (void*) android_view_RenderNode_getUsageSize },
-    { "nGetAllocatedSize",         "(J)I",    (void*) android_view_RenderNode_getAllocatedSize },
-    { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
-    { "nEndAllAnimators",          "(J)V", (void*) android_view_RenderNode_endAllAnimators },
-    { "nRequestPositionUpdates",   "(JLandroid/graphics/RenderNode$PositionUpdateListener;)V", (void*) android_view_RenderNode_requestPositionUpdates },
+        // ----------------------------------------------------------------------------
+        // Regular JNI
+        // ----------------------------------------------------------------------------
+        {"nCreate", "(Ljava/lang/String;)J", (void*)android_view_RenderNode_create},
+        {"nGetNativeFinalizer", "()J", (void*)android_view_RenderNode_getNativeFinalizer},
+        {"nOutput", "(J)V", (void*)android_view_RenderNode_output},
+        {"nGetUsageSize", "(J)I", (void*)android_view_RenderNode_getUsageSize},
+        {"nGetAllocatedSize", "(J)I", (void*)android_view_RenderNode_getAllocatedSize},
+        {"nAddAnimator", "(JJ)V", (void*)android_view_RenderNode_addAnimator},
+        {"nEndAllAnimators", "(J)V", (void*)android_view_RenderNode_endAllAnimators},
+        {"nRequestPositionUpdates", "(JLandroid/graphics/RenderNode$PositionUpdateListener;)V",
+         (void*)android_view_RenderNode_requestPositionUpdates},
 
-// ----------------------------------------------------------------------------
-// Critical JNI via @CriticalNative annotation in RenderNode.java
-// ----------------------------------------------------------------------------
-    { "nDiscardDisplayList",   "(J)V",   (void*) android_view_RenderNode_discardDisplayList },
-    { "nIsValid",              "(J)Z",   (void*) android_view_RenderNode_isValid },
-    { "nSetLayerType",         "(JI)Z",  (void*) android_view_RenderNode_setLayerType },
-    { "nGetLayerType",         "(J)I",   (void*) android_view_RenderNode_getLayerType },
-    { "nSetLayerPaint",        "(JJ)Z",  (void*) android_view_RenderNode_setLayerPaint },
-    { "nSetStaticMatrix",      "(JJ)Z",  (void*) android_view_RenderNode_setStaticMatrix },
-    { "nSetAnimationMatrix",   "(JJ)Z",  (void*) android_view_RenderNode_setAnimationMatrix },
-    { "nGetAnimationMatrix",   "(JJ)Z",  (void*) android_view_RenderNode_getAnimationMatrix },
-    { "nSetClipToBounds",      "(JZ)Z",  (void*) android_view_RenderNode_setClipToBounds },
-    { "nGetClipToBounds",      "(J)Z",   (void*) android_view_RenderNode_getClipToBounds },
-    { "nSetClipBounds",        "(JIIII)Z", (void*) android_view_RenderNode_setClipBounds },
-    { "nSetClipBoundsEmpty",   "(J)Z",   (void*) android_view_RenderNode_setClipBoundsEmpty },
-    { "nSetProjectBackwards",  "(JZ)Z",  (void*) android_view_RenderNode_setProjectBackwards },
-    { "nSetProjectionReceiver","(JZ)Z",  (void*) android_view_RenderNode_setProjectionReceiver },
+        // ----------------------------------------------------------------------------
+        // Critical JNI via @CriticalNative annotation in RenderNode.java
+        // ----------------------------------------------------------------------------
+        {"nDiscardDisplayList", "(J)V", (void*)android_view_RenderNode_discardDisplayList},
+        {"nIsValid", "(J)Z", (void*)android_view_RenderNode_isValid},
+        {"nSetLayerType", "(JI)Z", (void*)android_view_RenderNode_setLayerType},
+        {"nGetLayerType", "(J)I", (void*)android_view_RenderNode_getLayerType},
+        {"nSetLayerPaint", "(JJ)Z", (void*)android_view_RenderNode_setLayerPaint},
+        {"nSetStaticMatrix", "(JJ)Z", (void*)android_view_RenderNode_setStaticMatrix},
+        {"nSetAnimationMatrix", "(JJ)Z", (void*)android_view_RenderNode_setAnimationMatrix},
+        {"nGetAnimationMatrix", "(JJ)Z", (void*)android_view_RenderNode_getAnimationMatrix},
+        {"nSetClipToBounds", "(JZ)Z", (void*)android_view_RenderNode_setClipToBounds},
+        {"nGetClipToBounds", "(J)Z", (void*)android_view_RenderNode_getClipToBounds},
+        {"nSetClipBounds", "(JIIII)Z", (void*)android_view_RenderNode_setClipBounds},
+        {"nSetClipBoundsEmpty", "(J)Z", (void*)android_view_RenderNode_setClipBoundsEmpty},
+        {"nSetProjectBackwards", "(JZ)Z", (void*)android_view_RenderNode_setProjectBackwards},
+        {"nSetProjectionReceiver", "(JZ)Z", (void*)android_view_RenderNode_setProjectionReceiver},
 
-    { "nSetOutlineRoundRect",  "(JIIIIFF)Z", (void*) android_view_RenderNode_setOutlineRoundRect },
-    { "nSetOutlinePath",       "(JJF)Z", (void*) android_view_RenderNode_setOutlinePath },
-    { "nSetOutlineEmpty",      "(J)Z",   (void*) android_view_RenderNode_setOutlineEmpty },
-    { "nSetOutlineNone",       "(J)Z",   (void*) android_view_RenderNode_setOutlineNone },
-    { "nClearStretch",         "(J)Z",   (void*) android_view_RenderNode_clearStretch },
-    { "nStretch",              "(JFFFFFFF)Z",   (void*) android_view_RenderNode_stretch },
-    { "nHasShadow",            "(J)Z",   (void*) android_view_RenderNode_hasShadow },
-    { "nSetSpotShadowColor",   "(JI)Z",  (void*) android_view_RenderNode_setSpotShadowColor },
-    { "nGetSpotShadowColor",   "(J)I",   (void*) android_view_RenderNode_getSpotShadowColor },
-    { "nSetAmbientShadowColor","(JI)Z",  (void*) android_view_RenderNode_setAmbientShadowColor },
-    { "nGetAmbientShadowColor","(J)I",   (void*) android_view_RenderNode_getAmbientShadowColor },
-    { "nSetClipToOutline",     "(JZ)Z",  (void*) android_view_RenderNode_setClipToOutline },
-    { "nSetRevealClip",        "(JZFFF)Z", (void*) android_view_RenderNode_setRevealClip },
+        {"nSetOutlineRoundRect", "(JIIIIFF)Z", (void*)android_view_RenderNode_setOutlineRoundRect},
+        {"nSetOutlinePath", "(JJF)Z", (void*)android_view_RenderNode_setOutlinePath},
+        {"nSetOutlineEmpty", "(J)Z", (void*)android_view_RenderNode_setOutlineEmpty},
+        {"nSetOutlineNone", "(J)Z", (void*)android_view_RenderNode_setOutlineNone},
+        {"nClearStretch", "(J)Z", (void*)android_view_RenderNode_clearStretch},
+        {"nStretch", "(JFFFFFFF)Z", (void*)android_view_RenderNode_stretch},
+        {"nHasShadow", "(J)Z", (void*)android_view_RenderNode_hasShadow},
+        {"nSetSpotShadowColor", "(JI)Z", (void*)android_view_RenderNode_setSpotShadowColor},
+        {"nGetSpotShadowColor", "(J)I", (void*)android_view_RenderNode_getSpotShadowColor},
+        {"nSetAmbientShadowColor", "(JI)Z", (void*)android_view_RenderNode_setAmbientShadowColor},
+        {"nGetAmbientShadowColor", "(J)I", (void*)android_view_RenderNode_getAmbientShadowColor},
+        {"nSetClipToOutline", "(JZ)Z", (void*)android_view_RenderNode_setClipToOutline},
+        {"nSetRevealClip", "(JZFFF)Z", (void*)android_view_RenderNode_setRevealClip},
 
-    { "nSetAlpha",             "(JF)Z",  (void*) android_view_RenderNode_setAlpha },
-    { "nSetRenderEffect",      "(JJ)Z",  (void*) android_view_RenderNode_setRenderEffect },
-    { "nSetHasOverlappingRendering", "(JZ)Z",
-            (void*) android_view_RenderNode_setHasOverlappingRendering },
-    { "nSetUsageHint",    "(JI)V", (void*) android_view_RenderNode_setUsageHint },
-    { "nSetElevation",         "(JF)Z",  (void*) android_view_RenderNode_setElevation },
-    { "nSetTranslationX",      "(JF)Z",  (void*) android_view_RenderNode_setTranslationX },
-    { "nSetTranslationY",      "(JF)Z",  (void*) android_view_RenderNode_setTranslationY },
-    { "nSetTranslationZ",      "(JF)Z",  (void*) android_view_RenderNode_setTranslationZ },
-    { "nSetRotation",          "(JF)Z",  (void*) android_view_RenderNode_setRotation },
-    { "nSetRotationX",         "(JF)Z",  (void*) android_view_RenderNode_setRotationX },
-    { "nSetRotationY",         "(JF)Z",  (void*) android_view_RenderNode_setRotationY },
-    { "nSetScaleX",            "(JF)Z",  (void*) android_view_RenderNode_setScaleX },
-    { "nSetScaleY",            "(JF)Z",  (void*) android_view_RenderNode_setScaleY },
-    { "nSetPivotX",            "(JF)Z",  (void*) android_view_RenderNode_setPivotX },
-    { "nSetPivotY",            "(JF)Z",  (void*) android_view_RenderNode_setPivotY },
-    { "nResetPivot",           "(J)Z",   (void*) android_view_RenderNode_resetPivot },
-    { "nSetCameraDistance",    "(JF)Z",  (void*) android_view_RenderNode_setCameraDistance },
-    { "nSetLeft",              "(JI)Z",  (void*) android_view_RenderNode_setLeft },
-    { "nSetTop",               "(JI)Z",  (void*) android_view_RenderNode_setTop },
-    { "nSetRight",             "(JI)Z",  (void*) android_view_RenderNode_setRight },
-    { "nSetBottom",            "(JI)Z",  (void*) android_view_RenderNode_setBottom },
-    { "nGetLeft",              "(J)I",  (void*) android_view_RenderNode_getLeft },
-    { "nGetTop",               "(J)I",  (void*) android_view_RenderNode_getTop },
-    { "nGetRight",             "(J)I",  (void*) android_view_RenderNode_getRight },
-    { "nGetBottom",            "(J)I",  (void*) android_view_RenderNode_getBottom },
-    { "nSetLeftTopRightBottom","(JIIII)Z", (void*) android_view_RenderNode_setLeftTopRightBottom },
-    { "nOffsetLeftAndRight",   "(JI)Z",  (void*) android_view_RenderNode_offsetLeftAndRight },
-    { "nOffsetTopAndBottom",   "(JI)Z",  (void*) android_view_RenderNode_offsetTopAndBottom },
+        {"nSetAlpha", "(JF)Z", (void*)android_view_RenderNode_setAlpha},
+        {"nSetRenderEffect", "(JJ)Z", (void*)android_view_RenderNode_setRenderEffect},
+        {"nSetHasOverlappingRendering", "(JZ)Z",
+         (void*)android_view_RenderNode_setHasOverlappingRendering},
+        {"nSetUsageHint", "(JI)V", (void*)android_view_RenderNode_setUsageHint},
+        {"nSetElevation", "(JF)Z", (void*)android_view_RenderNode_setElevation},
+        {"nSetTranslationX", "(JF)Z", (void*)android_view_RenderNode_setTranslationX},
+        {"nSetTranslationY", "(JF)Z", (void*)android_view_RenderNode_setTranslationY},
+        {"nSetTranslationZ", "(JF)Z", (void*)android_view_RenderNode_setTranslationZ},
+        {"nSetRotation", "(JF)Z", (void*)android_view_RenderNode_setRotation},
+        {"nSetRotationX", "(JF)Z", (void*)android_view_RenderNode_setRotationX},
+        {"nSetRotationY", "(JF)Z", (void*)android_view_RenderNode_setRotationY},
+        {"nSetScaleX", "(JF)Z", (void*)android_view_RenderNode_setScaleX},
+        {"nSetScaleY", "(JF)Z", (void*)android_view_RenderNode_setScaleY},
+        {"nSetPivotX", "(JF)Z", (void*)android_view_RenderNode_setPivotX},
+        {"nSetPivotY", "(JF)Z", (void*)android_view_RenderNode_setPivotY},
+        {"nResetPivot", "(J)Z", (void*)android_view_RenderNode_resetPivot},
+        {"nSetCameraDistance", "(JF)Z", (void*)android_view_RenderNode_setCameraDistance},
+        {"nSetLeft", "(JI)Z", (void*)android_view_RenderNode_setLeft},
+        {"nSetTop", "(JI)Z", (void*)android_view_RenderNode_setTop},
+        {"nSetRight", "(JI)Z", (void*)android_view_RenderNode_setRight},
+        {"nSetBottom", "(JI)Z", (void*)android_view_RenderNode_setBottom},
+        {"nGetLeft", "(J)I", (void*)android_view_RenderNode_getLeft},
+        {"nGetTop", "(J)I", (void*)android_view_RenderNode_getTop},
+        {"nGetRight", "(J)I", (void*)android_view_RenderNode_getRight},
+        {"nGetBottom", "(J)I", (void*)android_view_RenderNode_getBottom},
+        {"nSetLeftTopRightBottom", "(JIIII)Z",
+         (void*)android_view_RenderNode_setLeftTopRightBottom},
+        {"nOffsetLeftAndRight", "(JI)Z", (void*)android_view_RenderNode_offsetLeftAndRight},
+        {"nOffsetTopAndBottom", "(JI)Z", (void*)android_view_RenderNode_offsetTopAndBottom},
 
-    { "nHasOverlappingRendering", "(J)Z",  (void*) android_view_RenderNode_hasOverlappingRendering },
-    { "nGetClipToOutline",        "(J)Z",  (void*) android_view_RenderNode_getClipToOutline },
-    { "nGetAlpha",                "(J)F",  (void*) android_view_RenderNode_getAlpha },
-    { "nGetCameraDistance",       "(J)F",  (void*) android_view_RenderNode_getCameraDistance },
-    { "nGetScaleX",               "(J)F",  (void*) android_view_RenderNode_getScaleX },
-    { "nGetScaleY",               "(J)F",  (void*) android_view_RenderNode_getScaleY },
-    { "nGetElevation",            "(J)F",  (void*) android_view_RenderNode_getElevation },
-    { "nGetTranslationX",         "(J)F",  (void*) android_view_RenderNode_getTranslationX },
-    { "nGetTranslationY",         "(J)F",  (void*) android_view_RenderNode_getTranslationY },
-    { "nGetTranslationZ",         "(J)F",  (void*) android_view_RenderNode_getTranslationZ },
-    { "nGetRotation",             "(J)F",  (void*) android_view_RenderNode_getRotation },
-    { "nGetRotationX",            "(J)F",  (void*) android_view_RenderNode_getRotationX },
-    { "nGetRotationY",            "(J)F",  (void*) android_view_RenderNode_getRotationY },
-    { "nIsPivotExplicitlySet",    "(J)Z",  (void*) android_view_RenderNode_isPivotExplicitlySet },
-    { "nHasIdentityMatrix",       "(J)Z",  (void*) android_view_RenderNode_hasIdentityMatrix },
+        {"nHasOverlappingRendering", "(J)Z",
+         (void*)android_view_RenderNode_hasOverlappingRendering},
+        {"nGetClipToOutline", "(J)Z", (void*)android_view_RenderNode_getClipToOutline},
+        {"nGetAlpha", "(J)F", (void*)android_view_RenderNode_getAlpha},
+        {"nGetCameraDistance", "(J)F", (void*)android_view_RenderNode_getCameraDistance},
+        {"nGetScaleX", "(J)F", (void*)android_view_RenderNode_getScaleX},
+        {"nGetScaleY", "(J)F", (void*)android_view_RenderNode_getScaleY},
+        {"nGetElevation", "(J)F", (void*)android_view_RenderNode_getElevation},
+        {"nGetTranslationX", "(J)F", (void*)android_view_RenderNode_getTranslationX},
+        {"nGetTranslationY", "(J)F", (void*)android_view_RenderNode_getTranslationY},
+        {"nGetTranslationZ", "(J)F", (void*)android_view_RenderNode_getTranslationZ},
+        {"nGetRotation", "(J)F", (void*)android_view_RenderNode_getRotation},
+        {"nGetRotationX", "(J)F", (void*)android_view_RenderNode_getRotationX},
+        {"nGetRotationY", "(J)F", (void*)android_view_RenderNode_getRotationY},
+        {"nIsPivotExplicitlySet", "(J)Z", (void*)android_view_RenderNode_isPivotExplicitlySet},
+        {"nHasIdentityMatrix", "(J)Z", (void*)android_view_RenderNode_hasIdentityMatrix},
 
-    { "nGetTransformMatrix",       "(JJ)V", (void*) android_view_RenderNode_getTransformMatrix },
-    { "nGetInverseTransformMatrix","(JJ)V", (void*) android_view_RenderNode_getInverseTransformMatrix },
+        {"nGetTransformMatrix", "(JJ)V", (void*)android_view_RenderNode_getTransformMatrix},
+        {"nGetInverseTransformMatrix", "(JJ)V",
+         (void*)android_view_RenderNode_getInverseTransformMatrix},
 
-    { "nGetPivotX",                "(J)F",  (void*) android_view_RenderNode_getPivotX },
-    { "nGetPivotY",                "(J)F",  (void*) android_view_RenderNode_getPivotY },
-    { "nGetWidth",                 "(J)I",  (void*) android_view_RenderNode_getWidth },
-    { "nGetHeight",                "(J)I",  (void*) android_view_RenderNode_getHeight },
-    { "nSetAllowForceDark",        "(JZ)Z", (void*) android_view_RenderNode_setAllowForceDark },
-    { "nGetAllowForceDark",        "(J)Z",  (void*) android_view_RenderNode_getAllowForceDark },
-    { "nGetUniqueId",              "(J)J",  (void*) android_view_RenderNode_getUniqueId },
+        {"nGetPivotX", "(J)F", (void*)android_view_RenderNode_getPivotX},
+        {"nGetPivotY", "(J)F", (void*)android_view_RenderNode_getPivotY},
+        {"nGetWidth", "(J)I", (void*)android_view_RenderNode_getWidth},
+        {"nGetHeight", "(J)I", (void*)android_view_RenderNode_getHeight},
+        {"nSetAllowForceDark", "(JZ)Z", (void*)android_view_RenderNode_setAllowForceDark},
+        {"nGetAllowForceDark", "(J)Z", (void*)android_view_RenderNode_getAllowForceDark},
+        {"nGetUniqueId", "(J)J", (void*)android_view_RenderNode_getUniqueId},
 };
 
 int register_android_view_RenderNode(JNIEnv* env) {

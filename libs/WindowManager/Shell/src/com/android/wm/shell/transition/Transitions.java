@@ -214,8 +214,8 @@ public class Transitions {
             final SurfaceControl leash = change.getLeash();
             final int mode = info.getChanges().get(i).getMode();
 
-            // Don't move anything with an animating parent
-            if (change.getParent() != null) {
+            // Don't move anything that isn't independent within its parents
+            if (!TransitionInfo.isIndependent(change, info)) {
                 if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT || mode == TRANSIT_CHANGE) {
                     t.show(leash);
                     t.setMatrix(leash, 1, 0, 0, 1);
@@ -225,9 +225,13 @@ public class Transitions {
                 continue;
             }
 
-            t.reparent(leash, info.getRootLeash());
-            t.setPosition(leash, change.getStartAbsBounds().left - info.getRootOffset().x,
-                    change.getStartAbsBounds().top - info.getRootOffset().y);
+            boolean hasParent = change.getParent() != null;
+
+            if (!hasParent) {
+                t.reparent(leash, info.getRootLeash());
+                t.setPosition(leash, change.getStartAbsBounds().left - info.getRootOffset().x,
+                        change.getStartAbsBounds().top - info.getRootOffset().y);
+            }
             // Put all the OPEN/SHOW on top
             if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
                 t.show(leash);

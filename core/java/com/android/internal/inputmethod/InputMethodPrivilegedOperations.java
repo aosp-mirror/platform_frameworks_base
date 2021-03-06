@@ -95,7 +95,8 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#setImeWindowStatus(int, int)}.
+     * Calls {@link IInputMethodPrivilegedOperations#setImeWindowStatus(int, int,
+     * IVoidResultCallback)}.
      *
      * @param vis visibility flags
      * @param backDisposition disposition flags
@@ -112,14 +113,17 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            ops.setImeWindowStatus(vis, backDisposition);
+            final Completable.Void value = Completable.createVoid();
+            ops.setImeWindowStatus(vis, backDisposition, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#reportStartInput(IBinder)}.
+     * Calls {@link IInputMethodPrivilegedOperations#reportStartInput(IBinder,
+     * IVoidResultCallback)}.
      *
      * @param startInputToken {@link IBinder} token to distinguish startInput session
      */
@@ -130,14 +134,17 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            ops.reportStartInput(startInputToken);
+            final Completable.Void value = Completable.createVoid();
+            ops.reportStartInput(startInputToken, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#createInputContentUriToken(Uri, String)}.
+     * Calls {@link IInputMethodPrivilegedOperations#createInputContentUriToken(Uri, String,
+     * IIInputContentUriTokenResultCallback)}.
      *
      * @param contentUri Content URI to which a temporary read permission should be granted
      * @param packageName Indicates what package needs to have a temporary read permission
@@ -151,7 +158,10 @@ public final class InputMethodPrivilegedOperations {
             return null;
         }
         try {
-            return ops.createInputContentUriToken(contentUri, packageName);
+            final Completable.IInputContentUriToken value =
+                    Completable.createIInputContentUriToken();
+            ops.createInputContentUriToken(contentUri, packageName, ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             // For historical reasons, this error was silently ignored.
             // Note that the caller already logs error so we do not need additional Log.e() here.
@@ -161,7 +171,8 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#reportFullscreenMode(boolean)}.
+     * Calls {@link IInputMethodPrivilegedOperations#reportFullscreenMode(boolean,
+     * IVoidResultCallback)}.
      *
      * @param fullscreen {@code true} if the IME enters full screen mode
      */
@@ -172,14 +183,17 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            ops.reportFullscreenMode(fullscreen);
+            final Completable.Void value = Completable.createVoid();
+            ops.reportFullscreenMode(fullscreen, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#updateStatusIcon(String, int)}.
+     * Calls {@link IInputMethodPrivilegedOperations#updateStatusIcon(String, int,
+     * IVoidResultCallback)}.
      *
      * @param packageName package name from which the status icon should be loaded
      * @param iconResId resource ID of the icon to be loaded
@@ -191,14 +205,16 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            ops.updateStatusIcon(packageName, iconResId);
+            final Completable.Void value = Completable.createVoid();
+            ops.updateStatusIcon(packageName, iconResId, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#setInputMethod(String)}.
+     * Calls {@link IInputMethodPrivilegedOperations#setInputMethod(String, IVoidResultCallback)}.
      *
      * @param id IME ID of the IME to switch to
      * @see android.view.inputmethod.InputMethodInfo#getId()
@@ -210,7 +226,9 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            ops.setInputMethod(id);
+            final Completable.Void value = Completable.createVoid();
+            ops.setInputMethod(id, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -218,7 +236,7 @@ public final class InputMethodPrivilegedOperations {
 
     /**
      * Calls {@link IInputMethodPrivilegedOperations#setInputMethodAndSubtype(String,
-     * InputMethodSubtype)}
+     * InputMethodSubtype, IVoidResultCallback)}
      *
      * @param id IME ID of the IME to switch to
      * @param subtype {@link InputMethodSubtype} to switch to
@@ -231,14 +249,16 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            ops.setInputMethodAndSubtype(id, subtype);
+            final Completable.Void value = Completable.createVoid();
+            ops.setInputMethodAndSubtype(id, subtype, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#hideMySoftInput(int)}
+     * Calls {@link IInputMethodPrivilegedOperations#hideMySoftInput(int, IVoidResultCallback)}
      *
      * @param flags additional operating flags
      * @see android.view.inputmethod.InputMethodManager#HIDE_IMPLICIT_ONLY
@@ -251,14 +271,16 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            ops.hideMySoftInput(flags);
+            final Completable.Void value = Completable.createVoid();
+            ops.hideMySoftInput(flags, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#showMySoftInput(int)}
+     * Calls {@link IInputMethodPrivilegedOperations#showMySoftInput(int, IVoidResultCallback)}
      *
      * @param flags additional operating flags
      * @see android.view.inputmethod.InputMethodManager#SHOW_IMPLICIT
@@ -271,14 +293,17 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            ops.showMySoftInput(flags);
+            final Completable.Void value = Completable.createVoid();
+            ops.showMySoftInput(flags, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#switchToPreviousInputMethod()}
+     * Calls {@link IInputMethodPrivilegedOperations#switchToPreviousInputMethod(
+     * IBooleanResultCallback)}
      *
      * @return {@code true} if handled
      */
@@ -289,14 +314,17 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            return ops.switchToPreviousInputMethod();
+            final Completable.Boolean value = Completable.createBoolean();
+            ops.switchToPreviousInputMethod(ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#switchToNextInputMethod(boolean)}
+     * Calls {@link IInputMethodPrivilegedOperations#switchToNextInputMethod(boolean,
+     * IBooleanResultCallback)}
      *
      * @param onlyCurrentIme {@code true} to switch to a {@link InputMethodSubtype} within the same
      *                       IME
@@ -309,14 +337,17 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            return ops.switchToNextInputMethod(onlyCurrentIme);
+            final Completable.Boolean value = Completable.createBoolean();
+            ops.switchToNextInputMethod(onlyCurrentIme, ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#shouldOfferSwitchingToNextInputMethod()}
+     * Calls {@link IInputMethodPrivilegedOperations#shouldOfferSwitchingToNextInputMethod(
+     * IBooleanResultCallback)}
      *
      * @return {@code true} if the IEM should offer a way to globally switch IME
      */
@@ -327,14 +358,16 @@ public final class InputMethodPrivilegedOperations {
             return false;
         }
         try {
-            return ops.shouldOfferSwitchingToNextInputMethod();
+            final Completable.Boolean value = Completable.createBoolean();
+            ops.shouldOfferSwitchingToNextInputMethod(ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#notifyUserAction()}
+     * Calls {@link IInputMethodPrivilegedOperations#notifyUserAction(IVoidResultCallback)}
      */
     @AnyThread
     public void notifyUserAction() {
@@ -343,14 +376,17 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            ops.notifyUserAction();
+            final Completable.Void value = Completable.createVoid();
+            ops.notifyUserAction(ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibility(IBinder, boolean)}.
+     * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibility(IBinder, boolean,
+     * IVoidResultCallback)}.
      *
      * @param showOrHideInputToken placeholder token that maps to window requesting
      *        {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} or
@@ -365,7 +401,9 @@ public final class InputMethodPrivilegedOperations {
             return;
         }
         try {
-            ops.applyImeVisibility(showOrHideInputToken, setVisible);
+            final Completable.Void value = Completable.createVoid();
+            ops.applyImeVisibility(showOrHideInputToken, setVisible, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

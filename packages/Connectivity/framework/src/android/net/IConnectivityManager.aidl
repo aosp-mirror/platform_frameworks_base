@@ -31,6 +31,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
+import android.net.NetworkStateSnapshot;
 import android.net.OemNetworkPreferences;
 import android.net.ProxyInfo;
 import android.net.UidRange;
@@ -78,6 +79,8 @@ interface IConnectivityManager
 
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     NetworkState[] getAllNetworkState();
+
+    List<NetworkStateSnapshot> getAllNetworkStateSnapshot();
 
     boolean isActiveNetworkMetered();
 

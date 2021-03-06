@@ -69,7 +69,7 @@ class TransitionController {
      * Creates a transition. It can immediately collect participants.
      */
     @NonNull
-    Transition createTransition(@WindowManager.TransitionOldType int type,
+    Transition createTransition(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags) {
         if (mTransitionPlayer == null) {
             throw new IllegalStateException("Shell Transitions not enabled");
@@ -113,6 +113,14 @@ class TransitionController {
     }
 
     /**
+     * @return {@code true} if transition is actively collecting changes and `wc` is one of them.
+     *                      This is {@code false} once a transition is playing.
+     */
+    boolean isCollecting(@NonNull WindowContainer wc) {
+        return mCollectingTransition != null && mCollectingTransition.mParticipants.contains(wc);
+    }
+
+    /**
      * @return {@code true} if transition is actively playing. This is not necessarily {@code true}
      * during collection.
      */
@@ -128,9 +136,7 @@ class TransitionController {
 
     /** @return {@code true} if wc is in a participant subtree */
     boolean inTransition(@NonNull WindowContainer wc) {
-        if (mCollectingTransition != null && mCollectingTransition.mParticipants.contains(wc)) {
-            return true;
-        }
+        if (isCollecting(wc))  return true;
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             for (WindowContainer p = wc; p != null; p = p.getParent()) {
                 if (mPlayingTransitions.get(i).mParticipants.contains(p)) {

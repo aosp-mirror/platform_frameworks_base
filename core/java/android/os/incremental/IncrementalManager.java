@@ -58,6 +58,8 @@ public final class IncrementalManager {
 
     private static final String ALLOWED_PROPERTY = "incremental.allowed";
 
+    public static final int MIN_VERSION_TO_SUPPORT_FSVERITY = 2;
+
     public static final int CREATE_MODE_TEMPORARY_BIND =
             IIncrementalService.CREATE_MODE_TEMPORARY_BIND;
     public static final int CREATE_MODE_PERMANENT_BIND =

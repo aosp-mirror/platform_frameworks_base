@@ -518,6 +518,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 TYPE_WALLPAPER, TYPE_APPLICATION);
         final WindowState wallpaper = windows[0];
         assertTrue(wallpaper.mIsWallpaper);
+        wallpaper.mToken.asWallpaperToken().setVisibility(false);
         // By default WindowState#mWallpaperVisible is false.
         assertFalse(wallpaper.isVisible());
 

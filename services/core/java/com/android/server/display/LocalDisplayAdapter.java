@@ -767,6 +767,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     }
 
                     private void setDisplayBrightness(float brightness) {
+                        // Ensure brightnessState is valid, before processing and sending to
+                        // surface control
+                        if (Float.isNaN(brightness)) {
+                            return;
+                        }
+
                         if (DEBUG) {
                             Slog.d(TAG, "setDisplayBrightness("
                                     + "id=" + physicalDisplayId

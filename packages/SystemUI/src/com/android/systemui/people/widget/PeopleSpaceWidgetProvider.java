@@ -16,30 +16,16 @@
 
 package com.android.systemui.people.widget;
 
-import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
-import static com.android.systemui.people.PeopleSpaceUtils.SHORTCUT_ID;
-import static com.android.systemui.people.PeopleSpaceUtils.USER_ID;
-
-import android.app.PendingIntent;
-import android.app.people.IPeopleManager;
+import android.annotation.NonNull;
+import android.app.people.ConversationChannel;
+import android.app.people.PeopleManager;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.LauncherApps;
-import android.os.ServiceManager;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
-import android.widget.RemoteViews;
 
-import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.UiEventLoggerImpl;
-import com.android.systemui.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.people.PeopleSpaceUtils;
-
-import java.util.Collections;
 
 /** People Space Widget Provider class. */
 public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
@@ -50,7 +36,26 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
     public static final String EXTRA_PACKAGE_NAME = "extra_package_name";
     public static final String EXTRA_USER_HANDLE = "extra_user_handle";
 
-    public UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
+    public PeopleSpaceWidgetManager peopleSpaceWidgetManager;
+
+    /** Listener for the shortcut data changes. */
+    public class TileConversationListener implements PeopleManager.ConversationListener {
+
+        @Override
+        public void onConversationUpdate(@NonNull ConversationChannel conversation) {
+            if (DEBUG) {
+                Log.d(TAG,
+                        "Received updated conversation: "
+                                + conversation.getShortcutInfo().getLabel());
+            }
+            if (peopleSpaceWidgetManager == null) {
+                // This shouldn't happen since onUpdate is called at reboot.
+                Log.e(TAG, "Skipping conversation update: WidgetManager uninitialized");
+                return;
+            }
+            peopleSpaceWidgetManager.updateWidgetsWithConversationChanged(conversation);
+        }
+    }
 
     /** Called when widget updates. */
     @Override
@@ -58,70 +63,32 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
         if (DEBUG) Log.d(TAG, "onUpdate called");
-        boolean showSingleConversation = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
-        if (showSingleConversation) {
-            PeopleSpaceUtils.updateSingleConversationWidgets(context, appWidgetIds,
-                    appWidgetManager, IPeopleManager.Stub.asInterface(
-                            ServiceManager.getService(Context.PEOPLE_SERVICE)));
-            return;
-        }
-        // Perform this loop procedure for each App Widget that belongs to this provider
+        ensurePeopleSpaceWidgetManagerInitialized(context);
+        peopleSpaceWidgetManager.updateWidgets(appWidgetIds);
         for (int appWidgetId : appWidgetIds) {
-            RemoteViews views =
-                    new RemoteViews(context.getPackageName(), R.layout.people_space_widget);
+            PeopleSpaceWidgetProvider.TileConversationListener
+                    newListener = new PeopleSpaceWidgetProvider.TileConversationListener();
+            peopleSpaceWidgetManager.registerConversationListenerIfNeeded(appWidgetId,
+                    newListener);
+        }
+        return;
+    }
 
-            Intent intent = new Intent(context, PeopleSpaceWidgetService.class);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            views.setRemoteAdapter(R.id.widget_list_view, intent);
-
-            Intent activityIntent = new Intent(context, LaunchConversationActivity.class);
-            activityIntent.addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            | Intent.FLAG_ACTIVITY_NO_HISTORY
-                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                    context,
-                    appWidgetId,
-                    activityIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
-            views.setPendingIntentTemplate(R.id.widget_list_view, pendingIntent);
-
-            // Tell the AppWidgetManager to perform an update on the current app widget
-            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_list_view);
-            appWidgetManager.updateAppWidget(appWidgetId, views);
+    private void ensurePeopleSpaceWidgetManagerInitialized(Context context) {
+        if (peopleSpaceWidgetManager == null) {
+            peopleSpaceWidgetManager = new PeopleSpaceWidgetManager(context);
         }
     }
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
         super.onDeleted(context, appWidgetIds);
-        LauncherApps launcherApps = context.getSystemService(LauncherApps.class);
+        ensurePeopleSpaceWidgetManagerInitialized(context);
+        peopleSpaceWidgetManager.deleteWidgets(appWidgetIds);
+    }
 
-        for (int widgetId : appWidgetIds) {
-            if (DEBUG) Log.d(TAG, "Widget removed");
-            mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_DELETED);
-            if (launcherApps != null) {
-                SharedPreferences widgetSp = context.getSharedPreferences(String.valueOf(widgetId),
-                        Context.MODE_PRIVATE);
-                String packageName = widgetSp.getString(PACKAGE_NAME, null);
-                String shortcutId = widgetSp.getString(SHORTCUT_ID, null);
-                int userId = widgetSp.getInt(USER_ID, -1);
-
-                if (packageName != null && shortcutId != null && userId != -1) {
-                    try {
-                        if (DEBUG) Log.d(TAG, "Uncaching shortcut for PeopleTile: " + shortcutId);
-                        launcherApps.uncacheShortcuts(packageName,
-                                Collections.singletonList(shortcutId),
-                                UserHandle.of(userId),
-                                LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
-                    } catch (Exception e) {
-                        Log.d(TAG, "Exception uncaching shortcut:" + e);
-                    }
-                }
-            }
-            PeopleSpaceUtils.removeStorageForTile(context, widgetId);
-        }
+    @VisibleForTesting
+    public void setPeopleSpaceWidgetManager(PeopleSpaceWidgetManager manager) {
+        peopleSpaceWidgetManager = manager;
     }
 }

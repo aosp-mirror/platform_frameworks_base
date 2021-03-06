@@ -99,6 +99,9 @@ class EnsureActivitiesVisibleHelper {
         mTask.forAllActivities(a -> {
             setActivityVisibilityState(a, starting, resumeTopActivity);
         });
+        if (mTask.mAtmService.getTransitionController().getTransitionPlayer() != null) {
+            mTask.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
+        }
     }
 
     private void setActivityVisibilityState(ActivityRecord r, ActivityRecord starting,

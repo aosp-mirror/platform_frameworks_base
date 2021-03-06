@@ -16,6 +16,7 @@
 
 package android.companion;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -141,6 +142,10 @@ public final class CompanionDeviceManager {
      * <p>Calling this API requires a uses-feature
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
      *
+     * <p>When using {@link AssociationRequest#DEVICE_PROFILE_WATCH watch}
+     * {@link AssociationRequest.Builder#setDeviceProfile profile}, caller must also hold
+     * {@link Manifest.permission#REQUEST_COMPANION_PROFILE_WATCH}</p>
+     *
      * @param request specific details about this request
      * @param callback will be called once there's at least one device found for user to choose from
      * @param handler A handler to control which thread the callback will be delivered on, or null,
@@ -148,6 +153,9 @@ public final class CompanionDeviceManager {
      *
      * @see AssociationRequest
      */
+    @RequiresPermission(
+            value = Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH,
+            conditional = true)
     public void associate(
             @NonNull AssociationRequest request,
             @NonNull Callback callback,

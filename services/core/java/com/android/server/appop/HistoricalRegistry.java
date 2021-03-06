@@ -138,7 +138,7 @@ final class HistoricalRegistry {
     private static final String PARAMETER_ASSIGNMENT = "=";
     private static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
 
-    volatile @NonNull DiscreteRegistry mDiscreteRegistry;
+    private volatile @NonNull DiscreteRegistry mDiscreteRegistry;
 
     @GuardedBy("mLock")
     private @NonNull LinkedList<HistoricalOps> mPendingWrites = new LinkedList<>();
@@ -477,7 +477,8 @@ final class HistoricalRegistry {
     }
 
     void incrementOpAccessedCount(int op, int uid, @NonNull String packageName,
-            @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags) {
+            @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags,
+            long accessTime) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
@@ -487,6 +488,9 @@ final class HistoricalRegistry {
                 getUpdatedPendingHistoricalOpsMLocked(
                         System.currentTimeMillis()).increaseAccessCount(op, uid, packageName,
                         attributionTag, uidState, flags, 1);
+
+                mDiscreteRegistry.recordDiscreteAccess(uid, packageName, op, attributionTag,
+                        flags, uidState, accessTime, -1);
             }
         }
     }
@@ -508,7 +512,7 @@ final class HistoricalRegistry {
 
     void increaseOpAccessDuration(int op, int uid, @NonNull String packageName,
             @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags,
-            long increment) {
+            long eventStartTime, long increment) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
@@ -518,6 +522,8 @@ final class HistoricalRegistry {
                 getUpdatedPendingHistoricalOpsMLocked(
                         System.currentTimeMillis()).increaseAccessDuration(op, uid, packageName,
                         attributionTag, uidState, flags, increment);
+                mDiscreteRegistry.recordDiscreteAccess(uid, packageName, op, attributionTag,
+                        flags, uidState, increment, eventStartTime);
             }
         }
     }
@@ -562,7 +568,7 @@ final class HistoricalRegistry {
                     return;
                 }
                 final List<HistoricalOps> history = mPersistence.readHistoryDLocked();
-                clearHistory();
+                clearHistoricalRegistry();
                 if (history != null) {
                     final int historySize = history.size();
                     for (int i = 0; i < historySize; i++) {
@@ -631,7 +637,16 @@ final class HistoricalRegistry {
         }
     }
 
-    void clearHistory() {
+    void writeAndClearDiscreteHistory() {
+        mDiscreteRegistry.writeAndClearAccessHistory();
+    }
+
+    void clearAllHistory() {
+        clearHistoricalRegistry();
+        mDiscreteRegistry.clearHistory();
+    }
+
+    void clearHistoricalRegistry() {
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
                 if (!isPersistenceInitializedMLocked()) {

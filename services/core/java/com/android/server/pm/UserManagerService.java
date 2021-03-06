@@ -1544,7 +1544,7 @@ public class UserManagerService extends IUserManager.Stub {
     public String getUserName() {
         final int callingUid = Binder.getCallingUid();
         if (!hasManageOrCreateUsersPermission()
-                || hasPermissionGranted(
+                && !hasPermissionGranted(
                         android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, callingUid)) {
             throw new SecurityException("You need MANAGE_USERS or CREATE_USERS or "
                     + "GET_ACCOUNTS_PRIVILEGED permissions to: get user name");

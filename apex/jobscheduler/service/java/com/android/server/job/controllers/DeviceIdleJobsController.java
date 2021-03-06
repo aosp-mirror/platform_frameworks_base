@@ -64,7 +64,7 @@ public final class DeviceIdleJobsController extends StateController {
      * when the app is temp whitelisted or in the foreground.
      */
     private final ArraySet<JobStatus> mAllowInIdleJobs;
-    private final SparseBooleanArray mForegroundUids;
+    private final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
     private final DeviceIdleUpdateFunctor mDeviceIdleUpdateFunctor;
     private final DeviceIdleJobsDelayHandler mHandler;
     private final PowerManager mPowerManager;
@@ -77,7 +77,6 @@ public final class DeviceIdleJobsController extends StateController {
     private int[] mDeviceIdleWhitelistAppIds;
     private int[] mPowerSaveTempWhitelistAppIds;
 
-    // onReceive
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -120,6 +119,10 @@ public final class DeviceIdleJobsController extends StateController {
         }
     };
 
+    /** Criteria for whether or not we should a job's rush evaluation when the device exits Doze. */
+    private final Predicate<JobStatus> mShouldRushEvaluation = (jobStatus) ->
+            jobStatus.isRequestedExpeditedJob() || mForegroundUids.get(jobStatus.getSourceUid());
+
     public DeviceIdleJobsController(JobSchedulerService service) {
         super(service);
 
@@ -133,7 +136,6 @@ public final class DeviceIdleJobsController extends StateController {
                 mLocalDeviceIdleController.getPowerSaveTempWhitelistAppIds();
         mDeviceIdleUpdateFunctor = new DeviceIdleUpdateFunctor();
         mAllowInIdleJobs = new ArraySet<>();
-        mForegroundUids = new SparseBooleanArray();
         final IntentFilter filter = new IntentFilter();
         filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
@@ -156,14 +158,9 @@ public final class DeviceIdleJobsController extends StateController {
                 mHandler.removeMessages(PROCESS_BACKGROUND_JOBS);
                 mService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
             } else {
-                // When coming out of doze, process all foreground uids immediately, while others
-                // will be processed after a delay of 3 seconds.
-                for (int i = 0; i < mForegroundUids.size(); i++) {
-                    if (mForegroundUids.valueAt(i)) {
-                        mService.getJobStore().forEachJobForSourceUid(
-                                mForegroundUids.keyAt(i), mDeviceIdleUpdateFunctor);
-                    }
-                }
+                // When coming out of doze, process all foreground uids and EJs immediately,
+                // while others will be processed after a delay of 3 seconds.
+                mService.getJobStore().forEachJob(mShouldRushEvaluation, mDeviceIdleUpdateFunctor);
                 mHandler.sendEmptyMessageDelayed(PROCESS_BACKGROUND_JOBS, BACKGROUND_JOBS_DELAY);
             }
         }

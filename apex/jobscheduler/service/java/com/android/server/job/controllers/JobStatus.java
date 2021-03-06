@@ -91,6 +91,12 @@ public final class JobStatus {
     static final int CONSTRAINT_WITHIN_EXPEDITED_QUOTA = 1 << 23;    // Implicit constraint
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1 << 22; // Implicit constraint
 
+    // The following set of dynamic constraints are for specific use cases (as explained in their
+    // relative naming and comments). Right now, they apply different constraints, which is fine,
+    // but if in the future, we have overlapping dynamic constraint sets, removing one constraint
+    // set may accidentally remove a constraint applied by another dynamic set.
+    // TODO: properly handle overlapping dynamic constraint sets
+
     /**
      * The additional set of dynamic constraints that must be met if the job's effective bucket is
      * {@link JobSchedulerService#RESTRICTED_INDEX}. Connectivity can be ignored if the job doesn't
@@ -101,6 +107,13 @@ public final class JobStatus {
                     | CONSTRAINT_CHARGING
                     | CONSTRAINT_CONNECTIVITY
                     | CONSTRAINT_IDLE;
+
+    /**
+     * The additional set of dynamic constraints that must be met if this is an expedited job that
+     * had a long enough run while the device was Dozing or in battery saver.
+     */
+    private static final int DYNAMIC_EXPEDITED_DEFERRAL_CONSTRAINTS =
+            CONSTRAINT_DEVICE_NOT_DOZING | CONSTRAINT_BACKGROUND_NOT_RESTRICTED;
 
     /**
      * Standard media URIs that contain the media files that might be important to the user.
@@ -426,7 +439,8 @@ public final class JobStatus {
     private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
             int sourceUserId, int standbyBucket, String tag, int numFailures,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
-            long lastSuccessfulRunTime, long lastFailedRunTime, int internalFlags) {
+            long lastSuccessfulRunTime, long lastFailedRunTime, int internalFlags,
+            int dynamicConstraints) {
         this.job = job;
         this.callingUid = callingUid;
         this.standbyBucket = standbyBucket;
@@ -487,6 +501,7 @@ public final class JobStatus {
         }
         this.requiredConstraints = requiredConstraints;
         mRequiredConstraintsOfInterest = requiredConstraints & CONSTRAINTS_OF_INTEREST;
+        addDynamicConstraints(dynamicConstraints);
         mReadyNotDozing = canRunInDoze();
         if (standbyBucket == RESTRICTED_INDEX) {
             addDynamicConstraints(DYNAMIC_RESTRICTED_CONSTRAINTS);
@@ -521,7 +536,7 @@ public final class JobStatus {
                 jobStatus.getSourceTag(), jobStatus.getNumFailures(),
                 jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed(),
                 jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime(),
-                jobStatus.getInternalFlags());
+                jobStatus.getInternalFlags(), jobStatus.mDynamicConstraints);
         mPersistedUtcTimes = jobStatus.mPersistedUtcTimes;
         if (jobStatus.mPersistedUtcTimes != null) {
             if (DEBUG) {
@@ -543,12 +558,12 @@ public final class JobStatus {
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime,
             Pair<Long, Long> persistedExecutionTimesUTC,
-            int innerFlags) {
+            int innerFlags, int dynamicConstraints) {
         this(job, callingUid, sourcePkgName, sourceUserId,
                 standbyBucket,
                 sourceTag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
-                lastSuccessfulRunTime, lastFailedRunTime, innerFlags);
+                lastSuccessfulRunTime, lastFailedRunTime, innerFlags, dynamicConstraints);
 
         // Only during initial inflation do we record the UTC-timebase execution bounds
         // read from the persistent store.  If we ever have to recreate the JobStatus on
@@ -572,7 +587,8 @@ public final class JobStatus {
                 rescheduling.getStandbyBucket(),
                 rescheduling.getSourceTag(), backoffAttempt, newEarliestRuntimeElapsedMillis,
                 newLatestRuntimeElapsedMillis,
-                lastSuccessfulRunTime, lastFailedRunTime, rescheduling.getInternalFlags());
+                lastSuccessfulRunTime, lastFailedRunTime, rescheduling.getInternalFlags(),
+                rescheduling.mDynamicConstraints);
     }
 
     /**
@@ -609,7 +625,7 @@ public final class JobStatus {
                 standbyBucket, tag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
-                /*innerFlags=*/ 0);
+                /*innerFlags=*/ 0, /* dynamicConstraints */ 0);
     }
 
     public void enqueueWorkLocked(JobWorkItem work) {
@@ -1083,12 +1099,15 @@ public final class JobStatus {
      * in Doze.
      */
     public boolean canRunInDoze() {
-        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0 || shouldTreatAsExpeditedJob();
+        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
+                || (shouldTreatAsExpeditedJob()
+                && (mDynamicConstraints & CONSTRAINT_DEVICE_NOT_DOZING) == 0);
     }
 
     boolean canRunInBatterySaver() {
         return (getInternalFlags() & INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0
-                || shouldTreatAsExpeditedJob();
+                || (shouldTreatAsExpeditedJob()
+                && (mDynamicConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) == 0);
     }
 
     boolean shouldIgnoreNetworkBlocking() {
@@ -1242,6 +1261,14 @@ public final class JobStatus {
 
     void setTrackingController(int which) {
         trackingControllers |= which;
+    }
+
+    /**
+     * Add additional constraints to prevent this job from running when doze or battery saver are
+     * active.
+     */
+    public void disallowRunInBatterySaverAndDoze() {
+        addDynamicConstraints(DYNAMIC_EXPEDITED_DEFERRAL_CONSTRAINTS);
     }
 
     /**

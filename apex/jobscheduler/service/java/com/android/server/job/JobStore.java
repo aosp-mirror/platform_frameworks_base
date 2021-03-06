@@ -954,7 +954,7 @@ public final class JobStore {
                     appBucket, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime,
-                    (rtcIsGood) ? null : rtcRuntimes, internalFlags);
+                    (rtcIsGood) ? null : rtcRuntimes, internalFlags, /* dynamicConstraints */ 0);
             return js;
         }
 

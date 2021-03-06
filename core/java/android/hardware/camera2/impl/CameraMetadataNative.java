@@ -16,6 +16,7 @@
 
 package android.hardware.camera2.impl;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
@@ -53,6 +54,7 @@ import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
 import android.hardware.camera2.params.MandatoryStreamCombination;
+import android.hardware.camera2.params.MultiResolutionStreamConfigurationMap;
 import android.hardware.camera2.params.OisSample;
 import android.hardware.camera2.params.RecommendedStreamConfiguration;
 import android.hardware.camera2.params.RecommendedStreamConfigurationMap;
@@ -61,6 +63,7 @@ import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.TonemapCurve;
+import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.TypeReference;
 import android.location.Location;
 import android.location.LocationManager;
@@ -79,9 +82,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Implementation of camera metadata marshal/unmarshal across Binder to
@@ -745,6 +753,15 @@ public class CameraMetadataNative implements Parcelable {
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
                         return (T) metadata.getExtendedSceneModeCapabilities();
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMultiResolutionStreamConfigurationMap();
                     }
                 });
     }
@@ -1688,6 +1705,7 @@ public class CameraMetadataNative implements Parcelable {
     private boolean mHasMandatoryConcurrentStreams = false;
     private Size mDisplaySize = new Size(0, 0);
     private long mBufferSize = 0;
+    private MultiResolutionStreamConfigurationMap mMultiResolutionStreamConfigurationMap = null;
 
     /**
      * Set the current camera Id.
@@ -1721,6 +1739,30 @@ public class CameraMetadataNative implements Parcelable {
      */
     public void setDisplaySize(Size displaySize) {
         mDisplaySize = displaySize;
+    }
+
+    /**
+     * Set the multi-resolution stream configuration map.
+     *
+     * @param multiResolutionMap The multi-resolution stream configuration map.
+     *
+     * @hide
+     */
+    public void setMultiResolutionStreamConfigurationMap(
+            @NonNull Map<String, StreamConfiguration[]> multiResolutionMap) {
+        mMultiResolutionStreamConfigurationMap =
+                new MultiResolutionStreamConfigurationMap(multiResolutionMap);
+    }
+
+    /**
+     * Get the multi-resolution stream configuration map.
+     *
+     * @return The multi-resolution stream configuration map.
+     *
+     * @hide
+     */
+    public MultiResolutionStreamConfigurationMap getMultiResolutionStreamConfigurationMap() {
+        return mMultiResolutionStreamConfigurationMap;
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -1777,6 +1819,7 @@ public class CameraMetadataNative implements Parcelable {
         mCameraId = other.mCameraId;
         mHasMandatoryConcurrentStreams = other.mHasMandatoryConcurrentStreams;
         mDisplaySize = other.mDisplaySize;
+        mMultiResolutionStreamConfigurationMap = other.mMultiResolutionStreamConfigurationMap;
         updateNativeAllocation();
         other.updateNativeAllocation();
     }
@@ -1978,6 +2021,39 @@ public class CameraMetadataNative implements Parcelable {
             if (o != null) return false;
         }
         return true;
+    }
+
+    /**
+     * Return the set of physical camera ids that this logical {@link CameraDevice} is made
+     * up of.
+     *
+     * If the camera device isn't a logical camera, return an empty set.
+     *
+     * @hide
+     */
+    public Set<String> getPhysicalCameraIds() {
+        int[] availableCapabilities = get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+        if (availableCapabilities == null) {
+            throw new AssertionError("android.request.availableCapabilities must be non-null "
+                        + "in the characteristics");
+        }
+
+        if (!ArrayUtils.contains(availableCapabilities,
+                CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA)) {
+            return Collections.emptySet();
+        }
+        byte[] physicalCamIds = get(CameraCharacteristics.LOGICAL_MULTI_CAMERA_PHYSICAL_IDS);
+
+        String physicalCamIdString = null;
+        try {
+            physicalCamIdString = new String(physicalCamIds, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new AssertionError("android.logicalCam.physicalIds must be UTF-8 string");
+        }
+        String[] physicalCameraIdArray = physicalCamIdString.split("\0");
+
+        return Collections.unmodifiableSet(
+                new HashSet<String>(Arrays.asList(physicalCameraIdArray)));
     }
 
     static {

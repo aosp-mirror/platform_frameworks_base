@@ -8424,6 +8424,9 @@
         <!-- Fully qualified class name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity" />
+        <!-- Fully qualified class name of an activity that allows the user to view any passwords
+             saved by this service. -->
+        <attr name="passwordsActivity" format="string" />
 
         <!-- Specifies whether the AutofillService supports inline suggestions-->
         <attr name="supportsInlineSuggestions" format="boolean" />
