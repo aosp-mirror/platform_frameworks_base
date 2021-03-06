@@ -245,11 +245,19 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     private WindowToken createWindowToken(
             DisplayContent dc, int windowingMode, int activityType, int type) {
+        if (type == TYPE_WALLPAPER) {
+            return createWallpaperToken(dc);
+        }
         if (type < FIRST_APPLICATION_WINDOW || type > LAST_APPLICATION_WINDOW) {
             return createTestWindowToken(type, dc);
         }
 
         return createActivityRecord(dc, windowingMode, activityType);
+    }
+
+    private WindowToken createWallpaperToken(DisplayContent dc) {
+        return new WallpaperWindowToken(mWm, mock(IBinder.class), true /* explicit */, dc,
+                true /* ownerCanManageAppTokens */);
     }
 
     WindowState createAppWindow(Task task, int type, String name) {

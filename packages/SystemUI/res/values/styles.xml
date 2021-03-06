@@ -608,6 +608,11 @@
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
+    <!-- Privacy dialog -->
+    <style name="PrivacyDialog" parent="ScreenRecord">
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
+
     <!-- USB Contaminant dialog -->
     <style name ="USBContaminant" />
 

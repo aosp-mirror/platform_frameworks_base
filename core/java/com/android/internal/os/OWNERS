@@ -6,6 +6,7 @@ per-file *Cpu* = file:CPU_OWNERS
 per-file BatterySipper.java = file:/BATTERY_STATS_OWNERS
 per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
 per-file BatteryUsageStats* = file:/BATTERY_STATS_OWNERS
+per-file *ChargeCalculator* = file:/BATTERY_STATS_OWNERS
 per-file *PowerCalculator* = file:/BATTERY_STATS_OWNERS
 per-file *PowerEstimator* = file:/BATTERY_STATS_OWNERS
 

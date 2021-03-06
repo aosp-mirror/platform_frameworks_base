@@ -27,6 +27,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.text.TextUtils;
@@ -180,8 +181,9 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
 
     boolean isValidTouch(float x, float y, float pressure) {
         // The X and Y coordinates of the sensor's center.
-        final float cx = mSensorRect.centerX();
-        final float cy = mSensorRect.centerY();
+        final PointF translation = mAnimationView.getTouchTranslation();
+        final float cx = mSensorRect.centerX() + translation.x;
+        final float cy = mSensorRect.centerY() + translation.y;
         // Radii along the X and Y axes.
         final float rx = (mSensorRect.right - mSensorRect.left) / 2.0f;
         final float ry = (mSensorRect.bottom - mSensorRect.top) / 2.0f;

@@ -32,12 +32,8 @@ public interface DeviceIdleInternal {
 
     void exitIdle(String reason);
 
-    // duration in milliseconds
     void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
-            long duration, int userId, boolean sync, String reason);
-
-    void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
-            long duration, int userId, boolean sync, @ReasonCode int reasonCode,
+            long durationMs, int userId, boolean sync, @ReasonCode int reasonCode,
             @Nullable String reason);
 
     /**
@@ -49,10 +45,11 @@ public interface DeviceIdleInternal {
      * @param sync
      * @param reasonCode one of {@link ReasonCode}
      * @param reason
+     * @param callingUid UID of app who added this temp-allowlist.
      */
     void addPowerSaveTempWhitelistAppDirect(int uid, long duration,
             @TempAllowListType int type, boolean sync, @ReasonCode int reasonCode,
-            @Nullable String reason);
+            @Nullable String reason, int callingUid);
 
     // duration in milliseconds
     long getNotificationAllowlistDuration();

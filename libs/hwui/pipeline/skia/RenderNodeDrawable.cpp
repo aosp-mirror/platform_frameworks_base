@@ -169,8 +169,8 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) const {
     displayList->mProjectedOutline = nullptr;
 }
 
-static bool layerNeedsPaint(const LayerProperties& properties, float alphaMultiplier,
-                            SkPaint* paint) {
+static bool layerNeedsPaint(const sk_sp<SkImage>& snapshotImage, const LayerProperties& properties,
+                            float alphaMultiplier, SkPaint* paint) {
     if (alphaMultiplier < 1.0f || properties.alpha() < 255 ||
         properties.xferMode() != SkBlendMode::kSrcOver || properties.getColorFilter() != nullptr ||
         properties.getImageFilter() != nullptr || !properties.getStretchEffect().isEmpty()) {
@@ -179,7 +179,8 @@ static bool layerNeedsPaint(const LayerProperties& properties, float alphaMultip
         paint->setColorFilter(sk_ref_sp(properties.getColorFilter()));
 
         sk_sp<SkImageFilter> imageFilter = sk_ref_sp(properties.getImageFilter());
-        sk_sp<SkImageFilter> stretchFilter = properties.getStretchEffect().getImageFilter();
+        sk_sp<SkImageFilter> stretchFilter =
+                properties.getStretchEffect().getImageFilter(snapshotImage);
         sk_sp<SkImageFilter> filter;
         if (imageFilter && stretchFilter) {
             filter = SkImageFilters::Compose(
@@ -240,7 +241,8 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
         if (renderNode->getLayerSurface() && mComposeLayer) {
             SkASSERT(properties.effectiveLayerType() == LayerType::RenderLayer);
             SkPaint paint;
-            layerNeedsPaint(layerProperties, alphaMultiplier, &paint);
+            sk_sp<SkImage> snapshotImage = renderNode->getLayerSurface()->makeImageSnapshot();
+            layerNeedsPaint(snapshotImage, layerProperties, alphaMultiplier, &paint);
             SkSamplingOptions sampling(SkFilterMode::kLinear);
 
             // surfaces for layers are created on LAYER_SIZE boundaries (which are >= layer size) so
@@ -254,8 +256,8 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                 canvas->drawAnnotation(bounds, String8::format(
                     "SurfaceID|%" PRId64, renderNode->uniqueId()).c_str(), nullptr);
             }
-            canvas->drawImageRect(renderNode->getLayerSurface()->makeImageSnapshot(), bounds,
-                                  bounds, sampling, &paint, SkCanvas::kStrict_SrcRectConstraint);
+            canvas->drawImageRect(snapshotImage, bounds, bounds, sampling, &paint,
+                                  SkCanvas::kStrict_SrcRectConstraint);
 
             if (!renderNode->getSkiaLayer()->hasRenderedSinceRepaint) {
                 renderNode->getSkiaLayer()->hasRenderedSinceRepaint = true;

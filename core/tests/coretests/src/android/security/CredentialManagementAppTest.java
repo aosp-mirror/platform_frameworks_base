@@ -37,8 +37,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
-import java.util.Map;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -149,37 +147,6 @@ public final class CredentialManagementAppTest {
     private void assertCredentialManagementAppsEqual(CredentialManagementApp actual,
             CredentialManagementApp expected) {
         assertThat(actual.getPackageName(), is(expected.getPackageName()));
-        assertAuthenticationPoliciesEqual(actual.getAuthenticationPolicy(),
-                expected.getAuthenticationPolicy());
-    }
-
-    private void assertAuthenticationPoliciesEqual(AppUriAuthenticationPolicy actual,
-            AppUriAuthenticationPolicy expected) {
-        Iterator<Map.Entry<String, Map<Uri, String>>> actualIter =
-                actual.getAppAndUriMappings().entrySet().iterator();
-        Iterator<Map.Entry<String, Map<Uri, String>>> expectedIter =
-                expected.getAppAndUriMappings().entrySet().iterator();
-
-        assertThat(actual.getAppAndUriMappings().size(),
-                is(expected.getAppAndUriMappings().size()));
-        while (actualIter.hasNext()) {
-            Map.Entry<String, Map<Uri, String>> actualAppToUri = actualIter.next();
-            Map.Entry<String, Map<Uri, String>> expectedAppToUri = expectedIter.next();
-            assertThat(actualAppToUri.getKey(), is(expectedAppToUri.getKey()));
-            assertUrisToAliasesEqual(actualAppToUri.getValue(), expectedAppToUri.getValue());
-        }
-    }
-
-    private void assertUrisToAliasesEqual(Map<Uri, String> actual, Map<Uri, String> expected) {
-        Iterator<Map.Entry<Uri, String>> actualIter = actual.entrySet().iterator();
-        Iterator<Map.Entry<Uri, String>> expectedIter = expected.entrySet().iterator();
-
-        assertThat(actual.size(), is(expected.size()));
-        while (actualIter.hasNext()) {
-            Map.Entry<Uri, String> actualUriToAlias = actualIter.next();
-            Map.Entry<Uri, String> expectedUriToAlias = expectedIter.next();
-            assertThat(actualUriToAlias.getKey(), is(expectedUriToAlias.getKey()));
-            assertThat(actualUriToAlias.getValue(), is(expectedUriToAlias.getValue()));
-        }
+        assertThat(actual.getAuthenticationPolicy(), is(expected.getAuthenticationPolicy()));
     }
 }

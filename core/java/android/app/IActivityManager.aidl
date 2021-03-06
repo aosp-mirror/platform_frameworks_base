@@ -706,7 +706,7 @@ interface IActivityManager {
     boolean stopProfile(int userId);
 
     /** Called by PendingIntent.queryIntentComponents() */
-    List<ResolveInfo> queryIntentComponentsForIntentSender(in IIntentSender sender, int matchFlags);
+    ParceledListSlice queryIntentComponentsForIntentSender(in IIntentSender sender, int matchFlags);
 
     int getUidProcessCapabilities(int uid, in String callingPackage);
 }

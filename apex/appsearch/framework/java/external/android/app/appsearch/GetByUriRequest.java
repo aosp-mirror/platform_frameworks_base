@@ -166,29 +166,7 @@ public final class GetByUriRequest {
          * all results, excepting any types that have their own, specific property paths set.
          *
          * @throws IllegalStateException if the builder has already been used.
-         *     <p>{@see SearchSpec.Builder#addProjection(String, String...)}
-         */
-        @NonNull
-        public Builder addProjection(@NonNull String schemaType, @NonNull String... propertyPaths) {
-            Preconditions.checkNotNull(propertyPaths);
-            return addProjection(schemaType, Arrays.asList(propertyPaths));
-        }
-
-        /**
-         * Adds property paths for the specified type to be used for projection. If property paths
-         * are added for a type, then only the properties referred to will be retrieved for results
-         * of that type. If a property path that is specified isn't present in a result, it will be
-         * ignored for that result. Property paths cannot be null.
-         *
-         * <p>If no property paths are added for a particular type, then all properties of results
-         * of that type will be retrieved.
-         *
-         * <p>If property path is added for the {@link
-         * GetByUriRequest#PROJECTION_SCHEMA_TYPE_WILDCARD}, then those property paths will apply to
-         * all results, excepting any types that have their own, specific property paths set.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         *     <p>{@see SearchSpec.Builder#addProjection(String, String...)}
+         * @see SearchSpec.Builder#addProjection
          */
         @NonNull
         public Builder addProjection(

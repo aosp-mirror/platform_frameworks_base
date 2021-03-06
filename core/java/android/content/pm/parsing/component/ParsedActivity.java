@@ -155,6 +155,7 @@ public class ParsedActivity extends ParsedMainComponent {
         alias.nonLocalizedLabel = target.nonLocalizedLabel;
         alias.launchMode = target.launchMode;
         alias.lockTaskLaunchMode = target.lockTaskLaunchMode;
+        alias.documentLaunchMode = target.documentLaunchMode;
         alias.descriptionRes = target.descriptionRes;
         alias.screenOrientation = target.screenOrientation;
         alias.taskAffinity = target.taskAffinity;
@@ -179,7 +180,6 @@ public class ParsedActivity extends ParsedMainComponent {
 //        alias.exported = target.exported;
 //        alias.permission = target.permission;
 //        alias.splitName = target.splitName;
-//        alias.documentLaunchMode = target.documentLaunchMode;
 //        alias.persistableMode = target.persistableMode;
 //        alias.rotationAnimation = target.rotationAnimation;
 //        alias.colorMode = target.colorMode;

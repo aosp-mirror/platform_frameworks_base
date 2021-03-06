@@ -21,5 +21,5 @@ package com.android.systemui.shared.recents;
  */
 oneway interface ISplitScreenListener {
     void onStagePositionChanged(int stage, int position);
-    void onTaskStageChanged(int taskId, int stage);
+    void onTaskStageChanged(int taskId, int stage, boolean visible);
 }

@@ -387,4 +387,41 @@ public final class ResultCallbacks {
             }
         };
     }
+
+    /**
+     * Creates {@link IIInputContentUriTokenResultCallback.Stub} that is to set
+     * {@link Completable.IInputContentUriToken} when receiving the result.
+     *
+     * @param value {@link Completable.IInputContentUriToken} to be set when receiving the result.
+     * @return {@link IIInputContentUriTokenResultCallback.Stub} that can be passed as a binder IPC
+     * parameter.
+     */
+    @AnyThread
+    public static IIInputContentUriTokenResultCallback.Stub of(
+            @NonNull Completable.IInputContentUriToken value) {
+        final AtomicReference<WeakReference<Completable.IInputContentUriToken>>
+                atomicRef = new AtomicReference<>(new WeakReference<>(value));
+
+        return new IIInputContentUriTokenResultCallback.Stub() {
+            @BinderThread
+            @Override
+            public void onResult(IInputContentUriToken result) {
+                final Completable.IInputContentUriToken value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onComplete(result);
+            }
+
+            @BinderThread
+            @Override
+            public void onError(ThrowableHolder throwableHolder) {
+                final Completable.IInputContentUriToken value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onError(throwableHolder);
+            }
+        };
+    }
 }

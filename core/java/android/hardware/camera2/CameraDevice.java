@@ -770,6 +770,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * streams with {@code Y8} in all guaranteed stream combinations for the device's hardware level
      * and capabilities.</p>
      *
+     * <p>Clients can access the above mandatory stream combination tables via
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination}.</p>
      *
      * <p>Devices capable of outputting HEIC formats ({@link StreamConfigurationMap#getOutputFormats}
      * contains {@link android.graphics.ImageFormat#HEIC}) will support substituting {@code JPEG}
@@ -777,8 +779,33 @@ public abstract class CameraDevice implements AutoCloseable {
      * level and capabilities. Calling createCaptureSession with both JPEG and HEIC outputs is not
      * supported.</p>
      *
-     * <p>Clients can access the above mandatory stream combination tables via
-     * {@link android.hardware.camera2.params.MandatoryStreamCombination}.</p>
+     * <p>Devices capable of multi-resolution output for a particular format (
+     * {@link android.hardware.camera2.params.MultiResolutionStreamConfigurationMap#getOutputInfo}
+     * returns a non-empty list) support using {@link MultiResolutionImageReader} for MAXIMUM
+     * resolution streams of that format for all mandatory stream combinations. For example,
+     * if a LIMITED camera device supports multi-resolution output streams for both {@code JPEG} and
+     * {@code PRIVATE}, in addition to the stream configurations
+     * in the LIMITED and Legacy table above, the camera device supports the following guaranteed
+     * stream combinations ({@code MULTI_RES} in the Max size column refers to a {@link
+     * MultiResolutionImageReader} created based on the variable max resolutions supported):
+     *
+     * <table>
+     * <tr><th colspan="7">LEGACY-level additional guaranteed combinations with MultiResolutionoutputs</th></tr>
+     * <tr> <th colspan="2" id="rb">Target 1</th> <th colspan="2" id="rb">Target 2</th>  <th colspan="2" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr> <th>Type</th><th id="rb">Max size</th> <th>Type</th><th id="rb">Max size</th> <th>Type</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MULTI_RES}</td> <td colspan="2" id="rb"></td> <td colspan="2" id="rb"></td> <td>Simple preview, GPU video processing, or no-preview video recording.</td> </tr>
+     * <tr> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td colspan="2" id="rb"></td> <td colspan="2" id="rb"></td> <td>No-viewfinder still image capture.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td colspan="2" id="rb"></td> <td>Standard still imaging.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td>Still capture plus in-app processing.</td> </tr>
+     * </table><br>
+     * <table>
+     * <tr><th colspan="7">LIMITED-level additional guaranteed configurations with MultiResolutionoutputs</th></tr>
+     * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td>Two-input in-app processing with still capture.</td> </tr>
+     * </table><br>
+     * The same logic applies to other hardware levels and capabilities.
+     * </p>
      *
      * <p>Since the capabilities of camera devices vary greatly, a given camera device may support
      * target combinations with sizes outside of these guarantees, but this can only be tested for
@@ -937,6 +964,32 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code 640x480}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td>In-app viewfinder analysis with ZSL and RAW.</td> </tr>
      * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code 640x480}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td><td>In-app viewfinder analysis with ZSL, RAW, and JPEG reprocessing output.</td> </tr>
      * </table><br>
+     * </p>
+     *
+     * <p>If a camera device supports multi-resolution {@code YUV} input and multi-resolution
+     * {@code YUV} output or supports multi-resolution {@code PRIVATE} input and multi-resolution
+     * {@code PRIVATE} output, the additional mandatory stream combinations for LIMITED and FULL devices are listed
+     * below ({@code MULTI_RES} in the Max size column refers to a
+     * {@link MultiResolutionImageReader} for output, and a multi-resolution
+     * {@link InputConfiguration} for input):
+     * <table>
+     * <tr><th colspan="11">LIMITED-level additional guaranteed configurations for creating a reprocessable capture session with multi-resolution input and multi-resolution outputs<br>({@code PRIV} input is guaranteed only if PRIVATE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
+     * <tr><th colspan="2" id="rb">Input</th><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th><th colspan="2" id="rb">Target 4</th><th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MULTI_RES}</td> <td>Same as input</td><td id="rb">{@code MULTI_RES}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td></td><td id="rb"></td> <td></td><td id="rb"></td> <td>No-viewfinder still image reprocessing.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MULTI_RES}</td> <td>Same as input</td><td id="rb">{@code MULTI_RES}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td></td><td id="rb"></td> <td>ZSL(Zero-Shutter-Lag) still imaging.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MULTI_RES}</td> <td>Same as input</td><td id="rb">{@code MULTI_RES}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td></td><td id="rb"></td> <td>ZSL still and in-app processing imaging.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MULTI_RES}</td> <td>Same as input</td><td id="rb">{@code MULTI_RES}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td>ZSL in-app processing with still capture.</td> </tr>
+     * </table><br>
+     * <table>
+     * <tr><th colspan="11">FULL-level additional guaranteed configurations for creating a reprocessable capture session with multi-resolution input and multi-resolution outputs<br>({@code PRIV} input is guaranteed only if PRIVATE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
+     * <tr><th colspan="2" id="rb">Input</th><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th><th colspan="2" id="rb">Target 4</th><th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MULTI_RES}</td> <td>{@code PRIV}</td><td id="rb">{@code MULTI_RES}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MULTI_RES}</td> <td></td><td id="rb"></td> <td>Maximum-resolution ZSL in-app processing with regular preview.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MULTI_RES}</td> <td>{@code PRIV}</td><td id="rb">{@code MULTI_RES}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MULTI_RES}</td> <td></td><td id="rb"></td> <td>Maximum-resolution two-input ZSL in-app processing.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MULTI_RES}</td> <td>Same as input</td><td id="rb">{@code MULTI_RES}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td>ZSL still capture and in-app processing.</td> </tr>
+     * </table><br>
+     * No additional mandatory stream combinations for RAW capability and LEVEL-3 hardware level.
      * </p>
      *
      * <h3>Constrained high-speed recording</h3>

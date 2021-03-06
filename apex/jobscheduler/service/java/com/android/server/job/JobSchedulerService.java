@@ -1745,11 +1745,12 @@ public class JobSchedulerService extends com.android.server.SystemService
      * A job just finished executing. We fetch the
      * {@link com.android.server.job.controllers.JobStatus} from the store and depending on
      * whether we want to reschedule we re-add it to the controllers.
-     * @param jobStatus Completed job.
+     *
+     * @param jobStatus       Completed job.
      * @param needsReschedule Whether the implementing class should reschedule this job.
      */
     @Override
-    public void onJobCompletedLocked(JobStatus jobStatus, boolean needsReschedule) {
+    public void onJobCompletedLocked(JobStatus jobStatus, int stopReason, boolean needsReschedule) {
         if (DEBUG) {
             Slog.d(TAG, "Completed " + jobStatus + ", reschedule=" + needsReschedule);
         }
@@ -1767,6 +1768,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         // we stop it.
         final JobStatus rescheduledJob = needsReschedule
                 ? getRescheduleJobForFailureLocked(jobStatus) : null;
+        if (rescheduledJob != null
+                && (stopReason == JobParameters.REASON_TIMEOUT
+                || stopReason == JobParameters.REASON_PREEMPT)) {
+            rescheduledJob.disallowRunInBatterySaverAndDoze();
+        }
 
         // Do not write back immediately if this is a periodic job. The job may get lost if system
         // shuts down before it is added back.
