@@ -32,7 +32,6 @@ import com.android.server.biometrics.sensors.GenerateChallengeClient;
  */
 class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISession> {
     private static final String TAG = "FingerprintGenerateChallengeClient";
-    private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
     FingerprintGenerateChallengeClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon,
@@ -45,7 +44,7 @@ class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISessio
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().generateChallenge(mSequentialId, CHALLENGE_TIMEOUT_SEC);
+            getFreshDaemon().generateChallenge(mSequentialId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to generateChallenge", e);
         }
