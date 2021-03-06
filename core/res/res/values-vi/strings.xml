@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Cho phép ứng dụng này sửa đổi bộ sưu tập ảnh của bạn."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"đọc vị trí từ bộ sưu tập phương tiện"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Cho phép ứng dụng này đọc vị trí từ bộ sưu tập phương tiện của bạn."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Xác minh danh tính của bạn"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Không có phần cứng sinh trắc học"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Đã hủy xác thực"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Không nhận dạng được"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Đã hủy xác thực"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Chưa đặt mã PIN, hình mở khóa hoặc mật khẩu"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Lỗi khi xác thực"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Đã phát hiện được một phần vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Không thể xử lý vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Cảm biến vân tay bị bẩn. Hãy làm sạch và thử lại."</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Thiết bị này không có cảm biến vân tay."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Đã tạm thời tắt cảm biến."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Ngón tay <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Sử dụng dấu vân tay của bạn để tiếp tục"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Không nhận ra khuôn mặt. Hãy thử lại."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Khuôn mặt quá giống nhau, vui lòng đổi tư thế."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Hãy bớt di chuyển đầu."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Hãy bớt ngửa hoặc cúi đầu."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Hãy bớt di chuyển đầu."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Hãy loại bỏ mọi thứ che khuất khuôn mặt bạn."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Vệ sinh phần đầu màn hình, bao gồm cả thanh màu đen"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Thiết bị này không hỗ trợ tính năng mở khóa bằng khuôn mặt."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Đã tạm thời tắt cảm biến."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Khuôn mặt <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Biểu tượng khuôn mặt"</string>
@@ -986,7 +1005,7 @@
     <string name="save_password_remember" msgid="6490888932657708341">"Nhớ"</string>
     <string name="save_password_never" msgid="6776808375903410659">"Chưa bao giờ"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Bạn không được phép mở trang này."</string>
-    <string name="text_copied" msgid="2531420577879738860">"Đã sao chép văn bản vào khay nhớ tạm thời."</string>
+    <string name="text_copied" msgid="2531420577879738860">"Đã sao chép văn bản vào bảng nhớ tạm thời."</string>
     <string name="copied" msgid="4675902854553014676">"Đã sao chép"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Thêm"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Trình đơn+"</string>
@@ -1111,7 +1130,7 @@
     <string name="selectAll" msgid="1532369154488982046">"Chọn tất cả"</string>
     <string name="cut" msgid="2561199725874745819">"Cắt"</string>
     <string name="copy" msgid="5472512047143665218">"Sao chép"</string>
-    <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Không sao chép được vào khay nhớ tạm"</string>
+    <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Không sao chép được vào bảng nhớ tạm"</string>
     <string name="paste" msgid="461843306215520225">"Dán"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Dán dưới dạng văn bản thuần túy"</string>
     <string name="replace" msgid="7842675434546657444">"Thay thế..."</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sử dụng phím tắt"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Đảo màu"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Chỉnh màu"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Giảm độ sáng"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã bật."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã tắt."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Nhấn và giữ đồng thời cả hai phím âm lượng trong 3 giây để sử dụng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Cảnh báo về hành vi lừa đảo"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Hồ sơ công việc"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Đã phát âm báo"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Đã xác minh"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Mở rộng"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Thu gọn"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"chuyển đổi mở rộng"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"Tin tức và tạp chí"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Bản đồ và dẫn đường"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Sản xuất"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Bộ nhớ của thiết bị"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Gỡ lỗi qua USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"giờ"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Để tiếp tục, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; cần quyền truy cập vào máy ảnh trên thiết bị của bạn."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Bật"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Quyền riêng tư khi sử dụng cảm biến"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Biểu tượng ứng dụng"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Hình ảnh thương hiệu của ứng dụng"</string>
 </resources>

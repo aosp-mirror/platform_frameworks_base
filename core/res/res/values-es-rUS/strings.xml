@@ -333,8 +333,8 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controla el posicionamiento y el nivel de zoom de la pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Usar gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Permite presionar, deslizar, pellizcar y usar otros gestos."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos del sensor de huellas digitales"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura los gestos que se hacen en el sensor de huellas digitales del dispositivo."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos del sensor de huellas dactilares"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Captura los gestos que se hacen en el sensor de huellas dactilares del dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Tomar captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puede tomar una captura de la pantalla."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra de estado"</string>
@@ -525,9 +525,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Permite que la app conecte el dispositivo Android TV a redes WiMAX y que lo desconecte de ellas."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Permite que la aplicación conecte el dispositivo a una red WiMAX y que lo desconecte de ella."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"vincular con dispositivos Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite que la aplicación vea la configuración de Bluetooth de la tablet y que cree y acepte conexiones con los dispositivos sincronizados."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite que la app vea la configuración de Bluetooth del dispositivo Android TV, así como que cree y acepte conexiones con los dispositivos sincronizados."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite que la aplicación vea la configuración de Bluetooth del dispositivo y que cree y acepte conexiones con los dispositivos sincronizados."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite que la aplicación vea la configuración de Bluetooth de la tablet y que cree y acepte conexiones con los dispositivos vinculados."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite que la app vea la configuración de Bluetooth del dispositivo Android TV, así como que cree y acepte conexiones con los dispositivos vinculados."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite que la aplicación vea la configuración de Bluetooth del dispositivo y que cree y acepte conexiones con los dispositivos vinculados."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información sobre servicio de pago NFC preferido"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que la app reciba información del servicio de pago NFC preferido, como el servicio de asistencia registrado y el destino de la ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar la Transmisión de datos en proximidad"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permite que la app conozca el nivel de complejidad del bloqueo de pantalla (alta, media, baja o ninguna), lo que indica el rango de duración posible y el tipo de bloqueo. La app también puede sugerirles a los usuarios que actualicen el bloqueo de pantalla a un determinado nivel, aunque ellos pueden ignorar esta sugerencia y seguir navegando. Ten en cuenta que el bloqueo de pantalla no se almacena como texto sin formato, por lo que la app no conoce la contraseña exacta."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"usar hardware biométrico"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permite que la app use hardware biométrico para realizar la autenticación"</string>
-    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Administrar el hardware de huellas digitales"</string>
-    <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permite que la aplicación emplee métodos para agregar y eliminar plantillas de huellas digitales para su uso."</string>
-    <string name="permlab_useFingerprint" msgid="1001421069766751922">"Utilizar hardware de huellas digitales"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permite que la aplicación utilice el hardware de huellas digitales para realizar la autenticación."</string>
+    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Administrar el hardware de huellas dactilares"</string>
+    <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permite que la aplicación emplee métodos para agregar y eliminar plantillas de huellas dactilares para su uso."</string>
+    <string name="permlab_useFingerprint" msgid="1001421069766751922">"Utilizar hardware de huellas dactilares"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permite que la aplicación utilice el hardware de huellas dactilares para realizar la autenticación."</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar tu colección de música"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permite que la app modifique tu colección de música."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"modificar tu colección de videos"</string>
@@ -550,39 +550,53 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Permite que la app modifique tu colección de fotos."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"leer ubicaciones de tu colección de contenido multimedia"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permite que la app lea las ubicaciones de tu colección de contenido multimedia."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Comprueba que eres tú"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"No hay hardware biométrico disponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Se canceló la autenticación"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No se reconoció"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Se canceló la autenticación"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No se estableció ningún PIN, patrón ni contraseña"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Error de autenticación"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Se detectó parcialmente la huella digital. Vuelve a intentarlo."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No se pudo procesar la huella digital. Vuelve a intentarlo."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"El sensor de huellas digitales está sucio. Limpia el sensor y vuelve a intentarlo."</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
+    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Se detectó parcialmente la huella dactilar. Vuelve a intentarlo."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No se pudo procesar la huella dactilar. Vuelve a intentarlo."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"El sensor de huellas dactilares está sucio. Limpia el sensor y vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Moviste el dedo muy rápido. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Moviste el dedo muy lento. Vuelve a intentarlo."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_authenticated" msgid="2024862866860283100">"Se autenticó la huella digital"</string>
+    <string name="fingerprint_authenticated" msgid="2024862866860283100">"Se autenticó la huella dactilar"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Se autenticó el rostro"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Se autenticó el rostro; presiona Confirmar"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"El hardware para detectar huellas digitales no está disponible."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"No se puede almacenar la huella digital. Elimina una de las existentes."</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Finalizó el tiempo de espera para la huella digital. Vuelve a intentarlo."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Se canceló la operación de huella digital."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"El usuario canceló la operación de huella digital."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"El hardware para detectar huellas dactilares no está disponible."</string>
+    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"No se puede almacenar la huella dactilar. Elimina una de las existentes."</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Finalizó el tiempo de espera para la huella dactilar. Vuelve a intentarlo."</string>
+    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Se canceló la operación de huella dactilar."</string>
+    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"El usuario canceló la operación de huella dactilar."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Demasiados intentos. Vuelve a intentarlo más tarde."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Realizaste demasiados intentos. Se inhabilitó el sensor de huellas digitales."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Realizaste demasiados intentos. Se inhabilitó el sensor de huellas dactilares."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Vuelve a intentarlo."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No se registraron huellas digitales."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo no tiene sensor de huellas digitales."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo no tiene sensor de huellas dactilares."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Se inhabilitó temporalmente el sensor."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utiliza tu huella digital para continuar"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utiliza tu huella dactilar para continuar"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícono de huella digital"</string>
+    <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícono de huella dactilar"</string>
     <string name="permlab_manageFace" msgid="4569549381889283282">"administrar el hardware de desbloqueo facial"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Permite que la app emplee métodos para agregar y borrar plantillas de rostros para su uso."</string>
     <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"usar el hardware de desbloqueo facial"</string>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Ya no se reconoce el rostro. Vuelve a intentarlo."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Es muy similar a la anterior. Haz otra pose."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Gira la cabeza un poco menos."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Inclina un poco menos la cabeza."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Gira la cabeza un poco menos."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Quítate cualquier objeto que te cubra el rostro."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpia la parte superior de la pantalla, incluida la barra negra"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"No se admite el desbloqueo facial en este dispositivo."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Se inhabilitó temporalmente el sensor."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Rostro <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ícono cara"</string>
@@ -1557,8 +1576,8 @@
     <string name="expires_on" msgid="1623640879705103121">"Expira el:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Número de serie:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Huellas digitales:"</string>
-    <string name="sha256_fingerprint" msgid="7103976380961964600">"Huella digital SHA-256"</string>
-    <string name="sha1_fingerprint" msgid="2339915142825390774">"Huella digital SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="7103976380961964600">"Huella dactilar SHA-256"</string>
+    <string name="sha1_fingerprint" msgid="2339915142825390774">"Huella dactilar SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Ver todas"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Elige actividad"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Compartir con"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usar acceso directo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de color"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Corrección de color"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Reducir el brillo"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Como mantuviste presionadas las teclas de volumen, se activó <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Se presionaron las teclas de volumen. Se desactivó <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén presionadas ambas teclas de volumen durante tres segundos para usar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Alerta de suplantación de identidad (phishing)"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Perfil de trabajo"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Alerta enviada"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Verificado"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Expandir"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Contraer"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"activar o desactivar la expansión"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"Noticias y revistas"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Mapas y navegación"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Productividad"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Almacenamiento del dispositivo"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Depuración por USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"hora"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Para continuar, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&amp;gt necesita acceso a la cámara del dispositivo."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Activar"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privacidad del sensor"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ícono de la aplicación"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imagen de marca de la aplicación"</string>
 </resources>
