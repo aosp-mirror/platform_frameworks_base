@@ -68,4 +68,7 @@ interface IKeyChainService {
     // APIs used by KeyChainActivity
     void setGrant(int uid, String alias, boolean value);
     boolean hasGrant(int uid, String alias);
+
+    // API used by Wifi
+    String getWifiKeyGrantAsUser(String alias);
 }
