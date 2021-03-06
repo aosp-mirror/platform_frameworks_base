@@ -23,9 +23,13 @@ import static android.app.AppOpsManager.FILTER_BY_UID;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_FINE_LOCATION;
+import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
+import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.AppOpsManager.flagsToString;
+import static android.app.AppOpsManager.getUidStateName;
 
 import static java.lang.Math.max;
 
@@ -45,15 +49,20 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 
+import libcore.util.EmptyArray;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -237,6 +246,23 @@ final class DiscreteRegistry {
         }
     }
 
+    void dump(@NonNull PrintWriter pw, int uidFilter, @Nullable String packageNameFilter,
+            @Nullable String attributionTagFilter,
+            @AppOpsManager.HistoricalOpsRequestFilter int filter, int dumpOp,
+            @NonNull SimpleDateFormat sdf, @NonNull Date date, @NonNull String prefix,
+            int nDiscreteOps) {
+        DiscreteOps discreteOps = new DiscreteOps();
+        synchronized (mOnDiskLock) {
+            writeAndClearAccessHistory();
+            String[] opNamesFilter = dumpOp == OP_NONE ? EmptyArray.STRING
+                    : new String[]{AppOpsManager.opToPublicName(dumpOp)};
+            readDiscreteOpsFromDisk(discreteOps, 0, Instant.now().toEpochMilli(), filter,
+                    uidFilter, packageNameFilter, opNamesFilter, attributionTagFilter,
+                    OP_FLAGS_ALL);
+        }
+        discreteOps.dump(pw, sdf, date, prefix, nDiscreteOps);
+    }
+
     public static boolean isDiscreteOp(int op, int uid, @AppOpsManager.OpFlags int flags) {
         if (!isDiscreteOp(op)) {
             return false;
@@ -304,6 +330,18 @@ final class DiscreteRegistry {
             out.endTag(null, TAG_HISTORY);
             out.endDocument();
             stream.close();
+        }
+
+        private void dump(@NonNull PrintWriter pw, @NonNull SimpleDateFormat sdf,
+                @NonNull Date date, @NonNull String prefix, int nDiscreteOps) {
+            int nUids = mUids.size();
+            for (int i = 0; i < nUids; i++) {
+                pw.print(prefix);
+                pw.print("Uid: ");
+                pw.print(mUids.keyAt(i));
+                pw.println();
+                mUids.valueAt(i).dump(pw, sdf, date, prefix + "  ", nDiscreteOps);
+            }
         }
 
         private DiscreteUidOps getOrCreateDiscreteUidOps(int uid) {
@@ -395,6 +433,18 @@ final class DiscreteRegistry {
             }
         }
 
+        private void dump(@NonNull PrintWriter pw, @NonNull SimpleDateFormat sdf,
+                @NonNull Date date, @NonNull String prefix, int nDiscreteOps) {
+            int nPackages = mPackages.size();
+            for (int i = 0; i < nPackages; i++) {
+                pw.print(prefix);
+                pw.print("Package: ");
+                pw.print(mPackages.keyAt(i));
+                pw.println();
+                mPackages.valueAt(i).dump(pw, sdf, date, prefix + "  ", nDiscreteOps);
+            }
+        }
+
         void deserialize(TypedXmlPullParser parser, long beginTimeMillis,
                 long endTimeMillis, @AppOpsManager.HistoricalOpsRequestFilter int filter,
                 @Nullable String packageNameFilter,
@@ -455,6 +505,17 @@ final class DiscreteRegistry {
                 out.attributeInt(null, ATTR_OP_ID, mPackageOps.keyAt(i));
                 mPackageOps.valueAt(i).serialize(out);
                 out.endTag(null, TAG_OP);
+            }
+        }
+
+        private void dump(@NonNull PrintWriter pw, @NonNull SimpleDateFormat sdf,
+                @NonNull Date date, @NonNull String prefix, int nDiscreteOps) {
+            int nOps = mPackageOps.size();
+            for (int i = 0; i < nOps; i++) {
+                pw.print(prefix);
+                pw.print(AppOpsManager.opToName(mPackageOps.keyAt(i)));
+                pw.println();
+                mPackageOps.valueAt(i).dump(pw, sdf, date, prefix + "  ", nDiscreteOps);
             }
         }
 
@@ -525,6 +586,24 @@ final class DiscreteRegistry {
                     DiscreteOpEvent event = events.get(j);
                     result.addDiscreteAccess(op, uid, packageName, tag, event.mUidState,
                             event.mOpFlag, event.mNoteTime, event.mNoteDuration);
+                }
+            }
+        }
+
+        private void dump(@NonNull PrintWriter pw, @NonNull SimpleDateFormat sdf,
+                @NonNull Date date, @NonNull String prefix, int nDiscreteOps) {
+            int nAttributions = mAttributedOps.size();
+            for (int i = 0; i < nAttributions; i++) {
+                pw.print(prefix);
+                pw.print("Attribution: ");
+                pw.print(mAttributedOps.keyAt(i));
+                pw.println();
+                List<DiscreteOpEvent> ops = mAttributedOps.valueAt(i);
+                int nOps = ops.size();
+                int first = nDiscreteOps < 1 ? 0 : max(0, nOps - nDiscreteOps);
+                for (int j = first; j < nOps; j++) {
+                    ops.get(j).dump(pw, sdf, date, prefix + "  ");
+
                 }
             }
         }
@@ -601,6 +680,24 @@ final class DiscreteRegistry {
             mNoteDuration = noteDuration;
             mUidState = uidState;
             mOpFlag = opFlag;
+        }
+
+        private void dump(@NonNull PrintWriter pw, @NonNull SimpleDateFormat sdf,
+                @NonNull Date date, @NonNull String prefix) {
+            pw.print(prefix);
+            pw.print("Access [");
+            pw.print(getUidStateName(mUidState));
+            pw.print("-");
+            pw.print(flagsToString(mOpFlag));
+            pw.print("] at ");
+            date.setTime(mNoteTime);
+            pw.print(sdf.format(date));
+            if (mNoteDuration != -1) {
+                pw.print(" for ");
+                pw.print(mNoteDuration);
+                pw.print(" milliseconds ");
+            }
+            pw.println();
         }
 
         private void serialize(TypedXmlSerializer out) throws Exception {

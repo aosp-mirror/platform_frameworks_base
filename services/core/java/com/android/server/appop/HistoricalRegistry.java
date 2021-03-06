@@ -349,6 +349,15 @@ final class HistoricalRegistry {
         }
     }
 
+    void dumpDiscreteData(@NonNull PrintWriter pw, int uidFilter,
+            @Nullable String packageNameFilter, @Nullable String attributionTagFilter,
+            @HistoricalOpsRequestFilter int filter, int dumpOp,
+            @NonNull SimpleDateFormat sdf, @NonNull Date date, @NonNull String prefix,
+            int nDiscreteOps) {
+        mDiscreteRegistry.dump(pw, uidFilter, packageNameFilter, attributionTagFilter, filter,
+                dumpOp, sdf, date, prefix, nDiscreteOps);
+    }
+
     @HistoricalMode int getMode() {
         synchronized (mInMemoryLock) {
             return mMode;

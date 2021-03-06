@@ -5282,8 +5282,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("    Limit output to data associated with the given package name.");
         pw.println("  --attributionTag [attributionTag]");
         pw.println("    Limit output to data associated with the given attribution tag.");
+        pw.println("  --include-discrete [n]");
+        pw.println("    Include discrete ops limited to n per dimension. Use zero for no limit.");
         pw.println("  --watchers");
         pw.println("    Only output the watcher sections.");
+        pw.println("  --history");
+        pw.println("    Only output history.");
     }
 
     private void dumpStatesLocked(@NonNull PrintWriter pw, @Nullable String filterAttributionTag,
@@ -5418,10 +5422,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         boolean dumpWatchers = false;
         // TODO ntmyren: Remove the dumpHistory and dumpFilter
         boolean dumpHistory = false;
+        boolean includeDiscreteOps = false;
+        int nDiscreteOps = 10;
         @HistoricalOpsRequestFilter int dumpFilter = 0;
 
         if (args != null) {
-            for (int i=0; i<args.length; i++) {
+            for (int i = 0; i < args.length; i++) {
                 String arg = args[i];
                 if ("-h".equals(arg)) {
                     dumpHelp(pw);
@@ -5479,7 +5485,22 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 } else if ("--watchers".equals(arg)) {
                     dumpWatchers = true;
-                } else if (arg.length() > 0 && arg.charAt(0) == '-'){
+                } else if ("--include-discrete".equals(arg)) {
+                    i++;
+                    if (i >= args.length) {
+                        pw.println("No argument for --include-discrete option");
+                        return;
+                    }
+                    try {
+                        nDiscreteOps = Integer.valueOf(args[i]);
+                    } catch (NumberFormatException e) {
+                        pw.println("Wrong parameter: " + args[i]);
+                        return;
+                    }
+                    includeDiscreteOps = true;
+                } else if ("--history".equals(arg)) {
+                    dumpHistory = true;
+                } else if (arg.length() > 0 && arg.charAt(0) == '-') {
                     pw.println("Unknown option: " + arg);
                     return;
                 } else {
@@ -5489,6 +5510,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        final Date date = new Date();
         synchronized (this) {
             pw.println("Current AppOps Service state:");
             if (!dumpHistory && !dumpWatchers) {
@@ -5498,8 +5521,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             final long now = System.currentTimeMillis();
             final long nowElapsed = SystemClock.elapsedRealtime();
             final long nowUptime = SystemClock.uptimeMillis();
-            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-            final Date date = new Date();
             boolean needSep = false;
             if (dumpFilter == 0 && dumpMode < 0 && mProfileOwners != null && !dumpWatchers
                     && !dumpHistory) {
@@ -5966,6 +5987,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (dumpHistory && !dumpWatchers) {
             mHistoricalRegistry.dump("  ", pw, dumpUid, dumpPackage, dumpAttributionTag, dumpOp,
                     dumpFilter);
+        }
+        if (includeDiscreteOps) {
+            pw.println("Discrete accesses: ");
+            mHistoricalRegistry.dumpDiscreteData(pw, dumpUid, dumpPackage, dumpAttributionTag,
+                    dumpFilter, dumpOp, sdf, date, "  ", nDiscreteOps);
         }
     }
 
