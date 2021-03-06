@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.android.internal.R;
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.ConversationLayout;
+import com.android.internal.widget.ImageFloatingTextView;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentView;
@@ -430,6 +431,8 @@ public class NotificationGroupingUtil {
 
         public static final int[] MARGIN_ADJUSTED_VIEWS = {
                 R.id.notification_headerless_view_column,
+                R.id.text,
+                R.id.big_text,
                 R.id.title,
                 R.id.notification_main_column,
                 R.id.notification_header};
@@ -456,6 +459,10 @@ public class NotificationGroupingUtil {
 
         void adjustMargins(boolean iconVisible, View target) {
             if (target == null) {
+                return;
+            }
+            if (target instanceof ImageFloatingTextView) {
+                ((ImageFloatingTextView) target).setHasImage(iconVisible);
                 return;
             }
             final Integer data = (Integer) target.getTag(iconVisible
