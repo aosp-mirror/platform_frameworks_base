@@ -877,10 +877,12 @@ public class NotificationContentView extends FrameLayout {
 
     public void setBackgroundTintColor(int color) {
         if (mExpandedSmartReplyView != null) {
-            mExpandedSmartReplyView.setBackgroundTintColor(color);
+            boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
+            mExpandedSmartReplyView.setBackgroundTintColor(color, colorized);
         }
         if (mHeadsUpSmartReplyView != null) {
-            mHeadsUpSmartReplyView.setBackgroundTintColor(color);
+            boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
+            mHeadsUpSmartReplyView.setBackgroundTintColor(color, colorized);
         }
     }
 
@@ -1510,7 +1512,9 @@ public class NotificationContentView extends FrameLayout {
             smartReplyView.addPreInflatedButtons(
                     inflatedSmartReplyViewHolder.getSmartSuggestionButtons());
             // Ensure the colors of the smart suggestion buttons are up-to-date.
-            smartReplyView.setBackgroundTintColor(entry.getRow().getCurrentBackgroundTint());
+            int backgroundColor = entry.getRow().getCurrentBackgroundTint();
+            boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
+            smartReplyView.setBackgroundTintColor(backgroundColor, colorized);
             smartReplyContainer.setVisibility(View.VISIBLE);
         }
         return smartReplyView;
