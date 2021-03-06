@@ -19,17 +19,16 @@ package com.android.wm.shell.splitscreen;
 import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
-
-import java.io.PrintWriter;
 
 /**
  * Interface to engage split-screen feature.
@@ -87,7 +86,7 @@ public interface SplitScreen extends DragAndDropPolicy.Starter {
     /** Callback interface for listening to changes in a split-screen stage. */
     interface SplitScreenListener {
         void onStagePositionChanged(@StageType int stage, @StagePosition int position);
-        void onTaskStageChanged(int taskId, @StageType int stage);
+        void onTaskStageChanged(int taskId, @StageType int stage, boolean visible);
     }
 
     /** @return {@code true} if split-screen is currently visible. */
@@ -118,6 +117,7 @@ public interface SplitScreen extends DragAndDropPolicy.Starter {
             @StageType int stage, @StagePosition int position, @Nullable Bundle options);
     void startShortcut(String packageName, String shortcutId, @StageType int stage,
             @StagePosition int position, @Nullable Bundle options, UserHandle user);
-    void startIntent(PendingIntent intent,
-            @StageType int stage, @StagePosition int position, @Nullable Bundle options);
+    void startIntent(PendingIntent intent, Context context,
+            @Nullable Intent fillInIntent, @StageType int stage,
+            @StagePosition int position, @Nullable Bundle options);
 }

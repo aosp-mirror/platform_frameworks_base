@@ -1964,6 +1964,8 @@
     <string name="config_systemContacts" translatable="false">com.android.contacts</string>
     <!-- The name of the package that will hold the speech recognizer role by default. -->
     <string name="config_systemSpeechRecognizer" translatable="false"></string>
+    <!-- The name of the package that will hold the system Wi-Fi coex manager role. -->
+    <string name="config_systemWifiCoexManager" translateable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false"></string>

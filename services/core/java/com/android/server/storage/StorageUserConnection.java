@@ -42,8 +42,8 @@ import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageVolume;
 import android.service.storage.ExternalStorageService;
 import android.service.storage.IExternalStorageService;
-import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -76,8 +76,8 @@ public final class StorageUserConnection {
     private final StorageSessionController mSessionController;
     private final StorageManagerInternal mSmInternal;
     private final ActiveConnection mActiveConnection = new ActiveConnection();
-    @GuardedBy("mLock") private final Map<String, Session> mSessions = new HashMap<>();
-    @GuardedBy("mLock") private final Set<Integer> mUidsBlockedOnIo = new ArraySet<>();
+    @GuardedBy("mSessionsLock") private final Map<String, Session> mSessions = new HashMap<>();
+    @GuardedBy("mSessionsLock") private final SparseArray<Integer> mUidsBlockedOnIo = new SparseArray<>();
     private final HandlerThread mHandlerThread;
 
     public StorageUserConnection(Context context, int userId, StorageSessionController controller) {
@@ -249,7 +249,8 @@ public final class StorageUserConnection {
     public void notifyAppIoBlocked(String volumeUuid, int uid, int tid,
             @StorageManager.AppIoBlockedReason int reason) {
         synchronized (mSessionsLock) {
-            mUidsBlockedOnIo.add(uid);
+            int ioBlockedCounter = mUidsBlockedOnIo.get(uid, 0);
+            mUidsBlockedOnIo.put(uid, ++ioBlockedCounter);
         }
     }
 
@@ -262,7 +263,12 @@ public final class StorageUserConnection {
     public void notifyAppIoResumed(String volumeUuid, int uid, int tid,
             @StorageManager.AppIoBlockedReason int reason) {
         synchronized (mSessionsLock) {
-            mUidsBlockedOnIo.remove(uid);
+            int ioBlockedCounter = mUidsBlockedOnIo.get(uid, 0);
+            if (ioBlockedCounter == 0) {
+                mUidsBlockedOnIo.remove(uid);
+            } else {
+                mUidsBlockedOnIo.put(uid, --ioBlockedCounter);
+            }
         }
     }
 

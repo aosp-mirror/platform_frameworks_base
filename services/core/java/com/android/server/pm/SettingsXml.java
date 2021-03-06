@@ -83,7 +83,7 @@ public class SettingsXml {
         @Override
         public void close() throws IOException {
             mWriteSection.closeCompletely();
-            mXmlSerializer.endDocument();
+            mXmlSerializer.flush();
         }
     }
 

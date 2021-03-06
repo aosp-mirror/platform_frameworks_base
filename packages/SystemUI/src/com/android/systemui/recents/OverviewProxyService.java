@@ -662,14 +662,29 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
-        public void startIntent(PendingIntent intent, int stage, int position, Bundle options) {
+        public void startIntent(PendingIntent intent, Intent fillInIntent,
+                int stage, int position, Bundle options) {
             if (!verifyCaller("startIntent")) {
                 return;
             }
             final long token = Binder.clearCallingIdentity();
             try {
                 mSplitScreenOptional.ifPresent(s ->
-                        s.startIntent(intent, stage, position, options));
+                        s.startIntent(intent, mContext, fillInIntent, stage, position, options));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void removeFromSideStage(int taskId) {
+            if (!verifyCaller("removeFromSideStage")) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mSplitScreenOptional.ifPresent(
+                        s -> s.removeFromSideStage(taskId));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -789,10 +804,10 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
-        public void onTaskStageChanged(int taskId, int stage) {
+        public void onTaskStageChanged(int taskId, int stage, boolean visible) {
             try {
                 if (mISplitScreenListener != null) {
-                    mISplitScreenListener.onTaskStageChanged(taskId, stage);
+                    mISplitScreenListener.onTaskStageChanged(taskId, stage, visible);
                 }
             } catch (RemoteException e) {
                 Log.e(TAG_OPS, "onTaskStageChanged", e);

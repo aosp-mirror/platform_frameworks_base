@@ -17,7 +17,7 @@
 #include "DrawFrameTask.h"
 
 #include <utils/Log.h>
-#include <utils/Trace.h>
+#include <utils/TraceUtils.h>
 
 #include "../DeferredLayerUpdater.h"
 #include "../DisplayList.h"
@@ -82,7 +82,8 @@ void DrawFrameTask::postAndWait() {
 }
 
 void DrawFrameTask::run() {
-    ATRACE_NAME("DrawFrame");
+    const int64_t vsyncId = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameTimelineVsyncId)];
+    ATRACE_FORMAT("DrawFrames %" PRId64, vsyncId);
 
     bool canUnblockUiThread;
     bool canDrawThisFrame;

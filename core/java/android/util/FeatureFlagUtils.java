@@ -68,7 +68,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_DO_NOT_RESTORE_PRESERVED, "true");
 
         DEFAULT_FLAGS.put("settings_tether_all_in_one", "false");
-        DEFAULT_FLAGS.put("settings_silky_home", "false");
+        DEFAULT_FLAGS.put("settings_silky_home", "true");
         DEFAULT_FLAGS.put("settings_contextual_home", "false");
         DEFAULT_FLAGS.put(SETTINGS_PROVIDER_MODEL, "false");
         DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "false");

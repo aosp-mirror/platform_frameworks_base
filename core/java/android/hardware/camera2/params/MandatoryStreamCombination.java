@@ -1297,19 +1297,6 @@ public final class MandatoryStreamCombination {
         }
 
         /**
-         * Size comparison method used by size comparators.
-         */
-        private static int compareSizes(int widthA, int heightA, int widthB, int heightB) {
-            long left = widthA * (long) heightA;
-            long right = widthB * (long) heightB;
-            if (left == right) {
-                left = widthA;
-                right = widthB;
-            }
-            return (left < right) ? -1 : (left > right ? 1 : 0);
-        }
-
-        /**
          * Size comparator that compares the number of pixels it covers.
          *
          * <p>If two the areas of two sizes are same, compare the widths.</p>
@@ -1317,8 +1304,8 @@ public final class MandatoryStreamCombination {
         public static class SizeComparator implements Comparator<Size> {
             @Override
             public int compare(@NonNull Size lhs, @NonNull Size rhs) {
-                return compareSizes(lhs.getWidth(), lhs.getHeight(), rhs.getWidth(),
-                        rhs.getHeight());
+                return StreamConfigurationMap.compareSizes(lhs.getWidth(), lhs.getHeight(),
+                        rhs.getWidth(), rhs.getHeight());
             }
         }
 

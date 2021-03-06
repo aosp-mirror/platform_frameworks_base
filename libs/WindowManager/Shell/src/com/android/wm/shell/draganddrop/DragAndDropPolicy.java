@@ -234,8 +234,8 @@ public class DragAndDropPolicy {
             final UserHandle user = intent.getParcelableExtra(EXTRA_USER);
             mStarter.startShortcut(packageName, id, stage, position, opts, user);
         } else {
-            mStarter.startIntent(intent.getParcelableExtra(EXTRA_PENDING_INTENT), stage, position,
-                    opts);
+            mStarter.startIntent(intent.getParcelableExtra(EXTRA_PENDING_INTENT),
+                    mContext, null, stage, position, opts);
         }
     }
 
@@ -295,7 +295,8 @@ public class DragAndDropPolicy {
                 @Nullable Bundle options);
         void startShortcut(String packageName, String shortcutId, @StageType int stage,
                 @StagePosition int position, @Nullable Bundle options, UserHandle user);
-        void startIntent(PendingIntent intent, @StageType int stage, @StagePosition int position,
+        void startIntent(PendingIntent intent, Context context, Intent fillInIntent,
+                @StageType int stage, @StagePosition int position,
                 @Nullable Bundle options);
         void enterSplitScreen(int taskId, boolean leftOrTop);
         void exitSplitScreen();
@@ -336,10 +337,11 @@ public class DragAndDropPolicy {
         }
 
         @Override
-        public void startIntent(PendingIntent intent, int stage, int position,
+        public void startIntent(PendingIntent intent, Context context,
+                @Nullable Intent fillInIntent, int stage, int position,
                 @Nullable Bundle options) {
             try {
-                intent.send(null, 0, null, null, null, null, options);
+                intent.send(mContext, 0, fillInIntent, null, null, null, options);
             } catch (PendingIntent.CanceledException e) {
                 Slog.e(TAG, "Failed to launch activity", e);
             }

@@ -1400,16 +1400,15 @@ static void insertPackagesToMergedList(JNIEnv* env,
 }
 
 static void isolateAppData(JNIEnv* env, jobjectArray pkg_data_info_list,
-    jobjectArray whitelisted_data_info_list, uid_t uid, const char* process_name,
-    jstring managed_nice_name, fail_fn_t fail_fn) {
+                           jobjectArray allowlisted_data_info_list, uid_t uid,
+                           const char* process_name, jstring managed_nice_name, fail_fn_t fail_fn) {
+    std::vector<std::string> merged_data_info_list;
+    insertPackagesToMergedList(env, merged_data_info_list, pkg_data_info_list, process_name,
+                               managed_nice_name, fail_fn);
+    insertPackagesToMergedList(env, merged_data_info_list, allowlisted_data_info_list, process_name,
+                               managed_nice_name, fail_fn);
 
-  std::vector<std::string> merged_data_info_list;
-  insertPackagesToMergedList(env, merged_data_info_list, pkg_data_info_list,
-          process_name, managed_nice_name, fail_fn);
-  insertPackagesToMergedList(env, merged_data_info_list, whitelisted_data_info_list,
-          process_name, managed_nice_name, fail_fn);
-
-  isolateAppData(env, merged_data_info_list, uid, process_name, managed_nice_name, fail_fn);
+    isolateAppData(env, merged_data_info_list, uid, process_name, managed_nice_name, fail_fn);
 }
 
 /**
@@ -1510,240 +1509,242 @@ static void BindMountStorageDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
 }
 
 // Utility routine to specialize a zygote child process.
-static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
-                             jint runtime_flags, jobjectArray rlimits,
-                             jlong permitted_capabilities, jlong effective_capabilities,
-                             jint mount_external, jstring managed_se_info,
-                             jstring managed_nice_name, bool is_system_server,
-                             bool is_child_zygote, jstring managed_instruction_set,
-                             jstring managed_app_data_dir, bool is_top_app,
-                             jobjectArray pkg_data_info_list,
-                             jobjectArray whitelisted_data_info_list,
-                             bool mount_data_dirs, bool mount_storage_dirs) {
-  const char* process_name = is_system_server ? "system_server" : "zygote";
-  auto fail_fn = std::bind(ZygoteFailure, env, process_name, managed_nice_name, _1);
-  auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
+static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, jint runtime_flags,
+                             jobjectArray rlimits, jlong permitted_capabilities,
+                             jlong effective_capabilities, jint mount_external,
+                             jstring managed_se_info, jstring managed_nice_name,
+                             bool is_system_server, bool is_child_zygote,
+                             jstring managed_instruction_set, jstring managed_app_data_dir,
+                             bool is_top_app, jobjectArray pkg_data_info_list,
+                             jobjectArray allowlisted_data_info_list, bool mount_data_dirs,
+                             bool mount_storage_dirs) {
+    const char* process_name = is_system_server ? "system_server" : "zygote";
+    auto fail_fn = std::bind(ZygoteFailure, env, process_name, managed_nice_name, _1);
+    auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
 
-  auto se_info = extract_fn(managed_se_info);
-  auto nice_name = extract_fn(managed_nice_name);
-  auto instruction_set = extract_fn(managed_instruction_set);
-  auto app_data_dir = extract_fn(managed_app_data_dir);
+    auto se_info = extract_fn(managed_se_info);
+    auto nice_name = extract_fn(managed_nice_name);
+    auto instruction_set = extract_fn(managed_instruction_set);
+    auto app_data_dir = extract_fn(managed_app_data_dir);
 
-  // Keep capabilities across UID change, unless we're staying root.
-  if (uid != 0) {
-    EnableKeepCapabilities(fail_fn);
-  }
-
-  SetInheritable(permitted_capabilities, fail_fn);
-
-  DropCapabilitiesBoundingSet(fail_fn);
-
-  bool need_pre_initialize_native_bridge =
-      !is_system_server &&
-      instruction_set.has_value() &&
-      android::NativeBridgeAvailable() &&
-      // Native bridge may be already initialized if this
-      // is an app forked from app-zygote.
-      !android::NativeBridgeInitialized() &&
-      android::NeedsNativeBridge(instruction_set.value().c_str());
-
-  MountEmulatedStorage(uid, mount_external, need_pre_initialize_native_bridge, fail_fn);
-
-  // Make sure app is running in its own mount namespace before isolating its data directories.
-  ensureInAppMountNamespace(fail_fn);
-
-  // Sandbox data and jit profile directories by overlaying a tmpfs on those dirs and bind
-  // mount all related packages separately.
-  if (mount_data_dirs) {
-    isolateAppData(env, pkg_data_info_list, whitelisted_data_info_list,
-            uid, process_name, managed_nice_name, fail_fn);
-    isolateJitProfile(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
-  }
-  // MOUNT_EXTERNAL_INSTALLER, MOUNT_EXTERNAL_PASS_THROUGH, MOUNT_EXTERNAL_ANDROID_WRITABLE apps
-  // will have mount_storage_dirs == false here (set by ProcessList.needsStorageDataIsolation()),
-  // and hence they won't bind mount storage dirs.
-  if (mount_storage_dirs) {
-    BindMountStorageDirs(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
-  }
-
-  // If this zygote isn't root, it won't be able to create a process group,
-  // since the directory is owned by root.
-  if (!is_system_server && getuid() == 0) {
-    const int rc = createProcessGroup(uid, getpid());
-    if (rc == -EROFS) {
-      ALOGW("createProcessGroup failed, kernel missing CONFIG_CGROUP_CPUACCT?");
-    } else if (rc != 0) {
-      ALOGE("createProcessGroup(%d, %d) failed: %s", uid, /* pid= */ 0, strerror(-rc));
+    // Keep capabilities across UID change, unless we're staying root.
+    if (uid != 0) {
+        EnableKeepCapabilities(fail_fn);
     }
-  }
 
-  SetGids(env, gids, is_child_zygote, fail_fn);
-  SetRLimits(env, rlimits, fail_fn);
+    SetInheritable(permitted_capabilities, fail_fn);
 
-  if (need_pre_initialize_native_bridge) {
-    // Due to the logic behind need_pre_initialize_native_bridge we know that
-    // instruction_set contains a value.
-    android::PreInitializeNativeBridge(
-        app_data_dir.has_value() ? app_data_dir.value().c_str() : nullptr,
-        instruction_set.value().c_str());
-  }
+    DropCapabilitiesBoundingSet(fail_fn);
 
-  if (setresgid(gid, gid, gid) == -1) {
-    fail_fn(CREATE_ERROR("setresgid(%d) failed: %s", gid, strerror(errno)));
-  }
+    bool need_pre_initialize_native_bridge = !is_system_server && instruction_set.has_value() &&
+            android::NativeBridgeAvailable() &&
+            // Native bridge may be already initialized if this
+            // is an app forked from app-zygote.
+            !android::NativeBridgeInitialized() &&
+            android::NeedsNativeBridge(instruction_set.value().c_str());
 
-  // Must be called when the new process still has CAP_SYS_ADMIN, in this case,
-  // before changing uid from 0, which clears capabilities.  The other
-  // alternative is to call prctl(PR_SET_NO_NEW_PRIVS, 1) afterward, but that
-  // breaks SELinux domain transition (see b/71859146).  As the result,
-  // privileged syscalls used below still need to be accessible in app process.
-  SetUpSeccompFilter(uid, is_child_zygote);
+    MountEmulatedStorage(uid, mount_external, need_pre_initialize_native_bridge, fail_fn);
 
-  // Must be called before losing the permission to set scheduler policy.
-  SetSchedulerPolicy(fail_fn, is_top_app);
+    // Make sure app is running in its own mount namespace before isolating its data directories.
+    ensureInAppMountNamespace(fail_fn);
 
-  if (setresuid(uid, uid, uid) == -1) {
-    fail_fn(CREATE_ERROR("setresuid(%d) failed: %s", uid, strerror(errno)));
-  }
-
-  // The "dumpable" flag of a process, which controls core dump generation, is
-  // overwritten by the value in /proc/sys/fs/suid_dumpable when the effective
-  // user or group ID changes. See proc(5) for possible values. In most cases,
-  // the value is 0, so core dumps are disabled for zygote children. However,
-  // when running in a Chrome OS container, the value is already set to 2,
-  // which allows the external crash reporter to collect all core dumps. Since
-  // only system crashes are interested, core dump is disabled for app
-  // processes. This also ensures compliance with CTS.
-  int dumpable = prctl(PR_GET_DUMPABLE);
-  if (dumpable == -1) {
-    ALOGE("prctl(PR_GET_DUMPABLE) failed: %s", strerror(errno));
-    RuntimeAbort(env, __LINE__, "prctl(PR_GET_DUMPABLE) failed");
-  }
-
-  if (dumpable == 2 && uid >= AID_APP) {
-    if (prctl(PR_SET_DUMPABLE, 0, 0, 0, 0) == -1) {
-      ALOGE("prctl(PR_SET_DUMPABLE, 0) failed: %s", strerror(errno));
-      RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 0) failed");
+    // Sandbox data and jit profile directories by overlaying a tmpfs on those dirs and bind
+    // mount all related packages separately.
+    if (mount_data_dirs) {
+        isolateAppData(env, pkg_data_info_list, allowlisted_data_info_list, uid, process_name,
+                       managed_nice_name, fail_fn);
+        isolateJitProfile(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
     }
-  }
-
-  // Set process properties to enable debugging if required.
-  if ((runtime_flags & RuntimeFlags::DEBUG_ENABLE_JDWP) != 0) {
-    EnableDebugger();
-  }
-  if ((runtime_flags & RuntimeFlags::PROFILE_FROM_SHELL) != 0) {
-    // simpleperf needs the process to be dumpable to profile it.
-    if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0) == -1) {
-      ALOGE("prctl(PR_SET_DUMPABLE) failed: %s", strerror(errno));
-      RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 1) failed");
+    // MOUNT_EXTERNAL_INSTALLER, MOUNT_EXTERNAL_PASS_THROUGH, MOUNT_EXTERNAL_ANDROID_WRITABLE apps
+    // will have mount_storage_dirs == false here (set by ProcessList.needsStorageDataIsolation()),
+    // and hence they won't bind mount storage dirs.
+    if (mount_storage_dirs) {
+        BindMountStorageDirs(env, pkg_data_info_list, uid, process_name, managed_nice_name,
+                             fail_fn);
     }
-  }
 
-  HeapTaggingLevel heap_tagging_level;
-  switch (runtime_flags & RuntimeFlags::MEMORY_TAG_LEVEL_MASK) {
-    case RuntimeFlags::MEMORY_TAG_LEVEL_TBI:
-      heap_tagging_level = M_HEAP_TAGGING_LEVEL_TBI;
-      break;
-    case RuntimeFlags::MEMORY_TAG_LEVEL_ASYNC:
-      heap_tagging_level = M_HEAP_TAGGING_LEVEL_ASYNC;
-      break;
-    case RuntimeFlags::MEMORY_TAG_LEVEL_SYNC:
-      heap_tagging_level = M_HEAP_TAGGING_LEVEL_SYNC;
-      break;
-    default:
-      heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
-      break;
-  }
-  mallopt(M_BIONIC_SET_HEAP_TAGGING_LEVEL, heap_tagging_level);
-
-  // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART runtime.
-  runtime_flags &= ~RuntimeFlags::MEMORY_TAG_LEVEL_MASK;
-
-  // Avoid heap zero initialization for applications without MTE. Zero init may
-  // cause app compat problems, use more memory, or reduce performance. While it
-  // would be nice to have them for apps, we will have to wait until they are
-  // proven out, have more efficient hardware, and/or apply them only to new
-  // applications.
-  if (!(runtime_flags & RuntimeFlags::NATIVE_HEAP_ZERO_INIT)) {
-    mallopt(M_BIONIC_ZERO_INIT, 0);
-  }
-
-  // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART runtime.
-  runtime_flags &= ~RuntimeFlags::NATIVE_HEAP_ZERO_INIT;
-
-  bool forceEnableGwpAsan = false;
-  switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
-      default:
-      case RuntimeFlags::GWP_ASAN_LEVEL_NEVER:
-          break;
-      case RuntimeFlags::GWP_ASAN_LEVEL_ALWAYS:
-          forceEnableGwpAsan = true;
-          [[fallthrough]];
-      case RuntimeFlags::GWP_ASAN_LEVEL_LOTTERY:
-          android_mallopt(M_INITIALIZE_GWP_ASAN, &forceEnableGwpAsan, sizeof(forceEnableGwpAsan));
-  }
-  // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART runtime.
-  runtime_flags &= ~RuntimeFlags::GWP_ASAN_LEVEL_MASK;
-
-  if (NeedsNoRandomizeWorkaround()) {
-    // Work around ARM kernel ASLR lossage (http://b/5817320).
-    int old_personality = personality(0xffffffff);
-    int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
-    if (new_personality == -1) {
-      ALOGW("personality(%d) failed: %s", new_personality, strerror(errno));
+    // If this zygote isn't root, it won't be able to create a process group,
+    // since the directory is owned by root.
+    if (!is_system_server && getuid() == 0) {
+        const int rc = createProcessGroup(uid, getpid());
+        if (rc == -EROFS) {
+            ALOGW("createProcessGroup failed, kernel missing CONFIG_CGROUP_CPUACCT?");
+        } else if (rc != 0) {
+            ALOGE("createProcessGroup(%d, %d) failed: %s", uid, /* pid= */ 0, strerror(-rc));
+        }
     }
-  }
 
-  SetCapabilities(permitted_capabilities, effective_capabilities, permitted_capabilities, fail_fn);
+    SetGids(env, gids, is_child_zygote, fail_fn);
+    SetRLimits(env, rlimits, fail_fn);
 
-  __android_log_close();
-  AStatsSocket_close();
+    if (need_pre_initialize_native_bridge) {
+        // Due to the logic behind need_pre_initialize_native_bridge we know that
+        // instruction_set contains a value.
+        android::PreInitializeNativeBridge(app_data_dir.has_value() ? app_data_dir.value().c_str()
+                                                                    : nullptr,
+                                           instruction_set.value().c_str());
+    }
 
-  const char* se_info_ptr = se_info.has_value() ? se_info.value().c_str() : nullptr;
-  const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
+    if (setresgid(gid, gid, gid) == -1) {
+        fail_fn(CREATE_ERROR("setresgid(%d) failed: %s", gid, strerror(errno)));
+    }
 
-  if (selinux_android_setcontext(uid, is_system_server, se_info_ptr, nice_name_ptr) == -1) {
-    fail_fn(CREATE_ERROR("selinux_android_setcontext(%d, %d, \"%s\", \"%s\") failed",
-                         uid, is_system_server, se_info_ptr, nice_name_ptr));
-  }
+    // Must be called when the new process still has CAP_SYS_ADMIN, in this case,
+    // before changing uid from 0, which clears capabilities.  The other
+    // alternative is to call prctl(PR_SET_NO_NEW_PRIVS, 1) afterward, but that
+    // breaks SELinux domain transition (see b/71859146).  As the result,
+    // privileged syscalls used below still need to be accessible in app process.
+    SetUpSeccompFilter(uid, is_child_zygote);
 
-  // Make it easier to debug audit logs by setting the main thread's name to the
-  // nice name rather than "app_process".
-  if (nice_name.has_value()) {
-    SetThreadName(nice_name.value());
-  } else if (is_system_server) {
-    SetThreadName("system_server");
-  }
+    // Must be called before losing the permission to set scheduler policy.
+    SetSchedulerPolicy(fail_fn, is_top_app);
 
-  // Unset the SIGCHLD handler, but keep ignoring SIGHUP (rationale in SetSignalHandlers).
-  UnsetChldSignalHandler();
+    if (setresuid(uid, uid, uid) == -1) {
+        fail_fn(CREATE_ERROR("setresuid(%d) failed: %s", uid, strerror(errno)));
+    }
 
-  if (is_system_server) {
-    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkSystemServerHooks, runtime_flags);
+    // The "dumpable" flag of a process, which controls core dump generation, is
+    // overwritten by the value in /proc/sys/fs/suid_dumpable when the effective
+    // user or group ID changes. See proc(5) for possible values. In most cases,
+    // the value is 0, so core dumps are disabled for zygote children. However,
+    // when running in a Chrome OS container, the value is already set to 2,
+    // which allows the external crash reporter to collect all core dumps. Since
+    // only system crashes are interested, core dump is disabled for app
+    // processes. This also ensures compliance with CTS.
+    int dumpable = prctl(PR_GET_DUMPABLE);
+    if (dumpable == -1) {
+        ALOGE("prctl(PR_GET_DUMPABLE) failed: %s", strerror(errno));
+        RuntimeAbort(env, __LINE__, "prctl(PR_GET_DUMPABLE) failed");
+    }
+
+    if (dumpable == 2 && uid >= AID_APP) {
+        if (prctl(PR_SET_DUMPABLE, 0, 0, 0, 0) == -1) {
+            ALOGE("prctl(PR_SET_DUMPABLE, 0) failed: %s", strerror(errno));
+            RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 0) failed");
+        }
+    }
+
+    // Set process properties to enable debugging if required.
+    if ((runtime_flags & RuntimeFlags::DEBUG_ENABLE_JDWP) != 0) {
+        EnableDebugger();
+    }
+    if ((runtime_flags & RuntimeFlags::PROFILE_FROM_SHELL) != 0) {
+        // simpleperf needs the process to be dumpable to profile it.
+        if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0) == -1) {
+            ALOGE("prctl(PR_SET_DUMPABLE) failed: %s", strerror(errno));
+            RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 1) failed");
+        }
+    }
+
+    HeapTaggingLevel heap_tagging_level;
+    switch (runtime_flags & RuntimeFlags::MEMORY_TAG_LEVEL_MASK) {
+        case RuntimeFlags::MEMORY_TAG_LEVEL_TBI:
+            heap_tagging_level = M_HEAP_TAGGING_LEVEL_TBI;
+            break;
+        case RuntimeFlags::MEMORY_TAG_LEVEL_ASYNC:
+            heap_tagging_level = M_HEAP_TAGGING_LEVEL_ASYNC;
+            break;
+        case RuntimeFlags::MEMORY_TAG_LEVEL_SYNC:
+            heap_tagging_level = M_HEAP_TAGGING_LEVEL_SYNC;
+            break;
+        default:
+            heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
+            break;
+    }
+    mallopt(M_BIONIC_SET_HEAP_TAGGING_LEVEL, heap_tagging_level);
+
+    // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
+    // runtime.
+    runtime_flags &= ~RuntimeFlags::MEMORY_TAG_LEVEL_MASK;
+
+    // Avoid heap zero initialization for applications without MTE. Zero init may
+    // cause app compat problems, use more memory, or reduce performance. While it
+    // would be nice to have them for apps, we will have to wait until they are
+    // proven out, have more efficient hardware, and/or apply them only to new
+    // applications.
+    if (!(runtime_flags & RuntimeFlags::NATIVE_HEAP_ZERO_INIT)) {
+        mallopt(M_BIONIC_ZERO_INIT, 0);
+    }
+
+    // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
+    // runtime.
+    runtime_flags &= ~RuntimeFlags::NATIVE_HEAP_ZERO_INIT;
+
+    bool forceEnableGwpAsan = false;
+    switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
+        default:
+        case RuntimeFlags::GWP_ASAN_LEVEL_NEVER:
+            break;
+        case RuntimeFlags::GWP_ASAN_LEVEL_ALWAYS:
+            forceEnableGwpAsan = true;
+            [[fallthrough]];
+        case RuntimeFlags::GWP_ASAN_LEVEL_LOTTERY:
+            android_mallopt(M_INITIALIZE_GWP_ASAN, &forceEnableGwpAsan, sizeof(forceEnableGwpAsan));
+    }
+    // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
+    // runtime.
+    runtime_flags &= ~RuntimeFlags::GWP_ASAN_LEVEL_MASK;
+
+    if (NeedsNoRandomizeWorkaround()) {
+        // Work around ARM kernel ASLR lossage (http://b/5817320).
+        int old_personality = personality(0xffffffff);
+        int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
+        if (new_personality == -1) {
+            ALOGW("personality(%d) failed: %s", new_personality, strerror(errno));
+        }
+    }
+
+    SetCapabilities(permitted_capabilities, effective_capabilities, permitted_capabilities,
+                    fail_fn);
+
+    __android_log_close();
+    AStatsSocket_close();
+
+    const char* se_info_ptr = se_info.has_value() ? se_info.value().c_str() : nullptr;
+    const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
+
+    if (selinux_android_setcontext(uid, is_system_server, se_info_ptr, nice_name_ptr) == -1) {
+        fail_fn(CREATE_ERROR("selinux_android_setcontext(%d, %d, \"%s\", \"%s\") failed", uid,
+                             is_system_server, se_info_ptr, nice_name_ptr));
+    }
+
+    // Make it easier to debug audit logs by setting the main thread's name to the
+    // nice name rather than "app_process".
+    if (nice_name.has_value()) {
+        SetThreadName(nice_name.value());
+    } else if (is_system_server) {
+        SetThreadName("system_server");
+    }
+
+    // Unset the SIGCHLD handler, but keep ignoring SIGHUP (rationale in SetSignalHandlers).
+    UnsetChldSignalHandler();
+
+    if (is_system_server) {
+        env->CallStaticVoidMethod(gZygoteClass, gCallPostForkSystemServerHooks, runtime_flags);
+        if (env->ExceptionCheck()) {
+            fail_fn("Error calling post fork system server hooks.");
+        }
+
+        // TODO(b/117874058): Remove hardcoded label here.
+        static const char* kSystemServerLabel = "u:r:system_server:s0";
+        if (selinux_android_setcon(kSystemServerLabel) != 0) {
+            fail_fn(CREATE_ERROR("selinux_android_setcon(%s)", kSystemServerLabel));
+        }
+    }
+
+    if (is_child_zygote) {
+        initUnsolSocketToSystemServer();
+    }
+
+    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
+                              is_system_server, is_child_zygote, managed_instruction_set);
+
+    // Reset the process priority to the default value.
+    setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_DEFAULT);
+
     if (env->ExceptionCheck()) {
-      fail_fn("Error calling post fork system server hooks.");
+        fail_fn("Error calling post fork hooks.");
     }
-
-    // TODO(oth): Remove hardcoded label here (b/117874058).
-    static const char* kSystemServerLabel = "u:r:system_server:s0";
-    if (selinux_android_setcon(kSystemServerLabel) != 0) {
-      fail_fn(CREATE_ERROR("selinux_android_setcon(%s)", kSystemServerLabel));
-    }
-  }
-
-  if (is_child_zygote) {
-      initUnsolSocketToSystemServer();
-  }
-
-  env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
-                            is_system_server, is_child_zygote, managed_instruction_set);
-
-  // Reset the process priority to the default value.
-  setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_DEFAULT);
-
-  if (env->ExceptionCheck()) {
-    fail_fn("Error calling post fork hooks.");
-  }
 }
 
 static uint64_t GetEffectiveCapabilityMask(JNIEnv* env) {
@@ -2068,12 +2069,11 @@ static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jcl
 
 NO_PAC_FUNC
 static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
-        JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
-        jint runtime_flags, jobjectArray rlimits,
-        jint mount_external, jstring se_info, jstring nice_name,
+        JNIEnv* env, jclass, jint uid, jint gid, jintArray gids, jint runtime_flags,
+        jobjectArray rlimits, jint mount_external, jstring se_info, jstring nice_name,
         jintArray managed_fds_to_close, jintArray managed_fds_to_ignore, jboolean is_child_zygote,
         jstring instruction_set, jstring app_data_dir, jboolean is_top_app,
-        jobjectArray pkg_data_info_list, jobjectArray whitelisted_data_info_list,
+        jobjectArray pkg_data_info_list, jobjectArray allowlisted_data_info_list,
         jboolean mount_data_dirs, jboolean mount_storage_dirs) {
     jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
@@ -2108,14 +2108,11 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
     pid_t pid = zygote::ForkCommon(env, false, fds_to_close, fds_to_ignore, true);
 
     if (pid == 0) {
-      SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
-                       capabilities, capabilities,
-                       mount_external, se_info, nice_name, false,
-                       is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
-                       is_top_app == JNI_TRUE, pkg_data_info_list,
-                       whitelisted_data_info_list,
-                       mount_data_dirs == JNI_TRUE,
-                       mount_storage_dirs == JNI_TRUE);
+        SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits, capabilities, capabilities,
+                         mount_external, se_info, nice_name, false, is_child_zygote == JNI_TRUE,
+                         instruction_set, app_data_dir, is_top_app == JNI_TRUE, pkg_data_info_list,
+                         allowlisted_data_info_list, mount_data_dirs == JNI_TRUE,
+                         mount_storage_dirs == JNI_TRUE);
     }
     return pid;
 }
@@ -2147,12 +2144,11 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   if (pid == 0) {
       // System server prcoess does not need data isolation so no need to
       // know pkg_data_info_list.
-      SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
-                       permitted_capabilities, effective_capabilities,
-                       MOUNT_EXTERNAL_DEFAULT, nullptr, nullptr, true,
+      SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits, permitted_capabilities,
+                       effective_capabilities, MOUNT_EXTERNAL_DEFAULT, nullptr, nullptr, true,
                        false, nullptr, nullptr, /* is_top_app= */ false,
                        /* pkg_data_info_list */ nullptr,
-                       /* whitelisted_data_info_list */ nullptr, false, false);
+                       /* allowlisted_data_info_list */ nullptr, false, false);
   } else if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -2260,7 +2256,7 @@ static void com_android_internal_os_Zygote_nativeAllowFileAcrossFork(
     if (!path_cstr) {
         RuntimeAbort(env, __LINE__, "path_cstr == nullptr");
     }
-    FileDescriptorWhitelist::Get()->Allow(path_cstr);
+    FileDescriptorAllowlist::Get()->Allow(path_cstr);
 }
 
 static void com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter(
@@ -2295,20 +2291,19 @@ static void com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter(
  * @param is_top_app  If the process is for top (high priority) application
  */
 static void com_android_internal_os_Zygote_nativeSpecializeAppProcess(
-    JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
-    jint runtime_flags, jobjectArray rlimits,
-    jint mount_external, jstring se_info, jstring nice_name,
-    jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir, jboolean is_top_app,
-    jobjectArray pkg_data_info_list, jobjectArray whitelisted_data_info_list,
-    jboolean mount_data_dirs, jboolean mount_storage_dirs) {
-  jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
+        JNIEnv* env, jclass, jint uid, jint gid, jintArray gids, jint runtime_flags,
+        jobjectArray rlimits, jint mount_external, jstring se_info, jstring nice_name,
+        jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir,
+        jboolean is_top_app, jobjectArray pkg_data_info_list,
+        jobjectArray allowlisted_data_info_list, jboolean mount_data_dirs,
+        jboolean mount_storage_dirs) {
+    jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
-  SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
-                   capabilities, capabilities,
-                   mount_external, se_info, nice_name, false,
-                   is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
-                   is_top_app == JNI_TRUE, pkg_data_info_list, whitelisted_data_info_list,
-                   mount_data_dirs == JNI_TRUE, mount_storage_dirs == JNI_TRUE);
+    SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits, capabilities, capabilities,
+                     mount_external, se_info, nice_name, false, is_child_zygote == JNI_TRUE,
+                     instruction_set, app_data_dir, is_top_app == JNI_TRUE, pkg_data_info_list,
+                     allowlisted_data_info_list, mount_data_dirs == JNI_TRUE,
+                     mount_storage_dirs == JNI_TRUE);
 }
 
 /**

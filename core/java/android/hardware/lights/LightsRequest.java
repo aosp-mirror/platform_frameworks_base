@@ -17,6 +17,7 @@
 package android.hardware.lights;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.util.SparseArray;
 
 import com.android.internal.util.Preconditions;
@@ -91,6 +92,20 @@ public final class LightsRequest {
             Preconditions.checkNotNull(state);
             mChanges.put(light.getId(), state);
             return this;
+        }
+
+        /**
+         * Overrides the color and intensity of a given light.
+         *
+         * @param light the light to modify
+         * @param state the desired color and intensity of the light         *
+         * @deprecated Use {@link #addLight(Light, LightState)} instead.
+         * @hide
+         */
+        @SystemApi
+        @Deprecated
+        public @NonNull Builder setLight(@NonNull Light light, @NonNull LightState state) {
+            return addLight(light, state);
         }
 
         /**

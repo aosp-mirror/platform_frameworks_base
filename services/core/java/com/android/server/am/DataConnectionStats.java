@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity;
+package com.android.server.am;
 
 import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
 import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
@@ -34,11 +34,11 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.server.am.BatteryStatsService;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
+/** Class for receiving data connection state to report to {@link BatteryStatsService}. */
 public class DataConnectionStats extends BroadcastReceiver {
     private static final String TAG = "DataConnectionStats";
     private static final boolean DEBUG = false;
@@ -62,14 +62,14 @@ public class DataConnectionStats extends BroadcastReceiver {
                 new PhoneStateListenerImpl(new PhoneStateListenerExecutor(listenerHandler));
     }
 
+    /** Start data connection state monitoring. */
     public void startMonitoring() {
-        TelephonyManager phone =
-                (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager phone = mContext.getSystemService(TelephonyManager.class);
         phone.listen(mPhoneStateListener,
                 PhoneStateListener.LISTEN_SERVICE_STATE
-              | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
-              | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
-              | PhoneStateListener.LISTEN_DATA_ACTIVITY);
+                | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
+                | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
+                | PhoneStateListener.LISTEN_DATA_ACTIVITY);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SIM_STATE_CHANGED);
@@ -103,8 +103,10 @@ public class DataConnectionStats extends BroadcastReceiver {
         if (mNrState == NetworkRegistrationInfo.NR_STATE_CONNECTED) {
             networkType = TelephonyManager.NETWORK_TYPE_NR;
         }
-        if (DEBUG) Log.d(TAG, String.format("Noting data connection for network type %s: %svisible",
-                networkType, visible ? "" : "not "));
+        if (DEBUG) {
+            Log.d(TAG, String.format("Noting data connection for network type %s: %svisible",
+                    networkType, visible ? "" : "not "));
+        }
         try {
             mBatteryStats.notePhoneDataConnectionState(networkType, visible,
                     mServiceState.getState());
@@ -113,7 +115,7 @@ public class DataConnectionStats extends BroadcastReceiver {
         }
     }
 
-    private final void updateSimState(Intent intent) {
+    private void updateSimState(Intent intent) {
         String stateExtra = intent.getStringExtra(Intent.EXTRA_SIM_STATE);
         if (Intent.SIM_STATE_ABSENT.equals(stateExtra)) {
             mSimState = TelephonyManager.SIM_STATE_ABSENT;

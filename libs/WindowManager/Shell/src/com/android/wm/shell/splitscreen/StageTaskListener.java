@@ -58,7 +58,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
         void onStatusChanged(boolean visible, boolean hasChildren);
-        void onChildTaskStatusChanged(int taskId, boolean present);
+        void onChildTaskStatusChanged(int taskId, boolean present, boolean visible);
         void onRootTaskVanished();
     }
     private final StageListenerCallbacks mCallbacks;
@@ -88,7 +88,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenLeashes.put(taskId, leash);
             mChildrenTaskInfo.put(taskId, taskInfo);
             updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
-            mCallbacks.onChildTaskStatusChanged(taskId, true /* present */);
+            mCallbacks.onChildTaskStatusChanged(taskId, true /* present */, taskInfo.isVisible);
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
@@ -105,6 +105,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
             updateChildTaskSurface(
                     taskInfo, mChildrenLeashes.get(taskInfo.taskId), false /* firstAppeared */);
+            mCallbacks.onChildTaskStatusChanged(taskInfo.taskId, true /* present */,
+                    taskInfo.isVisible);
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
@@ -123,7 +125,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenTaskInfo.remove(taskId);
             mChildrenLeashes.remove(taskId);
             sendStatusChanged();
-            mCallbacks.onChildTaskStatusChanged(taskId, false /* present */);
+            mCallbacks.onChildTaskStatusChanged(taskId, false /* present */, taskInfo.isVisible);
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
@@ -152,7 +154,9 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     void onSplitScreenListenerRegistered(SplitScreen.SplitScreenListener listener,
             @SplitScreen.StageType int stage) {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
-            listener.onTaskStageChanged(mChildrenTaskInfo.keyAt(i), stage);
+            int taskId = mChildrenTaskInfo.keyAt(i);
+            listener.onTaskStageChanged(taskId, stage,
+                    mChildrenTaskInfo.get(taskId).isVisible);
         }
     }
 

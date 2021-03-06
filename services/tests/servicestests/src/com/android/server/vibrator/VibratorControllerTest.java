@@ -19,6 +19,7 @@ package com.android.server.vibrator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -202,7 +203,7 @@ public class VibratorControllerTest {
 
         VibrationEffect.Prebaked effect = (VibrationEffect.Prebaked)
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
-        controller.on(effect, 11);
+        assertEquals(10L, controller.on(effect, 11));
 
         assertTrue(controller.isVibrating());
         verify(mNativeWrapperMock).perform(eq((long) VibrationEffect.EFFECT_CLICK),
@@ -212,13 +213,14 @@ public class VibratorControllerTest {
     @Test
     public void on_withComposed_performsEffect() {
         mockVibratorCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        when(mNativeWrapperMock.compose(any(), anyLong())).thenReturn(15L);
         VibratorController controller = createController();
 
         VibrationEffect.Composed effect = (VibrationEffect.Composed)
                 VibrationEffect.startComposition()
                         .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
                         .compose();
-        controller.on(effect, 12);
+        assertEquals(15L, controller.on(effect, 12));
 
         ArgumentCaptor<VibrationEffect.Composition.PrimitiveEffect[]> primitivesCaptor =
                 ArgumentCaptor.forClass(VibrationEffect.Composition.PrimitiveEffect[].class);

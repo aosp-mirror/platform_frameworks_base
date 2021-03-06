@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.SystemClock;
-import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 
 import com.android.server.FgThread;
@@ -55,8 +55,8 @@ public class SystemEmergencyHelper extends EmergencyHelper {
 
         // TODO: this doesn't account for multisim phones
 
-        mTelephonyManager.registerPhoneStateListener(FgThread.getExecutor(),
-                new EmergencyCallPhoneStateListener());
+        mTelephonyManager.registerTelephonyCallback(FgThread.getExecutor(),
+                new EmergencyCallTelephonyCallback());
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -78,8 +78,8 @@ public class SystemEmergencyHelper extends EmergencyHelper {
                 || mTelephonyManager.isInEmergencySmsMode();
     }
 
-    private class EmergencyCallPhoneStateListener extends PhoneStateListener implements
-            PhoneStateListener.CallStateChangedListener {
+    private class EmergencyCallTelephonyCallback extends TelephonyCallback implements
+            TelephonyCallback.CallStateListener{
 
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {

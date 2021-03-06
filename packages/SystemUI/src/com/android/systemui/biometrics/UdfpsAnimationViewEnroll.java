@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -33,7 +34,7 @@ public class UdfpsAnimationViewEnroll extends UdfpsAnimationView
 
     private static final String TAG = "UdfpsAnimationViewEnroll";
 
-    @NonNull private UdfpsAnimation mUdfpsAnimation;
+    @NonNull private UdfpsAnimationEnroll mUdfpsAnimation;
     @NonNull private UdfpsProgressBar mProgressBar;
     @Nullable private UdfpsEnrollHelper mEnrollHelper;
 
@@ -50,6 +51,7 @@ public class UdfpsAnimationViewEnroll extends UdfpsAnimationView
 
     public void setEnrollHelper(@NonNull UdfpsEnrollHelper helper) {
         mEnrollHelper = helper;
+        mUdfpsAnimation.setEnrollHelper(helper);
     }
 
     @Override
@@ -80,5 +82,15 @@ public class UdfpsAnimationViewEnroll extends UdfpsAnimationView
                 * Math.max(0, totalSteps + 1 - remaining) / (totalSteps + 1);
 
         mProgressBar.setProgress(interpolatedProgress, true);
+    }
+
+    @NonNull
+    @Override
+    PointF getTouchTranslation() {
+        if (!mEnrollHelper.isCenterEnrollmentComplete()) {
+            return new PointF(0, 0);
+        } else {
+            return mEnrollHelper.getNextGuidedEnrollmentPoint();
+        }
     }
 }

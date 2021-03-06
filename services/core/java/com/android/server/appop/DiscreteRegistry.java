@@ -495,6 +495,12 @@ final class DiscreteRegistry {
             int nAttributedOps = attributedOps.size();
             for (int i = nAttributedOps - 1; i >= 0; i--) {
                 DiscreteOpEvent previousOp = attributedOps.get(i);
+                if (i == nAttributedOps - 1 && previousOp.mNoteTime == accessTime
+                        && accessDuration > -1) {
+                    // existing event with updated duration
+                    attributedOps.remove(i);
+                    break;
+                }
                 if (previousOp.mNoteTime < accessTime) {
                     break;
                 }

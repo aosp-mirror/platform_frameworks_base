@@ -764,7 +764,7 @@ public class PowerManagerServiceTest {
         createService();
         startSystem();
 
-        mService.getBinderServiceInstance().userActivity(mClock.now(),
+        mService.getBinderServiceInstance().userActivity(Display.DEFAULT_DISPLAY, mClock.now(),
                 PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
         verify(mInattentiveSleepWarningControllerMock, never()).show();
 
@@ -773,7 +773,7 @@ public class PowerManagerServiceTest {
         verify(mInattentiveSleepWarningControllerMock, never()).dismiss(anyBoolean());
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(true);
 
-        mService.getBinderServiceInstance().userActivity(mClock.now(),
+        mService.getBinderServiceInstance().userActivity(Display.DEFAULT_DISPLAY, mClock.now(),
                 PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
         verify(mInattentiveSleepWarningControllerMock, times(1)).dismiss(true);
     }
