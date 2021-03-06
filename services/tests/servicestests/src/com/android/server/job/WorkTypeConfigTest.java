@@ -17,6 +17,7 @@ package com.android.server.job;
 
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BG;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER_IMPORTANT;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_EJ;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_FGS;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
@@ -49,11 +50,13 @@ public class WorkTypeConfigTest {
     private static final String KEY_MAX_FGS = "concurrency_max_fgs_test";
     private static final String KEY_MAX_EJ = "concurrency_max_ej_test";
     private static final String KEY_MAX_BG = "concurrency_max_bg_test";
+    private static final String KEY_MAX_BGUSER_IMPORTANT = "concurrency_max_bguser_important_test";
     private static final String KEY_MAX_BGUSER = "concurrency_max_bguser_test";
     private static final String KEY_MIN_TOP = "concurrency_min_top_test";
     private static final String KEY_MIN_FGS = "concurrency_min_fgs_test";
     private static final String KEY_MIN_EJ = "concurrency_min_ej_test";
     private static final String KEY_MIN_BG = "concurrency_min_bg_test";
+    private static final String KEY_MIN_BGUSER_IMPORTANT = "concurrency_min_bguser_important_test";
     private static final String KEY_MIN_BGUSER = "concurrency_min_bguser_test";
 
     @After
@@ -68,11 +71,15 @@ public class WorkTypeConfigTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_FGS, null, false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_EJ, null, false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_BG, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                KEY_MAX_BGUSER_IMPORTANT, null, false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_BGUSER, null, false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_TOP, null, false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_FGS, null, false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_EJ, null, false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_BG, null, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                KEY_MIN_BGUSER_IMPORTANT, null, false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_BGUSER, null, false);
     }
 
@@ -316,19 +323,23 @@ public class WorkTypeConfigTest {
                         .setInt(KEY_MIN_EJ, 3)
                         .setInt(KEY_MAX_BG, 13)
                         .setInt(KEY_MIN_BG, 4)
-                        .setInt(KEY_MAX_BGUSER, 12)
-                        .setInt(KEY_MIN_BGUSER, 5)
+                        .setInt(KEY_MAX_BGUSER_IMPORTANT, 12)
+                        .setInt(KEY_MIN_BGUSER_IMPORTANT, 5)
+                        .setInt(KEY_MAX_BGUSER, 11)
+                        .setInt(KEY_MIN_BGUSER, 6)
                         .build(),
                 /*default*/ 9,
                 /* min */ List.of(Pair.create(WORK_TYPE_BG, 9)),
                 /* max */ List.of(Pair.create(WORK_TYPE_BG, 9)),
                 /*expected*/ true, 16,
                 /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_FGS, 2),
-                        Pair.create(WORK_TYPE_EJ, 3),
-                        Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 5)),
+                        Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 4),
+                        Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 5),
+                        Pair.create(WORK_TYPE_BGUSER, 6)),
                 /* max */
                 List.of(Pair.create(WORK_TYPE_TOP, 16), Pair.create(WORK_TYPE_FGS, 15),
-                        Pair.create(WORK_TYPE_EJ, 14),
-                        Pair.create(WORK_TYPE_BG, 13), Pair.create(WORK_TYPE_BGUSER, 12)));
+                        Pair.create(WORK_TYPE_EJ, 14), Pair.create(WORK_TYPE_BG, 13),
+                        Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 12),
+                        Pair.create(WORK_TYPE_BGUSER, 11)));
     }
 }
