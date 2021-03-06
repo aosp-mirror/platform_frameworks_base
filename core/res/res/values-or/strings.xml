@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"ଆପଣଙ୍କ ଫଟୋ ସଂଗ୍ରହ ପରିବର୍ତ୍ତନ କରିବାକୁ ଆପ୍‍ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ଆପଣଙ୍କ ମିଡିଆ ସଂଗ୍ରହ ଠାରୁ ଲୋକେସନ୍‍ଗୁଡିକୁ ପଢନ୍ତୁ"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"ଆପଣଙ୍କ ମିଡିଆ ସଂଗ୍ରହ ଠାରୁ ଅବସ୍ଥାନଗୁଡିକୁ ପଢିବାକୁ ଆପ୍‍ ଅନୁମତି ଦେଇଥାଏ।"</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"ଏହା ଆପଣ ବୋଲି ଯାଞ୍ଚ କରନ୍ତୁ"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ବାୟୋମେଟ୍ରିକ୍‌ ହାର୍ଡୱେର୍‌ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ପ୍ରାମାଣିକତାକୁ ବାତିଲ୍ କରାଯାଇଛି"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"ପ୍ରାମାଣିକତାକୁ ବାତିଲ୍ କରାଯାଇଛି"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"କୌଣସି ପିନ୍, ପେଟେର୍ନ ବା ପାସ୍‍ୱର୍ଡ ସେଟ୍ ନାହିଁ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"ପ୍ରାମାଣିକରଣ କରିବା ସମୟରେ ତ୍ରୁଟି"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"ଆଂଶିକ ଟିପଚିହ୍ନ ଚିହ୍ନଟ ହେଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ଟିପଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ଟିପଚିହ୍ନ ସେନ୍ସର୍‍ ମଇଳା ହୋଇଯାଇଛି। ଦୟାକରି ସଫା କରନ୍ତୁ ଓ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ଏହି ଡିଭାଇସ୍‌ରେ ଟିପଚିହ୍ନ ସେନ୍‍ସର୍ ନାହିଁ।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ଆଙ୍ଗୁଠି <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ଜାରି ରଖିବାକୁ ଆପଣଙ୍କ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"ଆଉ ମୁହଁ ଚିହ୍ନଟ କରିହେଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"ଅତ୍ୟନ୍ତ ସମପରି, ଦୟାକରି ଆପଣଙ୍କର ପୋଜ୍ ବଦଳାନ୍ତୁ।"</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"ଆପଣଙ୍କ ମୁଣ୍ଡକୁ ଟିକିଏ କମ୍ ଟିଲ୍ଟ କରନ୍ତୁ।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"ଆପଣଙ୍କର ମୁହଁ ଲୁଚାଉଥିବା ଜିନିଷକୁ କାଢ଼ି ଦିଅନ୍ତୁ।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"କଳା ବାର୍ ସମେତ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍‌ର ଶୀର୍ଷକୁ ସଫା କରନ୍ତୁ"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"ଏହି ଡିଭାଇସ୍‌ରେ ଫେସ୍ ଅନ୍‌ଲକ୍ ସମର୍ଥିତ ନୁହେଁ।"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g>ଙ୍କ ଫେସ୍‍"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"ଫେସ୍ ଆଇକନ୍"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ରଙ୍ଗ ବଦଳାଇବାର ସୁବିଧା"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ରଙ୍ଗ ସଂଶୋଧନ"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"ଉଜ୍ଜ୍ୱଳତା କମ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ଭଲ୍ୟୁମ୍ କୀ\'ଗୁଡ଼ିକୁ ଧରି ରଖାଯାଇଛି। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ଚାଲୁ ହୋଇଛି।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ଭଲ୍ୟୁମ୍ କୀ\'ଗୁଡ଼ିକୁ ଧରି ରଖାଯାଇଛି। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ବନ୍ଦ ହୋଇଛି।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ବ୍ୟବହାର କରିବାକୁ ତିନି ସେକେଣ୍ଡ ପାଇଁ ଉଭୟ ଭଲ୍ୟୁମ୍‍ କୀ ଦବାଇ ଧରି ରଖନ୍ତୁ"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ଫିସିଂ ଆଲର୍ଟ"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"ଆଲର୍ଟ କରାଯାଇଛି"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"ଯାଞ୍ଚ କରାଯାଇଛି"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ବଢ଼ାନ୍ତୁ"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"ଟୋଗଲ୍‍ ସମ୍ପ୍ରସାରଣ"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"ଖବର ଓ ମ୍ୟାଗାଜିନ୍‍"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"ମାନଚିତ୍ର ଓ ନେଭିଗେଶନ୍‍"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ଉତ୍ପାଦକତା"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ଡିଭାଇସ୍‌ ଷ୍ଟୋରେଜ୍‌"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB ଡିବଗିଂ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ଘଣ୍ଟା"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ଜାରି ରଖିବାକୁ, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ଆପଣଙ୍କ ଡିଭାଇସର କ୍ୟାମେରାକୁ ଆକ୍ସେସ୍ ଆବଶ୍ୟକ କରେ।"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ସେନ୍ସର୍ ଗୋପନୀୟତା"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ଆପ୍ଲିକେସନ୍ ଆଇକନ୍"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ଆପ୍ଲିକେସନ୍ ବ୍ରାଣ୍ଡିଂ ଛବି"</string>
 </resources>
