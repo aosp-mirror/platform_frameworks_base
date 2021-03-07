@@ -331,11 +331,6 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return null;
     }
 
-    /**
-     * Set the shelf icon to be visible and hide our own icons.
-     */
-    public void setShelfIconVisible(boolean shelfIconVisible) {}
-
     public int getHeaderTranslation(boolean forceNoHeader) {
         return 0;
     }
