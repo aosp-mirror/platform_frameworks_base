@@ -64,10 +64,12 @@ public final class AssociationRequest implements Parcelable {
      * set up is a specific kind of device, and some extra permissions may be granted to the app
      * as a result.
      *
+     * Using it requires declaring uses-permission
+     * {@link android.Manifest.permission#REQUEST_COMPANION_PROFILE_WATCH} in the manifest.
+     *
      * @see AssociationRequest.Builder#setDeviceProfile
      */
-    public static final String DEVICE_PROFILE_WATCH =
-            "android.app.role.COMPANION_DEVICE_WATCH";
+    public static final String DEVICE_PROFILE_WATCH = "android.app.role.COMPANION_DEVICE_WATCH";
 
     /** @hide */
     @StringDef(value = { DEVICE_PROFILE_WATCH })

@@ -38,6 +38,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainRunna
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
+import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -417,6 +418,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             checkCallerIsSystemOr(callingPackage);
             int userId = getCallingUserId();
             checkUsesFeature(callingPackage, userId);
+            checkProfilePermissions(request);
 
             mFindDeviceCallback = callback;
             mRequest = request;
@@ -524,6 +526,21 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             int callingUid = Binder.getCallingUid();
             if (mAppOpsManager.checkPackage(callingUid, pkg) != AppOpsManager.MODE_ALLOWED) {
                 throw new SecurityException(pkg + " doesn't belong to uid " + callingUid);
+            }
+        }
+
+        private void checkProfilePermissions(AssociationRequest request) {
+            checkProfilePermission(request,
+                    AssociationRequest.DEVICE_PROFILE_WATCH,
+                    Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH);
+        }
+
+        private void checkProfilePermission(
+                AssociationRequest request, String profile, String permission) {
+            if (profile.equals(request.getDeviceProfile())
+                    && getContext().checkCallingOrSelfPermission(permission)
+                            != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Using " + profile + " requires " + permission);
             }
         }
 
