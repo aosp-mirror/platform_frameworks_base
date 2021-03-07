@@ -116,7 +116,10 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"إلغاء"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"مشاركة"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"تمّ إلغاء تسجيل الشاشة."</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"تمّ حفظ تسجيل الشاشة، انقر لعرضه."</string>
+    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
+    <skip />
+    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
+    <skip />
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"حدث خطأ أثناء حذف تسجيل الشاشة."</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"تعذّر الحصول على أذونات."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"حدث خطأ في بدء تسجيل الشاشة"</string>
@@ -420,8 +423,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"حتى شروق الشمس"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"تفعيل الوضع في <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"حتى <xliff:g id="TIME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
-    <skip />
+    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"تقليل السطوع"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"تم تفعيل الاتصال القريب المدى"</string>
@@ -455,8 +457,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏افتح قفل الشاشة لاستخدام تقنية NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"هذا الجهاز يخص مؤسستك."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"هذا الجهاز يخص <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"توفر مؤسسة \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\" هذا الجهاز."</string>
     <string name="phone_hint" msgid="6682125338461375925">"يمكنك التمرير سريعًا من الرمز لتشغيل الهاتف"</string>
     <string name="voice_hint" msgid="7476017460191291417">"يمكنك التمرير سريعًا من الرمز لتشغيل المساعد الصوتي"</string>
     <string name="camera_hint" msgid="4519495795000658637">"يمكنك التمرير سريعًا من الرمز لتشغيل الكاميرا"</string>
@@ -640,8 +641,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. انقر للتعيين على الاهتزاز."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. انقر لكتم الصوت."</string>
-    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
-    <skip />
+    <string name="volume_ringer_change" msgid="3574969197796055532">"انقر لتغيير وضع الرنين."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"كتم الصوت"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"إعادة الصوت"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"اهتزاز"</string>
