@@ -143,4 +143,14 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public boolean canAdminGrantSensorsPermissionsForUser(int userId) {
         return false;
     }
+
+    @Override
+    public boolean setKeyGrantToWifiAuth(String callerPackage, String alias, boolean hasGrant) {
+        return false;
+    }
+
+    @Override
+    public boolean isKeyPairGrantedToWifiAuth(String callerPackage, String alias) {
+        return false;
+    }
 }

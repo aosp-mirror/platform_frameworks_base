@@ -37,6 +37,8 @@ public final class BatteryUsageStats implements Parcelable {
     private final long mStatsStartRealtimeMs;
     private final double mDischargedPowerLowerBound;
     private final double mDischargedPowerUpperBound;
+    private final long mBatteryTimeRemainingMs;
+    private final long mChargeTimeRemainingMs;
     private final ArrayList<UidBatteryConsumer> mUidBatteryConsumers;
     private final ArrayList<SystemBatteryConsumer> mSystemBatteryConsumers;
     private final ArrayList<UserBatteryConsumer> mUserBatteryConsumers;
@@ -50,6 +52,8 @@ public final class BatteryUsageStats implements Parcelable {
         mDischargedPowerUpperBound = builder.mDischargedPowerUpperBoundMah;
         mHistoryBuffer = builder.mHistoryBuffer;
         mHistoryTagPool = builder.mHistoryTagPool;
+        mBatteryTimeRemainingMs = builder.mBatteryTimeRemainingMs;
+        mChargeTimeRemainingMs = builder.mChargeTimeRemainingMs;
 
         double totalPower = 0;
 
@@ -110,6 +114,25 @@ public final class BatteryUsageStats implements Parcelable {
     }
 
     /**
+     * Returns an approximation for how much run time (in milliseconds) is remaining on
+     * the battery.  Returns -1 if no time can be computed: either there is not
+     * enough current data to make a decision, or the battery is currently
+     * charging.
+     */
+    public long getBatteryTimeRemainingMs() {
+        return mBatteryTimeRemainingMs;
+    }
+
+    /**
+     * Returns an approximation for how much time (in milliseconds) remains until the battery
+     * is fully charged.  Returns -1 if no time can be computed: either there is not
+     * enough current data to make a decision, or the battery is currently discharging.
+     */
+    public long getChargeTimeRemainingMs() {
+        return mChargeTimeRemainingMs;
+    }
+
+    /**
      * Total amount of battery charge drained since BatteryStats reset (e.g. due to being fully
      * charged), in mAh
      */
@@ -156,6 +179,8 @@ public final class BatteryUsageStats implements Parcelable {
         mDischargePercentage = source.readInt();
         mDischargedPowerLowerBound = source.readDouble();
         mDischargedPowerUpperBound = source.readDouble();
+        mBatteryTimeRemainingMs = source.readLong();
+        mChargeTimeRemainingMs = source.readLong();
         mUidBatteryConsumers = new ArrayList<>();
         source.readParcelableList(mUidBatteryConsumers, getClass().getClassLoader());
         mSystemBatteryConsumers = new ArrayList<>();
@@ -194,6 +219,8 @@ public final class BatteryUsageStats implements Parcelable {
         dest.writeInt(mDischargePercentage);
         dest.writeDouble(mDischargedPowerLowerBound);
         dest.writeDouble(mDischargedPowerUpperBound);
+        dest.writeLong(mBatteryTimeRemainingMs);
+        dest.writeLong(mChargeTimeRemainingMs);
         dest.writeParcelableList(mUidBatteryConsumers, flags);
         dest.writeParcelableList(mSystemBatteryConsumers, flags);
         dest.writeParcelableList(mUserBatteryConsumers, flags);
@@ -237,6 +264,8 @@ public final class BatteryUsageStats implements Parcelable {
         private int mDischargePercentage;
         private double mDischargedPowerLowerBoundMah;
         private double mDischargedPowerUpperBoundMah;
+        private long mBatteryTimeRemainingMs = -1;
+        private long mChargeTimeRemainingMs = -1;
         private final SparseArray<UidBatteryConsumer.Builder> mUidBatteryConsumerBuilders =
                 new SparseArray<>();
         private final SparseArray<SystemBatteryConsumer.Builder> mSystemBatteryConsumerBuilders =
@@ -285,6 +314,26 @@ public final class BatteryUsageStats implements Parcelable {
                 double dischargedPowerUpperBoundMah) {
             mDischargedPowerLowerBoundMah = dischargedPowerLowerBoundMah;
             mDischargedPowerUpperBoundMah = dischargedPowerUpperBoundMah;
+            return this;
+        }
+
+        /**
+         * Sets an approximation for how much time (in milliseconds) remains until the battery
+         * is fully discharged.
+         */
+        @NonNull
+        public Builder setBatteryTimeRemainingMs(long batteryTimeRemainingMs) {
+            mBatteryTimeRemainingMs = batteryTimeRemainingMs;
+            return this;
+        }
+
+        /**
+         * Sets an approximation for how much time (in milliseconds) remains until the battery
+         * is fully charged.
+         */
+        @NonNull
+        public Builder setChargeTimeRemainingMs(long chargeTimeRemainingMs) {
+            mChargeTimeRemainingMs = chargeTimeRemainingMs;
             return this;
         }
 

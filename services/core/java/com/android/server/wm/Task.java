@@ -3291,11 +3291,22 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     boolean handlesOrientationChangeFromDescendant() {
-        return super.handlesOrientationChangeFromDescendant()
-                // Display won't rotate for the orientation request if the Task/TaskDisplayArea
-                // can't specify orientation.
-                && canSpecifyOrientation()
-                && getDisplayArea().canSpecifyOrientation();
+        if (!super.handlesOrientationChangeFromDescendant()) {
+            return false;
+        }
+
+        // At task level, we want to check canSpecifyOrientation() based on the top activity type.
+        // Do this only on leaf Task, so that the result is not affecting by the sibling leaf Task.
+        // Otherwise, root Task will use the result from the top leaf Task, and all its child
+        // leaf Tasks will rely on that from super.handlesOrientationChangeFromDescendant().
+        if (!isLeafTask()) {
+            return true;
+        }
+
+        // Check for leaf Task.
+        // Display won't rotate for the orientation request if the Task/TaskDisplayArea
+        // can't specify orientation.
+        return canSpecifyOrientation() && getDisplayArea().canSpecifyOrientation();
     }
 
     void resize(boolean relayout, boolean forced) {

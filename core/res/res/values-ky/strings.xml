@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Колдонмого сүрөт жыйнагыңызды өзгөртүүгө мүмкүнчүлүк берет."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"медиа жыйнагыңыз сакталган жерлерди окуу"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Колдонмого медиа жыйнагыңыз сакталган жерлерди окууга мүмкүнчүлүк берет."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Өзүңүздү ырастаңыз"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометрикалык аппарат жеткиликсиз"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Аныктыгын текшерүү жокко чыгарылды"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Таанылган жок"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Аныктыгын текшерүү жокко чыгарылды"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN код, графикалык ачкыч же сырсөз коюлган жок"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Аутентификация катасы"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Манжа изи жарым-жартылай аныкталды. Кайталап көрүңүз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Манжа изи иштелбей койду. Кайталап көрүңүз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Манжа изинин сенсору кирдеп калган. Тазалап, кайталап көрүңүз."</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Бул түзмөктө манжа изинин сенсору жок."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сенсор убактылуу өчүрүлгөн."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>-манжа"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Улантуу үчүн манжаңыздын изин колдонуңуз"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Жүз таанылган жок. Кайталап көрүңүз."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Мурункуга окшош болуп калды, башкача туруңуз."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Башыңызды бир аз гана эңкейтиңиз."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Башыңызды бир аз гана эңкейтиңиз."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Башыңызды бир аз гана эңкейтиңиз."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Жүзүңүздү жашырып турган нерселерди алып салыңыз."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Экраныңыздын жогору жагын, анын ичинде тилкени да тазалаңыз"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Жүзүнөн таануу функциясы бул түзмөктө иштебейт."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Сенсор убактылуу өчүрүлгөн."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Жүз <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Жүздүн сүрөтчөсү"</string>
@@ -1015,7 +1034,7 @@
       <item quantity="other">Акыркы <xliff:g id="COUNT_1">%d</xliff:g> күн</item>
       <item quantity="one">Акыркы <xliff:g id="COUNT_0">%d</xliff:g> күн</item>
     </plurals>
-    <string name="last_month" msgid="1528906781083518683">"Өткөн ай"</string>
+    <string name="last_month" msgid="1528906781083518683">"Акыркы ай"</string>
     <string name="older" msgid="1645159827884647400">"Эскирээк"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g> күнү"</string>
     <string name="preposition_for_time" msgid="4336835286453822053">"саат <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Кыска жолду колдонуу"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Түстү инверсиялоо"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Түсүн тууралоо"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Экрандын жарыктыгын төмөндөтүү"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> күйгүзүлдү."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өчүрүлдү."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> кызматын колдонуу үчүн үнүн чоңойтуп/кичирейтүү баскычтарын үч секунд коё бербей басып туруңуз"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Фишинг жөнүндө эскертүү"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Жумуш профили"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Эскертилди"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Ырасталды"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Жайып көрсөтүү"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Жыйыштыруу"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"жайып көрсөтүү же жыйыштыруу"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"Жаңылыктар жана журналдар"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Карталар жана чабыттоо"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Өндүрүш категориясы"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Түзмөктүн сактагычы"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB аркылуу мүчүлүштүктөрдү аныктоо"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"саат"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Улантуу үчүн &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; колдонмосуна түзмөгүңүздүн камерасын пайдаланууга уруксат беришиңиз керек."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Күйгүзүү"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Сенсордун купуялыгы"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Колдонмонун сүрөтчөсү"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Колдонмонун брендинин сүрөтү"</string>
 </resources>

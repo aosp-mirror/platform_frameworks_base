@@ -16,10 +16,12 @@
 
 package android.media.metrics;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -65,9 +67,10 @@ public final class TrackChangeEvent extends Event implements Parcelable {
     private final @Nullable String mLanguage;
     private final @Nullable String mLanguageRegion;
     private final int mChannelCount;
-    private final int mSampleRate;
+    private final int mAudioSampleRate;
     private final int mWidth;
     private final int mHeight;
+    private final float mVideoFrameRate;
 
 
 
@@ -99,6 +102,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TrackType {}
 
+    // TODO: remove this constructor. Use the private one below.
     public TrackChangeEvent(
             int state,
             int reason,
@@ -125,9 +129,45 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         this.mLanguage = language;
         this.mLanguageRegion = languageRegion;
         this.mChannelCount = channelCount;
-        this.mSampleRate = sampleRate;
+        this.mAudioSampleRate = sampleRate;
         this.mWidth = width;
         this.mHeight = height;
+        this.mVideoFrameRate = -1;
+    }
+
+    private TrackChangeEvent(
+            int state,
+            int reason,
+            @Nullable String containerMimeType,
+            @Nullable String sampleMimeType,
+            @Nullable String codecName,
+            int bitrate,
+            long timeSinceCreatedMillis,
+            int type,
+            @Nullable String language,
+            @Nullable String languageRegion,
+            int channelCount,
+            int sampleRate,
+            int width,
+            int height,
+            float videoFrameRate,
+            @Nullable Bundle extras) {
+        this.mState = state;
+        this.mReason = reason;
+        this.mContainerMimeType = containerMimeType;
+        this.mSampleMimeType = sampleMimeType;
+        this.mCodecName = codecName;
+        this.mBitrate = bitrate;
+        this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
+        this.mType = type;
+        this.mLanguage = language;
+        this.mLanguageRegion = languageRegion;
+        this.mChannelCount = channelCount;
+        this.mAudioSampleRate = sampleRate;
+        this.mWidth = width;
+        this.mHeight = height;
+        this.mVideoFrameRate = videoFrameRate;
+        this.mExtras = extras.deepCopy();
     }
 
     /**
@@ -223,7 +263,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
      */
     @IntRange(from = -1, to = Integer.MAX_VALUE)
     public int getSampleRate() {
-        return mSampleRate;
+        return mAudioSampleRate;
     }
 
     /**
@@ -244,6 +284,16 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         return mHeight;
     }
 
+    /**
+     * Gets video frame rate.
+     * @return the video frame rate, or -1 if unknown.
+     * @hide
+     */
+    @FloatRange(from = -1, to = Float.MAX_VALUE)
+    public float getVideoFrameRate() {
+        return mVideoFrameRate;
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         int flg = 0;
@@ -252,6 +302,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         if (mCodecName != null) flg |= 0x10;
         if (mLanguage != null) flg |= 0x100;
         if (mLanguageRegion != null) flg |= 0x200;
+        if (mExtras != null) flg |= 0x400;
         dest.writeInt(flg);
         dest.writeInt(mState);
         dest.writeInt(mReason);
@@ -264,9 +315,11 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         if (mLanguage != null) dest.writeString(mLanguage);
         if (mLanguageRegion != null) dest.writeString(mLanguageRegion);
         dest.writeInt(mChannelCount);
-        dest.writeInt(mSampleRate);
+        dest.writeInt(mAudioSampleRate);
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
+        dest.writeFloat(mVideoFrameRate);
+        if (mExtras != null) dest.writeBundle(mExtras);
     }
 
     @Override
@@ -291,6 +344,8 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         int sampleRate = in.readInt();
         int width = in.readInt();
         int height = in.readInt();
+        float videoFrameRate = in.readFloat();
+        Bundle extras = (flg & 0x400) == 0 ? null : in.readBundle();
 
         this.mState = state;
         this.mReason = reason;
@@ -303,9 +358,11 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         this.mLanguage = language;
         this.mLanguageRegion = languageRegion;
         this.mChannelCount = channelCount;
-        this.mSampleRate = sampleRate;
+        this.mAudioSampleRate = sampleRate;
         this.mWidth = width;
         this.mHeight = height;
+        this.mVideoFrameRate = videoFrameRate;
+        this.mExtras = extras;
     }
 
     public static final @NonNull Parcelable.Creator<TrackChangeEvent> CREATOR =
@@ -335,9 +392,10 @@ public final class TrackChangeEvent extends Event implements Parcelable {
                 + "language = " + mLanguage + ", "
                 + "languageRegion = " + mLanguageRegion + ", "
                 + "channelCount = " + mChannelCount + ", "
-                + "sampleRate = " + mSampleRate + ", "
+                + "sampleRate = " + mAudioSampleRate + ", "
                 + "width = " + mWidth + ", "
-                + "height = " + mHeight
+                + "height = " + mHeight + ", "
+                + "videoFrameRate = " + mVideoFrameRate
                 + " }";
     }
 
@@ -357,16 +415,17 @@ public final class TrackChangeEvent extends Event implements Parcelable {
                 && Objects.equals(mLanguage, that.mLanguage)
                 && Objects.equals(mLanguageRegion, that.mLanguageRegion)
                 && mChannelCount == that.mChannelCount
-                && mSampleRate == that.mSampleRate
+                && mAudioSampleRate == that.mAudioSampleRate
                 && mWidth == that.mWidth
-                && mHeight == that.mHeight;
+                && mHeight == that.mHeight
+                && mVideoFrameRate == that.mVideoFrameRate;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mState, mReason, mContainerMimeType, mSampleMimeType, mCodecName,
                 mBitrate, mTimeSinceCreatedMillis, mType, mLanguage, mLanguageRegion,
-                mChannelCount, mSampleRate, mWidth, mHeight);
+                mChannelCount, mAudioSampleRate, mWidth, mHeight, mVideoFrameRate);
     }
 
     /**
@@ -385,9 +444,11 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         private @Nullable String mLanguage;
         private @Nullable String mLanguageRegion;
         private int mChannelCount = -1;
-        private int mSampleRate = -1;
+        private int mAudioSampleRate = -1;
         private int mWidth = -1;
         private int mHeight = -1;
+        private float mVideoFrameRate = -1;
+        private Bundle mExtras;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -512,9 +573,10 @@ public final class TrackChangeEvent extends Event implements Parcelable {
          */
         public @NonNull Builder setSampleRate(
                 @IntRange(from = -1, to = Integer.MAX_VALUE) int value) {
+            // TODO: rename it to setAudioSampleRate
             checkNotUsed();
             mBuilderFieldsSet |= 0x800;
-            mSampleRate = value;
+            mAudioSampleRate = value;
             return this;
         }
 
@@ -540,6 +602,28 @@ public final class TrackChangeEvent extends Event implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets video frame rate.
+         * @param value the video frame rate. -1 indicates the value is unknown.
+         * @hide
+         */
+        public @NonNull Builder setVideoFrameRate(
+                @FloatRange(from = -1, to = Float.MAX_VALUE) float value) {
+            checkNotUsed();
+            mVideoFrameRate = value;
+            return this;
+        }
+
+        /**
+         * Set extras for compatibility.
+         * <p>Should be used by support library only.
+         * @hide
+         */
+        public @NonNull Builder setExtras(@NonNull Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull TrackChangeEvent build() {
             checkNotUsed();
@@ -557,9 +641,11 @@ public final class TrackChangeEvent extends Event implements Parcelable {
                     mLanguage,
                     mLanguageRegion,
                     mChannelCount,
-                    mSampleRate,
+                    mAudioSampleRate,
                     mWidth,
-                    mHeight);
+                    mHeight,
+                    mVideoFrameRate,
+                    mExtras);
             return o;
         }
 

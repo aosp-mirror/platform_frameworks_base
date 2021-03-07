@@ -182,6 +182,9 @@ public class PackageWatchdog {
     private final Runnable mSaveToFile = this::saveToFile;
     private final SystemClock mSystemClock;
     private final BootThreshold mBootThreshold;
+    private final DeviceConfig.OnPropertiesChangedListener
+            mOnPropertyChangedListener = this::onPropertyChanged;
+
     // The set of packages that have been synced with the ExplicitHealthCheckController
     @GuardedBy("mLock")
     private Set<String> mRequestedHealthCheckPackages = new ArraySet<>();
@@ -669,9 +672,17 @@ public class PackageWatchdog {
         }
     }
 
+    @VisibleForTesting
     long getTriggerFailureCount() {
         synchronized (mLock) {
             return mTriggerFailureCount;
+        }
+    }
+
+    @VisibleForTesting
+    long getTriggerFailureDurationMs() {
+        synchronized (mLock) {
+            return mTriggerFailureDurationMs;
         }
     }
 
@@ -983,21 +994,25 @@ public class PackageWatchdog {
         }
     }
 
+    private void onPropertyChanged(DeviceConfig.Properties properties) {
+        try {
+            updateConfigs();
+        } catch (Exception ignore) {
+            Slog.w(TAG, "Failed to reload device config changes");
+        }
+    }
+
     /** Adds a {@link DeviceConfig#OnPropertiesChangedListener}. */
     private void setPropertyChangedListenerLocked() {
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_ROLLBACK,
                 mContext.getMainExecutor(),
-                (properties) -> {
-                    if (!DeviceConfig.NAMESPACE_ROLLBACK.equals(properties.getNamespace())) {
-                        return;
-                    }
-                    try {
-                        updateConfigs();
-                    } catch (Exception ignore) {
-                        Slog.w(TAG, "Failed to reload device config changes");
-                    }
-                });
+                mOnPropertyChangedListener);
+    }
+
+    @VisibleForTesting
+    void removePropertyChangedListener() {
+        DeviceConfig.removeOnPropertiesChangedListener(mOnPropertyChangedListener);
     }
 
     /**

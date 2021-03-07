@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂຄໍເລັກຊັນຮູບຂອງທ່ານ."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ອ່ານສະຖານທີ່ຈາກຄໍເລັກຊັນມີເດຍຂອງທ່ານ"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"ອະນຸຍາດໃຫ້ແອັບອ່ານສະຖານທີ່ຈາກຄໍເລັກຊັນມີເດຍຂອງທ່ານ."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"ຢັ້ງຢືນວ່າແມ່ນທ່ານ"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ຮາດແວຊີວະມິຕິບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ຍົກເລີກການຮັບຮອງຄວາມຖືກຕ້ອງແລ້ວ"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"ບໍ່ຮັບຮູ້"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"ຍົກເລີກການຮັບຮອງຄວາມຖືກຕ້ອງແລ້ວ"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"ບໍ່ໄດ້ຕັ້ງ PIN, ຮູບແບບປົດລັອກ ຫຼື ລະຫັດຜ່ານ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"ເກີດຄວາມຜິດພາດໃນການພິສູດຢືນຢັນ"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"ກວດ​ພົບ​ລາຍ​ນີ້ວ​ມື​ບາງ​ສ່ວນ​ແລ້ວ. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ບໍ່​ສາ​ມາດ​ດຳ​ເນີນ​ການ​ລາຍ​ນີ້ວ​ມື​ໄດ້. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ເຊັນ​ເຊີ​ລາຍ​ນີ້ວ​ມື​ເປື້ອນ. ກະ​ລຸ​ນາ​ທຳ​ຄວາມ​ສະ​ອາດ ແລະ​ລອງ​ໃໝ່​ອີກ."</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ອຸປະກອນນີ້ບໍ່ມີເຊັນເຊີລາຍນິ້ວມື."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ປິດການເຮັດວຽກຂອງເຊັນເຊີໄວ້ຊົ່ວຄາວແລ້ວ."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ນີ້ວ​ມື <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ໃຊ້​ລາຍ​ນີ້ວ​ມື​ຂອງ​ທ່ານ​ເພື່ອ​ສືບ​ຕໍ່"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"ບໍ່ສາມາດຈຳແນກໃບໜ້າໄດ້ອີກຕໍ່ໄປ. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"ຄ້າຍກັນເກີນໄປ, ກະລຸນາປ່ຽນທ່າຂອງທ່ານ."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ອຽງຫົວຂອງທ່ານໜ້ອຍໜຶ່ງ."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"ປັບມຸມໜ້າຂອງທ່ານໃຫ້ຕັ້ງຊື່."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ອຽງຫົວຂອງທ່ານໜ້ອຍໜຶ່ງ."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"ນຳສິ່ງທີ່ກີດຂວາງໃບໜ້າທ່ານອອກ."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ທຳຄວາມສະອາດສ່ວນເທິງສຸດຂອງໜ້າຈໍທ່ານ, ຮວມທັງແຖບດຳນຳ"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"ບໍ່ຮອງຮັບການປົດລັອກດ້ວຍໜ້າຢູ່ອຸປະກອນນີ້."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ປິດການເຮັດວຽກຂອງເຊັນເຊີໄວ້ຊົ່ວຄາວແລ້ວ."</string>
     <string name="face_name_template" msgid="3877037340223318119">"ໃບໜ້າ <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"ໄອຄອນໃບໜ້າ"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ໃຊ້ປຸ່ມລັດ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ການປີ້ນສີ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ການແກ້ໄຂຄ່າສີ"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"ຫຼຸດຄວາມສະຫວ່າງລົງ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ເປີດໃຊ້ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ແລ້ວ."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ປິດ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ໄວ້ແລ້ວ."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"ກົດປຸ່ມສຽງທັງສອງພ້ອມກັນຄ້າງໄວ້ສາມວິນາທີເພື່ອໃຊ້ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ການແຈ້ງເຕືອນການຫຼອກເອົາຂໍ້ມູນ"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"ເຕືອນແລ້ວ"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"ຢັ້ງຢືນແລ້ວ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ຂະຫຍາຍ"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ຫຍໍ້ເຂົ້າ"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"ປິດ/ເປີດ ການຂະຫຍາຍ"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"News &amp; Magazines"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Maps &amp; Navigation"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ຜະລິດຕະພາບ"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ບ່ອນຈັດເກັບຂໍ້ມູນອຸປະກອນ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"ການດີບັກຜ່ານ USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ຊົ່ວໂມງ"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ເພື່ອດຳເນີນການຕໍ່, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ຕ້ອງການສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງອຸປະກອນທ່ານ."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ເປີດໃຊ້"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ຄວາມເປັນສ່ວນຕົວເຊັນເຊີ"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ໄອຄອນແອັບພລິເຄຊັນ"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ຮູບແບຣນແອັບພລິເຄຊັນ"</string>
 </resources>

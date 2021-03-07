@@ -5523,8 +5523,6 @@ public abstract class Context {
      * {@link GameManager}.
      *
      * @see #getSystemService(String)
-     *
-     * @hide
      */
     public static final String GAME_SERVICE = "game";
 
@@ -6373,6 +6371,19 @@ public abstract class Context {
     public Context createWindowContext(@NonNull Display display, @WindowType int type,
             @SuppressLint("NullableCollection")
             @Nullable Bundle options) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Creates a context with specific properties and behaviors.
+     *
+     * @param contextParams Parameters for how the new context should behave.
+     * @return A context with the specified behaviors.
+     *
+     * @see ContextParams
+     */
+    @NonNull
+    public Context createContext(@NonNull ContextParams contextParams) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

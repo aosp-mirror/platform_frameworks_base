@@ -16,17 +16,16 @@
 
 package com.android.wm.shell.onehanded;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_EXIT;
 import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_TRIGGER;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
+import android.util.Slog;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.window.DisplayAreaAppearedInfo;
 import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
@@ -60,6 +59,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private static final String ONE_HANDED_MODE_TRANSLATE_ANIMATION_DURATION =
             "persist.debug.one_handed_translate_animation_duration";
 
+    private final WindowManager mWindowManager;
     private final Rect mLastVisualDisplayBounds = new Rect();
     private final Rect mDefaultDisplayBounds = new Rect();
 
@@ -110,12 +110,14 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
      * Constructor of OneHandedDisplayAreaOrganizer
      */
     public OneHandedDisplayAreaOrganizer(Context context,
+            WindowManager windowManager,
             DisplayController displayController,
             OneHandedAnimationController animationController,
             OneHandedTutorialHandler tutorialHandler,
             OneHandedBackgroundPanelOrganizer oneHandedBackgroundGradientOrganizer,
             ShellExecutor mainExecutor) {
         super(mainExecutor);
+        mWindowManager = windowManager;
         mAnimationController = animationController;
         mDisplayController = displayController;
         mLastVisualDisplayBounds.set(getDisplayBounds());
@@ -292,11 +294,16 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
 
     @Nullable
     private Rect getDisplayBounds() {
-        Point realSize = new Point(0, 0);
-        if (mDisplayController != null && mDisplayController.getDisplay(DEFAULT_DISPLAY) != null) {
-            mDisplayController.getDisplay(DEFAULT_DISPLAY).getRealSize(realSize);
+        if (mWindowManager == null) {
+            Slog.e(TAG, "WindowManager instance is null! Can not get display size!");
+            return new Rect();
         }
-        return new Rect(0, 0, realSize.x, realSize.y);
+        final Rect displayBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        if (displayBounds.width() == 0 || displayBounds.height() == 0) {
+            Slog.e(TAG, "Display size error! width = " + displayBounds.width()
+                    + ", height = " + displayBounds.height());
+        }
+        return displayBounds;
     }
 
     @VisibleForTesting

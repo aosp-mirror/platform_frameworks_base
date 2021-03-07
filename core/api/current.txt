@@ -5312,6 +5312,14 @@ package android.app {
     field @Deprecated public static final int TRANSIT_UNSET = -1; // 0xffffffff
   }
 
+  public final class GameManager {
+    method public int getGameMode();
+    field public static final int GAME_MODE_BATTERY = 3; // 0x3
+    field public static final int GAME_MODE_PERFORMANCE = 2; // 0x2
+    field public static final int GAME_MODE_STANDARD = 1; // 0x1
+    field public static final int GAME_MODE_UNSUPPORTED = 0; // 0x0
+  }
+
   public class Instrumentation {
     ctor public Instrumentation();
     method public android.os.TestLooperManager acquireLooperManager(android.os.Looper);
@@ -7113,6 +7121,7 @@ package android.app.admin {
     method @NonNull public android.os.Bundle getUserRestrictions(@NonNull android.content.ComponentName);
     method @Nullable public String getWifiMacAddress(@NonNull android.content.ComponentName);
     method public boolean grantKeyPairToApp(@Nullable android.content.ComponentName, @NonNull String, @NonNull String);
+    method public boolean grantKeyPairToWifiAuth(@NonNull String);
     method public boolean hasCaCertInstalled(@Nullable android.content.ComponentName, byte[]);
     method public boolean hasGrantedPolicy(@NonNull android.content.ComponentName, int);
     method public boolean hasKeyPair(@NonNull String);
@@ -7135,6 +7144,7 @@ package android.app.admin {
     method public boolean isDeviceIdAttestationSupported();
     method public boolean isDeviceOwnerApp(String);
     method public boolean isEphemeralUser(@NonNull android.content.ComponentName);
+    method public boolean isKeyPairGrantedToWifiAuth(@NonNull String);
     method public boolean isLockTaskPermitted(String);
     method public boolean isLogoutEnabled();
     method public boolean isManagedProfile(@NonNull android.content.ComponentName);
@@ -7170,6 +7180,7 @@ package android.app.admin {
     method @Nullable public java.util.List<android.app.admin.SecurityLog.SecurityEvent> retrievePreRebootSecurityLogs(@NonNull android.content.ComponentName);
     method @Nullable public java.util.List<android.app.admin.SecurityLog.SecurityEvent> retrieveSecurityLogs(@NonNull android.content.ComponentName);
     method public boolean revokeKeyPairFromApp(@Nullable android.content.ComponentName, @NonNull String, @NonNull String);
+    method public boolean revokeKeyPairFromWifiAuth(@NonNull String);
     method public void setAccountManagementDisabled(@NonNull android.content.ComponentName, String, boolean);
     method public void setAffiliationIds(@NonNull android.content.ComponentName, @NonNull java.util.Set<java.lang.String>);
     method public void setAlwaysOnVpnPackage(@NonNull android.content.ComponentName, @Nullable String, boolean) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -10325,6 +10336,7 @@ package android.content {
     method @Deprecated public abstract void clearWallpaper() throws java.io.IOException;
     method @NonNull public android.content.Context createAttributionContext(@Nullable String);
     method public abstract android.content.Context createConfigurationContext(@NonNull android.content.res.Configuration);
+    method @NonNull public android.content.Context createContext(@NonNull android.content.ContextParams);
     method public abstract android.content.Context createContextForSplit(String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.Context createDeviceProtectedStorageContext();
     method public abstract android.content.Context createDisplayContext(@NonNull android.view.Display);
@@ -10486,6 +10498,7 @@ package android.content {
     field public static final String EUICC_SERVICE = "euicc";
     field public static final String FILE_INTEGRITY_SERVICE = "file_integrity";
     field public static final String FINGERPRINT_SERVICE = "fingerprint";
+    field public static final String GAME_SERVICE = "game";
     field public static final String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
     field public static final String INPUT_METHOD_SERVICE = "input_method";
     field public static final String INPUT_SERVICE = "input";
@@ -10544,6 +10557,19 @@ package android.content {
     field public static final String WIFI_RTT_RANGING_SERVICE = "wifirtt";
     field public static final String WIFI_SERVICE = "wifi";
     field public static final String WINDOW_SERVICE = "window";
+  }
+
+  public final class ContextParams {
+    method @Nullable public String getAttributionTag();
+    method @Nullable public String getReceiverAttributionTag();
+    method @Nullable public String getReceiverPackage();
+  }
+
+  public static final class ContextParams.Builder {
+    ctor public ContextParams.Builder();
+    method @NonNull public android.content.ContextParams build();
+    method @NonNull public android.content.ContextParams.Builder setAttributionTag(@NonNull String);
+    method @NonNull public android.content.ContextParams.Builder setReceiverPackage(@NonNull String, @Nullable String);
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -12881,18 +12907,18 @@ package android.content.pm {
   }
 
   public class ShortcutManager {
-    method public boolean addDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
-    method public android.content.Intent createShortcutResultIntent(@NonNull android.content.pm.ShortcutInfo);
+    method @WorkerThread public boolean addDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
+    method @WorkerThread public android.content.Intent createShortcutResultIntent(@NonNull android.content.pm.ShortcutInfo);
     method public void disableShortcuts(@NonNull java.util.List<java.lang.String>);
     method public void disableShortcuts(@NonNull java.util.List<java.lang.String>, CharSequence);
     method public void enableShortcuts(@NonNull java.util.List<java.lang.String>);
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getDynamicShortcuts();
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getDynamicShortcuts();
     method public int getIconMaxHeight();
     method public int getIconMaxWidth();
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getManifestShortcuts();
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getManifestShortcuts();
     method public int getMaxShortcutCountPerActivity();
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getPinnedShortcuts();
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getShortcuts(int);
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getPinnedShortcuts();
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getShortcuts(int);
     method public boolean isRateLimitingActive();
     method public boolean isRequestPinShortcutSupported();
     method public void pushDynamicShortcut(@NonNull android.content.pm.ShortcutInfo);
@@ -12900,10 +12926,10 @@ package android.content.pm {
     method public void removeDynamicShortcuts(@NonNull java.util.List<java.lang.String>);
     method public void removeLongLivedShortcuts(@NonNull java.util.List<java.lang.String>);
     method public void reportShortcutUsed(String);
-    method public boolean requestPinShortcut(@NonNull android.content.pm.ShortcutInfo, @Nullable android.content.IntentSender);
-    method public boolean setDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
+    method @WorkerThread public boolean requestPinShortcut(@NonNull android.content.pm.ShortcutInfo, @Nullable android.content.IntentSender);
+    method @WorkerThread public boolean setDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
     method public void updateShortcutVisibility(@NonNull String, @Nullable byte[], boolean);
-    method public boolean updateShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
+    method @WorkerThread public boolean updateShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
     field public static final int FLAG_MATCH_CACHED = 8; // 0x8
     field public static final int FLAG_MATCH_DYNAMIC = 2; // 0x2
     field public static final int FLAG_MATCH_MANIFEST = 1; // 0x1
@@ -50898,6 +50924,7 @@ package android.view.autofill {
     field public static final String EXTRA_AUTHENTICATION_RESULT = "android.view.autofill.extra.AUTHENTICATION_RESULT";
     field public static final String EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET = "android.view.autofill.extra.AUTHENTICATION_RESULT_EPHEMERAL_DATASET";
     field public static final String EXTRA_CLIENT_STATE = "android.view.autofill.extra.CLIENT_STATE";
+    field public static final String EXTRA_INLINE_SUGGESTIONS_REQUEST = "android.view.autofill.extra.INLINE_SUGGESTIONS_REQUEST";
   }
 
   public abstract static class AutofillManager.AutofillCallback {
