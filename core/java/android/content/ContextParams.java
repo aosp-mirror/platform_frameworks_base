@@ -18,6 +18,13 @@ package android.content;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
+
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * This class represents rules around how a context being created via
@@ -48,9 +55,19 @@ import android.annotation.Nullable;
  * @see Context#createContext(ContextParams)
  */
 public final class ContextParams {
+    private final String mAttributionTag;
+    private final String mReceiverPackage;
+    private final String mReceiverAttributionTag;
+    private final Set<String> mRenouncedPermissions;
 
-    private ContextParams() {
-        /* hide ctor */
+    /** {@hide} */
+    public static final ContextParams EMPTY = new ContextParams.Builder().build();
+
+    private ContextParams(@NonNull ContextParams.Builder builder) {
+        mAttributionTag = builder.mAttributionTag;
+        mReceiverPackage = builder.mReceiverPackage;
+        mReceiverAttributionTag = builder.mReceiverAttributionTag;
+        mRenouncedPermissions = builder.mRenouncedPermissions;
     }
 
     /**
@@ -58,7 +75,7 @@ public final class ContextParams {
      */
     @Nullable
     public String getAttributionTag() {
-        return null;
+        return mAttributionTag;
     }
 
     /**
@@ -66,7 +83,7 @@ public final class ContextParams {
      */
     @Nullable
     public String getReceiverPackage() {
-        return null;
+        return mReceiverPackage;
     }
 
     /**
@@ -74,13 +91,33 @@ public final class ContextParams {
      */
     @Nullable
     public String getReceiverAttributionTag() {
-        return null;
+        return mReceiverAttributionTag;
+    }
+
+    /**
+     * @return The set of permissions to treat as renounced.
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("NullableCollection")
+    @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
+    public @Nullable Set<String> getRenouncedPermissions() {
+        return mRenouncedPermissions;
+    }
+
+    /** @hide */
+    public boolean isRenouncedPermission(@NonNull String permission) {
+        return mRenouncedPermissions != null && mRenouncedPermissions.contains(permission);
     }
 
     /**
      * Builder for creating a {@link ContextParams}.
      */
     public static final class Builder {
+        private String mAttributionTag;
+        private String mReceiverPackage;
+        private String mReceiverAttributionTag;
+        private Set<String> mRenouncedPermissions;
 
         /**
          * Sets an attribution tag against which to track permission accesses.
@@ -90,6 +127,7 @@ public final class ContextParams {
          */
         @NonNull
         public Builder setAttributionTag(@NonNull String attributionTag) {
+            mAttributionTag = Objects.requireNonNull(attributionTag);
             return this;
         }
 
@@ -104,18 +142,46 @@ public final class ContextParams {
         @NonNull
         public Builder setReceiverPackage(@NonNull String packageName,
                 @Nullable String attributionTag) {
+            mReceiverPackage = Objects.requireNonNull(packageName);
+            mReceiverAttributionTag = attributionTag;
             return this;
         }
 
         /**
-         * Creates a new instance. You need to either specify an attribution tag
-         * or a receiver package or both.
+         * Sets permissions which have been voluntarily "renounced" by the
+         * calling app.
+         * <p>
+         * Interactions performed through the created Context will ideally be
+         * treated as if these "renounced" permissions have not actually been
+         * granted to the app, regardless of their actual grant status.
+         * <p>
+         * This is designed for use by separate logical components within an app
+         * which have no intention of interacting with data or services that are
+         * protected by the renounced permissions.
+         * <p>
+         * Note that only {@link PermissionInfo#PROTECTION_DANGEROUS}
+         * permissions are supported by this mechanism.
+         *
+         * @param renouncedPermissions The set of permissions to treat as
+         *            renounced.
+         * @return This builder.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
+        public @NonNull Builder setRenouncedPermissions(@NonNull Set<String> renouncedPermissions) {
+            mRenouncedPermissions = Collections.unmodifiableSet(renouncedPermissions);
+            return this;
+        }
+
+        /**
+         * Creates a new instance.
          *
          * @return The new instance.
          */
         @NonNull
         public ContextParams build() {
-            return new ContextParams();
+            return new ContextParams(this);
         }
     }
 }
