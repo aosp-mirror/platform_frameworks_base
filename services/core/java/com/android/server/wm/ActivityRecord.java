@@ -211,7 +211,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
 import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_SOLID_COLOR;
-import static com.android.server.wm.WindowManagerService.MIN_TASK_LETTERBOX_ASPECT_RATIO;
+import static com.android.server.wm.WindowManagerService.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.letterboxBackgroundTypeToString;
@@ -6994,6 +6994,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         float aspect = Math.max(parentWidth, parentHeight)
                 / (float) Math.min(parentWidth, parentHeight);
 
+        // Override from config_fixedOrientationLetterboxAspectRatio or via ADB with
+        // set-fixed-orientation-letterbox-aspect-ratio.
+        final float letterboxAspectRatioOverride =
+                mWmService.getFixedOrientationLetterboxAspectRatio();
+        aspect = letterboxAspectRatioOverride > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
+                ? letterboxAspectRatioOverride : aspect;
+
         // Adjust the fixed orientation letterbox bounds to fit the app request aspect ratio in
         // order to use the extra available space.
         final float maxAspectRatio = info.maxAspectRatio;
@@ -7003,16 +7010,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (aspect < minAspectRatio) {
             aspect = minAspectRatio;
         }
-
-        // Override from config_letterboxAspectRatio or via ADB with set-letterbox-aspect-ratio.
-        // TODO(b/175212232): Rename getTaskLetterboxAspectRatio and all related methods since fixed
-        // orientation letterbox is on the activity level now.
-        final float letterboxAspectRatioOverride = mWmService.getTaskLetterboxAspectRatio();
-        // Activity min/max aspect ratio restrictions will be respected by the activity-level
-        // letterboxing (size-compat mode). Therefore this override can control the maximum screen
-        // area that can be occupied by the app in the letterbox mode.
-        aspect = letterboxAspectRatioOverride > MIN_TASK_LETTERBOX_ASPECT_RATIO
-                ? letterboxAspectRatioOverride : aspect;
 
         // Store the current bounds to be able to revert to size compat mode values below if needed.
         Rect mTmpFullBounds = new Rect(resolvedBounds);
