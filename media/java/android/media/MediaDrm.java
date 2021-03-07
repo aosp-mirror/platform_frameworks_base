@@ -558,12 +558,20 @@ public final class MediaDrm implements AutoCloseable {
         public static final int ERROR_PROVISIONING_PARSE = 26;
 
         /**
+         * The provisioning server detected an error in the provisioning
+         * request.
+         * <p>
+         * Check for errors on the provisioning server.
+         */
+        public static final int ERROR_PROVISIONING_REQUEST_REJECTED = 27;
+
+        /**
          * Provisioning failed in a way that is likely to succeed on a
          * subsequent attempt.
          * <p>
          * The app should retry the operation.
          */
-        public static final int ERROR_PROVISIONING_RETRY = 27;
+        public static final int ERROR_PROVISIONING_RETRY = 28;
 
         /**
          * This indicates that apps using MediaDrm sessions are
@@ -572,7 +580,7 @@ public final class MediaDrm implements AutoCloseable {
          * <p>
          * The app should retry the operation later.
          */
-        public static final int ERROR_RESOURCE_CONTENTION = 28;
+        public static final int ERROR_RESOURCE_CONTENTION = 29;
 
         /**
          * Failed to generate a secure stop request because a field in the
@@ -581,7 +589,7 @@ public final class MediaDrm implements AutoCloseable {
          * The secure stop can't be released on the server, but the app may
          * remove it explicitly using {@link MediaDrm#removeSecureStop}.
          */
-        public static final int ERROR_SECURE_STOP_RELEASE = 29;
+        public static final int ERROR_SECURE_STOP_RELEASE = 30;
 
         /**
          * The plugin was unable to read data from the filesystem.
@@ -589,7 +597,7 @@ public final class MediaDrm implements AutoCloseable {
          * Please see the general error handling strategy for unexpected errors
          * described in {@link ErrorCodes}.
          */
-        public static final int ERROR_STORAGE_READ = 30;
+        public static final int ERROR_STORAGE_READ = 31;
 
         /**
          * The plugin was unable to write data to the filesystem.
@@ -597,7 +605,7 @@ public final class MediaDrm implements AutoCloseable {
          * Please see the general error handling strategy for unexpected errors
          * described in {@link ErrorCodes}.
          */
-        public static final int ERROR_STORAGE_WRITE = 31;
+        public static final int ERROR_STORAGE_WRITE = 32;
 
         /**
          * {@link MediaCodec#queueSecureInputBuffer} called with 0 subsamples.
@@ -605,7 +613,7 @@ public final class MediaDrm implements AutoCloseable {
          * Check the {@link MediaCodec.CryptoInfo} object passed to {@link
          * MediaCodec#queueSecureInputBuffer}.
          */
-        public static final int ERROR_ZERO_SUBSAMPLES = 32;
+        public static final int ERROR_ZERO_SUBSAMPLES = 33;
 
     }
 
@@ -637,6 +645,7 @@ public final class MediaDrm implements AutoCloseable {
         ErrorCodes.ERROR_PROVISIONING_CERTIFICATE,
         ErrorCodes.ERROR_PROVISIONING_CONFIG,
         ErrorCodes.ERROR_PROVISIONING_PARSE,
+        ErrorCodes.ERROR_PROVISIONING_REQUEST_REJECTED,
         ErrorCodes.ERROR_PROVISIONING_RETRY,
         ErrorCodes.ERROR_SECURE_STOP_RELEASE,
         ErrorCodes.ERROR_STORAGE_READ,
