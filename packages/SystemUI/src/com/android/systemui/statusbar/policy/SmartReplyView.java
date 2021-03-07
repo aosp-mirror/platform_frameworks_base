@@ -92,6 +92,7 @@ public class SmartReplyView extends ViewGroup {
     @ColorInt private int mCurrentStrokeColor;
     @ColorInt private int mCurrentTextColor;
     @ColorInt private int mCurrentRippleColor;
+    private boolean mCurrentColorized;
     private int mMaxSqueezeRemeasureAttempts;
     private int mMaxNumActions;
     private int mMinNumSystemGeneratedReplies;
@@ -143,7 +144,7 @@ public class SmartReplyView extends ViewGroup {
 
         mBreakIterator = BreakIterator.getLineInstance();
 
-        setBackgroundTintColor(mDefaultBackgroundColor);
+        setBackgroundTintColor(mDefaultBackgroundColor, false /* colorized */);
         reallocateCandidateButtonQueueForSqueezing();
     }
 
@@ -182,7 +183,7 @@ public class SmartReplyView extends ViewGroup {
     public void resetSmartSuggestions(View newSmartReplyContainer) {
         mSmartReplyContainer = newSmartReplyContainer;
         removeAllViews();
-        setBackgroundTintColor(mDefaultBackgroundColor);
+        setBackgroundTintColor(mDefaultBackgroundColor, false /* colorized */);
     }
 
     /** Add buttons to the {@link SmartReplyView} */
@@ -676,19 +677,24 @@ public class SmartReplyView extends ViewGroup {
         return lp.show && super.drawChild(canvas, child, drawingTime);
     }
 
-    public void setBackgroundTintColor(int backgroundColor) {
-        if (backgroundColor == mCurrentBackgroundColor) {
+    /**
+     * Set the current background color of the notification so that the smart reply buttons can
+     * match it, and calculate other colors (e.g. text, ripple, stroke)
+     */
+    public void setBackgroundTintColor(int backgroundColor, boolean colorized) {
+        if (backgroundColor == mCurrentBackgroundColor && colorized == mCurrentColorized) {
             // Same color ignoring.
            return;
         }
         mCurrentBackgroundColor = backgroundColor;
+        mCurrentColorized = colorized;
 
         final boolean dark = !ContrastColorUtil.isColorLight(backgroundColor);
 
         mCurrentTextColor = ContrastColorUtil.ensureTextContrast(
                 dark ? mDefaultTextColorDarkBg : mDefaultTextColor,
                 backgroundColor | 0xff000000, dark);
-        mCurrentStrokeColor = ContrastColorUtil.ensureContrast(
+        mCurrentStrokeColor = colorized ? mCurrentTextColor : ContrastColorUtil.ensureContrast(
                 mDefaultStrokeColor, backgroundColor | 0xff000000, dark, mMinStrokeContrast);
         mCurrentRippleColor = dark ? mRippleColorDarkBg : mRippleColor;
 
