@@ -249,6 +249,18 @@ public final class AutofillManager {
     public static final String EXTRA_CLIENT_STATE =
             "android.view.autofill.extra.CLIENT_STATE";
 
+    /**
+     * Intent extra: the {@link android.view.inputmethod.InlineSuggestionsRequest} in the
+     * autofill request.
+     *
+     * <p>This is filled in the authentication intent so the
+     * {@link android.service.autofill.AutofillService} can use it to create the inline
+     * suggestion {@link android.service.autofill.Dataset} in the response, if the original autofill
+     * request contains the {@link android.view.inputmethod.InlineSuggestionsRequest}.
+     */
+    public static final String EXTRA_INLINE_SUGGESTIONS_REQUEST =
+            "android.view.autofill.extra.INLINE_SUGGESTIONS_REQUEST";
+
     /** @hide */
     public static final String EXTRA_RESTORE_SESSION_TOKEN =
             "android.view.autofill.extra.RESTORE_SESSION_TOKEN";
