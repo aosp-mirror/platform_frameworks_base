@@ -4398,7 +4398,10 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     public static Bundle getActivityOptions(int displayId,
             @Nullable RemoteAnimationAdapter animationAdapter) {
-        return getDefaultActivityOptions(animationAdapter).toBundle();
+        ActivityOptions options = getDefaultActivityOptions(animationAdapter);
+        options.setLaunchDisplayId(displayId);
+        options.setCallerDisplayId(displayId);
+        return options.toBundle();
     }
 
     /**
