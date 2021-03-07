@@ -32,7 +32,6 @@ import com.android.server.biometrics.sensors.GenerateChallengeClient;
  */
 public class FaceGenerateChallengeClient extends GenerateChallengeClient<ISession> {
     private static final String TAG = "FaceGenerateChallengeClient";
-    private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
     FaceGenerateChallengeClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
@@ -43,7 +42,7 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<ISessio
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().generateChallenge(mSequentialId, CHALLENGE_TIMEOUT_SEC);
+            getFreshDaemon().generateChallenge(mSequentialId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to generateChallenge", e);
         }

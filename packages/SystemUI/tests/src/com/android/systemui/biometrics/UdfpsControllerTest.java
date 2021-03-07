@@ -179,7 +179,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     public void fingerDown() throws RemoteException {
         // Configure UdfpsView to accept the ACTION_DOWN event
         when(mUdfpsView.isIlluminationRequested()).thenReturn(false);
-        when(mUdfpsView.isValidTouch(anyFloat(), anyFloat(), anyFloat())).thenReturn(true);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
@@ -187,9 +187,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mFgExecutor.runAllReady();
         // WHEN ACTION_DOWN is received
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
-        MotionEvent event = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
-        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
-        event.recycle();
+        MotionEvent downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        downEvent.recycle();
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        moveEvent.recycle();
         // THEN illumination begins
         // AND onIlluminatedRunnable that notifies FingerprintManager is set
         verify(mUdfpsView).startIllumination(mOnIlluminatedRunnableCaptor.capture());

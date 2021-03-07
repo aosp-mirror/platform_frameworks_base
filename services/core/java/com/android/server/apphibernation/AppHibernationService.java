@@ -59,6 +59,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.File;
@@ -134,6 +135,8 @@ public final class AppHibernationService extends SystemService {
         intentFilter.addAction(ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
         userAllContext.registerReceiver(mBroadcastReceiver, intentFilter);
+
+        LocalServices.addService(AppHibernationManagerInternal.class, mLocalService);
     }
 
     @Override
@@ -542,6 +545,36 @@ public final class AppHibernationService extends SystemService {
                 idpw.print(state);
                 idpw.println();
             }
+        }
+    }
+
+    private final AppHibernationManagerInternal mLocalService = new LocalService(this);
+
+    private static final class LocalService extends AppHibernationManagerInternal {
+        private final AppHibernationService mService;
+
+        LocalService(AppHibernationService service) {
+            mService = service;
+        }
+
+        @Override
+        public boolean isHibernatingForUser(String packageName, int userId) {
+            return mService.isHibernatingForUser(packageName, userId);
+        }
+
+        @Override
+        public void setHibernatingForUser(String packageName, int userId, boolean isHibernating) {
+            mService.setHibernatingForUser(packageName, userId, isHibernating);
+        }
+
+        @Override
+        public void setHibernatingGlobally(String packageName, boolean isHibernating) {
+            mService.setHibernatingGlobally(packageName, isHibernating);
+        }
+
+        @Override
+        public boolean isHibernatingGlobally(String packageName) {
+            return mService.isHibernatingGlobally(packageName);
         }
     }
 

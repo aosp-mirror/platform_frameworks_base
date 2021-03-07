@@ -172,7 +172,6 @@ public class NotificationContentView extends FrameLayout {
     private int mContentHeightAtAnimationStart = UNDEFINED;
     private boolean mFocusOnVisibilityChange;
     private boolean mHeadsUpAnimatingAway;
-    private boolean mShelfIconVisible;
     private int mClipBottomAmount;
     private boolean mIsLowPriority;
     private boolean mIsContentExpandable;
@@ -877,10 +876,12 @@ public class NotificationContentView extends FrameLayout {
 
     public void setBackgroundTintColor(int color) {
         if (mExpandedSmartReplyView != null) {
-            mExpandedSmartReplyView.setBackgroundTintColor(color);
+            boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
+            mExpandedSmartReplyView.setBackgroundTintColor(color, colorized);
         }
         if (mHeadsUpSmartReplyView != null) {
-            mHeadsUpSmartReplyView.setBackgroundTintColor(color);
+            boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
+            mHeadsUpSmartReplyView.setBackgroundTintColor(color, colorized);
         }
     }
 
@@ -1510,7 +1511,9 @@ public class NotificationContentView extends FrameLayout {
             smartReplyView.addPreInflatedButtons(
                     inflatedSmartReplyViewHolder.getSmartSuggestionButtons());
             // Ensure the colors of the smart suggestion buttons are up-to-date.
-            smartReplyView.setBackgroundTintColor(entry.getRow().getCurrentBackgroundTint());
+            int backgroundColor = entry.getRow().getCurrentBackgroundTint();
+            boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
+            smartReplyView.setBackgroundTintColor(backgroundColor, colorized);
             smartReplyContainer.setVisibility(View.VISIBLE);
         }
         return smartReplyView;
@@ -1737,23 +1740,6 @@ public class NotificationContentView extends FrameLayout {
 
     public void setFocusOnVisibilityChange() {
         mFocusOnVisibilityChange = true;
-    }
-
-    public void setShelfIconVisible(boolean iconsVisible) {
-        mShelfIconVisible = iconsVisible;
-        updateIconVisibilities();
-    }
-
-    private void updateIconVisibilities() {
-        if (mContractedWrapper != null) {
-            mContractedWrapper.setShelfIconVisible(mShelfIconVisible);
-        }
-        if (mHeadsUpWrapper != null) {
-            mHeadsUpWrapper.setShelfIconVisible(mShelfIconVisible);
-        }
-        if (mExpandedWrapper != null) {
-            mExpandedWrapper.setShelfIconVisible(mShelfIconVisible);
-        }
     }
 
     @Override

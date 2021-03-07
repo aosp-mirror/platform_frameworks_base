@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Разрешава на приложението да променя колекцията ви от снимки."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"да чете местоположенията от мултимедийната ви колекция"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Разрешава на приложението да чете местоположенията от мултимедийната ви колекция."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Потвърдете, че сте вие"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометричният хардуер не е налице"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Удостоверяването бе анулирано"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Не е разпознато"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Удостоверяването бе анулирано"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Няма зададен ПИН код, фигура или парола"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Грешка при удостоверяването"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Открит е частичен отпечатък. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Отпечатъкът не бе обработен. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Сензорът за отпечатъци е мръсен. Моля, почистете го и опитайте отново."</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Това устройство няма сензор за отпечатъци."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сензорът е временно деактивиран."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Пръст <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Използвайте отпечатъка си, за да продължите"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Лицето не бе разпознато. Опитайте отново."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Позата ви е сходна с предишна. Моля, променете я."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Не завъртайте главата си толкова много."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Не накланяйте главата си толкова много."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Не завъртайте главата си толкова много."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Премахнете всичко, което закрива лицето ви."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Почистете горната част на екрана си, включително черната лента"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Отключването с лице не се поддържа на това устройство."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Сензорът е временно деактивиран."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Икона на лице"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Използване на пряк път"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инвертиране на цветовете"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Коригиране на цветовете"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Намаляване на яркостта"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е включена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е изключена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"За да използвате <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, натиснете двата бутона за силата на звука и ги задръжте за 3 секунди"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Сигнал за фишинг"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Служебен потребителски профил"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Сигналът е изпратен"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Потвърдено"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Разгъване"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Свиване"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"превключване на разгъването"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"Новини и списания"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Карти и навигация"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Производителност"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Хранилище на устройството"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Отстраняване на грешки през USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"час"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"За да продължите, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; се нуждае от достъп до камерата на устройството ви."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Включване"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Поверителност на сензорните данни"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Икона на приложението"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Изображение на търговската марка на приложението"</string>
 </resources>

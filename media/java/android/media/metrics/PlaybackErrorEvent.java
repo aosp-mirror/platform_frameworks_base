@@ -21,6 +21,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -63,11 +64,13 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
             @Nullable String exceptionStack,
             int errorCode,
             int subErrorCode,
-            long timeSinceCreatedMillis) {
+            long timeSinceCreatedMillis,
+            Bundle extras) {
         this.mExceptionStack = exceptionStack;
         this.mErrorCode = errorCode;
         this.mSubErrorCode = subErrorCode;
         this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
+        this.mExtras = extras.deepCopy();
     }
 
     /** @hide */
@@ -135,11 +138,13 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         byte flg = 0;
         if (mExceptionStack != null) flg |= 0x1;
+        if (mExtras != null) flg |= 0x2;
         dest.writeByte(flg);
         if (mExceptionStack != null) dest.writeString(mExceptionStack);
         dest.writeInt(mErrorCode);
         dest.writeInt(mSubErrorCode);
         dest.writeLong(mTimeSinceCreatedMillis);
+        if (mExtras != null) dest.writeBundle(mExtras);
     }
 
     @Override
@@ -154,11 +159,13 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
         int errorCode = in.readInt();
         int subErrorCode = in.readInt();
         long timeSinceCreatedMillis = in.readLong();
+        Bundle extras = (flg & 0x2) == 0 ? null : in.readBundle();
 
         this.mExceptionStack = exceptionStack;
         this.mErrorCode = errorCode;
         this.mSubErrorCode = subErrorCode;
         this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
+        this.mExtras = extras;
     }
 
 
@@ -183,6 +190,7 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
         private int mErrorCode;
         private int mSubErrorCode;
         private long mTimeSinceCreatedMillis = -1;
+        private Bundle mExtras;
 
         /**
          * Creates a new Builder.
@@ -226,6 +234,16 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
             return this;
         }
 
+        /**
+         * Set extras for compatibility.
+         * <p>Should be used by support library only.
+         * @hide
+         */
+        public @NonNull Builder setExtras(@NonNull Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
         /** Builds the instance. */
         public @NonNull PlaybackErrorEvent build() {
 
@@ -241,7 +259,8 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
                     stack,
                     mErrorCode,
                     mSubErrorCode,
-                    mTimeSinceCreatedMillis);
+                    mTimeSinceCreatedMillis,
+                    mExtras);
             return o;
         }
     }

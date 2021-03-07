@@ -136,6 +136,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
     /**
      * SystemService lifecycle for GameService.
+     *
      * @hide
      */
     public static class Lifecycle extends SystemService {
@@ -169,39 +170,69 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
-    private boolean hasPermission(String permission) {
-        return mContext.checkCallingOrSelfPermission(permission)
-                == PackageManager.PERMISSION_GRANTED;
+    private boolean isValidPackageName(String packageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            return pm.getPackageUid(packageName, 0) == Binder.getCallingUid();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    @Override
-    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
-    public @GameMode int getGameMode(String packageName, int userId) {
-        if (!hasPermission(Manifest.permission.MANAGE_GAME_MODE)) {
-            Log.w(TAG, String.format("Caller or self does not have permission.MANAGE_GAME_MODE"));
-            return GameManager.GAME_MODE_UNSUPPORTED;
+    private void checkPermission(String permission) throws SecurityException {
+        if (mContext.checkCallingOrSelfPermission(permission)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Access denied to process: " + Binder.getCallingPid()
+                    + ", must have permission " + permission);
         }
+    }
+
+    private @GameMode int getGameModeFromSettings(String packageName, int userId) {
+        synchronized (mLock) {
+            if (!mSettings.containsKey(userId)) {
+                Log.w(TAG, "User ID '" + userId + "' does not have a Game Mode"
+                        + " selected for package: '" + packageName + "'");
+                return GameManager.GAME_MODE_UNSUPPORTED;
+            }
+
+            return mSettings.get(userId).getGameModeLocked(packageName);
+        }
+    }
+
+    /**
+     * Get the Game Mode for the package name.
+     * Verifies that the calling process is for the matching package UID or has
+     * {@link android.Manifest.permission#MANAGE_GAME_MODE}.
+     */
+    @Override
+    public @GameMode int getGameMode(String packageName, int userId)
+            throws SecurityException {
+        // TODO(b/178860939): Restrict to games only.
 
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, true, "getGameMode",
                 "com.android.server.app.GameManagerService");
 
-        synchronized (mLock) {
-            if (!mSettings.containsKey(userId)) {
-                return GameManager.GAME_MODE_UNSUPPORTED;
-            }
-            GameManagerSettings userSettings = mSettings.get(userId);
-            return userSettings.getGameModeLocked(packageName);
+        if (isValidPackageName(packageName)) {
+            return getGameModeFromSettings(packageName, userId);
         }
+
+        checkPermission(Manifest.permission.MANAGE_GAME_MODE);
+        return getGameModeFromSettings(packageName, userId);
     }
 
+    /**
+     * Sets the Game Mode for the package name.
+     * Verifies that the calling process has {@link android.Manifest.permission#MANAGE_GAME_MODE}.
+     */
     @Override
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
-    public void setGameMode(String packageName, @GameMode int gameMode, int userId) {
-        if (!hasPermission(Manifest.permission.MANAGE_GAME_MODE)) {
-            Log.w(TAG, String.format("Caller or self does not have permission.MANAGE_GAME_MODE"));
-            return;
-        }
+    public void setGameMode(String packageName, @GameMode int gameMode, int userId)
+            throws SecurityException {
+        // TODO(b/178860939): Restrict to games only.
+
+        checkPermission(Manifest.permission.MANAGE_GAME_MODE);
 
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, true, "setGameMode",

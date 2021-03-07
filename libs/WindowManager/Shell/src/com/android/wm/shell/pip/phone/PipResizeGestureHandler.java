@@ -65,6 +65,8 @@ public class PipResizeGestureHandler {
     private static final int PINCH_RESIZE_SNAP_DURATION = 250;
     private static final int PINCH_RESIZE_MAX_ANGLE_ROTATION = 45;
     private static final float PINCH_RESIZE_AUTO_MAX_RATIO = 0.9f;
+    private static final float OVERROTATE_DAMP_FACTOR = 0.4f;
+    private static final float ANGLE_THRESHOLD = 5f;
 
     private final Context mContext;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
@@ -423,26 +425,28 @@ public class PipResizeGestureHandler {
                 float down1X = mDownSecondaryPoint.x;
                 float down1Y = mDownSecondaryPoint.y;
 
+                float angle = 0;
                 if (down0X > focusX && down0Y < focusY && down1X < focusX && down1Y > focusY) {
                     // Top right + Bottom left pinch to zoom.
-                    mAngle = calculateRotationAngle(mLastResizeBounds.centerX(),
+                    angle = calculateRotationAngle(mLastResizeBounds.centerX(),
                             mLastResizeBounds.centerY(), x0, y0, x1, y1, true);
                 } else if (down1X > focusX && down1Y < focusY
                         && down0X < focusX && down0Y > focusY) {
                     // Top right + Bottom left pinch to zoom.
-                    mAngle = calculateRotationAngle(mLastResizeBounds.centerX(),
+                    angle = calculateRotationAngle(mLastResizeBounds.centerX(),
                             mLastResizeBounds.centerY(), x1, y1, x0, y0, true);
                 } else if (down0X < focusX && down0Y < focusY
                         && down1X > focusX && down1Y > focusY) {
                     // Top left + bottom right pinch to zoom.
-                    mAngle = calculateRotationAngle(mLastResizeBounds.centerX(),
+                    angle = calculateRotationAngle(mLastResizeBounds.centerX(),
                             mLastResizeBounds.centerY(), x0, y0, x1, y1, false);
                 } else if (down1X < focusX && down1Y < focusY
                         && down0X > focusX && down0Y > focusY) {
                     // Top left + bottom right pinch to zoom.
-                    mAngle = calculateRotationAngle(mLastResizeBounds.centerX(),
+                    angle = calculateRotationAngle(mLastResizeBounds.centerX(),
                             mLastResizeBounds.centerY(), x1, y1, x0, y0, false);
                 }
+                mAngle = angle;
 
                 mLastResizeBounds.set(PipPinchResizingAlgorithm.pinchResize(x0, y0, x1, y1,
                         mDownPoint.x, mDownPoint.y, mDownSecondaryPoint.x, mDownSecondaryPoint.y,
@@ -477,10 +481,40 @@ public class PipResizeGestureHandler {
         }
 
         // Calculate the percentage difference of [0, 90] compare to the base angle.
-        double diff0 = (Math.max(0, Math.min(angle0, 90)) - baseAngle) / 90;
-        double diff1 = (Math.max(0, Math.min(angle1, 90)) - baseAngle) / 90;
+        double diff0 = (Math.max(-90, Math.min(angle0, 90)) - baseAngle) / 90;
+        double diff1 = (Math.max(-90, Math.min(angle1, 90)) - baseAngle) / 90;
 
-        return (float) (diff0 + diff1) / 2 * PINCH_RESIZE_MAX_ANGLE_ROTATION * (positive ? 1 : -1);
+        final float angle =
+                (float) (diff0 + diff1) / 2 * PINCH_RESIZE_MAX_ANGLE_ROTATION * (positive ? 1 : -1);
+
+        // Remove some degrees so that user doesn't immediately start rotating until a threshold
+        return angle / Math.abs(angle)
+                * Math.max(0, (Math.abs(dampedRotate(angle)) - ANGLE_THRESHOLD));
+    }
+
+    /**
+     * Given the current rotation angle, dampen it so that as it approaches the maximum angle,
+     * dampen it.
+     */
+    private float dampedRotate(float amount) {
+        if (Float.compare(amount, 0) == 0) return 0;
+
+        float f = amount / PINCH_RESIZE_MAX_ANGLE_ROTATION;
+        f = f / (Math.abs(f)) * (overRotateInfluenceCurve(Math.abs(f)));
+
+        // Clamp this factor, f, to -1 < f < 1
+        if (Math.abs(f) >= 1) {
+            f /= Math.abs(f);
+        }
+        return OVERROTATE_DAMP_FACTOR * f * PINCH_RESIZE_MAX_ANGLE_ROTATION;
+    }
+
+    /**
+     * Returns a value that corresponds to y = (f - 1)^3 + 1.
+     */
+    private float overRotateInfluenceCurve(float f) {
+        f -= 1.0f;
+        return f * f * f + 1.0f;
     }
 
     private void onDragCornerResize(MotionEvent ev) {

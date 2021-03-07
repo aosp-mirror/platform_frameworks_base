@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -58,6 +59,10 @@ public final class PlaybackMetrics implements Parcelable {
     /** SS (HTTP Smooth Streaming) stream type. */
     public static final int STREAM_TYPE_SS = 5;
 
+    /** Unknown playback type. */
+    // TODO: change the PLAYBACK_TYPE_ values
+    /** @hide */
+    public static final int PLAYBACK_TYPE_UNKNOWN = 0;
     /** VOD (Video on Demand) playback type. */
     public static final int PLAYBACK_TYPE_VOD = 0;
     /** Live playback type. */
@@ -80,6 +85,10 @@ public final class PlaybackMetrics implements Parcelable {
     /** Clear key DRM type. */
     public static final int DRM_TYPE_CLEARKEY = 6;
 
+    /** Unknown content type. */
+    // TODO: change the CONTENT_TYPE_ values
+    /** @hide */
+    public static final int CONTENT_TYPE_UNKNOWN = 0;
     /** Main contents. */
     public static final int CONTENT_TYPE_MAIN = 0;
     /** Advertisement contents. */
@@ -112,6 +121,7 @@ public final class PlaybackMetrics implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = "PLAYBACK_TYPE_", value = {
+        PLAYBACK_TYPE_UNKNOWN,
         PLAYBACK_TYPE_VOD,
         PLAYBACK_TYPE_LIVE,
         PLAYBACK_TYPE_OTHER
@@ -134,6 +144,7 @@ public final class PlaybackMetrics implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = "CONTENT_TYPE_", value = {
+        CONTENT_TYPE_UNKNOWN,
         CONTENT_TYPE_MAIN,
         CONTENT_TYPE_AD,
         CONTENT_TYPE_OTHER
@@ -158,6 +169,8 @@ public final class PlaybackMetrics implements Parcelable {
     private final long mNetworkBytesRead;
     private final long mLocalBytesRead;
     private final long mNetworkTransferDurationMillis;
+    private final byte[] mDrmSessionId;
+    private final Bundle mExtras;
 
     /**
      * Creates a new PlaybackMetrics.
@@ -179,7 +192,9 @@ public final class PlaybackMetrics implements Parcelable {
             int audioUnderrunCount,
             long networkBytesRead,
             long localBytesRead,
-            long networkTransferDurationMillis) {
+            long networkTransferDurationMillis,
+            byte[] drmSessionId,
+            Bundle extras) {
         this.mMediaDurationMillis = mediaDurationMillis;
         this.mStreamSource = streamSource;
         this.mStreamType = streamType;
@@ -196,6 +211,8 @@ public final class PlaybackMetrics implements Parcelable {
         this.mNetworkBytesRead = networkBytesRead;
         this.mLocalBytesRead = localBytesRead;
         this.mNetworkTransferDurationMillis = networkTransferDurationMillis;
+        this.mDrmSessionId = drmSessionId;
+        this.mExtras = extras.deepCopy();
     }
 
     /**
@@ -321,6 +338,12 @@ public final class PlaybackMetrics implements Parcelable {
         return mNetworkTransferDurationMillis;
     }
 
+    /** @hide */
+    @NonNull
+    public byte[] getDrmSessionId() {
+        return mDrmSessionId;
+    }
+
     @Override
     public String toString() {
         return "PlaybackMetrics { "
@@ -339,6 +362,7 @@ public final class PlaybackMetrics implements Parcelable {
                 + "networkBytesRead = " + mNetworkBytesRead + ", "
                 + "localBytesRead = " + mLocalBytesRead + ", "
                 + "networkTransferDurationMillis = " + mNetworkTransferDurationMillis
+                + "drmSessionId = " + Arrays.toString(mDrmSessionId)
                 + " }";
     }
 
@@ -361,7 +385,8 @@ public final class PlaybackMetrics implements Parcelable {
                 && mAudioUnderrunCount == that.mAudioUnderrunCount
                 && mNetworkBytesRead == that.mNetworkBytesRead
                 && mLocalBytesRead == that.mLocalBytesRead
-                && mNetworkTransferDurationMillis == that.mNetworkTransferDurationMillis;
+                && mNetworkTransferDurationMillis == that.mNetworkTransferDurationMillis
+                && Arrays.equals(mDrmSessionId, that.mDrmSessionId);
     }
 
     @Override
@@ -369,7 +394,7 @@ public final class PlaybackMetrics implements Parcelable {
         return Objects.hash(mMediaDurationMillis, mStreamSource, mStreamType, mPlaybackType,
                 mDrmType, mContentType, mPlayerName, mPlayerVersion, mExperimentIds,
                 mVideoFramesPlayed, mVideoFramesDropped, mAudioUnderrunCount, mNetworkBytesRead,
-                mLocalBytesRead, mNetworkTransferDurationMillis);
+                mLocalBytesRead, mNetworkTransferDurationMillis, mDrmSessionId);
     }
 
     @Override
@@ -377,6 +402,7 @@ public final class PlaybackMetrics implements Parcelable {
         long flg = 0;
         if (mPlayerName != null) flg |= 0x80;
         if (mPlayerVersion != null) flg |= 0x100;
+        if (mExtras != null) flg |= 0x200;
         dest.writeLong(flg);
         dest.writeLong(mMediaDurationMillis);
         dest.writeInt(mStreamSource);
@@ -386,6 +412,7 @@ public final class PlaybackMetrics implements Parcelable {
         dest.writeInt(mContentType);
         if (mPlayerName != null) dest.writeString(mPlayerName);
         if (mPlayerVersion != null) dest.writeString(mPlayerVersion);
+        if (mExtras != null) dest.writeBundle(mExtras);
         dest.writeLongArray(mExperimentIds);
         dest.writeInt(mVideoFramesPlayed);
         dest.writeInt(mVideoFramesDropped);
@@ -393,6 +420,8 @@ public final class PlaybackMetrics implements Parcelable {
         dest.writeLong(mNetworkBytesRead);
         dest.writeLong(mLocalBytesRead);
         dest.writeLong(mNetworkTransferDurationMillis);
+        dest.writeInt(mDrmSessionId.length);
+        dest.writeByteArray(mDrmSessionId);
     }
 
     @Override
@@ -411,6 +440,7 @@ public final class PlaybackMetrics implements Parcelable {
         int contentType = in.readInt();
         String playerName = (flg & 0x80) == 0 ? null : in.readString();
         String playerVersion = (flg & 0x100) == 0 ? null : in.readString();
+        Bundle extras = (flg & 0x200) == 0 ? null : in.readBundle();
         long[] experimentIds = in.createLongArray();
         int videoFramesPlayed = in.readInt();
         int videoFramesDropped = in.readInt();
@@ -418,6 +448,9 @@ public final class PlaybackMetrics implements Parcelable {
         long networkBytesRead = in.readLong();
         long localBytesRead = in.readLong();
         long networkTransferDurationMillis = in.readLong();
+        int drmSessionIdLen = in.readInt();
+        byte[] drmSessionId = new byte[drmSessionIdLen];
+        in.readByteArray(drmSessionId);
 
         this.mMediaDurationMillis = mediaDurationMillis;
         this.mStreamSource = streamSource;
@@ -435,6 +468,8 @@ public final class PlaybackMetrics implements Parcelable {
         this.mNetworkBytesRead = networkBytesRead;
         this.mLocalBytesRead = localBytesRead;
         this.mNetworkTransferDurationMillis = networkTransferDurationMillis;
+        this.mDrmSessionId = drmSessionId;
+        this.mExtras = extras;
     }
 
     public static final @NonNull Parcelable.Creator<PlaybackMetrics> CREATOR =
@@ -470,6 +505,8 @@ public final class PlaybackMetrics implements Parcelable {
         private long mNetworkBytesRead = -1;
         private long mLocalBytesRead = -1;
         private long mNetworkTransferDurationMillis = -1;
+        private byte[] mDrmSessionId = new byte[0];
+        private Bundle mExtras;
 
         /**
          * Creates a new Builder.
@@ -608,6 +645,24 @@ public final class PlaybackMetrics implements Parcelable {
             return this;
         }
 
+        /**
+         * @hide
+         */
+        public @NonNull Builder setDrmSessionId(@NonNull byte[] drmSessionId) {
+            mDrmSessionId = drmSessionId;
+            return this;
+        }
+
+        /**
+         * Set extras for compatibility.
+         * <p>Should be used by support library only.
+         * @hide
+         */
+        public @NonNull Builder setExtras(@NonNull Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull PlaybackMetrics build() {
 
@@ -626,7 +681,9 @@ public final class PlaybackMetrics implements Parcelable {
                     mAudioUnderrunCount,
                     mNetworkBytesRead,
                     mLocalBytesRead,
-                    mNetworkTransferDurationMillis);
+                    mNetworkTransferDurationMillis,
+                    mDrmSessionId,
+                    mExtras);
             return o;
         }
 
