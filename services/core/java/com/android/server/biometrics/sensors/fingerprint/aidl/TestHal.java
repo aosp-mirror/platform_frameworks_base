@@ -45,7 +45,7 @@ public class TestHal extends IFingerprint.Stub {
 
         return new ISession.Stub() {
             @Override
-            public void generateChallenge(int cookie, int timeoutSec) throws RemoteException {
+            public void generateChallenge(int cookie) throws RemoteException {
                 Slog.w(TAG, "generateChallenge, cookie: " + cookie);
                 cb.onChallengeGenerated(0L);
             }
