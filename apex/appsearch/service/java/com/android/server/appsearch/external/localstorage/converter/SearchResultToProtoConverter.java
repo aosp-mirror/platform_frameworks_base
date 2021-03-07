@@ -113,8 +113,6 @@ public class SearchResultToProtoConverter {
         Bundle bundle = new Bundle();
         bundle.putString(SearchResult.MatchInfo.PROPERTY_PATH_FIELD, propertyPath);
         bundle.putInt(
-                SearchResult.MatchInfo.VALUES_INDEX_FIELD, snippetMatchProto.getValuesIndex());
-        bundle.putInt(
                 SearchResult.MatchInfo.EXACT_MATCH_POSITION_LOWER_FIELD,
                 snippetMatchProto.getExactMatchPosition());
         bundle.putInt(

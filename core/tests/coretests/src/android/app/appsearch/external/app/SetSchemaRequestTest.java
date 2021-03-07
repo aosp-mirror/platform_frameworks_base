@@ -42,13 +42,13 @@ public class SetSchemaRequestTest {
     }
 
     @Test
-    public void testInvalidSchemaReferences_fromSystemUiVisibility() {
+    public void testInvalidSchemaReferences_fromDisplayedBySystem() {
         IllegalArgumentException expected =
                 expectThrows(
                         IllegalArgumentException.class,
                         () ->
                                 new SetSchemaRequest.Builder()
-                                        .setSchemaTypeVisibilityForSystemUi("InvalidSchema", false)
+                                        .setSchemaTypeDisplayedBySystem("InvalidSchema", false)
                                         .build());
         assertThat(expected).hasMessageThat().contains("referenced, but were not added");
     }
@@ -71,30 +71,30 @@ public class SetSchemaRequestTest {
     }
 
     @Test
-    public void testSchemaTypeVisibilityForSystemUi_visible() {
+    public void testSetSchemaTypeDisplayedBySystem_displayed() {
         AppSearchSchema schema = new AppSearchSchema.Builder("Schema").build();
 
-        // By default, the schema is visible.
+        // By default, the schema is displayed.
         SetSchemaRequest request = new SetSchemaRequest.Builder().addSchemas(schema).build();
-        assertThat(request.getSchemasNotVisibleToSystemUi()).isEmpty();
+        assertThat(request.getSchemasNotDisplayedBySystem()).isEmpty();
 
         request =
                 new SetSchemaRequest.Builder()
                         .addSchemas(schema)
-                        .setSchemaTypeVisibilityForSystemUi("Schema", true)
+                        .setSchemaTypeDisplayedBySystem("Schema", true)
                         .build();
-        assertThat(request.getSchemasNotVisibleToSystemUi()).isEmpty();
+        assertThat(request.getSchemasNotDisplayedBySystem()).isEmpty();
     }
 
     @Test
-    public void testSchemaTypeVisibilityForSystemUi_notVisible() {
+    public void testSetSchemaTypeDisplayedBySystem_notDisplayed() {
         AppSearchSchema schema = new AppSearchSchema.Builder("Schema").build();
         SetSchemaRequest request =
                 new SetSchemaRequest.Builder()
                         .addSchemas(schema)
-                        .setSchemaTypeVisibilityForSystemUi("Schema", false)
+                        .setSchemaTypeDisplayedBySystem("Schema", false)
                         .build();
-        assertThat(request.getSchemasNotVisibleToSystemUi()).containsExactly("Schema");
+        assertThat(request.getSchemasNotDisplayedBySystem()).containsExactly("Schema");
     }
 
     @Test

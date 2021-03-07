@@ -34,8 +34,8 @@ public interface GlobalSearchSessionShim extends Closeable {
      * SetSchemaRequest.Builder#setDocumentClassVisibilityForPackage} when building a schema.
      *
      * <p>Document access can also be granted to system UIs by specifying {@link
-     * SetSchemaRequest.Builder#setSchemaTypeVisibilityForSystemUi}, or {@link
-     * SetSchemaRequest.Builder#setDocumentClassVisibilityForSystemUi} when building a schema.
+     * SetSchemaRequest.Builder#setSchemaTypeDisplayedBySystem}, or {@link
+     * SetSchemaRequest.Builder#setDocumentClassDisplayedBySystem} when building a schema.
      *
      * <p>See {@link AppSearchSessionShim#search} for a detailed explanation on forming a query
      * string.
