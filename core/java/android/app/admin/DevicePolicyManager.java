@@ -6438,6 +6438,74 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device or profile owner, or delegated certificate chooser (an app that has been
+     * delegated the {@link #DELEGATION_CERT_SELECTION} privilege), to allow using a KeyChain key
+     * pair for authentication to Wifi networks. The key can then be used in configurations passed
+     * to {@link android.net.wifi.WifiManager#addNetwork}.
+     *
+     * @param alias The alias of the key pair.
+     * @return {@code true} if the operation was set successfully, {@code false} otherwise.
+     *
+     * @throws SecurityException if the caller is not a device owner, a profile owner or
+     *         delegated certificate chooser.
+     * @see #revokeKeyPairFromWifiAuth
+     */
+    public boolean grantKeyPairToWifiAuth(@NonNull String alias) {
+        throwIfParentInstance("grantKeyPairToWifiAuth");
+        try {
+            return mService.setKeyGrantToWifiAuth(mContext.getPackageName(), alias, true);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
+     * Called by a device or profile owner, or delegated certificate chooser (an app that has been
+     * delegated the {@link #DELEGATION_CERT_SELECTION} privilege), to deny using a KeyChain key
+     * pair for authentication to Wifi networks. Configured networks using this key won't be able to
+     * authenticate.
+     *
+     * @param alias The alias of the key pair.
+     * @return {@code true} if the operation was set successfully, {@code false} otherwise.
+     *
+     * @throws SecurityException if the caller is not a device owner, a profile owner or
+     *         delegated certificate chooser.
+     * @see #grantKeyPairToWifiAuth
+     */
+    public boolean revokeKeyPairFromWifiAuth(@NonNull String alias) {
+        throwIfParentInstance("revokeKeyPairFromWifiAuth");
+        try {
+            return mService.setKeyGrantToWifiAuth(mContext.getPackageName(), alias, false);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
+     * Called by a device or profile owner, or delegated certificate chooser (an app that has been
+     * delegated the {@link #DELEGATION_CERT_SELECTION} privilege), to query whether a KeyChain key
+     * pair can be used for authentication to Wifi networks.
+     *
+     * @param alias The alias of the key pair.
+     * @return {@code true} if the key pair can be used, {@code false} otherwise.
+     *
+     * @throws SecurityException if the caller is not a device owner, a profile owner or
+     *         delegated certificate chooser.
+     * @see #grantKeyPairToWifiAuth
+     */
+    public boolean isKeyPairGrantedToWifiAuth(@NonNull String alias) {
+        throwIfParentInstance("isKeyPairGrantedToWifiAuth");
+        try {
+            return mService.isKeyPairGrantedToWifiAuth(mContext.getPackageName(), alias);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
      * Returns {@code true} if the device supports attestation of device identifiers in addition
      * to key attestation. See
      * {@link #generateKeyPair(ComponentName, String, KeyGenParameterSpec, int)}
