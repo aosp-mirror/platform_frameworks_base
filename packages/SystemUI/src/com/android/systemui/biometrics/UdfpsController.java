@@ -28,11 +28,13 @@ import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.VelocityTracker;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -66,6 +68,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     private static final String TAG = "UdfpsController";
     private static final long AOD_INTERRUPT_TIMEOUT_MILLIS = 1000;
 
+    // Minimum required delay between consecutive touch logs in milliseconds.
+    private static final long MIN_TOUCH_LOG_INTERVAL = 50;
+
     private final Context mContext;
     private final FingerprintManager mFingerprintManager;
     @NonNull private final LayoutInflater mInflater;
@@ -77,6 +82,13 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
     private final WindowManager.LayoutParams mCoreLayoutParams;
+
+    // Tracks the velocity of a touch to help filter out the touches that move too fast.
+    @Nullable private VelocityTracker mVelocityTracker;
+    // The ID of the pointer for which ACTION_DOWN has occurred. -1 means no pointer is active.
+    private int mActivePointerId;
+    // The timestamp of the most recent touch log.
+    private long mTouchLogTime;
 
     @Nullable private UdfpsView mView;
     // Indicates whether the overlay has been requested.
@@ -136,46 +148,98 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         }
     }
 
-    @VisibleForTesting
-    final StatusBar.ExpansionChangedListener mStatusBarExpansionListener =
+    @VisibleForTesting final StatusBar.ExpansionChangedListener mStatusBarExpansionListener =
             (expansion, expanded) -> mView.onExpansionChanged(expansion, expanded);
 
-    @VisibleForTesting
-    final StatusBarStateController.StateListener mStatusBarStateListener =
+    @VisibleForTesting final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onStateChanged(int newState) {
-                        mView.onStateChanged(newState);
+                    mView.onStateChanged(newState);
                 }
-    };
+            };
+
+    private static float computePointerSpeed(@NonNull VelocityTracker tracker, int pointerId) {
+        final float vx = tracker.getXVelocity(pointerId);
+        final float vy = tracker.getYVelocity(pointerId);
+        return (float) Math.sqrt(Math.pow(vx, 2.0) + Math.pow(vy, 2.0));
+    }
 
     @SuppressLint("ClickableViewAccessibility")
-    private final UdfpsView.OnTouchListener mOnTouchListener = (v, event) -> {
-        UdfpsView view = (UdfpsView) v;
-        final boolean isFingerDown = view.isIlluminationRequested();
-        switch (event.getAction()) {
+    private final UdfpsView.OnTouchListener mOnTouchListener = (view, event) -> {
+        UdfpsView udfpsView = (UdfpsView) view;
+        final boolean isFingerDown = udfpsView.isIlluminationRequested();
+        boolean handled = false;
+        switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE:
-                final boolean isValidTouch = view.isValidTouch(event.getX(), event.getY(),
-                        event.getPressure());
-                if (!isFingerDown && isValidTouch) {
-                    onFingerDown((int) event.getX(), (int) event.getY(), event.getTouchMinor(),
-                            event.getTouchMajor());
-                } else if (isFingerDown && !isValidTouch) {
-                    onFingerUp();
+                // To simplify the lifecycle of the velocity tracker, make sure it's never null
+                // after ACTION_DOWN, and always null after ACTION_CANCEL or ACTION_UP.
+                if (mVelocityTracker == null) {
+                    mVelocityTracker = VelocityTracker.obtain();
+                } else {
+                    // ACTION_UP or ACTION_CANCEL is not guaranteed to be called before a new
+                    // ACTION_DOWN, in that case we should just reuse the old instance.
+                    mVelocityTracker.clear();
                 }
-                return true;
+                // TODO: move isWithinSensorArea to UdfpsController.
+                if (udfpsView.isWithinSensorArea(event.getX(), event.getY())) {
+                    // The pointer that causes ACTION_DOWN is always at index 0.
+                    // We need to persist its ID to track it during ACTION_MOVE that could include
+                    // data for many other pointers because of multi-touch support.
+                    mActivePointerId = event.getPointerId(0);
+                    mVelocityTracker.addMovement(event);
+                    handled = true;
+                }
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                final int idx = event.findPointerIndex(mActivePointerId);
+                if (idx == event.getActionIndex()) {
+                    final float x = event.getX(idx);
+                    final float y = event.getY(idx);
+                    if (udfpsView.isWithinSensorArea(x, y)) {
+                        mVelocityTracker.addMovement(event);
+                        // Compute pointer velocity in pixels per second.
+                        mVelocityTracker.computeCurrentVelocity(1000);
+                        // Compute pointer speed from X and Y velocities.
+                        final float v = computePointerSpeed(mVelocityTracker, mActivePointerId);
+                        final float minor = event.getTouchMinor(idx);
+                        final float major = event.getTouchMajor(idx);
+                        final String touchInfo = String.format("minor: %.1f, major: %.1f, v: %.1f",
+                                minor, major, v);
+                        final long sinceLastLog = SystemClock.elapsedRealtime() - mTouchLogTime;
+                        if (!isFingerDown) {
+                            onFingerDown((int) x, (int) y, minor, major);
+                            Log.v(TAG, "onTouch | finger down: " + touchInfo);
+                            mTouchLogTime = SystemClock.elapsedRealtime();
+                            handled = true;
+                        } else if (sinceLastLog >= MIN_TOUCH_LOG_INTERVAL) {
+                            Log.v(TAG, "onTouch | finger move: " + touchInfo);
+                            mTouchLogTime = SystemClock.elapsedRealtime();
+                        }
+                    } else if (isFingerDown) {
+                        Log.v(TAG, "onTouch | finger outside");
+                        onFingerUp();
+                    }
+                }
+                break;
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
                 if (isFingerDown) {
+                    Log.v(TAG, "onTouch | finger up");
                     onFingerUp();
                 }
-                return true;
+                break;
 
             default:
-                return false;
+                // Do nothing.
         }
+        return handled;
     };
 
     @Inject

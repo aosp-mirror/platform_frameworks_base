@@ -176,7 +176,6 @@ public final class NotificationEntry extends ListEntry {
     private int mBucket = BUCKET_ALERTING;
     @Nullable private Long mPendingAnimationDuration;
     private boolean mIsMarkedForUserTriggeredMovement;
-    private boolean mShelfIconVisible;
     private boolean mIsAlerting;
 
     public boolean mRemoteEditImeVisible;
@@ -417,7 +416,6 @@ public final class NotificationEntry extends ListEntry {
     //TODO: This will go away when we have a way to bind an entry to a row
     public void setRow(ExpandableNotificationRow row) {
         this.row = row;
-        updateShelfIconVisibility();
     }
 
     public ExpandableNotificationRowController getRowController() {
@@ -936,19 +934,6 @@ public final class NotificationEntry extends ListEntry {
     /** Whether or not this entry has been marked for a user-triggered movement. */
     public boolean isMarkedForUserTriggeredMovement() {
         return mIsMarkedForUserTriggeredMovement;
-    }
-
-    /** Whether or not the icon for this notification is visible in the shelf. */
-    public void setShelfIconVisible(boolean shelfIconVisible) {
-        if (row == null) return;
-        mShelfIconVisible = shelfIconVisible;
-        updateShelfIconVisibility();
-    }
-
-    private void updateShelfIconVisibility() {
-        if (row != null) {
-            row.setShelfIconVisible(mShelfIconVisible);
-        }
     }
 
     /**

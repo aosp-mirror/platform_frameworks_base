@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"உங்களின் படத் தொகுப்பை மாற்ற ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"மீடியா தொகுப்பிலிருந்து இடங்களை அறிதல்"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"உங்களின் மீடியா தொகுப்பிலிருந்து இடங்களை அறிந்துகொள்ள ஆப்ஸை அனுமதிக்கும்."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"நீங்கள்தான் என உறுதிசெய்க"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"பயோமெட்ரிக் வன்பொருள் இல்லை"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"அங்கீகரிப்பு ரத்தானது"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"அடையாளங்காணபடவில்லை"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"அங்கீகரிப்பு ரத்தானது"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"பின்னோ, பேட்டர்னோ, கடவுச்சொல்லோ அமைக்கப்படவில்லை"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"அங்கீகரிப்பதில் பிழை"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"கைரேகையை ஓரளவுதான் கண்டறிய முடிந்தது. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"கைரேகையைச் செயலாக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"கைரேகை சென்சாரில் தூசி உள்ளது. சுத்தம் செய்து, முயலவும்."</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"இந்தச் சாதனத்தில் கைரேகை சென்சார் இல்லை."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"சென்சார் தற்காலிகமாக முடக்கப்பட்டுள்ளது."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"கைரேகை <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"தொடர்வதற்கு கைரேகையைப் பயன்படுத்துங்கள்"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"முகத்தைக் கண்டறிய இயலவில்லை. மீண்டும் முயலவும்."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"மீண்டும் அதே போஸ் தருகிறீர்கள், வேறு முயலுங்கள்."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"தலையை லேசாகத் திருப்பவும்."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"உங்கள் தலையை லேசாகச் சாய்க்கவும்."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"உங்கள் தலையைச் சற்றுத் திருப்பவும்."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"உங்கள் முகத்தை மறைக்கும் அனைத்தையும் நீக்குக."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"திரையையும் அதிலுள்ள கருப்புப் பட்டியையும் சுத்தம் செய்யவும்"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"இந்த சாதனத்தில் ’முகம் காட்டித் திறத்தல்’ ஆதரிக்கப்படவில்லை."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"சென்சார் தற்காலிகமாக முடக்கப்பட்டுள்ளது."</string>
     <string name="face_name_template" msgid="3877037340223318119">"முகம் <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"முக ஐகான்"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ஷார்ட்கட்டைப் பயன்படுத்து"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"கலர் இன்வெர்ஷன்"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"வண்ணத் திருத்தம்"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"ஒளிர்வைக் குறைத்தல்"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆன் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆஃப் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐப் பயன்படுத்த 3 விநாடிகளுக்கு இரண்டு ஒலியளவு பட்டன்களையும் அழுத்திப் பிடிக்கவும்"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ஃபிஷிங் எச்சரிக்கை"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"பணிக் கணக்கு"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"விழிப்பூட்டல் ஐகான்"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"சரிபார்க்கப்பட்டது"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"விரிவாக்கும்"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"சுருக்கும்"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"விரிவாக்கத்தை நிலைமாற்றும்"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"செய்திகளும் பத்திரிகைகளும்"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"வரைபடங்களும் வழிசெலுத்தலும்"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"உற்பத்தித்திறன்"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"சாதனச் சேமிப்பகம்"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB பிழைதிருத்தம்"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"மணி"</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"தொடர, உங்கள் சாதனத்தின் கேமராவை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ஆப்ஸுக்கு அனுமதி வேண்டும்."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ஆன் செய்"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"சென்சார் தனியுரிமை"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ஆப்ஸ் ஐகான்"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ஆப்ஸ் பிராண்டிங் இமேஜ்"</string>
 </resources>

@@ -527,7 +527,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         handleCustomTransformHeight(view, expandingAnimated, iconState);
 
         float fullTransitionAmount;
-        float transitionAmount;
+        float iconTransitionAmount;
         float contentTransformationAmount;
         float shelfStart = getTranslationY();
         boolean fullyInOrOut = true;
@@ -549,18 +549,19 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 fullTransitionAmount = 1.0f - interpolatedAmount;
 
                 if (isLastChild) {
-                    // If it's the last child we should use all of the notification to transform
-                    // instead of just to the icon, since that can be quite low.
-                    transitionAmount = (shelfStart - viewStart) / transformDistance;
+                    // Reduce icon transform distance to completely fade in shelf icon
+                    // by the time the notification icon fades out, and vice versa
+                    iconTransitionAmount = (shelfStart - viewStart)
+                            / (iconTransformStart - viewStart);
                 } else {
-                    transitionAmount = (shelfStart - iconTransformStart) / transformDistance;
+                    iconTransitionAmount = (shelfStart - iconTransformStart) / transformDistance;
                 }
-                transitionAmount = MathUtils.constrain(transitionAmount, 0.0f, 1.0f);
-                transitionAmount = 1.0f - transitionAmount;
+                iconTransitionAmount = MathUtils.constrain(iconTransitionAmount, 0.0f, 1.0f);
+                iconTransitionAmount = 1.0f - iconTransitionAmount;
                 fullyInOrOut = false;
             } else {
                 fullTransitionAmount = 1.0f;
-                transitionAmount = 1.0f;
+                iconTransitionAmount = 1.0f;
             }
 
             // Transforming the content
@@ -569,7 +570,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             contentTransformationAmount = 1.0f - contentTransformationAmount;
         } else {
             fullTransitionAmount = 0.0f;
-            transitionAmount = 0.0f;
+            iconTransitionAmount = 0.0f;
             contentTransformationAmount = 0.0f;
         }
         if (iconState != null && fullyInOrOut && !expandingAnimated && iconState.isLastExpandIcon) {
@@ -585,7 +586,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         view.setContentTransformationAmount(contentTransformationAmount, isLastChild);
 
         // Update the positioning of the icon
-        updateIconPositioning(view, transitionAmount, fullTransitionAmount,
+        updateIconPositioning(view, iconTransitionAmount, fullTransitionAmount,
                 transformDistance, scrolling, scrollingFast, expandingAnimated, isLastChild);
 
         return fullTransitionAmount;
@@ -679,8 +680,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 || iconState.useLinearTransitionAmount) {
             transitionAmount = iconTransitionAmount;
         } else {
-            // We take the clamped position instead
-            transitionAmount = clampedAmount;
+            transitionAmount = iconTransitionAmount;
             iconState.needsCannedAnimation = iconState.clampedAppearAmount != clampedAmount
                     && !mNoAnimationsInThisFrame;
         }
@@ -689,8 +689,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 ? fullTransitionAmount
                 : transitionAmount;
         iconState.clampedAppearAmount = clampedAmount;
-        setIconTransformationAmount(view, transitionAmount, iconTransformDistance,
-                clampedAmount != transitionAmount, isLastChild);
+        setIconTransformationAmount(view, transitionAmount, isLastChild);
     }
 
     private boolean isTargetClipped(ExpandableView view) {
@@ -708,7 +707,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     private void setIconTransformationAmount(ExpandableView view,
-            float transitionAmount, float iconTransformDistance, boolean usingLinearInterpolation,
+            float transitionAmount,
             boolean isLastChild) {
         if (!(view instanceof ExpandableNotificationRow)) {
             return;
@@ -720,42 +719,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
         View rowIcon = row.getShelfTransformationTarget();
 
         // Let's resolve the relative positions of the icons
-        float notificationIconSize = 0.0f;
-        int iconTopPadding;
         int iconStartPadding;
         if (rowIcon != null) {
-            iconTopPadding = row.getRelativeTopPadding(rowIcon);
             iconStartPadding = row.getRelativeStartPadding(rowIcon);
-            notificationIconSize = rowIcon.getHeight();
         } else {
-            iconTopPadding = mIconAppearTopPadding;
             iconStartPadding = 0;
         }
-
-        float shelfIconSize = mAmbientState.isFullyHidden() ? mHiddenShelfIconSize : mIconSize;
-        shelfIconSize = shelfIconSize * icon.getIconScale();
-
-        // Get the icon correctly positioned in Y
-        float notificationIconPositionY = row.getTranslationY() + row.getContentTranslation();
-        float targetYPosition = 0;
         boolean stayingInShelf = row.isInShelf() && !row.isTransformingIntoShelf();
-        if (usingLinearInterpolation && !stayingInShelf) {
-            // If we interpolate from the notification position, this might lead to a slightly
-            // odd interpolation, since the notification position changes as well.
-            // Let's instead interpolate directly to the top left of the notification
-            targetYPosition =  NotificationUtils.interpolate(
-                    Math.min(notificationIconPositionY + mIconAppearTopPadding
-                            - getTranslationY(), 0),
-                    0,
-                    transitionAmount);
-        }
-        notificationIconPositionY += iconTopPadding;
-        float shelfIconPositionY = getTranslationY() + icon.getTop();
-        shelfIconPositionY += (icon.getHeight() - shelfIconSize) / 2.0f;
-        float iconYTranslation = NotificationUtils.interpolate(
-                notificationIconPositionY - shelfIconPositionY,
-                targetYPosition,
-                transitionAmount);
 
         // Get the icon correctly positioned in X
         // Even in RTL it's the left, since we're inverting the location in post
@@ -767,28 +737,19 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 transitionAmount);
 
         // Let's handle the case that there's no Icon
-        float alpha = 1.0f;
         boolean noIcon = !row.isShowingIcon();
         if (noIcon) {
             // The view currently doesn't have an icon, lets transform it in!
-            alpha = transitionAmount;
-            notificationIconSize = shelfIconSize / 2.0f;
             iconXTranslation = mShelfIcons.getActualPaddingStart();
         }
-        // The notification size is different from the size in the shelf / statusbar
-        float newSize = NotificationUtils.interpolate(notificationIconSize, shelfIconSize,
-                transitionAmount);
         if (iconState != null) {
-            iconState.scaleX = newSize / shelfIconSize;
-            iconState.scaleY = iconState.scaleX;
             iconState.hidden = transitionAmount == 0.0f && !iconState.isAnimating(icon);
             boolean isAppearing = row.isDrawingAppearAnimation() && !row.isInShelf();
             if (isAppearing) {
                 iconState.hidden = true;
                 iconState.iconAppearAmount = 0.0f;
             }
-            iconState.alpha = alpha;
-            iconState.yTranslation = iconYTranslation;
+            iconState.alpha = transitionAmount;
             iconState.xTranslation = iconXTranslation;
             if (stayingInShelf) {
                 iconState.iconAppearAmount = 1.0f;

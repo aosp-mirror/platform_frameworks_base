@@ -550,13 +550,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‎‎‎‏‏‎‎‎‏‎‎‎‏‎‏‎‏‎‎‎‎‎‏‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‎‏‏‎‎‏‏‎‎‏‎‏‎Allows the app to modify your photo collection.‎‏‎‎‏‎"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‎‎‎‎‎‏‎‏‏‏‏‏‎‎‏‏‎‏‏‏‎‏‏‎‎‎‏‏‏‎‏‎‏‏‏‎‏‎‏‏‎‎‏‎‎‏‎‏‏‎‎‏‎‎read locations from your media collection‎‏‎‎‏‎"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‏‎‎‏‏‎‎‎‎‏‏‎‏‏‎‏‎‎‏‏‏‎‏‎‎‏‏‏‎‎‎‏‏‎‎‎‏‎‎‎‎‏‎‏‎‎‎‎‎‎‏‏‎‏‎‎Allows the app to read locations from your media collection.‎‏‎‎‏‎"</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‎‏‎‏‎‏‏‏‎‏‎‎‎‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‎‏‎‎‏‏‏‎‏‎‎‏‎‏‎‏‏‏‏‏‎‎‏‏‏‎‎‏‎Use biometrics‎‏‎‎‏‎"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‏‏‏‎‎‏‏‎‎‎‏‏‏‎‎‎‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‏‏‎‏‏‎‏‎‎‏‎‏‎‏‎‎‏‎‏‏‎‎‎‎Use biometrics or screen lock‎‏‎‎‏‎"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‎‏‏‎‎‎‎‏‏‎‏‏‏‏‏‏‎‏‎‎‏‎‏‎‏‎‎‎‏‎‎‎‏‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‎‏‎‎‏‎‎‏‎‎Verify it’s you‎‏‎‎‏‎"</string>
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‏‏‏‎‎‎‏‎‎‎‎‎‎‎‎‎‎‎‎‏‎‎‎‏‎‏‏‎‏‏‎‏‎‏‏‎‎‏‎‏‎‏‏‎‏‏‎‏‏‎‎‎‎Use your biometric to continue‎‏‎‎‏‎"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‏‎‎‏‏‏‎‎‏‎‏‏‏‏‏‎‎‎‏‎‏‎‎‏‏‏‎‏‎‏‎‏‎‏‏‏‎‏‎‏‏‏‎‎‏‎‏‎‎‎‏‏‎‎‎‎‎Biometric hardware unavailable‎‏‎‎‏‎"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‎‏‏‏‏‏‎‎‏‎‏‏‎‎‎‏‎‏‏‏‏‎‎‎‎‏‏‎‎‎‏‏‎‎‎‎‎‏‏‎‎‏‎‎‏‎‎‎‏‎‎Authentication canceled‎‏‎‎‏‎"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‏‎‏‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‏‏‎‏‎‏‏‎‎‏‎‎‏‏‎‏‏‎‎‎‎‏‏‎‏‎‎‎‏‎‏‏‏‎‎‎‎‎Not recognized‎‏‎‎‏‎"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‏‎‎‎‏‏‎‎‏‏‎‎‏‏‏‎‎‏‏‎‎‎‏‎‎‎‏‏‎‎‏‏‏‎‏‏‎‏‎‏‎‎‎‏‎‏‎‎‎‎‏‎‎Authentication canceled‎‏‎‎‏‎"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‏‏‏‎‏‏‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‏‎‏‎‎‎‏‎‏‎‎‎No pin, pattern, or password set‎‏‎‎‏‎"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‎‎‏‏‎‏‏‏‎‏‏‏‎‎‏‎‏‎‎‏‏‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‏‎‎‎‎‏‏‎‏‎‎‎‏‏‏‎Error authenticating‎‏‎‎‏‎"</string>
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‎‎‎‏‏‏‎‏‏‏‏‎‏‏‏‏‎‎‏‏‏‎‏‏‏‏‏‏‎‏‏‏‏‏‎‎‎‎‎‏‎‏‏‏‏‎‏‏‏‎‏‏‎‎‎Use screen lock‎‏‎‎‏‎"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‏‎‏‎‎‏‏‎‏‏‏‎‎‏‏‎‏‏‎‎‎‎‎‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‎‏‎‎‎‎‏‎‎‎‏‏‎Enter your device credential to continue‎‏‎‎‏‎"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‎‏‎‎‎‏‏‎‏‏‎‎‎‎‎‎‏‏‏‎‎‎‏‏‎‎‏‏‎‎‏‏‏‎‎‏‎‏‎‏‎‎‎‎‎‎‏‏‏‎‎Partial fingerprint detected. Please try again.‎‏‎‎‏‎"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‏‏‎‎‎‎‎‎‎‏‎‎‏‏‏‎‎‏‎‏‎‏‏‎‎‎‏‎‎‏‏‎Couldn\'t process fingerprint. Please try again.‎‏‎‎‏‎"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‏‎‎‏‏‏‎‏‎‎‎‏‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‏‏‎‏‎‎‏‏‎‏‎‏‏‎‎‎‏‏‏‏‎‏‎‎‏‏‎‎Fingerprint sensor is dirty. Please clean and try again.‎‏‎‎‏‎"</string>
@@ -579,6 +584,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‎‎‎‏‎‎‎‏‎‏‏‎‏‏‏‏‎‎‎‏‎‎‎‏‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‎‎‎‎‎‎‎‏‏‎‎‏‎‏‏‎‎This device does not have a fingerprint sensor.‎‏‎‎‏‎"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‎‏‏‏‎‎‎‏‏‎‎‏‎‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎‏‏‎‎‎‏‎‎‎‏‏‏‎‎‎‎‏‎‏‏‏‎‎‎‏‎Sensor temporarily disabled.‎‏‎‎‏‎"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‏‏‎‎‏‎‏‎‏‎‎‏‎‎‏‎‏‏‎‏‎‏‎‎‏‎‎‏‎‏‏‏‏‏‎‎‏‎‎‎‏‏‏‏‏‏‎‎‏‎‎Finger ‎‏‎‎‏‏‎<xliff:g id="FINGERID">%d</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‎‎‎‎‏‎‎‎‎‏‏‎‏‎‏‏‎‏‎‏‏‎‎‎‏‏‎‎‎‏‏‏‎‎‏‏‏‏‏‎‏‎‎‏‏‎‎‎‏‎‏‎‎‏‎‎‎Use fingerprint‎‏‎‎‏‎"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‏‎‎‎‏‎‏‏‎‎‎‏‎‎‏‎‏‏‏‎‎‏‏‏‏‏‎‎‎‎‎‎‎‎‎‏‎‏‏‏‏‏‎‎‏‏‏‎‏‎‏‏‎Use fingerprint or screen lock‎‏‎‎‏‎"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‏‎‏‏‏‏‏‏‎‏‏‏‏‎‏‏‎‏‎‏‎‏‎‏‎‏‏‏‏‎‎‏‎‎‎‏‎‏‏‎‎‏‎‎‎‏‏‎‎‎‎‎‏‎Use your fingerprint to continue‎‏‎‎‏‎"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -624,6 +631,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‏‎‏‏‎‏‏‏‎‎‎‏‎‎‏‏‏‎‏‏‏‎‏‏‎‏‎‏‎‏‏‏‎‏‎‏‏‏‎‎‏‎‎‏‏‏‏‎‎‎‏‏‎‎‎‎Face unlock is not supported on this device.‎‏‎‎‏‎"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‏‏‎‎‎‏‏‎‏‎‎‎‏‎‏‏‎‎‎‎‎‏‏‏‎‏‏‏‎‎‎‎‏‎‎‎‎‎‎‏‎‎‎‏‏‎‎‏‎‏‎‎‎‏‎Sensor temporarily disabled.‎‏‎‎‏‎"</string>
     <string name="face_name_template" msgid="3877037340223318119">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‎‏‏‏‎‎‎‎‎‎‎‎‎‏‏‏‎‏‎‏‏‎‏‏‎‎‏‎‎‏‏‏‎‏‏‏‏‏‎‏‎‏‎‎‎‎‏‏‎‎‏‏‏‎Face ‎‏‎‎‏‏‎<xliff:g id="FACEID">%d</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="face_app_setting_name" msgid="8130135875458467243">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‎‏‏‏‎‎‎‎‎‎‏‎‏‏‏‎‎‏‎‎‎‎‏‎‏‏‎‏‎‏‎‏‏‎Use face unlock‎‏‎‎‏‎"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‎‏‎‏‏‏‎‎‏‎‎‏‎‏‎‏‏‏‏‎‎‏‎‏‏‎‎‎‎‏‎‎‏‏‎‎‏‎‎Use face or screen lock‎‏‎‎‏‎"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‎‎‏‏‎‎‏‏‎‏‏‎‎‎‏‎‎‏‏‏‏‎‏‎‎‏‏‎‎‎‏‏‎‏‎‎‎‎‏‎‎‏‏‏‎‎‎‏‏‏‏‏‎‎‎‎Use face unlock to continue‎‏‎‎‏‎"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‎‎‏‏‏‎‏‎‎‎‎‎‏‏‏‏‎‏‏‎‏‎‎‎‏‏‎‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‏‏‎‎‏‎‏‏‏‏‏‏‎‎‎‎Face icon‎‏‎‎‏‎"</string>
@@ -1874,6 +1884,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‎‏‏‎‏‏‎‏‏‏‏‎‏‏‎‎‏‎‎‎‏‏‏‎‏‏‎‎‏‏‏‏‎‎‎‎‎‏‎‏‎‎‏‎‏‏‎‏‎‎‎‎‎‎‏‏‎‎Phishing alert‎‏‎‎‏‎"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‎‎‎‎‎‎‎‏‏‎‏‏‏‏‎‏‎‏‎‎‎‏‏‏‎‎‎‎‏‎‎‏‏‎‏‏‎‏‏‏‎‏‎‎‏‎‎‎‏‏‎‎‏‏‏‎Work profile‎‏‎‎‏‎"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‏‎‏‎‎‏‎‎‏‎‎‎‎‏‎‏‎‏‎‏‎‎‏‏‎‏‎‏‎‎‎‎‏‎‎‏‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‎Alerted‎‏‎‎‏‎"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‎‏‏‎‏‎‏‎‎‎‏‏‎‏‏‎‏‎‏‏‏‎‎‏‎‎‏‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‏‏‎‏‎‏‏‏‏‏‎Verified‎‏‎‎‏‎"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‎‎‎‎‎‏‏‏‏‏‎‎‎‏‎‎‎‎‏‏‎‎‏‏‎‎‏‎‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‎‎‏‏‏‎‎‏‏‏‎Expand‎‏‎‎‏‎"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‎‎‏‎‎‎‏‎‎‏‎‎‎‏‎‏‎‏‏‏‏‎‎‏‎‎‎‏‎‎‏‏‏‏‎‏‎‎‎‏‏‎‎‎‎‏‎Collapse‎‏‎‎‏‎"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‎‎‎‎‎‏‏‏‎‏‏‏‎‏‏‏‏‏‎‎‎‎‎‏‏‎‎‎‎‎‏‏‎‎‎‎‎‏‏‏‏‏‎‎‎‏‎‎‎‏‎‎‎‎‏‏‎toggle expansion‎‏‎‎‏‎"</string>
@@ -1945,6 +1956,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‏‎‎‎‏‏‎‎‏‏‏‏‏‎‏‎‏‏‏‏‎‏‎‏‏‎‏‏‎‏‎‎‎‎‏‎‏‏‎‎‎‏‏‏‎‎‏‎‏‎‎‎‎‎‎‎News &amp; Magazines‎‏‎‎‏‎"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‎‏‎‎‎‏‎‏‏‏‎‎‏‏‏‎‎‎‏‏‏‏‏‏‏‎‎‏‎‎‎‏‎‎‎‏‏‎‏‎‎‏‏‎‎‏‎‎‏‎‎‎Maps &amp; Navigation‎‏‎‎‏‎"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‏‎‎‏‏‎‎‎‏‎‏‏‎‏‎‎‏‎‏‎‏‏‎‏‎‎‎‏‏‏‎‏‏‎‏‏‏‏‏‎‎‎‎‏‏‎‏‎‎‏‏‏‏‎‏‏‎Productivity‎‏‎‎‏‎"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‎‏‏‎‎‏‎‏‎‎‎‎‏‏‏‏‎‏‏‎‏‎‎‎‎‎‏‎‏‎‏‎‏‏‏‎‎‎‏‏‏‎‏‎‏‎‏‎‏‏‎‎‎‏‏‎Accessibility‎‏‎‎‏‎"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‏‏‎‏‎‏‎‏‏‎‎‎‏‎‏‎‏‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‎‎‏‏‎‎‏‏‎‏‎‏‎‏‎‏‏‏‏‏‎‎‏‏‎‎Device storage‎‏‎‎‏‎"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‎‎‏‏‏‎‏‎‏‎‎‏‎‏‏‎‎‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‏‎‎‎‎‏‏‏‏‎‏‎‏‎‎‏‏‎‎‏‎‎‎‎USB debugging‎‏‎‎‏‎"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‏‏‏‎‏‎‎‏‎‎‎‏‎‎‏‏‎‎‏‏‏‎‏‏‏‎‎‎‏‏‎‏‏‎‎‎‎‎‎hour‎‏‎‎‏‎"</string>

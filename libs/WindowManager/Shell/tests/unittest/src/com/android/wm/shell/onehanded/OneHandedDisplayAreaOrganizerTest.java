@@ -121,6 +121,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         when(mMockLeash.getHeight()).thenReturn(DISPLAY_HEIGHT);
 
         mSpiedDisplayAreaOrganizer = spy(new OneHandedDisplayAreaOrganizer(mContext,
+                mWindowManager,
                 mMockDisplayController,
                 mMockAnimationController,
                 mTutorialHandler,

@@ -91,6 +91,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -222,6 +223,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final ArrayMap<AutofillId, ViewState> mViewStates = new ArrayMap<>();
 
     /**
+     * Tracks the most recent IME inline request and the corresponding request id, for regular
+     * autofill.
+     */
+    @GuardedBy("mLock")
+    @Nullable private Pair<Integer, InlineSuggestionsRequest> mLastInlineSuggestionsRequest;
+
+    /**
      * Id of the View currently being displayed.
      */
     @GuardedBy("mLock")
@@ -330,7 +338,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private ArrayList<AutofillId> mAugmentedAutofillableIds;
 
-    @Nullable
+    @NonNull
     private final AutofillInlineSessionController mInlineSessionController;
 
     /**
@@ -821,11 +829,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             /* isInlineRequest= */ true);
             if (inlineSuggestionsRequestConsumer != null) {
                 final AutofillId focusedId = mCurrentViewId;
+                final int requestIdCopy = requestId;
                 remoteRenderService.getInlineSuggestionsRendererInfo(
                         new RemoteCallback((extras) -> {
                             synchronized (mLock) {
                                 mInlineSessionController.onCreateInlineSuggestionsRequestLocked(
-                                        focusedId, inlineSuggestionsRequestConsumer, extras);
+                                        focusedId, inlineSuggestionsRequestCacheDecorator(
+                                                inlineSuggestionsRequestConsumer, requestIdCopy),
+                                        extras);
                             }
                         }, mHandler)
                 );
@@ -3668,9 +3679,25 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     requestId, mContexts);
             return null;
         }
+        if (mLastInlineSuggestionsRequest != null
+                && mLastInlineSuggestionsRequest.first == requestId) {
+            fillInIntent.putExtra(AutofillManager.EXTRA_INLINE_SUGGESTIONS_REQUEST,
+                    mLastInlineSuggestionsRequest.second);
+        }
         fillInIntent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, context.getStructure());
         fillInIntent.putExtra(AutofillManager.EXTRA_CLIENT_STATE, extras);
         return fillInIntent;
+    }
+
+    @NonNull
+    private Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestCacheDecorator(
+            @NonNull Consumer<InlineSuggestionsRequest> consumer, int requestId) {
+        return inlineSuggestionsRequest -> {
+            consumer.accept(inlineSuggestionsRequest);
+            synchronized (mLock) {
+                mLastInlineSuggestionsRequest = Pair.create(requestId, inlineSuggestionsRequest);
+            }
+        };
     }
 
     private void startAuthentication(int authenticationId, IntentSender intent,

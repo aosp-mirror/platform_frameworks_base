@@ -44,8 +44,9 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
-                ViewConfiguration.get(mTestContext), mMockShellMainExecutor);
+        mGestureHandler = new OneHandedGestureHandler(mContext, mWindowManager,
+                mMockDisplayController, ViewConfiguration.get(mTestContext),
+                mMockShellMainExecutor);
     }
 
     @Test

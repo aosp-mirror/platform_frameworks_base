@@ -33,17 +33,13 @@ import static android.os.Process.ROOT_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myUid;
 
-import static com.android.internal.util.XmlUtils.readBooleanAttribute;
-import static com.android.internal.util.XmlUtils.readIntAttribute;
-import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
-import static com.android.internal.util.XmlUtils.writeIntAttribute;
-import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.uri.UriGrantsManagerService.H.PERSIST_URI_GRANTS_MSG;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -82,7 +78,6 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
@@ -94,9 +89,7 @@ import com.google.android.collect.Maps;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -104,7 +97,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -211,6 +203,21 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
     }
 
+    /**
+     * Grant uri permissions to the specified app.
+     *
+     * @param token An opaque owner token for tracking the permissions. See
+     *              {@link UriGrantsManagerInternal#newUriPermissionOwner}.
+     * @param fromUid The uid of the grantor app that has permissions to the uri. Permissions
+     *                will be granted on behalf of this app.
+     * @param targetPkg The package name of the grantor app that has permissions to the uri.
+     *                  Permissions will be granted on behalf of this app.
+     * @param uri The uri for which permissions should be granted. This uri must NOT contain an
+     *            embedded userId; use {@link ContentProvider#getUriWithoutUserId(Uri)} if needed.
+     * @param modeFlags The modes to grant. See {@link Intent#FLAG_GRANT_READ_URI_PERMISSION}, etc.
+     * @param sourceUserId The userId in which the uri is to be resolved.
+     * @param targetUserId The userId of the target app to receive the grant.
+     */
     @Override
     public void grantUriPermissionFromOwner(IBinder token, int fromUid, String targetPkg,
             Uri uri, final int modeFlags, int sourceUserId, int targetUserId) {
@@ -219,12 +226,11 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     }
 
     /**
-     * @param uri This uri must NOT contain an embedded userId.
-     * @param sourceUserId The userId in which the uri is to be resolved.
-     * @param targetUserId The userId of the app that receives the grant.
+     * See {@link #grantUriPermissionFromOwner(IBinder, int, String, Uri, int, int, int)}.
      */
-    private void grantUriPermissionFromOwnerUnlocked(IBinder token, int fromUid, String targetPkg,
-            Uri uri, final int modeFlags, int sourceUserId, int targetUserId) {
+    private void grantUriPermissionFromOwnerUnlocked(@NonNull IBinder token, int fromUid,
+            @NonNull String targetPkg, @NonNull Uri uri, final int modeFlags,
+            int sourceUserId, int targetUserId) {
         targetUserId = mAmInternal.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), targetUserId, false, ALLOW_FULL_ONLY,
                 "grantUriPermissionFromOwner", null);
