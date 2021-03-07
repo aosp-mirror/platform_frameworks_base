@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import android.content.Context;
+import android.platform.test.annotations.Presubmit;
 import android.util.AtomicFile;
 import android.util.Log;
 
@@ -37,6 +38,7 @@ import java.io.IOException;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class GameManagerServiceSettingsTests {
 
     private static final String TAG = "GameServiceSettingsTests";
