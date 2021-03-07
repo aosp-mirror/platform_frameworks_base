@@ -87,8 +87,8 @@ final class VibratorController {
     static native long vibratorPerformEffect(
             long nativePtr, long effect, long strength, long vibrationId);
 
-    static native void vibratorPerformComposedEffect(long nativePtr,
-            VibrationEffect.Composition.PrimitiveEffect[] effect, long vibrationId);
+    static native long vibratorPerformComposedEffect(
+            long nativePtr, VibrationEffect.Composition.PrimitiveEffect[] effect, long vibrationId);
 
     static native void vibratorSetExternalControl(long nativePtr, boolean enabled);
 
@@ -269,13 +269,9 @@ final class VibratorController {
             VibrationEffect.Composition.PrimitiveEffect[] primitives =
                     effect.getPrimitiveEffects().toArray(
                             new VibrationEffect.Composition.PrimitiveEffect[0]);
-            mNativeWrapper.compose(primitives, vibrationId);
-            notifyVibratorOnLocked();
-            // Compose don't actually give us an estimated duration, so we just guess here.
-            long duration = 0;
-            for (VibrationEffect.Composition.PrimitiveEffect primitive : primitives) {
-                // TODO(b/177807015): use exposed durations from IVibrator here instead
-                duration += 20 + primitive.delay;
+            long duration = mNativeWrapper.compose(primitives, vibrationId);
+            if (duration > 0) {
+                notifyVibratorOnLocked();
             }
             return duration;
         }
@@ -393,9 +389,9 @@ final class VibratorController {
         }
 
         /** Turns vibrator on to perform one of the supported composed effects. */
-        public void compose(
+        public long compose(
                 VibrationEffect.Composition.PrimitiveEffect[] effect, long vibrationId) {
-            VibratorController.vibratorPerformComposedEffect(mNativePtr, effect,
+            return VibratorController.vibratorPerformComposedEffect(mNativePtr, effect,
                     vibrationId);
         }
 
