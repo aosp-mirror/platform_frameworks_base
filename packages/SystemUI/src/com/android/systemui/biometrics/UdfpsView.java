@@ -33,6 +33,7 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -90,6 +91,12 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
         mDebugTextPaint.setTextSize(DEBUG_TEXT_SIZE_PX);
 
         mIlluminationRequested = false;
+    }
+
+    // Don't propagate any touch events to the child views.
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return true;
     }
 
     @Override
@@ -179,7 +186,7 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
         postInvalidate();
     }
 
-    boolean isValidTouch(float x, float y, float pressure) {
+    boolean isWithinSensorArea(float x, float y) {
         // The X and Y coordinates of the sensor's center.
         final PointF translation = mAnimationView.getTouchTranslation();
         final float cx = mSensorRect.centerX() + translation.x;
