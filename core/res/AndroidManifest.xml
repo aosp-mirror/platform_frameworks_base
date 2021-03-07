@@ -5561,6 +5561,11 @@
     <permission android:name="android.permission.READ_PEOPLE_DATA"
                 android:protectionLevel="signature|appPredictor|recents"/>
 
+    <!-- @hide @SystemApi Allows a logical component within an application to
+         temporarily renounce a set of otherwise granted permissions. -->
+    <permission android:name="android.permission.RENOUNCE_PERMISSIONS"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
