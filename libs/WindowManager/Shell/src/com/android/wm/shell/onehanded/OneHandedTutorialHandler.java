@@ -20,7 +20,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -51,14 +50,13 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
             "persist.debug.one_handed_offset_percentage";
     private static final int MAX_TUTORIAL_SHOW_COUNT = 2;
-    private final Rect mLastUpdatedBounds = new Rect();
     private final WindowManager mWindowManager;
     private final AccessibilityManager mAccessibilityManager;
     private final String mPackageName;
+    private final Rect mDisplaySize;
 
     private Context mContext;
     private View mTutorialView;
-    private Point mDisplaySize = new Point();
     private ContentResolver mContentResolver;
     private boolean mCanShowTutorial;
     private String mStartOneHandedDescription;
@@ -101,14 +99,14 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         }
     };
 
-    public OneHandedTutorialHandler(Context context, ShellExecutor mainExecutor) {
+    public OneHandedTutorialHandler(Context context, WindowManager windowManager,
+            ShellExecutor mainExecutor) {
         mContext = context;
-        context.getDisplay().getRealSize(mDisplaySize);
+        mWindowManager = windowManager;
+        mDisplaySize = windowManager.getCurrentWindowMetrics().getBounds();
         mPackageName = context.getPackageName();
         mContentResolver = context.getContentResolver();
-        mWindowManager = context.getSystemService(WindowManager.class);
         mAccessibilityManager = AccessibilityManager.getInstance(context);
-
         mStartOneHandedDescription = context.getResources().getString(
                 R.string.accessibility_action_start_one_handed);
         mStopOneHandedDescription = context.getResources().getString(
@@ -121,7 +119,8 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
                 R.fraction.config_one_handed_offset, 1, 1);
         final int sysPropPercentageConfig = SystemProperties.getInt(
                 ONE_HANDED_MODE_OFFSET_PERCENTAGE, Math.round(offsetPercentageConfig * 100.0f));
-        mTutorialAreaHeight = Math.round(mDisplaySize.y * (sysPropPercentageConfig / 100.0f));
+        mTutorialAreaHeight = Math.round(
+                mDisplaySize.height() * (sysPropPercentageConfig / 100.0f));
 
         mainExecutor.execute(() -> {
             recreateTutorialView(mContext);
@@ -214,7 +213,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
      */
     private WindowManager.LayoutParams getTutorialTargetLayoutParams() {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                mDisplaySize.x, mTutorialAreaHeight, 0, 0,
+                mDisplaySize.width(), mTutorialAreaHeight, 0, 0,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
@@ -228,9 +227,13 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
 
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + "states: ");
-        pw.print(innerPrefix + "mLastUpdatedBounds=");
-        pw.println(mLastUpdatedBounds);
+        pw.println(TAG + " states: ");
+        pw.print(innerPrefix + "mTriggerState=");
+        pw.println(mTriggerState);
+        pw.print(innerPrefix + "mDisplaySize=");
+        pw.println(mDisplaySize);
+        pw.print(innerPrefix + "mTutorialAreaHeight=");
+        pw.println(mTutorialAreaHeight);
     }
 
     private boolean canShowTutorial() {

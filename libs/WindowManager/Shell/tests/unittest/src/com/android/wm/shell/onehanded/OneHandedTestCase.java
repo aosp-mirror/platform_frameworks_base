@@ -26,6 +26,7 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.os.SystemProperties;
 import android.testing.TestableContext;
+import android.view.WindowManager;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -45,12 +46,21 @@ public abstract class OneHandedTestCase {
     public TestableContext mTestContext = new TestableContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    protected WindowManager mWindowManager;
+
     @Before
     public void setUpContext() {
         assumeTrue(SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false));
 
         final DisplayManager dm = getTestContext().getSystemService(DisplayManager.class);
         mContext = getTestContext().createDisplayContext(dm.getDisplay(DEFAULT_DISPLAY));
+    }
+
+    @Before
+    public void setUpWindowManager() {
+        assumeTrue(SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false));
+        mWindowManager = getTestContext().getSystemService(WindowManager.class);
     }
 
     /** return testable context */

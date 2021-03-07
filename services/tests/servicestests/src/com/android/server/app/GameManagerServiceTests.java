@@ -17,12 +17,14 @@
 package com.android.server.app;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import android.Manifest;
 import android.app.GameManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -38,11 +40,11 @@ import java.util.function.Supplier;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class GameManagerServiceTests {
 
     private static final String TAG = "GameServiceTests";
-    private static final String PACKAGE_NAME_0 = "com.android.app0";
-    private static final String PACKAGE_NAME_1 = "com.android.app1";
+    private static final String PACKAGE_NAME_INVALID = "com.android.app";
     private static final int USER_ID_1 = 1001;
     private static final int USER_ID_2 = 1002;
 
@@ -62,6 +64,7 @@ public class GameManagerServiceTests {
          *
          * <p>Passing null reverts to default behavior, which does a real permission check on the
          * test package.
+         *
          * @param granted One of {@link PackageManager#PERMISSION_GRANTED} or
          *                {@link PackageManager#PERMISSION_DENIED}.
          */
@@ -103,9 +106,12 @@ public class GameManagerServiceTests {
     @Mock
     private MockContext mMockContext;
 
+    private String mPackageName;
+
     @Before
     public void setUp() throws Exception {
         mMockContext = new MockContext(InstrumentationRegistry.getContext());
+        mPackageName = mMockContext.getPackageName();
     }
 
     private void mockModifyGameModeGranted() {
@@ -129,7 +135,7 @@ public class GameManagerServiceTests {
         mockModifyGameModeGranted();
 
         assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
-                gameManagerService.getGameMode(PACKAGE_NAME_0, USER_ID_1));
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
 
     /**
@@ -142,9 +148,9 @@ public class GameManagerServiceTests {
 
         mockModifyGameModeGranted();
 
-        gameManagerService.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_STANDARD, USER_ID_2);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD, USER_ID_2);
         assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
-                gameManagerService.getGameMode(PACKAGE_NAME_1, USER_ID_2));
+                gameManagerService.getGameMode(mPackageName, USER_ID_2));
     }
 
     /**
@@ -152,40 +158,41 @@ public class GameManagerServiceTests {
      */
     @Test
     public void testGameMode() {
-        GameManagerService gameManagerService =  new GameManagerService(mMockContext);
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
         gameManagerService.onUserStarting(USER_ID_1);
 
         mockModifyGameModeGranted();
 
         assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
-                gameManagerService.getGameMode(PACKAGE_NAME_1, USER_ID_1));
-        gameManagerService.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_STANDARD, USER_ID_1);
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD, USER_ID_1);
         assertEquals(GameManager.GAME_MODE_STANDARD,
-                gameManagerService.getGameMode(PACKAGE_NAME_1, USER_ID_1));
-        gameManagerService.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_PERFORMANCE,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE,
                 USER_ID_1);
         assertEquals(GameManager.GAME_MODE_PERFORMANCE,
-                gameManagerService.getGameMode(PACKAGE_NAME_1, USER_ID_1));
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
 
     /**
      * Test permission.MANAGE_GAME_MODE is checked
      */
     @Test
-    public void testGetGameModePermissionDenied() {
-        GameManagerService gameManagerService =  new GameManagerService(mMockContext);
+    public void testGetGameModeInvalidPackageName() {
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
         gameManagerService.onUserStarting(USER_ID_1);
 
-        // Update the game mode so we can read back something valid.
-        mockModifyGameModeGranted();
-        gameManagerService.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_STANDARD, USER_ID_1);
-        assertEquals(GameManager.GAME_MODE_STANDARD,
-                gameManagerService.getGameMode(PACKAGE_NAME_1, USER_ID_1));
+        try {
+            assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
+                    gameManagerService.getGameMode(PACKAGE_NAME_INVALID,
+                            USER_ID_1));
 
-        // Deny permission.MANAGE_GAME_MODE and verify we get back GameManager.GAME_MODE_UNSUPPORTED
-        mockModifyGameModeDenied();
-        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
-                gameManagerService.getGameMode(PACKAGE_NAME_1, USER_ID_1));
+            fail("GameManagerService failed to generate SecurityException when "
+                    + "permission.MANAGE_GAME_MODE is not granted.");
+        } catch (SecurityException ignored) {
+        }
+
+        // The test should throw an exception, so the test is passing if we get here.
     }
 
     /**
@@ -193,22 +200,30 @@ public class GameManagerServiceTests {
      */
     @Test
     public void testSetGameModePermissionDenied() {
-        GameManagerService gameManagerService =  new GameManagerService(mMockContext);
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
         gameManagerService.onUserStarting(USER_ID_1);
 
         // Update the game mode so we can read back something valid.
         mockModifyGameModeGranted();
-        gameManagerService.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_STANDARD, USER_ID_1);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD, USER_ID_1);
         assertEquals(GameManager.GAME_MODE_STANDARD,
-                gameManagerService.getGameMode(PACKAGE_NAME_1, USER_ID_1));
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
 
         // Deny permission.MANAGE_GAME_MODE and verify the game mode is not updated.
         mockModifyGameModeDenied();
-        gameManagerService.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_PERFORMANCE,
-                USER_ID_1);
+        try {
+            gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE,
+                    USER_ID_1);
 
+            fail("GameManagerService failed to generate SecurityException when "
+                    + "permission.MANAGE_GAME_MODE is denied.");
+        } catch (SecurityException ignored) {
+        }
+
+        // The test should throw an exception, so the test is passing if we get here.
         mockModifyGameModeGranted();
+        // Verify that the Game Mode value wasn't updated.
         assertEquals(GameManager.GAME_MODE_STANDARD,
-                gameManagerService.getGameMode(PACKAGE_NAME_1, USER_ID_1));
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
 }

@@ -20,7 +20,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
@@ -34,6 +33,7 @@ import android.view.InputMonitor;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.ViewConfiguration;
+import android.view.WindowManager;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.VisibleForTesting;
@@ -59,8 +59,9 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     private final PointF mDownPos = new PointF();
     private final PointF mLastPos = new PointF();
     private final PointF mStartDragPos = new PointF();
-    private boolean mPassedSlop;
+    private final WindowManager mWindowManager;
 
+    private boolean mPassedSlop;
     private boolean mAllowGesture;
     private boolean mIsEnabled;
     private int mNavGestureHeight;
@@ -86,9 +87,10 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
      * @param context                  {@link Context}
      * @param displayController        {@link DisplayController}
      */
-    public OneHandedGestureHandler(Context context, DisplayController displayController,
-            ViewConfiguration viewConfig,
+    public OneHandedGestureHandler(Context context, WindowManager windowManager,
+            DisplayController displayController, ViewConfiguration viewConfig,
             ShellExecutor mainExecutor) {
+        mWindowManager = windowManager;
         mDisplayController = displayController;
         mMainExecutor = mainExecutor;
         displayController.addDisplayChangingController(this);
@@ -210,16 +212,10 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         disposeInputChannel();
 
         if (mIsEnabled && mIsThreeButtonModeEnabled) {
-            final Point displaySize = new Point();
-            if (mDisplayController != null) {
-                final Display display = mDisplayController.getDisplay(DEFAULT_DISPLAY);
-                if (display != null) {
-                    display.getRealSize(displaySize);
-                }
-            }
+            final Rect displaySize = mWindowManager.getCurrentWindowMetrics().getBounds();
             // Register input event receiver to monitor the touch region of NavBar gesture height
-            mGestureRegion.set(0, displaySize.y - mNavGestureHeight, displaySize.x,
-                    displaySize.y);
+            mGestureRegion.set(0, displaySize.height() - mNavGestureHeight, displaySize.width(),
+                    displaySize.height());
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "onehanded-gesture-offset", DEFAULT_DISPLAY);
             try {

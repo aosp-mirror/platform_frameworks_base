@@ -2703,7 +2703,7 @@ package android.content.pm {
   }
 
   public class ShortcutManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS) public java.util.List<android.content.pm.ShortcutManager.ShareShortcutInfo> getShareTargets(@NonNull android.content.IntentFilter);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS) @WorkerThread public java.util.List<android.content.pm.ShortcutManager.ShareShortcutInfo> getShareTargets(@NonNull android.content.IntentFilter);
     method public boolean hasShareTargets(@NonNull String);
   }
 
@@ -9194,6 +9194,15 @@ package android.se.omapi {
 
   public final class Reader {
     method @RequiresPermission(android.Manifest.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION) public boolean reset();
+  }
+
+}
+
+package android.security {
+
+  public final class KeyChain {
+    method @Nullable @WorkerThread public static String getWifiKeyGrantAsUser(@NonNull android.content.Context, @NonNull android.os.UserHandle, @NonNull String);
+    method @WorkerThread public static boolean hasWifiKeyGrantAsUser(@NonNull android.content.Context, @NonNull android.os.UserHandle, @NonNull String);
   }
 
 }

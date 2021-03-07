@@ -95,11 +95,6 @@ class IconManager @Inject constructor(
         // Construct the shelf icon view.
         val shelfIcon = iconBuilder.createIconView(entry)
         shelfIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
-
-        // TODO: This doesn't belong here
-        shelfIcon.setOnVisibilityChangedListener { newVisibility: Int ->
-            entry.setShelfIconVisible(newVisibility == View.VISIBLE)
-        }
         shelfIcon.visibility = View.INVISIBLE
 
         // Construct the aod icon view.

@@ -24,6 +24,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ContextParams;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -2604,6 +2605,12 @@ class ContextImpl extends Context {
         return mResourcesManager.createBaseTokenResources(mToken, resDir, splitResDirs,
                 legacyOverlayDirs, overlayPaths, libDirs, displayId, null /* overrideConfig */,
                 compatInfo, mClassLoader, loaders);
+    }
+
+    @NonNull
+    @Override
+    public Context createContext(@NonNull ContextParams contextParams) {
+        return this;
     }
 
     @Override

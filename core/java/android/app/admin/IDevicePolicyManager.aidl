@@ -479,6 +479,8 @@ interface IDevicePolicyManager {
 
     boolean setKeyGrantForApp(in ComponentName admin, String callerPackage, String alias, String packageName, boolean hasGrant);
     List<String> getKeyPairGrants(in String callerPackage, in String alias);
+    boolean setKeyGrantToWifiAuth(String callerPackage, String alias, boolean hasGrant);
+    boolean isKeyPairGrantedToWifiAuth(String callerPackage, String alias);
 
     void setUserControlDisabledPackages(in ComponentName admin, in List<String> packages);
 
