@@ -55,9 +55,10 @@ public interface NotificationDelegate {
     void onNotificationBubbleChanged(String key, boolean isBubble, int flags);
     /**
      * Called when the state of {@link Notification.BubbleMetadata#FLAG_SUPPRESS_NOTIFICATION}
-     * changes.
+     * or {@link Notification.BubbleMetadata#FLAG_SUPPRESS_BUBBLE} changes.
      */
-    void onBubbleNotificationSuppressionChanged(String key, boolean isSuppressed);
+    void onBubbleNotificationSuppressionChanged(String key, boolean isNotifSuppressed,
+            boolean isBubbleSuppressed);
 
     /**
      * Grant permission to read the specified URI to the package associated with the

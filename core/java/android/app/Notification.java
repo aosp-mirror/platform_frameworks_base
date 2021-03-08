@@ -9907,6 +9907,22 @@ public class Notification implements Parcelable
          */
         public static final int FLAG_SUPPRESS_NOTIFICATION = 0x00000002;
 
+        /**
+         * Indicates whether the bubble should be visually suppressed from the bubble stack if the
+         * user is viewing the same content outside of the bubble. For example, the user has a
+         * bubble with Alice and then opens up the main app and navigates to Alice's page.
+         *
+         * @hide
+         */
+        public static final int FLAG_SHOULD_SUPPRESS_BUBBLE = 0x00000004;
+
+        /**
+         * Indicates whether the bubble is visually suppressed from the bubble stack.
+         *
+         * @hide
+         */
+        public static final int FLAG_SUPPRESS_BUBBLE = 0x00000008;
+
         private BubbleMetadata(PendingIntent expandIntent, PendingIntent deleteIntent,
                 Icon icon, int height, @DimenRes int heightResId, String shortcutId) {
             mPendingIntent = expandIntent;
@@ -10047,6 +10063,32 @@ public class Notification implements Parcelable
          */
         public boolean isNotificationSuppressed() {
             return (mFlags & FLAG_SUPPRESS_NOTIFICATION) != 0;
+        }
+
+        /**
+         * Indicates whether the bubble should be visually suppressed from the bubble stack if the
+         * user is viewing the same content outside of the bubble. For example, the user has a
+         * bubble with Alice and then opens up the main app and navigates to Alice's page.
+         *
+         * To match the activity and the bubble notification, the bubble notification should
+         * have a locus id set that matches a locus id set on the activity.
+         *
+         * @return whether this bubble should be suppressed when the same content is visible
+         * outside of the bubble.
+         *
+         * @see BubbleMetadata.Builder#setSuppressBubble(boolean)
+         */
+        public boolean isBubbleSuppressable() {
+            return (mFlags & FLAG_SHOULD_SUPPRESS_BUBBLE) != 0;
+        }
+
+        /**
+         * Indicates whether the bubble is currently visually suppressed from the bubble stack.
+         *
+         * @see BubbleMetadata.Builder#setSuppressBubble(boolean)
+         */
+        public boolean isBubbleSuppressed() {
+            return (mFlags & FLAG_SUPPRESS_BUBBLE) != 0;
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<BubbleMetadata> CREATOR =
@@ -10387,6 +10429,23 @@ public class Notification implements Parcelable
             @NonNull
             public BubbleMetadata.Builder setSuppressNotification(boolean shouldSuppressNotif) {
                 setFlag(FLAG_SUPPRESS_NOTIFICATION, shouldSuppressNotif);
+                return this;
+            }
+
+            /**
+             * Indicates whether the bubble should be visually suppressed from the bubble stack if
+             * the user is viewing the same content outside of the bubble. For example, the user has
+             * a bubble with Alice and then opens up the main app and navigates to Alice's page.
+             *
+             * To match the activity and the bubble notification, the bubble notification should
+             * have a locus id set that matches a locus id set on the activity.
+             *
+             * {@link Notification.Builder#setLocusId(LocusId)}
+             * {@link Activity#setLocusContext(LocusId, Bundle)}
+             */
+            @NonNull
+            public BubbleMetadata.Builder setSuppressBubble(boolean suppressBubble) {
+                setFlag(FLAG_SHOULD_SUPPRESS_BUBBLE, suppressBubble);
                 return this;
             }
 

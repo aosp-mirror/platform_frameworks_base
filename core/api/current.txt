@@ -5819,6 +5819,8 @@ package android.app {
     method @Nullable public android.graphics.drawable.Icon getIcon();
     method @Nullable public android.app.PendingIntent getIntent();
     method @Nullable public String getShortcutId();
+    method public boolean isBubbleSuppressable();
+    method public boolean isBubbleSuppressed();
     method public boolean isNotificationSuppressed();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.Notification.BubbleMetadata> CREATOR;
@@ -5835,6 +5837,7 @@ package android.app {
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setDesiredHeightResId(@DimenRes int);
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setIcon(@NonNull android.graphics.drawable.Icon);
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setIntent(@NonNull android.app.PendingIntent);
+    method @NonNull public android.app.Notification.BubbleMetadata.Builder setSuppressBubble(boolean);
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setSuppressNotification(boolean);
   }
 
