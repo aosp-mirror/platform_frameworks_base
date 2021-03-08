@@ -367,6 +367,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
+import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -23405,14 +23406,24 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 true /* checkShell */, "stop package");
+        boolean shouldUnhibernate = false;
         // writer
         synchronized (mLock) {
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
+            if (ps.getStopped(userId) && !stopped) {
+                shouldUnhibernate = true;
+            }
             if (!shouldFilterApplicationLocked(ps, callingUid, userId)
                     && mSettings.setPackageStoppedStateLPw(this, packageName, stopped,
                             allowedByPermission, callingUid, userId)) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
+        }
+        if (shouldUnhibernate) {
+            AppHibernationManagerInternal ah =
+                    mInjector.getLocalService(AppHibernationManagerInternal.class);
+            ah.setHibernatingForUser(packageName, userId, false);
+            ah.setHibernatingGlobally(packageName, false);
         }
     }
 
