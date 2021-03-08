@@ -59,6 +59,7 @@ import android.net.ipsec.ike.exceptions.AuthenticationFailedException;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
+import android.net.vcn.VcnControlPlaneIkeConfig;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
@@ -1348,7 +1349,7 @@ public class VcnGatewayConnection extends StateMachine {
                 mIkeSession = null;
             }
 
-            mIkeSession = buildIkeSession();
+            mIkeSession = buildIkeSession(mUnderlying.network);
         }
 
         @Override
@@ -1939,23 +1940,29 @@ public class VcnGatewayConnection extends StateMachine {
                 new EventDisconnectRequestedInfo(reason, shouldQuit));
     }
 
-    private IkeSessionParams buildIkeParams() {
-        // TODO: Implement this once IkeSessionParams is persisted
-        return null;
+    private IkeSessionParams buildIkeParams(@NonNull Network network) {
+        final VcnControlPlaneIkeConfig controlPlaneConfig =
+                (VcnControlPlaneIkeConfig) mConnectionConfig.getControlPlaneConfig();
+        final IkeSessionParams.Builder builder =
+                new IkeSessionParams.Builder(controlPlaneConfig.getIkeSessionParams());
+        builder.setConfiguredNetwork(network);
+
+        return builder.build();
     }
 
     private ChildSessionParams buildChildParams() {
-        // TODO: Implement this once IkeSessionParams is persisted
-        return null;
+        final VcnControlPlaneIkeConfig controlPlaneConfig =
+                (VcnControlPlaneIkeConfig) mConnectionConfig.getControlPlaneConfig();
+        return controlPlaneConfig.getChildSessionParams();
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    VcnIkeSession buildIkeSession() {
+    VcnIkeSession buildIkeSession(@NonNull Network network) {
         final int token = ++mCurrentToken;
 
         return mDeps.newIkeSession(
                 mVcnContext,
-                buildIkeParams(),
+                buildIkeParams(network),
                 buildChildParams(),
                 new IkeSessionCallbackImpl(token),
                 new VcnChildSessionCallback(token));

@@ -73,7 +73,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         mGatewayConnection.setUnderlyingNetwork(TEST_UNDERLYING_NETWORK_RECORD_1);
 
-        mIkeSession = mGatewayConnection.buildIkeSession();
+        mIkeSession = mGatewayConnection.buildIkeSession(TEST_UNDERLYING_NETWORK_RECORD_1.network);
         mGatewayConnection.setIkeSession(mIkeSession);
 
         mGatewayConnection.transitionTo(mGatewayConnection.mConnectedState);
