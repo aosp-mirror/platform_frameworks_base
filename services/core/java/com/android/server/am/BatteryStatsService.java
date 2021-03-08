@@ -74,7 +74,6 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.server.LocalServices;
-import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.net.BaseNetworkObserver;
 
 import java.io.File;
