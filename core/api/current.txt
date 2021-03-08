@@ -40586,14 +40586,6 @@ package android.telephony {
   public static final class CarrierConfigManager.Iwlan {
     field public static final int AUTHENTICATION_METHOD_CERT = 1; // 0x1
     field public static final int AUTHENTICATION_METHOD_EAP_ONLY = 0; // 0x0
-    field public static final int DH_GROUP_1024_BIT_MODP = 2; // 0x2
-    field public static final int DH_GROUP_1536_BIT_MODP = 5; // 0x5
-    field public static final int DH_GROUP_2048_BIT_MODP = 14; // 0xe
-    field public static final int DH_GROUP_3072_BIT_MODP = 15; // 0xf
-    field public static final int DH_GROUP_4096_BIT_MODP = 16; // 0x10
-    field public static final int DH_GROUP_NONE = 0; // 0x0
-    field public static final int ENCRYPTION_ALGORITHM_AES_CBC = 12; // 0xc
-    field public static final int ENCRYPTION_ALGORITHM_AES_CTR = 13; // 0xd
     field public static final int EPDG_ADDRESS_CELLULAR_LOC = 3; // 0x3
     field public static final int EPDG_ADDRESS_PCO = 2; // 0x2
     field public static final int EPDG_ADDRESS_PLMN = 1; // 0x1
@@ -40601,12 +40593,6 @@ package android.telephony {
     field public static final int ID_TYPE_FQDN = 2; // 0x2
     field public static final int ID_TYPE_KEY_ID = 11; // 0xb
     field public static final int ID_TYPE_RFC822_ADDR = 3; // 0x3
-    field public static final int INTEGRITY_ALGORITHM_AES_XCBC_96 = 5; // 0x5
-    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA1_96 = 2; // 0x2
-    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_256_128 = 12; // 0xc
-    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_384_192 = 13; // 0xd
-    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_512_256 = 14; // 0xe
-    field public static final int INTEGRITY_ALGORITHM_NONE = 0; // 0x0
     field public static final String KEY_ADD_KE_TO_CHILD_SESSION_REKEY_BOOL = "iwlan.add_ke_to_child_session_rekey_bool";
     field public static final String KEY_CHILD_SA_REKEY_HARD_TIMER_SEC_INT = "iwlan.child_sa_rekey_hard_timer_sec_int";
     field public static final String KEY_CHILD_SA_REKEY_SOFT_TIMER_SEC_INT = "iwlan.child_sa_rekey_soft_timer_sec_int";
@@ -40626,10 +40612,6 @@ package android.telephony {
     field public static final String KEY_IKE_REMOTE_ID_TYPE_INT = "iwlan.ike_remote_id_type_int";
     field public static final String KEY_IKE_SESSION_AES_CBC_KEY_SIZE_INT_ARRAY = "iwlan.ike_session_encryption_aes_cbc_key_size_int_array";
     field public static final String KEY_IKE_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY = "iwlan.ike_session_encryption_aes_ctr_key_size_int_array";
-    field public static final int KEY_LEN_AES_128 = 128; // 0x80
-    field public static final int KEY_LEN_AES_192 = 192; // 0xc0
-    field public static final int KEY_LEN_AES_256 = 256; // 0x100
-    field public static final int KEY_LEN_UNUSED = 0; // 0x0
     field public static final String KEY_MAX_RETRIES_INT = "iwlan.max_retries_int";
     field public static final String KEY_MCC_MNCS_STRING_ARRAY = "iwlan.mcc_mncs_string_array";
     field public static final String KEY_NATT_KEEP_ALIVE_TIMER_SEC_INT = "iwlan.natt_keep_alive_timer_sec_int";
@@ -40639,11 +40621,6 @@ package android.telephony {
     field public static final String KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY = "iwlan.supported_ike_session_encryption_algorithms_int_array";
     field public static final String KEY_SUPPORTED_INTEGRITY_ALGORITHMS_INT_ARRAY = "iwlan.supported_integrity_algorithms_int_array";
     field public static final String KEY_SUPPORTED_PRF_ALGORITHMS_INT_ARRAY = "iwlan.supported_prf_algorithms_int_array";
-    field public static final int PSEUDORANDOM_FUNCTION_AES128_XCBC = 4; // 0x4
-    field public static final int PSEUDORANDOM_FUNCTION_HMAC_SHA1 = 2; // 0x2
-    field public static final int PSEUDORANDOM_FUNCTION_SHA2_256 = 5; // 0x5
-    field public static final int PSEUDORANDOM_FUNCTION_SHA2_384 = 6; // 0x6
-    field public static final int PSEUDORANDOM_FUNCTION_SHA2_512 = 7; // 0x7
   }
 
   public abstract class CellIdentity implements android.os.Parcelable {
