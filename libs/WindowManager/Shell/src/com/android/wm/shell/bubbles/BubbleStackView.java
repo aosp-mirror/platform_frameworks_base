@@ -1687,6 +1687,13 @@ public class BubbleStackView extends FrameLayout
         notifyExpansionChanged(mExpandedBubble, mIsExpanded);
     }
 
+    void setBubbleVisibility(Bubble b, boolean visible) {
+        if (b.getIconView() != null) {
+            b.getIconView().setVisibility(visible ? VISIBLE : GONE);
+        }
+        // TODO(b/181166384): Animate in / out & handle adjusting how the bubbles overlap
+    }
+
     /**
      * Asks the BubbleController to hide the IME from anywhere, whether it's focused on Bubbles or
      * not.

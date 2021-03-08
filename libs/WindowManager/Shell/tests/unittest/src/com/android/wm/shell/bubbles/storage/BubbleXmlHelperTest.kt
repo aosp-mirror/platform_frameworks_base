@@ -32,10 +32,12 @@ import java.io.ByteArrayOutputStream
 class BubbleXmlHelperTest : ShellTestCase() {
 
     private val bubbles = listOf(
+            // user, package, shortcut, notification key, height, res-height, title, taskId, locusId
             BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0, null, 1),
-            BubbleEntity(10, "com.example.chat", "alice and bob", "k2", 0, 16537428, "title", 2),
+            BubbleEntity(10, "com.example.chat", "alice and bob", "k2", 0, 16537428, "title",
+                    2, null),
             BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0, null,
-                    INVALID_TASK_ID)
+                    INVALID_TASK_ID, "l3")
     )
 
     @Test
@@ -43,7 +45,7 @@ class BubbleXmlHelperTest : ShellTestCase() {
         val expectedEntries = """
 <bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" tid="1" />
 <bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" tid="2" />
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" tid="-1" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" tid="-1" l="l3" />
         """.trimIndent()
         ByteArrayOutputStream().use {
             writeXml(it, bubbles)
@@ -60,7 +62,7 @@ class BubbleXmlHelperTest : ShellTestCase() {
 <bs v="1">
 <bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" tid="1" />
 <bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" tid="2" />
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" tid="-1" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" tid="-1" l="l3" />
 </bs>
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
@@ -97,7 +99,32 @@ class BubbleXmlHelperTest : ShellTestCase() {
                 BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0, null,
                         INVALID_TASK_ID)
         )
+        val src = """
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<bs v="1">
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" />
+<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" />
+</bs>
+        """.trimIndent()
+        val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
+        assertEquals("failed parsing bubbles from xml\n$src", expectedBubbles, actual)
+    }
 
+    /**
+     * LocusId is optional so it can be added without a version change, this test makes sure that
+     * works.
+     */
+    @Test
+    fun testXMLWithoutLocusToLocus() {
+        val expectedBubbles = listOf(
+            BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0, null,
+                    INVALID_TASK_ID, null),
+            BubbleEntity(10, "com.example.chat", "alice and bob", "k2", 0, 16537428, "title",
+                    INVALID_TASK_ID, null),
+            BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0, null,
+                    INVALID_TASK_ID, null)
+        )
         val src = """
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
 <bs v="1">
