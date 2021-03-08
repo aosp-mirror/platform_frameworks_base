@@ -791,12 +791,13 @@ public final class ContentService extends IContentService.Stub {
     public SyncAdapterType[] getSyncAdapterTypesAsUser(int userId) {
         enforceCrossUserPermission(userId,
                 "no permission to read sync settings for user " + userId);
+        final int callingUid = Binder.getCallingUid();
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         final long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
-            return syncManager.getSyncAdapterTypes(userId);
+            return syncManager.getSyncAdapterTypes(callingUid, userId);
         } finally {
             restoreCallingIdentity(identityToken);
         }

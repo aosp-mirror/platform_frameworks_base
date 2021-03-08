@@ -88,6 +88,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -1256,16 +1257,19 @@ public class SyncManager {
                 syncExemptionFlag, callingUid, callingPid, callingPackage);
     }
 
-    public SyncAdapterType[] getSyncAdapterTypes(int userId) {
+    public SyncAdapterType[] getSyncAdapterTypes(int callingUid, int userId) {
         final Collection<RegisteredServicesCache.ServiceInfo<SyncAdapterType>> serviceInfos;
         serviceInfos = mSyncAdapters.getAllServices(userId);
-        SyncAdapterType[] types = new SyncAdapterType[serviceInfos.size()];
-        int i = 0;
+        final List<SyncAdapterType> types = new ArrayList<>(serviceInfos.size());
         for (RegisteredServicesCache.ServiceInfo<SyncAdapterType> serviceInfo : serviceInfos) {
-            types[i] = serviceInfo.type;
-            ++i;
+            final String packageName = serviceInfo.type.getPackageName();
+            if (!TextUtils.isEmpty(packageName) && mPackageManagerInternal.filterAppAccess(
+                    packageName, callingUid, userId)) {
+                continue;
+            }
+            types.add(serviceInfo.type);
         }
-        return types;
+        return types.toArray(new SyncAdapterType[] {});
     }
 
     public String[] getSyncAdapterPackagesForAuthorityAsUser(String authority, int userId) {

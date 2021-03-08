@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -168,6 +169,7 @@ public class SyncAdapterType implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public @Nullable String getPackageName() {
         return packageName;
     }
