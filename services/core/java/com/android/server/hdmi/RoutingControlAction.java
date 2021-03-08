@@ -16,11 +16,9 @@
 
 package com.android.server.hdmi;
 
-import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
-import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
@@ -66,15 +64,12 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
     // <Inactive Source> command.
     private final boolean mNotifyInputChange;
 
-    @Nullable private final IHdmiControlCallback mCallback;
-
     // The latest routing path. Updated by each <Routing Information> from CEC switches.
     private int mCurrentRoutingPath;
 
     RoutingControlAction(HdmiCecLocalDevice localDevice, int path, boolean queryDevicePowerStatus,
             IHdmiControlCallback callback) {
-        super(localDevice);
-        mCallback = callback;
+        super(localDevice, callback);
         mCurrentRoutingPath = path;
         mQueryDevicePowerStatus = queryDevicePowerStatus;
         // Callback is non-null when routing control action is brought up by binder API. Use
@@ -147,11 +142,6 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
                 mCurrentRoutingPath));
     }
 
-    private void finishWithCallback(int result) {
-        invokeCallback(result);
-        finish();
-    }
-
     @Override
     public void handleTimerEvent(int timeoutState) {
         if (mState != timeoutState || mState == STATE_NONE) {
@@ -198,17 +188,6 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
             updateActiveInput();
             sendSetStreamPath();
             finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-        }
-    }
-
-    private void invokeCallback(int result) {
-        if (mCallback == null) {
-            return;
-        }
-        try {
-            mCallback.onComplete(result);
-        } catch (RemoteException e) {
-            // Do nothing.
         }
     }
 }

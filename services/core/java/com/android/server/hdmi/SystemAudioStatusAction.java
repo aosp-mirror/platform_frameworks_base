@@ -16,13 +16,13 @@
 
 package com.android.server.hdmi;
 
-import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.os.RemoteException;
-import android.util.Slog;
+
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
+
+import java.util.List;
 
 /**
  * Action to update audio status (volume or mute) of audio amplifier
@@ -34,13 +34,17 @@ final class SystemAudioStatusAction extends HdmiCecFeatureAction {
     private static final int STATE_WAIT_FOR_REPORT_AUDIO_STATUS = 1;
 
     private final int mAvrAddress;
-    @Nullable private final IHdmiControlCallback mCallback;
+
+    SystemAudioStatusAction(
+            HdmiCecLocalDevice source, int avrAddress, List<IHdmiControlCallback> callbacks) {
+        super(source, callbacks);
+        mAvrAddress = avrAddress;
+    }
 
     SystemAudioStatusAction(HdmiCecLocalDevice source, int avrAddress,
             IHdmiControlCallback callback) {
-        super(source);
+        super(source, callback);
         mAvrAddress = avrAddress;
-        mCallback = callback;
     }
 
     @Override
@@ -95,17 +99,6 @@ final class SystemAudioStatusAction extends HdmiCecFeatureAction {
             sendUserControlPressedAndReleased(mAvrAddress, HdmiCecKeycode.CEC_KEYCODE_MUTE);
         }
         finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-    }
-
-    private void finishWithCallback(int returnCode) {
-        if (mCallback != null) {
-            try {
-                mCallback.onComplete(returnCode);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to invoke callback.", e);
-            }
-        }
-        finish();
     }
 
     @Override
