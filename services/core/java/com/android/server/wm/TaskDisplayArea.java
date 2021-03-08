@@ -393,7 +393,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         final boolean moveToBottom = position <= 0;
 
         final int oldPosition = mChildren.indexOf(child);
-        if (child.getWindowConfiguration().isAlwaysOnTop() && !moveToTop) {
+        if (child.isAlwaysOnTop() && !moveToTop) {
             // This root task is always-on-top, override the default behavior.
             Slog.w(TAG_WM, "Ignoring move of always-on-top root task=" + this + " to bottom");
 
@@ -972,14 +972,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
         mDisplayContent.releaseSelfIfNeeded();
         onRootTaskOrderChanged(rootTask);
-    }
-
-    /** Reset the mPreferredTopFocusableRootTask if it is or below the given task. */
-    void resetPreferredTopFocusableRootTaskIfNeeded(Task task) {
-        if (mPreferredTopFocusableRootTask != null
-                && mPreferredTopFocusableRootTask.compareTo(task) <= 0) {
-            mPreferredTopFocusableRootTask = null;
-        }
     }
 
     /**
