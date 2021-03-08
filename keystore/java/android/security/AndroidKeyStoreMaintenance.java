@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
-import android.security.usermanager.IKeystoreUserManager;
+import android.security.maintenance.IKeystoreMaintenance;
 import android.system.keystore2.Domain;
 import android.system.keystore2.ResponseCode;
 import android.util.Log;
@@ -34,9 +34,9 @@ public class AndroidKeyStoreMaintenance {
 
     public static final int SYSTEM_ERROR = ResponseCode.SYSTEM_ERROR;
 
-    private static IKeystoreUserManager getService() {
-        return IKeystoreUserManager.Stub.asInterface(
-                ServiceManager.checkService("android.security.usermanager"));
+    private static IKeystoreMaintenance getService() {
+        return IKeystoreMaintenance.Stub.asInterface(
+                ServiceManager.checkService("android.security.maintenance"));
     }
 
     /**
