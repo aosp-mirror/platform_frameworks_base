@@ -346,43 +346,6 @@ public class LocationManager {
      */
     public static final String EXTRA_GNSS_CAPABILITIES = "android.location.extra.GNSS_CAPABILITIES";
 
-    /**
-     * Broadcast intent action for Settings app to inject a footer at the bottom of location
-     * settings. This is for use only by apps that are included in the system image.
-     *
-     * <p>To inject a footer to location settings, you must declare a broadcast receiver for
-     * this action in the manifest:
-     * <pre>
-     *     &lt;receiver android:name="com.example.android.footer.MyFooterInjector"&gt;
-     *         &lt;intent-filter&gt;
-     *             &lt;action android:name="com.android.settings.location.INJECT_FOOTER" /&gt;
-     *         &lt;/intent-filter&gt;
-     *         &lt;meta-data
-     *             android:name="com.android.settings.location.FOOTER_STRING"
-     *             android:resource="@string/my_injected_footer_string" /&gt;
-     *     &lt;/receiver&gt;
-     * </pre>
-     *
-     * <p>This broadcast receiver will never actually be invoked. See also
-     * {#METADATA_SETTINGS_FOOTER_STRING}.
-     *
-     * @hide
-     */
-    public static final String SETTINGS_FOOTER_DISPLAYED_ACTION =
-            "com.android.settings.location.DISPLAYED_FOOTER";
-
-    /**
-     * Metadata name for {@link LocationManager#SETTINGS_FOOTER_DISPLAYED_ACTION} broadcast
-     * receivers to specify a string resource id as location settings footer text. This is for use
-     * only by apps that are included in the system image.
-     *
-     * <p>See {@link #SETTINGS_FOOTER_DISPLAYED_ACTION} for more detail on how to use.
-     *
-     * @hide
-     */
-    public static final String METADATA_SETTINGS_FOOTER_STRING =
-            "com.android.settings.location.FOOTER_STRING";
-
     private static final long MAX_SINGLE_LOCATION_TIMEOUT_MS = 30 * 1000;
 
     private static final String CACHE_KEY_LOCATION_ENABLED_PROPERTY =
