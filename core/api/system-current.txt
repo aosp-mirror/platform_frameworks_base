@@ -4343,7 +4343,7 @@ package android.location {
 
   public final class CorrelationVector implements android.os.Parcelable {
     method public int describeContents();
-    method @IntRange(from=0) public int getFrequencyOffsetMetersPerSecond();
+    method @FloatRange(from=0.0f) public double getFrequencyOffsetMetersPerSecond();
     method @NonNull public int[] getMagnitude();
     method @FloatRange(from=0.0f) public double getSamplingStartMeters();
     method @FloatRange(from=0.0f, fromInclusive=false) public double getSamplingWidthMeters();
@@ -4354,7 +4354,7 @@ package android.location {
   public static final class CorrelationVector.Builder {
     ctor public CorrelationVector.Builder();
     method @NonNull public android.location.CorrelationVector build();
-    method @NonNull public android.location.CorrelationVector.Builder setFrequencyOffsetMetersPerSecond(@IntRange(from=0) int);
+    method @NonNull public android.location.CorrelationVector.Builder setFrequencyOffsetMetersPerSecond(@FloatRange(from=0.0f) double);
     method @NonNull public android.location.CorrelationVector.Builder setMagnitude(@NonNull int[]);
     method @NonNull public android.location.CorrelationVector.Builder setSamplingStartMeters(@FloatRange(from=0.0f) double);
     method @NonNull public android.location.CorrelationVector.Builder setSamplingWidthMeters(@FloatRange(from=0.0f, fromInclusive=false) double);
