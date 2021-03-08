@@ -60,7 +60,7 @@ final class OneTimeSafetyChecker implements DevicePolicySafetyChecker {
         mOperation = operation;
         mReason = reason;
         mRealSafetyChecker = service.getDevicePolicySafetyChecker();
-        Slog.i(TAG, "OneTimeSafetyChecker constructor: operation= " + operationToString(operation)
+        Slog.i(TAG, "OneTimeSafetyChecker constructor: operation=" + operationToString(operation)
                 + ", reason=" + operationSafetyReasonToString(reason)
                 + ", realChecker=" + mRealSafetyChecker
                 + ", maxDuration=" + SELF_DESTRUCT_TIMEOUT_MS + "ms");
