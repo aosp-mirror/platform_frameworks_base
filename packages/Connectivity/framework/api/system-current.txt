@@ -336,14 +336,18 @@ package android.net {
 
   public final class NetworkScore implements android.os.Parcelable {
     method public int describeContents();
+    method public int getKeepConnectedReason();
     method public int getLegacyInt();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkScore> CREATOR;
+    field public static final int KEEP_CONNECTED_FOR_HANDOVER = 1; // 0x1
+    field public static final int KEEP_CONNECTED_NONE = 0; // 0x0
   }
 
   public static final class NetworkScore.Builder {
     ctor public NetworkScore.Builder();
     method @NonNull public android.net.NetworkScore build();
+    method @NonNull public android.net.NetworkScore.Builder setKeepConnectedReason(int);
     method @NonNull public android.net.NetworkScore.Builder setLegacyInt(int);
   }
 

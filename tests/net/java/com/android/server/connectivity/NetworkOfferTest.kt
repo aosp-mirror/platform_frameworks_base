@@ -19,6 +19,7 @@ package com.android.server.connectivity
 import android.net.INetworkOfferCallback
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.net.NetworkScore.KEEP_CONNECTED_NONE
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import org.junit.Test
@@ -38,7 +39,7 @@ class NetworkOfferTest {
 
     @Test
     fun testOfferNeededUnneeded() {
-        val score = FullScore(50, POLICY_NONE)
+        val score = FullScore(50, POLICY_NONE, KEEP_CONNECTED_NONE)
         val offer = NetworkOffer(score, NetworkCapabilities.Builder().build(), mockCallback,
                 1 /* providerId */)
         val request1 = mock(NetworkRequest::class.java)
