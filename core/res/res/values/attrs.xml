@@ -8633,6 +8633,9 @@
          Described here are the attributes that can be included in that tag. -->
     <declare-styleable name="RecognitionService">
         <attr name="settingsActivity" />
+        <!-- Flag indicating whether a recognition service can be selected as default. The default
+             value of this flag is true. -->
+        <attr name="selectableAsDefault" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>voice-interaction-service</code> as the root tag of the XML resource that
