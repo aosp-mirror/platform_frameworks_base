@@ -314,8 +314,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         /** Gets the subId indicated by the given {@link WifiInfo}. */
         public int getSubIdForWifiInfo(@NonNull WifiInfo wifiInfo) {
-            // TODO(b/178501049): use the subId indicated by WifiInfo#getSubscriptionId
-            return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+            return wifiInfo.getSubscriptionId();
         }
 
         /** Creates a new LocationPermissionChecker for the provided Context. */
