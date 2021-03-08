@@ -6583,10 +6583,6 @@ public class Notification implements Parcelable
             return R.layout.notification_template_material_conversation;
         }
 
-        private int getCallLayoutResource() {
-            return R.layout.notification_template_material_call;
-        }
-
         private int getActionLayoutResource() {
             return R.layout.notification_material_action;
         }
@@ -9329,7 +9325,7 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeContentView(boolean increasedHeight) {
-            return makeCallLayout();
+            return makeCallLayout(StandardTemplateParams.VIEW_TYPE_NORMAL);
         }
 
         /**
@@ -9337,14 +9333,14 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            return makeCallLayout();
+            return makeCallLayout(StandardTemplateParams.VIEW_TYPE_HEADS_UP);
         }
 
         /**
          * @hide
          */
         public RemoteViews makeBigContentView() {
-            return makeCallLayout();
+            return makeCallLayout(StandardTemplateParams.VIEW_TYPE_BIG);
         }
 
         @NonNull
@@ -9443,7 +9439,7 @@ public class Notification implements Parcelable
             return resultActions;
         }
 
-        private RemoteViews makeCallLayout() {
+        private RemoteViews makeCallLayout(int viewType) {
             Bundle extras = mBuilder.mN.extras;
             CharSequence text = mBuilder.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
             if (text == null) {
@@ -9452,15 +9448,21 @@ public class Notification implements Parcelable
 
             // Bind standard template
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(viewType)
                     .callStyleActions(true)
                     .allowTextWithProgress(true)
                     .hideLargeIcon(true)
                     .text(text)
                     .summaryText(mBuilder.processLegacyText(mVerificationText));
             mBuilder.mActions = getActionsListWithSystemActions();
-            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
-                    mBuilder.getCallLayoutResource(), p, null /* result */);
+            final RemoteViews contentView;
+            if (p.mViewType != StandardTemplateParams.VIEW_TYPE_NORMAL) {
+                contentView = mBuilder.applyStandardTemplateWithActions(
+                        R.layout.notification_template_material_big_call, p, null /* result */);
+            } else {
+                contentView = mBuilder.applyStandardTemplate(
+                        R.layout.notification_template_material_call, p, null /* result */);
+            }
 
             // Bind some extra conversation-specific header fields.
             mBuilder.setTextViewColorPrimary(contentView, R.id.conversation_text, p);
