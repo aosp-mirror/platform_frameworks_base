@@ -287,6 +287,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.settings.internalVersion).thenReturn(DEFAULT_VERSION_INFO)
         whenever(mocks.settings.keySetManagerService).thenReturn(mocks.keySetManagerService)
         whenever(mocks.settings.keySetManagerService).thenReturn(mocks.keySetManagerService)
+        whenever(mocks.settings.snapshot()).thenReturn(mocks.settings)
         whenever(mocks.packageAbiHelper.derivePackageAbi(
                 any(AndroidPackage::class.java), anyBoolean(), nullable(), any(File::class.java))) {
             android.util.Pair(PackageAbiHelper.Abis("", ""),
