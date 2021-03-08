@@ -5566,6 +5566,12 @@
     <permission android:name="android.permission.RENOUNCE_PERMISSIONS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows the holder to set the source of the data when setting a clip on the
+         clipboard.
+         @hide -->
+    <permission android:name="android.permission.SET_CLIP_SOURCE"
+                android:protectionLevel="signature|recents" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
