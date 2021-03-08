@@ -79,6 +79,7 @@ android_test {
         "android.test.runner",
         "android.test.base",
         "android.test.mock",
+        "ServiceConnectivityResources",
     ],
     jni_libs: [
         "libservice-connectivity",
