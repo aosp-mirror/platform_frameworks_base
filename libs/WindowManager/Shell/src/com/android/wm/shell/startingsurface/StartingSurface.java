@@ -19,6 +19,7 @@ package com.android.wm.shell.startingsurface;
 import android.os.IBinder;
 import android.window.StartingWindowInfo;
 
+import java.util.function.BiConsumer;
 /**
  * Interface to engage starting window feature.
  */
@@ -36,4 +37,11 @@ public interface StartingSurface {
      * @param taskId
      */
     void copySplashScreenView(int taskId);
+
+    /**
+     * Registers the starting window listener.
+     *
+     * @param listener The callback when need a starting window.
+     */
+    void setStartingWindowListener(BiConsumer<Integer, Integer> listener);
 }
