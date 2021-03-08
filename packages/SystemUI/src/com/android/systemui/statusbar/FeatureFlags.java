@@ -90,4 +90,8 @@ public class FeatureFlags {
     public boolean isPMLiteEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_pm_lite);
     }
+
+    public boolean isAlarmTileAvailable() {
+        return mFlagReader.isEnabled(R.bool.flag_alarm_tile);
+    }
 }
