@@ -13639,6 +13639,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mInjector.binderWithCleanCallingIdentity(() -> {
             // Clear restriction as user.
             final UserHandle parentUser = mUserManager.getProfileParent(UserHandle.of(userId));
+            if (parentUser == null) {
+                throw new IllegalStateException(String.format("User %d is not a profile", userId));
+            }
             if (!parentUser.isSystem()) {
                 throw new IllegalStateException(
                         String.format("Only the profile owner of a managed profile on the"
