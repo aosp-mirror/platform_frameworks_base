@@ -6254,6 +6254,9 @@ public class Notification implements Parcelable
             if (rawColor == COLOR_DEFAULT) {
                 ensureColors(p);
                 color = ContrastColorUtil.resolveDefaultColor(mContext, background, mInNightMode);
+                if (mTintWithThemeAccent) {
+                    color = obtainThemeColor(R.attr.colorAccent, color);
+                }
             } else {
                 color = ContrastColorUtil.resolveContrastColor(mContext, rawColor,
                         background, mInNightMode);
