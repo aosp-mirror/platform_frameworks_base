@@ -488,6 +488,8 @@ applications that come with the platform
         <permission name="android.permission.READ_PEOPLE_DATA" />
         <!-- Permission required for CTS test - UiTranslationManagerTest -->
         <permission name="android.permission.MANAGE_UI_TRANSLATION" />
+        <!-- Permission required for CTS test - ClipboardManagerTest -->
+        <permission name="android.permission.SET_CLIP_SOURCE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
