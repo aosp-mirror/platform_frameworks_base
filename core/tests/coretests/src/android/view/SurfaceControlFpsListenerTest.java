@@ -39,7 +39,7 @@ public class SurfaceControlFpsListenerTest {
             }
         };
 
-        listener.register(new SurfaceControl());
+        listener.register(0);
 
         listener.unregister();
     }
