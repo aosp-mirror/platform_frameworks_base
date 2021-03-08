@@ -164,7 +164,7 @@ public class ScrollCaptureController {
         if (mImageTileSet.isEmpty()) {
             mCaptureCallback.onError();
         } else {
-            mCaptureCallback.onComplete(mImageTileSet);
+            mCaptureCallback.onComplete(mImageTileSet, session.getPageHeight());
         }
     }
 
@@ -172,7 +172,7 @@ public class ScrollCaptureController {
      * Callback for image capture completion or error.
      */
     public interface ScrollCaptureCallback {
-        void onComplete(ImageTileSet imageTileSet);
+        void onComplete(ImageTileSet imageTileSet, int pageHeight);
         void onError();
     }
 
