@@ -3471,13 +3471,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // Special permissions for the device configurator.
             allowed = true;
         }
-        if (!allowed && bp.isWellbeing()
-                && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_WELLBEING, UserHandle.USER_SYSTEM),
-                pkg.getPackageName())) {
-            // Special permission granted only to the OEM specified wellbeing app
-            allowed = true;
-        }
         if (!allowed && bp.isDocumenter()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                         PackageManagerInternal.PACKAGE_DOCUMENTER, UserHandle.USER_SYSTEM),
