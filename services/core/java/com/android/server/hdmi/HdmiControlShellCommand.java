@@ -35,9 +35,23 @@ final class HdmiControlShellCommand extends ShellCommand {
 
     private final IHdmiControlService.Stub mBinderService;
 
+    final CountDownLatch mLatch;
+    AtomicInteger mCecResult;
+    IHdmiControlCallback.Stub mHdmiControlCallback;
 
     HdmiControlShellCommand(IHdmiControlService.Stub binderService) {
         mBinderService = binderService;
+        mLatch = new CountDownLatch(1);
+        mCecResult = new AtomicInteger();
+        mHdmiControlCallback =
+                new IHdmiControlCallback.Stub() {
+                    @Override
+                    public void onComplete(int result) {
+                        getOutPrintWriter().println(" done (" + getResultString(result) + ")");
+                        mCecResult.set(result);
+                        mLatch.countDown();
+                    }
+                };
     }
 
     @Override
@@ -74,6 +88,8 @@ final class HdmiControlShellCommand extends ShellCommand {
         pw.println("      Get the current value of a CEC setting");
         pw.println("  cec_setting set <setting name> <value>");
         pw.println("      Set the value of a CEC setting");
+        pw.println("  setsystemaudiomode, setsam [on|off]");
+        pw.println("      Sets the System Audio Mode feature on or off on TV devices");
     }
 
     private int handleShellCommand(String cmd) throws RemoteException {
@@ -87,6 +103,9 @@ final class HdmiControlShellCommand extends ShellCommand {
                 return vendorCommand(pw);
             case "cec_setting":
                 return cecSetting(pw);
+            case "setsystemaudiomode":
+            case "setsam":
+                return setSystemAudioMode(pw);
         }
 
         getErrPrintWriter().println("Unhandled command: " + cmd);
@@ -94,28 +113,14 @@ final class HdmiControlShellCommand extends ShellCommand {
     }
 
     private int oneTouchPlay(PrintWriter pw) throws RemoteException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        AtomicInteger cecResult = new AtomicInteger();
         pw.print("Sending One Touch Play...");
-        mBinderService.oneTouchPlay(new IHdmiControlCallback.Stub() {
-            @Override
-            public void onComplete(int result) {
-                pw.println(" done (" + result + ")");
-                latch.countDown();
-                cecResult.set(result);
-            }
-        });
+        mBinderService.oneTouchPlay(mHdmiControlCallback);
 
-        try {
-            if (!latch.await(HdmiConfig.TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-                getErrPrintWriter().println("One Touch Play timed out.");
-                return 1;
-            }
-        } catch (InterruptedException e) {
-            getErrPrintWriter().println("Caught InterruptedException");
-            Thread.currentThread().interrupt();
+        if (!receiveCallback("One Touch Play")) {
+            return 1;
         }
-        return cecResult.get() == HdmiControlManager.RESULT_SUCCESS ? 0 : 1;
+
+        return mCecResult.get() == HdmiControlManager.RESULT_SUCCESS ? 0 : 1;
     }
 
     private int vendorCommand(PrintWriter pw) throws RemoteException {
@@ -197,5 +202,63 @@ final class HdmiControlShellCommand extends ShellCommand {
             default:
                 throw new IllegalArgumentException("Unknown operation: " + operation);
         }
+    }
+
+    private int setSystemAudioMode(PrintWriter pw) throws RemoteException {
+        if (1 > getRemainingArgsCount()) {
+            throw new IllegalArgumentException(
+                    "Please indicate if System Audio Mode should be turned \"on\" or \"off\".");
+        }
+
+        String arg = getNextArg();
+        if (arg.equals("on")) {
+            pw.println("Setting System Audio Mode on");
+            mBinderService.setSystemAudioMode(true, mHdmiControlCallback);
+        } else if (arg.equals("off")) {
+            pw.println("Setting System Audio Mode off");
+            mBinderService.setSystemAudioMode(false, mHdmiControlCallback);
+        } else {
+            throw new IllegalArgumentException(
+                    "Please indicate if System Audio Mode should be turned \"on\" or \"off\".");
+        }
+
+        if (!receiveCallback("Set System Audio Mode")) {
+            return 1;
+        }
+
+        return mCecResult.get() == HdmiControlManager.RESULT_SUCCESS ? 0 : 1;
+    }
+
+    private boolean receiveCallback(String command) {
+        try {
+            if (!mLatch.await(HdmiConfig.TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                getErrPrintWriter().println(command + " timed out.");
+                return false;
+            }
+        } catch (InterruptedException e) {
+            getErrPrintWriter().println("Caught InterruptedException");
+            Thread.currentThread().interrupt();
+        }
+        return true;
+    }
+
+    private String getResultString(int result) {
+        switch (result) {
+            case HdmiControlManager.RESULT_SUCCESS:
+                return "Success";
+            case HdmiControlManager.RESULT_TIMEOUT:
+                return "Timeout";
+            case HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE:
+                return "Source not available";
+            case HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE:
+                return "Target not available";
+            case HdmiControlManager.RESULT_EXCEPTION:
+                return "Exception";
+            case HdmiControlManager.RESULT_INCORRECT_MODE:
+                return "Incorrect mode";
+            case HdmiControlManager.RESULT_COMMUNICATION_FAILED:
+                return "Communication Failed";
+        }
+        return Integer.toString(result);
     }
 }
