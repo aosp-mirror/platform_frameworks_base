@@ -46,7 +46,8 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final long durationMs = calculateDuration(batteryStats, rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED);
-        final double powerMah = getMeasuredOrEstimatedPower(batteryStats.getScreenDozeEnergy(),
+        final double powerMah = getMeasuredOrEstimatedPower(
+                batteryStats.getScreenDozeMeasuredBatteryConsumptionUC(),
                 mPowerEstimator, durationMs, query.shouldForceUsePowerProfileModel());
         builder.getOrCreateSystemBatteryConsumerBuilder(
                         SystemBatteryConsumer.DRAIN_TYPE_AMBIENT_DISPLAY)
@@ -64,7 +65,8 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
         final long durationMs = calculateDuration(batteryStats, rawRealtimeUs, statsType);
-        final double powerMah = getMeasuredOrEstimatedPower(batteryStats.getScreenDozeEnergy(),
+        final double powerMah = getMeasuredOrEstimatedPower(
+                batteryStats.getScreenDozeMeasuredBatteryConsumptionUC(),
                 mPowerEstimator, durationMs, false);
         if (powerMah > 0) {
             BatterySipper bs = new BatterySipper(BatterySipper.DrainType.AMBIENT_DISPLAY, null, 0);
@@ -78,5 +80,4 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
     private long calculateDuration(BatteryStats batteryStats, long rawRealtimeUs, int statsType) {
         return batteryStats.getScreenDozeTime(rawRealtimeUs, statsType) / 1000;
     }
-
 }

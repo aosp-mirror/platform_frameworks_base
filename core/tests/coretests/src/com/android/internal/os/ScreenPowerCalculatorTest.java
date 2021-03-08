@@ -52,19 +52,19 @@ public class ScreenPowerCalculatorTest {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
         batteryStats.noteScreenStateLocked(Display.STATE_ON, 0, 0, 0);
-        batteryStats.updateDisplayEnergyLocked(0, Display.STATE_ON, 2 * MINUTE_IN_MS);
+        batteryStats.updateDisplayMeasuredEnergyStatsLocked(0, Display.STATE_ON, 2 * MINUTE_IN_MS);
 
         setFgState(APP_UID1, true, 2 * MINUTE_IN_MS, 2 * MINUTE_IN_MS);
         setFgState(APP_UID1, false, 20 * MINUTE_IN_MS, 20 * MINUTE_IN_MS);
         setFgState(APP_UID2, true, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
 
-        batteryStats.updateDisplayEnergyLocked(300_000_000, Display.STATE_ON,
+        batteryStats.updateDisplayMeasuredEnergyStatsLocked(300_000_000, Display.STATE_ON,
                 60 * MINUTE_IN_MS);
 
         batteryStats.noteScreenStateLocked(Display.STATE_OFF,
                 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
 
-        batteryStats.updateDisplayEnergyLocked(100_000_000, Display.STATE_DOZE,
+        batteryStats.updateDisplayMeasuredEnergyStatsLocked(100_000_000, Display.STATE_DOZE,
                 120 * MINUTE_IN_MS);
 
         mStatsRule.setTime(120 * MINUTE_IN_US, 120 * MINUTE_IN_US);
@@ -78,20 +78,29 @@ public class ScreenPowerCalculatorTest {
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_SCREEN);
         assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE))
                 .isEqualTo(80 * MINUTE_IN_MS);
+
+        // 400000000 uAs * (1 mA / 1000 uA) * (1 h / 3600 s)  = 111.11111 mAh
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE))
-                .isWithin(PRECISION).of(30.03003);
+                .isWithin(PRECISION).of(111.11111);
 
         UidBatteryConsumer uid1 = mStatsRule.getUidBatteryConsumer(APP_UID1);
         assertThat(uid1.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
                 .isEqualTo(18 * MINUTE_IN_MS);
+
+        // Uid1 ran for 18 minutes out of the total 48 min of foreground time during the first
+        // Display update. Uid1 charge = 18 / 48 * 300000000 uAs = 31.25 mAh
         assertThat(uid1.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
-                .isWithin(PRECISION).of(8.44594);
+                .isWithin(PRECISION).of(31.25);
 
         UidBatteryConsumer uid2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
         assertThat(uid2.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
                 .isEqualTo(90 * MINUTE_IN_MS);
+
+        // Uid2 ran for 30 minutes out of the total 48 min of foreground time during the first
+        // Display update and then took all of the time during the second Display update.
+        // Uid1 charge = 30 / 48 * 300000000 + 100000000 mAs = 79.86111 mAh
         assertThat(uid2.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
-                .isWithin(PRECISION).of(21.58408);
+                .isWithin(PRECISION).of(79.86111);
     }
 
     @Test
