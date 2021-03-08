@@ -20177,14 +20177,15 @@ package android.media {
     method public void adjustStreamVolume(int, int, int);
     method public void adjustSuggestedStreamVolume(int, int, int);
     method public void adjustVolume(int, int);
-    method public void clearDeviceForCommunication();
+    method public void clearCommunicationDevice();
     method public void dispatchMediaKeyEvent(android.view.KeyEvent);
     method public int generateAudioSessionId();
     method @NonNull public java.util.List<android.media.AudioPlaybackConfiguration> getActivePlaybackConfigurations();
     method @NonNull public java.util.List<android.media.AudioRecordingConfiguration> getActiveRecordingConfigurations();
     method public int getAllowedCapturePolicy();
     method public int getAudioHwSyncForSession(int);
-    method @Nullable public android.media.AudioDeviceInfo getDeviceForCommunication();
+    method @NonNull public java.util.List<android.media.AudioDeviceInfo> getAvailableCommunicationDevices();
+    method @Nullable public android.media.AudioDeviceInfo getCommunicationDevice();
     method public android.media.AudioDeviceInfo[] getDevices(int);
     method public java.util.List<android.media.MicrophoneInfo> getMicrophones() throws java.io.IOException;
     method public int getMode();
@@ -20226,7 +20227,7 @@ package android.media {
     method public void setAllowedCapturePolicy(int);
     method @Deprecated public void setBluetoothA2dpOn(boolean);
     method public void setBluetoothScoOn(boolean);
-    method public boolean setDeviceForCommunication(@NonNull android.media.AudioDeviceInfo);
+    method public boolean setCommunicationDevice(@NonNull android.media.AudioDeviceInfo);
     method public void setMicrophoneMute(boolean);
     method public void setMode(int);
     method public void setParameters(String);
