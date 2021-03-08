@@ -13770,9 +13770,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print(" unmapped + ");
                         pw.print(stringifyKBSize(ionPool));
                         pw.println(" pools)");
+                kernelUsed += ionUnmapped;
                 // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
-                // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
-                kernelUsed += ionHeap;
+                // set on ION VMAs, however it might be included by the memtrack HAL.
+                // Replace memtrack HAL reported Graphics category with mapped dmabufs
+                totalPss -= totalMemtrackGraphics;
+                totalPss += dmabufMapped;
             } else {
                 final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
                 if (totalExportedDmabuf >= 0) {
@@ -14632,17 +14635,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         long kernelUsed = memInfo.getKernelUsedSizeKb();
         final long ionHeap = Debug.getIonHeapsSizeKb();
         final long ionPool = Debug.getIonPoolsSizeKb();
+        final long dmabufMapped = Debug.getDmabufMappedSizeKb();
         if (ionHeap >= 0 && ionPool >= 0) {
+            final long ionUnmapped = ionHeap - dmabufMapped;
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
             memInfoBuilder.append("\n");
+            kernelUsed += ionUnmapped;
             // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
-            // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
-            kernelUsed += ionHeap;
+            // set on ION VMAs, however it might be included by the memtrack HAL.
+            // Replace memtrack HAL reported Graphics category with mapped dmabufs
+            totalPss -= totalMemtrackGraphics;
+            totalPss += dmabufMapped;
         } else {
             final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
             if (totalExportedDmabuf >= 0) {
-                final long dmabufMapped = Debug.getDmabufMappedSizeKb();
                 final long dmabufUnmapped = totalExportedDmabuf - dmabufMapped;
                 memInfoBuilder.append("DMA-BUF: ");
                 memInfoBuilder.append(stringifyKBSize(totalExportedDmabuf));
