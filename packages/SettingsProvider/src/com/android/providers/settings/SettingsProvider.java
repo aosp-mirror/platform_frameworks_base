@@ -3396,7 +3396,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 198;
+            private static final int SETTINGS_VERSION = 199;
 
             private final int mUserId;
 
@@ -4894,6 +4894,36 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 198;
                 }
 
+                if (currentVersion == 198) {
+                    // Version 198: Set the default value for accessibility button. If the user
+                    // uses accessibility button in the navigation bar to trigger their
+                    // accessibility features (check if ACCESSIBILITY_BUTTON_TARGETS has value)
+                    // then leave accessibility button mode in the navigation bar, otherwise, set it
+                    // to the floating menu.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting accessibilityButtonMode = secureSettings.getSettingLocked(
+                            Secure.ACCESSIBILITY_BUTTON_MODE);
+                    if (accessibilityButtonMode.isNull()) {
+                        if (isAccessibilityButtonInNavigationBarOn(secureSettings)) {
+                            secureSettings.insertSettingLocked(Secure.ACCESSIBILITY_BUTTON_MODE,
+                                    String.valueOf(
+                                            Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR),
+                                    /*tag= */ null, /* makeDefault= */ false,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        } else {
+                            final int defAccessibilityButtonMode =
+                                    getContext().getResources().getInteger(
+                                            R.integer.def_accessibility_button_mode);
+                            secureSettings.insertSettingLocked(Secure.ACCESSIBILITY_BUTTON_MODE,
+                                    String.valueOf(defAccessibilityButtonMode), /* tag= */
+                                    null, /* makeDefault= */ true,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 199;
+                }
+
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {
@@ -5071,6 +5101,16 @@ public class SettingsProvider extends ContentProvider {
                 items.add(str);
             }
             return items;
+        }
+
+        private boolean isAccessibilityButtonInNavigationBarOn(SettingsState secureSettings) {
+            final boolean hasValueInA11yBtnTargets = !TextUtils.isEmpty(
+                    secureSettings.getSettingLocked(
+                            Secure.ACCESSIBILITY_BUTTON_TARGETS).getValue());
+            final int navigationMode = getContext().getResources().getInteger(
+                    com.android.internal.R.integer.config_navBarInteractionMode);
+
+            return hasValueInA11yBtnTargets && (navigationMode != NAV_BAR_MODE_GESTURAL);
         }
     }
 }
