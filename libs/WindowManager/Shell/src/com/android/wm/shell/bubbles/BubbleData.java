@@ -24,7 +24,10 @@ import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -75,6 +78,8 @@ public class BubbleData {
         @Nullable Bubble updatedBubble;
         @Nullable Bubble addedOverflowBubble;
         @Nullable Bubble removedOverflowBubble;
+        @Nullable Bubble suppressedBubble;
+        @Nullable Bubble unsuppressedBubble;
         // Pair with Bubble and @DismissReason Integer
         final List<Pair<Bubble, Integer>> removedBubbles = new ArrayList<>();
 
@@ -95,7 +100,9 @@ public class BubbleData {
                     || !removedBubbles.isEmpty()
                     || addedOverflowBubble != null
                     || removedOverflowBubble != null
-                    || orderChanged;
+                    || orderChanged
+                    || suppressedBubble != null
+                    || unsuppressedBubble != null;
         }
 
         void bubbleRemoved(Bubble bubbleToRemove, @DismissReason int reason) {
@@ -125,6 +132,11 @@ public class BubbleData {
     private final List<Bubble> mOverflowBubbles;
     /** Bubbles that are being loaded but haven't been added to the stack just yet. */
     private final HashMap<String, Bubble> mPendingBubbles;
+    /** Bubbles that are suppressed due to locusId. */
+    private final ArrayMap<LocusId, Bubble> mSuppressedBubbles = new ArrayMap<>();
+    /** Visible locusIds. */
+    private final ArraySet<LocusId> mVisibleLocusIds = new ArraySet<>();
+
     private BubbleViewProvider mSelectedBubble;
     private final BubbleOverflow mOverflow;
     private boolean mShowingOverflow;
@@ -141,7 +153,7 @@ public class BubbleData {
     private Listener mListener;
 
     @Nullable
-    private Bubbles.NotificationSuppressionChangedListener mSuppressionListener;
+    private Bubbles.SuppressionChangedListener mSuppressionListener;
     private Bubbles.PendingIntentCanceledListener mCancelledListener;
 
     /**
@@ -173,7 +185,7 @@ public class BubbleData {
     }
 
     public void setSuppressionChangedListener(
-            Bubbles.NotificationSuppressionChangedListener listener) {
+            Bubbles.SuppressionChangedListener listener) {
         mSuppressionListener = listener;
     }
 
@@ -321,6 +333,18 @@ public class BubbleData {
         bubble.setSuppressNotification(suppress);
         bubble.setShowDot(!isBubbleExpandedAndSelected /* show */);
 
+        LocusId locusId = bubble.getLocusId();
+        if (locusId != null) {
+            boolean isSuppressed = mSuppressedBubbles.containsKey(locusId);
+            if (isSuppressed && (!bubble.isSuppressed() || !bubble.isSuppressable())) {
+                mSuppressedBubbles.remove(locusId);
+                mStateChange.unsuppressedBubble = bubble;
+            } else if (!isSuppressed && (bubble.isSuppressed()
+                    || bubble.isSuppressable() && mVisibleLocusIds.contains(locusId))) {
+                mSuppressedBubbles.put(locusId, bubble);
+                mStateChange.suppressedBubble = bubble;
+            }
+        }
         dispatchPendingChanges();
     }
 
@@ -581,6 +605,43 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
+    /**
+     * Called in response to the visibility of a locusId changing. A locusId is set on a task
+     * and if there's a matching bubble for that locusId then the bubble may be hidden or shown
+     * depending on the visibility of the locusId.
+     *
+     * @param taskId the taskId associated with the locusId visibility change.
+     * @param locusId the locusId whose visibility has changed.
+     * @param visible whether the task with the locusId is visible or not.
+     */
+    public void onLocusVisibilityChanged(int taskId, LocusId locusId, boolean visible) {
+        Bubble matchingBubble = getBubbleInStackWithLocusId(locusId);
+        // Don't add the locus if it's from a bubble'd activity, we only suppress for non-bubbled.
+        if (visible && (matchingBubble == null || matchingBubble.getTaskId() != taskId)) {
+            mVisibleLocusIds.add(locusId);
+        } else {
+            mVisibleLocusIds.remove(locusId);
+        }
+        if (matchingBubble == null) {
+            return;
+        }
+        boolean isAlreadySuppressed = mSuppressedBubbles.get(locusId) != null;
+        if (visible && !isAlreadySuppressed && matchingBubble.isSuppressable()
+                && taskId != matchingBubble.getTaskId()) {
+            mSuppressedBubbles.put(locusId, matchingBubble);
+            matchingBubble.setSuppressBubble(true);
+            mStateChange.suppressedBubble = matchingBubble;
+            dispatchPendingChanges();
+        } else if (!visible) {
+            Bubble unsuppressedBubble = mSuppressedBubbles.remove(locusId);
+            if (unsuppressedBubble != null) {
+                unsuppressedBubble.setSuppressBubble(false);
+                mStateChange.unsuppressedBubble = unsuppressedBubble;
+            }
+            dispatchPendingChanges();
+        }
+    }
+
     private void dispatchPendingChanges() {
         if (mListener != null && mStateChange.anythingChanged()) {
             mListener.applyUpdate(mStateChange);
@@ -785,6 +846,18 @@ public class BubbleData {
         for (int i = 0; i < mBubbles.size(); i++) {
             Bubble bubble = mBubbles.get(i);
             if (bubble.getKey().equals(key)) {
+                return bubble;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private Bubble getBubbleInStackWithLocusId(LocusId locusId) {
+        if (locusId == null) return null;
+        for (int i = 0; i < mBubbles.size(); i++) {
+            Bubble bubble = mBubbles.get(i);
+            if (locusId.equals(bubble.getLocusId())) {
                 return bubble;
             }
         }

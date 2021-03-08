@@ -106,7 +106,7 @@ public class BubbleDataTest extends ShellTestCase {
     private ArgumentCaptor<BubbleData.Update> mUpdateCaptor;
 
     @Mock
-    private Bubbles.NotificationSuppressionChangedListener mSuppressionListener;
+    private Bubbles.SuppressionChangedListener mSuppressionListener;
 
     @Mock
     private Bubbles.PendingIntentCanceledListener mPendingIntentCanceledListener;
