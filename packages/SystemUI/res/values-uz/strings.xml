@@ -116,7 +116,10 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Bekor qilish"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Ulashish"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Ekrandan yozib olish bekor qilindi"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Ekrandan yozib olingan video saqlandi. Uni ochish uchun bildirishnomani bosing."</string>
+    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
+    <skip />
+    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
+    <skip />
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Ekrandan yozib olingan vi olib tashlanmadi"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Zarur ruxsatlar olinmadi"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Ekranni yozib olish boshlanmadi"</string>
@@ -446,8 +449,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ishlatish uchun qurilma qulfini oching"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Bu qurilma tashkilotingizga tegishli"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Bu qurilma <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tashkilotiga tegishli"</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Bu qurilma <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tomonidan berilgan."</string>
     <string name="phone_hint" msgid="6682125338461375925">"Telefonni ochish uchun suring"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Ovozli yordam: belgidan boshlab suring"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Kamerani ochish uchun suring"</string>
