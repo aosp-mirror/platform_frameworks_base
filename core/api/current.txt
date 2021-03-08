@@ -1259,6 +1259,7 @@ package android {
     field public static final int segmentedButtonStyle = 16843568; // 0x1010330
     field public static final int selectAllOnFocus = 16843102; // 0x101015e
     field public static final int selectable = 16843238; // 0x10101e6
+    field public static final int selectableAsDefault = 16844352; // 0x1010640
     field public static final int selectableItemBackground = 16843534; // 0x101030e
     field public static final int selectableItemBackgroundBorderless = 16843868; // 0x101045c
     field @Deprecated public static final int selectedDateVerticalBar = 16843591; // 0x1010347
