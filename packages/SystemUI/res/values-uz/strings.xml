@@ -446,8 +446,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ishlatish uchun qurilma qulfini oching"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Bu qurilma tashkilotingizga tegishli"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Bu qurilma <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tashkilotiga tegishli"</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Bu qurilma <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tomonidan berilgan."</string>
     <string name="phone_hint" msgid="6682125338461375925">"Telefonni ochish uchun suring"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Ovozli yordam: belgidan boshlab suring"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Kamerani ochish uchun suring"</string>
