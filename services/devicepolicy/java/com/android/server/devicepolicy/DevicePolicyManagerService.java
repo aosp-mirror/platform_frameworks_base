@@ -5684,6 +5684,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (generationResult != KeyChain.KEY_GEN_SUCCESS) {
                     Log.e(LOG_TAG, String.format(
                             "KeyChain failed to generate a keypair, error %d.", generationResult));
+                    logGenerateKeyPairFailure(caller, isCredentialManagementApp);
                     switch (generationResult) {
                         case KeyChain.KEY_GEN_STRONGBOX_UNAVAILABLE:
                             throw new ServiceSpecificException(
@@ -5693,7 +5694,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             throw new UnsupportedOperationException(
                                 "Device does not support Device ID attestation.");
                         default:
-                            logGenerateKeyPairFailure(caller, isCredentialManagementApp);
                             return false;
                     }
                 }
