@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
-import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.TwoStatePreference;
 
@@ -79,8 +78,7 @@ public class MainSwitchPreference extends TwoStatePreference {
             final TypedArray a = context.obtainStyledAttributes(attrs,
                     androidx.preference.R.styleable.Preference, 0 /*defStyleAttr*/,
                     0 /*defStyleRes*/);
-            final CharSequence title = TypedArrayUtils.getText(a,
-                    androidx.preference.R.styleable.Preference_title,
+            final CharSequence title = a.getText(
                     androidx.preference.R.styleable.Preference_android_title);
             setTitle(title);
             a.recycle();
