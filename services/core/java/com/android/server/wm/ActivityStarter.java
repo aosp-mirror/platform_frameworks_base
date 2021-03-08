@@ -1572,7 +1572,7 @@ class ActivityStarter {
                 }
             } else {
                 if (!mAvoidMoveToFront && mDoResume
-                        && mRootWindowContainer.hasVisibleWindowAboveNotificationShade(
+                        && mRootWindowContainer.hasVisibleWindowAboveButDoesNotOwnNotificationShade(
                             r.launchedFromUid)) {
                     // If the UID launching the activity has a visible window on top of the
                     // notification shade and it's launching an activity that's going to be at the

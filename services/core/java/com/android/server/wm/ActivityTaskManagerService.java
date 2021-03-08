@@ -2940,7 +2940,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // startActivity() for these apps.
         if (!CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
             synchronized (mGlobalLock) {
-                if (mRootWindowContainer.hasVisibleWindowAboveNotificationShade(uid)) {
+                // It's ok that the owner of the shade is not allowed *per this rule* because it has
+                // BROADCAST_CLOSE_SYSTEM_DIALOGS (SystemUI), so it would fall into that rule.
+                if (mRootWindowContainer.hasVisibleWindowAboveButDoesNotOwnNotificationShade(uid)) {
                     return true;
                 }
             }

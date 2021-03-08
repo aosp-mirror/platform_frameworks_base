@@ -3143,11 +3143,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Returns {@code true} if {@code uid} has a visible window that's above a window of type {@link
-     * WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}. If there is no window with type {@link
-     * WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}, it returns {@code false}.
+     * Returns {@code true} if {@code uid} has a visible window that's above the window of type
+     * {@link WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE} and {@code uid} is not owner of
+     * the window of type {@link WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}.
+     *
+     * If there is no window with type {@link WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE},
+     * it returns {@code false}.
      */
-    boolean hasVisibleWindowAboveNotificationShade(int uid) {
+    boolean hasVisibleWindowAboveButDoesNotOwnNotificationShade(int uid) {
         boolean[] visibleWindowFound = {false};
         // We only return true if we found the notification shade (ie. window of type
         // TYPE_NOTIFICATION_SHADE). Usually, it should always be there, but if for some reason
@@ -3157,7 +3160,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 visibleWindowFound[0] = true;
             }
             if (w.mAttrs.type == TYPE_NOTIFICATION_SHADE) {
-                return visibleWindowFound[0];
+                return visibleWindowFound[0] && w.mOwnerUid != uid;
             }
             return false;
         }, true /* traverseTopToBottom */);
