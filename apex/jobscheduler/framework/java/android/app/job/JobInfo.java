@@ -59,6 +59,9 @@ import java.util.Objects;
  * constraint on the JobInfo object that you are creating. Otherwise, the builder would throw an
  * exception when building. From Android version {@link Build.VERSION_CODES#Q} and onwards, it is
  * valid to schedule jobs with no constraints.
+ * <p> Prior to Android version {@link Build.VERSION_CODES#S}, jobs could only have a maximum of 100
+ * jobs scheduled at a time. Starting with Android version {@link Build.VERSION_CODES#S}, that limit
+ * has been increased to 150. Expedited jobs also count towards the limit.
  * <p> In Android version {@link Build.VERSION_CODES#LOLLIPOP}, jobs had a maximum execution time
  * of one minute. Starting with Android version {@link Build.VERSION_CODES#M} and ending with
  * Android version {@link Build.VERSION_CODES#R}, jobs had a maximum execution time of 10 minutes.
