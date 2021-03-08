@@ -127,7 +127,7 @@ public final class ContextParams {
          */
         @NonNull
         public Builder setAttributionTag(@NonNull String attributionTag) {
-            mAttributionTag = Objects.requireNonNull(attributionTag);
+            mAttributionTag = attributionTag;
             return this;
         }
 
@@ -142,7 +142,7 @@ public final class ContextParams {
         @NonNull
         public Builder setReceiverPackage(@NonNull String packageName,
                 @Nullable String attributionTag) {
-            mReceiverPackage = Objects.requireNonNull(packageName);
+            mReceiverPackage = packageName;
             mReceiverAttributionTag = attributionTag;
             return this;
         }
@@ -170,7 +170,11 @@ public final class ContextParams {
         @SystemApi
         @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
         public @NonNull Builder setRenouncedPermissions(@NonNull Set<String> renouncedPermissions) {
-            mRenouncedPermissions = Collections.unmodifiableSet(renouncedPermissions);
+            if (renouncedPermissions != null) {
+                mRenouncedPermissions = Collections.unmodifiableSet(renouncedPermissions);
+            } else {
+                mRenouncedPermissions = null;
+            }
             return this;
         }
 
