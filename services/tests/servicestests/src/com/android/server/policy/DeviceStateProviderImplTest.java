@@ -150,8 +150,8 @@ public final class DeviceStateProviderImplTest {
         provider.setListener(listener);
 
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
-        final DeviceState[] expectedStates = new DeviceState[]{ new DeviceState(1, null),
-                new DeviceState(2, null) };
+        final DeviceState[] expectedStates = new DeviceState[]{ new DeviceState(1, ""),
+                new DeviceState(2, "") };
         assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
 
         verify(listener).onStateChanged(mIntegerCaptor.capture());
@@ -187,16 +187,22 @@ public final class DeviceStateProviderImplTest {
         provider.setListener(listener);
 
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
-        final DeviceState[] expectedStates = new DeviceState[]{ new DeviceState(1, null),
+        final DeviceState[] expectedStates = new DeviceState[]{ new DeviceState(1, ""),
                 new DeviceState(2, "CLOSED") };
         assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
+
+        // onStateChanged() should not be called because the provider has not yet been notified of
+        // the initial lid switch state.
+        verify(listener, never()).onStateChanged(mIntegerCaptor.capture());
+
+        provider.notifyLidSwitchChanged(0, false /* lidOpen */);
 
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(2, mIntegerCaptor.getValue().intValue());
 
         Mockito.clearInvocations(listener);
 
-        provider.notifyLidSwitchChanged(0, true /* lidOpen */);
+        provider.notifyLidSwitchChanged(1, true /* lidOpen */);
         verify(listener, never()).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(1, mIntegerCaptor.getValue().intValue());
@@ -260,9 +266,9 @@ public final class DeviceStateProviderImplTest {
         assertArrayEquals(
                 new DeviceState[]{ new DeviceState(1, "CLOSED"), new DeviceState(2, "HALF_OPENED"),
                         new DeviceState(3, "OPENED") }, mDeviceStateArrayCaptor.getValue());
-
-        verify(listener).onStateChanged(mIntegerCaptor.capture());
-        assertEquals(1, mIntegerCaptor.getValue().intValue());
+        // onStateChanged() should not be called because the provider has not yet been notified of
+        // the initial sensor state.
+        verify(listener, never()).onStateChanged(mIntegerCaptor.capture());
 
         Mockito.clearInvocations(listener);
 
