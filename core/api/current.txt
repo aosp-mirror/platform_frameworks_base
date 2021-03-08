@@ -37468,6 +37468,7 @@ package android.service.autofill {
     method public void onDisconnected();
     method public abstract void onFillRequest(@NonNull android.service.autofill.FillRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.FillCallback);
     method public abstract void onSaveRequest(@NonNull android.service.autofill.SaveRequest, @NonNull android.service.autofill.SaveCallback);
+    method public void onSavedDatasetsInfoRequest(@NonNull android.service.autofill.SavedDatasetsInfoCallback);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.AutofillService";
     field public static final String SERVICE_META_DATA = "android.autofill";
   }
@@ -37741,6 +37742,22 @@ package android.service.autofill {
     method @NonNull public java.util.List<android.service.autofill.FillContext> getFillContexts();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.autofill.SaveRequest> CREATOR;
+  }
+
+  public final class SavedDatasetsInfo {
+    ctor public SavedDatasetsInfo(@NonNull String, @IntRange(from=0) int);
+    method @IntRange(from=0) public int getCount();
+    method @NonNull public String getType();
+    field public static final String TYPE_OTHER = "other";
+    field public static final String TYPE_PASSWORDS = "passwords";
+  }
+
+  public interface SavedDatasetsInfoCallback {
+    method public void onError(int);
+    method public void onSuccess(@NonNull java.util.Set<android.service.autofill.SavedDatasetsInfo>);
+    field public static final int ERROR_NEEDS_USER_ACTION = 2; // 0x2
+    field public static final int ERROR_OTHER = 0; // 0x0
+    field public static final int ERROR_UNSUPPORTED = 1; // 0x1
   }
 
   public final class TextValueSanitizer implements android.os.Parcelable android.service.autofill.Sanitizer {
