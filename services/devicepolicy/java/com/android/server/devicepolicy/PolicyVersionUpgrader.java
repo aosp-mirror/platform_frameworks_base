@@ -83,6 +83,27 @@ public class PolicyVersionUpgrader {
             currentVersion = 1;
         }
 
+        if (currentVersion == 1) {
+            Slog.i(LOG_TAG, String.format("Upgrading from version %d", currentVersion));
+            // This upgrade step is for Device Owner scenario only: For devices upgrading to S,
+            // if there is a device owner, it retains the ability to control sensors-related
+            // permission grants.
+            for (int userId : allUsers) {
+                DevicePolicyData userData = allUsersData.get(userId);
+                if (userData == null) {
+                    continue;
+                }
+                for (ActiveAdmin admin : userData.mAdminList) {
+                    if (mProvider.isUserDeviceOwner(userId, admin.info.getComponent())) {
+                        Slog.i(LOG_TAG, String.format(
+                                "Marking Device Owner in user %d for permission grant ", userId));
+                        admin.mAdminCanGrantSensorsPermissions = true;
+                    }
+                }
+            }
+            currentVersion = 2;
+        }
+
         writePoliciesAndVersion(allUsers, allUsersData, currentVersion);
     }
 

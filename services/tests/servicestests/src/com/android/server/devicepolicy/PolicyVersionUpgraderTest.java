@@ -21,6 +21,11 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.admin.DeviceAdminInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.os.Parcel;
+import android.util.TypedXmlPullParser;
+import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -32,9 +37,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,18 +54,21 @@ import java.util.function.Function;
 public class PolicyVersionUpgraderTest {
     // NOTE: Only change this value if the corresponding CL also adds a test to test the upgrade
     // to the new version.
-    private static final int LATEST_TESTED_VERSION = 1;
+    private static final int LATEST_TESTED_VERSION = 2;
+    public static final String PERMISSIONS_TAG = "admin-can-grant-sensors-permissions";
+    private ComponentName mFakeAdmin;
 
     private static class FakePolicyUpgraderDataProvider implements PolicyUpgraderDataProvider {
         int mDeviceOwnerUserId;
+        ComponentName mDeviceOwnerComponent = new ComponentName("", "");
         boolean mIsFileBasedEncryptionEnabled;
         Map<Integer, ComponentName> mUserToComponent = new HashMap<>();
-        Map<ComponentName, DeviceAdminInfo> mComponentToDeviceAdminInfo;
+        Map<ComponentName, DeviceAdminInfo> mComponentToDeviceAdminInfo = new HashMap<>();
         File mDataDir;
 
         @Override
-        public boolean isUserDeviceOwner(int userId) {
-            return userId == mDeviceOwnerUserId;
+        public boolean isUserDeviceOwner(int userId, ComponentName who) {
+            return userId == mDeviceOwnerUserId && mDeviceOwnerComponent.equals(who);
         }
 
         @Override
@@ -105,7 +118,14 @@ public class PolicyVersionUpgraderTest {
         mUpgrader = new PolicyVersionUpgrader(mProvider);
         mDataDir = new File(mRealTestContext.getCacheDir(), "test-data");
         mDataDir.getParentFile().mkdirs();
+        // Prepare provider.
         mProvider.mDataDir = mDataDir;
+        mFakeAdmin = new ComponentName(
+                "com.android.frameworks.servicestests",
+                        "com.android.server.devicepolicy.DummyDeviceAdmins$Admin1");
+        ActivityInfo activityInfo = createActivityInfo(mFakeAdmin);
+        DeviceAdminInfo dai = createDeviceAdminInfo(activityInfo);
+        mProvider.mComponentToDeviceAdminInfo.put(mFakeAdmin, dai);
     }
 
     @Test
@@ -122,21 +142,43 @@ public class PolicyVersionUpgraderTest {
     }
 
     @Test
-    public void testUpgrade0To1RemovesPasswordMetrics() throws IOException {
+    public void testUpgrade0To1RemovesPasswordMetrics() throws IOException, XmlPullParserException {
+        final String activePasswordTag = "active-password";
         int[] users = new int[] {0, 10};
         writeVersionToXml(0);
         for (int userId : users) {
             preparePoliciesFile(userId);
         }
-
-        String oldContents = readPoliciesFile(0);
-        assertThat(oldContents).contains("active-password");
+        // Validate test set-up.
+        assertThat(isTagPresent(readPoliciesFileToStream(0), activePasswordTag)).isTrue();
 
         mUpgrader.upgradePolicy(users, 1);
 
-        assertThat(readVersionFromXml()).isEqualTo(1);
-        assertThat(readPoliciesFile(users[0])).doesNotContain("active-password");
-        assertThat(readPoliciesFile(users[1])).doesNotContain("active-password");
+        assertThat(readVersionFromXml()).isGreaterThan(1);
+        for (int user: users) {
+            assertThat(isTagPresent(readPoliciesFileToStream(user), activePasswordTag)).isFalse();
+        }
+    }
+
+    @Test
+    public void testUpgrade1To2MarksDoForPermissionControl()
+            throws IOException, XmlPullParserException {
+        int[] users = new int[] {0, 10};
+        writeVersionToXml(1);
+        for (int userId : users) {
+            preparePoliciesFile(userId);
+        }
+        mProvider.mDeviceOwnerUserId = 10;
+        mProvider.mDeviceOwnerComponent = mFakeAdmin;
+        mProvider.mUserToComponent.put(10, mFakeAdmin);
+
+        mUpgrader.upgradePolicy(users, 2);
+
+        assertThat(readVersionFromXml()).isEqualTo(2);
+        assertThat(getBooleanValueTag(readPoliciesFileToStream(users[0]),
+                PERMISSIONS_TAG)).isFalse();
+        assertThat(getBooleanValueTag(readPoliciesFileToStream(users[1]),
+                PERMISSIONS_TAG)).isTrue();
     }
 
     @Test
@@ -169,6 +211,70 @@ public class PolicyVersionUpgraderTest {
 
     private String readPoliciesFile(int userId) throws IOException {
         File policiesFile = mProvider.makeDevicePoliciesJournaledFile(userId).chooseForRead();
-        return new String(Files.asByteSource(policiesFile).read());
+        FileReader reader = new FileReader(policiesFile);
+        return new String(Files.asByteSource(policiesFile).read(), Charset.defaultCharset());
+    }
+
+    private InputStream readPoliciesFileToStream(int userId) throws IOException {
+        File policiesFile = mProvider.makeDevicePoliciesJournaledFile(userId).chooseForRead();
+        return new FileInputStream(policiesFile);
+    }
+
+    private boolean getBooleanValueTag(InputStream inputXml, String tagName)
+            throws IOException, XmlPullParserException {
+        TypedXmlPullParser parser = Xml.resolvePullParser(inputXml);
+
+        int eventType = parser.getEventType();
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                String tag = parser.getName();
+                if (tagName.equals(tag)) {
+                    String res = parser.getAttributeValue(null, "value");
+                    return Boolean.parseBoolean(res);
+                }
+            }
+            eventType = parser.next();
+        }
+
+        throw new IllegalStateException("Could not find " + tagName);
+    }
+
+    private boolean isTagPresent(InputStream inputXml, String tagName)
+            throws IOException, XmlPullParserException {
+        TypedXmlPullParser parser = Xml.resolvePullParser(inputXml);
+
+        int eventType = parser.getEventType();
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                String tag = parser.getName();
+                if (tagName.equals(tag)) {
+                    return true;
+                }
+            }
+            eventType = parser.next();
+        }
+
+        return false;
+    }
+
+    private ActivityInfo createActivityInfo(ComponentName admin) {
+        ActivityInfo ai = new ActivityInfo();
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.className = admin.getClassName();
+        applicationInfo.uid = 2222;
+        ai.applicationInfo = applicationInfo;
+        ai.name = admin.getClassName();
+        ai.packageName = admin.getPackageName();
+        return ai;
+    }
+
+    private DeviceAdminInfo createDeviceAdminInfo(ActivityInfo activityInfo) {
+        Parcel parcel = Parcel.obtain();
+        activityInfo.writeToParcel(parcel, 0);
+        parcel.writeInt(0);
+        parcel.writeBoolean(true);
+        parcel.setDataPosition(0);
+
+        return DeviceAdminInfo.CREATOR.createFromParcel(parcel);
     }
 }

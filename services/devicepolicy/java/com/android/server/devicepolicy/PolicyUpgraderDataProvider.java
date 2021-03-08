@@ -33,7 +33,7 @@ public interface PolicyUpgraderDataProvider {
      * Returns true if the provided {@code userId} is a device owner. May affect some policy
      * defaults.
      */
-    boolean isUserDeviceOwner(int userId);
+    boolean isUserDeviceOwner(int userId, ComponentName who);
 
     /**
      * Returns true if the storage manager indicates file-based encryption is enabled.

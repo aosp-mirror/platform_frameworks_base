@@ -473,7 +473,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     // to decide whether an existing policy in the {@link #DEVICE_POLICIES_XML} needs to
     // be upgraded. See {@link PolicyVersionUpgrader} on instructions how to add an upgrade
     // step.
-    static final int DPMS_VERSION = 1;
+    static final int DPMS_VERSION = 2;
 
     static {
         SECURE_SETTINGS_ALLOWLIST = new ArraySet<>();
@@ -2973,8 +2973,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private class DpmsUpgradeDataProvider implements PolicyUpgraderDataProvider {
         @Override
-        public boolean isUserDeviceOwner(int userId) {
-            return mOwners.isDeviceOwnerUserId(userId);
+        public boolean isUserDeviceOwner(int userId, ComponentName who) {
+            return mOwners.isDeviceOwnerUserId(userId)
+                    && mOwners.getDeviceOwnerComponent().equals(who);
         }
 
         @Override
