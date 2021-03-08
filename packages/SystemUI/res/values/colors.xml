@@ -36,6 +36,7 @@
     <color name="qs_user_detail_icon_muted">#FFFFFFFF</color> <!-- not so muted after all -->
     <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->
     <color name="qs_customize_decoration">@color/GM2_grey_300</color>
+    <color name="qs_footer_action_border">#2E312C</color>
 
     <!-- The color of the background in the separated list of the Global Actions menu -->
     <color name="global_actions_separated_background">#F5F5F5</color>

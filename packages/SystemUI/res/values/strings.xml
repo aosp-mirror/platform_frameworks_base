@@ -2315,6 +2315,9 @@
     <!-- accessibility label for button to edit quick settings [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_edit">Edit order of settings.</string>
 
+    <!-- accessibility label for button to open power menu [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_power_menu">Power menu</string>
+
     <!-- accessibility label for paging indicator in quick settings [CHAR LIMITi=NONE] -->
     <string name="accessibility_quick_settings_page">Page <xliff:g name="current_page" example="1">%1$d</xliff:g> of <xliff:g name="num_pages" example="2">%2$d</xliff:g></string>
 
