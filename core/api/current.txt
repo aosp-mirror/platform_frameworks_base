@@ -55,7 +55,9 @@ package android {
     field public static final String BIND_WALLPAPER = "android.permission.BIND_WALLPAPER";
     field public static final String BLUETOOTH = "android.permission.BLUETOOTH";
     field public static final String BLUETOOTH_ADMIN = "android.permission.BLUETOOTH_ADMIN";
+    field public static final String BLUETOOTH_CONNECT = "android.permission.BLUETOOTH_CONNECT";
     field public static final String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
+    field public static final String BLUETOOTH_SCAN = "android.permission.BLUETOOTH_SCAN";
     field public static final String BODY_SENSORS = "android.permission.BODY_SENSORS";
     field public static final String BROADCAST_PACKAGE_REMOVED = "android.permission.BROADCAST_PACKAGE_REMOVED";
     field public static final String BROADCAST_SMS = "android.permission.BROADCAST_SMS";
@@ -194,6 +196,7 @@ package android {
     field public static final String CONTACTS = "android.permission-group.CONTACTS";
     field public static final String LOCATION = "android.permission-group.LOCATION";
     field public static final String MICROPHONE = "android.permission-group.MICROPHONE";
+    field public static final String NEARBY_DEVICES = "android.permission-group.NEARBY_DEVICES";
     field public static final String PHONE = "android.permission-group.PHONE";
     field public static final String SENSORS = "android.permission-group.SENSORS";
     field public static final String SMS = "android.permission-group.SMS";
