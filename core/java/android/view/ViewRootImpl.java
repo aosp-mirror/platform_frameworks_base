@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.os.IInputConstants.INVALID_INPUT_EVENT_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
@@ -105,6 +106,7 @@ import android.graphics.Color;
 import android.graphics.FrameInfo;
 import android.graphics.HardwareRenderer;
 import android.graphics.HardwareRenderer.FrameDrawingCallback;
+import android.graphics.HardwareRendererObserver;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -1191,6 +1193,14 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     mInputEventReceiver = new WindowInputEventReceiver(inputChannel,
                             Looper.myLooper());
+
+                    if (mAttachInfo.mThreadedRenderer != null) {
+                        InputMetricsListener listener =
+                                new InputMetricsListener(mInputEventReceiver);
+                        mHardwareRendererObserver = new HardwareRendererObserver(
+                                listener, listener.data, mHandler, true /*waitForPresentTime*/);
+                        mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
+                    }
                 }
 
                 view.assignParent(this);
@@ -8568,6 +8578,34 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
     WindowInputEventReceiver mInputEventReceiver;
+
+    final class InputMetricsListener
+            implements HardwareRendererObserver.OnFrameMetricsAvailableListener {
+        public long[] data = new long[FrameMetrics.Index.FRAME_STATS_COUNT];
+
+        private InputEventReceiver mReceiver;
+
+        InputMetricsListener(InputEventReceiver receiver) {
+            mReceiver = receiver;
+        }
+
+        @Override
+        public void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
+            final int inputEventId = (int) data[FrameMetrics.Index.INPUT_EVENT_ID];
+            if (inputEventId == INVALID_INPUT_EVENT_ID) {
+                return;
+            }
+            final long presentTime = data[FrameMetrics.Index.DISPLAY_PRESENT_TIME];
+            if (presentTime <= 0) {
+                // Present time is not available for this frame. If the present time is not
+                // available, we cannot compute end-to-end input latency metrics.
+                return;
+            }
+            final long gpuCompletedTime = data[FrameMetrics.Index.GPU_COMPLETED];
+            mReceiver.reportLatencyInfo(inputEventId, gpuCompletedTime, presentTime);
+        }
+    }
+    HardwareRendererObserver mHardwareRendererObserver;
 
     final class ConsumeBatchedInputRunnable implements Runnable {
         @Override
