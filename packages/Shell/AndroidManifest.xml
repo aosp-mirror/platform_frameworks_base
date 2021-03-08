@@ -407,7 +407,6 @@
     <!-- Permission required for GTS test - GtsAssistIntentTestCases -->
     <uses-permission android:name="android.permission.MANAGE_SOUND_TRIGGER" />
     <uses-permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD" />
-    <uses-permission android:name="android.permission.BIND_VOICE_INTERACTION" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
     <uses-permission android:name="android.permission.BIND_RESUME_ON_REBOOT_SERVICE" />
