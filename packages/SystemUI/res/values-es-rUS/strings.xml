@@ -58,7 +58,7 @@
     <string name="always_use_device" msgid="210535878779644679">"Abrir siempre <xliff:g id="APPLICATION">%1$s</xliff:g> cuando se conecte <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Abrir siempre <xliff:g id="APPLICATION">%1$s</xliff:g> cuando se conecte <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"¿Permitir depuración por USB?"</string>
-    <string name="usb_debugging_message" msgid="5794616114463921773">"La huella digital de tu clave RSA es:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="5794616114463921773">"La huella dactilar de tu clave RSA es:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Permitir siempre desde esta computadora"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"No tienes permitida la depuración por USB"</string>
@@ -128,8 +128,8 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Teléfono"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Asistente voz"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloquear"</string>
-    <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Esperando huella digital"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Desbloquear sin utilizar la huella digital"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Esperando huella dactilar"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Desbloquear sin utilizar la huella dactilar"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Escaneando rostro"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Enviar"</string>
     <string name="accessibility_manage_notification" msgid="582215815790143983">"Administrar notificaciones"</string>
@@ -168,8 +168,8 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Hubo demasiados intentos incorrectos. Se borrará este usuario."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Hubo demasiados intentos incorrectos. Se borrarán este perfil de trabajo y sus datos."</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Descartar"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas digitales"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícono de huella digital"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas dactilares"</string>
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícono de huella dactilar"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Autenticando tu rostro…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ícono de rostro"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Botón de zoom de compatibilidad"</string>
