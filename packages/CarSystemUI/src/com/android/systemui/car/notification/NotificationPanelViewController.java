@@ -240,6 +240,9 @@ public class NotificationPanelViewController extends OverlayPanelViewController
 
     /** Reinflates the view. */
     public void reinflate() {
+        // Do not reinflate the view if it has not been inflated at all.
+        if (!isInflated()) return;
+
         ViewGroup container = (ViewGroup) getLayout();
         container.removeView(mNotificationView);
 
