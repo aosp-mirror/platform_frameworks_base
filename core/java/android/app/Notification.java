@@ -92,7 +92,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.contentcapture.ContentCaptureContext;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
@@ -4970,8 +4969,6 @@ public class Notification implements Parcelable
             contentView.setTextViewText(R.id.title, null);
             contentView.setViewVisibility(R.id.text, View.GONE);
             contentView.setTextViewText(R.id.text, null);
-            contentView.setViewVisibility(R.id.text_line_1, View.GONE);
-            contentView.setTextViewText(R.id.text_line_1, null);
         }
 
         /**
@@ -5015,14 +5012,10 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
                 contentView.setTextViewText(R.id.title, processTextSpans(p.title));
                 setTextViewColorPrimary(contentView, R.id.title, p);
-                contentView.setViewLayoutWidth(R.id.title, showProgress
-                        ? ViewGroup.LayoutParams.WRAP_CONTENT
-                        : ViewGroup.LayoutParams.MATCH_PARENT,
-                        TypedValue.COMPLEX_UNIT_PX);
             }
-            if (p.text != null && p.text.length() != 0) {
-                int textId = showProgress ? com.android.internal.R.id.text_line_1
-                        : com.android.internal.R.id.text;
+            if (p.text != null && p.text.length() != 0
+                    && (!showProgress || p.mAllowTextWithProgress)) {
+                int textId = com.android.internal.R.id.text;
                 contentView.setTextViewText(textId, processTextSpans(p.text));
                 setTextViewColorSecondary(contentView, textId, p);
                 contentView.setViewVisibility(textId, View.VISIBLE);
@@ -5188,16 +5181,13 @@ public class Notification implements Parcelable
             final boolean ind = ex.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
             if (!p.mHideProgress && (max != 0 || ind)) {
                 contentView.setViewVisibility(com.android.internal.R.id.progress, View.VISIBLE);
-                contentView.setProgressBar(
-                        R.id.progress, max, progress, ind);
-                contentView.setProgressBackgroundTintList(
-                        R.id.progress, ColorStateList.valueOf(mContext.getColor(
-                                R.color.notification_progress_background_color)));
-                if (getRawColor(p) != COLOR_DEFAULT) {
-                    int color = getAccentColor(p);
-                    ColorStateList colorStateList = ColorStateList.valueOf(color);
-                    contentView.setProgressTintList(R.id.progress, colorStateList);
-                    contentView.setProgressIndeterminateTintList(R.id.progress, colorStateList);
+                contentView.setProgressBar(R.id.progress, max, progress, ind);
+                contentView.setProgressBackgroundTintList(R.id.progress,
+                        mContext.getColorStateList(R.color.notification_progress_background_color));
+                if (mTintWithThemeAccent || getRawColor(p) != COLOR_DEFAULT) {
+                    ColorStateList progressTint = ColorStateList.valueOf(getAccentColor(p));
+                    contentView.setProgressTintList(R.id.progress, progressTint);
+                    contentView.setProgressIndeterminateTintList(R.id.progress, progressTint);
                 }
                 return true;
             } else {
@@ -5220,7 +5210,7 @@ public class Notification implements Parcelable
             } else {
                 // views in states with a header (big states)
                 result.mHeadingExtraMarginSet.applyToView(contentView, R.id.notification_header);
-                result.mTitleMarginSet.applyToView(contentView, R.id.line1);
+                result.mTitleMarginSet.applyToView(contentView, R.id.title);
             }
         }
 
@@ -5749,7 +5739,6 @@ public class Notification implements Parcelable
             }
             if (mStyle != null) {
                 result = mStyle.makeBigContentView();
-                hideLine1Text(result);
                 if (fullyCustomViewRequiresDecoration(true /* fromStyle */)) {
                     result = minimallyDecoratedBigContentView(result);
                 }
@@ -5758,6 +5747,7 @@ public class Notification implements Parcelable
                 if (bigContentViewRequired()) {
                     StandardTemplateParams p = mParams.reset()
                             .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                            .allowTextWithProgress(true)
                             .fillTextsFrom(this);
                     result = applyStandardTemplateWithActions(getBigBaseLayoutResource(), p,
                             null /* result */);
@@ -5830,12 +5820,6 @@ public class Notification implements Parcelable
                 return headsUpContentView;
             }
             return createContentView();
-        }
-
-        private void hideLine1Text(RemoteViews result) {
-            if (result != null) {
-                result.setViewVisibility(R.id.text_line_1, View.GONE);
-            }
         }
 
         /**
@@ -7031,9 +7015,9 @@ public class Notification implements Parcelable
                     result);
 
             if (mBigContentTitle != null && mBigContentTitle.equals("")) {
-                contentView.setViewVisibility(R.id.line1, View.GONE);
+                contentView.setViewVisibility(R.id.title, View.GONE);
             } else {
-                contentView.setViewVisibility(R.id.line1, View.VISIBLE);
+                contentView.setViewVisibility(R.id.title, View.VISIBLE);
             }
 
             return contentView;
@@ -9100,7 +9084,7 @@ public class Notification implements Parcelable
 
         private void handleImage(RemoteViews contentView) {
             if (mBuilder.mN.hasLargeIcon()) {
-                contentView.setViewLayoutMarginDimen(R.id.line1, RemoteViews.MARGIN_END, 0);
+                contentView.setViewLayoutMarginDimen(R.id.title, RemoteViews.MARGIN_END, 0);
                 contentView.setViewLayoutMarginDimen(R.id.text, RemoteViews.MARGIN_END, 0);
             }
         }
@@ -9409,6 +9393,7 @@ public class Notification implements Parcelable
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
                     .allowActionIcons(true)
+                    .allowTextWithProgress(true)
                     .hideLargeIcon(true)
                     .text(text)
                     .summaryText(mBuilder.processLegacyText(mVerificationText));
@@ -12073,6 +12058,7 @@ public class Notification implements Parcelable
         boolean mHideSnoozeButton;
         boolean mPromotePicture;
         boolean mAllowActionIcons;
+        boolean mAllowTextWithProgress;
         CharSequence title;
         CharSequence text;
         CharSequence headerTextSecondary;
@@ -12091,6 +12077,7 @@ public class Notification implements Parcelable
             mHideSnoozeButton = false;
             mPromotePicture = false;
             mAllowActionIcons = false;
+            mAllowTextWithProgress = false;
             title = null;
             text = null;
             summaryText = null;
@@ -12132,6 +12119,11 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams allowActionIcons(boolean allowActionIcons) {
             this.mAllowActionIcons = allowActionIcons;
+            return this;
+        }
+
+        final StandardTemplateParams allowTextWithProgress(boolean allowTextWithProgress) {
+            this.mAllowTextWithProgress = allowTextWithProgress;
             return this;
         }
 

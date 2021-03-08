@@ -430,7 +430,7 @@ public class NotificationGroupingUtil {
 
         public static final int[] MARGIN_ADJUSTED_VIEWS = {
                 R.id.notification_headerless_view_column,
-                R.id.line1,
+                R.id.title,
                 R.id.notification_main_column,
                 R.id.notification_header};
 
