@@ -1877,11 +1877,6 @@
   <java-symbol type="array" name="config_locationProviderPackageNames" />
   <java-symbol type="array" name="config_locationExtraPackageNames" />
   <java-symbol type="array" name="config_testLocationProviders" />
-  <java-symbol type="string" name="config_longterm_psds_server_1" />
-  <java-symbol type="string" name="config_longterm_psds_server_2" />
-  <java-symbol type="string" name="config_longterm_psds_server_3" />
-  <java-symbol type="string" name="config_normal_psds_server" />
-  <java-symbol type="string" name="config_realtime_psds_server" />
   <java-symbol type="array" name="config_defaultNotificationVibePattern" />
   <java-symbol type="array" name="config_notificationFallbackVibePattern" />
   <java-symbol type="bool" name="config_enableServerNotificationEffectsForAutomotive" />
