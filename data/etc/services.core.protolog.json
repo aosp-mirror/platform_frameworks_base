@@ -823,12 +823,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
     },
-    "-1159577965": {
-      "message": "Focus requested for input consumer=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/InputMonitor.java"
-    },
     "-1156118957": {
       "message": "Updated config=%s",
       "level": "DEBUG",
@@ -3445,6 +3439,12 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
+    "1931178855": {
+      "message": "\tnonApp=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_REMOTE_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
     "1947239194": {
       "message": "Deferring rotation, still finishing previous rotation",
       "level": "VERBOSE",
@@ -3492,6 +3492,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1999594750": {
+      "message": "startAnimation",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_REMOTE_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/NonAppWindowAnimationAdapter.java"
     },
     "2018454757": {
       "message": "WS.removeImmediately: %s Already removed...",
