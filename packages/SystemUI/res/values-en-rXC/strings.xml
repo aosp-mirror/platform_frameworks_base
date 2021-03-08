@@ -446,8 +446,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‏‎‏‏‏‎‏‎‎‏‏‎‏‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‎‎‎‎‏‎‏‎‎‏‏‏‏‎Unlock to use NFC‎‏‎‎‏‎"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‏‎‎‏‏‏‏‎‎‏‏‎‏‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‎‏‏‎‎‏‎‏‏‏‏‎‏‏‏‏‏‎This device belongs to your organization‎‏‎‎‏‎"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‎‎‎‎‏‏‏‎‎‎‎‎‎‎‎‏‏‎‏‎‏‎‎‎‏‎‏‏‏‏‏‎‎‎‏‎‎‏‎‏‎‎‏‎‎‏‎‎‎‏‏‏‎‏‏‎This device belongs to ‎‏‎‎‏‏‎<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‎‎‏‏‎‎‏‏‏‎‏‎‎‏‎‎‎‏‏‎‏‎‎‏‏‎‎‏‎‎‎‎‎‎‏‏‏‏‏‎‎‎‎‏‎‎‎‎‎‏‏‎‎‎‎This device is provided by ‎‏‎‎‏‏‎<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="phone_hint" msgid="6682125338461375925">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‎‎‏‎‏‏‏‏‎‎‎‎‏‏‏‏‎‏‎‎‎‎‎‏‎‎‎‏‏‎‏‏‎‏‏‎‏‎‏‎Swipe from icon for phone‎‏‎‎‏‎"</string>
     <string name="voice_hint" msgid="7476017460191291417">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‎‎‎‎‎‎‎‏‎‎‏‏‎‎‏‎‎‎‏‎‏‎‎‏‏‏‎‎‏‎‏‎‏‎‎‎‏‏‏‏‎‏‎‎‎‎‎‎‏‏‎‎‏‎Swipe from icon for voice assist‎‏‎‎‏‎"</string>
     <string name="camera_hint" msgid="4519495795000658637">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‏‏‏‏‎‎‏‎‏‏‏‏‎‏‎‏‏‏‏‎‎‎‎‏‏‏‎‎‎‏‎‏‏‎‎‏‎‏‎‏‏‎‎‏‏‎‏‎Swipe from icon for camera‎‏‎‎‏‎"</string>

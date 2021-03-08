@@ -414,8 +414,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Līdz saullēktam"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Plkst. <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Līdz plkst. <xliff:g id="TIME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
-    <skip />
+    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"Samazināt spilgtumu"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ir atspējoti"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ir iespējoti"</string>
@@ -449,8 +448,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Atbloķējiet ierīci, lai izmantotu NFC."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Šī ierīce pieder jūsu organizācijai."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Šo ierīci nodrošina <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Lai lietotu tālruni, velciet no ikonas"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Lai lietotu balss palīgu, velciet no ikonas"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Lai lietotu kameru, velciet no ikonas"</string>
@@ -631,8 +629,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Pieskarieties, lai izslēgtu skaņu. Var tikt izslēgti pieejamības pakalpojumu signāli."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Pieskarieties, lai iestatītu vibrozvanu."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Pieskarieties, lai izslēgtu skaņu."</string>
-    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
-    <skip />
+    <string name="volume_ringer_change" msgid="3574969197796055532">"Pieskarieties, lai mainītu zvanītāja režīmu."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"izslēgt skaņu"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ieslēgt skaņu"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrēt"</string>
@@ -724,7 +721,7 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Statuss:&lt;/b&gt; svarīgums pazemināts, un paziņojums tiks rādīts bez skaņas"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Statuss:&lt;/b&gt; rangs paaugstināts"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Statuss:&lt;/b&gt; rangs pazemināts"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Parādās sarunu sadaļas augšdaļā un kā peldošs burbulis, kā arī bloķēšanas ekrānā tiek rādīts profila attēls"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Parādās sarunu sadaļas augšdaļā, arī kā peldošs burbulis, profila attēls parādās bloķēšanas ekrānā"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Iestatījumi"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritārs"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g> netiek atbalstītas sarunu funkcijas."</string>

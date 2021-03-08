@@ -412,8 +412,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Cho đến khi trời sáng"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Bật vào lúc <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Cho đến <xliff:g id="TIME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
-    <skip />
+    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"Giảm độ sáng"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC đã được tắt"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC đã được bật"</string>
@@ -447,8 +446,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Mở khóa để sử dụng NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Thiết bị này thuộc về tổ chức của bạn"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Thiết bị này thuộc về <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Thiết bị này do <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> cung cấp"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Vuốt từ biểu tượng để mở điện thoại"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Vuốt từ biểu tượng để mở trợ lý thoại"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Vuốt từ biểu tượng để mở máy ảnh"</string>
@@ -628,8 +626,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Nhấn để tắt tiếng. Bạn có thể tắt tiếng dịch vụ trợ năng."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Nhấn để đặt chế độ rung."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Nhấn để tắt tiếng."</string>
-    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
-    <skip />
+    <string name="volume_ringer_change" msgid="3574969197796055532">"Nhấn để thay đổi chế độ chuông"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"tắt tiếng"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"bật tiếng"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"rung"</string>
@@ -844,7 +841,7 @@
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"Loại nút bổ sung bên phải"</string>
     <string name="nav_bar_default" msgid="8386559913240761526">"(mặc định)"</string>
   <string-array name="nav_bar_buttons">
-    <item msgid="2681220472659720036">"Khay nhớ tạm"</item>
+    <item msgid="2681220472659720036">"Bảng nhớ tạm"</item>
     <item msgid="4795049793625565683">"Mã phím"</item>
     <item msgid="80697951177515644">"Xác nhận xoay, trình chuyển đổi bàn phím"</item>
     <item msgid="7626977989589303588">"Không có"</item>
@@ -859,7 +856,7 @@
     <string name="save" msgid="3392754183673848006">"Lưu"</string>
     <string name="reset" msgid="8715144064608810383">"Đặt lại"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Điều chỉnh chiều rộng nút"</string>
-    <string name="clipboard" msgid="8517342737534284617">"Khay nhớ tạm"</string>
+    <string name="clipboard" msgid="8517342737534284617">"Bảng nhớ tạm"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Nút điều hướng tùy chỉnh"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Mã phím bên trái"</string>
     <string name="right_keycode" msgid="2480715509844798438">"Mã phím bên phải"</string>
@@ -1080,7 +1077,7 @@
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Không thể kết nối. Hãy thử lại."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Ghép nối thiết bị mới"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Số bản dựng"</string>
-    <string name="build_number_copy_toast" msgid="877720921605503046">"Đã sao chép số bản dựng vào khay nhớ tạm."</string>
+    <string name="build_number_copy_toast" msgid="877720921605503046">"Đã sao chép số bản dựng vào bảng nhớ tạm."</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Đã xảy ra vấn đề khi đọc dung lượng pin của bạn"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Nhấn để biết thêm thông tin"</string>
 </resources>
