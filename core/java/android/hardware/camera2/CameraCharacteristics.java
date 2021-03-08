@@ -24,13 +24,11 @@ import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.params.RecommendedStreamConfigurationMap;
 import android.hardware.camera2.params.SessionConfiguration;
-import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.TypeReference;
 import android.os.Build;
 import android.util.Rational;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -641,27 +639,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @NonNull
     public Set<String> getPhysicalCameraIds() {
-        int[] availableCapabilities = get(REQUEST_AVAILABLE_CAPABILITIES);
-        if (availableCapabilities == null) {
-            throw new AssertionError("android.request.availableCapabilities must be non-null "
-                        + "in the characteristics");
-        }
-
-        if (!ArrayUtils.contains(availableCapabilities,
-                REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA)) {
-            return Collections.emptySet();
-        }
-        byte[] physicalCamIds = get(LOGICAL_MULTI_CAMERA_PHYSICAL_IDS);
-
-        String physicalCamIdString = null;
-        try {
-            physicalCamIdString = new String(physicalCamIds, "UTF-8");
-        } catch (java.io.UnsupportedEncodingException e) {
-            throw new AssertionError("android.logicalCam.physicalIds must be UTF-8 string");
-        }
-        String[] physicalCameraIdArray = physicalCamIdString.split("\0");
-
-        return Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(physicalCameraIdArray)));
+        return mProperties.getPhysicalCameraIds();
     }
 
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
@@ -2929,6 +2907,74 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE =
             new Key<android.util.Size>("android.scaler.defaultSecureImageSize", android.util.Size.class);
+
+    /**
+     * <p>The available multi-resolution stream configurations that this
+     * physical camera device supports
+     * (i.e. format, width, height, output/input stream).</p>
+     * <p>This list contains a subset of the parent logical camera's multi-resolution stream
+     * configurations which belong to this physical camera, and it will advertise and will only
+     * advertise the maximum supported resolutions for a particular format.</p>
+     * <p>If this camera device isn't a physical camera device constituting a logical camera,
+     * but a standalone ULTRA_HIGH_RESOLUTION_SENSOR camera, this field represents the
+     * multi-resolution input/output stream configurations of default mode and max resolution
+     * modes. The sizes will be the maximum resolution of a particular format for default mode
+     * and max resolution mode.</p>
+     * <p>This field will only be advertised if the device is a physical camera of a
+     * logical multi-camera device or an ultra high resolution sensor camera. For a logical
+     * multi-camera, the camera API will derive the logical camera’s multi-resolution stream
+     * configurations from all physical cameras. For an ultra high resolution sensor camera, this
+     * is used directly as the camera’s multi-resolution stream configurations.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> SCALER_PHYSICAL_CAMERA_MULTI_RESOLUTION_STREAM_CONFIGURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.scaler.physicalCameraMultiResolutionStreamConfigurations", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>The multi-resolution stream configurations supported by this logical camera
+     * or ultra high resolution sensor camera device.</p>
+     * <p>Multi-resolution streams can be used by a LOGICAL_MULTI_CAMERA or an
+     * ULTRA_HIGH_RESOLUTION_SENSOR camera where the images sent or received can vary in
+     * resolution per frame. This is useful in cases where the camera device's effective full
+     * resolution changes depending on factors such as the current zoom level, lighting
+     * condition, focus distance, or pixel mode.</p>
+     * <ul>
+     * <li>For a logical multi-camera implementing optical zoom, at different zoom level, a
+     * different physical camera may be active, resulting in different full-resolution image
+     * sizes.</li>
+     * <li>For an ultra high resolution camera, depending on whether the camera operates in default
+     * mode, or maximum resolution mode, the output full-size images may be of either binned
+     * resolution or maximum resolution.</li>
+     * </ul>
+     * <p>To use multi-resolution output streams, the supported formats can be queried by {@link android.hardware.camera2.params.MultiResolutionStreamConfigurationMap#getOutputFormats }.
+     * A {@link android.hardware.camera2.MultiResolutionImageReader } can then be created for a
+     * supported format with the MultiResolutionStreamInfo group queried by {@link android.hardware.camera2.params.MultiResolutionStreamConfigurationMap#getOutputInfo }.</p>
+     * <p>If a camera device supports multi-resolution output streams for a particular format, for
+     * each of its mandatory stream combinations, the camera device will support using a
+     * MultiResolutionImageReader for the MAXIMUM stream of supported formats. Refer to
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession } for additional details.</p>
+     * <p>To use multi-resolution input streams, the supported formats can be queried by {@link android.hardware.camera2.params.MultiResolutionStreamConfigurationMap#getInputFormats }.
+     * A reprocessable CameraCaptureSession can then be created using an {@link android.hardware.camera2.params.InputConfiguration InputConfiguration} constructed with
+     * the input MultiResolutionStreamInfo group, queried by {@link android.hardware.camera2.params.MultiResolutionStreamConfigurationMap#getInputInfo }.</p>
+     * <p>If a camera device supports multi-resolution {@code YUV} input and multi-resolution
+     * {@code YUV} output, or multi-resolution {@code PRIVATE} input and multi-resolution
+     * {@code PRIVATE} output, {@code JPEG} and {@code YUV} are guaranteed to be supported
+     * multi-resolution output stream formats. Refer to
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession } for
+     * details about the additional mandatory stream combinations in this case.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.MultiResolutionStreamConfigurationMap> SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP =
+            new Key<android.hardware.camera2.params.MultiResolutionStreamConfigurationMap>("android.scaler.multiResolutionStreamConfigurationMap", android.hardware.camera2.params.MultiResolutionStreamConfigurationMap.class);
 
     /**
      * <p>The area of the image sensor which corresponds to active pixels after any geometric

@@ -328,12 +328,12 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<OneHandedController> provideOneHandedController(Context context,
-            DisplayController displayController, TaskStackListenerImpl taskStackListener,
-            UiEventLogger uiEventLogger,
+            WindowManager windowManager, DisplayController displayController,
+            TaskStackListenerImpl taskStackListener, UiEventLogger uiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
-        return Optional.ofNullable(OneHandedController.create(context, displayController,
-                taskStackListener, uiEventLogger, mainExecutor, mainHandler));
+        return Optional.ofNullable(OneHandedController.create(context, windowManager,
+                displayController, taskStackListener, uiEventLogger, mainExecutor, mainHandler));
     }
 
     //

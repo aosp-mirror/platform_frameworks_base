@@ -207,7 +207,6 @@ package android.app.appsearch {
 
   public static final class GetByUriRequest.Builder {
     ctor public GetByUriRequest.Builder();
-    method @NonNull public android.app.appsearch.GetByUriRequest.Builder addProjection(@NonNull String, @NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addProjection(@NonNull String, @NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUris(@NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUris(@NonNull java.util.Collection<java.lang.String>);
@@ -323,7 +322,6 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterPackageNames(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterSchemas(@NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterSchemas(@NonNull java.util.Collection<java.lang.String>);
-    method @NonNull public android.app.appsearch.SearchSpec.Builder addProjection(@NonNull String, @NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addProjection(@NonNull String, @NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.SearchSpec build();
     method @NonNull public android.app.appsearch.SearchSpec.Builder setMaxSnippetSize(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_SNIPPET_SIZE_LIMIT) int);
@@ -338,7 +336,8 @@ package android.app.appsearch {
   public final class SetSchemaRequest {
     method @NonNull public java.util.Map<java.lang.String,android.app.appsearch.AppSearchSchema.Migrator> getMigrators();
     method @NonNull public java.util.Set<android.app.appsearch.AppSearchSchema> getSchemas();
-    method @NonNull public java.util.Set<java.lang.String> getSchemasNotVisibleToSystemUi();
+    method @NonNull public java.util.Set<java.lang.String> getSchemasNotDisplayedBySystem();
+    method @Deprecated @NonNull public java.util.Set<java.lang.String> getSchemasNotVisibleToSystemUi();
     method @NonNull public java.util.Map<java.lang.String,java.util.Set<android.app.appsearch.PackageIdentifier>> getSchemasVisibleToPackages();
     method public boolean isForceOverride();
   }
@@ -350,8 +349,9 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.SetSchemaRequest build();
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setForceOverride(boolean);
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setMigrator(@NonNull String, @NonNull android.app.appsearch.AppSearchSchema.Migrator);
+    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeDisplayedBySystem(@NonNull String, boolean);
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeVisibilityForPackage(@NonNull String, boolean, @NonNull android.app.appsearch.PackageIdentifier);
-    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeVisibilityForSystemUi(@NonNull String, boolean);
+    method @Deprecated @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeVisibilityForSystemUi(@NonNull String, boolean);
   }
 
   public class SetSchemaResponse {

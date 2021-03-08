@@ -23,7 +23,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -79,11 +78,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Test PackageWatchdog.
  */
 public class PackageWatchdogTest {
+    private static final long RETRY_MAX_COUNT = 30;
+    private static final long RETRY_TIMEOUT_MILLIS = 500;
+
     private static final String APP_A = "com.package.a";
     private static final String APP_B = "com.package.b";
     private static final String APP_C = "com.package.c";
@@ -108,6 +111,16 @@ public class PackageWatchdogTest {
     private ArgumentCaptor<ConnectivityModuleHealthListener> mConnectivityModuleCallbackCaptor;
     private MockitoSession mSession;
     private HashMap<String, String> mSystemSettingsMap;
+
+    private boolean retry(Supplier<Boolean> supplier) throws Exception {
+        for (int i = 0; i < RETRY_MAX_COUNT; ++i) {
+            if (supplier.get()) {
+                return true;
+            }
+            Thread.sleep(RETRY_TIMEOUT_MILLIS);
+        }
+        return false;
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -176,6 +189,10 @@ public class PackageWatchdogTest {
     public void tearDown() throws Exception {
         dropShellPermissions();
         mSession.finishMocking();
+        // Clean up listeners since too many listeners will delay notifications significantly
+        for (PackageWatchdog watchdog : mAllocatedWatchdogs) {
+            watchdog.removePropertyChangedListener();
+        }
         mAllocatedWatchdogs.clear();
     }
 
@@ -1280,6 +1297,66 @@ public class PackageWatchdogTest {
         MonitoredPackage readPkg = watchdog.parseMonitoredPackage(parser);
 
         assertTrue(readPkg.isEqualTo(expectedPkg));
+    }
+
+    /**
+     * Tests device config changes are propagated correctly.
+     */
+    @Test
+    public void testDeviceConfigChange_explicitHealthCheckEnabled() throws Exception {
+        TestController controller = new TestController();
+        PackageWatchdog watchdog = createWatchdog(controller, true /* withPackagesReady */);
+        assertThat(controller.mIsEnabled).isTrue();
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED,
+                Boolean.toString(false), /*makeDefault*/false);
+        retry(() -> !controller.mIsEnabled);
+        assertThat(controller.mIsEnabled).isFalse();
+    }
+
+    /**
+     * Tests device config changes are propagated correctly.
+     */
+    @Test
+    public void testDeviceConfigChange_triggerFailureCount() throws Exception {
+        PackageWatchdog watchdog = createWatchdog();
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(777), false);
+        retry(() -> watchdog.getTriggerFailureCount() == 777);
+        assertThat(watchdog.getTriggerFailureCount()).isEqualTo(777);
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(0), false);
+        retry(() -> watchdog.getTriggerFailureCount()
+                == PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT);
+        assertThat(watchdog.getTriggerFailureCount()).isEqualTo(
+                PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT);
+    }
+
+    /**
+     * Tests device config changes are propagated correctly.
+     */
+    @Test
+    public void testDeviceConfigChange_triggerFailureDurationMs() throws Exception {
+        PackageWatchdog watchdog = createWatchdog();
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_DURATION_MILLIS,
+                Integer.toString(888), false);
+        retry(() -> watchdog.getTriggerFailureDurationMs() == 888);
+        assertThat(watchdog.getTriggerFailureDurationMs()).isEqualTo(888);
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_DURATION_MILLIS,
+                Integer.toString(0), false);
+        retry(() -> watchdog.getTriggerFailureDurationMs()
+                == PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS);
+        assertThat(watchdog.getTriggerFailureDurationMs()).isEqualTo(
+                PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS);
     }
 
     private void adoptShellPermissions(String... permissions) {

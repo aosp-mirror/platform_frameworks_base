@@ -202,14 +202,6 @@ public final class SearchResult {
          */
         public static final String PROPERTY_PATH_FIELD = "propertyPath";
 
-        /**
-         * The index of matching value in its property. A property may have multiple values. This
-         * index indicates which value is the match.
-         *
-         * @hide
-         */
-        public static final String VALUES_INDEX_FIELD = "valuesIndex";
-
         /** @hide */
         public static final String EXACT_MATCH_POSITION_LOWER_FIELD = "exactMatchPositionLower";
 
@@ -232,8 +224,7 @@ public final class SearchResult {
             mBundle = Preconditions.checkNotNull(bundle);
             Preconditions.checkNotNull(document);
             mPropertyPath = Preconditions.checkNotNull(bundle.getString(PROPERTY_PATH_FIELD));
-            mFullText =
-                    getPropertyValues(document, mPropertyPath, mBundle.getInt(VALUES_INDEX_FIELD));
+            mFullText = getPropertyValues(document, mPropertyPath);
         }
 
         /**
@@ -326,8 +317,7 @@ public final class SearchResult {
         }
 
         /** Extracts the matching string from the document. */
-        private static String getPropertyValues(
-                GenericDocument document, String propertyName, int valueIndex) {
+        private static String getPropertyValues(GenericDocument document, String propertyName) {
             // In IcingLib snippeting is available for only 3 data types i.e String, double and
             // long, so we need to check which of these three are requested.
             // TODO (tytytyww): getPropertyStringArray takes property name, handle for property
@@ -337,7 +327,9 @@ public final class SearchResult {
             if (values == null) {
                 throw new IllegalStateException("No content found for requested property path!");
             }
-            return values[valueIndex];
+
+            // TODO(b/175146044): Return the proper match based on the index in the propertyName.
+            return values[0];
         }
     }
 

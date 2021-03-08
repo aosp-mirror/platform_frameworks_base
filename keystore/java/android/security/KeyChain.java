@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.Activity;
@@ -1010,6 +1011,54 @@ public final class KeyChain {
     public static KeyChainConnection bindAsUser(@NonNull Context context, UserHandle user)
             throws InterruptedException {
         return bindAsUser(context, null, user);
+    }
+
+    /**
+     * Returns a persistable grant string that allows WiFi stack to access the key using Keystore
+     * SSL engine.
+     *
+     * @return grant string or null if key is not granted or doesn't exist.
+     *
+     * The key should be granted to Process.WIFI_UID.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    @WorkerThread
+    public static String getWifiKeyGrantAsUser(
+            @NonNull Context context, @NonNull UserHandle user, @NonNull String alias) {
+        try (KeyChainConnection keyChainConnection =
+                     bindAsUser(context.getApplicationContext(), user)) {
+            return keyChainConnection.getService().getWifiKeyGrantAsUser(alias);
+        } catch (RemoteException | RuntimeException e) {
+            Log.i(LOG, "Couldn't get grant for wifi", e);
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.i(LOG, "Interrupted while getting grant for wifi", e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns whether the key is granted to WiFi stack.
+     * @hide
+     */
+    @SystemApi
+    @WorkerThread
+    public static boolean hasWifiKeyGrantAsUser(
+            @NonNull Context context, @NonNull UserHandle user, @NonNull String alias) {
+        try (KeyChainConnection keyChainConnection =
+                     bindAsUser(context.getApplicationContext(), user)) {
+            return keyChainConnection.getService().hasGrant(Process.WIFI_UID, alias);
+        } catch (RemoteException | RuntimeException e) {
+            Log.i(LOG, "Couldn't query grant for wifi", e);
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.i(LOG, "Interrupted while querying grant for wifi", e);
+            return false;
+        }
     }
 
     /**

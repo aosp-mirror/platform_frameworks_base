@@ -17,7 +17,6 @@
 package com.android.wm.shell.onehanded;
 
 import static android.os.UserHandle.USER_CURRENT;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,7 +24,7 @@ import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -33,6 +32,7 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.ViewConfiguration;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
@@ -82,6 +82,7 @@ public class OneHandedController {
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
     private final OneHandedImpl mImpl = new OneHandedImpl();
+    private final WindowManager mWindowManager;
 
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
     private final AccessibilityManager mAccessibilityManager;
@@ -141,7 +142,7 @@ public class OneHandedController {
      */
     @Nullable
     public static OneHandedController create(
-            Context context, DisplayController displayController,
+            Context context, WindowManager windowManager, DisplayController displayController,
             TaskStackListenerImpl taskStackListener, UiEventLogger uiEventLogger,
             ShellExecutor mainExecutor, Handler mainHandler) {
         if (!SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
@@ -151,22 +152,24 @@ public class OneHandedController {
 
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
         OneHandedTutorialHandler tutorialHandler = new OneHandedTutorialHandler(context,
-                mainExecutor);
+                windowManager, mainExecutor);
         OneHandedAnimationController animationController =
                 new OneHandedAnimationController(context);
         OneHandedTouchHandler touchHandler = new OneHandedTouchHandler(timeoutHandler,
                 mainExecutor);
         OneHandedGestureHandler gestureHandler = new OneHandedGestureHandler(
-                context, displayController, ViewConfiguration.get(context), mainExecutor);
+                context, windowManager, displayController, ViewConfiguration.get(context),
+                mainExecutor);
         OneHandedBackgroundPanelOrganizer oneHandedBackgroundPanelOrganizer =
-                new OneHandedBackgroundPanelOrganizer(context, displayController, mainExecutor);
+                new OneHandedBackgroundPanelOrganizer(context, windowManager, displayController,
+                        mainExecutor);
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
-                context, displayController, animationController, tutorialHandler,
+                context, windowManager, displayController, animationController, tutorialHandler,
                 oneHandedBackgroundPanelOrganizer, mainExecutor);
         OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
-        return new OneHandedController(context, displayController,
+        return new OneHandedController(context, windowManager, displayController,
                 oneHandedBackgroundPanelOrganizer, organizer, touchHandler, tutorialHandler,
                 gestureHandler, timeoutHandler, oneHandedUiEventsLogger, overlayManager,
                 taskStackListener, mainExecutor, mainHandler);
@@ -174,6 +177,7 @@ public class OneHandedController {
 
     @VisibleForTesting
     OneHandedController(Context context,
+            WindowManager windowManager,
             DisplayController displayController,
             OneHandedBackgroundPanelOrganizer backgroundPanelOrganizer,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
@@ -187,6 +191,7 @@ public class OneHandedController {
             ShellExecutor mainExecutor,
             Handler mainHandler) {
         mContext = context;
+        mWindowManager = windowManager;
         mBackgroundPanelOrganizer = backgroundPanelOrganizer;
         mDisplayAreaOrganizer = displayAreaOrganizer;
         mDisplayController = displayController;
@@ -269,7 +274,7 @@ public class OneHandedController {
             return;
         }
         if (!mDisplayAreaOrganizer.isInOneHanded()) {
-            final int yOffSet = Math.round(getDisplaySize().y * mOffSetFraction);
+            final int yOffSet = Math.round(getDisplaySize().height() * mOffSetFraction);
             mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
             mTimeoutHandler.resetTimer();
             mOneHandedUiEventLogger.writeEvent(
@@ -428,14 +433,19 @@ public class OneHandedController {
     }
 
     /**
-     * Query the current display real size from {@link DisplayController}
+     * Query the current display real size from {@link WindowManager}
      *
-     * @return {@link DisplayController#getDisplay(int)#getDisplaySize()}
+     * @return {@link WindowManager#getCurrentWindowMetrics()#getBounds()}
      */
-    private Point getDisplaySize() {
-        Point displaySize = new Point();
-        if (mDisplayController != null && mDisplayController.getDisplay(DEFAULT_DISPLAY) != null) {
-            mDisplayController.getDisplay(DEFAULT_DISPLAY).getRealSize(displaySize);
+    private Rect getDisplaySize() {
+        if (mWindowManager == null) {
+            Slog.e(TAG, "WindowManager instance is null! Can not get display size!");
+            return new Rect();
+        }
+        final Rect displaySize = mWindowManager.getCurrentWindowMetrics().getBounds();
+        if (displaySize.width() == 0 || displaySize.height() == 0) {
+            Slog.e(TAG, "Display size error! width = " + displaySize.width()
+                    + ", height = " + displaySize.height());
         }
         return displaySize;
     }

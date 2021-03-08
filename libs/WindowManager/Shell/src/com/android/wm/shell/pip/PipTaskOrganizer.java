@@ -172,6 +172,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     };
 
     private ActivityManager.RunningTaskInfo mTaskInfo;
+    // To handle the edge case that onTaskInfoChanged callback is received during the entering
+    // PiP transition, where we do not want to intercept the transition but still want to apply the
+    // changed RunningTaskInfo when it finishes.
+    private ActivityManager.RunningTaskInfo mDeferredTaskInfo;
     private WindowContainerToken mToken;
     private SurfaceControl mLeash;
     private State mState = State.UNDEFINED;
@@ -520,12 +524,18 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipTransitionController.sendOnPipTransitionStarted(direction);
     }
 
-    private void sendOnPipTransitionFinished(
+    @VisibleForTesting
+    void sendOnPipTransitionFinished(
             @PipAnimationController.TransitionDirection int direction) {
         if (direction == TRANSITION_DIRECTION_TO_PIP) {
             mState = State.ENTERED_PIP;
         }
         mPipTransitionController.sendOnPipTransitionFinished(direction);
+        // Apply the deferred RunningTaskInfo if applicable after all proper callbacks are sent.
+        if (direction == TRANSITION_DIRECTION_TO_PIP && mDeferredTaskInfo != null) {
+            onTaskInfoChanged(mDeferredTaskInfo);
+            mDeferredTaskInfo = null;
+        }
     }
 
     private void sendOnPipTransitionCancelled(
@@ -567,6 +577,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(mToken, "onTaskInfoChanged requires valid existing mToken");
+        if (mState != State.ENTERED_PIP) {
+            Log.d(TAG, "Defer onTaskInfoChange in current state: " + mState);
+            mDeferredTaskInfo = info;
+            return;
+        }
         mPipBoundsState.setLastPipComponentName(info.topActivity);
         mPipBoundsState.setOverrideMinSize(
                 mPipBoundsAlgorithm.getMinimalSize(info.topActivityInfo));

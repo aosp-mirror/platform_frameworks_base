@@ -31,6 +31,7 @@ import android.content.ContentCaptureOptions;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextParams;
 import android.content.ContextWrapper;
 import android.content.IContentProvider;
 import android.content.IIntentReceiver;
@@ -220,8 +221,7 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mOpPackageName;
 
-    /** Attribution tag of this context */
-    private final @Nullable String mAttributionTag;
+    private final @NonNull ContextParams mParams;
 
     private final @NonNull ResourcesManager mResourcesManager;
     @UnsupportedAppUsage
@@ -469,7 +469,12 @@ class ContextImpl extends Context {
     /** @hide */
     @Override
     public @Nullable String getAttributionTag() {
-        return mAttributionTag;
+        return mParams.getAttributionTag();
+    }
+
+    @Override
+    public @Nullable ContextParams getParams() {
+        return mParams;
     }
 
     @Override
@@ -2046,6 +2051,11 @@ class ContextImpl extends Context {
         if (permission == null) {
             throw new IllegalArgumentException("permission is null");
         }
+        if (mParams.isRenouncedPermission(permission)
+                && pid == android.os.Process.myPid() && uid == android.os.Process.myUid()) {
+            Log.v(TAG, "Treating renounced permission " + permission + " as denied");
+            return PERMISSION_DENIED;
+        }
         return PermissionManager.checkPermission(permission, pid, uid);
     }
 
@@ -2054,6 +2064,11 @@ class ContextImpl extends Context {
     public int checkPermission(String permission, int pid, int uid, IBinder callerToken) {
         if (permission == null) {
             throw new IllegalArgumentException("permission is null");
+        }
+        if (mParams.isRenouncedPermission(permission)
+                && pid == android.os.Process.myPid() && uid == android.os.Process.myUid()) {
+            Log.v(TAG, "Treating renounced permission " + permission + " as denied");
+            return PERMISSION_DENIED;
         }
 
         try {
@@ -2091,6 +2106,10 @@ class ContextImpl extends Context {
     public int checkSelfPermission(String permission) {
         if (permission == null) {
             throw new IllegalArgumentException("permission is null");
+        }
+        if (mParams.isRenouncedPermission(permission)) {
+            Log.v(TAG, "Treating renounced permission " + permission + " as denied");
+            return PERMISSION_DENIED;
         }
 
         return checkPermission(permission, Process.myPid(), Process.myUid());
@@ -2392,8 +2411,9 @@ class ContextImpl extends Context {
         LoadedApk pi = mMainThread.getPackageInfo(application, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE);
         if (pi != null) {
-            ContextImpl c = new ContextImpl(this, mMainThread, pi, null, null, mToken,
-                    new UserHandle(UserHandle.getUserId(application.uid)), flags, null, null);
+            ContextImpl c = new ContextImpl(this, mMainThread, pi, ContextParams.EMPTY, null,
+                    mToken, new UserHandle(UserHandle.getUserId(application.uid)),
+                    flags, null, null);
 
             final int displayId = getDisplayId();
             final Integer overrideDisplayId = mForceDisplayOverrideInResources
@@ -2422,14 +2442,14 @@ class ContextImpl extends Context {
         if (packageName.equals("system") || packageName.equals("android")) {
             // The system resources are loaded in every application, so we can safely copy
             // the context without reloading Resources.
-            return new ContextImpl(this, mMainThread, mPackageInfo, mAttributionTag, null,
+            return new ContextImpl(this, mMainThread, mPackageInfo, mParams, null,
                     mToken, user, flags, null, null);
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
         if (pi != null) {
-            ContextImpl c = new ContextImpl(this, mMainThread, pi, mAttributionTag, null,
+            ContextImpl c = new ContextImpl(this, mMainThread, pi, mParams, null,
                     mToken, user, flags, null, null);
 
             final int displayId = getDisplayId();
@@ -2468,7 +2488,7 @@ class ContextImpl extends Context {
         final String[] paths = mPackageInfo.getSplitPaths(splitName);
 
         final ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo,
-                mAttributionTag, splitName, mToken, mUser, mFlags, classLoader, null);
+                mParams, splitName, mToken, mUser, mFlags, classLoader, null);
 
         context.setResources(ResourcesManager.getInstance().getResources(
                 mToken,
@@ -2501,7 +2521,7 @@ class ContextImpl extends Context {
             overrideConfiguration = displayAdjustedConfig;
         }
 
-        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mAttributionTag,
+        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
                 mSplitName, mToken, mUser, mFlags, mClassLoader, null);
 
         final int displayId = getDisplayId();
@@ -2519,7 +2539,7 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("display must not be null");
         }
 
-        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mAttributionTag,
+        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
                 mSplitName, mToken, mUser, mFlags, mClassLoader, null);
 
         final int displayId = display.getDisplayId();
@@ -2577,7 +2597,7 @@ class ContextImpl extends Context {
 
 
     ContextImpl createBaseWindowContext(IBinder token, Display display) {
-        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mAttributionTag,
+        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
                 mSplitName, token, mUser, mFlags, mClassLoader, null);
         // Window contexts receive configurations directly from the server and as such do not
         // need to override their display in ResourcesManager.
@@ -2606,17 +2626,23 @@ class ContextImpl extends Context {
                 compatInfo, mClassLoader, loaders);
     }
 
+    @NonNull
+    @Override
+    public Context createContext(@NonNull ContextParams params) {
+        return new ContextImpl(this, mMainThread, mPackageInfo, params, mSplitName,
+                mToken, mUser, mFlags, mClassLoader, null);
+    }
+
     @Override
     public @NonNull Context createAttributionContext(@Nullable String attributionTag) {
-        return new ContextImpl(this, mMainThread, mPackageInfo, attributionTag, mSplitName,
-                mToken, mUser, mFlags, mClassLoader, null);
+        return createContext(new ContextParams.Builder().setAttributionTag(attributionTag).build());
     }
 
     @Override
     public Context createDeviceProtectedStorageContext() {
         final int flags = (mFlags & ~Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE)
                 | Context.CONTEXT_DEVICE_PROTECTED_STORAGE;
-        return new ContextImpl(this, mMainThread, mPackageInfo, mAttributionTag, mSplitName,
+        return new ContextImpl(this, mMainThread, mPackageInfo, mParams, mSplitName,
                 mToken, mUser, flags, mClassLoader, null);
     }
 
@@ -2624,7 +2650,7 @@ class ContextImpl extends Context {
     public Context createCredentialProtectedStorageContext() {
         final int flags = (mFlags & ~Context.CONTEXT_DEVICE_PROTECTED_STORAGE)
                 | Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE;
-        return new ContextImpl(this, mMainThread, mPackageInfo, mAttributionTag, mSplitName,
+        return new ContextImpl(this, mMainThread, mPackageInfo, mParams, mSplitName,
                 mToken, mUser, flags, mClassLoader, null);
     }
 
@@ -2798,8 +2824,8 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage
     static ContextImpl createSystemContext(ActivityThread mainThread) {
         LoadedApk packageInfo = new LoadedApk(mainThread);
-        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, null,
-                0, null, null);
+        ContextImpl context = new ContextImpl(null, mainThread, packageInfo,
+                ContextParams.EMPTY, null, null, null, 0, null, null);
         context.setResources(packageInfo.getResources());
         context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
                 context.mResourcesManager.getDisplayMetrics());
@@ -2816,8 +2842,8 @@ class ContextImpl extends Context {
      */
     static ContextImpl createSystemUiContext(ContextImpl systemContext, int displayId) {
         final LoadedApk packageInfo = systemContext.mPackageInfo;
-        ContextImpl context = new ContextImpl(null, systemContext.mMainThread, packageInfo, null,
-                null, null, null, 0, null, null);
+        ContextImpl context = new ContextImpl(null, systemContext.mMainThread, packageInfo,
+                ContextParams.EMPTY, null, null, null, 0, null, null);
         context.setResources(createResources(null, packageInfo, null, displayId, null,
                 packageInfo.getCompatibilityInfo(), null));
         context.updateDisplay(displayId);
@@ -2841,8 +2867,8 @@ class ContextImpl extends Context {
     static ContextImpl createAppContext(ActivityThread mainThread, LoadedApk packageInfo,
             String opPackageName) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
-        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, null,
-                0, null, opPackageName);
+        ContextImpl context = new ContextImpl(null, mainThread, packageInfo,
+                ContextParams.EMPTY, null, null, null, 0, null, opPackageName);
         context.setResources(packageInfo.getResources());
         context.mContextType = isSystemOrSystemUI(context) ? CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI
                 : CONTEXT_TYPE_NON_UI;
@@ -2871,7 +2897,7 @@ class ContextImpl extends Context {
             }
         }
 
-        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null,
+        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, ContextParams.EMPTY,
                 activityInfo.splitName, activityToken, null, 0, classLoader, null);
         context.mContextType = CONTEXT_TYPE_ACTIVITY;
 
@@ -2904,7 +2930,7 @@ class ContextImpl extends Context {
     }
 
     private ContextImpl(@Nullable ContextImpl container, @NonNull ActivityThread mainThread,
-            @NonNull LoadedApk packageInfo, @Nullable String attributionTag,
+            @NonNull LoadedApk packageInfo, @NonNull ContextParams params,
             @Nullable String splitName, @Nullable IBinder token, @Nullable UserHandle user,
             int flags, @Nullable ClassLoader classLoader, @Nullable String overrideOpPackageName) {
         mOuterContext = this;
@@ -2959,7 +2985,7 @@ class ContextImpl extends Context {
         }
 
         mOpPackageName = overrideOpPackageName != null ? overrideOpPackageName : opPackageName;
-        mAttributionTag = attributionTag;
+        mParams = Objects.requireNonNull(params);
         mContentResolver = new ApplicationContentResolver(this, mainThread);
     }
 

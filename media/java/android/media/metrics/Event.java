@@ -17,20 +17,28 @@
 package android.media.metrics;
 
 import android.annotation.IntRange;
+import android.os.Bundle;
 
 /**
  * Abstract class for metrics events.
  */
 public abstract class Event {
-    private final long mTimeSinceCreatedMillis;
+    final long mTimeSinceCreatedMillis;
+    Bundle mExtras;
 
     // hide default constructor
     /* package */ Event() {
         mTimeSinceCreatedMillis = MediaMetricsManager.INVALID_TIMESTAMP;
     }
 
+    // TODO: remove
     protected Event(long timeSinceCreatedMillis) {
         mTimeSinceCreatedMillis = timeSinceCreatedMillis;
+    }
+
+    /* package */ Event(long timeSinceCreatedMillis, Bundle extras) {
+        mTimeSinceCreatedMillis = timeSinceCreatedMillis;
+        mExtras = extras;
     }
 
     /**
@@ -40,5 +48,10 @@ public abstract class Event {
     @IntRange(from = -1)
     public long getTimeSinceCreatedMillis() {
         return mTimeSinceCreatedMillis;
+    }
+
+    /** @hide */
+    public Bundle getExtras() {
+        return mExtras;
     }
 }

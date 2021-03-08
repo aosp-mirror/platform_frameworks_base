@@ -27,10 +27,10 @@ import java.util.List;
 /**
  * Estimates the battery discharge amounts.
  */
-public class DischargedPowerCalculator extends PowerCalculator {
+public class BatteryChargeCalculator extends PowerCalculator {
     private final double mBatteryCapacity;
 
-    public DischargedPowerCalculator(PowerProfile powerProfile) {
+    public BatteryChargeCalculator(PowerProfile powerProfile) {
         mBatteryCapacity = powerProfile.getBatteryCapacity();
     }
 
@@ -42,6 +42,16 @@ public class DischargedPowerCalculator extends PowerCalculator {
                 .setDischargedPowerRange(
                         batteryStats.getLowDischargeAmountSinceCharge() * mBatteryCapacity / 100,
                         batteryStats.getHighDischargeAmountSinceCharge() * mBatteryCapacity / 100);
+
+        final long batteryTimeRemainingMs = batteryStats.computeBatteryTimeRemaining(rawRealtimeUs);
+        if (batteryTimeRemainingMs != -1) {
+            builder.setBatteryTimeRemainingMs(batteryTimeRemainingMs / 1000);
+        }
+
+        final long chargeTimeRemainingMs = batteryStats.computeChargeTimeRemaining(rawRealtimeUs);
+        if (chargeTimeRemainingMs != -1) {
+            builder.setChargeTimeRemainingMs(chargeTimeRemainingMs / 1000);
+        }
     }
 
     @Override

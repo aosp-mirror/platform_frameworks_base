@@ -550,13 +550,23 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Leyfir forritinu að breyta myndasafninu þínu."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"lesa staðsetningar úr efnissafninu þínu"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Leyfir forritinu að lesa staðsetningar úr efnissafninu þínu."</string>
+    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
+    <skip />
+    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
+    <skip />
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Staðfestu hver þú ert"</string>
+    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Lífkennavélbúnaður ekki tiltækur"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Hætt við auðkenningu"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Þekktist ekki"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Hætt við auðkenningu"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ekkert PIN-númer, mynstur eða aðgangsorð stillt"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Villa við auðkenningu"</string>
+    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
+    <skip />
+    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Hluti fingrafars greindist. Reyndu aftur."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Ekki var hægt að vinna úr fingrafarinu. Reyndu aftur."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Fingrafaraskynjarinn er óhreinn. Hreinsaðu hann og reyndu aftur."</string>
@@ -579,6 +589,10 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Þetta tæki er ekki með fingrafaralesara."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Slökkt tímabundið á skynjara."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Fingur <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
+    <skip />
+    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
+    <skip />
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Notaðu fingrafarið þitt til að halda áfram"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -606,8 +620,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Andlit þekkist ekki lengur. Reyndu aftur."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Of svipað. Stilltu þér öðruvísi upp."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Snúðu höfðinu aðeins minna."</string>
-    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
-    <skip />
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Hallaðu höfðinu aðeins minna."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Snúðu höfðinu aðeins minna."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Fjarlægðu það sem kann að hylja andlitið."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Hreinsaðu efsta hluta skjásins þíns, þ.m.t. svörtu stikuna"</string>
@@ -625,6 +638,12 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Andlitsopnun er ekki studd í þessu tæki."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Slökkt tímabundið á skynjara."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Andlit <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
+    <skip />
+    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
+    <skip />
+    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Andlitstákn"</string>
@@ -1668,8 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Nota flýtileið"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Umsnúningur lita"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Litaleiðrétting"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Minnka birtu"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Hljóðstyrkstökkum haldið inni. Kveikt á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Hljóðstyrkstökkum haldið inni. Slökkt á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Haltu báðum hljóðstyrkstökkunum inni í þrjár sekúndur til að nota <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1876,6 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Viðvörun um vefveiðar"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Vinnusnið"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Tilkynnt"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Staðfest"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Stækka"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Minnka"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"stækka eða minnka"</string>
@@ -1947,6 +1966,8 @@
     <string name="app_category_news" msgid="1172762719574964544">"Fréttir og tímarit"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Kort og leiðsögn"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Aðstoð"</string>
+    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
+    <skip />
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Geymslurými tækis"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-villuleit"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"klst."</string>
@@ -2221,8 +2242,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Til að halda áfram þarf &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; aðgang að myndavél tækisins."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Kveikja"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Persónuvernd skynjara"</string>
-    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
-    <skip />
-    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
-    <skip />
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Forritstákn"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Mynd af merki forrits"</string>
 </resources>

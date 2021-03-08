@@ -55,7 +55,7 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators = new ArrayList<>();
 
                 // Power calculators are applied in the order of registration
-                mPowerCalculators.add(new DischargedPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new BatteryChargeCalculator(mPowerProfile));
                 mPowerCalculators.add(new CpuPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));

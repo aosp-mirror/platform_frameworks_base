@@ -888,6 +888,14 @@ public abstract class Context {
         return getAttributionTag();
     }
 
+    /**
+     * Return the set of parameters which this Context was created with, if it
+     * was created via {@link #createContext(ContextParams)}.
+     */
+    public @Nullable ContextParams getParams() {
+        return null;
+    }
+
     /** Return the full application info for this context's package. */
     public abstract ApplicationInfo getApplicationInfo();
 
@@ -5523,8 +5531,6 @@ public abstract class Context {
      * {@link GameManager}.
      *
      * @see #getSystemService(String)
-     *
-     * @hide
      */
     public static final String GAME_SERVICE = "game";
 
@@ -6373,6 +6379,19 @@ public abstract class Context {
     public Context createWindowContext(@NonNull Display display, @WindowType int type,
             @SuppressLint("NullableCollection")
             @Nullable Bundle options) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Creates a context with specific properties and behaviors.
+     *
+     * @param contextParams Parameters for how the new context should behave.
+     * @return A context with the specified behaviors.
+     *
+     * @see ContextParams
+     */
+    @NonNull
+    public Context createContext(@NonNull ContextParams contextParams) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

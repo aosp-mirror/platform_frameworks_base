@@ -228,6 +228,7 @@ package android {
     field public static final String REMOTE_DISPLAY_PROVIDER = "android.permission.REMOTE_DISPLAY_PROVIDER";
     field public static final String REMOVE_DRM_CERTIFICATES = "android.permission.REMOVE_DRM_CERTIFICATES";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final String RENOUNCE_PERMISSIONS = "android.permission.RENOUNCE_PERMISSIONS";
     field public static final String REQUEST_NETWORK_SCORES = "android.permission.REQUEST_NETWORK_SCORES";
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
@@ -2184,6 +2185,14 @@ package android.content {
     field public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
   }
 
+  public final class ContextParams {
+    method @Nullable @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public java.util.Set<java.lang.String> getRenouncedPermissions();
+  }
+
+  public static final class ContextParams.Builder {
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.ContextParams.Builder setRenouncedPermissions(@NonNull java.util.Set<java.lang.String>);
+  }
+
   public class ContextWrapper extends android.content.Context {
     method public android.content.Context createCredentialProtectedStorageContext();
     method @Nullable public java.io.File getPreloadsFileCache();
@@ -2703,7 +2712,7 @@ package android.content.pm {
   }
 
   public class ShortcutManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS) public java.util.List<android.content.pm.ShortcutManager.ShareShortcutInfo> getShareTargets(@NonNull android.content.IntentFilter);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS) @WorkerThread public java.util.List<android.content.pm.ShortcutManager.ShareShortcutInfo> getShareTargets(@NonNull android.content.IntentFilter);
     method public boolean hasShareTargets(@NonNull String);
   }
 
@@ -3448,6 +3457,10 @@ package android.hardware.lights {
 
   public abstract class LightsManager {
     field @Deprecated public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
+  }
+
+  public static final class LightsRequest.Builder {
+    method @Deprecated @NonNull public android.hardware.lights.LightsRequest.Builder setLight(@NonNull android.hardware.lights.Light, @NonNull android.hardware.lights.LightState);
   }
 
 }
@@ -9191,6 +9204,15 @@ package android.se.omapi {
 
   public final class Reader {
     method @RequiresPermission(android.Manifest.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION) public boolean reset();
+  }
+
+}
+
+package android.security {
+
+  public final class KeyChain {
+    method @Nullable @WorkerThread public static String getWifiKeyGrantAsUser(@NonNull android.content.Context, @NonNull android.os.UserHandle, @NonNull String);
+    method @WorkerThread public static boolean hasWifiKeyGrantAsUser(@NonNull android.content.Context, @NonNull android.os.UserHandle, @NonNull String);
   }
 
 }

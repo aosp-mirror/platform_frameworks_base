@@ -535,28 +535,6 @@ public final class SearchSpec {
          */
         @NonNull
         public SearchSpec.Builder addProjection(
-                @NonNull String schema, @NonNull String... propertyPaths) {
-            Preconditions.checkNotNull(propertyPaths);
-            return addProjection(schema, Arrays.asList(propertyPaths));
-        }
-
-        /**
-         * Adds property paths for the specified type to be used for projection. If property paths
-         * are added for a type, then only the properties referred to will be retrieved for results
-         * of that type. If a property path that is specified isn't present in a result, it will be
-         * ignored for that result. Property paths cannot be null.
-         *
-         * <p>If no property paths are added for a particular type, then all properties of results
-         * of that type will be retrieved.
-         *
-         * <p>If property path is added for the {@link SearchSpec#PROJECTION_SCHEMA_TYPE_WILDCARD},
-         * then those property paths will apply to all results, excepting any types that have their
-         * own, specific property paths set.
-         *
-         * <p>{@see SearchSpec.Builder#addProjection(String, String...)}
-         */
-        @NonNull
-        public SearchSpec.Builder addProjection(
                 @NonNull String schema, @NonNull Collection<String> propertyPaths) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Preconditions.checkNotNull(schema);

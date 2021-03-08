@@ -36,6 +36,8 @@ import android.hardware.camera2.ICameraOfflineSession;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.InputConfiguration;
+import android.hardware.camera2.params.MultiResolutionStreamConfigurationMap;
+import android.hardware.camera2.params.MultiResolutionStreamInfo;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -468,7 +470,8 @@ public class CameraDeviceImpl extends CameraDevice
                     }
                     if (inputConfig != null) {
                         int streamId = mRemoteDevice.createInputStream(inputConfig.getWidth(),
-                                inputConfig.getHeight(), inputConfig.getFormat());
+                                inputConfig.getHeight(), inputConfig.getFormat(),
+                                inputConfig.isMultiResolution());
                         mConfiguredInput = new SimpleEntry<Integer, InputConfiguration>(
                                 streamId, inputConfig);
                     }
@@ -1355,7 +1358,42 @@ public class CameraDeviceImpl extends CameraDevice
     }
 
     private void checkInputConfiguration(InputConfiguration inputConfig) {
-        if (inputConfig != null) {
+        if (inputConfig == null) {
+            return;
+        }
+
+        if (inputConfig.isMultiResolution()) {
+            MultiResolutionStreamConfigurationMap configMap = mCharacteristics.get(
+                    CameraCharacteristics.SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP);
+
+            int[] inputFormats = configMap.getInputFormats();
+            boolean validFormat = false;
+            for (int format : inputFormats) {
+                if (format == inputConfig.getFormat()) {
+                    validFormat = true;
+                }
+            }
+
+            if (validFormat == false) {
+                throw new IllegalArgumentException("multi-resolution input format " +
+                        inputConfig.getFormat() + " is not valid");
+            }
+
+            boolean validSize = false;
+            Collection<MultiResolutionStreamInfo> inputStreamInfo =
+                    configMap.getInputInfo(inputConfig.getFormat());
+            for (MultiResolutionStreamInfo info : inputStreamInfo) {
+                if (inputConfig.getWidth() == info.getWidth() &&
+                        inputConfig.getHeight() == info.getHeight()) {
+                    validSize = true;
+                }
+            }
+
+            if (validSize == false) {
+                throw new IllegalArgumentException("Multi-resolution input size " +
+                        inputConfig.getWidth() + "x" + inputConfig.getHeight() + " is not valid");
+            }
+        } else {
             StreamConfigurationMap configMap = mCharacteristics.get(
                     CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 

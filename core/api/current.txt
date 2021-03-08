@@ -1072,6 +1072,7 @@ package android {
     field public static final int panelTextAppearance = 16842850; // 0x1010062
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
+    field public static final int passwordsActivity = 16844351; // 0x101063f
     field public static final int path = 16842794; // 0x101002a
     field public static final int pathAdvancedPattern = 16844320; // 0x1010620
     field public static final int pathData = 16843781; // 0x1010405
@@ -5311,6 +5312,14 @@ package android.app {
     field @Deprecated public static final int TRANSIT_UNSET = -1; // 0xffffffff
   }
 
+  public final class GameManager {
+    method public int getGameMode();
+    field public static final int GAME_MODE_BATTERY = 3; // 0x3
+    field public static final int GAME_MODE_PERFORMANCE = 2; // 0x2
+    field public static final int GAME_MODE_STANDARD = 1; // 0x1
+    field public static final int GAME_MODE_UNSUPPORTED = 0; // 0x0
+  }
+
   public class Instrumentation {
     ctor public Instrumentation();
     method public android.os.TestLooperManager acquireLooperManager(android.os.Looper);
@@ -7112,6 +7121,7 @@ package android.app.admin {
     method @NonNull public android.os.Bundle getUserRestrictions(@NonNull android.content.ComponentName);
     method @Nullable public String getWifiMacAddress(@NonNull android.content.ComponentName);
     method public boolean grantKeyPairToApp(@Nullable android.content.ComponentName, @NonNull String, @NonNull String);
+    method public boolean grantKeyPairToWifiAuth(@NonNull String);
     method public boolean hasCaCertInstalled(@Nullable android.content.ComponentName, byte[]);
     method public boolean hasGrantedPolicy(@NonNull android.content.ComponentName, int);
     method public boolean hasKeyPair(@NonNull String);
@@ -7134,6 +7144,7 @@ package android.app.admin {
     method public boolean isDeviceIdAttestationSupported();
     method public boolean isDeviceOwnerApp(String);
     method public boolean isEphemeralUser(@NonNull android.content.ComponentName);
+    method public boolean isKeyPairGrantedToWifiAuth(@NonNull String);
     method public boolean isLockTaskPermitted(String);
     method public boolean isLogoutEnabled();
     method public boolean isManagedProfile(@NonNull android.content.ComponentName);
@@ -7169,6 +7180,7 @@ package android.app.admin {
     method @Nullable public java.util.List<android.app.admin.SecurityLog.SecurityEvent> retrievePreRebootSecurityLogs(@NonNull android.content.ComponentName);
     method @Nullable public java.util.List<android.app.admin.SecurityLog.SecurityEvent> retrieveSecurityLogs(@NonNull android.content.ComponentName);
     method public boolean revokeKeyPairFromApp(@Nullable android.content.ComponentName, @NonNull String, @NonNull String);
+    method public boolean revokeKeyPairFromWifiAuth(@NonNull String);
     method public void setAccountManagementDisabled(@NonNull android.content.ComponentName, String, boolean);
     method public void setAffiliationIds(@NonNull android.content.ComponentName, @NonNull java.util.Set<java.lang.String>);
     method public void setAlwaysOnVpnPackage(@NonNull android.content.ComponentName, @Nullable String, boolean) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -8371,7 +8383,6 @@ package android.appwidget {
   public class AppWidgetHostView extends android.widget.FrameLayout {
     ctor public AppWidgetHostView(android.content.Context);
     ctor public AppWidgetHostView(android.content.Context, int, int);
-    method public void clearCurrentSize();
     method public int getAppWidgetId();
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo();
     method public static android.graphics.Rect getDefaultPaddingForWidget(android.content.Context, android.content.ComponentName, android.graphics.Rect);
@@ -8381,13 +8392,12 @@ package android.appwidget {
     method public void resetColorResources();
     method public void setAppWidget(int, android.appwidget.AppWidgetProviderInfo);
     method public void setColorResources(@NonNull android.util.SparseIntArray);
-    method public void setCurrentSize(@NonNull android.graphics.PointF);
     method public void setExecutor(java.util.concurrent.Executor);
     method public void setOnLightBackground(boolean);
     method public void updateAppWidget(android.widget.RemoteViews);
     method public void updateAppWidgetOptions(android.os.Bundle);
     method @Deprecated public void updateAppWidgetSize(android.os.Bundle, int, int, int, int);
-    method public void updateAppWidgetSize(@NonNull android.os.Bundle, @NonNull java.util.List<android.graphics.PointF>);
+    method public void updateAppWidgetSize(@NonNull android.os.Bundle, @NonNull java.util.List<android.util.SizeF>);
   }
 
   public class AppWidgetManager {
@@ -9716,7 +9726,7 @@ package android.companion {
   }
 
   public final class CompanionDeviceManager {
-    method public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
+    method @RequiresPermission(value=android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
     method public void disassociate(@NonNull String);
     method @NonNull public java.util.List<java.lang.String> getAssociations();
     method public boolean hasNotificationAccess(android.content.ComponentName);
@@ -10326,6 +10336,7 @@ package android.content {
     method @Deprecated public abstract void clearWallpaper() throws java.io.IOException;
     method @NonNull public android.content.Context createAttributionContext(@Nullable String);
     method public abstract android.content.Context createConfigurationContext(@NonNull android.content.res.Configuration);
+    method @NonNull public android.content.Context createContext(@NonNull android.content.ContextParams);
     method public abstract android.content.Context createContextForSplit(String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.Context createDeviceProtectedStorageContext();
     method public abstract android.content.Context createDisplayContext(@NonNull android.view.Display);
@@ -10376,6 +10387,7 @@ package android.content {
     method public abstract android.content.pm.PackageManager getPackageManager();
     method public abstract String getPackageName();
     method public abstract String getPackageResourcePath();
+    method @Nullable public android.content.ContextParams getParams();
     method public abstract android.content.res.Resources getResources();
     method public abstract android.content.SharedPreferences getSharedPreferences(String, int);
     method @NonNull public final String getString(@StringRes int);
@@ -10487,6 +10499,7 @@ package android.content {
     field public static final String EUICC_SERVICE = "euicc";
     field public static final String FILE_INTEGRITY_SERVICE = "file_integrity";
     field public static final String FINGERPRINT_SERVICE = "fingerprint";
+    field public static final String GAME_SERVICE = "game";
     field public static final String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
     field public static final String INPUT_METHOD_SERVICE = "input_method";
     field public static final String INPUT_SERVICE = "input";
@@ -10545,6 +10558,19 @@ package android.content {
     field public static final String WIFI_RTT_RANGING_SERVICE = "wifirtt";
     field public static final String WIFI_SERVICE = "wifi";
     field public static final String WINDOW_SERVICE = "window";
+  }
+
+  public final class ContextParams {
+    method @Nullable public String getAttributionTag();
+    method @Nullable public String getReceiverAttributionTag();
+    method @Nullable public String getReceiverPackage();
+  }
+
+  public static final class ContextParams.Builder {
+    ctor public ContextParams.Builder();
+    method @NonNull public android.content.ContextParams build();
+    method @NonNull public android.content.ContextParams.Builder setAttributionTag(@NonNull String);
+    method @NonNull public android.content.ContextParams.Builder setReceiverPackage(@NonNull String, @Nullable String);
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -12882,18 +12908,18 @@ package android.content.pm {
   }
 
   public class ShortcutManager {
-    method public boolean addDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
-    method public android.content.Intent createShortcutResultIntent(@NonNull android.content.pm.ShortcutInfo);
+    method @WorkerThread public boolean addDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
+    method @WorkerThread public android.content.Intent createShortcutResultIntent(@NonNull android.content.pm.ShortcutInfo);
     method public void disableShortcuts(@NonNull java.util.List<java.lang.String>);
     method public void disableShortcuts(@NonNull java.util.List<java.lang.String>, CharSequence);
     method public void enableShortcuts(@NonNull java.util.List<java.lang.String>);
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getDynamicShortcuts();
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getDynamicShortcuts();
     method public int getIconMaxHeight();
     method public int getIconMaxWidth();
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getManifestShortcuts();
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getManifestShortcuts();
     method public int getMaxShortcutCountPerActivity();
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getPinnedShortcuts();
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getShortcuts(int);
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getPinnedShortcuts();
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getShortcuts(int);
     method public boolean isRateLimitingActive();
     method public boolean isRequestPinShortcutSupported();
     method public void pushDynamicShortcut(@NonNull android.content.pm.ShortcutInfo);
@@ -12901,10 +12927,10 @@ package android.content.pm {
     method public void removeDynamicShortcuts(@NonNull java.util.List<java.lang.String>);
     method public void removeLongLivedShortcuts(@NonNull java.util.List<java.lang.String>);
     method public void reportShortcutUsed(String);
-    method public boolean requestPinShortcut(@NonNull android.content.pm.ShortcutInfo, @Nullable android.content.IntentSender);
-    method public boolean setDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
+    method @WorkerThread public boolean requestPinShortcut(@NonNull android.content.pm.ShortcutInfo, @Nullable android.content.IntentSender);
+    method @WorkerThread public boolean setDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
     method public void updateShortcutVisibility(@NonNull String, @Nullable byte[], boolean);
-    method public boolean updateShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
+    method @WorkerThread public boolean updateShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
     field public static final int FLAG_MATCH_CACHED = 8; // 0x8
     field public static final int FLAG_MATCH_DYNAMIC = 2; // 0x2
     field public static final int FLAG_MATCH_MANIFEST = 1; // 0x1
@@ -17771,6 +17797,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_STREAM_COMBINATIONS;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MultiResolutionStreamConfigurationMap> SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SENSOR_AVAILABLE_TEST_PATTERN_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.BlackLevelPattern> SENSOR_BLACK_LEVEL_PATTERN;
@@ -18375,9 +18402,20 @@ package android.hardware.camera2 {
     field public static final int MAX_THUMBNAIL_DIMENSION = 256; // 0x100
   }
 
+  public class MultiResolutionImageReader implements java.lang.AutoCloseable {
+    method public void close();
+    method protected void finalize();
+    method public void flush();
+    method @NonNull public android.hardware.camera2.params.MultiResolutionStreamInfo getStreamInfoForImageReader(@NonNull android.media.ImageReader);
+    method @NonNull public android.view.Surface getSurface();
+    method @NonNull public static android.hardware.camera2.MultiResolutionImageReader newInstance(@NonNull java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo>, int, @IntRange(from=1) int);
+    method public void setOnImageAvailableListener(@Nullable android.media.ImageReader.OnImageAvailableListener, @Nullable java.util.concurrent.Executor);
+  }
+
   public final class TotalCaptureResult extends android.hardware.camera2.CaptureResult {
     method @NonNull public java.util.List<android.hardware.camera2.CaptureResult> getPartialResults();
-    method public java.util.Map<java.lang.String,android.hardware.camera2.CaptureResult> getPhysicalCameraResults();
+    method @Deprecated public java.util.Map<java.lang.String,android.hardware.camera2.CaptureResult> getPhysicalCameraResults();
+    method @NonNull public java.util.Map<java.lang.String,android.hardware.camera2.TotalCaptureResult> getPhysicalCameraTotalResults();
   }
 
 }
@@ -18426,9 +18464,11 @@ package android.hardware.camera2.params {
 
   public final class InputConfiguration {
     ctor public InputConfiguration(int, int, int);
+    ctor public InputConfiguration(@NonNull java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo>, int);
     method public int getFormat();
     method public int getHeight();
     method public int getWidth();
+    method public boolean isMultiResolution();
   }
 
   public final class LensShadingMap {
@@ -18471,6 +18511,20 @@ package android.hardware.camera2.params {
     field public static final int METERING_WEIGHT_MIN = 0; // 0x0
   }
 
+  public final class MultiResolutionStreamConfigurationMap {
+    method @NonNull public int[] getInputFormats();
+    method @NonNull public java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo> getInputInfo(int);
+    method @NonNull public int[] getOutputFormats();
+    method @NonNull public java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo> getOutputInfo(int);
+  }
+
+  public class MultiResolutionStreamInfo {
+    ctor public MultiResolutionStreamInfo(int, int, @NonNull String);
+    method public int getHeight();
+    method @NonNull public String getPhysicalCameraId();
+    method public int getWidth();
+  }
+
   public final class OisSample {
     ctor public OisSample(long, float, float);
     method public long getTimestamp();
@@ -18483,6 +18537,7 @@ package android.hardware.camera2.params {
     ctor public OutputConfiguration(int, @NonNull android.view.Surface);
     ctor public OutputConfiguration(@NonNull android.util.Size, @NonNull Class<T>);
     method public void addSurface(@NonNull android.view.Surface);
+    method @NonNull public static java.util.Collection<android.hardware.camera2.params.OutputConfiguration> createInstancesForMultiResolutionOutput(@NonNull android.hardware.camera2.MultiResolutionImageReader);
     method public int describeContents();
     method public void enableSurfaceSharing();
     method public int getMaxSharedSurfaceCount();
@@ -21906,16 +21961,17 @@ package android.media {
     field public static final int ERROR_PROVISIONING_CERTIFICATE = 24; // 0x18
     field public static final int ERROR_PROVISIONING_CONFIG = 25; // 0x19
     field public static final int ERROR_PROVISIONING_PARSE = 26; // 0x1a
-    field public static final int ERROR_PROVISIONING_RETRY = 27; // 0x1b
+    field public static final int ERROR_PROVISIONING_REQUEST_REJECTED = 27; // 0x1b
+    field public static final int ERROR_PROVISIONING_RETRY = 28; // 0x1c
     field public static final int ERROR_RESOURCE_BUSY = 3; // 0x3
-    field public static final int ERROR_RESOURCE_CONTENTION = 28; // 0x1c
-    field public static final int ERROR_SECURE_STOP_RELEASE = 29; // 0x1d
+    field public static final int ERROR_RESOURCE_CONTENTION = 29; // 0x1d
+    field public static final int ERROR_SECURE_STOP_RELEASE = 30; // 0x1e
     field public static final int ERROR_SESSION_NOT_OPENED = 5; // 0x5
-    field public static final int ERROR_STORAGE_READ = 30; // 0x1e
-    field public static final int ERROR_STORAGE_WRITE = 31; // 0x1f
+    field public static final int ERROR_STORAGE_READ = 31; // 0x1f
+    field public static final int ERROR_STORAGE_WRITE = 32; // 0x20
     field public static final int ERROR_UNKNOWN = 0; // 0x0
     field public static final int ERROR_UNSUPPORTED_OPERATION = 6; // 0x6
-    field public static final int ERROR_ZERO_SUBSAMPLES = 32; // 0x20
+    field public static final int ERROR_ZERO_SUBSAMPLES = 33; // 0x21
   }
 
   @Deprecated @IntDef({android.media.MediaDrm.HDCP_LEVEL_UNKNOWN, android.media.MediaDrm.HDCP_NONE, android.media.MediaDrm.HDCP_V1, android.media.MediaDrm.HDCP_V2, android.media.MediaDrm.HDCP_V2_1, android.media.MediaDrm.HDCP_V2_2, android.media.MediaDrm.HDCP_V2_3, android.media.MediaDrm.HDCP_NO_DIGITAL_OUTPUT}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MediaDrm.HdcpLevel {
@@ -45924,11 +45980,14 @@ package android.util {
     method public static android.util.Size parseSize(String) throws java.lang.NumberFormatException;
   }
 
-  public final class SizeF {
+  public final class SizeF implements android.os.Parcelable {
     ctor public SizeF(float, float);
+    method public int describeContents();
     method public float getHeight();
     method public float getWidth();
     method public static android.util.SizeF parseSizeF(String) throws java.lang.NumberFormatException;
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.util.SizeF> CREATOR;
   }
 
   public class SparseArray<E> implements java.lang.Cloneable {
@@ -50873,6 +50932,7 @@ package android.view.autofill {
     field public static final String EXTRA_AUTHENTICATION_RESULT = "android.view.autofill.extra.AUTHENTICATION_RESULT";
     field public static final String EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET = "android.view.autofill.extra.AUTHENTICATION_RESULT_EPHEMERAL_DATASET";
     field public static final String EXTRA_CLIENT_STATE = "android.view.autofill.extra.CLIENT_STATE";
+    field public static final String EXTRA_INLINE_SUGGESTIONS_REQUEST = "android.view.autofill.extra.INLINE_SUGGESTIONS_REQUEST";
   }
 
   public abstract static class AutofillManager.AutofillCallback {
@@ -54820,7 +54880,7 @@ package android.widget {
   public class RemoteViews implements android.view.LayoutInflater.Filter android.os.Parcelable {
     ctor public RemoteViews(String, int);
     ctor public RemoteViews(android.widget.RemoteViews, android.widget.RemoteViews);
-    ctor public RemoteViews(@NonNull java.util.Map<android.graphics.PointF,android.widget.RemoteViews>);
+    ctor public RemoteViews(@NonNull java.util.Map<android.util.SizeF,android.widget.RemoteViews>);
     ctor public RemoteViews(android.widget.RemoteViews);
     ctor public RemoteViews(android.os.Parcel);
     method public void addView(@IdRes int, android.widget.RemoteViews);

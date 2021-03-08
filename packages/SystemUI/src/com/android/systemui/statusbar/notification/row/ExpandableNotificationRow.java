@@ -331,7 +331,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mHeadsupDisappearRunning;
     private View mChildAfterViewWhenDismissed;
     private View mGroupParentWhenDismissed;
-    private boolean mShelfIconVisible;
     private boolean mAboveShelf;
     private OnUserInteractionCallback mOnUserInteractionCallback;
     private NotificationGutsManager mNotificationGutsManager;
@@ -568,7 +567,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // The public layouts expand button is always visible
         mPublicLayout.updateExpandButtons(true);
         updateLimits();
-        updateIconVisibilities();
         updateShelfIconColor();
         updateRippleAllowed();
         if (mUpdateBackgroundOnUpdate) {
@@ -883,7 +881,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             setDistanceToTopRoundness(NO_ROUNDNESS);
             mNotificationParent.updateBackgroundForGroupState();
         }
-        updateIconVisibilities();
         updateBackgroundClipping();
     }
 
@@ -1481,21 +1478,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return getShelfTransformationTarget() != null;
     }
 
-    /**
-     * Set the icons to be visible of this notification.
-     */
-    public void setShelfIconVisible(boolean iconVisible) {
-        if (iconVisible != mShelfIconVisible) {
-            mShelfIconVisible = iconVisible;
-            updateIconVisibilities();
-        }
-    }
-
-    @Override
-    protected void onBelowSpeedBumpChanged() {
-        updateIconVisibilities();
-    }
-
     @Override
     protected void updateContentTransformation() {
         if (mExpandAnimationRunning) {
@@ -1519,18 +1501,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mChildrenContainer.setAlpha(contentAlpha);
             mChildrenContainer.setTranslationY(translationY);
             // TODO: handle children fade out better
-        }
-    }
-
-    /** Refreshes the visibility of notification icons */
-    public void updateIconVisibilities() {
-        // The shelf icon is never hidden for children in groups
-        boolean visible = !isChildInGroup() && mShelfIconVisible;
-        for (NotificationContentView l : mLayouts) {
-            l.setShelfIconVisible(visible);
-        }
-        if (mChildrenContainer != null) {
-            mChildrenContainer.setShelfIconVisible(visible);
         }
     }
 
