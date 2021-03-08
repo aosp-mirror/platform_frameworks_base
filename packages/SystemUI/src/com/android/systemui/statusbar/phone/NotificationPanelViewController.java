@@ -1051,9 +1051,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
             mKeyguardStatusViewController.setHasVisibleNotifications(hasVisibleNotifications);
             int userIconHeight = mKeyguardQsUserSwitchController != null
-                    ? mKeyguardQsUserSwitchController.getUserIconHeight()
-                    : (mKeyguardUserSwitcherController != null
-                            ? mKeyguardUserSwitcherController.getUserIconHeight() : 0);
+                    ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
             mClockPositionAlgorithm.setup(mStatusBarHeaderHeightKeyguard,
                     totalHeight - bottomPadding,
                     mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
