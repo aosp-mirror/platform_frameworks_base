@@ -134,7 +134,6 @@ import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
-import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
@@ -6068,6 +6067,17 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "Package " + pkg +
                         ": Use of fullScreenIntent requires the USE_FULL_SCREEN_INTENT permission");
             }
+        }
+
+        // Ensure CallStyle has all the correct actions
+        if ("android.app.Notification$CallStyle".equals(
+                notification.extras.getString(Notification.EXTRA_TEMPLATE))) {
+            Notification.Builder builder =
+                    Notification.Builder.recoverBuilder(getContext(), notification);
+            Notification.CallStyle style = (Notification.CallStyle) builder.getStyle();
+            List<Notification.Action> actions = style.getActionsListWithSystemActions();
+            notification.actions = new Notification.Action[actions.size()];
+            actions.toArray(notification.actions);
         }
 
         // Remote views? Are they too big?
