@@ -139,8 +139,4 @@ public class TestHal extends IFace.Stub {
             }
         };
     }
-
-    @Override
-    public void reset() {
-    }
 }
