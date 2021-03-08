@@ -141,9 +141,9 @@ public class ScreenPowerCalculator extends PowerCalculator {
                 statsType);
 
         if (!forceUsePowerProfileModel) {
-            final long energyUJ = batteryStats.getScreenOnEnergy();
-            if (energyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE) {
-                totalPowerAndDuration.powerMah = uJtoMah(energyUJ);
+            final long chargeUC = batteryStats.getScreenOnMeasuredBatteryConsumptionUC();
+            if (chargeUC != BatteryStats.POWER_DATA_UNAVAILABLE) {
+                totalPowerAndDuration.powerMah = uCtoMah(chargeUC);
                 return true;
             }
         }
@@ -157,14 +157,14 @@ public class ScreenPowerCalculator extends PowerCalculator {
             BatteryStats.Uid u, long rawRealtimeUs) {
         appPowerAndDuration.durationMs = getProcessForegroundTimeMs(u, rawRealtimeUs);
 
-        final long energyUJ = u.getScreenOnEnergy();
-        if (energyUJ < 0) {
+        final long chargeUC = u.getScreenOnMeasuredBatteryConsumptionUC();
+        if (chargeUC < 0) {
             Slog.wtf(TAG, "Screen energy not supported, so calculateApp shouldn't de called");
             appPowerAndDuration.powerMah = 0;
             return;
         }
 
-        appPowerAndDuration.powerMah = uJtoMah(energyUJ);
+        appPowerAndDuration.powerMah = uCtoMah(chargeUC);
     }
 
     private long calculateDuration(BatteryStats batteryStats, long rawRealtimeUs, int statsType) {

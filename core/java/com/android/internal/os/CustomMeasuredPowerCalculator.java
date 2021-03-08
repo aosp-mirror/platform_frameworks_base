@@ -35,7 +35,7 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         super.calculate(builder, batteryStats, rawRealtimeUs, rawUptimeUs, query);
         final double[] customMeasuredPowerMah = calculateMeasuredEnergiesMah(
-                batteryStats.getCustomMeasuredEnergiesMicroJoules());
+                batteryStats.getCustomConsumerMeasuredBatteryConsumptionUC());
         if (customMeasuredPowerMah != null) {
             final SystemBatteryConsumer.Builder systemBatteryConsumerBuilder =
                     builder.getOrCreateSystemBatteryConsumerBuilder(
@@ -52,7 +52,7 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
     protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final double[] customMeasuredPowerMah = calculateMeasuredEnergiesMah(
-                u.getCustomMeasuredEnergiesMicroJoules());
+                u.getCustomConsumerMeasuredBatteryConsumptionUC());
         if (customMeasuredPowerMah != null) {
             for (int i = 0; i < customMeasuredPowerMah.length; i++) {
                 app.setConsumedPowerForCustomComponent(
@@ -65,20 +65,20 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
     @Override
     protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
             long rawUptimeUs, int statsType) {
-        updateCustomMeasuredPowerMah(app, u.getCustomMeasuredEnergiesMicroJoules());
+        updateCustomMeasuredPowerMah(app, u.getCustomConsumerMeasuredBatteryConsumptionUC());
     }
 
-    private void updateCustomMeasuredPowerMah(BatterySipper sipper, long[] measuredEnergiesUJ) {
-        sipper.customMeasuredPowerMah = calculateMeasuredEnergiesMah(measuredEnergiesUJ);
+    private void updateCustomMeasuredPowerMah(BatterySipper sipper, long[] measuredChargeUC) {
+        sipper.customMeasuredPowerMah = calculateMeasuredEnergiesMah(measuredChargeUC);
     }
 
-    private double[] calculateMeasuredEnergiesMah(long[] measuredEnergiesUJ) {
-        if (measuredEnergiesUJ == null) {
+    private double[] calculateMeasuredEnergiesMah(long[] measuredChargeUC) {
+        if (measuredChargeUC == null) {
             return null;
         }
-        final double[] measuredEnergiesMah = new double[measuredEnergiesUJ.length];
-        for (int i = 0; i < measuredEnergiesUJ.length; i++) {
-            measuredEnergiesMah[i] = uJtoMah(measuredEnergiesUJ[i]);
+        final double[] measuredEnergiesMah = new double[measuredChargeUC.length];
+        for (int i = 0; i < measuredChargeUC.length; i++) {
+            measuredEnergiesMah[i] = uCtoMah(measuredChargeUC[i]);
         }
         return measuredEnergiesMah;
     }
