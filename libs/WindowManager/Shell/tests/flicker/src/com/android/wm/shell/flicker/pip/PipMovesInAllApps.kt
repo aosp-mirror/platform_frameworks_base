@@ -24,8 +24,6 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.google.common.truth.Truth
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -59,15 +57,23 @@ class PipMovesInAllApps(testSpec: FlickerTestParameter) : PipTransition(testSpec
 
     @Postsubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     @Postsubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     @Postsubmit
     @Test
     fun pipAlwaysVisible() = testSpec.assertWm { this.showsAppWindow(pipApp.windowName) }
+
+    @Postsubmit
+    @Test
+    fun pipLayerInsideDisplay() {
+        testSpec.assertLayersStart {
+            coversAtMost(displayBounds, pipApp.defaultWindowName)
+        }
+    }
 
     @Postsubmit
     @Test

@@ -23,13 +23,7 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,7 +42,6 @@ class EnterExitPipTest(
     testSpec: FlickerTestParameter
 ) : PipTransition(testSpec) {
     private val testApp = FixedAppHelper(instrumentation)
-    private val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = true) {
@@ -84,14 +77,6 @@ class EnterExitPipTest(
 
     @Presubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
-
-    @Presubmit
-    @Test
     fun showBothAppLayersThenHidePip() {
         testSpec.assertLayers {
             isVisible(testApp.defaultWindowName)
@@ -117,14 +102,6 @@ class EnterExitPipTest(
             coversExactly(displayBounds, pipApp.defaultWindowName)
         }
     }
-
-    @Presubmit
-    @Test
-    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
