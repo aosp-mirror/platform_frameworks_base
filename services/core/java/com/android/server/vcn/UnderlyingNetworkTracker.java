@@ -23,7 +23,6 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkCapabilities.NetCapability;
 import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
@@ -133,7 +132,7 @@ public class UnderlyingNetworkTracker {
 
     private NetworkRequest.Builder getNetworkRequestBase() {
         NetworkRequest.Builder requestBase = new NetworkRequest.Builder();
-        for (@NetCapability int capability : mRequiredUnderlyingNetworkCapabilities) {
+        for (int capability : mRequiredUnderlyingNetworkCapabilities) {
             requestBase.addCapability(capability);
         }
 
