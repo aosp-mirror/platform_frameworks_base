@@ -34,7 +34,7 @@ class NotificationCallTemplateViewWrapper constructor(
 ) : NotificationTemplateViewWrapper(ctx, view, row) {
 
     private val minHeightWithActions: Int =
-            NotificationUtils.getFontScaledHeight(ctx, R.dimen.call_notification_full_height)
+            NotificationUtils.getFontScaledHeight(ctx, R.dimen.notification_max_height)
     private val callLayout: CallLayout = view as CallLayout
 
     private lateinit var conversationIconView: CachingIconView
