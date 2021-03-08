@@ -1203,7 +1203,10 @@ public final class Display {
      */
     @Nullable
     public DeviceProductInfo getDeviceProductInfo() {
-        return mDisplayInfo.deviceProductInfo;
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.deviceProductInfo;
+        }
     }
 
     /**
