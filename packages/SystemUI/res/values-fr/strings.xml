@@ -116,7 +116,10 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Annuler"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Partager"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Enregistrement de l\'écran annulé"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Enregistrement de l\'écran enregistré. Appuyez pour afficher"</string>
+    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
+    <skip />
+    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
+    <skip />
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Erreur lors de la suppression de l\'enregistrement de l\'écran"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Échec d\'obtention des autorisations"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Erreur lors du démarrage de l\'enregistrement de l\'écran"</string>
@@ -412,8 +415,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Jusqu\'à l\'aube"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"À partir de <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Jusqu\'à <xliff:g id="TIME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
-    <skip />
+    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"Réduire la luminosité"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC désactivée"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"La technologie NFC est activée"</string>
@@ -447,8 +449,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Déverrouillez l\'écran pour pouvoir utiliser NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Cet appareil appartient à votre organisation"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Cet appareil est fourni par <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Balayer pour téléphoner"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Balayer l\'écran depuis l\'icône pour l\'assistance vocale"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Balayer pour prendre une photo"</string>
@@ -628,8 +629,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Appuyez pour ignorer. Vous pouvez ignorer les services d\'accessibilité."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Appuyez pour mettre en mode vibreur."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Appuyez pour ignorer."</string>
-    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
-    <skip />
+    <string name="volume_ringer_change" msgid="3574969197796055532">"Appuyez pour changer le mode de la sonnerie"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"couper le son"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"réactiver le son"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"activer le vibreur"</string>

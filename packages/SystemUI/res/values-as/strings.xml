@@ -116,7 +116,10 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"বাতিল কৰক"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"শ্বেয়াৰ কৰক"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"স্ক্রীণ ৰেকৰ্ড কৰাটো বাতিল কৰা হ’ল"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"স্ক্রীণ ৰেকৰ্ডিং ছেভ কৰা হ’ল, চাবলৈ টিপক"</string>
+    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
+    <skip />
+    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
+    <skip />
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"স্ক্রীণ ৰেকৰ্ডিং মচি থাকোঁতে কিবা আসোঁৱাহ হ’ল"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"অনুমতি পাব পৰা নগ\'ল"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"স্ক্রীন ৰেকৰ্ড কৰা আৰম্ভ কৰোঁতে আসোঁৱাহ হৈছে"</string>
@@ -412,8 +415,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"সূৰ্যোদয়লৈকে"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>ত অন কৰক"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> পৰ্যন্ত"</string>
-    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
-    <skip />
+    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"উজ্জ্বলতা কমাওক"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC নিষ্ক্ৰিয় হৈ আছে"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC সক্ষম হৈ আছে"</string>
@@ -447,8 +449,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ব্যৱহাৰ কৰিবলৈ আনলক কৰক"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>ৰ"</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>এ প্ৰদান কৰিছে"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ফ\'নৰ বাবে আইকনৰপৰা ছোৱাইপ কৰক"</string>
     <string name="voice_hint" msgid="7476017460191291417">"কণ্ঠধ্বনিৰে সহায়ৰ বাবে আইকনৰ পৰা ছোৱাইপ কৰক"</string>
     <string name="camera_hint" msgid="4519495795000658637">"কেমেৰা খুলিবলৈ আইকনৰপৰা ছোৱাইপ কৰক"</string>
@@ -628,8 +629,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। মিউট কৰিবলৈ টিপক। দিব্য়াংগসকলৰ বাবে থকা সেৱা মিউট হৈ থাকিব পাৰে।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s। কম্পন অৱস্থাত ছেট কৰিবলৈ টিপক।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s। মিউট কৰিবলৈ টিপক।"</string>
-    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
-    <skip />
+    <string name="volume_ringer_change" msgid="3574969197796055532">"ৰিংগাৰ ম’ড সলনি কৰিবলৈ টিপক"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"মিউট কৰক"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"আনমিউট কৰক"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"কম্পন কৰক"</string>

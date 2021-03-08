@@ -116,7 +116,10 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Цуцлах"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Хуваалцах"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Дэлгэцийн бичлэгийг цуцалсан"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Дэлгэцийн бичлэгийг хадгалсан. Харахын тулд товшино уу"</string>
+    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
+    <skip />
+    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
+    <skip />
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Дэлгэцийн бичлэгийг устгахад алдаа гарлаа"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Зөвшөөрөл авч чадсангүй"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Дэлгэцийн бичлэгийг эхлүүлэхэд алдаа гарлаа"</string>
@@ -446,8 +449,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC-г ашиглахын тулд түгжээг тайлна уу"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Энэ төхөөрөмж танай байгууллагад харьяалагддаг"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Энэ төхөөрөмж <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>-д харьяалагддаг"</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Энэ төхөөрөмжийг <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>-с нийлүүлдэг"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Утсыг гаргахын тулд дүрс тэмдгээс шудрах"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Дуут туслахыг нээхийн тулд дүрс тэмдгээс шудрах"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Камер нээхийн тулд дүрс тэмдгийг шудрах"</string>

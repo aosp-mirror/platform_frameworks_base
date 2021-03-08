@@ -58,7 +58,7 @@
     <string name="always_use_device" msgid="210535878779644679">"Abrir siempre <xliff:g id="APPLICATION">%1$s</xliff:g> cuando se conecte <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Abrir siempre <xliff:g id="APPLICATION">%1$s</xliff:g> cuando se conecte <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"¿Permitir depuración por USB?"</string>
-    <string name="usb_debugging_message" msgid="5794616114463921773">"La huella digital de tu clave RSA es:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="5794616114463921773">"La huella dactilar de tu clave RSA es:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Permitir siempre desde esta computadora"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"No tienes permitida la depuración por USB"</string>
@@ -116,7 +116,10 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Cancelar"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Compartir"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Se canceló la grabación de pantalla"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Se guardó la grabación de pantalla; presiona para verla"</string>
+    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
+    <skip />
+    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
+    <skip />
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"No se pudo borrar la grabación de pantalla"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Error al obtener permisos"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Error al iniciar la grabación de pantalla"</string>
@@ -135,8 +138,8 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Teléfono"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Asistente voz"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloquear"</string>
-    <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Esperando huella digital"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Desbloquear sin utilizar la huella digital"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Esperando huella dactilar"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Desbloquear sin utilizar la huella dactilar"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Escaneando rostro"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Enviar"</string>
     <string name="accessibility_manage_notification" msgid="582215815790143983">"Administrar notificaciones"</string>
@@ -175,8 +178,8 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Hubo demasiados intentos incorrectos. Se borrará este usuario."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Hubo demasiados intentos incorrectos. Se borrarán este perfil de trabajo y sus datos."</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Descartar"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas digitales"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícono de huella digital"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas dactilares"</string>
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícono de huella dactilar"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Autenticando tu rostro…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ícono de rostro"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Botón de zoom de compatibilidad"</string>
@@ -412,8 +415,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Hasta el amanecer"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"A la(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Hasta la(s) <xliff:g id="TIME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
-    <skip />
+    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"Reducir el brillo"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"La tecnología NFC está inhabilitada"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"La tecnología NFC está habilitada"</string>
@@ -447,8 +449,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea el dispositivo para usar NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertenece a tu organización"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Este dispositivo pertenece a <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> proporciona este dispositivo"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Desliza el dedo para desbloquear el teléfono."</string>
     <string name="voice_hint" msgid="7476017460191291417">"Desliza el dedo desde el ícono para abrir asistente de voz."</string>
     <string name="camera_hint" msgid="4519495795000658637">"Desliza el dedo para acceder a la cámara."</string>
@@ -628,8 +629,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Presiona para silenciar. Es posible que los servicios de accesibilidad estén silenciados."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Presiona para establecer el modo vibración."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Presiona para silenciar."</string>
-    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
-    <skip />
+    <string name="volume_ringer_change" msgid="3574969197796055532">"Presiona para cambiar el modo de timbre"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"silenciar"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"dejar de silenciar"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrar"</string>

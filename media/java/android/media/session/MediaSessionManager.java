@@ -541,17 +541,6 @@ public final class MediaSessionManager {
      * Sends a media key event. The receiver will be selected automatically.
      *
      * @param keyEvent the key event to send
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void dispatchMediaKeyEvent(@NonNull KeyEvent keyEvent) {
-        dispatchMediaKeyEventInternal(keyEvent, /*asSystemService=*/false, /*needWakeLock=*/false);
-    }
-
-    /**
-     * Sends a media key event. The receiver will be selected automatically.
-     *
-     * @param keyEvent the key event to send
      * @param needWakeLock true if a wake lock should be held while sending the key
      * @hide
      */
