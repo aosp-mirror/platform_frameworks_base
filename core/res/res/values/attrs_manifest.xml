@@ -1370,7 +1370,7 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="resumeWhilePausing" format="boolean" />
 
-    <!-- Indicates that it is okay for this activity to be put in multi-window mode. Intended for a
+    <!-- Hint to platform that the activity works well in multi-window mode. Intended for a
          multi-window device where there can be multiple activities of various sizes on the screen
          at the same time.
 
@@ -1390,7 +1390,7 @@
          resizeable.
 
          <p>NOTE: The value of {@link android.R.attr#screenOrientation} is ignored for
-         resizeable activities when in multi-window mode. -->
+         resizeable activities when in multi-window mode before Android 12. -->
     <attr name="resizeableActivity" format="boolean" />
 
     <!-- Indicates that the activity specifically supports the picture-in-picture form of
