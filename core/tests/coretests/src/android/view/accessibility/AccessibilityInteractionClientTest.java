@@ -33,6 +33,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Tests for AccessibilityInteractionClient
  */
@@ -62,7 +65,7 @@ public class AccessibilityInteractionClientTest {
         final long accessibilityNodeId = 0x4321L;
         AccessibilityNodeInfo nodeFromConnection = AccessibilityNodeInfo.obtain();
         nodeFromConnection.setSourceNodeId(accessibilityNodeId, windowId);
-        mMockConnection.mInfoToReturn = nodeFromConnection;
+        mMockConnection.mInfosToReturn = Arrays.asList(nodeFromConnection);
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         AccessibilityNodeInfo node = client.findAccessibilityNodeInfoByAccessibilityId(
                 MOCK_CONNECTION_ID, windowId, accessibilityNodeId, true, 0, null);
@@ -72,7 +75,7 @@ public class AccessibilityInteractionClientTest {
     }
 
     private static class MockConnection extends AccessibilityServiceConnectionImpl {
-        AccessibilityNodeInfo mInfoToReturn;
+        List<AccessibilityNodeInfo> mInfosToReturn;
 
         @Override
         public String[] findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
@@ -80,7 +83,7 @@ public class AccessibilityInteractionClientTest {
                 IAccessibilityInteractionConnectionCallback callback, int flags, long threadId,
                 Bundle arguments) {
             try {
-                callback.setFindAccessibilityNodeInfoResult(mInfoToReturn, interactionId);
+                callback.setFindAccessibilityNodeInfosResult(mInfosToReturn, interactionId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
