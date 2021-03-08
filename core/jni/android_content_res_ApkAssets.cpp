@@ -353,12 +353,8 @@ static jlong NativeLoadEmpty(JNIEnv* env, jclass /*clazz*/, jint flags, jobject 
   return reinterpret_cast<jlong>(apk_assets.release());
 }
 
-static void NativeDestroy(void* ptr) {
+static void NativeDestroy(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
   delete reinterpret_cast<ApkAssets*>(ptr);
-}
-
-static jlong NativeGetFinalizer(JNIEnv* /*env*/, jclass /*clazz*/) {
-  return static_cast<jlong>(reinterpret_cast<uintptr_t>(&NativeDestroy));
 }
 
 static jstring NativeGetAssetPath(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
@@ -477,7 +473,7 @@ static const JNINativeMethod gApkAssetsMethods[] = {
     {"nativeLoadFdOffsets",
      "(ILjava/io/FileDescriptor;Ljava/lang/String;JJILandroid/content/res/loader/AssetsProvider;)J",
      (void*)NativeLoadFromFdOffset},
-    {"nativeGetFinalizer", "()J", (void*)NativeGetFinalizer},
+    {"nativeDestroy", "(J)V", (void*)NativeDestroy},
     {"nativeGetAssetPath", "(J)Ljava/lang/String;", (void*)NativeGetAssetPath},
     {"nativeGetDebugName", "(J)Ljava/lang/String;", (void*)NativeGetDebugName},
     {"nativeGetStringBlock", "(J)J", (void*)NativeGetStringBlock},
