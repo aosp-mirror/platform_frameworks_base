@@ -599,8 +599,39 @@ void CanvasContext::finishFrame(FrameInfo* frameInfo) {
     // TODO (b/169858044): Move this into JankTracker to adjust deadline when queue is
     // double-stuffed.
     if (CC_UNLIKELY(mFrameMetricsReporter.get() != nullptr)) {
-        mFrameMetricsReporter->reportFrameMetrics(frameInfo->data());
+        mFrameMetricsReporter->reportFrameMetrics(frameInfo->data(), false /*hasPresentTime*/);
     }
+}
+
+void CanvasContext::reportMetricsWithPresentTime() {
+    if (mFrameMetricsReporter == nullptr) {
+        return;
+    }
+    if (mNativeSurface == nullptr) {
+        return;
+    }
+    FrameInfo* forthBehind;
+    int64_t frameNumber;
+    {  // acquire lock
+        std::scoped_lock lock(mLast4FrameInfosMutex);
+        if (mLast4FrameInfos.size() != mLast4FrameInfos.capacity()) {
+            // Not enough frames yet
+            return;
+        }
+        // Surface object keeps stats for the last 8 frames.
+        std::tie(forthBehind, frameNumber) = mLast4FrameInfos.front();
+    }  // release lock
+
+    nsecs_t presentTime = 0;
+    native_window_get_frame_timestamps(
+            mNativeSurface->getNativeWindow(), frameNumber, nullptr /*outRequestedPresentTime*/,
+            nullptr /*outAcquireTime*/, nullptr /*outLatchTime*/,
+            nullptr /*outFirstRefreshStartTime*/, nullptr /*outLastRefreshStartTime*/,
+            nullptr /*outGpuCompositionDoneTime*/, &presentTime, nullptr /*outDequeueReadyTime*/,
+            nullptr /*outReleaseTime*/);
+
+    forthBehind->set(FrameInfoIndex::DisplayPresentTime) = presentTime;
+    mFrameMetricsReporter->reportFrameMetrics(forthBehind->data(), true /*hasPresentTime*/);
 }
 
 void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* control,
@@ -624,6 +655,9 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* cont
             }
         }
     }
+
+    instance->reportMetricsWithPresentTime();
+
     if (frameInfo != nullptr) {
         if (gpuCompleteTime == -1) {
             gpuCompleteTime = frameInfo->get(FrameInfoIndex::SwapBuffersCompleted);
