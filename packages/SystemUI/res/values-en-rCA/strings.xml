@@ -116,7 +116,10 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Cancel"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Share"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Screen recording cancelled"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Screen recording saved, tap to view"</string>
+    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
+    <skip />
+    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
+    <skip />
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Error deleting screen recording"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Failed to get permissions"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Error starting screen recording"</string>
@@ -446,8 +449,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Unlock to use NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"This device belongs to your organisation"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"This device is provided by <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Swipe from icon for phone"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Swipe from icon for voice assist"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Swipe from icon for camera"</string>

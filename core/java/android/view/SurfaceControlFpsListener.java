@@ -57,14 +57,14 @@ public abstract class SurfaceControlFpsListener {
     public abstract void onFpsReported(float fps);
 
     /**
-     * Registers the sampling listener.
+     * Registers the sampling listener for a particular task ID
      */
-    public void register(@NonNull SurfaceControl layer) {
+    public void register(int taskId) {
         if (mNativeListener == 0) {
             return;
         }
 
-        nativeRegister(mNativeListener, layer.mNativeObject);
+        nativeRegister(mNativeListener, taskId);
     }
 
     /**
@@ -82,12 +82,13 @@ public abstract class SurfaceControlFpsListener {
      *
      * Called from native code on a binder thread.
      */
-    private static void dispatchOnFpsReported(SurfaceControlFpsListener listener, float fps) {
+    private static void dispatchOnFpsReported(
+            @NonNull SurfaceControlFpsListener listener, float fps) {
         listener.onFpsReported(fps);
     }
 
     private static native long nativeCreate(SurfaceControlFpsListener thiz);
     private static native void nativeDestroy(long ptr);
-    private static native void nativeRegister(long ptr, long layerObject);
+    private static native void nativeRegister(long ptr, int taskId);
     private static native void nativeUnregister(long ptr);
 }
