@@ -134,7 +134,6 @@ import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
-import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
@@ -10624,17 +10623,17 @@ public class NotificationManagerService extends SystemService {
                     return true;
                 }
             }
-            String toastMessage = "Indirect activity start from " + packageName;
             String logcatMessage =
                     "Indirect notification activity start (trampoline) from " + packageName;
-
+            // Call to toast() method is posted to mHandler below to offload PM lookup from the
+            // activity start path
             if (CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid)) {
-                toast(toastMessage + " blocked.");
+                mHandler.post(() -> toast(packageName, uid, /* blocked */ true));
                 Slog.e(TAG, logcatMessage + " blocked");
                 return false;
             } else {
                 if (mPackagesShown.add(packageName)) {
-                    toast(toastMessage + ". This will be blocked in S.");
+                    mHandler.post(() -> toast(packageName, uid, /* blocked */ false));
                 }
                 Slog.w(TAG, logcatMessage + ", this should be avoided for performance reasons");
                 return true;
@@ -10650,10 +10649,19 @@ public class NotificationManagerService extends SystemService {
                     && !CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
         }
 
-        private void toast(String message) {
-            mUiHandler.post(() ->
-                    Toast.makeText(getUiContext(), message + "\nSee g.co/dev/trampolines.",
-                            Toast.LENGTH_LONG).show());
+        private void toast(String packageName, int uid, boolean blocked) {
+            final CharSequence label;
+            try {
+                label = mPackageManagerClient.getApplicationLabel(
+                        mPackageManager.getApplicationInfo(packageName, 0,
+                                UserHandle.getUserId(uid)));
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unexpected exception obtaining app label from PackageManager", e);
+                return;
+            }
+            mUiHandler.post(() -> Toast.makeText(getUiContext(),
+                    label + " launch " + (blocked ? "blocked" : "will be blocked")
+                            + "\ng.co/dev/trampolines", Toast.LENGTH_LONG).show());
         }
     }
 }
