@@ -379,18 +379,35 @@ public class ClipboardService extends SystemService {
         @Override
         public void setPrimaryClip(ClipData clip, String callingPackage, @UserIdInt int userId) {
             synchronized (this) {
-                if (clip == null || clip.getItemCount() <= 0) {
-                    throw new IllegalArgumentException("No items");
-                }
-                final int intendingUid = getIntendingUid(callingPackage, userId);
-                final int intendingUserId = UserHandle.getUserId(intendingUid);
-                if (!clipboardAccessAllowed(AppOpsManager.OP_WRITE_CLIPBOARD, callingPackage,
-                            intendingUid, intendingUserId)) {
-                    return;
-                }
-                checkDataOwnerLocked(clip, intendingUid);
-                setPrimaryClipInternal(clip, intendingUid, callingPackage);
+                checkAndSetPrimaryClipLocked(clip, callingPackage, userId, callingPackage);
             }
+        }
+
+        @Override
+        public void setPrimaryClipAsPackage(
+                ClipData clip, String callingPackage, @UserIdInt int userId, String sourcePackage) {
+            getContext().enforceCallingOrSelfPermission(Manifest.permission.SET_CLIP_SOURCE,
+                    "Requires SET_CLIP_SOURCE permission");
+
+            synchronized (this) {
+                checkAndSetPrimaryClipLocked(clip, callingPackage, userId, sourcePackage);
+            }
+        }
+
+        @GuardedBy("this")
+        private void checkAndSetPrimaryClipLocked(
+                ClipData clip, String callingPackage, @UserIdInt int userId, String sourcePackage) {
+            if (clip == null || clip.getItemCount() <= 0) {
+                throw new IllegalArgumentException("No items");
+            }
+            final int intendingUid = getIntendingUid(callingPackage, userId);
+            final int intendingUserId = UserHandle.getUserId(intendingUid);
+            if (!clipboardAccessAllowed(AppOpsManager.OP_WRITE_CLIPBOARD, callingPackage,
+                    intendingUid, intendingUserId)) {
+                return;
+            }
+            checkDataOwnerLocked(clip, intendingUid);
+            setPrimaryClipInternal(clip, intendingUid, sourcePackage);
         }
 
         @Override
@@ -490,6 +507,26 @@ public class ClipboardService extends SystemService {
                     return text != null && text.length() > 0;
                 }
                 return false;
+            }
+        }
+
+        @Override
+        public String getPrimaryClipSource(String callingPackage, int userId) {
+            getContext().enforceCallingOrSelfPermission(Manifest.permission.SET_CLIP_SOURCE,
+                    "Requires SET_CLIP_SOURCE permission");
+            synchronized (this) {
+                final int intendingUid = getIntendingUid(callingPackage, userId);
+                final int intendingUserId = UserHandle.getUserId(intendingUid);
+                if (!clipboardAccessAllowed(AppOpsManager.OP_READ_CLIPBOARD, callingPackage,
+                        intendingUid, intendingUserId, false)
+                        || isDeviceLocked(intendingUserId)) {
+                    return null;
+                }
+                PerUserClipboard clipboard = getClipboard(intendingUserId);
+                if (clipboard.primaryClip != null) {
+                    return clipboard.mPrimaryClipPackage;
+                }
+                return null;
             }
         }
     };

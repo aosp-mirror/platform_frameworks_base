@@ -658,6 +658,10 @@ package android.content {
     field @Nullable public android.util.ArraySet<android.content.ComponentName> whitelistedActivitiesForAugmentedAutofill;
   }
 
+  public class ClipboardManager extends android.text.ClipboardManager {
+    method @Nullable @RequiresPermission(android.Manifest.permission.SET_CLIP_SOURCE) public String getPrimaryClipSource();
+  }
+
   public final class ContentCaptureOptions implements android.os.Parcelable {
     ctor public ContentCaptureOptions(int);
     ctor public ContentCaptureOptions(int, int, int, int, int, @Nullable android.util.ArraySet<android.content.ComponentName>);
