@@ -56,6 +56,14 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
             }
         }
 
+    @FlakyTest
+    @Test
+    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+
+    @FlakyTest
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+
     @Presubmit
     @Test
     fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()

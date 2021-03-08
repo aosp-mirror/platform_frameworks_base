@@ -27,8 +27,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisible
@@ -74,16 +72,6 @@ class RotateTwoLaunchedAppsInAppPairsMode(
     @Presubmit
     @Test
     fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
-
-    @Presubmit
-    @Test
-    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0,
-        testSpec.config.endRotation)
-
-    @Presubmit
-    @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0,
-        testSpec.config.endRotation)
 
     @FlakyTest(bugId = 172776659)
     @Test
