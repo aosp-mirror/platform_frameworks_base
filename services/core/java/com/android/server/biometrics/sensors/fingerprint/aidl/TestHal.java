@@ -140,9 +140,5 @@ public class TestHal extends IFingerprint.Stub {
             }
         };
     }
-
-    @Override
-    public void reset() {
-    }
 }
 
