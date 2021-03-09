@@ -1216,7 +1216,7 @@ public class Notification implements Parcelable
     /**
      * {@link #extras} key: this is a content description of the big picture supplied from
      * {@link BigPictureStyle#bigPicture(Bitmap)}, supplied to
-     * {@link BigPictureStyle#bigPictureContentDescription(CharSequence)}.
+     * {@link BigPictureStyle#setContentDescription(CharSequence)}.
      */
     public static final String EXTRA_PICTURE_CONTENT_DESCRIPTION =
             "android.pictureContentDescription";
@@ -7292,7 +7292,7 @@ public class Notification implements Parcelable
          * Set the content description of the big picture.
          */
         @NonNull
-        public BigPictureStyle bigPictureContentDescription(
+        public BigPictureStyle setContentDescription(
                 @Nullable CharSequence contentDescription) {
             mPictureContentDescription = contentDescription;
             return this;
