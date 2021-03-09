@@ -424,7 +424,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"적색약(적녹)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"청색약(청황)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"색상 보정"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"색상 보정을 사용하면 기기에 표시되는 색상을 조절할 수 있습니다."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="8625527799885140826">"기기에 색상이 표시되는 방식을 조정합니다. 색상을 더 정확하게 보고 싶거나 집중을 위해 일부 색상을 제거할 때 유용합니다."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>, <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -515,6 +515,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"사용 중지할 때까지"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"조금 전"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"휴대전화 스피커"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"이 휴대전화"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"연결 중에 문제가 발생했습니다. 기기를 껐다가 다시 켜 보세요."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"유선 오디오 기기"</string>
     <string name="help_label" msgid="3528360748637781274">"고객센터"</string>

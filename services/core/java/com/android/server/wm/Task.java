@@ -4107,6 +4107,8 @@ class Task extends WindowContainer<WindowContainer> {
                 : INVALID_TASK_ID;
         info.isFocused = isFocused();
         info.isVisible = hasVisibleChildren();
+        ActivityRecord topRecord = getTopNonFinishingActivity();
+        info.mTopActivityLocusId = topRecord != null ? topRecord.getLocusId() : null;
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {

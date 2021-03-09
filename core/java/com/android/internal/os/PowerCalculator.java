@@ -30,6 +30,8 @@ import java.util.Locale;
  */
 public abstract class PowerCalculator {
 
+    protected static final double MILLIAMPHOUR_PER_MICROCOULOMB = 1.0 / 1000.0 / 60.0 / 60.0;
+
     /**
      * Attributes the total amount of power used by this subsystem to various consumers such
      * as apps.
@@ -115,12 +117,12 @@ public abstract class PowerCalculator {
     /**
      * Returns either the measured energy converted to mAh or a usage-based estimate.
      */
-    protected static double getMeasuredOrEstimatedPower(long measuredEnergyUj,
+    protected static double getMeasuredOrEstimatedPower(long measuredEnergyUC,
             UsageBasedPowerEstimator powerEstimator, long durationMs,
             boolean forceUsePowerProfileModel) {
-        if (measuredEnergyUj != BatteryStats.ENERGY_DATA_UNAVAILABLE
+        if (measuredEnergyUC != BatteryStats.POWER_DATA_UNAVAILABLE
                 && !forceUsePowerProfileModel) {
-            return uJtoMah(measuredEnergyUj);
+            return uCtoMah(measuredEnergyUC);
         }
         return powerEstimator.calculatePower(durationMs);
     }
@@ -156,13 +158,7 @@ public abstract class PowerCalculator {
         return String.format(Locale.ENGLISH, format, power);
     }
 
-    static double uJtoMah(long energyUJ) {
-        if (energyUJ == 0) {
-            return 0;
-        }
-
-        // TODO(b/173765509): Convert properly. This is mJ / V * (h/3600s) = mAh with V = 3.7 fixed.
-        //                    Leaving for later since desired units of energy have yet to be decided
-        return energyUJ / 1000.0 / 3.7  / 3600;
+    static double uCtoMah(long chargeUC) {
+        return chargeUC * MILLIAMPHOUR_PER_MICROCOULOMB;
     }
 }

@@ -30,34 +30,4 @@
         android:layout_gravity="top|end"
         android:gravity="end" />
 
-    <LinearLayout
-        android:id="@+id/end_guest_button"
-        android:layout_height="@dimen/end_guest_button_layout_height"
-        android:layout_width="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/end_guest_button_margin_bottom"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingLeft="@dimen/end_guest_button_padding_horizontal"
-        android:paddingRight="@dimen/end_guest_button_padding_horizontal"
-        android:background="@drawable/end_guest_button_background"
-        android:visibility="gone">
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:src="@drawable/ic_exit_to_app"
-            android:background="@android:color/transparent"
-            android:color="?attr/wallpaperTextColor" />
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:gravity="center"
-            android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
-            android:textColor="?attr/wallpaperTextColor"
-            android:textSize="13sp"
-            android:text="@string/guest_exit_button" />
-    </LinearLayout>
-
 </com.android.systemui.statusbar.policy.KeyguardUserSwitcherView>

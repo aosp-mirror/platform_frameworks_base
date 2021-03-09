@@ -18,6 +18,7 @@ package android.security.keystore2;
 
 import android.app.ActivityThread;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.security.keymint.ErrorCode;
 import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.security.KeyStoreException;
@@ -183,15 +184,19 @@ abstract class KeyStoreCryptoOperationUtils {
             try {
                 operation.abort();
             } catch (KeyStoreException e) {
-                // We log this error, but we can afford to ignore it. Dropping the reference
-                // to the KeyStoreOperation is enough to clean up all related resources even
-                // in the Keystore daemon. We log it anyway, because it may indicate some
-                // underlying problem that is worth debugging.
-                Log.w(
-                        "KeyStoreCryptoOperationUtils",
-                        "Encountered error trying to abort a keystore operation.",
-                        e
-                );
+                // Invalid operation handle is very common at this point. It occurs every time
+                // an already finalized operation gets aborted.
+                if (e.getErrorCode() != ErrorCode.INVALID_OPERATION_HANDLE) {
+                    // This error gets logged but ignored. Dropping the reference
+                    // to the KeyStoreOperation is enough to clean up all related resources even
+                    // in the Keystore daemon. It gets logged anyway, because it may indicate some
+                    // underlying problem that is worth debugging.
+                    Log.w(
+                            "KeyStoreCryptoOperationUtils",
+                            "Encountered error trying to abort a keystore operation.",
+                            e
+                    );
+                }
             }
         }
     }

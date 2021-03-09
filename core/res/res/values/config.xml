@@ -1761,13 +1761,6 @@
         <item>com.android.location.fused</item>
     </string-array>
 
-    <!-- Gnss Psds Servers -->
-    <string name="config_longterm_psds_server_1" translatable="false"></string>
-    <string name="config_longterm_psds_server_2" translatable="false"></string>
-    <string name="config_longterm_psds_server_3" translatable="false"></string>
-    <string name="config_normal_psds_server" translatable="false"></string>
-    <string name="config_realtime_psds_server" translatable="false"></string>
-
     <!-- This string array can be overriden to enable test location providers initially. -->
     <!-- Array of "[locationProviderName],[requiresNetwork],
          [requiresSatellite],[requiresCell],[hasMonetaryCost],
@@ -1966,6 +1959,8 @@
     <string name="config_systemSpeechRecognizer" translatable="false"></string>
     <!-- The name of the package that will hold the system Wi-Fi coex manager role. -->
     <string name="config_systemWifiCoexManager" translateable="false"></string>
+    <!-- The name of the package that will hold the wellbeing role. -->
+    <string name="config_systemWellbeing" translatable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false"></string>

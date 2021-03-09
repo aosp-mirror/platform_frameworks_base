@@ -88,7 +88,7 @@ public class ScrollCaptureController {
     }
 
     private void onCaptureResult(CaptureResult result) {
-        Log.d(TAG, "onCaptureResult: " + result + " scrolling up: " + mScrollingUp
+        Log.d(TAG, "onCaptureResult: " + result + " scrolling " + (mScrollingUp ? "UP" : "DOWN")
                 + " finish on boundary: " + mFinishOnBoundary);
         boolean emptyResult = result.captured.height() == 0;
         boolean partialResult = !emptyResult
@@ -98,6 +98,7 @@ public class ScrollCaptureController {
         if (partialResult || emptyResult) {
             // Potentially reached a vertical boundary. Extend in the other direction.
             if (mFinishOnBoundary) {
+                Log.d(TAG, "Partial/empty: finished!");
                 finish = true;
             } else {
                 // We hit a boundary, clear the tiles, capture everything in the opposite direction,
@@ -105,16 +106,22 @@ public class ScrollCaptureController {
                 mImageTileSet.clear();
                 mFinishOnBoundary = true;
                 mScrollingUp = !mScrollingUp;
+                Log.d(TAG, "Partial/empty: cleared, switch direction to finish");
             }
         } else {
             // Got the full requested result, but may have got enough bitmap data now
             int expectedTiles = mImageTileSet.size() + 1;
-            boolean hitMaxTiles = expectedTiles >= mSession.getMaxTiles();
-            if (hitMaxTiles && mFinishOnBoundary) {
+            if (expectedTiles >= mSession.getMaxTiles()) {
+                Log.d(TAG, "Hit max tiles: finished");
+                // If we ever hit the max tiles, we've got enough bitmap data to finish (even if we
+                // weren't sure we'd finish on this pass).
                 finish = true;
             } else {
-                if (mScrollingUp) {
+                if (mScrollingUp && !mFinishOnBoundary) {
+                    // During the initial scroll up, we only want to acquire the portion described
+                    // by IDEAL_PORTION_ABOVE.
                     if (expectedTiles >= mSession.getMaxTiles() * IDEAL_PORTION_ABOVE) {
+                        Log.d(TAG, "Hit ideal portion above: clear and switch direction");
                         // We got enough above the start point, now see how far down it can go.
                         mImageTileSet.clear();
                         mScrollingUp = false;

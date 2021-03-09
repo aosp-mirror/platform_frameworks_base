@@ -424,7 +424,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"நிறம் அடையாளங்காண முடியாமை (நீலம்-மஞ்சள்)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"வண்ணத்திருத்தம்"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"கலர் கரெக்‌ஷனைப் பயன்படுத்தி உங்கள் சாதனத்தில் வண்ணங்கள் காண்பிக்கப்படும் விதத்தைச் சரிசெய்யலாம்"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (8625527799885140826) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
@@ -515,6 +516,8 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"ஆஃப் செய்யும் வரை"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"சற்றுமுன்"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"மொபைல் ஸ்பீக்கர்"</string>
+    <!-- no translation found for media_transfer_this_phone (7194341457812151531) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"இணைப்பதில் சிக்கல். சாதனத்தை ஆஃப் செய்து மீண்டும் ஆன் செய்யவும்"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"வயருடன்கூடிய ஆடியோ சாதனம்"</string>
     <string name="help_label" msgid="3528360748637781274">"உதவியும் கருத்தும்"</string>

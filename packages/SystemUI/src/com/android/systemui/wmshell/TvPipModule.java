@@ -19,16 +19,15 @@ package com.android.systemui.wmshell;
 import android.content.Context;
 import android.os.Handler;
 
-import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -140,6 +139,7 @@ public abstract class TvPipModule {
     @Provides
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
             TvPipMenuController tvPipMenuController,
+            SyncTransactionQueue syncTransactionQueue,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
@@ -149,7 +149,8 @@ public abstract class TvPipModule {
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
+        return new PipTaskOrganizer(context,
+                syncTransactionQueue, pipBoundsState, pipBoundsAlgorithm,
                 tvPipMenuController, pipAnimationController, pipSurfaceTransactionHelper,
                 pipTransitionController, splitScreenOptional, displayController, pipUiEventLogger,
                 shellTaskOrganizer, mainExecutor);

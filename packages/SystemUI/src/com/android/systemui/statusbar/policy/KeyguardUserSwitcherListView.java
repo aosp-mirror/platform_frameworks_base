@@ -35,20 +35,22 @@ public class KeyguardUserSwitcherListView extends AlphaOptimizedLinearLayout {
     private static final String TAG = "KeyguardUserSwitcherListView";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
 
-    private static final int ANIMATION_DURATION_OPENING = 360;
-    private static final int ANIMATION_DURATION_CLOSING = 240;
-
     private boolean mAnimating;
     private final AppearAnimationUtils mAppearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtils;
 
     public KeyguardUserSwitcherListView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setClipChildren(false);
-        mAppearAnimationUtils = new AppearAnimationUtils(context, ANIMATION_DURATION_OPENING,
-                -0.5f, 0.5f, Interpolators.FAST_OUT_SLOW_IN);
-        mDisappearAnimationUtils = new DisappearAnimationUtils(context, ANIMATION_DURATION_CLOSING,
-                0.5f, 0.5f, Interpolators.FAST_OUT_LINEAR_IN);
+        mAppearAnimationUtils = new AppearAnimationUtils(context,
+                AppearAnimationUtils.DEFAULT_APPEAR_DURATION,
+                -0.5f /* translationScaleFactor */,
+                0.5f /* delayScaleFactor */,
+                Interpolators.FAST_OUT_SLOW_IN);
+        mDisappearAnimationUtils = new DisappearAnimationUtils(context,
+                AppearAnimationUtils.DEFAULT_APPEAR_DURATION,
+                0.2f /* translationScaleFactor */,
+                0.2f /* delayScaleFactor */,
+                Interpolators.FAST_OUT_SLOW_IN_REVERSE);
     }
 
     /**
@@ -82,69 +84,40 @@ public class KeyguardUserSwitcherListView extends AlphaOptimizedLinearLayout {
 
         mAnimating = false;
 
-        int userListCount = getChildCount();
-        if (userListCount > 0) {
-            // The first child is always the current user.
-            KeyguardUserDetailItemView currentUserView = ((KeyguardUserDetailItemView) getChildAt(
-                    0));
-            currentUserView.updateVisibilities(true /* showItem */, open /* showTextName */,
-                    animate);
-            currentUserView.setClickable(true);
-            currentUserView.clearAnimation();
-        }
-
-        if (userListCount <= 1) {
-            return;
+        int childCount = getChildCount();
+        KeyguardUserDetailItemView[] userItemViews = new KeyguardUserDetailItemView[childCount];
+        for (int i = 0; i < childCount; i++) {
+            userItemViews[i] = (KeyguardUserDetailItemView) getChildAt(i);
+            userItemViews[i].clearAnimation();
+            if (i == 0) {
+                // The first child is always the current user.
+                userItemViews[i].updateVisibilities(true /* showItem */, open /* showTextName */,
+                        animate);
+                userItemViews[i].setClickable(true);
+            } else {
+                // Update clickable state immediately so that the menu feels more responsive
+                userItemViews[i].setClickable(open);
+                // Before running the animation, ensure visibility is set correctly
+                userItemViews[i].updateVisibilities(animate || open /* showItem */,
+                        true /* showTextName */, false /* animate */);
+            }
         }
 
         if (animate) {
-            // Create an array of all the remaining users (that aren't the current user).
-            KeyguardUserDetailItemView[] otherUserViews =
-                    new KeyguardUserDetailItemView[userListCount - 1];
-            for (int i = 1, n = 0; i < userListCount; i++, n++) {
-                otherUserViews[n] = (KeyguardUserDetailItemView) getChildAt(i);
-
-                // Update clickable state immediately so that the menu feels more responsive
-                otherUserViews[n].setClickable(open);
-
-                // Before running the animation, ensure visibility is set correctly
-                otherUserViews[n].updateVisibilities(
-                        true /* showItem */, true /* showTextName */, false /* animate */);
-                otherUserViews[n].clearAnimation();
-            }
+            // AnimationUtils will immediately hide/show the first item in the array. Since the
+            // first view is the current user, we want to manage its visibility separately.
+            // Set first item to null so AnimationUtils ignores it.
+            userItemViews[0] = null;
 
             setClipChildren(false);
             setClipToPadding(false);
-
             mAnimating = true;
-
-            final int nonCurrentUserCount = otherUserViews.length;
-            if (open) {
-                mAppearAnimationUtils.startAnimation(otherUserViews, () -> {
-                    setClipChildren(true);
-                    setClipToPadding(true);
-                    mAnimating = false;
-                });
-            } else {
-                mDisappearAnimationUtils.startAnimation(otherUserViews, () -> {
-                    setClipChildren(true);
-                    setClipToPadding(true);
-                    for (int i = 0; i < nonCurrentUserCount; i++) {
-                        otherUserViews[i].updateVisibilities(
-                                false /* showItem */, true /* showTextName */, false /* animate */);
-                    }
-                    mAnimating = false;
-                });
-            }
-        } else {
-            for (int i = 1; i < userListCount; i++) {
-                KeyguardUserDetailItemView nonCurrentUserView =
-                        ((KeyguardUserDetailItemView) getChildAt(i));
-                nonCurrentUserView.clearAnimation();
-                nonCurrentUserView.updateVisibilities(
-                        open /* showItem */, true /* showTextName */, false /* animate */);
-                nonCurrentUserView.setClickable(open);
-            }
+            (open ? mAppearAnimationUtils : mDisappearAnimationUtils)
+                    .startAnimation(userItemViews, () -> {
+                        setClipChildren(true);
+                        setClipToPadding(true);
+                        mAnimating = false;
+                    });
         }
     }
 

@@ -68,7 +68,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Memutuskan sambungan..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Menyambung..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> disambungkan"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Memasangkan..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Menggandingkan..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Disambungkan (tiada telefon)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Disambungkan (tiada media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Disambungkan (tiada akses mesej)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -113,7 +113,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Gunakan untuk pemindahan fail"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Gunakan untuk input"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gunakan untuk Alat Bantu Dengar"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Jadikan pasangan"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Gandingkan"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"JADIKAN PASANGAN"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Batal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Berpasangan memberi anda akses kepada kenalan dan sejarah panggilan apabila disambungkan."</string>
@@ -424,7 +424,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (merah-hijau)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (biru-kuning)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Pembetulan warna"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Pembetulan warna membolehkan anda melaraskan cara warna dipaparkan pada peranti anda"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="8625527799885140826">"Laraskan cara warna dipaparkan pada peranti anda. Ini boleh membantu apabila anda ingin:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt; Lihat warna dengan lebih tepat&lt;/li&gt; &lt;li&gt; Alih keluar warna untuk membantu anda fokus&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Diatasi oleh <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Kira-kira <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi"</string>
@@ -515,6 +515,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Sehingga anda matikan"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sebentar tadi"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Pembesar suara telefon"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Telefon ini"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Masalah penyambungan. Matikan &amp; hidupkan kembali peranti"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Peranti audio berwayar"</string>
     <string name="help_label" msgid="3528360748637781274">"Bantuan &amp; maklum balas"</string>

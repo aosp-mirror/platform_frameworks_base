@@ -121,7 +121,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         mChoreographer = choreographer;
         mSurfaceControlWrapper = surfaceControlWrapper;
         mHandler = handler;
-        mObserver = new HardwareRendererObserver(this, mMetricsWrapper.getTiming(), handler);
+        mObserver = new HardwareRendererObserver(
+                this, mMetricsWrapper.getTiming(), handler, false /*waitForPresentTime*/);
         mTraceThresholdMissedFrames = traceThresholdMissedFrames;
         mTraceThresholdFrameTimeMillis = traceThresholdFrameTimeMillis;
         mListener = listener;

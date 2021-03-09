@@ -80,6 +80,18 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         onErrorInternal(errorCode, vendorCode, true /* finish */);
     }
 
+    /**
+     * Notifies the caller that the operation was canceled by the user. Note that the actual
+     * operation still needs to wait for the HAL to send ERROR_CANCELED.
+     */
+    public void onUserCanceled() {
+        // Send USER_CANCELED, but do not finish. Wait for the HAL to respond with ERROR_CANCELED,
+        // which then finishes the AcquisitionClient's lifecycle.
+        onErrorInternal(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED, 0 /* vendorCode */,
+                false /* finish */);
+        stopHalOperation();
+    }
+
     protected void onErrorInternal(int errorCode, int vendorCode, boolean finish) {
         // In some cases, the framework will send an error to the caller before a true terminal
         // case (success, failure, or error) is received from the HAL (e.g. versions of fingerprint

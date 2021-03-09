@@ -17,6 +17,7 @@
 package com.android.server.content;
 
 import static android.os.PowerWhitelistManager.REASON_SYNC_MANAGER;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
 
 import static com.android.server.content.SyncLogger.logSafe;
 
@@ -1672,6 +1673,7 @@ public class SyncManager {
                 dic.addPowerSaveTempWhitelistApp(Process.SYSTEM_UID,
                         syncOperation.owningPackage,
                         mConstants.getKeyExemptionTempWhitelistDurationInSeconds() * 1000,
+                        TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED,
                         UserHandle.getUserId(syncOperation.owningUid),
                         /* sync=*/ false, REASON_SYNC_MANAGER, "sync by top app");
             }
