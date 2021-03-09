@@ -111,6 +111,8 @@ public class ProtoStreamUtils {
     static class StateResidencyResultUtils {
         public static void adjustTimeSinceBootToEpoch(StateResidencyResult[] stateResidencyResult,
                 long startWallTime) {
+            if (stateResidencyResult == null) return;
+
             for (int i = 0; i < stateResidencyResult.length; i++) {
                 final int stateLength = stateResidencyResult[i].stateResidencyData.length;
                 for (int j = 0; j < stateLength; j++) {
@@ -320,6 +322,8 @@ public class ProtoStreamUtils {
     static class EnergyMeasurementUtils {
         public static void adjustTimeSinceBootToEpoch(EnergyMeasurement[] energyMeasurement,
                 long startWallTime) {
+            if (energyMeasurement == null) return;
+
             for (int i = 0; i < energyMeasurement.length; i++) {
                 energyMeasurement[i].timestampMs += startWallTime;
             }
@@ -539,6 +543,8 @@ public class ProtoStreamUtils {
     static class EnergyConsumerResultUtils {
         public static void adjustTimeSinceBootToEpoch(EnergyConsumerResult[] energyConsumerResult,
                 long startWallTime) {
+            if (energyConsumerResult == null) return;
+
             for (int i = 0; i < energyConsumerResult.length; i++) {
                 energyConsumerResult[i].timestampMs += startWallTime;
             }

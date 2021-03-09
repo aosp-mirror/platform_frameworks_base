@@ -81,7 +81,8 @@ internal class BubbleDataRepository(
                     b.rawDesiredHeight,
                     b.rawDesiredHeightResId,
                     b.title,
-                    b.taskId
+                    b.taskId,
+                    b.locusId?.id
             )
         }
     }
@@ -172,6 +173,7 @@ internal class BubbleDataRepository(
                             entity.desiredHeightResId,
                             entity.title,
                             entity.taskId,
+                            entity.locus,
                             mainExecutor
                     ) }
         }

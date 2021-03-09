@@ -195,7 +195,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUsesTasksDisplayAreaIdPriorToSourceIfSet() {
+    public void testUsesSourcesDisplayAreaIdPriorToTaskIfSet() {
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
         final TestDisplayContent fullscreenDisplay = createNewDisplayContent(
@@ -211,7 +211,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
                         .setSource(source)
                         .calculate());
 
-        assertEquals(fullscreenDisplay.getDefaultTaskDisplayArea(),
+        assertEquals(freeformDisplay.getDefaultTaskDisplayArea(),
                 mResult.mPreferredTaskDisplayArea);
     }
 

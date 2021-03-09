@@ -16,9 +16,13 @@
 
 package android.content;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -103,6 +107,31 @@ public class ClipboardManager extends android.text.ClipboardManager {
             Objects.requireNonNull(clip);
             clip.prepareToLeaveProcess(true);
             mService.setPrimaryClip(clip, mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the current primary clip on the clipboard, attributed to the specified {@code
+     * sourcePackage}. The primary clip is the clip that is involved in normal cut and paste
+     * operations.
+     *
+     * @param clip The clipped data item to set.
+     * @param sourcePackage The package name of the app that is the source of the clip data.
+     * @throws IllegalArgumentException if the clip is null or contains no items.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.SET_CLIP_SOURCE)
+    public void setPrimaryClipAsPackage(@NonNull ClipData clip, @NonNull String sourcePackage) {
+        try {
+            Objects.requireNonNull(clip);
+            Objects.requireNonNull(sourcePackage);
+            clip.prepareToLeaveProcess(true);
+            mService.setPrimaryClipAsPackage(
+                    clip, mContext.getOpPackageName(), mContext.getUserId(), sourcePackage);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -229,6 +258,23 @@ public class ClipboardManager extends android.text.ClipboardManager {
     public boolean hasText() {
         try {
             return mService.hasClipboardText(mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the package name of the source of the current primary clip, or null if there is no
+     * primary clip or if a source is not available.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    @RequiresPermission(Manifest.permission.SET_CLIP_SOURCE)
+    public String getPrimaryClipSource() {
+        try {
+            return mService.getPrimaryClipSource(mContext.getOpPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

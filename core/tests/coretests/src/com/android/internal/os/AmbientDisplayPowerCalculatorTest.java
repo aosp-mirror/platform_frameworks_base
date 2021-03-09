@@ -44,18 +44,18 @@ public class AmbientDisplayPowerCalculatorTest {
     public void testMeasuredEnergyBasedModel() {
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
 
-        stats.updateDisplayEnergyLocked(300_000_000, Display.STATE_ON, 0);
+        stats.updateDisplayMeasuredEnergyStatsLocked(300_000_000, Display.STATE_ON, 0);
 
         stats.noteScreenStateLocked(Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
                 30 * MINUTE_IN_MS);
 
-        stats.updateDisplayEnergyLocked(200_000_000, Display.STATE_DOZE,
+        stats.updateDisplayMeasuredEnergyStatsLocked(200_000_000, Display.STATE_DOZE,
                 30 * MINUTE_IN_MS);
 
         stats.noteScreenStateLocked(Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
                 120 * MINUTE_IN_MS);
 
-        stats.updateDisplayEnergyLocked(100_000_000, Display.STATE_OFF,
+        stats.updateDisplayMeasuredEnergyStatsLocked(100_000_000, Display.STATE_OFF,
                 120 * MINUTE_IN_MS);
 
         AmbientDisplayPowerCalculator calculator =
@@ -68,8 +68,9 @@ public class AmbientDisplayPowerCalculatorTest {
                         SystemBatteryConsumer.DRAIN_TYPE_AMBIENT_DISPLAY);
         assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE))
                 .isEqualTo(90 * MINUTE_IN_MS);
+        // 100,000,00 uC / 1000 (micro-/milli-) / 360 (seconds/hour) = 27.777778 mAh
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE))
-                .isWithin(PRECISION).of(7.5075075);
+                .isWithin(PRECISION).of(27.777778);
     }
 
     @Test

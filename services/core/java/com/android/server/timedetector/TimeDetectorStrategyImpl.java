@@ -720,6 +720,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         String logMsg = "Set system clock using time=" + newTime
                 + " cause=" + cause
                 + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
+                + " (old) actualSystemClockMillis=" + actualSystemClockMillis
                 + " newSystemClockMillis=" + newSystemClockMillis;
         if (DBG) {
             Slog.d(LOG_TAG, logMsg);

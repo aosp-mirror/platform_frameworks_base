@@ -234,8 +234,8 @@ public interface Bubbles {
         void onBubbleExpandChanged(boolean isExpanding, String key);
     }
 
-    /** Listener to be notified when a bubbles' notification suppression state changes.*/
-    interface NotificationSuppressionChangedListener {
+    /** Listener to be notified when the flags for notification or bubble suppression changes.*/
+    interface SuppressionChangedListener {
         /** Called when the notification suppression state of a bubble changes. */
         void onBubbleNotificationSuppressionChange(Bubble bubble);
     }
