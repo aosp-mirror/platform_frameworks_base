@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
@@ -337,6 +338,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 qsHost,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
+                FalsingManagerFake(),
                 metricsLogger,
                 statusBarStateController,
                 activityStarter,

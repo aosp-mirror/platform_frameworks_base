@@ -1349,7 +1349,6 @@ public class NotificationPanelViewController extends PanelViewController {
         super.flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
 
-
     private boolean onQsIntercept(MotionEvent event) {
         int pointerIndex = event.findPointerIndex(mTrackingPointer);
         if (pointerIndex < 0) {
