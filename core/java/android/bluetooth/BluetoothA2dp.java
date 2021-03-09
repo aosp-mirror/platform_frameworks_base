@@ -139,7 +139,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 181103983)
     public static final String ACTION_CODEC_CONFIG_CHANGED =
             "android.bluetooth.a2dp.profile.action.CODEC_CONFIG_CHANGED";
 
@@ -684,7 +684,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return the current codec status
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 181103983)
     @Nullable
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothCodecStatus getCodecStatus(@NonNull BluetoothDevice device) {
@@ -713,7 +713,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @param codecConfig the codec configuration preference
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 181103983)
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public void setCodecConfigPreference(@NonNull BluetoothDevice device,
                                          @NonNull BluetoothCodecConfig codecConfig) {
