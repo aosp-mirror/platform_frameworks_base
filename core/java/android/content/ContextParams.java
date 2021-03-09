@@ -120,13 +120,44 @@ public final class ContextParams {
         private Set<String> mRenouncedPermissions;
 
         /**
+         * Create a new builder.
+         * <p>
+         * This is valuable when you are interested in having explicit control
+         * over every sub-parameter, and don't want to inherit any values from
+         * an existing Context.
+         * <p>
+         * Developers should strongly consider using
+         * {@link #Builder(ContextParams)} instead of this constructor, since
+         * that will will automatically inherit any new sub-parameters added in
+         * future platform releases.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Create a new builder that inherits all sub-parameters by default.
+         * <p>
+         * This is valuable when you are only interested in overriding specific
+         * sub-parameters, and want to preserve all other parameters. Setting a
+         * specific sub-parameter on the returned builder will override any
+         * inherited value.
+         */
+        public Builder(@NonNull ContextParams params) {
+            Objects.requireNonNull(params);
+            mAttributionTag = params.mAttributionTag;
+            mReceiverPackage = params.mReceiverPackage;
+            mReceiverAttributionTag = params.mReceiverAttributionTag;
+            mRenouncedPermissions = params.mRenouncedPermissions;
+        }
+
+        /**
          * Sets an attribution tag against which to track permission accesses.
          *
          * @param attributionTag The attribution tag.
          * @return This builder.
          */
         @NonNull
-        public Builder setAttributionTag(@NonNull String attributionTag) {
+        public Builder setAttributionTag(@Nullable String attributionTag) {
             mAttributionTag = attributionTag;
             return this;
         }
@@ -140,7 +171,7 @@ public final class ContextParams {
          * @return This builder.
          */
         @NonNull
-        public Builder setReceiverPackage(@NonNull String packageName,
+        public Builder setReceiverPackage(@Nullable String packageName,
                 @Nullable String attributionTag) {
             mReceiverPackage = packageName;
             mReceiverAttributionTag = attributionTag;
@@ -169,7 +200,8 @@ public final class ContextParams {
          */
         @SystemApi
         @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
-        public @NonNull Builder setRenouncedPermissions(@NonNull Set<String> renouncedPermissions) {
+        public @NonNull Builder setRenouncedPermissions(
+                @Nullable Set<String> renouncedPermissions) {
             if (renouncedPermissions != null) {
                 mRenouncedPermissions = Collections.unmodifiableSet(renouncedPermissions);
             } else {

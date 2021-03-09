@@ -10572,9 +10572,10 @@ package android.content {
 
   public static final class ContextParams.Builder {
     ctor public ContextParams.Builder();
+    ctor public ContextParams.Builder(@NonNull android.content.ContextParams);
     method @NonNull public android.content.ContextParams build();
-    method @NonNull public android.content.ContextParams.Builder setAttributionTag(@NonNull String);
-    method @NonNull public android.content.ContextParams.Builder setReceiverPackage(@NonNull String, @Nullable String);
+    method @NonNull public android.content.ContextParams.Builder setAttributionTag(@Nullable String);
+    method @NonNull public android.content.ContextParams.Builder setReceiverPackage(@Nullable String, @Nullable String);
   }
 
   public class ContextWrapper extends android.content.Context {
