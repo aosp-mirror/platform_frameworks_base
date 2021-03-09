@@ -163,28 +163,6 @@ public final class DomainVerificationManager {
     }
 
     /**
-     * For determine re-verify policy. This is hidden from the domain verification agent so that no
-     * behavior is made based on the result.
-     *
-     * @hide
-     */
-    public static boolean isStateDefault(@DomainVerificationState.State int state) {
-        switch (state) {
-            case DomainVerificationState.STATE_NO_RESPONSE:
-            case DomainVerificationState.STATE_MIGRATED:
-            case DomainVerificationState.STATE_RESTORED:
-                return true;
-            case DomainVerificationState.STATE_SUCCESS:
-            case DomainVerificationState.STATE_APPROVED:
-            case DomainVerificationState.STATE_DENIED:
-            case DomainVerificationState.STATE_LEGACY_FAILURE:
-            case DomainVerificationState.STATE_SYS_CONFIG:
-            default:
-                return false;
-        }
-    }
-
-    /**
      * @hide
      */
     public static final int ERROR_INVALID_DOMAIN_SET = 1;

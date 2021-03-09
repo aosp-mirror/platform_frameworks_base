@@ -793,19 +793,12 @@ public class DomainVerificationService extends SystemService
                 Integer oldStateInteger = oldStateMap.get(domain);
                 if (oldStateInteger != null) {
                     int oldState = oldStateInteger;
-                    switch (oldState) {
-                        case DomainVerificationState.STATE_SUCCESS:
-                        case DomainVerificationState.STATE_RESTORED:
-                        case DomainVerificationState.STATE_MIGRATED:
-                            newStateMap.put(domain, oldState);
-                            break;
-                        default:
-                            // In all other cases, the state code is left unset
-                            // (STATE_NO_RESPONSE) to signal to the verification agent that any
-                            // existing error has been cleared and the domain should be
-                            // re-attempted. This makes update of a package a signal to
-                            // re-verify.
-                            break;
+                    // If the following case fails, the state code is left unset
+                    // (STATE_NO_RESPONSE) to signal to the verification agent that any existing
+                    // error has been cleared and the domain should be re-attempted. This makes
+                    // update of a package a signal to re-verify.
+                    if (DomainVerificationState.shouldMigrate(oldState)) {
+                        newStateMap.put(domain, oldState);
                     }
                 }
             }
@@ -872,7 +865,7 @@ public class DomainVerificationService extends SystemService
         boolean hasAutoVerifyDomains = !domains.isEmpty();
         boolean isPendingOrRestored = pkgState != null;
         if (isPendingOrRestored) {
-            pkgState.setId(domainSetId);
+            pkgState = new DomainVerificationPkgState(pkgState, domainSetId, hasAutoVerifyDomains);
         } else {
             pkgState = new DomainVerificationPkgState(pkgName, domainSetId, hasAutoVerifyDomains);
         }
@@ -1185,7 +1178,7 @@ public class DomainVerificationService extends SystemService
     /**
      * Determine whether or not a broadcast should be sent at boot for the given {@param pkgState}.
      * Sends only if the only states recorded are default as decided by {@link
-     * DomainVerificationManager#isStateDefault(int)}.
+     * DomainVerificationState#isDefault(int)}.
      *
      * If any other state is set, it's assumed that the domain verification agent is aware of the
      * package and has already scheduled future verification requests.
@@ -1199,7 +1192,7 @@ public class DomainVerificationService extends SystemService
         int statesSize = stateMap.size();
         for (int stateIndex = 0; stateIndex < statesSize; stateIndex++) {
             Integer state = stateMap.valueAt(stateIndex);
-            if (!DomainVerificationManager.isStateDefault(state)) {
+            if (!DomainVerificationState.isDefault(state)) {
                 return false;
             }
         }

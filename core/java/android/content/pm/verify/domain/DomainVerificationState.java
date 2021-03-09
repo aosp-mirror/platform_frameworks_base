@@ -97,4 +97,50 @@ public interface DomainVerificationState {
      * @see DomainVerificationManager#STATE_FIRST_VERIFIER_DEFINED
      */
     int STATE_FIRST_VERIFIER_DEFINED = 0b10000000000;
+
+
+    /**
+     * For determining re-verify policy. This is hidden from the domain verification agent so that
+     * no behavior is made based on the result.
+     *
+     * @hide
+     */
+    static boolean isDefault(@State int state) {
+        switch (state) {
+            case STATE_NO_RESPONSE:
+            case STATE_MIGRATED:
+            case STATE_RESTORED:
+                return true;
+            case STATE_SUCCESS:
+            case STATE_APPROVED:
+            case STATE_DENIED:
+            case STATE_LEGACY_FAILURE:
+            case STATE_SYS_CONFIG:
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Whether the state is migrated when updating a package. Generally this is only for states
+     * that maintain verification state or were set by an explicit user or developer action.
+     *
+     * @hide
+     */
+    static boolean shouldMigrate(@State int state) {
+        switch (state) {
+            case STATE_SUCCESS:
+            case STATE_MIGRATED:
+            case STATE_RESTORED:
+            case STATE_APPROVED:
+            case STATE_DENIED:
+                return true;
+            case STATE_NO_RESPONSE:
+            case STATE_LEGACY_FAILURE:
+            case STATE_SYS_CONFIG:
+            case STATE_FIRST_VERIFIER_DEFINED:
+            default:
+                return false;
+        }
+    }
 }

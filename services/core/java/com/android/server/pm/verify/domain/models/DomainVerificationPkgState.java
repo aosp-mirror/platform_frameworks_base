@@ -68,6 +68,12 @@ public class DomainVerificationPkgState {
         this(packageName, id, hasAutoVerifyDomains, new ArrayMap<>(0), new SparseArray<>(0));
     }
 
+    public DomainVerificationPkgState(@NonNull DomainVerificationPkgState pkgState,
+            @NonNull UUID id, boolean hasAutoVerifyDomains) {
+        this(pkgState.getPackageName(), id, hasAutoVerifyDomains, pkgState.getStateMap(),
+                pkgState.getUserStates());
+    }
+
     @Nullable
     public DomainVerificationInternalUserState getUserState(@UserIdInt int userId) {
         return mUserStates.get(userId);
@@ -82,10 +88,6 @@ public class DomainVerificationPkgState {
             mUserStates.put(userId, userState);
         }
         return userState;
-    }
-
-    public void setId(@NonNull UUID id) {
-        mId = id;
     }
 
     public void removeUser(@UserIdInt int userId) {
