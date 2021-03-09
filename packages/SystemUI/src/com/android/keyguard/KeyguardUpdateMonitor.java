@@ -2077,8 +2077,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     boolean shouldListenForUdfps() {
         return shouldListenForFingerprint()
                 && !mBouncer
-                && mStatusBarState != StatusBarState.SHADE_LOCKED
-                && mStatusBarState != StatusBarState.FULLSCREEN_USER_SWITCHER
                 && mStrongAuthTracker.hasUserAuthenticatedSinceBoot();
     }
 
