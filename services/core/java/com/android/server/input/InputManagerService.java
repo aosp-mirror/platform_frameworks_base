@@ -586,18 +586,13 @@ public class InputManagerService extends IInputManager.Stub
     private void setDisplayViewportsInternal(List<DisplayViewport> viewports) {
         final DisplayViewport[] vArray = new DisplayViewport[viewports.size()];
         if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
-            // Remove all viewport operations. They will be built-into the window transforms.
+            // Remove display projection information from DisplayViewport, leaving only the
+            // orientation. The display projection will be built-into the window transforms.
             for (int i = viewports.size() - 1; i >= 0; --i) {
                 final DisplayViewport v = vArray[i] = viewports.get(i).makeCopy();
-                // deviceWidth/Height are apparently in "rotated" space, so flip them if needed.
-                if (v.orientation % 2 != 0) {
-                    final int dw = v.deviceWidth;
-                    v.deviceWidth = v.deviceHeight;
-                    v.deviceHeight = dw;
-                }
+                // Note: the deviceWidth/Height are in rotated with the orientation.
                 v.logicalFrame.set(0, 0, v.deviceWidth, v.deviceHeight);
                 v.physicalFrame.set(0, 0, v.deviceWidth, v.deviceHeight);
-                v.orientation = 0;
             }
         } else {
             for (int i = viewports.size() - 1; i >= 0; --i) {
