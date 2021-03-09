@@ -883,8 +883,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void applyBackgroundRoundness(float topRadius, float bottomRadius) {
-        mBackgroundDimmed.setRoundness(topRadius, bottomRadius);
-        mBackgroundNormal.setRoundness(topRadius, bottomRadius);
+        mBackgroundDimmed.setRadius(topRadius, bottomRadius);
+        mBackgroundNormal.setRadius(topRadius, bottomRadius);
     }
 
     @Override

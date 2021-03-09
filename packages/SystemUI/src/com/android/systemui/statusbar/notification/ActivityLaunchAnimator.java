@@ -146,17 +146,19 @@ public class ActivityLaunchAnimator {
         private final ExpandableNotificationRow mSourceNotification;
         private final ExpandAnimationParameters mParams;
         private final Rect mWindowCrop = new Rect();
-        private final float mNotificationCornerRadius;
-        private float mCornerRadius;
         private boolean mIsFullScreenLaunch = true;
         private final SyncRtSurfaceTransactionApplier mSyncRtTransactionApplier;
 
-        public AnimationRunner(ExpandableNotificationRow sourceNofitication) {
-            mSourceNotification = sourceNofitication;
+        private final float mNotificationStartTopCornerRadius;
+        private final float mNotificationStartBottomCornerRadius;
+
+        AnimationRunner(ExpandableNotificationRow sourceNotification) {
+            mSourceNotification = sourceNotification;
             mParams = new ExpandAnimationParameters();
             mSyncRtTransactionApplier = new SyncRtSurfaceTransactionApplier(mSourceNotification);
-            mNotificationCornerRadius = Math.max(mSourceNotification.getCurrentTopRoundness(),
-                    mSourceNotification.getCurrentBottomRoundness());
+            mNotificationStartTopCornerRadius = mSourceNotification.getCurrentBackgroundRadiusTop();
+            mNotificationStartBottomCornerRadius =
+                    mSourceNotification.getCurrentBackgroundRadiusBottom();
         }
 
         @Override
@@ -224,7 +226,10 @@ public class ActivityLaunchAnimator {
                                         + notificationHeight,
                                 primary.position.y + primary.sourceContainerBounds.bottom,
                                 progress);
-                        mCornerRadius = MathUtils.lerp(mNotificationCornerRadius,
+                        mParams.topCornerRadius = MathUtils.lerp(mNotificationStartTopCornerRadius,
+                                mWindowCornerRadius, progress);
+                        mParams.bottomCornerRadius = MathUtils.lerp(
+                                mNotificationStartBottomCornerRadius,
                                 mWindowCornerRadius, progress);
                         applyParamsToWindow(primary);
                         applyParamsToNotification(mParams);
@@ -309,12 +314,13 @@ public class ActivityLaunchAnimator {
             Matrix m = new Matrix();
             m.postTranslate(0, (float) (mParams.top - app.position.y));
             mWindowCrop.set(mParams.left, 0, mParams.right, mParams.getHeight());
+            float cornerRadius = Math.min(mParams.topCornerRadius, mParams.bottomCornerRadius);
             SurfaceParams params = new SurfaceParams.Builder(app.leash)
                     .withAlpha(1f)
                     .withMatrix(m)
                     .withWindowCrop(mWindowCrop)
                     .withLayer(app.prefixOrderIndex)
-                    .withCornerRadius(mCornerRadius)
+                    .withCornerRadius(cornerRadius)
                     .withVisibility(true)
                     .build();
             mSyncRtTransactionApplier.scheduleApply(params);
@@ -339,6 +345,8 @@ public class ActivityLaunchAnimator {
         int bottom;
         int startClipTopAmount;
         int parentStartClipTopAmount;
+        float topCornerRadius;
+        float bottomCornerRadius;
 
         public ExpandAnimationParameters() {
         }
@@ -388,6 +396,14 @@ public class ActivityLaunchAnimator {
 
         public float getStartTranslationZ() {
             return startTranslationZ;
+        }
+
+        public float getTopCornerRadius() {
+            return topCornerRadius;
+        }
+
+        public float getBottomCornerRadius() {
+            return bottomCornerRadius;
         }
     }
 

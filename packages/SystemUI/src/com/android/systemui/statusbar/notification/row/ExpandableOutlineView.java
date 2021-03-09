@@ -27,7 +27,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -83,8 +82,8 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
         public void getOutline(View view, Outline outline) {
-            if (!mCustomOutline && mCurrentTopRoundness == 0.0f
-                    && mCurrentBottomRoundness == 0.0f && !mAlwaysRoundBothCorners
+            if (!mCustomOutline && getCurrentTopRoundness() == 0.0f
+                    && getCurrentBottomRoundness() == 0.0f && !mAlwaysRoundBothCorners
                     && !mTopAmountRounded) {
                 int translation = mShouldTranslateContents ? (int) getTranslation() : 0;
                 int left = Math.max(translation, 0);
@@ -135,10 +134,12 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                 ? mOutlineRadius : getCurrentBackgroundRadiusBottom();
         if (topRoundness + bottomRoundness > height) {
             float overShoot = topRoundness + bottomRoundness - height;
-            topRoundness -= overShoot * mCurrentTopRoundness
-                    / (mCurrentTopRoundness + mCurrentBottomRoundness);
-            bottomRoundness -= overShoot * mCurrentBottomRoundness
-                    / (mCurrentTopRoundness + mCurrentBottomRoundness);
+            float currentTopRoundness = getCurrentTopRoundness();
+            float currentBottomRoundness = getCurrentBottomRoundness();
+            topRoundness -= overShoot * currentTopRoundness
+                    / (currentTopRoundness + currentBottomRoundness);
+            bottomRoundness -= overShoot * currentBottomRoundness
+                    / (currentTopRoundness + currentBottomRoundness);
         }
         getRoundedRectPath(left, top, right, bottom, topRoundness, bottomRoundness, mTmpPath);
         return mTmpPath;
@@ -267,7 +268,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (mTopAmountRounded) {
             return mOutlineRadius;
         }
-        return mCurrentTopRoundness * mOutlineRadius;
+        return getCurrentTopRoundness() * mOutlineRadius;
     }
 
     public float getCurrentTopRoundness() {
@@ -278,8 +279,8 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         return mCurrentBottomRoundness;
     }
 
-    protected float getCurrentBackgroundRadiusBottom() {
-        return mCurrentBottomRoundness * mOutlineRadius;
+    public float getCurrentBackgroundRadiusBottom() {
+        return getCurrentBottomRoundness() * mOutlineRadius;
     }
 
     @Override

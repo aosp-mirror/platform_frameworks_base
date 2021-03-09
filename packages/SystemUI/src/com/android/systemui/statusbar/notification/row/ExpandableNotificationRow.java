@@ -347,6 +347,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
             new SystemNotificationAsyncTask();
 
+    private float mTopRoundnessDuringExpandAnimation;
+    private float mBottomRoundnessDuringExpandAnimation;
+
     /**
      * Returns whether the given {@code statusBarNotification} is a system notification.
      * <b>Note</b>, this should be run in the background thread if possible as it makes multiple IPC
@@ -2012,6 +2015,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return false;
     }
 
+    @Override
+    public float getCurrentTopRoundness() {
+        if (mExpandAnimationRunning) {
+            return mTopRoundnessDuringExpandAnimation;
+        }
+
+        return super.getCurrentTopRoundness();
+    }
+
+    @Override
+    public float getCurrentBottomRoundness() {
+        if (mExpandAnimationRunning) {
+            return mBottomRoundnessDuringExpandAnimation;
+        }
+
+        return super.getCurrentBottomRoundness();
+    }
+
     public void applyExpandAnimationParams(ExpandAnimationParameters params) {
         if (params == null) {
             return;
@@ -2051,6 +2072,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         setTranslationY(top);
         setActualHeight(params.getHeight());
+
+        mTopRoundnessDuringExpandAnimation = params.getTopCornerRadius() / mOutlineRadius;
+        mBottomRoundnessDuringExpandAnimation = params.getBottomCornerRadius() / mOutlineRadius;
+        invalidateOutline();
 
         mBackgroundNormal.setExpandAnimationParams(params);
     }
