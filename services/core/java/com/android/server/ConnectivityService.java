@@ -5124,6 +5124,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void onUserRemoved(UserHandle user) {
         mPermissionMonitor.onUserRemoved(user);
+        // If there was a network preference for this user, remove it.
+        handleSetProfileNetworkPreference(new ProfileNetworkPreferences.Preference(user, null),
+                null /* listener */);
         if (mOemNetworkPreferences.getNetworkPreferences().size() > 0) {
             handleSetOemNetworkPreference(mOemNetworkPreferences, null);
         }
@@ -9237,7 +9240,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // touched on the handler thread, it's theoretically not impossible that it has changed
         // since.
         if (!mOemNetworkPreferences.isEmpty()) {
-            logwtf("handleSetProfileNetworkPreference, but OEM network preferences not empty");
+            // This may happen on a device with an OEM preference set when a user is removed.
+            // In this case, it's safe to ignore. In particular this happens in the tests.
+            loge("handleSetProfileNetworkPreference, but OEM network preferences not empty");
             return;
         }
 
