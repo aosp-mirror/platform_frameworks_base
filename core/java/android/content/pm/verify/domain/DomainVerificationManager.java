@@ -60,109 +60,6 @@ public final class DomainVerificationManager {
             "android.content.pm.verify.domain.extra.VERIFICATION_REQUEST";
 
     /**
-     * No response has been recorded by either the system or any verification agent.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int STATE_NO_RESPONSE = DomainVerificationState.STATE_NO_RESPONSE;
-
-    /**
-     * The verification agent has explicitly verified the domain at some point.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int STATE_SUCCESS = DomainVerificationState.STATE_SUCCESS;
-
-    /**
-     * The first available custom response code. This and any greater integer, along with {@link
-     * #STATE_SUCCESS} are the only values settable by the verification agent. All values will be
-     * treated as if the domain is unverified.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int STATE_FIRST_VERIFIER_DEFINED =
-            DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED;
-
-    /**
-     * @hide
-     */
-    @NonNull
-    public static String stateToDebugString(@DomainVerificationState.State int state) {
-        switch (state) {
-            case DomainVerificationState.STATE_NO_RESPONSE:
-                return "none";
-            case DomainVerificationState.STATE_SUCCESS:
-                return "verified";
-            case DomainVerificationState.STATE_APPROVED:
-                return "approved";
-            case DomainVerificationState.STATE_DENIED:
-                return "denied";
-            case DomainVerificationState.STATE_MIGRATED:
-                return "migrated";
-            case DomainVerificationState.STATE_RESTORED:
-                return "restored";
-            case DomainVerificationState.STATE_LEGACY_FAILURE:
-                return "legacy_failure";
-            case DomainVerificationState.STATE_SYS_CONFIG:
-                return "system_configured";
-            default:
-                return String.valueOf(state);
-        }
-    }
-
-    /**
-     * Checks if a state considers the corresponding domain to be successfully verified. The domain
-     * verification agent may use this to determine whether or not to re-verify a domain.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static boolean isStateVerified(@DomainVerificationState.State int state) {
-        switch (state) {
-            case DomainVerificationState.STATE_SUCCESS:
-            case DomainVerificationState.STATE_APPROVED:
-            case DomainVerificationState.STATE_MIGRATED:
-            case DomainVerificationState.STATE_RESTORED:
-            case DomainVerificationState.STATE_SYS_CONFIG:
-                return true;
-            case DomainVerificationState.STATE_NO_RESPONSE:
-            case DomainVerificationState.STATE_DENIED:
-            case DomainVerificationState.STATE_LEGACY_FAILURE:
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * Checks if a state is modifiable by the domain verification agent. This is useful as the
-     * platform may add new state codes in newer versions, and older verification agents can use
-     * this method to determine if a state can be changed without having to be aware of what the new
-     * state means.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static boolean isStateModifiable(@DomainVerificationState.State int state) {
-        switch (state) {
-            case DomainVerificationState.STATE_NO_RESPONSE:
-            case DomainVerificationState.STATE_SUCCESS:
-            case DomainVerificationState.STATE_MIGRATED:
-            case DomainVerificationState.STATE_RESTORED:
-            case DomainVerificationState.STATE_LEGACY_FAILURE:
-                return true;
-            case DomainVerificationState.STATE_APPROVED:
-            case DomainVerificationState.STATE_DENIED:
-            case DomainVerificationState.STATE_SYS_CONFIG:
-                return false;
-            default:
-                return state >= DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED;
-        }
-    }
-
-    /**
      * @hide
      */
     public static final int ERROR_INVALID_DOMAIN_SET = 1;
@@ -282,7 +179,7 @@ public final class DomainVerificationManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
     public void setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
-            @DomainVerificationState.State int state) throws NameNotFoundException {
+            int state) throws NameNotFoundException {
         try {
             mDomainVerificationManager.setDomainVerificationStatus(domainSetId.toString(),
                     new DomainSet(domains), state);

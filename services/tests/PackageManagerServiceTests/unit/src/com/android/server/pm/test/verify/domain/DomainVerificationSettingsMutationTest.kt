@@ -20,28 +20,27 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageUserState
-import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
 import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
 import com.android.server.pm.PackageSetting
+import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy
-import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.spyThrowOnUnmocked
 import com.android.server.testutils.whenever
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import org.mockito.Mockito
+import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
-import org.mockito.Mockito.any
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verify
@@ -129,13 +128,13 @@ class DomainVerificationSettingsMutationTest {
                     setDomainVerificationStatus(
                         TEST_UUID,
                         setOf("example.com"),
-                        DomainVerificationManager.STATE_SUCCESS
+                        DomainVerificationState.STATE_SUCCESS
                     )
                 },
                 service("setStatusInternalPackageName") {
                     setDomainVerificationStatusInternal(
                         TEST_PKG,
-                        DomainVerificationManager.STATE_SUCCESS,
+                        DomainVerificationState.STATE_SUCCESS,
                         ArraySet(setOf("example.com"))
                     )
                 },
@@ -144,7 +143,7 @@ class DomainVerificationSettingsMutationTest {
                         TEST_UID,
                         TEST_UUID,
                         setOf("example.com"),
-                        DomainVerificationManager.STATE_SUCCESS
+                        DomainVerificationState.STATE_SUCCESS
                     )
                 },
                 service("setLinkHandlingAllowedUserId") {

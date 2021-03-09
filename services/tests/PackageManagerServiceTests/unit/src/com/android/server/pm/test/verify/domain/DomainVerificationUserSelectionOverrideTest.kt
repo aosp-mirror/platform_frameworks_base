@@ -20,7 +20,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
-import android.content.pm.verify.domain.DomainVerificationManager
+import android.content.pm.verify.domain.DomainVerificationState
 import android.content.pm.verify.domain.DomainVerificationUserState
 import android.os.Build
 import android.os.PatternMatcher
@@ -160,7 +160,7 @@ class DomainVerificationUserStateOverrideTest {
 
         // Verify 1 to give it a higher approval level
         service.setDomainVerificationStatus(UUID_ONE, setOf(DOMAIN_ONE),
-            DomainVerificationManager.STATE_SUCCESS)
+            DomainVerificationState.STATE_SUCCESS)
         assertThat(service.stateFor(PKG_ONE, DOMAIN_ONE)).isEqualTo(STATE_VERIFIED)
         assertThat(service.getOwnersForDomain(DOMAIN_ONE, USER_ID).map { it.packageName })
             .containsExactly(PKG_ONE)

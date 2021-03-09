@@ -20,10 +20,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
-import android.content.pm.verify.domain.DomainVerificationState.STATE_APPROVED
-import android.content.pm.verify.domain.DomainVerificationState.STATE_DENIED
-import android.content.pm.verify.domain.DomainVerificationState.STATE_NO_RESPONSE
-import android.content.pm.verify.domain.DomainVerificationState.STATE_SUCCESS
+import android.content.pm.verify.domain.DomainVerificationInfo.STATE_NO_RESPONSE
+import android.content.pm.verify.domain.DomainVerificationInfo.STATE_SUCCESS
+import android.content.pm.verify.domain.DomainVerificationInfo.STATE_UNMODIFIABLE
+import android.content.pm.verify.domain.DomainVerificationState
 import android.content.pm.verify.domain.DomainVerificationUserState.DOMAIN_STATE_NONE
 import android.content.pm.verify.domain.DomainVerificationUserState.DOMAIN_STATE_SELECTED
 import android.content.pm.verify.domain.DomainVerificationUserState.DOMAIN_STATE_VERIFIED
@@ -168,9 +168,9 @@ class DomainVerificationPackageTest {
         map[pkgName] = pkgBefore
 
         // To test the approve/denial states, use the internal methods for this variant
-        service.setDomainVerificationStatusInternal(pkgName, STATE_APPROVED,
+        service.setDomainVerificationStatusInternal(pkgName, DomainVerificationState.STATE_APPROVED,
                 ArraySet(setOf(DOMAIN_1)))
-        service.setDomainVerificationStatusInternal(pkgName, STATE_DENIED,
+        service.setDomainVerificationStatusInternal(pkgName, DomainVerificationState.STATE_DENIED,
                 ArraySet(setOf(DOMAIN_3)))
         service.setDomainVerificationUserSelection(
                 UUID_ONE, setOf(DOMAIN_2, DOMAIN_4), true, USER_ID)
@@ -179,9 +179,9 @@ class DomainVerificationPackageTest {
         service.setDomainVerificationStatus(UUID_ONE, setOf(DOMAIN_1, DOMAIN_3), STATE_SUCCESS)
 
         assertThat(service.getInfo(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(
-                DOMAIN_1 to STATE_APPROVED,
+                DOMAIN_1 to STATE_UNMODIFIABLE,
                 DOMAIN_2 to STATE_NO_RESPONSE,
-                DOMAIN_3 to STATE_DENIED,
+                DOMAIN_3 to STATE_UNMODIFIABLE,
                 DOMAIN_4 to STATE_NO_RESPONSE,
         ))
         assertThat(service.getUserState(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(
@@ -199,7 +199,7 @@ class DomainVerificationPackageTest {
         service.migrateState(pkgBefore, pkgAfter)
 
         assertThat(service.getInfo(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(
-                DOMAIN_1 to STATE_APPROVED,
+                DOMAIN_1 to STATE_UNMODIFIABLE,
                 DOMAIN_2 to STATE_NO_RESPONSE,
         ))
         assertThat(service.getUserState(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(

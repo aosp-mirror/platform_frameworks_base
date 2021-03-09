@@ -33,7 +33,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainVerificationInfo;
-import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationManager.InvalidDomainSetException;
 import android.content.pm.verify.domain.DomainVerificationState;
 import android.content.pm.verify.domain.DomainVerificationUserState;
@@ -253,7 +252,7 @@ public class DomainVerificationService extends SystemService
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
             }
 
-            Map<String, Integer> hostToStateMap = new ArrayMap<>(pkgState.getStateMap());
+            ArrayMap<String, Integer> hostToStateMap = new ArrayMap<>(pkgState.getStateMap());
 
             // TODO(b/159952358): Should the domain list be cached?
             ArraySet<String> domains = mCollector.collectValidAutoVerifyDomains(pkg);
@@ -265,6 +264,13 @@ public class DomainVerificationService extends SystemService
             for (int index = 0; index < size; index++) {
                 hostToStateMap.putIfAbsent(domains.valueAt(index),
                         DomainVerificationState.STATE_NO_RESPONSE);
+            }
+
+            final int mapSize = hostToStateMap.size();
+            for (int index = 0; index < mapSize; index++) {
+                int internalValue = hostToStateMap.valueAt(index);
+                int publicValue = DomainVerificationState.convertToInfoState(internalValue);
+                hostToStateMap.setValueAt(index, publicValue);
             }
 
             // TODO(b/159952358): Do not return if no values are editable (all ignored states)?
@@ -300,11 +306,11 @@ public class DomainVerificationService extends SystemService
             for (String domain : domains) {
                 Integer previousState = stateMap.get(domain);
                 if (previousState != null
-                        && !DomainVerificationManager.isStateModifiable(previousState)) {
+                        && !DomainVerificationState.isModifiable(previousState)) {
                     continue;
                 }
 
-                if (DomainVerificationManager.isStateVerified(state)) {
+                if (DomainVerificationState.isVerified(state)) {
                     verifiedDomains.add(domain);
                 }
 
@@ -659,7 +665,7 @@ public class DomainVerificationService extends SystemService
                 Integer state = stateMap.get(host);
 
                 int domainState;
-                if (state != null && DomainVerificationManager.isStateVerified(state)) {
+                if (state != null && DomainVerificationState.isVerified(state)) {
                     domainState = DomainVerificationUserState.DOMAIN_STATE_VERIFIED;
                 } else if (enabledHosts.contains(host)) {
                     domainState = DomainVerificationUserState.DOMAIN_STATE_SELECTED;
@@ -1535,7 +1541,7 @@ public class DomainVerificationService extends SystemService
             ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
             // Check if the exact host matches
             Integer state = stateMap.get(host);
-            if (state != null && DomainVerificationManager.isStateVerified(state)) {
+            if (state != null && DomainVerificationState.isVerified(state)) {
                 if (DEBUG_APPROVAL) {
                     debugApproval(packageName, debugObject, userId, true,
                             "host verified exactly");
@@ -1546,7 +1552,7 @@ public class DomainVerificationService extends SystemService
             // Otherwise see if the host matches a verified domain by wildcard
             int stateMapSize = stateMap.size();
             for (int index = 0; index < stateMapSize; index++) {
-                if (!DomainVerificationManager.isStateVerified(stateMap.valueAt(index))) {
+                if (!DomainVerificationState.isVerified(stateMap.valueAt(index))) {
                     continue;
                 }
 

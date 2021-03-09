@@ -20,20 +20,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageUserState
-import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.verify.domain.DomainVerificationManager
+import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
 import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageSetting
+import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.verify.domain.DomainVerificationEnforcer
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy
-import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.spyThrowOnUnmocked
 import com.android.server.testutils.whenever
@@ -175,7 +176,7 @@ class DomainVerificationEnforcerTest {
                 service(Type.INTERNAL, "setStatusInternalPackageName") {
                     setDomainVerificationStatusInternal(
                         it.targetPackageName,
-                        DomainVerificationManager.STATE_SUCCESS,
+                        DomainVerificationState.STATE_SUCCESS,
                         ArraySet(setOf("example.com"))
                     )
                 },
@@ -206,7 +207,7 @@ class DomainVerificationEnforcerTest {
                     setDomainVerificationStatus(
                         it.targetDomainSetId,
                         setOf("example.com"),
-                        DomainVerificationManager.STATE_SUCCESS
+                        DomainVerificationState.STATE_SUCCESS
                     )
                 },
                 service(Type.VERIFIER, "setStatusInternalUid") {
@@ -214,7 +215,7 @@ class DomainVerificationEnforcerTest {
                         it.callingUid,
                         it.targetDomainSetId,
                         setOf("example.com"),
-                        DomainVerificationManager.STATE_SUCCESS
+                        DomainVerificationState.STATE_SUCCESS
                     )
                 },
                 service(Type.SELECTOR_USER, "setLinkHandlingAllowedUserId") {
