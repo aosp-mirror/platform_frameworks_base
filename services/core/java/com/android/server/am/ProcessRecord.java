@@ -650,7 +650,7 @@ class ProcessRecord implements WindowProcessListener {
                 if (procInfo != null && procInfo.deniedPermissions == null
                         && procInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_DEFAULT
                         && procInfo.memtagMode == ApplicationInfo.MEMTAG_DEFAULT
-                        && procInfo.nativeHeapZeroInit == null) {
+                        && procInfo.nativeHeapZeroInitialized == ApplicationInfo.ZEROINIT_DEFAULT) {
                     // If this process hasn't asked for permissions to be denied, or for a
                     // non-default GwpAsan mode, or any other non-default setting, then we don't
                     // care about it.

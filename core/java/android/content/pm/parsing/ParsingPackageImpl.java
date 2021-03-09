@@ -417,12 +417,14 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private int autoRevokePermissions;
     private boolean preserveLegacyExternalStorage;
 
-    protected int gwpAsanMode;
-    protected int memtagMode;
+    @ApplicationInfo.GwpAsanMode
+    private int gwpAsanMode;
 
-    @Nullable
-    @DataClass.ParcelWith(ForBoolean.class)
-    private Boolean nativeHeapZeroInit;
+    @ApplicationInfo.MemtagMode
+    private int memtagMode;
+
+    @ApplicationInfo.NativeHeapZeroInitialized
+    private int nativeHeapZeroInitialized;
 
     // TODO(chiuwinson): Non-null
     @Nullable
@@ -934,7 +936,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.crossProfile = isCrossProfile();
         appInfo.setGwpAsanMode(gwpAsanMode);
         appInfo.setMemtagMode(memtagMode);
-        appInfo.setNativeHeapZeroInit(nativeHeapZeroInit);
+        appInfo.setNativeHeapZeroInitialized(nativeHeapZeroInitialized);
         appInfo.setBaseCodePath(baseCodePath);
         appInfo.setBaseResourcePath(baseCodePath);
         appInfo.setCodePath(codePath);
@@ -1121,7 +1123,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeInt(this.gwpAsanMode);
         dest.writeSparseIntArray(this.minExtensionVersions);
         dest.writeInt(this.memtagMode);
-        sForBoolean.parcel(this.nativeHeapZeroInit, dest, flags);
+        dest.writeInt(this.nativeHeapZeroInitialized);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1284,7 +1286,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.gwpAsanMode = in.readInt();
         this.minExtensionVersions = in.readSparseIntArray();
         this.memtagMode = in.readInt();
-        this.nativeHeapZeroInit = sForBoolean.unparcel(in);
+        this.nativeHeapZeroInitialized = in.readInt();
     }
 
     public static final Parcelable.Creator<ParsingPackageImpl> CREATOR =
@@ -2012,20 +2014,22 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return directBootAware;
     }
 
+    @ApplicationInfo.GwpAsanMode
     @Override
     public int getGwpAsanMode() {
         return gwpAsanMode;
     }
 
+    @ApplicationInfo.MemtagMode
     @Override
     public int getMemtagMode() {
         return memtagMode;
     }
 
-    @Nullable
+    @ApplicationInfo.NativeHeapZeroInitialized
     @Override
-    public Boolean isNativeHeapZeroInit() {
-        return nativeHeapZeroInit;
+    public int getNativeHeapZeroInitialized() {
+        return nativeHeapZeroInitialized;
     }
 
     @Override
@@ -2495,20 +2499,21 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setGwpAsanMode(int value) {
+    public ParsingPackageImpl setGwpAsanMode(@ApplicationInfo.GwpAsanMode int value) {
         gwpAsanMode = value;
         return this;
     }
 
     @Override
-    public ParsingPackageImpl setMemtagMode(int value) {
+    public ParsingPackageImpl setMemtagMode(@ApplicationInfo.MemtagMode int value) {
         memtagMode = value;
         return this;
     }
 
     @Override
-    public ParsingPackageImpl setNativeHeapZeroInit(@Nullable Boolean value) {
-        nativeHeapZeroInit = value;
+    public ParsingPackageImpl setNativeHeapZeroInitialized(
+            @ApplicationInfo.NativeHeapZeroInitialized int value) {
+        nativeHeapZeroInitialized = value;
         return this;
     }
 

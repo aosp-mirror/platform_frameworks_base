@@ -978,7 +978,7 @@ package android {
     field public static final int multiArch = 16843918; // 0x101048e
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
-    field public static final int nativeHeapZeroInit = 16844314; // 0x101061a
+    field public static final int nativeHeapZeroInitialized = 16844314; // 0x101061a
     field public static final int navigationBarColor = 16843858; // 0x1010452
     field public static final int navigationBarDividerColor = 16844141; // 0x101056d
     field public static final int navigationContentDescription = 16843969; // 0x10104c1
@@ -11466,7 +11466,7 @@ package android.content.pm {
     method public static CharSequence getCategoryTitle(android.content.Context, int);
     method public int getGwpAsanMode();
     method public int getMemtagMode();
-    method @Nullable public Boolean isNativeHeapZeroInit();
+    method public int getNativeHeapZeroInitialized();
     method public boolean isProfileableByShell();
     method public boolean isResourceOverlay();
     method public boolean isVirtualPreload();
@@ -11520,6 +11520,9 @@ package android.content.pm {
     field public static final int MEMTAG_DEFAULT = -1; // 0xffffffff
     field public static final int MEMTAG_OFF = 0; // 0x0
     field public static final int MEMTAG_SYNC = 2; // 0x2
+    field public static final int ZEROINIT_DEFAULT = -1; // 0xffffffff
+    field public static final int ZEROINIT_DISABLED = 0; // 0x0
+    field public static final int ZEROINIT_ENABLED = 1; // 0x1
     field public String appComponentFactory;
     field public String backupAgentName;
     field public int category;

@@ -19,6 +19,7 @@ package android.content.pm.parsing;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
@@ -239,11 +240,12 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setEnabled(boolean enabled);
 
-    ParsingPackage setGwpAsanMode(int gwpAsanMode);
+    ParsingPackage setGwpAsanMode(@ApplicationInfo.GwpAsanMode int gwpAsanMode);
 
-    ParsingPackage setMemtagMode(int memtagMode);
+    ParsingPackage setMemtagMode(@ApplicationInfo.MemtagMode int memtagMode);
 
-    ParsingPackage setNativeHeapZeroInit(@Nullable Boolean nativeHeapZeroInit);
+    ParsingPackage setNativeHeapZeroInitialized(
+            @ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized);
 
     ParsingPackage setCrossProfile(boolean crossProfile);
 
