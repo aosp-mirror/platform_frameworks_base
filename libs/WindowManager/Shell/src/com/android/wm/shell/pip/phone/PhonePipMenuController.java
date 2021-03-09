@@ -121,6 +121,19 @@ public class PhonePipMenuController implements PipMenuController {
         }
     };
 
+    private final float[] mTmpValues = new float[9];
+    private final Runnable mUpdateEmbeddedMatrix = () -> {
+        if (mPipMenuView == null || mPipMenuView.getViewRootImpl() == null) {
+            return;
+        }
+        mMoveTransform.getValues(mTmpValues);
+        try {
+            mPipMenuView.getViewRootImpl().getAccessibilityEmbeddedConnection()
+                    .setScreenMatrix(mTmpValues);
+        } catch (RemoteException e) {
+        }
+    };
+
     public PhonePipMenuController(Context context, PipMediaController mediaController,
             SystemWindows systemWindows, ShellExecutor mainExecutor,
             Handler mainHandler) {
@@ -305,6 +318,11 @@ public class PhonePipMenuController implements PipMenuController {
             mApplier.scheduleApply(params, pipParams);
         } else {
             mApplier.scheduleApply(params);
+        }
+
+        if (mPipMenuView.getViewRootImpl() != null) {
+            mPipMenuView.getHandler().removeCallbacks(mUpdateEmbeddedMatrix);
+            mPipMenuView.getHandler().post(mUpdateEmbeddedMatrix);
         }
     }
 

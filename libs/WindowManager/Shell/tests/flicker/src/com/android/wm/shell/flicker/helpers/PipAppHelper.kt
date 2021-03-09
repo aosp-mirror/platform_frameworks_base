@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.graphics.Point
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.os.SystemClock
@@ -135,11 +134,8 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
             expandPipWindow(wmHelper)
             val exitPipObject = uiDevice.findObject(By.res(SYSTEMUI_PACKAGE, "dismiss"))
             requireNotNull(exitPipObject) { "PIP window dismiss button not found" }
-            val coordinatesInWindow = exitPipObject.visibleBounds
-            val windowOffset = wmHelper.getWindowRegion(component).bounds
-            val newCoordinates = Point(windowOffset.left + coordinatesInWindow.centerX(),
-                windowOffset.top + coordinatesInWindow.centerY())
-            uiDevice.click(newCoordinates.x, newCoordinates.y)
+            val dismissButtonBounds = exitPipObject.visibleBounds
+            uiDevice.click(dismissButtonBounds.centerX(), dismissButtonBounds.centerY())
         }
 
         // Wait for animation to complete.
