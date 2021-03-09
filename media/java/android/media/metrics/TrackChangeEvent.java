@@ -167,7 +167,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         this.mWidth = width;
         this.mHeight = height;
         this.mVideoFrameRate = videoFrameRate;
-        this.mExtras = extras.deepCopy();
+        this.mExtras = extras == null ? null : extras.deepCopy();
     }
 
     /**

@@ -113,10 +113,11 @@ public final class NetworkEvent extends Event implements Parcelable {
      *
      * @hide
      */
-    public NetworkEvent(@NetworkType int type, long timeSinceCreatedMillis, Bundle extras) {
+    public NetworkEvent(@NetworkType int type, long timeSinceCreatedMillis,
+            @Nullable Bundle extras) {
         this.mNetworkType = type;
         this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
-        this.mExtras = extras.deepCopy();
+        this.mExtras = extras == null ? null : extras.deepCopy();
     }
 
     /**

@@ -194,7 +194,7 @@ public final class PlaybackMetrics implements Parcelable {
             long localBytesRead,
             long networkTransferDurationMillis,
             byte[] drmSessionId,
-            Bundle extras) {
+            @Nullable Bundle extras) {
         this.mMediaDurationMillis = mediaDurationMillis;
         this.mStreamSource = streamSource;
         this.mStreamType = streamType;
@@ -212,7 +212,7 @@ public final class PlaybackMetrics implements Parcelable {
         this.mLocalBytesRead = localBytesRead;
         this.mNetworkTransferDurationMillis = networkTransferDurationMillis;
         this.mDrmSessionId = drmSessionId;
-        this.mExtras = extras.deepCopy();
+        this.mExtras = extras == null ? null : extras.deepCopy();
     }
 
     /**

@@ -65,12 +65,12 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
             int errorCode,
             int subErrorCode,
             long timeSinceCreatedMillis,
-            Bundle extras) {
+            @Nullable Bundle extras) {
         this.mExceptionStack = exceptionStack;
         this.mErrorCode = errorCode;
         this.mSubErrorCode = subErrorCode;
         this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
-        this.mExtras = extras.deepCopy();
+        this.mExtras = extras == null ? null : extras.deepCopy();
     }
 
     /** @hide */
