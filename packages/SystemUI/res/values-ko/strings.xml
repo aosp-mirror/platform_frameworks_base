@@ -412,8 +412,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"일출까지"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>에 켜짐"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g>까지"</string>
-    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
-    <skip />
+    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"밝기 낮추기"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC 사용 중지됨"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC 사용 설정됨"</string>
@@ -447,8 +446,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"잠금 해제하여 NFC 사용"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"내 조직에 속한 기기입니다."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>에 속한 기기입니다."</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"이 기기는 <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>에서 제공합니다"</string>
     <string name="phone_hint" msgid="6682125338461375925">"전화 기능을 사용하려면 아이콘에서 스와이프하세요."</string>
     <string name="voice_hint" msgid="7476017460191291417">"음성 지원을 사용하려면 아이콘에서 스와이프하세요."</string>
     <string name="camera_hint" msgid="4519495795000658637">"카메라를 사용하려면 아이콘에서 스와이프하세요."</string>
@@ -628,8 +626,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. 탭하여 음소거로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. 탭하여 진동으로 설정하세요."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. 탭하여 음소거로 설정하세요."</string>
-    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
-    <skip />
+    <string name="volume_ringer_change" msgid="3574969197796055532">"탭하여 벨소리 장치 모드 변경"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"음소거"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"음소거 해제"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"진동"</string>

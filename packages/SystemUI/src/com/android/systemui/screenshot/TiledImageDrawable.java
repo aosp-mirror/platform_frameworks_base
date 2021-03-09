@@ -38,8 +38,9 @@ public class TiledImageDrawable extends Drawable {
 
     public TiledImageDrawable(ImageTileSet tiles) {
         mTiles = tiles;
-        mTiles.setOnContentChangedListener(this::onContentChanged);
+        mTiles.addOnContentChangedListener(this::onContentChanged);
     }
+
 
     private void onContentChanged() {
         if (mNode != null && mNode.hasDisplayList()) {

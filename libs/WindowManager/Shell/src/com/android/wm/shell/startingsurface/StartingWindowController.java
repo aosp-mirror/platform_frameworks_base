@@ -25,6 +25,7 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.os.IBinder;
@@ -35,6 +36,8 @@ import android.window.TaskOrganizer;
 import android.window.TaskSnapshot;
 
 import com.android.wm.shell.common.ShellExecutor;
+
+import java.util.function.BiConsumer;
 
 /**
  * Implementation to draw the starting window to an application, and remove the starting window
@@ -53,6 +56,8 @@ public class StartingWindowController {
 
     private final StartingSurfaceDrawer mStartingSurfaceDrawer;
     private final StartingTypeChecker mStartingTypeChecker = new StartingTypeChecker();
+
+    private BiConsumer<Integer, Integer> mTaskLaunchingCallback;
     private final StartingSurfaceImpl mImpl = new StartingSurfaceImpl();
 
     public StartingWindowController(Context context, ShellExecutor mainExecutor) {
@@ -151,11 +156,24 @@ public class StartingWindowController {
         }
     }
 
+    /*
+     * Registers the starting window listener.
+     *
+     * @param listener The callback when need a starting window.
+     */
+    void setStartingWindowListener(BiConsumer<Integer, Integer> listener) {
+        mTaskLaunchingCallback = listener;
+    }
+
     /**
      * Called when a task need a starting window.
      */
     void addStartingWindow(StartingWindowInfo windowInfo, IBinder appToken) {
         final int suggestionType = mStartingTypeChecker.estimateStartingWindowType(windowInfo);
+        final RunningTaskInfo runningTaskInfo = windowInfo.taskInfo;
+        if (mTaskLaunchingCallback != null) {
+            mTaskLaunchingCallback.accept(runningTaskInfo.taskId, suggestionType);
+        }
         if (suggestionType == STARTING_WINDOW_TYPE_SPLASH_SCREEN) {
             mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, appToken);
         } else if (suggestionType == STARTING_WINDOW_TYPE_SNAPSHOT) {
@@ -191,6 +209,11 @@ public class StartingWindowController {
         @Override
         public void copySplashScreenView(int taskId) {
             StartingWindowController.this.copySplashScreenView(taskId);
+        }
+
+        @Override
+        public void setStartingWindowListener(BiConsumer<Integer, Integer> listener) {
+            StartingWindowController.this.setStartingWindowListener(listener);
         }
     }
 }

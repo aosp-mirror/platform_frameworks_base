@@ -28,11 +28,9 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Message;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.util.Log;
 
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,11 +59,6 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
     // If this is non-null (and this is not destroyed), it means APS is disabled and we should fall
     // back to using the ResolverRankerService.
     private ResolverRankerServiceResolverComparator mResolverRankerService;
-
-    private boolean mAppendDirectShareEnabled = DeviceConfig.getBoolean(
-            DeviceConfig.NAMESPACE_SYSTEMUI,
-            SystemUiDeviceConfigFlags.APPEND_DIRECT_SHARE_ENABLED,
-            true);
 
     AppPredictionServiceResolverComparator(
                 Context context,
@@ -182,9 +175,6 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
     float getScore(ComponentName name) {
         if (mResolverRankerService != null) {
             return mResolverRankerService.getScore(name);
-        }
-        if (mAppendDirectShareEnabled && !mTargetScores.isEmpty()) {
-            return mTargetScores.get(name);
         }
         Integer rank = mTargetRanks.get(name);
         if (rank == null) {

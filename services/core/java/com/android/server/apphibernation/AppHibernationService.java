@@ -314,17 +314,8 @@ public final class AppHibernationService extends SystemService {
     private void unhibernatePackageForUser(@NonNull String packageName, int userId,
             UserLevelState pkgState) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackage");
-        final long caller = Binder.clearCallingIdentity();
-        try {
-            mIPackageManager.setPackageStoppedState(packageName, false, userId);
-            pkgState.hibernated = false;
-        } catch (RemoteException e) {
-            throw new IllegalStateException(
-                    "Failed to unhibernate due to manager not being available", e);
-        } finally {
-            Binder.restoreCallingIdentity(caller);
-            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-        }
+        pkgState.hibernated = false;
+        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
     /**

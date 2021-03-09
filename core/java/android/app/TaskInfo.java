@@ -24,6 +24,7 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -121,6 +122,13 @@ public class TaskInfo {
      */
     @Nullable
     public ActivityManager.TaskDescription taskDescription;
+
+    /**
+     * The locusId of the task.
+     * @hide
+     */
+    @Nullable
+    public LocusId mTopActivityLocusId;
 
     /**
      * True if the task can go in the split-screen primary stack.
@@ -381,6 +389,7 @@ public class TaskInfo {
         isVisible = source.readBoolean();
         topActivityToken = source.readStrongBinder();
         topActivityInSizeCompat = source.readBoolean();
+        mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
     }
 
     /**
@@ -417,6 +426,7 @@ public class TaskInfo {
         dest.writeBoolean(isVisible);
         dest.writeStrongBinder(topActivityToken);
         dest.writeBoolean(topActivityInSizeCompat);
+        dest.writeTypedObject(mTopActivityLocusId, flags);
     }
 
     @Override
@@ -443,6 +453,7 @@ public class TaskInfo {
                 + " isVisible=" + isVisible
                 + " topActivityToken=" + topActivityToken
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
+                + " locusId= " + mTopActivityLocusId
                 + "}";
     }
 }

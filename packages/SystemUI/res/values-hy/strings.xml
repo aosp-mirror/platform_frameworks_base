@@ -446,8 +446,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ապակողպեք՝ NFC-ն օգտագործելու համար"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>» կազմակերպությանը"</string>
-    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
-    <skip />
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Այս սարքը տրամադրվել է «<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>» կազմակերպության կողմից"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Սահահարվածեք հեռախոսի պատկերակից"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Սահահարվածեք ձայնային հուշման պատկերակից"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Սահահարվածեք խցիկի պատկերակից"</string>
@@ -985,7 +984,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"տեսախցիկը"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"վայրը"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"խոսափողը"</string>
-    <string name="sensor_privacy_mode" msgid="4462866919026513692">"Տվիչներն անջատած են"</string>
+    <string name="sensor_privacy_mode" msgid="4462866919026513692">"Տվիչներն անջատված են"</string>
     <string name="device_services" msgid="1549944177856658705">"Սարքի ծառայություններ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Անանուն"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Տեղափոխել"</string>

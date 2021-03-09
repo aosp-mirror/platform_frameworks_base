@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.annotation.Nullable;
+import android.os.PowerWhitelistManager;
 import android.os.PowerWhitelistManager.ReasonCode;
 import android.os.PowerWhitelistManager.TempAllowListType;
 
@@ -32,9 +33,20 @@ public interface DeviceIdleInternal {
 
     void exitIdle(String reason);
 
+    /**
+     * Same as {@link #addPowerSaveTempWhitelistApp(int, String, long, int, boolean, int, String)}
+     * with {@link PowerWhitelistManager#TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED}.
+     */
     void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
             long durationMs, int userId, boolean sync, @ReasonCode int reasonCode,
             @Nullable String reason);
+
+    /**
+     * Put a package in the temp-allowlist.
+     */
+    void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
+            long durationMs, @TempAllowListType int tempAllowListType, int userId, boolean sync,
+            @ReasonCode int reasonCode, @Nullable String reason);
 
     /**
      * Called by ActivityManagerService to directly add UID to DeviceIdleController's temp

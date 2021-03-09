@@ -32,10 +32,12 @@ import org.junit.runner.RunWith
 class BubblePersistentRepositoryTest : ShellTestCase() {
 
     private val bubbles = listOf(
-            BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1", 120, 0, null, 1),
-            BubbleEntity(10, "com.example.chat", "alice and bob", "key-2", 0, 16537428, "title", 2),
+            // user, package, shortcut, notification key, height, res-height, title, taskId, locusId
+            BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1", 120, 0, null, 1, null),
+            BubbleEntity(10, "com.example.chat", "alice and bob", "key-2", 0, 16537428, "title",
+                    2, null),
             BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3", 120, 0, null,
-                    INVALID_TASK_ID)
+                    INVALID_TASK_ID, "key-3")
     )
     private lateinit var repository: BubblePersistentRepository
 

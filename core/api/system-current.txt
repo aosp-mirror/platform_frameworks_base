@@ -247,6 +247,7 @@ package android {
     field public static final String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
     field public static final String SERIAL_PORT = "android.permission.SERIAL_PORT";
     field public static final String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
+    field public static final String SET_CLIP_SOURCE = "android.permission.SET_CLIP_SOURCE";
     field public static final String SET_HARMFUL_APP_WARNINGS = "android.permission.SET_HARMFUL_APP_WARNINGS";
     field public static final String SET_MEDIA_KEY_LISTENER = "android.permission.SET_MEDIA_KEY_LISTENER";
     field public static final String SET_ORIENTATION = "android.permission.SET_ORIENTATION";
@@ -359,6 +360,7 @@ package android {
     field public static final int config_systemGallery = 17039399; // 0x1040027
     field public static final int config_systemShell = 17039402; // 0x104002a
     field public static final int config_systemSpeechRecognizer = 17039406; // 0x104002e
+    field public static final int config_systemWellbeing = 17039408; // 0x1040030
     field public static final int config_systemWifiCoexManager = 17039407; // 0x104002f
   }
 
@@ -2119,6 +2121,10 @@ package android.content {
     method @NonNull public final android.os.UserHandle getSendingUser();
   }
 
+  public class ClipboardManager extends android.text.ClipboardManager {
+    method @RequiresPermission(android.Manifest.permission.SET_CLIP_SOURCE) public void setPrimaryClipAsPackage(@NonNull android.content.ClipData, @NonNull String);
+  }
+
   public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
     method public int checkUriPermission(@NonNull android.net.Uri, int, int);
   }
@@ -2698,7 +2704,7 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_RETAIL_DEMO = 16777216; // 0x1000000
     field public static final int PROTECTION_FLAG_ROLE = 67108864; // 0x4000000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
-    field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
+    field @Deprecated public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
     field @Nullable public final String backgroundPermission;
     field @StringRes public int requestRes;
   }
@@ -2908,8 +2914,6 @@ package android.graphics.fonts {
   public class FontManager {
     method @NonNull public android.text.FontConfig getFontConfig();
     method @RequiresPermission(android.Manifest.permission.UPDATE_FONTS) public int updateFontFamily(@NonNull android.graphics.fonts.FontFamilyUpdateRequest, @IntRange(from=0) int);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_FONTS) public int updateFontFile(@NonNull android.graphics.fonts.FontFileUpdateRequest, @IntRange(from=0) int);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.UPDATE_FONTS) public int updateFontFile(@NonNull android.os.ParcelFileDescriptor, @NonNull byte[], @IntRange(from=0) int);
     field public static final int RESULT_ERROR_DOWNGRADING = -5; // 0xfffffffb
     field public static final int RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE = -1; // 0xffffffff
     field public static final int RESULT_ERROR_FAILED_UPDATE_CONFIG = -6; // 0xfffffffa
@@ -4340,7 +4344,7 @@ package android.location {
 
   public final class CorrelationVector implements android.os.Parcelable {
     method public int describeContents();
-    method @IntRange(from=0) public int getFrequencyOffsetMetersPerSecond();
+    method @FloatRange(from=0.0f) public double getFrequencyOffsetMetersPerSecond();
     method @NonNull public int[] getMagnitude();
     method @FloatRange(from=0.0f) public double getSamplingStartMeters();
     method @FloatRange(from=0.0f, fromInclusive=false) public double getSamplingWidthMeters();
@@ -4351,7 +4355,7 @@ package android.location {
   public static final class CorrelationVector.Builder {
     ctor public CorrelationVector.Builder();
     method @NonNull public android.location.CorrelationVector build();
-    method @NonNull public android.location.CorrelationVector.Builder setFrequencyOffsetMetersPerSecond(@IntRange(from=0) int);
+    method @NonNull public android.location.CorrelationVector.Builder setFrequencyOffsetMetersPerSecond(@FloatRange(from=0.0f) double);
     method @NonNull public android.location.CorrelationVector.Builder setMagnitude(@NonNull int[]);
     method @NonNull public android.location.CorrelationVector.Builder setSamplingStartMeters(@FloatRange(from=0.0f) double);
     method @NonNull public android.location.CorrelationVector.Builder setSamplingWidthMeters(@FloatRange(from=0.0f, fromInclusive=false) double);
@@ -7235,26 +7239,6 @@ package android.net {
 
   public static class NetworkStats.Entry {
     ctor public NetworkStats.Entry(@Nullable String, int, int, int, int, int, int, long, long, long, long, long);
-  }
-
-  public final class OemNetworkPreferences implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public java.util.Map<java.lang.String,java.lang.Integer> getNetworkPreferences();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.OemNetworkPreferences> CREATOR;
-    field public static final int OEM_NETWORK_PREFERENCE_OEM_PAID = 1; // 0x1
-    field public static final int OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK = 2; // 0x2
-    field public static final int OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY = 3; // 0x3
-    field public static final int OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY = 4; // 0x4
-    field public static final int OEM_NETWORK_PREFERENCE_UNINITIALIZED = 0; // 0x0
-  }
-
-  public static final class OemNetworkPreferences.Builder {
-    ctor public OemNetworkPreferences.Builder();
-    ctor public OemNetworkPreferences.Builder(@NonNull android.net.OemNetworkPreferences);
-    method @NonNull public android.net.OemNetworkPreferences.Builder addNetworkPreference(@NonNull String, int);
-    method @NonNull public android.net.OemNetworkPreferences build();
-    method @NonNull public android.net.OemNetworkPreferences.Builder clearNetworkPreference(@NonNull String);
   }
 
   public class RssiCurve implements android.os.Parcelable {
@@ -13018,7 +13002,7 @@ package android.telephony.ims {
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public boolean isRcsVolteSingleRegistrationCapable() throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyRcsAutoConfigurationReceived(@NonNull byte[], boolean);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerProvisioningChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.Callback) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public void registerRcsProvisioningChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.RcsProvisioningCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public void registerRcsProvisioningCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.RcsProvisioningCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningIntValue(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setProvisioningStatusForCapability(int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningStringValue(int, @NonNull String);
@@ -13026,7 +13010,7 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setRcsProvisioningStatusForCapability(int, boolean);
     method @RequiresPermission(android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION) public void triggerRcsReconfiguration();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.Callback);
-    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public void unregisterRcsProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.RcsProvisioningCallback);
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public void unregisterRcsProvisioningCallback(@NonNull android.telephony.ims.ProvisioningManager.RcsProvisioningCallback);
     field @RequiresPermission(android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION) public static final String ACTION_RCS_SINGLE_REGISTRATION_CAPABILITY_UPDATE = "android.telephony.ims.action.RCS_SINGLE_REGISTRATION_CAPABILITY_UPDATE";
     field public static final String EXTRA_STATUS = "android.telephony.ims.extra.STATUS";
     field public static final String EXTRA_SUBSCRIPTION_ID = "android.telephony.ims.extra.SUBSCRIPTION_ID";

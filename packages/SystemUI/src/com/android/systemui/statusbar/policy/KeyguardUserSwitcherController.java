@@ -33,7 +33,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -83,12 +82,10 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
 
     // Child views of KeyguardUserSwitcherView
     private KeyguardUserSwitcherListView mListView;
-    private LinearLayout mEndGuestButton;
 
     // State info for the user switcher
     private boolean mUserSwitcherOpen;
     private int mCurrentUserId = UserHandle.USER_NULL;
-    private boolean mCurrentUserIsGuest;
     private int mBarState;
     private float mDarkAmount;
 
@@ -185,11 +182,6 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         if (DEBUG) Log.d(TAG, "onInit");
 
         mListView = mView.findViewById(R.id.keyguard_user_switcher_list);
-        mEndGuestButton = mView.findViewById(R.id.end_guest_button);
-
-        mEndGuestButton.setOnClickListener(v -> {
-            mUserSwitcherController.showExitGuestDialog(mCurrentUserId);
-        });
 
         mView.setOnTouchListener((v, event) -> {
             if (!isListAnimating()) {
@@ -209,9 +201,14 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         mKeyguardUpdateMonitor.registerCallback(mInfoCallback);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mScreenLifecycle.addObserver(mScreenObserver);
-        mView.addOnLayoutChangeListener(mBackground);
-        mView.setBackground(mBackground);
-        mBackground.setAlpha(0);
+        if (isSimpleUserSwitcher()) {
+            // Don't use the background for the simple user switcher
+            setUserSwitcherOpened(true /* open */, true /* animate */);
+        } else {
+            mView.addOnLayoutChangeListener(mBackground);
+            mView.setBackground(mBackground);
+            mBackground.setAlpha(0);
+        }
     }
 
     @Override
@@ -291,7 +288,6 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                     }
                     foundCurrentUser = true;
                     mCurrentUserId = userTag.info.id;
-                    mCurrentUserIsGuest = userTag.isGuest;
                     // Current user is always visible
                     newView.updateVisibilities(true /* showItem */,
                             mUserSwitcherOpen /* showTextName */, false /* animate */);
@@ -317,16 +313,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         if (!foundCurrentUser) {
             Log.w(TAG, "Current user is not listed");
             mCurrentUserId = UserHandle.USER_NULL;
-            mCurrentUserIsGuest = false;
         }
-    }
-
-    /**
-     * Get the height of the keyguard user switcher view when closed.
-     */
-    public int getUserIconHeight() {
-        View firstChild = mListView.getChildAt(0);
-        return firstChild == null ? 0 : firstChild.getHeight();
     }
 
     /**
@@ -406,7 +393,6 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
 
     private void updateVisibilities(boolean animate) {
         if (DEBUG) Log.d(TAG, String.format("updateVisibilities: animate=%b", animate));
-        mEndGuestButton.animate().cancel();
         if (mBgAnimator != null) {
             mBgAnimator.cancel();
         }
@@ -434,44 +420,6 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
             });
             mBgAnimator.start();
         }
-
-        if (mUserSwitcherOpen && mCurrentUserIsGuest) {
-            // Show the "End guest session" button
-            mEndGuestButton.setVisibility(View.VISIBLE);
-            if (animate) {
-                mEndGuestButton.setAlpha(0f);
-                mEndGuestButton.animate()
-                        .alpha(1f)
-                        .setDuration(360)
-                        .setInterpolator(Interpolators.ALPHA_IN)
-                        .withEndAction(() -> {
-                            mEndGuestButton.setClickable(true);
-                        });
-            } else {
-                mEndGuestButton.setClickable(true);
-                mEndGuestButton.setAlpha(1f);
-            }
-        } else {
-            // Hide the "End guest session" button. If it's already GONE, don't try to
-            // animate it or it will appear again for an instant.
-            mEndGuestButton.setClickable(false);
-            if (animate && mEndGuestButton.getVisibility() != View.GONE) {
-                mEndGuestButton.setVisibility(View.VISIBLE);
-                mEndGuestButton.setAlpha(1f);
-                mEndGuestButton.animate()
-                        .alpha(0f)
-                        .setDuration(360)
-                        .setInterpolator(Interpolators.ALPHA_OUT)
-                        .withEndAction(() -> {
-                            mEndGuestButton.setVisibility(View.GONE);
-                            mEndGuestButton.setAlpha(1f);
-                        });
-            } else {
-                mEndGuestButton.setVisibility(View.GONE);
-                mEndGuestButton.setAlpha(1f);
-            }
-        }
-
         mListView.updateVisibilities(mUserSwitcherOpen, animate);
     }
 
@@ -530,15 +478,6 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         public View getView(int position, View convertView, ViewGroup parent) {
             UserSwitcherController.UserRecord item = getItem(position);
             return createUserDetailItemView(convertView, parent, item);
-        }
-
-        @Override
-        public String getName(Context context, UserSwitcherController.UserRecord item) {
-            if (item.isGuest) {
-                return context.getString(com.android.settingslib.R.string.guest_nickname);
-            } else {
-                return super.getName(context, item);
-            }
         }
 
         KeyguardUserDetailItemView convertOrInflate(View convertView, ViewGroup parent) {
@@ -608,18 +547,11 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
             }
 
             if (mKeyguardUserSwitcherController.isUserSwitcherOpen()) {
-                if (user.isCurrent) {
-                    // Close the switcher if tapping the current user
-                    mKeyguardUserSwitcherController.setUserSwitcherOpened(
-                            false /* open */, true /* animate */);
-                } else if (user.isSwitchToEnabled) {
-                    if (!user.isAddUser && !user.isRestricted && !user.isDisabledByAdmin) {
-                        if (mCurrentUserView != null) {
-                            mCurrentUserView.setActivated(false);
-                        }
-                        v.setActivated(true);
-                    }
+                if (!user.isCurrent || user.isGuest) {
                     onUserListItemClicked(user);
+                } else {
+                    mKeyguardUserSwitcherController.closeSwitcherIfOpenAndNotSimple(
+                            true /* animate */);
                 }
             } else {
                 // If switcher is closed, tapping anywhere in the view will open it

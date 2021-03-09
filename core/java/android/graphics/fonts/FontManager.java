@@ -25,7 +25,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.text.FontConfig;
 
@@ -205,9 +204,13 @@ public class FontManager {
     }
 
     /**
-     * Update a system installed font file.
+     * Update or add system font families.
      *
-     * <p>
+     * <p>This method will update existing font families or add new font families. The updated
+     * font family definitions will be used when creating {@link android.graphics.Typeface} objects
+     * with using {@link android.graphics.Typeface#create(String, int)} specifying the family name,
+     * or through XML resources.
+     *
      * To protect devices, system font updater relies on a Linux Kernel feature called fs-verity.
      * If the device does not support fs-verity, {@link #RESULT_ERROR_FONT_UPDATER_DISABLED} will be
      * returned.
@@ -226,69 +229,6 @@ public class FontManager {
      * <p>The font file must have a newer revision number in the head table. In other words, it is
      * not allowed to downgrade a font file. If an older font file is provided,
      * {@link #RESULT_ERROR_DOWNGRADING} will be returned.
-     *
-     * <p>The caller must specify the base config version for keeping the font configuration
-     * consistent. If the font configuration is updated for some reason between the time you get
-     * a configuration with {@link #getFontConfig()} and the time when you call this method,
-     * {@link #RESULT_ERROR_VERSION_MISMATCH} will be returned. Get the latest font configuration by
-     * calling {@link #getFontConfig()} and call this method again with the latest config version.
-     *
-     * @param request A {@link FontFileUpdateRequest} to execute.
-     * @param baseVersion A base config version to be updated. You can get the latest config version
-     *                    by {@link FontConfig#getConfigVersion()} via {@link #getFontConfig()}. If
-     *                    the system has a newer config version, the update will fail with
-     *                    {@link #RESULT_ERROR_VERSION_MISMATCH}.
-     * @return A result code.
-     *
-     * @see FontConfig#getConfigVersion()
-     * @see #getFontConfig()
-     * @see #RESULT_SUCCESS
-     * @see #RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE
-     * @see #RESULT_ERROR_VERIFICATION_FAILURE
-     * @see #RESULT_ERROR_VERSION_MISMATCH
-     * @see #RESULT_ERROR_INVALID_FONT_FILE
-     * @see #RESULT_ERROR_INVALID_FONT_NAME
-     * @see #RESULT_ERROR_DOWNGRADING
-     * @see #RESULT_ERROR_FAILED_UPDATE_CONFIG
-     * @see #RESULT_ERROR_FONT_UPDATER_DISABLED
-     */
-    @RequiresPermission(Manifest.permission.UPDATE_FONTS) public @ResultCode int updateFontFile(
-            @NonNull FontFileUpdateRequest request, @IntRange(from = 0) int baseVersion) {
-        try {
-            return mIFontManager.updateFontFile(new FontUpdateRequest(
-                    request.getParcelFileDescriptor(), request.getSignature()), baseVersion);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @deprecated Use {@link #updateFontFile(FontFileUpdateRequest, int)}
-     */
-    // TODO: Remove this API before Developer Preview 3.
-    @Deprecated
-    @RequiresPermission(Manifest.permission.UPDATE_FONTS) public @ResultCode int updateFontFile(
-            @NonNull ParcelFileDescriptor pfd,
-            @NonNull byte[] signature,
-            @IntRange(from = 0) int baseVersion
-    ) {
-        return updateFontFile(new FontFileUpdateRequest(pfd, signature), baseVersion);
-    }
-
-
-    /**
-     * Update or add system wide font families.
-     *
-     * <p>This method will update existing font families or add new font families. The updated
-     * font family definitions will be used when creating {@link android.graphics.Typeface} objects
-     * with using {@link android.graphics.Typeface#create(String, int)} specifying the family name,
-     * or through XML resources. Note that system fallback fonts cannot be modified by this method.
-     * Apps must use {@link android.graphics.Typeface.CustomFallbackBuilder} to use custom fallback
-     * fonts.
-     *
-     * <p>Font files can be updated by including {@link FontFileUpdateRequest} to {@code request}
-     * via {@link FontFamilyUpdateRequest.Builder#addFontFileUpdateRequest(FontFileUpdateRequest)}.
-     * The same constraints as {@link #updateFontFile} will apply when updating font files.
      *
      * <p>The caller must specify the base config version for keeping the font configuration
      * consistent. If the font configuration is updated for some reason between the time you get

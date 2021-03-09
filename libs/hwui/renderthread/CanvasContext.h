@@ -219,6 +219,12 @@ private:
     SkRect computeDirtyRect(const Frame& frame, SkRect* dirty);
     void finishFrame(FrameInfo* frameInfo);
 
+    /**
+     * Invoke 'reportFrameMetrics' on the last frame stored in 'mLast4FrameInfos'.
+     * Populate the 'presentTime' field before calling.
+     */
+    void reportMetricsWithPresentTime();
+
     // The same type as Frame.mWidth and Frame.mHeight
     int32_t mLastFrameWidth = 0;
     int32_t mLastFrameHeight = 0;

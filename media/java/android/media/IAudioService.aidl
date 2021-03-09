@@ -342,9 +342,11 @@ interface IAudioService {
 
     int getDevicesForStream(in int streamType);
 
-    boolean setDeviceForCommunication(IBinder cb, int portId);
+    int[] getAvailableCommunicationDeviceIds();
 
-    int getDeviceForCommunication();
+    boolean setCommunicationDevice(IBinder cb, int portId);
+
+    int getCommunicationDevice();
 
     void registerCommunicationDeviceDispatcher(ICommunicationDeviceDispatcher dispatcher);
 
