@@ -135,7 +135,11 @@ public class BiometricDeferredQueue {
             }
 
             sensorIds.remove(sensorId);
-            faceManager.revokeChallenge(sensorId);
+            // Challenge is only required for IBiometricsFace@1.0 (and not IFace AIDL). The
+            // IBiometricsFace@1.0 HAL does not require userId to revokeChallenge, so passing
+            // in 0 is OK.
+            final int userId = 0;
+            faceManager.revokeChallenge(sensorId, userId, challenge);
 
             if (sensorIds.isEmpty()) {
                 Slog.d(TAG, "Done requesting resetLockout for all face sensors");
