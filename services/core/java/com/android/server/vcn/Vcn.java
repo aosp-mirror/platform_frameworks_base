@@ -128,7 +128,6 @@ public class Vcn extends Handler {
      * from VcnManagementService, and therefore cannot rely on guarantees of running on the VCN
      * Looper.
      */
-    // TODO(b/179429339): update when exiting safemode (when a new VcnConfig is provided)
     private final AtomicBoolean mIsActive = new AtomicBoolean(true);
 
     public Vcn(
@@ -203,7 +202,8 @@ public class Vcn extends Handler {
 
     @Override
     public void handleMessage(@NonNull Message msg) {
-        if (!isActive()) {
+        // Ignore if this Vcn is not active and we're not receiving new configs
+        if (!isActive() && msg.what != MSG_EVENT_CONFIG_UPDATED) {
             return;
         }
 
@@ -237,7 +237,13 @@ public class Vcn extends Handler {
 
         mConfig = config;
 
-        // TODO: Reevaluate active VcnGatewayConnection(s)
+        // TODO(b/181815405): Reevaluate active VcnGatewayConnection(s)
+
+        if (!mIsActive.getAndSet(true)) {
+            // If this VCN was not previously active, it is exiting Safe Mode. Re-register the
+            // request listener to get NetworkRequests again (and all cached requests).
+            mVcnContext.getVcnNetworkProvider().registerListener(mRequestListener);
+        }
     }
 
     private void handleTeardown() {
@@ -252,6 +258,8 @@ public class Vcn extends Handler {
 
     private void handleEnterSafeMode() {
         handleTeardown();
+
+        mVcnGatewayConnections.clear();
 
         mVcnCallback.onEnteredSafeMode();
     }
