@@ -30,8 +30,8 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
-import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -92,8 +92,8 @@ public class MultinetworkPolicyTracker {
     }
 
     @VisibleForTesting
-    protected class ActiveDataSubscriptionIdChangedListener extends PhoneStateListener
-            implements PhoneStateListener.ActiveDataSubscriptionIdChangedListener {
+    protected class ActiveDataSubscriptionIdListener extends TelephonyCallback
+            implements TelephonyCallback.ActiveDataSubscriptionIdListener {
         @Override
         public void onActiveDataSubscriptionIdChanged(int subId) {
             mActiveSubId = subId;
@@ -121,8 +121,8 @@ public class MultinetworkPolicyTracker {
             }
         };
 
-        ctx.getSystemService(TelephonyManager.class).registerPhoneStateListener(
-                new HandlerExecutor(handler), new ActiveDataSubscriptionIdChangedListener());
+        ctx.getSystemService(TelephonyManager.class).registerTelephonyCallback(
+                new HandlerExecutor(handler), new ActiveDataSubscriptionIdListener());
 
         updateAvoidBadWifi();
         updateMeteredMultipathPreference();
