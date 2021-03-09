@@ -257,9 +257,11 @@ public final class TextServicesManager {
     }
 
     /**
+     * Deprecated. Use {@link #getEnabledSpellCheckerInfos()} instead.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553,
+            publicAlternatives = "Use {@link #getEnabledSpellCheckerInfos()} instead.")
     public SpellCheckerInfo[] getEnabledSpellCheckers() {
         try {
             final SpellCheckerInfo[] retval = mService.getEnabledSpellCheckers(mUserId);
@@ -279,7 +281,7 @@ public final class TextServicesManager {
      */
     @Nullable
     @SuppressLint("NullableCollection")
-    public List<SpellCheckerInfo> getEnabledSpellCheckersList() {
+    public List<SpellCheckerInfo> getEnabledSpellCheckerInfos() {
         final SpellCheckerInfo[] enabledSpellCheckers = getEnabledSpellCheckers();
         return enabledSpellCheckers != null ? Arrays.asList(enabledSpellCheckers) : null;
     }
@@ -290,7 +292,7 @@ public final class TextServicesManager {
      * @return The current active spell checker info.
      */
     @Nullable
-    public SpellCheckerInfo getCurrentSpellChecker() {
+    public SpellCheckerInfo getCurrentSpellCheckerInfo() {
         try {
             // Passing null as a locale for ICS
             return mService.getCurrentSpellChecker(mUserId, null);
@@ -300,12 +302,26 @@ public final class TextServicesManager {
     }
 
     /**
+     * Deprecated. Use {@link #getCurrentSpellCheckerInfo()} instead.
+     * @hide
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
+            publicAlternatives = "Use {@link #getCurrentSpellCheckerInfo()} instead.")
+    @Nullable
+    public SpellCheckerInfo getCurrentSpellChecker() {
+        return getCurrentSpellCheckerInfo();
+    }
+
+    /**
      * Retrieve the selected subtype of the selected spell checker, or null if there is none.
      *
      * @param allowImplicitlySelectedSubtype {@code true} to return the default language matching
      * system locale if there's no subtype selected explicitly, otherwise, returns null.
      * @return The meta information of the selected subtype of the selected spell checker.
+     *
+     * @hide
      */
+    @UnsupportedAppUsage
     @Nullable
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
             boolean allowImplicitlySelectedSubtype) {
