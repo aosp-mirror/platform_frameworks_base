@@ -19,14 +19,13 @@ package com.android.systemui.toast;
 import android.animation.Animator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -35,6 +34,8 @@ import android.widget.ToastPresenter;
 
 import com.android.internal.R;
 import com.android.launcher3.icons.IconFactory;
+import com.android.settingslib.applications.ApplicationsState;
+import com.android.settingslib.applications.ApplicationsState.AppEntry;
 import com.android.systemui.plugins.ToastPlugin;
 
 /**
@@ -170,8 +171,13 @@ public class SystemUIToast implements ToastPlugin.Toast {
                     com.android.systemui.R.layout.text_toast, null);
             ((TextView) toastView.findViewById(com.android.systemui.R.id.text)).setText(mText);
 
-            ((ImageView) toastView.findViewById(com.android.systemui.R.id.icon))
-                    .setImageDrawable(getBadgedIcon(mContext, mPackageName, mUserId));
+            Drawable icon = getBadgedIcon(mContext, mPackageName, mUserId);
+            if (icon == null) {
+                toastView.findViewById(com.android.systemui.R.id.icon).setVisibility(View.GONE);
+            } else {
+                ((ImageView) toastView.findViewById(com.android.systemui.R.id.icon))
+                        .setImageDrawable(icon);
+            }
         } else {
             toastView = ToastPresenter.getTextToastView(mContext, mText);
         }
@@ -217,18 +223,20 @@ public class SystemUIToast implements ToastPlugin.Toast {
      */
     public static Drawable getBadgedIcon(@NonNull Context context, String packageName,
             int userId) {
-        final PackageManager packageManager = context.getPackageManager();
-        try {
-            final ApplicationInfo appInfo = packageManager.getApplicationInfoAsUser(
-                    packageName, PackageManager.GET_META_DATA, userId);
-            UserHandle user = UserHandle.getUserHandleForUid(appInfo.uid);
-            IconFactory iconFactory = IconFactory.obtain(context);
-            Bitmap iconBmp = iconFactory.createBadgedIconBitmap(
-                    appInfo.loadUnbadgedIcon(packageManager), user, false).icon;
-            return new BitmapDrawable(context.getResources(), iconBmp);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e("SystemUIToast", "could not load icon for package=" + packageName + " e=" + e);
+        final ApplicationsState appState =
+                ApplicationsState.getInstance((Application) context.getApplicationContext());
+        final AppEntry appEntry = appState.getEntry(packageName, userId);
+
+        if (!ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(appEntry)) {
             return null;
         }
+
+        final ApplicationInfo appInfo = appEntry.info;
+        UserHandle user = UserHandle.getUserHandleForUid(appInfo.uid);
+        IconFactory iconFactory = IconFactory.obtain(context);
+        Bitmap iconBmp = iconFactory.createBadgedIconBitmap(
+                appInfo.loadUnbadgedIcon(context.getPackageManager()), user, true).icon;
+        return new BitmapDrawable(context.getResources(), iconBmp);
+
     }
 }
