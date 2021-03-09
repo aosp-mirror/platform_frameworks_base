@@ -2635,7 +2635,8 @@ class ContextImpl extends Context {
 
     @Override
     public @NonNull Context createAttributionContext(@Nullable String attributionTag) {
-        return createContext(new ContextParams.Builder().setAttributionTag(attributionTag).build());
+        return createContext(
+                new ContextParams.Builder(mParams).setAttributionTag(attributionTag).build());
     }
 
     @Override
