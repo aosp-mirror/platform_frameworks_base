@@ -11966,6 +11966,14 @@ package android.content.pm {
     field public static final String ACTION_CAN_INTERACT_ACROSS_PROFILES_CHANGED = "android.content.pm.action.CAN_INTERACT_ACROSS_PROFILES_CHANGED";
   }
 
+  public class DataLoaderParams {
+    method @NonNull public static final android.content.pm.DataLoaderParams forIncremental(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public static final android.content.pm.DataLoaderParams forStreaming(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public final String getArguments();
+    method @NonNull public final android.content.ComponentName getComponentName();
+    method @NonNull public final int getType();
+  }
+
   public final class FeatureGroupInfo implements android.os.Parcelable {
     ctor public FeatureGroupInfo();
     ctor public FeatureGroupInfo(android.content.pm.FeatureGroupInfo);
@@ -12194,6 +12202,10 @@ package android.content.pm {
     field public static final String ACTION_SESSION_COMMITTED = "android.content.pm.action.SESSION_COMMITTED";
     field public static final String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
     field public static final String ACTION_SESSION_UPDATED = "android.content.pm.action.SESSION_UPDATED";
+    field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
+    field public static final int DATA_LOADER_TYPE_NONE = 0; // 0x0
+    field public static final int DATA_LOADER_TYPE_STREAMING = 1; // 0x1
+    field public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
     field public static final String EXTRA_OTHER_PACKAGE_NAME = "android.content.pm.extra.OTHER_PACKAGE_NAME";
     field public static final String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
     field public static final String EXTRA_SESSION = "android.content.pm.extra.SESSION";
@@ -12201,6 +12213,9 @@ package android.content.pm {
     field public static final String EXTRA_STATUS = "android.content.pm.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.pm.extra.STATUS_MESSAGE";
     field public static final String EXTRA_STORAGE_PATH = "android.content.pm.extra.STORAGE_PATH";
+    field public static final int LOCATION_DATA_APP = 0; // 0x0
+    field public static final int LOCATION_MEDIA_DATA = 2; // 0x2
+    field public static final int LOCATION_MEDIA_OBB = 1; // 0x1
     field public static final int STATUS_FAILURE = 1; // 0x1
     field public static final int STATUS_FAILURE_ABORTED = 3; // 0x3
     field public static final int STATUS_FAILURE_BLOCKED = 2; // 0x2
@@ -12208,6 +12223,7 @@ package android.content.pm {
     field public static final int STATUS_FAILURE_INCOMPATIBLE = 7; // 0x7
     field public static final int STATUS_FAILURE_INVALID = 4; // 0x4
     field public static final int STATUS_FAILURE_STORAGE = 6; // 0x6
+    field public static final int STATUS_PENDING_STREAMING = -2; // 0xfffffffe
     field public static final int STATUS_PENDING_USER_ACTION = -1; // 0xffffffff
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }
@@ -12215,10 +12231,12 @@ package android.content.pm {
   public static class PackageInstaller.Session implements java.io.Closeable {
     method public void abandon();
     method public void addChildSessionId(int);
+    method public void addFile(int, @NonNull String, long, @NonNull byte[], @Nullable byte[]);
     method public void close();
     method public void commit(@NonNull android.content.IntentSender);
     method public void fsync(@NonNull java.io.OutputStream) throws java.io.IOException;
     method @NonNull public int[] getChildSessionIds();
+    method @Nullable public android.content.pm.DataLoaderParams getDataLoaderParams();
     method @NonNull public String[] getNames() throws java.io.IOException;
     method public int getParentSessionId();
     method public boolean isMultiPackage();
@@ -12292,6 +12310,7 @@ package android.content.pm {
     method public void setAppLabel(@Nullable CharSequence);
     method public void setAppPackageName(@Nullable String);
     method public void setAutoRevokePermissionsMode(boolean);
+    method public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
     method public void setInstallScenario(int);
