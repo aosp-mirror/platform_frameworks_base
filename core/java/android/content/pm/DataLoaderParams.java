@@ -17,17 +17,11 @@
 package android.content.pm;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.content.ComponentName;
 
 /**
  * This class represents the parameters used to configure a Data Loader.
- *
- * WARNING: This is a system API to aid internal development.
- * Use at your own risk. It will change or be removed without warning.
- * @hide
  */
-@SystemApi
 public class DataLoaderParams {
     @NonNull
     private final DataLoaderParamsParcel mData;
