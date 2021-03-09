@@ -127,4 +127,20 @@ public class UsageProgressBarPreferenceTest {
         assertThat(customContent.getChildAt(0)).isEqualTo(imageView);
         assertThat(customContent.getVisibility()).isEqualTo(View.VISIBLE);
     }
+
+    @Test
+    public void setCustomContent_setImageViewTwice_oneAndLatestChild() {
+        final ImageView imageViewLegacy = mock(ImageView.class);
+        final ImageView imageViewNew = mock(ImageView.class);
+        mUsageProgressBarPreference.setCustomContent(imageViewLegacy);
+        mUsageProgressBarPreference.setCustomContent(imageViewNew);
+
+        mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
+
+        final FrameLayout customContent =
+                (FrameLayout) mViewHolder.findViewById(R.id.custom_content);
+        assertThat(customContent.getChildCount()).isEqualTo(1);
+        assertThat(customContent.getChildAt(0)).isEqualTo(imageViewNew);
+        assertThat(customContent.getVisibility()).isEqualTo(View.VISIBLE);
+    }
 }
