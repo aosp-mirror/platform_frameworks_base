@@ -71,11 +71,6 @@ public class GnssConfiguration {
     private static final String CONFIG_GPS_LOCK = "GPS_LOCK";
     private static final String CONFIG_ES_EXTENSION_SEC = "ES_EXTENSION_SEC";
     public static final String CONFIG_NFW_PROXY_APPS = "NFW_PROXY_APPS";
-    private static final String CONFIG_LONGTERM_PSDS_SERVER_1 = "LONGTERM_PSDS_SERVER_1";
-    private static final String CONFIG_LONGTERM_PSDS_SERVER_2 = "LONGTERM_PSDS_SERVER_2";
-    private static final String CONFIG_LONGTERM_PSDS_SERVER_3 = "LONGTERM_PSDS_SERVER_3";
-    private static final String CONFIG_NORMAL_PSDS_SERVER = "NORMAL_PSDS_SERVER";
-    private static final String CONFIG_REALTIME_PSDS_SERVER = "REALTIME_PSDS_SERVER";
 
     // Limit on NI emergency mode time extension after emergency sessions ends
     private static final int MAX_EMERGENCY_MODE_EXTENSION_SECONDS = 300;  // 5 minute maximum
@@ -227,9 +222,6 @@ public class GnssConfiguration {
             mProperties.setProperty(CONFIG_LPP_PROFILE, lpp_prof);
         }
 
-        // Load Psds servers from resources
-        loadPsdsServersFromResources();
-
         /*
          * Overlay carrier properties from a debug configuration file.
          */
@@ -317,7 +309,7 @@ public class GnssConfiguration {
 
         int ddSubId = SubscriptionManager.getDefaultDataSubscriptionId();
         PersistableBundle configs = SubscriptionManager.isValidSubscriptionId(ddSubId)
-                ? configManager.getConfigForSubId(ddSubId) : null;
+                ? configManager.getConfigForSubId(ddSubId) : configManager.getConfig();
         if (configs == null) {
             if (DEBUG) Log.d(TAG, "SIM not ready, use default carrier config.");
             configs = CarrierConfigManager.getDefaultConfig();
@@ -379,34 +371,6 @@ public class GnssConfiguration {
             Log.e(TAG, "Unable to parse config parameter " + configParameter + " value: "
                     + valueString + ". Using default value: " + defaultValue);
             return defaultValue;
-        }
-    }
-
-    void loadPsdsServersFromResources() {
-        String longTermPsdsServer1 = mContext.getResources().getString(
-                com.android.internal.R.string.config_longterm_psds_server_1);
-        if (!TextUtils.isEmpty(longTermPsdsServer1)) {
-            mProperties.setProperty(CONFIG_LONGTERM_PSDS_SERVER_1, longTermPsdsServer1);
-        }
-        String longTermPsdsServer2 = mContext.getResources().getString(
-                com.android.internal.R.string.config_longterm_psds_server_2);
-        if (!TextUtils.isEmpty(longTermPsdsServer2)) {
-            mProperties.setProperty(CONFIG_LONGTERM_PSDS_SERVER_2, longTermPsdsServer2);
-        }
-        String longTermPsdsServer3 = mContext.getResources().getString(
-                com.android.internal.R.string.config_longterm_psds_server_3);
-        if (!TextUtils.isEmpty(longTermPsdsServer3)) {
-            mProperties.setProperty(CONFIG_LONGTERM_PSDS_SERVER_3, longTermPsdsServer3);
-        }
-        String normalPsdsServer = mContext.getResources().getString(
-                com.android.internal.R.string.config_normal_psds_server);
-        if (!TextUtils.isEmpty(normalPsdsServer)) {
-            mProperties.setProperty(CONFIG_NORMAL_PSDS_SERVER, normalPsdsServer);
-        }
-        String realtimePsdsServer = mContext.getResources().getString(
-                com.android.internal.R.string.config_realtime_psds_server);
-        if (!TextUtils.isEmpty(realtimePsdsServer)) {
-            mProperties.setProperty(CONFIG_REALTIME_PSDS_SERVER, realtimePsdsServer);
         }
     }
 

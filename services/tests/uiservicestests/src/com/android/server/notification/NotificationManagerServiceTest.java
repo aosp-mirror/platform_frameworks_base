@@ -6207,7 +6207,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         reset(mListeners);
 
         // Test: update suppression to true
-        mService.mNotificationDelegate.onBubbleNotificationSuppressionChanged(nr.getKey(), true);
+        mService.mNotificationDelegate.onBubbleNotificationSuppressionChanged(nr.getKey(), true,
+                false);
         waitForIdle();
 
         // Check
@@ -6218,7 +6219,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         reset(mListeners);
 
         // Test: update suppression to false
-        mService.mNotificationDelegate.onBubbleNotificationSuppressionChanged(nr.getKey(), false);
+        mService.mNotificationDelegate.onBubbleNotificationSuppressionChanged(nr.getKey(), false,
+                false);
         waitForIdle();
 
         // Check

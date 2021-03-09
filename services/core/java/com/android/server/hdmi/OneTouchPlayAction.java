@@ -18,11 +18,8 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.hardware.hdmi.IHdmiControlCallback;
-import android.os.RemoteException;
 import android.util.Slog;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Feature action that performs one touch play against TV/Display device. This action is initiated
@@ -50,7 +47,6 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
     private static final int LOOP_COUNTER_MAX = 10;
 
     private final int mTargetAddress;
-    private final List<IHdmiControlCallback> mCallbacks = new ArrayList<>();
 
     private int mPowerStatusCounter = 0;
 
@@ -69,9 +65,8 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
 
     private OneTouchPlayAction(HdmiCecLocalDevice localDevice, int targetAddress,
             IHdmiControlCallback callback) {
-        super(localDevice);
+        super(localDevice, callback);
         mTargetAddress = targetAddress;
-        addCallback(callback);
     }
 
     @Override
@@ -121,8 +116,7 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
             int status = cmd.getParams()[0];
             if (status == HdmiControlManager.POWER_STATUS_ON) {
                 broadcastActiveSource();
-                invokeCallback(HdmiControlManager.RESULT_SUCCESS);
-                finish();
+                finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
             }
             return true;
         }
@@ -140,23 +134,8 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
                 addTimer(mState, HdmiConfig.TIMEOUT_MS);
             } else {
                 // Couldn't wake up the TV for whatever reason. Report failure.
-                invokeCallback(HdmiControlManager.RESULT_TIMEOUT);
-                finish();
+                finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
             }
-        }
-    }
-
-    public void addCallback(IHdmiControlCallback callback) {
-        mCallbacks.add(callback);
-    }
-
-    private void invokeCallback(int result) {
-        try {
-            for (IHdmiControlCallback callback : mCallbacks) {
-                callback.onComplete(result);
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Callback failed:" + e);
         }
     }
 
@@ -170,4 +149,5 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
                         HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
         return sendStandbyOnSleep.equals(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
     }
+
 }

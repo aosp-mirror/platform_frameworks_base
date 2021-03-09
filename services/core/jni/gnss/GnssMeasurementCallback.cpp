@@ -131,7 +131,7 @@ void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
                              "([I)Landroid/location/CorrelationVector$Builder;");
     method_correlationVectorBuilderSetFrequencyOffsetMetersPerSecond =
             env->GetMethodID(class_correlationVectorBuilder, "setFrequencyOffsetMetersPerSecond",
-                             "(I)Landroid/location/CorrelationVector$Builder;");
+                             "(D)Landroid/location/CorrelationVector$Builder;");
     method_correlationVectorBuilderSetSamplingStartMeters =
             env->GetMethodID(class_correlationVectorBuilder, "setSamplingStartMeters",
                              "(D)Landroid/location/CorrelationVector$Builder;");

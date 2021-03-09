@@ -3086,6 +3086,7 @@
     <public name="hand_secondTintMode"/>
     <public name="dataExtractionRules"/>
     <public name="passwordsActivity"/>
+    <public name="selectableAsDefault"/>
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
@@ -3171,6 +3172,8 @@
     <public name="config_systemSpeechRecognizer" />
     <!-- @hide @SystemApi -->
     <public name="config_systemWifiCoexManager" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemWellbeing" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">

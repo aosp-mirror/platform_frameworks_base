@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.os.Trace;
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -195,6 +196,15 @@ public abstract class InputEventReceiver {
             }
         }
         event.recycleIfNeededAfterDispatch();
+    }
+
+    /**
+     * Report the latency information for a specific input event.
+     */
+    public final void reportLatencyInfo(int inputEventId, long gpuCompletedTime, long presentTime) {
+        Trace.traceBegin(Trace.TRACE_TAG_INPUT, "reportLatencyInfo");
+        // TODO(b/169866723) : send this data to InputDispatcher via InputChannel
+        Trace.traceEnd(Trace.TRACE_TAG_INPUT);
     }
 
     /**

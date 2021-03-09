@@ -45,6 +45,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 
@@ -65,8 +66,8 @@ import java.util.Optional;
 public class PipTaskOrganizerTest extends ShellTestCase {
     private PipTaskOrganizer mSpiedPipTaskOrganizer;
 
-    @Mock private DisplayController mMockdDisplayController;
-
+    @Mock private DisplayController mMockDisplayController;
+    @Mock private SyncTransactionQueue mMockSyncTransactionQueue;
     @Mock private PhonePipMenuController mMockPhonePipMenuController;
     @Mock private PipAnimationController mMockPipAnimationController;
     @Mock private PipTransitionController mMockPipTransitionController;
@@ -89,10 +90,11 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mPipBoundsState = new PipBoundsState(mContext);
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState);
         mMainExecutor = new TestShellExecutor();
-        mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext, mPipBoundsState,
+        mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext,
+                mMockSyncTransactionQueue, mPipBoundsState,
                 mPipBoundsAlgorithm, mMockPhonePipMenuController,
                 mMockPipAnimationController, mMockPipSurfaceTransactionHelper,
-                mMockPipTransitionController, mMockOptionalSplitScreen, mMockdDisplayController,
+                mMockPipTransitionController, mMockOptionalSplitScreen, mMockDisplayController,
                 mMockPipUiEventLogger, mMockShellTaskOrganizer, mMainExecutor));
         mMainExecutor.flushAll();
         preparePipTaskOrg();
@@ -105,7 +107,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
 
     @Test
     public void instantiatePipTaskOrganizer_addsDisplayWindowListener() {
-        verify(mMockdDisplayController).addDisplayWindowListener(any());
+        verify(mMockDisplayController).addDisplayWindowListener(any());
     }
 
     @Test

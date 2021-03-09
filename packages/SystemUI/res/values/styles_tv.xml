@@ -30,5 +30,6 @@
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsFloating">true</item>
     </style>
 </resources>

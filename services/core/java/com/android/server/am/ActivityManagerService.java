@@ -16652,7 +16652,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new SecurityException("Calling uid " + callingUid + " cannot set locusId"
                     + "for package " + activity.getPackageName());
         }
-
+        mActivityTaskManager.setLocusId(locusId, appToken);
         if (mUsageStatsService != null) {
             mUsageStatsService.reportLocusUpdate(activity, userId, locusId, appToken);
         }

@@ -643,7 +643,7 @@ private:
         }
 
         TracedRead last = {};
-        auto lastSerialNo = mLastSerialNo;
+        auto lastSerialNo = mLastSerialNo < 0 ? pageReads[0].serialNo : mLastSerialNo;
         for (auto&& read : pageReads) {
             const auto expectedSerialNo = lastSerialNo + last.count;
 #ifdef VERBOSE_READ_LOGS
@@ -676,8 +676,7 @@ private:
 
             // Second, report missing reads, if any.
             if (read.serialNo != expectedSerialNo) {
-                const auto readsMissing = read.serialNo - expectedSerialNo;
-                traceMissingReads(readsMissing);
+                traceMissingReads(expectedSerialNo, read.serialNo);
             }
 
             last = TracedRead{
@@ -721,9 +720,13 @@ private:
         ATRACE_END();
     }
 
-    void traceMissingReads(int64_t count) {
-        const auto trace = android::base::StringPrintf("missing_page_reads: count=%lld",
-                                                       static_cast<long long>(count));
+    void traceMissingReads(int64_t expectedSerialNo, int64_t readSerialNo) {
+        const auto readsMissing = readSerialNo - expectedSerialNo;
+        const auto trace =
+                android::base::StringPrintf("missing_page_reads: count=%lld, range [%lld,%lld)",
+                                            static_cast<long long>(readsMissing),
+                                            static_cast<long long>(expectedSerialNo),
+                                            static_cast<long long>(readSerialNo));
         ATRACE_BEGIN(trace.c_str());
         ATRACE_END();
     }
@@ -874,7 +877,7 @@ private:
     std::atomic<bool> mStopReceiving = false;
     std::atomic<bool> mReadLogsEnabled = false;
     std::chrono::milliseconds mWaitOnEofInterval{WaitOnEofMinInterval};
-    int64_t mLastSerialNo{1};
+    int64_t mLastSerialNo{-1};
     /** Tracks which files have been requested */
     std::unordered_set<FileIdx> mRequestedFiles;
 };

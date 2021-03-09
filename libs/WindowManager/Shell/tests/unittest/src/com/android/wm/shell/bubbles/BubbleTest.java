@@ -63,7 +63,7 @@ public class BubbleTest extends ShellTestCase {
     private Bubble mBubble;
 
     @Mock
-    private Bubbles.NotificationSuppressionChangedListener mSuppressionListener;
+    private Bubbles.SuppressionChangedListener mSuppressionListener;
 
     @Before
     public void setUp() {

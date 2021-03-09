@@ -32,6 +32,7 @@ import android.util.Size;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.graphics.palette.CelebiQuantizer;
 import com.android.internal.graphics.palette.Palette;
+import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
 import com.android.internal.util.ContrastColorUtil;
 
 import java.io.FileOutputStream;
@@ -178,11 +179,20 @@ public final class WallpaperColors implements Parcelable {
                     optimalSize.getHeight(), true /* filter */);
         }
 
-        final Palette palette = Palette
-                .from(bitmap, new CelebiQuantizer())
-                .maximumColorCount(256)
-                .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
-                .generate();
+        final Palette palette;
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            palette = Palette
+                    .from(bitmap, new VariationalKMeansQuantizer())
+                    .maximumColorCount(5)
+                    .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
+                    .generate();
+        } else {
+            palette = Palette
+                    .from(bitmap, new CelebiQuantizer())
+                    .maximumColorCount(256)
+                    .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
+                    .generate();
+        }
         // Remove insignificant colors and sort swatches by population
         final ArrayList<Palette.Swatch> swatches = new ArrayList<>(palette.getSwatches());
         swatches.sort((a, b) -> b.getPopulation() - a.getPopulation());

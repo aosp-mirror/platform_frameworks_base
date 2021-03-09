@@ -955,8 +955,8 @@ public class BubblesTest extends SysuiTestCase {
 
     @Test
     public void testNotifyShadeSuppressionChange_notificationDismiss() {
-        Bubbles.NotificationSuppressionChangedListener listener =
-                mock(Bubbles.NotificationSuppressionChangedListener.class);
+        Bubbles.SuppressionChangedListener listener =
+                mock(Bubbles.SuppressionChangedListener.class);
         mBubbleData.setSuppressionChangedListener(listener);
 
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
@@ -979,8 +979,8 @@ public class BubblesTest extends SysuiTestCase {
 
     @Test
     public void testNotifyShadeSuppressionChange_bubbleExpanded() {
-        Bubbles.NotificationSuppressionChangedListener listener =
-                mock(Bubbles.NotificationSuppressionChangedListener.class);
+        Bubbles.SuppressionChangedListener listener =
+                mock(Bubbles.SuppressionChangedListener.class);
         mBubbleData.setSuppressionChangedListener(listener);
 
         mEntryListener.onPendingEntryAdded(mRow.getEntry());

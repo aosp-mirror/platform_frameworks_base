@@ -20,7 +20,7 @@
     android:layout_width="@dimen/tv_notification_panel_width"
     android:layout_height="match_parent"
     android:layout_gravity="end"
-    android:background="@color/tv_notification_background_color"
+    android:background="@android:color/transparent"
     android:orientation="vertical">
 
     <TextView

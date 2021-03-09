@@ -1259,6 +1259,7 @@ package android {
     field public static final int segmentedButtonStyle = 16843568; // 0x1010330
     field public static final int selectAllOnFocus = 16843102; // 0x101015e
     field public static final int selectable = 16843238; // 0x10101e6
+    field public static final int selectableAsDefault = 16844352; // 0x1010640
     field public static final int selectableItemBackground = 16843534; // 0x101030e
     field public static final int selectableItemBackgroundBorderless = 16843868; // 0x101045c
     field @Deprecated public static final int selectedDateVerticalBar = 16843591; // 0x1010347
@@ -5818,6 +5819,8 @@ package android.app {
     method @Nullable public android.graphics.drawable.Icon getIcon();
     method @Nullable public android.app.PendingIntent getIntent();
     method @Nullable public String getShortcutId();
+    method public boolean isBubbleSuppressable();
+    method public boolean isBubbleSuppressed();
     method public boolean isNotificationSuppressed();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.Notification.BubbleMetadata> CREATOR;
@@ -5834,6 +5837,7 @@ package android.app {
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setDesiredHeightResId(@DimenRes int);
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setIcon(@NonNull android.graphics.drawable.Icon);
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setIntent(@NonNull android.app.PendingIntent);
+    method @NonNull public android.app.Notification.BubbleMetadata.Builder setSuppressBubble(boolean);
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setSuppressNotification(boolean);
   }
 
@@ -20177,14 +20181,15 @@ package android.media {
     method public void adjustStreamVolume(int, int, int);
     method public void adjustSuggestedStreamVolume(int, int, int);
     method public void adjustVolume(int, int);
-    method public void clearDeviceForCommunication();
+    method public void clearCommunicationDevice();
     method public void dispatchMediaKeyEvent(android.view.KeyEvent);
     method public int generateAudioSessionId();
     method @NonNull public java.util.List<android.media.AudioPlaybackConfiguration> getActivePlaybackConfigurations();
     method @NonNull public java.util.List<android.media.AudioRecordingConfiguration> getActiveRecordingConfigurations();
     method public int getAllowedCapturePolicy();
     method public int getAudioHwSyncForSession(int);
-    method @Nullable public android.media.AudioDeviceInfo getDeviceForCommunication();
+    method @NonNull public java.util.List<android.media.AudioDeviceInfo> getAvailableCommunicationDevices();
+    method @Nullable public android.media.AudioDeviceInfo getCommunicationDevice();
     method public android.media.AudioDeviceInfo[] getDevices(int);
     method public java.util.List<android.media.MicrophoneInfo> getMicrophones() throws java.io.IOException;
     method public int getMode();
@@ -20226,7 +20231,7 @@ package android.media {
     method public void setAllowedCapturePolicy(int);
     method @Deprecated public void setBluetoothA2dpOn(boolean);
     method public void setBluetoothScoOn(boolean);
-    method public boolean setDeviceForCommunication(@NonNull android.media.AudioDeviceInfo);
+    method public boolean setCommunicationDevice(@NonNull android.media.AudioDeviceInfo);
     method public void setMicrophoneMute(boolean);
     method public void setMode(int);
     method public void setParameters(String);
@@ -34744,6 +34749,7 @@ package android.provider {
     field public static final String ACTION_APP_NOTIFICATION_SETTINGS = "android.settings.APP_NOTIFICATION_SETTINGS";
     field public static final String ACTION_APP_SEARCH_SETTINGS = "android.settings.APP_SEARCH_SETTINGS";
     field public static final String ACTION_APP_USAGE_SETTINGS = "android.settings.action.APP_USAGE_SETTINGS";
+    field public static final String ACTION_AUTO_ROTATE_SETTINGS = "android.settings.AUTO_ROTATE_SETTINGS";
     field public static final String ACTION_BATTERY_SAVER_SETTINGS = "android.settings.BATTERY_SAVER_SETTINGS";
     field public static final String ACTION_BIOMETRIC_ENROLL = "android.settings.BIOMETRIC_ENROLL";
     field public static final String ACTION_BLUETOOTH_SETTINGS = "android.settings.BLUETOOTH_SETTINGS";
@@ -54883,6 +54889,7 @@ package android.widget {
     method public int describeContents();
     method public int getLayoutId();
     method public String getPackage();
+    method @IdRes public int getViewId();
     method @Deprecated public boolean onLoadClass(Class);
     method public void reapply(android.content.Context, android.view.View);
     method public void removeAllViews(@IdRes int);
@@ -54943,6 +54950,7 @@ package android.widget {
     method public void setTextViewText(@IdRes int, CharSequence);
     method public void setTextViewTextSize(@IdRes int, int, float);
     method public void setUri(@IdRes int, String, android.net.Uri);
+    method public void setViewId(@IdRes int);
     method public void setViewLayoutHeight(@IdRes int, float, int);
     method public void setViewLayoutHeightDimen(@IdRes int, @DimenRes int);
     method public void setViewLayoutMargin(@IdRes int, int, float, int);

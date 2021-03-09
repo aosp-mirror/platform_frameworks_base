@@ -1257,6 +1257,30 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
+     * Comparison operator on two PendingIntent objects, such that true is returned when they
+     * represent {@link Intent}s that are equal as per {@link Intent#filterEquals}.
+     *
+     * @param other The other PendingIntent to compare against.
+     * @return True if action, data, type, class, and categories on two intents are the same.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.GET_INTENT_SENDER_INTENT)
+    public boolean intentFilterEquals(@Nullable PendingIntent other) {
+        if (other == null) {
+            return false;
+        }
+        try {
+            return ActivityManager.getService().getIntentForIntentSender(other.mTarget)
+                    .filterEquals(getIntent());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Comparison operator on two PendingIntent objects, such that true
      * is returned then they both represent the same operation from the
      * same package.  This allows you to use {@link #getActivity},

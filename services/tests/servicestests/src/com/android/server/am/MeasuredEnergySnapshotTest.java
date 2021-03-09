@@ -57,45 +57,58 @@ public final class MeasuredEnergySnapshotTest {
     private static final SparseArray<EnergyConsumer> SOME_ID_CONSUMER_MAP = createIdToConsumerMap(
             CONSUMER_DISPLAY);
 
+    private static final int VOLTAGE_0 = 4_000;
+    private static final int VOLTAGE_1 = 3_500;
+    private static final int VOLTAGE_2 = 3_100;
+    private static final int VOLTAGE_3 = 3_000;
+    private static final int VOLTAGE_4 = 2_800;
+
     // Elements in each results are purposefully out of order.
-    private static final  EnergyConsumerResult[] RESULTS_0 = new EnergyConsumerResult[] {
-        createEnergyConsumerResult(CONSUMER_OTHER_0.id, 90, new int[] {47, 3}, new long[] {14, 13}),
-        createEnergyConsumerResult(CONSUMER_DISPLAY.id, 14, null, null),
-        createEnergyConsumerResult(CONSUMER_OTHER_1.id, 0, null, null),
-        // No CONSUMER_OTHER_2
+    private static final EnergyConsumerResult[] RESULTS_0 = new EnergyConsumerResult[]{
+            createEnergyConsumerResult(CONSUMER_OTHER_0.id, 90_000, new int[]{47, 3},
+                    new long[]{14_000, 13_000}),
+            createEnergyConsumerResult(CONSUMER_DISPLAY.id, 14_000, null, null),
+            createEnergyConsumerResult(CONSUMER_OTHER_1.id, 0, null, null),
+            // No CONSUMER_OTHER_2
     };
-    private static final  EnergyConsumerResult[] RESULTS_1 = new EnergyConsumerResult[] {
-        createEnergyConsumerResult(CONSUMER_DISPLAY.id, 24, null, null),
-        createEnergyConsumerResult(CONSUMER_OTHER_0.id, 90, new int[] {47, 3}, new long[] {14, 13}),
-        createEnergyConsumerResult(CONSUMER_OTHER_2.id, 12, new int[] {6}, new long[] {10}),
-        createEnergyConsumerResult(CONSUMER_OTHER_1.id, 12_000, null, null),
+    private static final EnergyConsumerResult[] RESULTS_1 = new EnergyConsumerResult[]{
+            createEnergyConsumerResult(CONSUMER_DISPLAY.id, 24_000, null, null),
+            createEnergyConsumerResult(CONSUMER_OTHER_0.id, 90_000, new int[]{47, 3},
+                    new long[]{14_000, 13_000}),
+            createEnergyConsumerResult(CONSUMER_OTHER_2.id, 12_000, new int[]{6},
+                    new long[]{10_000}),
+            createEnergyConsumerResult(CONSUMER_OTHER_1.id, 12_000_000, null, null),
     };
-    private static final  EnergyConsumerResult[] RESULTS_2 = new EnergyConsumerResult[] {
-        createEnergyConsumerResult(CONSUMER_DISPLAY.id, 36, null, null),
-        // No CONSUMER_OTHER_0
-        // No CONSUMER_OTHER_1
-        // No CONSUMER_OTHER_2
+    private static final EnergyConsumerResult[] RESULTS_2 = new EnergyConsumerResult[]{
+            createEnergyConsumerResult(CONSUMER_DISPLAY.id, 36_000, null, null),
+            // No CONSUMER_OTHER_0
+            // No CONSUMER_OTHER_1
+            // No CONSUMER_OTHER_2
     };
-    private static final  EnergyConsumerResult[] RESULTS_3 = new EnergyConsumerResult[] {
-        // No CONSUMER_DISPLAY
-        createEnergyConsumerResult(CONSUMER_OTHER_2.id, 13, new int[] {6}, new long[] {10}),
-        createEnergyConsumerResult(
-                CONSUMER_OTHER_0.id, 190, new int[] {2, 3, 47, 7}, new long[] {9, 18, 14, 6}),
-        createEnergyConsumerResult(CONSUMER_OTHER_1.id, 12_000, null, null),
+    private static final EnergyConsumerResult[] RESULTS_3 = new EnergyConsumerResult[]{
+            // No CONSUMER_DISPLAY
+            createEnergyConsumerResult(CONSUMER_OTHER_2.id, 13_000, new int[]{6},
+                    new long[]{10_000}),
+            createEnergyConsumerResult(
+                    CONSUMER_OTHER_0.id, 190_000, new int[]{2, 3, 47, 7},
+                    new long[]{9_000, 18_000, 14_000, 6_000}),
+            createEnergyConsumerResult(CONSUMER_OTHER_1.id, 12_000_000, null, null),
     };
-    private static final  EnergyConsumerResult[] RESULTS_4 = new EnergyConsumerResult[] {
-        createEnergyConsumerResult(CONSUMER_DISPLAY.id, 43, null, null),
-        createEnergyConsumerResult(
-                CONSUMER_OTHER_0.id, 290, new int[] {7, 47, 3, 2}, new long[] {6, 14, 18, 11}),
-        // No CONSUMER_OTHER_1
-        createEnergyConsumerResult(CONSUMER_OTHER_2.id, 165, new int[] {6, 47}, new long[] {10, 8}),
+    private static final EnergyConsumerResult[] RESULTS_4 = new EnergyConsumerResult[]{
+            createEnergyConsumerResult(CONSUMER_DISPLAY.id, 43_000, null, null),
+            createEnergyConsumerResult(
+                    CONSUMER_OTHER_0.id, 290_000, new int[]{7, 47, 3, 2},
+                    new long[]{6_000, 14_000, 18_000, 11_000}),
+            // No CONSUMER_OTHER_1
+            createEnergyConsumerResult(CONSUMER_OTHER_2.id, 165_000, new int[]{6, 47},
+                    new long[]{10_000, 8_000}),
     };
 
     @Test
     public void testUpdateAndGetDelta_empty() {
         final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
-        assertNull(snapshot.updateAndGetDelta(null));
-        assertNull(snapshot.updateAndGetDelta(new EnergyConsumerResult[0]));
+        assertNull(snapshot.updateAndGetDelta(null, VOLTAGE_0));
+        assertNull(snapshot.updateAndGetDelta(new EnergyConsumerResult[0], VOLTAGE_0));
     }
 
     @Test
@@ -103,69 +116,88 @@ public final class MeasuredEnergySnapshotTest {
         final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
 
         // results0
-        MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0);
+        MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
         if (delta != null) { // null is fine here. If non-null, it better be uninteresting though.
-            assertEquals(UNAVAILABLE, delta.displayEnergyUJ);
-            assertNull(delta.otherTotalEnergyUJ);
-            assertNull(delta.otherUidEnergiesUJ);
+            assertEquals(UNAVAILABLE, delta.displayChargeUC);
+            assertNull(delta.otherTotalChargeUC);
+            assertNull(delta.otherUidChargesUC);
         }
 
         // results1
-        delta = snapshot.updateAndGetDelta(RESULTS_1);
+        delta = snapshot.updateAndGetDelta(RESULTS_1, VOLTAGE_1);
         assertNotNull(delta);
-        assertEquals(24 - 14, delta.displayEnergyUJ);
+        long expectedChargeUC;
+        expectedChargeUC = calculateChargeConsumedUC(14_000, VOLTAGE_0, 24_000, VOLTAGE_1);
+        assertEquals(expectedChargeUC, delta.displayChargeUC);
 
-        assertNotNull(delta.otherTotalEnergyUJ);
-        assertEquals(90 - 90, delta.otherTotalEnergyUJ[0]);
-        assertEquals(12_000 - 0, delta.otherTotalEnergyUJ[1]);
-        assertEquals(0, delta.otherTotalEnergyUJ[2]); // First good pull. Treat delta as 0.
+        assertNotNull(delta.otherTotalChargeUC);
 
-        assertNotNull(delta.otherUidEnergiesUJ);
-        assertNullOrEmpty(delta.otherUidEnergiesUJ[0]); // No change in uid energies
-        assertNullOrEmpty(delta.otherUidEnergiesUJ[1]);
-        assertNullOrEmpty(delta.otherUidEnergiesUJ[2]);
+        expectedChargeUC = calculateChargeConsumedUC(90_000, VOLTAGE_0, 90_000, VOLTAGE_1);
+        assertEquals(expectedChargeUC, delta.otherTotalChargeUC[0]);
+        expectedChargeUC = calculateChargeConsumedUC(0, VOLTAGE_0, 12_000_000, VOLTAGE_1);
+        assertEquals(expectedChargeUC, delta.otherTotalChargeUC[1]);
+        assertEquals(0, delta.otherTotalChargeUC[2]); // First good pull. Treat delta as 0.
+
+        assertNotNull(delta.otherUidChargesUC);
+        assertNullOrEmpty(delta.otherUidChargesUC[0]); // No change in uid energies
+        assertNullOrEmpty(delta.otherUidChargesUC[1]);
+        assertNullOrEmpty(delta.otherUidChargesUC[2]);
 
         // results2
-        delta = snapshot.updateAndGetDelta(RESULTS_2);
+        delta = snapshot.updateAndGetDelta(RESULTS_2, VOLTAGE_2);
         assertNotNull(delta);
-        assertEquals(36 - 24, delta.displayEnergyUJ);
-        assertNull(delta.otherUidEnergiesUJ);
-        assertNull(delta.otherTotalEnergyUJ);
+        expectedChargeUC = calculateChargeConsumedUC(24_000, VOLTAGE_1, 36_000, VOLTAGE_2);
+        assertEquals(expectedChargeUC, delta.displayChargeUC);
+        assertNull(delta.otherUidChargesUC);
+        assertNull(delta.otherTotalChargeUC);
 
         // results3
-        delta = snapshot.updateAndGetDelta(RESULTS_3);
+        delta = snapshot.updateAndGetDelta(RESULTS_3, VOLTAGE_3);
         assertNotNull(delta);
-        assertEquals(UNAVAILABLE, delta.displayEnergyUJ);
+        assertEquals(UNAVAILABLE, delta.displayChargeUC);
 
-        assertNotNull(delta.otherTotalEnergyUJ);
-        assertEquals(190 - 90, delta.otherTotalEnergyUJ[0]);
-        assertEquals(12_000 - 12_000, delta.otherTotalEnergyUJ[1]);
-        assertEquals(13 - 12, delta.otherTotalEnergyUJ[2]);
+        assertNotNull(delta.otherTotalChargeUC);
 
-        assertNotNull(delta.otherUidEnergiesUJ);
-        assertEquals(3, delta.otherUidEnergiesUJ[0].size());
-        assertEquals(9 - 0, delta.otherUidEnergiesUJ[0].get(2));
-        assertEquals(18 - 13, delta.otherUidEnergiesUJ[0].get(3));
-        assertEquals(6 - 0, delta.otherUidEnergiesUJ[0].get(7));
-        assertNullOrEmpty(delta.otherUidEnergiesUJ[1]);
-        assertNullOrEmpty(delta.otherUidEnergiesUJ[2]);
+        expectedChargeUC = calculateChargeConsumedUC(90_000, VOLTAGE_1, 190_000, VOLTAGE_3);
+        assertEquals(expectedChargeUC, delta.otherTotalChargeUC[0]);
+        expectedChargeUC = calculateChargeConsumedUC(12_000_000, VOLTAGE_1, 12_000_000, VOLTAGE_3);
+        assertEquals(expectedChargeUC, delta.otherTotalChargeUC[1]);
+        expectedChargeUC = calculateChargeConsumedUC(12_000, VOLTAGE_1, 13_000, VOLTAGE_3);
+        assertEquals(expectedChargeUC, delta.otherTotalChargeUC[2]);
+
+        assertNotNull(delta.otherUidChargesUC);
+
+        assertEquals(3, delta.otherUidChargesUC[0].size());
+        expectedChargeUC = calculateChargeConsumedUC(0, VOLTAGE_1, 9_000, VOLTAGE_3);
+        assertEquals(expectedChargeUC, delta.otherUidChargesUC[0].get(2));
+        expectedChargeUC = calculateChargeConsumedUC(13_000, VOLTAGE_1, 18_000, VOLTAGE_3);
+        assertEquals(expectedChargeUC, delta.otherUidChargesUC[0].get(3));
+        expectedChargeUC = calculateChargeConsumedUC(0, VOLTAGE_1, 6_000, VOLTAGE_3);
+        assertEquals(expectedChargeUC, delta.otherUidChargesUC[0].get(7));
+        assertNullOrEmpty(delta.otherUidChargesUC[1]);
+        assertNullOrEmpty(delta.otherUidChargesUC[2]);
 
         // results4
-        delta = snapshot.updateAndGetDelta(RESULTS_4);
+        delta = snapshot.updateAndGetDelta(RESULTS_4, VOLTAGE_4);
         assertNotNull(delta);
-        assertEquals(43 - 36, delta.displayEnergyUJ);
+        expectedChargeUC = calculateChargeConsumedUC(36_000, VOLTAGE_2, 43_000, VOLTAGE_4);
+        assertEquals(expectedChargeUC, delta.displayChargeUC);
 
-        assertNotNull(delta.otherTotalEnergyUJ);
-        assertEquals(290 - 190, delta.otherTotalEnergyUJ[0]);
-        assertEquals(0, delta.otherTotalEnergyUJ[1]); // Not present (e.g. missing data)
-        assertEquals(165 - 13, delta.otherTotalEnergyUJ[2]);
+        assertNotNull(delta.otherTotalChargeUC);
+        expectedChargeUC = calculateChargeConsumedUC(190_000, VOLTAGE_3, 290_000, VOLTAGE_4);
+        assertEquals(expectedChargeUC, delta.otherTotalChargeUC[0]);
+        assertEquals(0, delta.otherTotalChargeUC[1]); // Not present (e.g. missing data)
+        expectedChargeUC = calculateChargeConsumedUC(13_000, VOLTAGE_3, 165_000, VOLTAGE_4);
+        assertEquals(expectedChargeUC, delta.otherTotalChargeUC[2]);
 
-        assertNotNull(delta.otherUidEnergiesUJ);
-        assertEquals(1, delta.otherUidEnergiesUJ[0].size());
-        assertEquals(11 - 9, delta.otherUidEnergiesUJ[0].get(2));
-        assertNullOrEmpty(delta.otherUidEnergiesUJ[1]); // Not present
-        assertEquals(1, delta.otherUidEnergiesUJ[2].size());
-        assertEquals(8, delta.otherUidEnergiesUJ[2].get(47));
+        assertNotNull(delta.otherUidChargesUC);
+        assertEquals(1, delta.otherUidChargesUC[0].size());
+        expectedChargeUC = calculateChargeConsumedUC(9_000, VOLTAGE_3, 11_000, VOLTAGE_4);
+        assertEquals(expectedChargeUC, delta.otherUidChargesUC[0].get(2));
+        assertNullOrEmpty(delta.otherUidChargesUC[1]); // Not present
+        assertEquals(1, delta.otherUidChargesUC[2].size());
+        expectedChargeUC = calculateChargeConsumedUC(0, VOLTAGE_3, 8_000, VOLTAGE_4);
+        assertEquals(expectedChargeUC, delta.otherUidChargesUC[2].get(47));
     }
 
     /** Test updateAndGetDelta() when the results have consumers absent from idToConsumerMap. */
@@ -174,19 +206,21 @@ public final class MeasuredEnergySnapshotTest {
         final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(SOME_ID_CONSUMER_MAP);
 
         // results0
-        MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0);
+        MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
         if (delta != null) { // null is fine here. If non-null, it better be uninteresting though.
-            assertEquals(UNAVAILABLE, delta.displayEnergyUJ);
-            assertNull(delta.otherTotalEnergyUJ);
-            assertNull(delta.otherUidEnergiesUJ);
+            assertEquals(UNAVAILABLE, delta.displayChargeUC);
+            assertNull(delta.otherTotalChargeUC);
+            assertNull(delta.otherUidChargesUC);
         }
 
         // results1
-        delta = snapshot.updateAndGetDelta(RESULTS_1);
+        delta = snapshot.updateAndGetDelta(RESULTS_1, VOLTAGE_1);
         assertNotNull(delta);
-        assertEquals(24 - 14, delta.displayEnergyUJ);
-        assertNull(delta.otherTotalEnergyUJ); // Although in the results, they're not in the idMap
-        assertNull(delta.otherUidEnergiesUJ);
+        final long expectedChargeUC =
+                calculateChargeConsumedUC(14_000, VOLTAGE_0, 24_000, VOLTAGE_1);
+        assertEquals(expectedChargeUC, delta.displayChargeUC);
+        assertNull(delta.otherTotalChargeUC); // Although in the results, they're not in the idMap
+        assertNull(delta.otherUidChargesUC);
     }
 
     @Test
@@ -232,6 +266,15 @@ public final class MeasuredEnergySnapshotTest {
             }
         }
         return ecr;
+    }
+
+    private static long calculateChargeConsumedUC(long energyUWs0, long voltageMv0, long energyUWs1,
+            long voltageMv1) {
+        final long deltaEnergyUWs = energyUWs1 - energyUWs0;
+        final long avgVoltageMv = (voltageMv1 + voltageMv0 + 1) / 2;
+
+        // Charge uC = Energy uWs * (1000 mV/V) / (voltage mV) + 0.5 (for rounding)
+        return (deltaEnergyUWs * 1000 + (avgVoltageMv / 2)) / avgVoltageMv;
     }
 
     private void assertNullOrEmpty(SparseLongArray a) {
