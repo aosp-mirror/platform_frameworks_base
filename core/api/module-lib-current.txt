@@ -6,6 +6,10 @@ package android.app {
     method public void setMaxManifestReceiverApiLevel(int);
   }
 
+  public final class PendingIntent implements android.os.Parcelable {
+    method @RequiresPermission("android.permission.GET_INTENT_SENDER_INTENT") public boolean intentFilterEquals(@Nullable android.app.PendingIntent);
+  }
+
 }
 
 package android.app.usage {
