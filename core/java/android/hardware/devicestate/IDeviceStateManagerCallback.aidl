@@ -21,7 +21,8 @@ import android.hardware.devicestate.DeviceStateInfo;
 /** @hide */
 interface IDeviceStateManagerCallback {
     /**
-     * Called in response to a change in {@link DeviceStateInfo}.
+     * Called in response to a change in {@link DeviceStateInfo}. Guaranteed to be called once
+     * after successful registration of the callback with the initial value.
      *
      * @param info the new device state info.
      *

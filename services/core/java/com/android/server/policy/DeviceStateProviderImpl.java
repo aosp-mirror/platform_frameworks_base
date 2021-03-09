@@ -161,7 +161,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private int mLastReportedState = INVALID_DEVICE_STATE;
 
     @GuardedBy("mLock")
-    private boolean mIsLidOpen;
+    private Boolean mIsLidOpen;
     @GuardedBy("mLock")
     private final Map<Sensor, SensorEvent> mLatestSensorEvent = new ArrayMap<>();
 
@@ -299,7 +299,17 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             int newState = mOrderedStates[0].getIdentifier();
             for (int i = 0; i < mOrderedStates.length; i++) {
                 int state = mOrderedStates[i].getIdentifier();
-                if (mStateConditions.get(state).getAsBoolean()) {
+                boolean conditionSatisfied;
+                try {
+                    conditionSatisfied = mStateConditions.get(state).getAsBoolean();
+                } catch (IllegalStateException e) {
+                    // Failed to compute the current state based on current available data. Return
+                    // with the expectation that notifyDeviceStateChangedIfNeeded() will be called
+                    // when a callback with the missing data is triggered.
+                    return;
+                }
+
+                if (conditionSatisfied) {
                     newState = state;
                     break;
                 }
@@ -351,6 +361,10 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         @Override
         public boolean getAsBoolean() {
             synchronized (mLock) {
+                if (mIsLidOpen == null) {
+                    throw new IllegalStateException("Have not received lid switch value.");
+                }
+
                 return mIsLidOpen == mExpectedOpen;
             }
         }
@@ -377,13 +391,11 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             synchronized (mLock) {
                 SensorEvent latestEvent = mLatestSensorEvent.get(mSensor);
                 if (latestEvent == null) {
-                    // Default to returning false if we have not yet received a sensor event for the
-                    // sensor.
-                    return false;
+                    throw new IllegalStateException("Have not received sensor event.");
                 }
 
                 if (latestEvent.values.length != mExpectedValues.size()) {
-                    throw new IllegalStateException("Number of supplied numeric range(s) does not "
+                    throw new RuntimeException("Number of supplied numeric range(s) does not "
                             + "match the number of values in the latest sensor event for sensor: "
                             + mSensor);
                 }
