@@ -38,6 +38,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
+import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
@@ -91,6 +92,7 @@ public class BrightnessTrackerTest {
             new HandlerThread("brightness.test", android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
     private int mDefaultNightModeColorTemperature;
+    private float mRbcOffsetFactor;
 
     private static Handler ensureHandler() {
         synchronized (sHandlerLock) {
@@ -111,6 +113,8 @@ public class BrightnessTrackerTest {
         mDefaultNightModeColorTemperature =
                 InstrumentationRegistry.getContext().getResources().getInteger(
                 R.integer.config_nightDisplayColorTemperatureDefault);
+        mRbcOffsetFactor = InstrumentationRegistry.getContext()
+                .getSystemService(ColorDisplayManager.class).getReduceBrightColorsOffsetFactor();
     }
 
     @Test
@@ -314,6 +318,9 @@ public class BrightnessTrackerTest {
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_ACTIVATED, 1);
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, 3333);
 
+        mInjector.mSecureIntSettings.put(Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED, 1);
+        mInjector.mSecureIntSettings.put(Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, 40);
+
         startTracker(mTracker, initialBrightness, DEFAULT_COLOR_SAMPLING_ENABLED);
         mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
                 batteryChangeEvent(30, 60));
@@ -337,7 +344,7 @@ public class BrightnessTrackerTest {
         assertEquals(3333, event.colorTemperature);
         assertTrue(event.reduceBrightColors);
         assertEquals(40, event.reduceBrightColorsStrength);
-        assertEquals(20f, event.reduceBrightColorsOffset, FLOAT_DELTA);
+        assertEquals(brightness * mRbcOffsetFactor, event.reduceBrightColorsOffset, FLOAT_DELTA);
         assertEquals("a.package", event.packageName);
         assertEquals(0, event.userId);
         assertArrayEquals(new long[] {1, 10, 100, 1000, 300, 30, 10, 1}, event.colorValueBuckets);
@@ -445,7 +452,9 @@ public class BrightnessTrackerTest {
                 + Long.toString(someTimeAgo) + "\" packageName=\""
                 + "com.example.app\" user=\"10\" "
                 + "lastNits=\"32.333\" "
-                + "batteryLevel=\"1.0\" nightMode=\"false\" colorTemperature=\"0\"\n"
+                + "batteryLevel=\"1.0\" nightMode=\"false\" colorTemperature=\"0\" "
+                + "reduceBrightColors=\"false\" reduceBrightColorsStrength=\"40\" "
+                + "reduceBrightColorsOffset=\"0\"\n"
                 + "lux=\"32.2,31.1\" luxTimestamps=\""
                 + Long.toString(someTimeAgo) + "," + Long.toString(someTimeAgo) + "\""
                 + "defaultConfig=\"true\" powerSaveFactor=\"0.5\" userPoint=\"true\" />"
@@ -453,7 +462,9 @@ public class BrightnessTrackerTest {
                 + Long.toString(someTimeAgo) + "\" packageName=\""
                 + "com.android.anapp\" user=\"11\" "
                 + "lastNits=\"32\" "
-                + "batteryLevel=\"0.5\" nightMode=\"true\" colorTemperature=\"3235\"\n"
+                + "batteryLevel=\"0.5\" nightMode=\"true\" colorTemperature=\"3235\" "
+                + "reduceBrightColors=\"true\" reduceBrightColorsStrength=\"40\" "
+                + "reduceBrightColorsOffset=\"0\"\n"
                 + "lux=\"132.2,131.1\" luxTimestamps=\""
                 + Long.toString(someTimeAgo) + "," + Long.toString(someTimeAgo) + "\""
                 + "colorSampleDuration=\"3456\" colorValueBuckets=\"123,598,23,19\"/>"
@@ -462,7 +473,9 @@ public class BrightnessTrackerTest {
                 + Long.toString(twoMonthsAgo) + "\" packageName=\""
                 + "com.example.app\" user=\"10\" "
                 + "lastNits=\"32\" "
-                + "batteryLevel=\"1.0\" nightMode=\"false\" colorTemperature=\"0\"\n"
+                + "batteryLevel=\"1.0\" nightMode=\"false\" colorTemperature=\"0\" "
+                + "reduceBrightColors=\"false\" reduceBrightColorsStrength=\"40\" "
+                + "reduceBrightColorsOffset=\"0\"\n"
                 + "lux=\"32.2,31.1\" luxTimestamps=\""
                 + Long.toString(twoMonthsAgo) + "," + Long.toString(twoMonthsAgo) + "\"/>"
                 + "</events>";
@@ -477,6 +490,7 @@ public class BrightnessTrackerTest {
         assertEquals(32.333, event.lastBrightness, FLOAT_DELTA);
         assertEquals(0, event.userId);
         assertFalse(event.nightMode);
+        assertFalse(event.reduceBrightColors);
         assertEquals(1.0f, event.batteryLevel, FLOAT_DELTA);
         assertEquals("com.example.app", event.packageName);
         assertTrue(event.isDefaultBrightnessConfig);
@@ -495,6 +509,7 @@ public class BrightnessTrackerTest {
         assertEquals(1, event.userId);
         assertTrue(event.nightMode);
         assertEquals(3235, event.colorTemperature);
+        assertTrue(event.reduceBrightColors);
         assertEquals(0.5f, event.batteryLevel, FLOAT_DELTA);
         assertEquals("com.android.anapp", event.packageName);
         // Not present in the event so default to false.
@@ -600,7 +615,7 @@ public class BrightnessTrackerTest {
         assertEquals(3339, event.colorTemperature);
         assertTrue(event.reduceBrightColors);
         assertEquals(40, event.reduceBrightColorsStrength);
-        assertEquals(20f, event.reduceBrightColorsOffset, FLOAT_DELTA);
+        assertEquals(brightness * mRbcOffsetFactor, event.reduceBrightColorsOffset, FLOAT_DELTA);
         assertEquals(0.5f, event.powerBrightnessFactor, FLOAT_DELTA);
         assertTrue(event.isUserSetBrightness);
         assertFalse(event.isDefaultBrightnessConfig);
