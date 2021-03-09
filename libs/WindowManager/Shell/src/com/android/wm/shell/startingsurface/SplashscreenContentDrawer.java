@@ -31,7 +31,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.util.Slog;
-import android.view.Window;
 import android.window.SplashScreenView;
 
 import com.android.internal.R;
@@ -91,12 +90,13 @@ public class SplashscreenContentDrawer {
         return new ColorDrawable(getSystemBGColor());
     }
 
-    SplashScreenView makeSplashScreenContentView(Window win, Context context, int iconRes,
+    SplashScreenView makeSplashScreenContentView(Context context, int iconRes,
             int splashscreenContentResId) {
         updateDensity();
         // splash screen content will be deprecated after S.
         final SplashScreenView ssc =
-                makeSplashscreenContentDrawable(win, context, splashscreenContentResId);
+                makeSplashscreenContentDrawable(context, splashscreenContentResId);
+
         if (ssc != null) {
             return ssc;
         }
@@ -127,7 +127,6 @@ public class SplashscreenContentDrawer {
         }
         // TODO (b/173975965) Tracking the performance on improved splash screen.
         return builder
-                .setWindow(win)
                 .setContext(context)
                 .setThemeDrawable(themeBGDrawable)
                 .setIconDrawable(iconDrawable)
@@ -169,7 +168,6 @@ public class SplashscreenContentDrawer {
     private class StartingWindowViewBuilder {
         private Drawable mThemeBGDrawable;
         private Drawable mIconDrawable;
-        private Window mWindow;
         private int mIconAnimationDuration;
         private Context mContext;
         private Drawable mBrandingDrawable;
@@ -189,12 +187,6 @@ public class SplashscreenContentDrawer {
 
         StartingWindowViewBuilder setIconDrawable(Drawable iconDrawable) {
             mIconDrawable = iconDrawable;
-            mBuildComplete = false;
-            return this;
-        }
-
-        StartingWindowViewBuilder setWindow(Window window) {
-            mWindow = window;
             mBuildComplete = false;
             return this;
         }
@@ -221,7 +213,7 @@ public class SplashscreenContentDrawer {
             if (mBuildComplete) {
                 return mCachedResult;
             }
-            if (mWindow == null || mContext == null) {
+            if (mContext == null) {
                 Slog.e(TAG, "Unable to create StartingWindowView, lack of materials!");
                 return null;
             }
@@ -237,7 +229,7 @@ public class SplashscreenContentDrawer {
                 mFinalIconDrawable = mIconDrawable;
             }
             final int iconSize = mFinalIconDrawable != null ? (int) (mIconSize * mScale) : 0;
-            mCachedResult = fillViewWithIcon(mWindow, mContext, iconSize, mFinalIconDrawable);
+            mCachedResult = fillViewWithIcon(mContext, iconSize, mFinalIconDrawable);
             mBuildComplete = true;
             return mCachedResult;
         }
@@ -313,7 +305,7 @@ public class SplashscreenContentDrawer {
             return true;
         }
 
-        private SplashScreenView fillViewWithIcon(Window win, Context context,
+        private SplashScreenView fillViewWithIcon(Context context,
                 int iconSize, Drawable iconDrawable) {
             final SplashScreenView.Builder builder = new SplashScreenView.Builder(context);
             builder.setIconSize(iconSize).setBackgroundColor(mThemeColor);
@@ -329,8 +321,6 @@ public class SplashscreenContentDrawer {
             if (DEBUG) {
                 Slog.d(TAG, "fillViewWithIcon surfaceWindowView " + splashScreenView);
             }
-            win.setContentView(splashScreenView);
-            splashScreenView.cacheRootWindow(win);
             splashScreenView.makeSystemUIColorsTransparent();
             return splashScreenView;
         }
@@ -363,8 +353,8 @@ public class SplashscreenContentDrawer {
         return root < 0.1;
     }
 
-    private static SplashScreenView makeSplashscreenContentDrawable(Window win,
-            Context ctx, int splashscreenContentResId) {
+    private static SplashScreenView makeSplashscreenContentDrawable(Context ctx,
+            int splashscreenContentResId) {
         // doesn't support windowSplashscreenContent after S
         // TODO add an allowlist to skip some packages if needed
         final int targetSdkVersion = ctx.getApplicationInfo().targetSdkVersion;
@@ -384,7 +374,6 @@ public class SplashscreenContentDrawer {
         SplashScreenView view = new SplashScreenView(ctx);
         view.setNotCopyable();
         view.setBackground(drawable);
-        win.setContentView(view);
         return view;
     }
 
