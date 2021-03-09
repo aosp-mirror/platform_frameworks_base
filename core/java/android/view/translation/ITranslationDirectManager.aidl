@@ -16,7 +16,7 @@
 
 package android.view.translation;
 
-import android.service.translation.TranslationRequest;
+import android.view.translation.TranslationRequest;
 import android.service.translation.ITranslationCallback;
 import com.android.internal.os.IResultReceiver;
 
