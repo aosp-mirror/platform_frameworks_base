@@ -524,10 +524,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"このアプリに画面ロックの複雑さレベル（高、中、低、なし）を認識することを許可します。複雑さレベルは、画面ロックの文字数の範囲やタイプを示すものです。アプリから一定レベルまで画面ロックを更新するよう推奨されることもありますが、ユーザーは無視したり別の操作を行ったりできます。画面ロックは平文で保存されないため、アプリが正確なパスワードを知ることはありません。"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"生体認証ハードウェアの使用"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"生体認証ハードウェアを認証に使用することをアプリに許可します"</string>
-    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"指紋ハードウェアの管理"</string>
+    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"指紋認証ハードウェアの管理"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"使用する指紋テンプレートの追加や削除を行う方法の呼び出しをアプリに許可します。"</string>
-    <string name="permlab_useFingerprint" msgid="1001421069766751922">"指紋ハードウェアの使用"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"指紋ハードウェアを認証に使用することをアプリに許可します"</string>
+    <string name="permlab_useFingerprint" msgid="1001421069766751922">"指紋認証ハードウェアの使用"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"指紋認証ハードウェアを認証に使用することをアプリに許可します"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"音楽コレクションの変更"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"音楽コレクションの変更をアプリに許可します。"</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"動画コレクションの変更"</string>
@@ -552,7 +552,7 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"指紋認証を完了しました"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"顔を認証しました"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"顔を認証しました。[確認] を押してください"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"指紋ハードウェアは使用できません。"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"指紋認証ハードウェアは使用できません。"</string>
     <string name="fingerprint_error_no_space" msgid="6126456006769817485">"指紋を保存できません。既存の指紋を削除してください。"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"指紋の読み取りがタイムアウトになりました。もう一度お試しください。"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指紋の操作をキャンセルしました。"</string>
@@ -2040,9 +2040,9 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"電源ダイアログ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ロック画面"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"スクリーンショット"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助のショートカット"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助のショートカットの選択メニュー"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助のショートカット"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助機能のショートカット"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助機能のショートカットの選択メニュー"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助機能のショートカット"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> のキャプション バーです。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> は RESTRICTED バケットに移動しました。"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>

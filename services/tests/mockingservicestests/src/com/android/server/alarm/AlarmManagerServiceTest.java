@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server;
+package com.android.server.alarm;
 
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
@@ -26,7 +26,6 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doThrow;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -34,20 +33,20 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.server.AlarmManagerService.ACTIVE_INDEX;
-import static com.android.server.AlarmManagerService.AlarmHandler.APP_STANDBY_BUCKET_CHANGED;
-import static com.android.server.AlarmManagerService.AlarmHandler.CHARGING_STATUS_CHANGED;
-import static com.android.server.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
-import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_LONG_TIME;
-import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_SHORT_TIME;
-import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
-import static com.android.server.AlarmManagerService.Constants.KEY_LISTENER_TIMEOUT;
-import static com.android.server.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
-import static com.android.server.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
-import static com.android.server.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
-import static com.android.server.AlarmManagerService.IS_WAKEUP_MASK;
-import static com.android.server.AlarmManagerService.TIME_CHANGED_MASK;
-import static com.android.server.AlarmManagerService.WORKING_INDEX;
+import static com.android.server.alarm.AlarmManagerService.ACTIVE_INDEX;
+import static com.android.server.alarm.AlarmManagerService.AlarmHandler.APP_STANDBY_BUCKET_CHANGED;
+import static com.android.server.alarm.AlarmManagerService.AlarmHandler.CHARGING_STATUS_CHANGED;
+import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_LONG_TIME;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_SHORT_TIME;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LISTENER_TIMEOUT;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
+import static com.android.server.alarm.AlarmManagerService.IS_WAKEUP_MASK;
+import static com.android.server.alarm.AlarmManagerService.TIME_CHANGED_MASK;
+import static com.android.server.alarm.AlarmManagerService.WORKING_INDEX;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -77,6 +76,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
@@ -87,6 +87,10 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.MockedVoidMethod;
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.AlarmManagerInternal;
+import com.android.server.AppStateTracker;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.usage.AppStandbyInternal;
 
 import org.junit.After;
@@ -255,7 +259,8 @@ public class AlarmManagerServiceTest {
                 .spyStatic(ActivityManager.class)
                 .mockStatic(LocalServices.class)
                 .spyStatic(Looper.class)
-                .spyStatic(Settings.Global.class)
+                .mockStatic(Settings.Global.class)
+                .mockStatic(ServiceManager.class)
                 .spyStatic(UserHandle.class)
                 .strictness(Strictness.WARN)
                 .startMocking();
@@ -280,7 +285,6 @@ public class AlarmManagerServiceTest {
         mInjector = new Injector(mMockContext);
         mService = new AlarmManagerService(mMockContext, mInjector);
         spyOn(mService);
-        doNothing().when(mService).publishBinderService(any(), any());
 
         mService.onStart();
         spyOn(mService.mHandler);
