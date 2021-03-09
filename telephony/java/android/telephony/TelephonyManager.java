@@ -5580,28 +5580,25 @@ public class TelephonyManager {
      * instability. If a process has registered too many listeners without unregistering them, it
      * may encounter an {@link IllegalStateException} when trying to register more listeners.
      *
-     * @param listener The {@link PhoneStateListener} object to register (or unregister)
-     * @param events The telephony state(s) of interest to the listener, as a bitwise-OR combination
-     *               of {@link PhoneStateListener} LISTEN_ flags.
-     * @deprecated Use {@link #registerPhoneStateListener(Executor, PhoneStateListener)}.
+     * @param listener The {@link PhoneStateListener} object to register
+     *                 (or unregister)
+     * @param events The telephony state(s) of interest to the listener,
+     *               as a bitwise-OR combination of {@link PhoneStateListener}
+     *               LISTEN_ flags.
+     * @deprecated Use {@link #registerTelephonyCallback(Executor, TelephonyCallback)}.
      */
     @Deprecated
     public void listen(PhoneStateListener listener, int events) {
-        if (!listener.isExecutorSet()) {
-            throw new IllegalStateException("PhoneStateListener should be created on a thread "
-                    + "with Looper.myLooper() != null");
-        }
-        boolean notifyNow = getITelephony() != null;
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr != null) {
-            if (events != PhoneStateListener.LISTEN_NONE) {
-                mTelephonyRegistryMgr.registerPhoneStateListenerWithEvents(mSubId,
-                        getOpPackageName(), getAttributionTag(), listener, events, notifyNow);
-            } else {
-                unregisterPhoneStateListener(listener);
-            }
+        if (mContext == null) return;
+        boolean notifyNow = (getITelephony() != null);
+        TelephonyRegistryManager telephonyRegistry =
+                (TelephonyRegistryManager)
+                        mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
+        if (telephonyRegistry != null) {
+            telephonyRegistry.listenFromListener(mSubId, getOpPackageName(),
+                    getAttributionTag(), listener, events, notifyNow);
         } else {
-            throw new IllegalStateException("telephony service is null.");
+            Rlog.w(TAG, "telephony registry not ready.");
         }
     }
 
@@ -14548,6 +14545,75 @@ public class TelephonyManager {
         return THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR;
     }
 
+    /**
+     * Registers a callback object to receive notification of changes in specified telephony states.
+     * <p>
+     * To register a callback, pass a {@link TelephonyCallback} which implements
+     * interfaces of events. For example,
+     * FakeServiceStateCallback extends {@link TelephonyCallback} implements
+     * {@link TelephonyCallback.ServiceStateListener}.
+     *
+     * At registration, and when a specified telephony state changes, the telephony manager invokes
+     * the appropriate callback method on the callback object and passes the current (updated)
+     * values.
+     * <p>
+     *
+     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
+     * applies to the given subId. Otherwise, applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To register events for multiple
+     * subIds, pass a separate callback object to each TelephonyManager object created with
+     * {@link #createForSubscriptionId}.
+     *
+     * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
+     * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
+     * {@link SecurityException} will be thrown otherwise.
+     *
+     * This API should be used sparingly -- large numbers of callbacks will cause system
+     * instability. If a process has registered too many callbacks without unregistering them, it
+     * may encounter an {@link IllegalStateException} when trying to register more callbacks.
+     *
+     * @param executor The executor of where the callback will execute.
+     * @param callback The {@link TelephonyCallback} object to register.
+     */
+    public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull TelephonyCallback callback) {
+        if (executor == null || callback == null) {
+            throw new IllegalArgumentException("TelephonyCallback and executor must be non-null");
+        }
+        mTelephonyRegistryMgr = (TelephonyRegistryManager)
+                mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
+        if (mTelephonyRegistryMgr != null) {
+            mTelephonyRegistryMgr.registerTelephonyCallback(executor, mSubId, getOpPackageName(),
+                    getAttributionTag(), callback, getITelephony() != null);
+        } else {
+            throw new IllegalStateException("telephony service is null.");
+        }
+    }
+
+    /**
+     * Unregister an existing {@link TelephonyCallback}.
+     *
+     * @param callback The {@link TelephonyCallback} object to unregister.
+     */
+    public void unregisterTelephonyCallback(@NonNull TelephonyCallback callback) {
+
+        if (mContext == null) {
+            throw new IllegalStateException("telephony service is null.");
+        }
+
+        if (callback.callback == null) {
+            return;
+        }
+
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr != null) {
+            mTelephonyRegistryMgr.unregisterTelephonyCallback(mSubId, getOpPackageName(),
+                    getAttributionTag(), callback, getITelephony() != null);
+        } else {
+            throw new IllegalStateException("telephony service is null.");
+        }
+    }
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"GBA_FAILURE_REASON_"}, value = {
@@ -14720,73 +14786,6 @@ public class TelephonyManager {
         } catch (RemoteException exception) {
             Log.e(TAG, "Error calling ITelephony#bootstrapAuthenticationRequest", exception);
             e.execute(() -> callback.onAuthenticationFailure(GBA_FAILURE_REASON_FEATURE_NOT_READY));
-        }
-    }
-
-    /**
-     * Registers a listener object to receive notification of changes in specified telephony states.
-     * <p>
-     * To register a listener, pass a {@link PhoneStateListener} which implements
-     * interfaces of events. For example,
-     * FakeServiceStateChangedListener extends {@link PhoneStateListener} implements
-     * {@link PhoneStateListener.ServiceStateChangedListener}.
-     *
-     * At registration, and when a specified telephony state changes, the telephony manager invokes
-     * the appropriate callback method on the listener object and passes the current (updated)
-     * values.
-     * <p>
-     *
-     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
-     * applies to the given subId. Otherwise, applies to
-     * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}. To listen events for multiple subIds,
-     * pass a separate listener object to each TelephonyManager object created with
-     * {@link #createForSubscriptionId}. Only {@link PhoneStateListener.CallStateChangedListener}
-     * can be used to receive changes for all subIds through
-     * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}.
-     *
-     * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
-     * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
-     * {@link SecurityException} will be thrown otherwise.
-     *
-     * This API should be used sparingly -- large numbers of listeners will cause system
-     * instability. If a process has registered too many listeners without unregistering them, it
-     * may encounter an {@link IllegalStateException} when trying to register more listeners.
-     *
-     * @param executor The executor of where the callback will execute.
-     * @param listener The {@link PhoneStateListener} object to register.
-     */
-    public void registerPhoneStateListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull PhoneStateListener listener) {
-        if (executor == null || listener == null) {
-            throw new IllegalArgumentException("PhoneStateListener and executor must be non-null");
-        }
-        mTelephonyRegistryMgr = (TelephonyRegistryManager)
-                mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
-        if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.registerPhoneStateListener(executor, mSubId,
-                    getOpPackageName(), getAttributionTag(), listener, getITelephony() != null);
-        } else {
-            throw new IllegalStateException("telephony service is null.");
-        }
-    }
-
-    /**
-     * Unregister an existing {@link PhoneStateListener}.
-     *
-     * @param listener The {@link PhoneStateListener} object to unregister.
-     */
-    public void unregisterPhoneStateListener(@NonNull PhoneStateListener listener) {
-
-        if (mContext == null) {
-            throw new IllegalStateException("telephony service is null.");
-        }
-
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.unregisterPhoneStateListener(mSubId, getOpPackageName(),
-                    getAttributionTag(), listener, getITelephony() != null);
-        } else {
-            throw new IllegalStateException("telephony service is null.");
         }
     }
 
