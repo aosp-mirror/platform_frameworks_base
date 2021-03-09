@@ -1423,7 +1423,7 @@
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"شنونده اعلان"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"‏شنونده VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"ارائه‌دهنده وضعیت"</string>
-    <string name="notification_ranker_binding_label" msgid="432708245635563763">"سرویس رتبه‌بندی اعلان"</string>
+    <string name="notification_ranker_binding_label" msgid="432708245635563763">"سرویس رده‌بندی اعلان"</string>
     <string name="vpn_title" msgid="5906991595291514182">"‏VPN فعال شد"</string>
     <string name="vpn_title_long" msgid="6834144390504619998">"‏VPN را <xliff:g id="APP">%s</xliff:g> فعال کرده است"</string>
     <string name="vpn_text" msgid="2275388920267251078">"برای مدیریت شبکه ضربه بزنید."</string>
