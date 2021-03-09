@@ -193,7 +193,7 @@ static constexpr unsigned int STORAGE_DIR_CHECK_MAX_INTERVAL_US = 1000;
  * If it exceeds 2s, PROC_START_TIMEOUT_MSG will kill the starting app anyway,
  * so it's fine to assume max retries is 5 mins.
  */
-static constexpr int STORAGE_DIR_CHECK_TIMEOUT_US = 1000 * 60 * 5;
+static constexpr int STORAGE_DIR_CHECK_TIMEOUT_US = 1000 * 1000 * 60 * 5;
 
 /**
  * A helper class containing accounting information for USAPs.
