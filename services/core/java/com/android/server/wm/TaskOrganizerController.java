@@ -865,6 +865,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             mPendingTaskEvents.remove(pending);
         }
         mPendingTaskEvents.add(pending);
+        mService.mWindowManager.mWindowPlacerLocked.requestTraversal();
         return true;
     }
 
