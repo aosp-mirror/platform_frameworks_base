@@ -92,7 +92,7 @@ public final class QosSocketInfo implements Parcelable {
         Objects.requireNonNull(socket, "socket cannot be null");
 
         mNetwork = Objects.requireNonNull(network, "network cannot be null");
-        mParcelFileDescriptor = ParcelFileDescriptor.dup(socket.getFileDescriptor$());
+        mParcelFileDescriptor = ParcelFileDescriptor.fromSocket(socket);
         mLocalSocketAddress =
                 new InetSocketAddress(socket.getLocalAddress(), socket.getLocalPort());
     }
