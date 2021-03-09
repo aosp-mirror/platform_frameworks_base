@@ -179,21 +179,6 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     }
 
     /**
-     * Build a {@link NetworkIdentity} from the given {@link NetworkState} and
-     * {@code subType}, assuming that any mobile networks are using the current IMSI.
-     * The subType if applicable, should be set as one of the TelephonyManager.NETWORK_TYPE_*
-     * constants, or {@link android.telephony.TelephonyManager#NETWORK_TYPE_UNKNOWN} if not.
-     */
-    // TODO: Delete this function after NetworkPolicyManagerService finishes the migration.
-    public static NetworkIdentity buildNetworkIdentity(Context context,
-            NetworkState state, boolean defaultNetwork, @NetworkType int subType) {
-        final NetworkStateSnapshot snapshot = new NetworkStateSnapshot(state.network,
-                state.networkCapabilities, state.linkProperties, state.subscriberId,
-                state.legacyNetworkType);
-        return buildNetworkIdentity(context, snapshot, defaultNetwork, subType);
-    }
-
-    /**
      * Build a {@link NetworkIdentity} from the given {@link NetworkStateSnapshot} and
      * {@code subType}, assuming that any mobile networks are using the current IMSI.
      * The subType if applicable, should be set as one of the TelephonyManager.NETWORK_TYPE_*
