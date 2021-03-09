@@ -18,7 +18,7 @@
 <resources>
 
     <!-- Size of layout margin left -->
-    <dimen name="switchbar_margin_start">22dp</dimen>
+    <dimen name="switchbar_margin_start">24dp</dimen>
 
     <!-- Size of layout margin right -->
     <dimen name="switchbar_margin_end">16dp</dimen>
@@ -34,6 +34,24 @@
 
     <!-- Restricted icon in switch bar -->
     <dimen name="restricted_icon_margin_end">16dp</dimen>
+
+    <!-- Radius of switch bar -->
+    <dimen name="switch_bar_radius">28dp</dimen>
+
+    <!-- Margin of switch thumb -->
+    <dimen name="switch_thumb_margin">4dp</dimen>
+
+    <!-- Size of switch thumb -->
+    <dimen name="switch_thumb_size">20dp</dimen>
+
+    <!-- Width of switch track -->
+    <dimen name="switch_track_width">52dp</dimen>
+
+    <!-- Height of switch track -->
+    <dimen name="switch_track_height">28dp</dimen>
+
+    <!-- Radius of switch track -->
+    <dimen name="switch_track_radius">35dp</dimen>
 
     <!-- SwitchBar sub settings margin start / end -->
     <dimen name="switchbar_subsettings_margin_start">72dp</dimen>
