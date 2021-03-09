@@ -23,6 +23,8 @@ import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.ACTION_USER_UNLOCKED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
+import static android.content.pm.PackageManager.FEATURE_WIFI;
+import static android.content.pm.PackageManager.FEATURE_WIFI_DIRECT;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
@@ -40,6 +42,7 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
 import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
+import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_DNS;
@@ -1461,6 +1464,9 @@ public class ConnectivityServiceTest {
             Looper.prepare();
         }
         mockDefaultPackages();
+        mockHasSystemFeature(FEATURE_WIFI, true);
+        mockHasSystemFeature(FEATURE_WIFI_DIRECT, true);
+        doReturn(true).when(mTelephonyManager).isDataCapable();
 
         FakeSettingsProvider.clearSettingsProvider();
         mServiceContext = new MockContext(InstrumentationRegistry.getContext(),
@@ -1784,7 +1790,8 @@ public class ConnectivityServiceTest {
         assertTrue(mCm.isNetworkSupported(TYPE_WIFI));
         assertTrue(mCm.isNetworkSupported(TYPE_MOBILE));
         assertTrue(mCm.isNetworkSupported(TYPE_MOBILE_MMS));
-        assertFalse(mCm.isNetworkSupported(TYPE_MOBILE_FOTA));
+        assertTrue(mCm.isNetworkSupported(TYPE_MOBILE_FOTA));
+        assertFalse(mCm.isNetworkSupported(TYPE_PROXY));
 
         // Check that TYPE_ETHERNET is supported. Unlike the asserts above, which only validate our
         // mocks, this assert exercises the ConnectivityService code path that ensures that
