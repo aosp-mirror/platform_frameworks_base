@@ -52,7 +52,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.FactoryTest.FACTORY_TEST_HIGH_LEVEL;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
-import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
