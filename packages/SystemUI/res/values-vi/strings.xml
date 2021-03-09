@@ -833,7 +833,7 @@
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"Loại nút bổ sung bên phải"</string>
     <string name="nav_bar_default" msgid="8386559913240761526">"(mặc định)"</string>
   <string-array name="nav_bar_buttons">
-    <item msgid="2681220472659720036">"Khay nhớ tạm"</item>
+    <item msgid="2681220472659720036">"Bảng nhớ tạm"</item>
     <item msgid="4795049793625565683">"Mã phím"</item>
     <item msgid="80697951177515644">"Xác nhận xoay, trình chuyển đổi bàn phím"</item>
     <item msgid="7626977989589303588">"Không có"</item>
@@ -848,7 +848,7 @@
     <string name="save" msgid="3392754183673848006">"Lưu"</string>
     <string name="reset" msgid="8715144064608810383">"Đặt lại"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Điều chỉnh chiều rộng nút"</string>
-    <string name="clipboard" msgid="8517342737534284617">"Khay nhớ tạm"</string>
+    <string name="clipboard" msgid="8517342737534284617">"Bảng nhớ tạm"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Nút điều hướng tùy chỉnh"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Mã phím bên trái"</string>
     <string name="right_keycode" msgid="2480715509844798438">"Mã phím bên phải"</string>
