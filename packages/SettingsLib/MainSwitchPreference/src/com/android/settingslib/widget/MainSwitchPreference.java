@@ -24,8 +24,6 @@ import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.TwoStatePreference;
 
-import com.android.settingslib.RestrictedLockUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,8 +38,6 @@ public class MainSwitchPreference extends TwoStatePreference {
 
     private MainSwitchBar mMainSwitchBar;
     private CharSequence mTitle;
-
-    private RestrictedLockUtils.EnforcedAdmin mEnforcedAdmin;
 
     public MainSwitchPreference(Context context) {
         super(context);
@@ -115,7 +111,6 @@ public class MainSwitchPreference extends TwoStatePreference {
         if (mMainSwitchBar != null) {
             mMainSwitchBar.setChecked(checked);
             mMainSwitchBar.setTitle(mTitle);
-            mMainSwitchBar.setDisabledByAdmin(mEnforcedAdmin);
             mMainSwitchBar.show();
         }
     }
@@ -139,18 +134,6 @@ public class MainSwitchPreference extends TwoStatePreference {
             mSwitchChangeListeners.remove(listener);
         } else {
             mMainSwitchBar.removeOnSwitchChangeListener(listener);
-        }
-    }
-
-    /**
-     * If admin is not null, disables the text and switch but keeps the view clickable.
-     * Otherwise, calls setEnabled which will enables the entire view including
-     * the text and switch.
-     */
-    public void setDisabledByAdmin(RestrictedLockUtils.EnforcedAdmin admin) {
-        mEnforcedAdmin = admin;
-        if (mMainSwitchBar != null) {
-            mMainSwitchBar.setDisabledByAdmin(mEnforcedAdmin);
         }
     }
 
