@@ -40,9 +40,11 @@ import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import org.junit.Before;
@@ -60,6 +62,7 @@ import java.util.List;
  * Tests for {@link com.android.server.apphibernation.AppHibernationService}
  */
 @SmallTest
+@Presubmit
 public final class AppHibernationServiceTest {
     private static final String PACKAGE_SCHEME = "package";
     private static final String PACKAGE_NAME_1 = "package1";
@@ -91,6 +94,7 @@ public final class AppHibernationServiceTest {
         MockitoAnnotations.initMocks(this);
         doReturn(mContext).when(mContext).createContextAsUser(any(), anyInt());
 
+        LocalServices.removeServiceForTest(AppHibernationManagerInternal.class);
         mAppHibernationService = new AppHibernationService(new MockInjector(mContext));
 
         verify(mContext).registerReceiver(mReceiverCaptor.capture(), any());
