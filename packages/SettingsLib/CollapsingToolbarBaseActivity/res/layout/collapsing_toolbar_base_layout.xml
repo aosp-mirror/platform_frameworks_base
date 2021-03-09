@@ -14,47 +14,23 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<!-- The main content view -->
+<LinearLayout
     android:id="@+id/content_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:transitionGroup="true">
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar"
+    android:fitsSystemWindows="true"
+    android:transitionGroup="true"
+    android:orientation="vertical">
+    <Toolbar
+        android:id="@+id/action_bar"
+        style="?android:attr/actionBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:theme="@style/Theme.CollapsingToolbar.Settings">
-
-        <com.android.settingslib.collapsingtoolbar.AdjustableToolbarLayout
-            android:id="@+id/collapsing_toolbar"
-            android:background="?android:attr/colorPrimary"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:maxLines="3"
-            app:contentScrim="?android:attr/colorPrimary"
-            app:collapsedTitleTextAppearance="@style/CollapsingToolbarTitle.Collapsed"
-            app:statusBarScrim="?android:attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:expandedTitleMarginStart="18dp"
-            app:expandedTitleMarginEnd="18dp"
-            app:toolbarId="@id/action_bar">
-
-            <Toolbar
-                android:id="@+id/action_bar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:theme="?android:attr/actionBarTheme"
-                app:layout_collapseMode="pin"/>
-
-        </com.android.settingslib.collapsingtoolbar.AdjustableToolbarLayout>
-    </com.google.android.material.appbar.AppBarLayout>
-
+        android:layout_height="wrap_content"
+        android:theme="?android:attr/actionBarTheme" />
     <FrameLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        android:layout_height="match_parent"/>
+</LinearLayout>
