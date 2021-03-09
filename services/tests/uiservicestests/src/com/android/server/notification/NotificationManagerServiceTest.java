@@ -900,10 +900,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testDefaultAssistant_overrideDefault() {
-        final int userId = 0;
+        final int userId = mContext.getUserId();
         final String testComponent = "package/class";
         final List<UserInfo> userInfos = new ArrayList<>();
-        userInfos.add(new UserInfo(0, "", 0));
+        userInfos.add(new UserInfo(userId, "", 0));
         final ArraySet<ComponentName> validAssistants = new ArraySet<>();
         validAssistants.add(ComponentName.unflattenFromString(testComponent));
         when(mActivityManager.isLowRamDevice()).thenReturn(false);
@@ -2346,7 +2346,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(mTestNotificationChannel);
 
         reset(mListeners);
-        mBinderService.updateNotificationChannelForPackage(PKG, 0, mTestNotificationChannel);
+        mBinderService.updateNotificationChannelForPackage(PKG, mUid, mTestNotificationChannel);
         verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
@@ -2882,7 +2882,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testSetListenerAccessForUser() throws Exception {
-        UserHandle user = UserHandle.of(10);
+        UserHandle user = UserHandle.of(mContext.getUserId() + 10);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
         mBinderService.setNotificationListenerAccessGrantedForUser(
                 c, user.getIdentifier(), true, true);
@@ -2899,20 +2899,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testSetAssistantAccessForUser() throws Exception {
-        UserHandle user = UserHandle.of(10);
-        List<UserInfo> uis = new ArrayList<>();
         UserInfo ui = new UserInfo();
-        ui.id = 10;
+        ui.id = mContext.getUserId() + 10;
+        UserHandle user = UserHandle.of(ui.id);
+        List<UserInfo> uis = new ArrayList<>();
         uis.add(ui);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        when(mUm.getEnabledProfiles(10)).thenReturn(uis);
+        when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
 
         mBinderService.setNotificationAssistantAccessGrantedForUser(c, user.getIdentifier(), true);
 
         verify(mContext, times(1)).sendBroadcastAsUser(any(), eq(user), any());
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), true, true, true);
-        verify(mAssistants).setUserSet(10, true);
+        verify(mAssistants).setUserSet(ui.id, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), false, true);
         verify(mListeners, never()).setPackageOrComponentEnabled(
@@ -2921,7 +2921,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testGetAssistantAllowedForUser() throws Exception {
-        UserHandle user = UserHandle.of(10);
+        UserHandle user = UserHandle.of(mContext.getUserId() + 10);
         try {
             mBinderService.getAllowedNotificationAssistantForUser(user.getIdentifier());
         } catch (IllegalStateException e) {
@@ -2941,12 +2941,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 throw e;
             }
         }
-        verify(mAssistants, times(1)).getAllowedComponents(0);
+        verify(mAssistants, times(1)).getAllowedComponents(mContext.getUserId());
     }
 
     @Test
     public void testSetDndAccessForUser() throws Exception {
-        UserHandle user = UserHandle.of(10);
+        UserHandle user = UserHandle.of(mContext.getUserId() + 10);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
         mBinderService.setNotificationPolicyAccessGrantedForUser(
                 c.getPackageName(), user.getIdentifier(), true);
@@ -2966,9 +2966,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationListenerAccessGranted(c, true, true);
 
         verify(mListeners, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true, true);
+                c.flattenToString(), mContext.getUserId(), true, true, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, false, true, true);
+                c.flattenToString(), mContext.getUserId(), false, true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
     }
@@ -2977,7 +2977,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testSetAssistantAccess() throws Exception {
         List<UserInfo> uis = new ArrayList<>();
         UserInfo ui = new UserInfo();
-        ui.id = 0;
+        ui.id = mContext.getUserId();
         uis.add(ui);
         when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
@@ -2985,9 +2985,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationAssistantAccessGranted(c, true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true, true);
+                c.flattenToString(), ui.id, true, true, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, false, true);
+                c.flattenToString(), ui.id, false, true);
         verify(mListeners, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }
@@ -2996,10 +2996,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testSetAssistantAccess_multiProfile() throws Exception {
         List<UserInfo> uis = new ArrayList<>();
         UserInfo ui = new UserInfo();
-        ui.id = 0;
+        ui.id = mContext.getUserId();
         uis.add(ui);
         UserInfo ui10 = new UserInfo();
-        ui10.id = 10;
+        ui10.id = mContext.getUserId() + 10;
         uis.add(ui10);
         when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
@@ -3007,13 +3007,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationAssistantAccessGranted(c, true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true, true);
+                c.flattenToString(), ui.id, true, true, true);
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 10, true, true, true);
+                c.flattenToString(), ui10.id, true, true, true);
+
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, false, true);
+                c.flattenToString(), ui.id, false, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 10, false, true);
+                c.flattenToString(), ui10.id, false, true);
         verify(mListeners, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }
@@ -3026,16 +3027,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAssistants.getAllowedComponents(anyInt())).thenReturn(componentList);
         List<UserInfo> uis = new ArrayList<>();
         UserInfo ui = new UserInfo();
-        ui.id = 0;
+        ui.id = mContext.getUserId();
         uis.add(ui);
         when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
 
         mBinderService.setNotificationAssistantAccessGranted(null, true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, false, true);
+                c.flattenToString(), ui.id, true, false, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, false,  false);
+                c.flattenToString(), ui.id, false,  false);
         verify(mListeners, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }
@@ -3044,21 +3045,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testSetAssistantAccessForUser_nullWithAllowedAssistant() throws Exception {
         List<UserInfo> uis = new ArrayList<>();
         UserInfo ui = new UserInfo();
-        ui.id = 10;
+        ui.id = mContext.getUserId() + 10;
         uis.add(ui);
         UserHandle user = ui.getUserHandle();
         ArrayList<ComponentName> componentList = new ArrayList<>();
         ComponentName c = ComponentName.unflattenFromString("package/Component");
         componentList.add(c);
         when(mAssistants.getAllowedComponents(anyInt())).thenReturn(componentList);
-        when(mUm.getEnabledProfiles(10)).thenReturn(uis);
+        when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
 
         mBinderService.setNotificationAssistantAccessGrantedForUser(
                 null, user.getIdentifier(), true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), true, false, true);
-        verify(mAssistants).setUserSet(10, true);
+        verify(mAssistants).setUserSet(ui.id, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), false,  false);
         verify(mListeners, never()).setPackageOrComponentEnabled(
@@ -3070,10 +3071,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
         List<UserInfo> uis = new ArrayList<>();
         UserInfo ui = new UserInfo();
-        ui.id = 0;
+        ui.id = mContext.getUserId();
         uis.add(ui);
         UserInfo ui10 = new UserInfo();
-        ui10.id = 10;
+        ui10.id = mContext.getUserId() + 10;
         uis.add(ui10);
         UserHandle user = ui.getUserHandle();
         ArrayList<ComponentName> componentList = new ArrayList<>();
@@ -3089,8 +3090,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 c.flattenToString(), user.getIdentifier(), true, false, true);
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), ui10.id, true, false, true);
-        verify(mAssistants).setUserSet(0, true);
-        verify(mAssistants).setUserSet(10, true);
+        verify(mAssistants).setUserSet(ui.id, true);
+        verify(mAssistants).setUserSet(ui10.id, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), false,  false);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
@@ -3106,7 +3107,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
 
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.getPackageName(), 0, true, true);
+                c.getPackageName(), mContext.getUserId(), true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
         verify(mListeners, never()).setPackageOrComponentEnabled(
@@ -3133,7 +3134,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ComponentName c = ComponentName.unflattenFromString("package/Component");
         List<UserInfo> uis = new ArrayList<>();
         UserInfo ui = new UserInfo();
-        ui.id = 0;
+        ui.id = mContext.getUserId();
         uis.add(ui);
         when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
 
@@ -3168,9 +3169,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationListenerAccessGranted(c, true, true);
 
         verify(mListeners, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true, true);
+                c.flattenToString(), mContext.getUserId(), true, true, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, false, true, true);
+                c.flattenToString(), mContext.getUserId(), false, true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
     }
@@ -3182,7 +3183,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ComponentName c = ComponentName.unflattenFromString("package/Component");
         List<UserInfo> uis = new ArrayList<>();
         UserInfo ui = new UserInfo();
-        ui.id = 0;
+        ui.id = mContext.getUserId();
         uis.add(ui);
         when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
 
@@ -3191,9 +3192,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mListeners, never()).setPackageOrComponentEnabled(
                 anyString(), anyInt(), anyBoolean(), anyBoolean());
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, false, true);
+                c.flattenToString(), ui.id, false, true);
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true, true);
+                c.flattenToString(), ui.id, true, true, true);
     }
 
     @Test
@@ -3207,7 +3208,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mListeners, never()).setPackageOrComponentEnabled(
                 anyString(), anyInt(), anyBoolean(), anyBoolean());
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
-                c.getPackageName(), 0, true, true);
+                c.getPackageName(), mContext.getUserId(), true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
     }
