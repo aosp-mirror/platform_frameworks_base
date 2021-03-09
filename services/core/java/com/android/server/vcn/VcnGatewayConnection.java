@@ -20,6 +20,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
@@ -1727,6 +1728,7 @@ public class VcnGatewayConnection extends StateMachine {
         final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
 
         builder.addTransportType(TRANSPORT_CELLULAR);
+        builder.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
         builder.addCapability(NET_CAPABILITY_NOT_CONGESTED);
         builder.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
 
