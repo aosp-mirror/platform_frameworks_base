@@ -226,7 +226,7 @@ public class LocationPermissionChecker {
     }
 
     private boolean isTargetSdkLessThan(String packageName, int versionCode, int callingUid) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             if (mContext.getPackageManager().getApplicationInfoAsUser(
                     packageName, 0,
