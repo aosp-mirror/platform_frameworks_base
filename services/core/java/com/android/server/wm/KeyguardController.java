@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -524,40 +525,36 @@ class KeyguardController {
 
             boolean occludedByActivity = false;
             final Task task = getRootTaskForControllingOccluding(display);
-            if (task != null) {
-                final ActivityRecord r = task.getTopNonFinishingActivity();
-                if (r != null) {
-                    final boolean showWhenLocked = r.canShowWhenLocked();
-                    if (r.containsDismissKeyguardWindow()) {
-                        mDismissingKeyguardActivity = r;
-                    }
-                    if (r.getTurnScreenOnFlag()
-                            && r.currentLaunchCanTurnScreenOn()) {
-                        mTopTurnScreenOnActivity = r;
-                    }
+            final ActivityRecord top = task != null ? task.getTopNonFinishingActivity() : null;
+            if (top != null) {
+                if (top.containsDismissKeyguardWindow()) {
+                    mDismissingKeyguardActivity = top;
+                }
+                if (top.getTurnScreenOnFlag() && top.currentLaunchCanTurnScreenOn()) {
+                    mTopTurnScreenOnActivity = top;
+                }
 
-                    if (showWhenLocked) {
-                        mTopOccludesActivity = r;
-                    }
+                final boolean showWhenLocked = top.canShowWhenLocked();
+                if (showWhenLocked) {
+                    mTopOccludesActivity = top;
+                }
 
-                    // Only the top activity may control occluded, as we can't occlude the Keyguard
-                    // if the top app doesn't want to occlude it.
-                    occludedByActivity = showWhenLocked || (mDismissingKeyguardActivity != null
-                            && task.topRunningActivity() == mDismissingKeyguardActivity
-                            && controller.canShowWhileOccluded(
-                                    true /* dismissKeyguard */, false /* showWhenLocked */));
-                    // FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD only apply for secondary display.
-                    if (mDisplayId != DEFAULT_DISPLAY && task.mDisplayContent != null) {
-                        occludedByActivity |=
-                                task.mDisplayContent.canShowWithInsecureKeyguard()
-                                && controller.canDismissKeyguard();
-                    }
+                // Only the top activity may control occluded, as we can't occlude the Keyguard
+                // if the top app doesn't want to occlude it.
+                occludedByActivity = showWhenLocked || (mDismissingKeyguardActivity != null
+                        && task.topRunningActivity() == mDismissingKeyguardActivity
+                        && controller.canShowWhileOccluded(
+                                true /* dismissKeyguard */, false /* showWhenLocked */));
+                // FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD only apply for secondary display.
+                if (mDisplayId != DEFAULT_DISPLAY) {
+                    occludedByActivity |= display.canShowWithInsecureKeyguard()
+                            && controller.canDismissKeyguard();
                 }
             }
-            // TODO(b/123372519): isShowingDream can only works on default display.
-            mOccluded = occludedByActivity || (mDisplayId == DEFAULT_DISPLAY
-                    && mService.mRootWindowContainer.getDefaultDisplay()
-                    .getDisplayPolicy().isShowingDreamLw());
+
+            final boolean dreaming = display.getDisplayPolicy().isShowingDreamLw() && (top != null
+                    && top.getActivityType() == ACTIVITY_TYPE_DREAM);
+            mOccluded = dreaming || occludedByActivity;
             mRequestDismissKeyguard = lastDismissKeyguardActivity != mDismissingKeyguardActivity
                     && !mOccluded
                     && mDismissingKeyguardActivity != null
