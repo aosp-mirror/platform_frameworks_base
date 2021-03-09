@@ -4123,8 +4123,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /**
      * Sets an OutlineProvider on the view whose corner radius is a dimension calculated using
-     * {@link TypedValue#applyDimension(int, float, DisplayMetrics)}. This outline may change shape
-     * during system transitions.
+     * {@link TypedValue#applyDimension(int, float, DisplayMetrics)}.
      *
      * <p>NOTE: It is recommended to use {@link TypedValue#COMPLEX_UNIT_PX} only for 0.
      * Setting margins in pixels will behave poorly when the RemoteViews object is used on a
@@ -4137,7 +4136,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /**
      * Sets an OutlineProvider on the view whose corner radius is a dimension resource with
-     * {@code resId}. This outline may change shape during system transitions.
+     * {@code resId}.
      */
     public void setViewOutlinePreferredRadiusDimen(@IdRes int viewId, @DimenRes int resId) {
         addAction(new SetViewOutlinePreferredRadiusAction(viewId, resId));
