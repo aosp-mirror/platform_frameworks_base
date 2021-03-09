@@ -128,6 +128,9 @@ public class BootReceiver extends BroadcastReceiver {
     // Location of ftrace pipe for notifications from kernel memory tools like KFENCE and KASAN.
     private static final String ERROR_REPORT_TRACE_PIPE =
             "/sys/kernel/tracing/instances/bootreceiver/trace_pipe";
+    // Stop after sending this many reports. See http://b/182159975.
+    private static final int MAX_ERROR_REPORTS = 8;
+    private static int sSentReports = 0;
     // Avoid reporing the same bug from processDmesg() twice.
     private static String sLastReportedBug = null;
 
@@ -301,7 +304,7 @@ public class BootReceiver extends BroadcastReceiver {
      *    - repeat the above steps till the last report is found.
      */
     private void processDmesg(Context ctx) throws IOException {
-
+        if (sSentReports == MAX_ERROR_REPORTS) return;
         /*
          * Only SYSTEM_KASAN_ERROR_REPORT and SYSTEM_KFENCE_ERROR_REPORT are supported at the
          * moment.
@@ -352,7 +355,7 @@ public class BootReceiver extends BroadcastReceiver {
         }
 
         // Avoid sending the same bug report twice.
-        if (bugTitle == sLastReportedBug) return;
+        if (bugTitle.equals(sLastReportedBug)) return;
 
         final String reportTag = "SYSTEM_" + tool + "_ERROR_REPORT";
         final DropBoxManager db = ctx.getSystemService(DropBoxManager.class);
@@ -361,6 +364,7 @@ public class BootReceiver extends BroadcastReceiver {
 
         addTextToDropBox(db, reportTag, reportText, "/dev/kmsg", LOG_SIZE);
         sLastReportedBug = bugTitle;
+        sSentReports++;
     }
 
     private void removeOldUpdatePackages(Context context) {
