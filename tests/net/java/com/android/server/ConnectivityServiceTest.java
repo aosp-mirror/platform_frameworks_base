@@ -265,7 +265,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.app.IBatteryStats;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.ArrayUtils;
@@ -427,7 +426,6 @@ public class ConnectivityServiceTest {
     @Mock DeviceIdleInternal mDeviceIdleInternal;
     @Mock INetworkManagementService mNetworkManagementService;
     @Mock NetworkStatsManager mStatsManager;
-    @Mock IBatteryStats mBatteryStatsService;
     @Mock IDnsResolver mMockDnsResolver;
     @Mock INetd mMockNetd;
     @Mock NetworkStackClient mNetworkStack;
@@ -1526,7 +1524,6 @@ public class ConnectivityServiceTest {
         doReturn(mSystemProperties).when(deps).getSystemProperties();
         doReturn(mock(ProxyTracker.class)).when(deps).makeProxyTracker(any(), any());
         doReturn(true).when(deps).queryUserAccess(anyInt(), anyInt());
-        doReturn(mBatteryStatsService).when(deps).getBatteryStatsService();
         doAnswer(inv -> {
             mPolicyTracker = new WrappedMultinetworkPolicyTracker(
                     inv.getArgument(0), inv.getArgument(1), inv.getArgument(2));
@@ -7811,7 +7808,6 @@ public class ConnectivityServiceTest {
         verify(mDeps).reportNetworkInterfaceForTransports(mServiceContext,
                 cellLp.getInterfaceName(),
                 new int[] { TRANSPORT_CELLULAR });
-        reset(mBatteryStatsService);
 
         final LinkProperties wifiLp = new LinkProperties();
         wifiLp.setInterfaceName("wifi0");
@@ -7821,7 +7817,6 @@ public class ConnectivityServiceTest {
         verify(mDeps).reportNetworkInterfaceForTransports(mServiceContext,
                 wifiLp.getInterfaceName(),
                 new int[] { TRANSPORT_WIFI });
-        reset(mBatteryStatsService);
 
         mCellNetworkAgent.disconnect();
         mWiFiNetworkAgent.disconnect();
@@ -7904,7 +7899,6 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, cellLp);
         reset(mMockDnsResolver);
         reset(mMockNetd);
-        reset(mBatteryStatsService);
 
         // Connect with ipv6 link properties. Expect prefix discovery to be started.
         mCellNetworkAgent.connect(true);
