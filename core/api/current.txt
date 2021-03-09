@@ -46431,8 +46431,8 @@ package android.view {
     method @Deprecated public int getPixelFormat();
     method @Nullable public android.graphics.ColorSpace getPreferredWideGamutColorSpace();
     method public long getPresentationDeadlineNanos();
-    method public void getRealMetrics(android.util.DisplayMetrics);
-    method public void getRealSize(android.graphics.Point);
+    method @Deprecated public void getRealMetrics(android.util.DisplayMetrics);
+    method @Deprecated public void getRealSize(android.graphics.Point);
     method @Deprecated public void getRectSize(android.graphics.Rect);
     method public float getRefreshRate();
     method public int getRotation();
