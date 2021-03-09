@@ -2194,6 +2194,7 @@
              Note that even if no splashscreen content is set on the theme, the system may still
              show a splash screen using the other attributes on the theme, like the
              {@link android.R.attr#windowBackground}.
+             {@deprecated Use windowSplashscreenAnimatedIcon instead.}
              -->
         <attr name="windowSplashscreenContent" format="reference" />
 
