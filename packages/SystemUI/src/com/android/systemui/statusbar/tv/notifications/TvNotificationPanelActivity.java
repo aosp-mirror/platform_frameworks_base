@@ -20,14 +20,18 @@ import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.View;
 
 import androidx.leanback.widget.VerticalGridView;
 
 import com.android.systemui.R;
+
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -42,6 +46,7 @@ public class TvNotificationPanelActivity extends Activity implements
     private VerticalGridView mNotificationListView;
     private View mNotificationPlaceholder;
     private boolean mPanelAlreadyOpen = false;
+    private final Consumer<Boolean> mBlurConsumer = this::enableBlur;
 
     @Inject
     public TvNotificationPanelActivity(TvNotificationHandler tvNotificationHandler) {
@@ -100,6 +105,33 @@ public class TvNotificationPanelActivity extends Activity implements
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getWindow().setGravity(Gravity.END);
+        getWindowManager().addCrossWindowBlurEnabledListener(mBlurConsumer);
+    }
+
+    private void enableBlur(boolean enabled) {
+        if (enabled) {
+            int blurRadius = getResources().getDimensionPixelSize(
+                    R.dimen.tv_notification_blur_radius);
+            getWindow().setBackgroundDrawable(
+                    new ColorDrawable(getColor(R.color.tv_notification_blur_background_color)));
+            getWindow().setBackgroundBlurRadius(blurRadius);
+        } else {
+            getWindow().setBackgroundDrawable(
+                    new ColorDrawable(getColor(R.color.tv_notification_default_background_color)));
+            getWindow().setBackgroundBlurRadius(0);
+        }
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        getWindowManager().removeCrossWindowBlurEnabledListener(mBlurConsumer);
     }
 
     @Override

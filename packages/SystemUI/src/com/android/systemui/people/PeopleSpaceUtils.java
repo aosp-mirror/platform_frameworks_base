@@ -609,6 +609,8 @@ public class PeopleSpaceUtils {
                     PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, tile.getPackageName());
             activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_USER_HANDLE,
                     tile.getUserHandle());
+            activityIntent.putExtra(
+                    PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY, tile.getNotificationKey());
             views.setOnClickPendingIntent(R.id.item, PendingIntent.getActivity(
                     context,
                     appWidgetId,

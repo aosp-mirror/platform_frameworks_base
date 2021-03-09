@@ -2042,7 +2042,9 @@ public class AppStandbyController
                 if (activityManager.isLowRamDevice() || ActivityManager.isSmallBatteryDevice()) {
                     mAutoRestrictedBucketDelayMs = 12 * ONE_HOUR;
                 }
-
+            } else if (phase == PHASE_BOOT_COMPLETED) {
+                // mWellbeingApp needs to be initialized lazily after boot to allow for roles to be
+                // parsed and the wellbeing role-holder to be assigned
                 final PackageManager packageManager = mContext.getPackageManager();
                 mWellbeingApp = packageManager.getWellbeingPackageName();
             }

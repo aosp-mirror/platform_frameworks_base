@@ -69,7 +69,6 @@ public abstract class PackageManagerInternal {
             PACKAGE_BROWSER,
             PACKAGE_SYSTEM_TEXT_CLASSIFIER,
             PACKAGE_PERMISSION_CONTROLLER,
-            PACKAGE_WELLBEING,
             PACKAGE_DOCUMENTER,
             PACKAGE_CONFIGURATOR,
             PACKAGE_INCIDENT_REPORT_APPROVER,

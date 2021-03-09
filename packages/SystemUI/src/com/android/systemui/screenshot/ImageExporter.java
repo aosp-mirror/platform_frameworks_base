@@ -41,6 +41,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Duration;
@@ -110,6 +111,39 @@ class ImageExporter {
     }
 
     /**
+     * Stores the given Bitmap to a temp file.
+     */
+    ListenableFuture<File> exportAsTempFile(Executor executor, Bitmap bitmap) {
+        return CallbackToFutureAdapter.getFuture(
+                (completer) -> {
+                    executor.execute(() -> {
+                        File cachePath;
+                        try {
+                            cachePath = File.createTempFile("long_screenshot_cache_", ".tmp");
+                            try (FileOutputStream stream = new FileOutputStream(cachePath)) {
+                                bitmap.compress(mCompressFormat, mQuality, stream);
+                            } catch (IOException e) {
+                                if (cachePath.exists()) {
+                                    //noinspection ResultOfMethodCallIgnored
+                                    cachePath.delete();
+                                    cachePath = null;
+                                }
+                                completer.setException(e);
+                            }
+                            if (cachePath != null) {
+                                completer.set(cachePath);
+                            }
+                        } catch (IOException e) {
+                            // Failed to create a new file
+                            completer.setException(e);
+                        }
+                    });
+                    return "Bitmap#compress";
+                }
+        );
+    }
+
+    /**
      * Export the image using the given executor.
      *
      * @param executor the thread for execution
@@ -122,7 +156,7 @@ class ImageExporter {
     }
 
     /**
-     * Export the image using the given executor.
+     * Export the image to MediaStore and publish.
      *
      * @param executor the thread for execution
      * @param bitmap the bitmap to export
@@ -131,8 +165,10 @@ class ImageExporter {
      */
     ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
             ZonedDateTime captureTime) {
-        final Task task =
-                new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat, mQuality);
+
+        final Task task = new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat,
+                mQuality, /* publish */ true);
+
         return CallbackToFutureAdapter.getFuture(
                 (completer) -> {
                     executor.execute(() -> {
@@ -147,12 +183,36 @@ class ImageExporter {
         );
     }
 
+    /**
+     * Delete the entry.
+     *
+     * @param executor the thread for execution
+     * @param uri the uri of the image to publish
+     *
+     * @return a listenable future result
+     */
+    ListenableFuture<Result> delete(Executor executor, Uri uri) {
+        return CallbackToFutureAdapter.getFuture((completer) -> {
+            executor.execute(() -> {
+                mResolver.delete(uri, null);
+
+                Result result = new Result();
+                result.uri = uri;
+                result.deleted = true;
+                completer.set(result);
+            });
+            return "ContentResolver#delete";
+        });
+    }
+
     static class Result {
+        Uri uri;
         UUID requestId;
         String fileName;
         long timestamp;
-        Uri uri;
         CompressFormat format;
+        boolean published;
+        boolean deleted;
     }
 
     private static class Task {
@@ -163,9 +223,10 @@ class ImageExporter {
         private final CompressFormat mFormat;
         private final int mQuality;
         private final String mFileName;
+        private final boolean mPublish;
 
         Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
-                CompressFormat format, int quality) {
+                CompressFormat format, int quality, boolean publish) {
             mResolver = resolver;
             mRequestId = requestId;
             mBitmap = bitmap;
@@ -173,6 +234,7 @@ class ImageExporter {
             mFormat = format;
             mQuality = quality;
             mFileName = createFilename(mCaptureTime, mFormat);
+            mPublish = publish;
         }
 
         public Result execute() throws ImageExportException, InterruptedException {
@@ -186,16 +248,21 @@ class ImageExporter {
                     start = Instant.now();
                 }
 
-                uri = createEntry(mFormat, mCaptureTime, mFileName);
+                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName);
                 throwIfInterrupted();
 
-                writeImage(mBitmap, mFormat, mQuality, uri);
+                writeImage(mResolver, mBitmap, mFormat, mQuality, uri);
                 throwIfInterrupted();
 
-                writeExif(uri, mRequestId, mBitmap.getWidth(), mBitmap.getHeight(), mCaptureTime);
+                int width = mBitmap.getWidth();
+                int height = mBitmap.getHeight();
+                writeExif(mResolver, uri, mRequestId, width, height, mCaptureTime);
                 throwIfInterrupted();
 
-                publishEntry(uri);
+                if (mPublish) {
+                    publishEntry(mResolver, uri);
+                    result.published = true;
+                }
 
                 result.timestamp = mCaptureTime.toInstant().toEpochMilli();
                 result.requestId = mRequestId;
@@ -218,88 +285,89 @@ class ImageExporter {
             return result;
         }
 
-        Uri createEntry(CompressFormat format, ZonedDateTime time, String fileName)
-                throws ImageExportException {
-            Trace.beginSection("ImageExporter_createEntry");
-            try {
-                final ContentValues values = createMetadata(time, format, fileName);
-
-                Uri uri = mResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-                if (uri == null) {
-                    throw new ImageExportException(RESOLVER_INSERT_RETURNED_NULL);
-                }
-                return uri;
-            } finally {
-                Trace.endSection();
-            }
-        }
-
-        void writeImage(Bitmap bitmap, CompressFormat format, int quality,
-                Uri contentUri) throws ImageExportException {
-            Trace.beginSection("ImageExporter_writeImage");
-            try (OutputStream out = mResolver.openOutputStream(contentUri)) {
-                long start = SystemClock.elapsedRealtime();
-                if (!bitmap.compress(format, quality, out)) {
-                    throw new ImageExportException(IMAGE_COMPRESS_RETURNED_FALSE);
-                } else if (LogConfig.DEBUG_STORAGE) {
-                    Log.d(TAG, "Bitmap.compress took "
-                            + (SystemClock.elapsedRealtime() - start) + " ms");
-                }
-            } catch (IOException ex) {
-                throw new ImageExportException(OPEN_OUTPUT_STREAM_EXCEPTION, ex);
-            } finally {
-                Trace.endSection();
-            }
-        }
-
-        void writeExif(Uri uri, UUID requestId, int width, int height, ZonedDateTime captureTime)
-                throws ImageExportException {
-            Trace.beginSection("ImageExporter_writeExif");
-            ParcelFileDescriptor pfd = null;
-            try {
-                pfd = mResolver.openFile(uri, "rw", null);
-                if (pfd == null) {
-                    throw new ImageExportException(RESOLVER_OPEN_FILE_RETURNED_NULL);
-                }
-                ExifInterface exif;
-                try {
-                    exif = new ExifInterface(pfd.getFileDescriptor());
-                } catch (IOException e) {
-                    throw new ImageExportException(EXIF_READ_EXCEPTION, e);
-                }
-
-                updateExifAttributes(exif, requestId, width, height, captureTime);
-                try {
-                    exif.saveAttributes();
-                } catch (IOException e) {
-                    throw new ImageExportException(EXIF_WRITE_EXCEPTION, e);
-                }
-            } catch (FileNotFoundException e) {
-                throw new ImageExportException(RESOLVER_OPEN_FILE_EXCEPTION, e);
-            } finally {
-                closeQuietly(pfd);
-                Trace.endSection();
-            }
-        }
-
-        void publishEntry(Uri uri) throws ImageExportException {
-            Trace.beginSection("ImageExporter_publishEntry");
-            try {
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.MediaColumns.IS_PENDING, 0);
-                values.putNull(MediaStore.MediaColumns.DATE_EXPIRES);
-                final int rowsUpdated = mResolver.update(uri, values, /* extras */ null);
-                if (rowsUpdated < 1) {
-                    throw new ImageExportException(RESOLVER_UPDATE_ZERO_ROWS);
-                }
-            } finally {
-                Trace.endSection();
-            }
-        }
-
         @Override
         public String toString() {
-            return "compress [" + mBitmap + "] to [" + mFormat + "] at quality " + mQuality;
+            return "export [" + mBitmap + "] to [" + mFormat + "] at quality " + mQuality;
+        }
+    }
+
+    private static Uri createEntry(ContentResolver resolver, CompressFormat format,
+            ZonedDateTime time, String fileName) throws ImageExportException {
+        Trace.beginSection("ImageExporter_createEntry");
+        try {
+            final ContentValues values = createMetadata(time, format, fileName);
+
+            Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            if (uri == null) {
+                throw new ImageExportException(RESOLVER_INSERT_RETURNED_NULL);
+            }
+            return uri;
+        } finally {
+            Trace.endSection();
+        }
+    }
+
+    private static void writeImage(ContentResolver resolver, Bitmap bitmap, CompressFormat format,
+            int quality, Uri contentUri) throws ImageExportException {
+        Trace.beginSection("ImageExporter_writeImage");
+        try (OutputStream out = resolver.openOutputStream(contentUri)) {
+            long start = SystemClock.elapsedRealtime();
+            if (!bitmap.compress(format, quality, out)) {
+                throw new ImageExportException(IMAGE_COMPRESS_RETURNED_FALSE);
+            } else if (LogConfig.DEBUG_STORAGE) {
+                Log.d(TAG, "Bitmap.compress took "
+                        + (SystemClock.elapsedRealtime() - start) + " ms");
+            }
+        } catch (IOException ex) {
+            throw new ImageExportException(OPEN_OUTPUT_STREAM_EXCEPTION, ex);
+        } finally {
+            Trace.endSection();
+        }
+    }
+
+    private static void writeExif(ContentResolver resolver, Uri uri, UUID requestId, int width,
+            int height, ZonedDateTime captureTime) throws ImageExportException {
+        Trace.beginSection("ImageExporter_writeExif");
+        ParcelFileDescriptor pfd = null;
+        try {
+            pfd = resolver.openFile(uri, "rw", null);
+            if (pfd == null) {
+                throw new ImageExportException(RESOLVER_OPEN_FILE_RETURNED_NULL);
+            }
+            ExifInterface exif;
+            try {
+                exif = new ExifInterface(pfd.getFileDescriptor());
+            } catch (IOException e) {
+                throw new ImageExportException(EXIF_READ_EXCEPTION, e);
+            }
+
+            updateExifAttributes(exif, requestId, width, height, captureTime);
+            try {
+                exif.saveAttributes();
+            } catch (IOException e) {
+                throw new ImageExportException(EXIF_WRITE_EXCEPTION, e);
+            }
+        } catch (FileNotFoundException e) {
+            throw new ImageExportException(RESOLVER_OPEN_FILE_EXCEPTION, e);
+        } finally {
+            closeQuietly(pfd);
+            Trace.endSection();
+        }
+    }
+
+    private static void publishEntry(ContentResolver resolver, Uri uri)
+            throws ImageExportException {
+        Trace.beginSection("ImageExporter_publishEntry");
+        try {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.IS_PENDING, 0);
+            values.putNull(MediaStore.MediaColumns.DATE_EXPIRES);
+            final int rowsUpdated = resolver.update(uri, values, /* extras */ null);
+            if (rowsUpdated < 1) {
+                throw new ImageExportException(RESOLVER_UPDATE_ZERO_ROWS);
+            }
+        } finally {
+            Trace.endSection();
         }
     }
 

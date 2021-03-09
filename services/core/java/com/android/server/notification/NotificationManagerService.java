@@ -1269,7 +1269,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationBubbleChanged(String key, boolean isBubble, int flags) {
+        public void onNotificationBubbleChanged(String key, boolean isBubble, int bubbleFlags) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
@@ -1287,7 +1287,7 @@ public class NotificationManagerService extends SystemService {
                         r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
                         r.setFlagBubbleRemoved(false);
                         if (r.getNotification().getBubbleMetadata() != null) {
-                            r.getNotification().getBubbleMetadata().setFlags(flags);
+                            r.getNotification().getBubbleMetadata().setFlags(bubbleFlags);
                         }
                         // Force isAppForeground true here, because for sysui's purposes we
                         // want to adjust the flag behaviour.
@@ -1299,7 +1299,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onBubbleNotificationSuppressionChanged(String key, boolean isSuppressed) {
+        public void onBubbleNotificationSuppressionChanged(String key, boolean isNotifSuppressed,
+                boolean isBubbleSuppressed) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
@@ -1308,26 +1309,36 @@ public class NotificationManagerService extends SystemService {
                         // No data, do nothing
                         return;
                     }
-                    boolean currentlySuppressed = data.isNotificationSuppressed();
-                    if (currentlySuppressed == isSuppressed) {
-                        // No changes, do nothing
-                        return;
-                    }
+
                     int flags = data.getFlags();
-                    if (isSuppressed) {
-                        flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
-                    } else {
-                        flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+                    boolean flagChanged = false;
+                    if (data.isNotificationSuppressed() != isNotifSuppressed) {
+                        flagChanged = true;
+                        if (isNotifSuppressed) {
+                            flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+                        } else {
+                            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+                        }
                     }
-                    data.setFlags(flags);
-                    r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
-                    mHandler.post(new EnqueueNotificationRunnable(r.getUser().getIdentifier(), r,
-                            true /* isAppForeground */));
+                    if (data.isBubbleSuppressed() != isBubbleSuppressed) {
+                        flagChanged = true;
+                        if (isBubbleSuppressed) {
+                            flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
+                        } else {
+                            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
+                        }
+                    }
+                    if (flagChanged) {
+                        data.setFlags(flags);
+                        r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
+                        mHandler.post(
+                                new EnqueueNotificationRunnable(r.getUser().getIdentifier(), r,
+                                        true /* isAppForeground */));
+                    }
                 }
             }
         }
 
-        @Override
         /**
          * Grant permission to read the specified URI to the package specified in the
          * NotificationRecord associated with the given key. The callingUid represents the UID of
@@ -1337,6 +1348,7 @@ public class NotificationManagerService extends SystemService {
          * user associated with the NotificationRecord, and this grant will fail when trying
          * to grant URI permissions across users.
          */
+        @Override
         public void grantInlineReplyUriPermission(String key, Uri uri, UserHandle user,
                 String packageName, int callingUid) {
             synchronized (mNotificationLock) {
@@ -6117,16 +6129,25 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
-     * Some bubble specific flags only work if the app is foreground, this will strip those flags
-     * if the app wasn't foreground.
+     * Strips any flags from BubbleMetadata that wouldn't apply (e.g. app not foreground).
      */
     private void updateNotificationBubbleFlags(NotificationRecord r, boolean isAppForeground) {
-        // Remove any bubble specific flags that only work when foregrounded
         Notification notification = r.getNotification();
         Notification.BubbleMetadata metadata = notification.getBubbleMetadata();
-        if (!isAppForeground && metadata != null) {
+        if (metadata == null) {
+            // Nothing to update
+            return;
+        }
+        if (!isAppForeground) {
+            // Auto expand only works if foreground
             int flags = metadata.getFlags();
             flags &= ~Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
+            metadata.setFlags(flags);
+        }
+        if (!metadata.isBubbleSuppressable()) {
+            // If it's not suppressable remove the suppress flag
+            int flags = metadata.getFlags();
+            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
             metadata.setFlags(flags);
         }
     }
@@ -6504,9 +6525,11 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     if (mReason == REASON_LISTENER_CANCEL
-                        && (r.getNotification().flags & FLAG_BUBBLE) != 0) {
+                            && r.getNotification().isBubbleNotification()) {
+                        boolean isBubbleSuppressed = r.getNotification().getBubbleMetadata() != null
+                                && r.getNotification().getBubbleMetadata().isBubbleSuppressed();
                         mNotificationDelegate.onBubbleNotificationSuppressionChanged(
-                            r.getKey(), /* suppressed */ true);
+                                r.getKey(), true /* suppressed */, isBubbleSuppressed);
                         return;
                     }
 

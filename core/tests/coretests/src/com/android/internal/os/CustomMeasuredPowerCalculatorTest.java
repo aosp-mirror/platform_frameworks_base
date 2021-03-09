@@ -47,10 +47,10 @@ public class CustomMeasuredPowerCalculatorTest {
         final BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
         SparseLongArray uidEnergies = new SparseLongArray();
         uidEnergies.put(APP_UID, 30_000_000);
-        batteryStats.updateCustomMeasuredEnergyDataLocked(0, 100_000_000, uidEnergies);
+        batteryStats.updateCustomMeasuredEnergyStatsLocked(0, 100_000_000, uidEnergies);
 
         uidEnergies.put(APP_UID, 120_000_000);
-        batteryStats.updateCustomMeasuredEnergyDataLocked(1, 200_000_000, uidEnergies);
+        batteryStats.updateCustomMeasuredEnergyStatsLocked(1, 200_000_000, uidEnergies);
 
         CustomMeasuredPowerCalculator calculator =
                 new CustomMeasuredPowerCalculator(mStatsRule.getPowerProfile());

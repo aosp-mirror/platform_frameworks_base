@@ -1942,22 +1942,29 @@ public class DeviceIdleController extends SystemService
             exitIdleInternal(reason);
         }
 
-        // duration in milliseconds
         @Override
         public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
                 long durationMs, int userId, boolean sync, @ReasonCode int reasonCode,
                 @Nullable String reason) {
             addPowerSaveTempAllowlistAppInternal(callingUid, packageName, durationMs,
+                    TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                     userId, sync, reasonCode, reason);
         }
 
-        // duration in milliseconds
         @Override
-        public void addPowerSaveTempWhitelistAppDirect(int uid, long duration,
-                @TempAllowListType int type, boolean sync, @ReasonCode int reasonCode,
+        public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
+                long durationMs, @TempAllowListType int tempAllowListType, int userId, boolean sync,
+                @ReasonCode int reasonCode, @Nullable String reason) {
+            addPowerSaveTempAllowlistAppInternal(callingUid, packageName, durationMs,
+                    tempAllowListType, userId, sync, reasonCode, reason);
+        }
+
+        @Override
+        public void addPowerSaveTempWhitelistAppDirect(int uid, long durationMs,
+                @TempAllowListType int tempAllowListType, boolean sync, @ReasonCode int reasonCode,
                 @Nullable String reason, int callingUid) {
-            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, duration, type, sync,
-                    reasonCode, reason);
+            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, durationMs,
+                    tempAllowListType, sync, reasonCode, reason);
         }
 
         // duration in milliseconds
@@ -2699,7 +2706,8 @@ public class DeviceIdleController extends SystemService
         final long token = Binder.clearCallingIdentity();
         try {
             addPowerSaveTempAllowlistAppInternal(callingUid,
-                    packageName, duration, userId, true, reasonCode, reason);
+                    packageName, duration, TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                    userId, true, reasonCode, reason);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -2731,8 +2739,8 @@ public class DeviceIdleController extends SystemService
      * app an exemption to access network and acquire wakelocks.
      */
     void addPowerSaveTempAllowlistAppInternal(int callingUid, String packageName,
-            long duration, int userId, boolean sync, @ReasonCode int reasonCode,
-            @Nullable String reason) {
+            long durationMs, @TempAllowListType int tempAllowListType, int userId, boolean sync,
+            @ReasonCode int reasonCode, @Nullable String reason) {
         synchronized (this) {
             int callingAppId = UserHandle.getAppId(callingUid);
             if (callingAppId >= Process.FIRST_APPLICATION_UID) {
@@ -2745,8 +2753,8 @@ public class DeviceIdleController extends SystemService
         }
         try {
             int uid = getContext().getPackageManager().getPackageUidAsUser(packageName, userId);
-            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, duration,
-                    TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, sync, reasonCode, reason);
+            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, durationMs,
+                    tempAllowListType, sync, reasonCode, reason);
         } catch (NameNotFoundException e) {
         }
     }
@@ -2756,8 +2764,8 @@ public class DeviceIdleController extends SystemService
      * app an exemption to access network and acquire wakelocks.
      */
     void addPowerSaveTempWhitelistAppDirectInternal(int callingUid, int uid,
-            long duration, @TempAllowListType int type, boolean sync, @ReasonCode int reasonCode,
-            @Nullable String reason) {
+            long duration, @TempAllowListType int tempAllowListType, boolean sync,
+            @ReasonCode int reasonCode, @Nullable String reason) {
         final long timeNow = SystemClock.elapsedRealtime();
         boolean informWhitelistChanged = false;
         int appId = UserHandle.getAppId(uid);
@@ -2782,8 +2790,8 @@ public class DeviceIdleController extends SystemService
                 } catch (RemoteException e) {
                 }
                 postTempActiveTimeoutMessage(uid, duration);
-                updateTempWhitelistAppIdsLocked(uid, true, duration, type, reasonCode,
-                        reason, callingUid);
+                updateTempWhitelistAppIdsLocked(uid, true, duration, tempAllowListType,
+                        reasonCode, reason, callingUid);
                 if (sync) {
                     informWhitelistChanged = true;
                 } else {

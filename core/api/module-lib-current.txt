@@ -35,6 +35,7 @@ package android.app {
   }
 
   public final class PendingIntent implements android.os.Parcelable {
+    method @RequiresPermission(android.Manifest.permission.GET_INTENT_SENDER_INTENT) public boolean intentFilterEquals(@Nullable android.app.PendingIntent);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_INTENT_SENDER_INTENT) public java.util.List<android.content.pm.ResolveInfo> queryIntentComponents(int);
   }
 

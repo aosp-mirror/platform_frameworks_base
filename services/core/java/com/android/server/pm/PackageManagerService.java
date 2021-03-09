@@ -351,6 +351,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -367,6 +368,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
+import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -1385,7 +1387,6 @@ public class PackageManagerService extends IPackageManager.Stub
         public @Nullable String systemTextClassifierPackage;
         public @Nullable String overlayConfigSignaturePackage;
         public ViewCompiler viewCompiler;
-        public @Nullable String wellbeingPackage;
         public @Nullable String retailDemoPackage;
         public @Nullable String recentsPackage;
         public ComponentName resolveComponentName;
@@ -1676,7 +1677,6 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mStorageManagerPackage;
     final @Nullable String mDefaultTextClassifierPackage;
     final @Nullable String mSystemTextClassifierPackageName;
-    final @Nullable String mWellbeingPackage;
     final @Nullable String mDocumenterPackage;
     final @Nullable String mConfiguratorPackage;
     final @Nullable String mAppPredictionServicePackage;
@@ -2654,13 +2654,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // If no apps are approved for the domain, resolve only to browsers
                 if (approvedInfos.isEmpty()) {
-                    // If the other profile has a result, include that and delegate to
-                    // ResolveActivity
+                    includeBrowser = true;
                     if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
                             > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
                         result.add(xpDomainInfo.resolveInfo);
-                    } else {
-                        includeBrowser = true;
                     }
                 } else {
                     result.addAll(approvedInfos);
@@ -2822,7 +2819,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 result.highestApprovalLevel = Math.max(mDomainVerificationManager
                         .approvalLevelForDomain(ps, intent, resultTargetUser, flags,
-                                riTargetUser.targetUserId), result.highestApprovalLevel);
+                                parentUserId), result.highestApprovalLevel);
             }
             if (result != null && result.highestApprovalLevel
                     <= DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
@@ -6216,7 +6213,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mStorageManagerPackage = testParams.storageManagerPackage;
         mDefaultTextClassifierPackage = testParams.defaultTextClassifierPackage;
         mSystemTextClassifierPackageName = testParams.systemTextClassifierPackage;
-        mWellbeingPackage = testParams.wellbeingPackage;
         mRetailDemoPackage = testParams.retailDemoPackage;
         mRecentsPackage = testParams.recentsPackage;
         mDocumenterPackage = testParams.documenterPackage;
@@ -6817,7 +6813,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mDefaultTextClassifierPackage = getDefaultTextClassifierPackageName();
             mSystemTextClassifierPackageName = getSystemTextClassifierPackageName();
-            mWellbeingPackage = getWellbeingPackageName();
             mDocumenterPackage = getDocumenterPackageName();
             mConfiguratorPackage = getDeviceConfiguratorPackageName();
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
@@ -9991,6 +9986,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         false /*includeInstantApps*/,
                         isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, parent.id,
                                 resolvedType, 0));
+                flags |= PackageManager.MATCH_DEFAULT_ONLY;
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, flags, sourceUserId, parent.id);
                 return xpDomainInfo != null;
@@ -22845,7 +22841,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getWellbeingPackageName() {
-        return ensureSystemPackageName(mContext.getString(R.string.config_defaultWellbeingPackage));
+        return CollectionUtils.firstOrNull(
+                mContext.getSystemService(RoleManager.class).getRoleHolders(
+                        RoleManager.ROLE_SYSTEM_WELLBEING));
     }
 
     @Override
@@ -23405,14 +23403,24 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 true /* checkShell */, "stop package");
+        boolean shouldUnhibernate = false;
         // writer
         synchronized (mLock) {
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
+            if (ps.getStopped(userId) && !stopped) {
+                shouldUnhibernate = true;
+            }
             if (!shouldFilterApplicationLocked(ps, callingUid, userId)
                     && mSettings.setPackageStoppedStateLPw(this, packageName, stopped,
                             allowedByPermission, callingUid, userId)) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
+        }
+        if (shouldUnhibernate) {
+            AppHibernationManagerInternal ah =
+                    mInjector.getLocalService(AppHibernationManagerInternal.class);
+            ah.setHibernatingForUser(packageName, userId, false);
+            ah.setHibernatingGlobally(packageName, false);
         }
     }
 
@@ -26363,8 +26371,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             mDefaultTextClassifierPackage, mSystemTextClassifierPackageName);
                 case PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER:
                     return filterOnlySystemPackages(mRequiredPermissionControllerPackage);
-                case PackageManagerInternal.PACKAGE_WELLBEING:
-                    return filterOnlySystemPackages(mWellbeingPackage);
                 case PackageManagerInternal.PACKAGE_DOCUMENTER:
                     return filterOnlySystemPackages(mDocumenterPackage);
                 case PackageManagerInternal.PACKAGE_CONFIGURATOR:

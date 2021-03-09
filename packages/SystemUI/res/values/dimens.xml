@@ -1333,13 +1333,6 @@
     <!-- Keyguard user switcher -->
     <dimen name="kg_user_switcher_text_size">16sp</dimen>
 
-    <!-- End guest session button -->
-    <dimen name="end_guest_button_layout_height">32dp</dimen>
-    <dimen name="end_guest_button_padding_horizontal">16dp</dimen>
-    <dimen name="end_guest_button_margin_bottom">96dp</dimen>
-    <dimen name="end_guest_button_border_size">1dp</dimen>
-    <dimen name="end_guest_button_corner_radius">16dp</dimen>
-
     <!-- Opacity at which the background for the shutdown UI will be drawn. -->
     <item name="shutdown_scrim_behind_alpha" format="float" type="dimen">0.95</item>
 

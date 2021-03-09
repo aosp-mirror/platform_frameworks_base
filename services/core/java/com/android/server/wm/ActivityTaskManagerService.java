@@ -160,6 +160,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -1938,6 +1939,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return true;
             } finally {
                 Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    /**
+     * Sets the locusId for a particular activity.
+     *
+     * @param locusId the locusId to set.
+     * @param appToken the ActivityRecord's appToken.
+     */
+    public void setLocusId(LocusId locusId, IBinder appToken) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(appToken);
+            if (r != null) {
+                r.setLocusId(locusId);
             }
         }
     }

@@ -172,6 +172,7 @@ public class WMShellModule {
     @WMSingleton
     @Provides
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
+            SyncTransactionQueue syncTransactionQueue,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PhonePipMenuController menuPhoneController,
@@ -182,7 +183,8 @@ public class WMShellModule {
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
+        return new PipTaskOrganizer(context,
+                syncTransactionQueue, pipBoundsState, pipBoundsAlgorithm,
                 menuPhoneController, pipAnimationController, pipSurfaceTransactionHelper,
                 pipTransitionController, splitScreenOptional, displayController, pipUiEventLogger,
                 shellTaskOrganizer, mainExecutor);

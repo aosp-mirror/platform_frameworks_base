@@ -147,7 +147,7 @@ public class BatteryUsageStatsRule implements TestRule {
 
     BatteryUsageStats apply(BatteryUsageStatsQuery query, PowerCalculator... calculators) {
         final long[] customMeasuredEnergiesMicroJoules =
-                mBatteryStats.getCustomMeasuredEnergiesMicroJoules();
+                mBatteryStats.getCustomConsumerMeasuredBatteryConsumptionUC();
         final int customMeasuredEnergiesCount = customMeasuredEnergiesMicroJoules != null
                 ? customMeasuredEnergiesMicroJoules.length
                 : 0;
