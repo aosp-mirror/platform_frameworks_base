@@ -64,6 +64,7 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
     private final HandlerThread mHandlerThread;
     private final Context mContext;
     private final String mLogTag;
+    private final NetworkAgentConfig mNetworkAgentConfig;
 
     private final ConditionVariable mDisconnected = new ConditionVariable();
     private final ConditionVariable mPreventReconnectReceived = new ConditionVariable();
@@ -115,13 +116,19 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
         mHandlerThread = new HandlerThread(mLogTag);
         mHandlerThread.start();
 
-        mNetworkAgent = makeNetworkAgent(linkProperties, type, typeName);
+        // extraInfo is set to "" by default in NetworkAgentConfig.
+        final String extraInfo = (transport == TRANSPORT_CELLULAR) ? "internet.apn" : "";
+        mNetworkAgentConfig = new NetworkAgentConfig.Builder()
+                .setLegacyType(type)
+                .setLegacyTypeName(typeName)
+                .setLegacyExtraInfo(extraInfo)
+                .build();
+        mNetworkAgent = makeNetworkAgent(linkProperties, mNetworkAgentConfig);
     }
 
     protected InstrumentedNetworkAgent makeNetworkAgent(LinkProperties linkProperties,
-            final int type, final String typeName)
-            throws Exception {
-        return new InstrumentedNetworkAgent(this, linkProperties, type, typeName);
+            final NetworkAgentConfig nac) throws Exception {
+        return new InstrumentedNetworkAgent(this, linkProperties, nac);
     }
 
     public static class InstrumentedNetworkAgent extends NetworkAgent {
@@ -129,11 +136,9 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
         private static final String PROVIDER_NAME = "InstrumentedNetworkAgentProvider";
 
         public InstrumentedNetworkAgent(NetworkAgentWrapper wrapper, LinkProperties lp,
-                final int type, final String typeName) {
+                NetworkAgentConfig nac) {
             super(wrapper.mContext, wrapper.mHandlerThread.getLooper(), wrapper.mLogTag,
-                    wrapper.mNetworkCapabilities, lp, wrapper.mScore,
-                    new NetworkAgentConfig.Builder()
-                            .setLegacyType(type).setLegacyTypeName(typeName).build(),
+                    wrapper.mNetworkCapabilities, lp, wrapper.mScore, nac,
                     new NetworkProvider(wrapper.mContext, wrapper.mHandlerThread.getLooper(),
                             PROVIDER_NAME));
             mWrapper = wrapper;
@@ -299,6 +304,14 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
 
     public NetworkCapabilities getNetworkCapabilities() {
         return mNetworkCapabilities;
+    }
+
+    public int getLegacyType() {
+        return mNetworkAgentConfig.getLegacyType();
+    }
+
+    public String getExtraInfo() {
+        return mNetworkAgentConfig.getLegacyExtraInfo();
     }
 
     public @NonNull ArrayTrackRecord<CallbackType>.ReadHead getCallbackHistory() {
