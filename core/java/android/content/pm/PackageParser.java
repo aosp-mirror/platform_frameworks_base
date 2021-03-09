@@ -214,6 +214,7 @@ public class PackageParser {
     public static final String METADATA_SUPPORTS_SIZE_CHANGES = "android.supports_size_changes";
     public static final String METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY =
             "android.activity_window_layout_affinity";
+    public static final String METADATA_ACTIVITY_LAUNCH_MODE = "android.activity.launch_mode";
 
     /**
      * Bit mask of all the valid bits that can be set in recreateOnConfigChanges.
