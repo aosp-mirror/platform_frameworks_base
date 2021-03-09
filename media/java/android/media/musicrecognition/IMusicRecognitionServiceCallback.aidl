@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.media.MediaMetadata;
 
 /**
- * Interface from a {@MusicRecognitionService} the system.
+ * Interface from a {@MusicRecognitionService} to the system.
  *
  * @hide
  */

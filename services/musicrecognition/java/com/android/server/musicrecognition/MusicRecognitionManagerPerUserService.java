@@ -48,6 +48,8 @@ import com.android.server.infra.AbstractPerUserSystemService;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+
 
 /**
  * Handles per-user requests received by
@@ -60,6 +62,11 @@ public final class MusicRecognitionManagerPerUserService extends
         implements RemoteMusicRecognitionService.Callbacks {
 
     private static final String TAG = MusicRecognitionManagerPerUserService.class.getSimpleName();
+    private static final String MUSIC_RECOGNITION_MANAGER_ATTRIBUTION_TAG =
+            "MusicRecognitionManagerService";
+    private static final String KEY_MUSIC_RECOGNITION_SERVICE_ATTRIBUTION_TAG =
+            "android.media.musicrecognition.attributiontag";
+
     // Number of bytes per sample of audio (which is a short).
     private static final int BYTES_PER_SAMPLE = 2;
     private static final int MAX_STREAMING_SECONDS = 24;
@@ -68,18 +75,24 @@ public final class MusicRecognitionManagerPerUserService extends
     @GuardedBy("mLock")
     private RemoteMusicRecognitionService mRemoteService;
     private final AppOpsManager mAppOpsManager;
+    private final String mAttributionMessage;
 
-    private String mAttributionTag;
-    private String mAttributionMessage;
+    // Service info of the remote MusicRecognitionService (which the audio gets forwarded to).
     private ServiceInfo mServiceInfo;
+    private CompletableFuture<String> mAttributionTagFuture;
 
     MusicRecognitionManagerPerUserService(
             @NonNull MusicRecognitionManagerService primary,
             @NonNull Object lock, int userId) {
         super(primary, lock, userId);
-        mAppOpsManager = getContext().getSystemService(AppOpsManager.class);
+
+        // When attributing audio-access, this establishes that audio access is performed by
+        // MusicRecognitionManager (on behalf of the receiving service, whose attribution tag,
+        // provided by mAttributionTagFuture, is used for the actual calls to startProxyOp(...).
+        mAppOpsManager = getContext().createAttributionContext(
+            MUSIC_RECOGNITION_MANAGER_ATTRIBUTION_TAG).getSystemService(AppOpsManager.class);
         mAttributionMessage = String.format("MusicRecognitionManager.invokedByUid.%s", userId);
-        mAttributionTag = null;
+        mAttributionTagFuture = null;
         mServiceInfo = null;
     }
 
@@ -126,10 +139,13 @@ public final class MusicRecognitionManagerPerUserService extends
                     new MusicRecognitionServiceCallback(clientCallback),
                     mMaster.isBindInstantServiceAllowed(),
                     mMaster.verbose);
+
             try {
                 mServiceInfo =
                         getContext().getPackageManager().getServiceInfo(
-                                mRemoteService.getComponentName(), 0);
+                                mRemoteService.getComponentName(), PackageManager.GET_META_DATA);
+                mAttributionTagFuture = mRemoteService.getAttributionTag();
+                Slog.i(TAG, "Remote service bound: " + mRemoteService.getComponentName());
             } catch (PackageManager.NameNotFoundException e) {
                 Slog.e(TAG, "Service was not found.", e);
             }
@@ -172,11 +188,13 @@ public final class MusicRecognitionManagerPerUserService extends
         ParcelFileDescriptor audioSink = clientPipe.second;
         ParcelFileDescriptor clientRead = clientPipe.first;
 
-        mMaster.mExecutorService.execute(() -> {
-            streamAudio(recognitionRequest, clientCallback, audioSink);
-        });
+        mAttributionTagFuture.thenAcceptAsync(
+                tag -> {
+                    streamAudio(tag, recognitionRequest, clientCallback, audioSink);
+                }, mMaster.mExecutorService);
+
         // Send the pipe down to the lookup service while we write to it asynchronously.
-        mRemoteService.writeAudioToPipe(clientRead, recognitionRequest.getAudioFormat());
+        mRemoteService.onAudioStreamStarted(clientRead, recognitionRequest.getAudioFormat());
     }
 
     /**
@@ -186,10 +204,12 @@ public final class MusicRecognitionManagerPerUserService extends
      * @param clientCallback the callback to notify on errors.
      * @param audioSink the sink to which to stream audio to.
      */
-    private void streamAudio(@NonNull RecognitionRequest recognitionRequest,
-            IMusicRecognitionManagerCallback clientCallback, ParcelFileDescriptor audioSink) {
+    private void streamAudio(@Nullable String attributionTag,
+            @NonNull RecognitionRequest recognitionRequest,
+            IMusicRecognitionManagerCallback clientCallback,
+            ParcelFileDescriptor audioSink) {
         try {
-            startRecordAudioOp();
+            startRecordAudioOp(attributionTag);
         } catch (SecurityException e) {
             // A security exception can occur if the MusicRecognitionService (receiving the audio)
             // does not (or does no longer) hold the necessary permissions to record audio.
@@ -214,7 +234,7 @@ public final class MusicRecognitionManagerPerUserService extends
             Slog.e(TAG, "Audio streaming stopped.", e);
         } finally {
             audioRecord.release();
-            finishRecordAudioOp();
+            finishRecordAudioOp(attributionTag);
             try {
                 clientCallback.onAudioStreamClosed();
             } catch (RemoteException ignored) {
@@ -323,23 +343,32 @@ public final class MusicRecognitionManagerPerUserService extends
      * Tracks that the RECORD_AUDIO operation started (attributes it to the service receiving the
      * audio).
      */
-    private void startRecordAudioOp() {
-        mAppOpsManager.startProxyOp(
+    private void startRecordAudioOp(@Nullable String attributionTag) {
+        int status = mAppOpsManager.startProxyOp(
                 Objects.requireNonNull(AppOpsManager.permissionToOp(RECORD_AUDIO)),
                 mServiceInfo.applicationInfo.uid,
                 mServiceInfo.packageName,
-                mAttributionTag,
+                attributionTag,
                 mAttributionMessage);
+        // The above should already throw a SecurityException. This is just a fallback.
+        if (status != AppOpsManager.MODE_ALLOWED) {
+            throw new SecurityException(String.format(
+                    "Failed to obtain RECORD_AUDIO permission (status: %d) for "
+                    + "receiving service: %s", status, mServiceInfo.getComponentName()));
+        }
+        Slog.i(TAG, String.format(
+                "Starting audio streaming. Attributing to %s (%d) with tag '%s'",
+                mServiceInfo.packageName, mServiceInfo.applicationInfo.uid, attributionTag));
     }
 
 
     /** Tracks that the RECORD_AUDIO operation finished. */
-    private void finishRecordAudioOp() {
+    private void finishRecordAudioOp(@Nullable String attributionTag) {
         mAppOpsManager.finishProxyOp(
                 Objects.requireNonNull(AppOpsManager.permissionToOp(RECORD_AUDIO)),
                 mServiceInfo.applicationInfo.uid,
                 mServiceInfo.packageName,
-                mAttributionTag);
+                attributionTag);
     }
 
     /** Establishes an audio stream from the DSP audio source. */

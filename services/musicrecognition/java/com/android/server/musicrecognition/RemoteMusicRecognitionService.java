@@ -20,14 +20,19 @@ import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioFormat;
+import android.media.musicrecognition.IMusicRecognitionAttributionTagCallback;
 import android.media.musicrecognition.IMusicRecognitionService;
 import android.media.musicrecognition.MusicRecognitionService;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.text.format.DateUtils;
 
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 import com.android.server.musicrecognition.MusicRecognitionManagerPerUserService.MusicRecognitionServiceCallback;
+
+import java.util.concurrent.CompletableFuture;
+
 
 /** Remote connection to an instance of {@link MusicRecognitionService}. */
 public class RemoteMusicRecognitionService extends
@@ -81,9 +86,26 @@ public class RemoteMusicRecognitionService extends
      * Sends the given descriptor to the app's {@link MusicRecognitionService} to read the
      * audio.
      */
-    public void writeAudioToPipe(@NonNull ParcelFileDescriptor fd,
+    public void onAudioStreamStarted(@NonNull ParcelFileDescriptor fd,
             @NonNull AudioFormat audioFormat) {
         scheduleAsyncRequest(
                 binder -> binder.onAudioStreamStarted(fd, audioFormat, mServerCallback));
+    }
+
+
+    /**
+     * Returns the name of the <attribution> tag defined in the remote service's manifest.
+     */
+    public CompletableFuture<String> getAttributionTag() {
+        CompletableFuture<String> attributionTagFuture = new CompletableFuture<String>();
+        scheduleAsyncRequest(
+                binder -> binder.getAttributionTag(
+                    new IMusicRecognitionAttributionTagCallback.Stub() {
+                        @Override
+                        public void onAttributionTag(String tag) throws RemoteException {
+                            attributionTagFuture.complete(tag);
+                        }
+                    }));
+        return attributionTagFuture;
     }
 }
