@@ -1743,11 +1743,29 @@ public class ConnectivityServiceTest {
         return expected;
     }
 
+    private boolean extraInfoInBroadcastHasExpectedNullness(NetworkInfo ni) {
+        final DetailedState state = ni.getDetailedState();
+        if (state == DetailedState.CONNECTED && ni.getExtraInfo() == null) return false;
+        // Expect a null extraInfo if the network is CONNECTING, because a CONNECTIVITY_ACTION
+        // broadcast with a state of CONNECTING only happens due to legacy VPN lockdown, which also
+        // nulls out extraInfo.
+        if (state == DetailedState.CONNECTING && ni.getExtraInfo() != null) return false;
+        // Can't make any assertions about DISCONNECTED broadcasts. When a network actually
+        // disconnects, disconnectAndDestroyNetwork sets its state to DISCONNECTED and its extraInfo
+        // to null. But if the DISCONNECTED broadcast is just simulated by LegacyTypeTracker due to
+        // a network switch, extraInfo will likely be populated.
+        // This is likely a bug in CS, but likely not one we can fix without impacting apps.
+        return true;
+    }
+
     private ExpectedBroadcast expectConnectivityAction(int type, NetworkInfo.DetailedState state) {
-        return registerConnectivityBroadcastThat(1, intent ->
-                type == intent.getIntExtra(EXTRA_NETWORK_TYPE, -1) && state.equals(
-                        ((NetworkInfo) intent.getParcelableExtra(EXTRA_NETWORK_INFO))
-                                .getDetailedState()));
+        return registerConnectivityBroadcastThat(1, intent -> {
+            final int actualType = intent.getIntExtra(EXTRA_NETWORK_TYPE, -1);
+            final NetworkInfo ni = intent.getParcelableExtra(EXTRA_NETWORK_INFO);
+            return type == actualType
+                    && state == ni.getDetailedState()
+                    && extraInfoInBroadcastHasExpectedNullness(ni);
+        });
     }
 
     @Test
@@ -7185,12 +7203,14 @@ public class ConnectivityServiceTest {
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertExtraInfoFromCmPresent(mCellNetworkAgent);
 
         setUidRulesChanged(RULE_REJECT_ALL);
         cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
         assertNull(mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
+        assertExtraInfoFromCmBlocked(mCellNetworkAgent);
 
         // ConnectivityService should cache it not to invoke the callback again.
         setUidRulesChanged(RULE_REJECT_METERED);
@@ -7201,12 +7221,14 @@ public class ConnectivityServiceTest {
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertExtraInfoFromCmPresent(mCellNetworkAgent);
 
         setUidRulesChanged(RULE_REJECT_METERED);
         cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
         assertNull(mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
+        assertExtraInfoFromCmBlocked(mCellNetworkAgent);
 
         // Restrict the network based on UID rule and NOT_METERED capability change.
         mCellNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
@@ -7215,6 +7237,7 @@ public class ConnectivityServiceTest {
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertExtraInfoFromCmPresent(mCellNetworkAgent);
 
         mCellNetworkAgent.removeCapability(NET_CAPABILITY_NOT_METERED);
         cellNetworkCallback.expectCapabilitiesWithout(NET_CAPABILITY_NOT_METERED,
@@ -7223,12 +7246,14 @@ public class ConnectivityServiceTest {
         assertNull(mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
+        assertExtraInfoFromCmBlocked(mCellNetworkAgent);
 
         setUidRulesChanged(RULE_ALLOW_METERED);
         cellNetworkCallback.expectBlockedStatusCallback(false, mCellNetworkAgent);
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertExtraInfoFromCmPresent(mCellNetworkAgent);
 
         setUidRulesChanged(RULE_NONE);
         cellNetworkCallback.assertNoCallback();
@@ -7239,6 +7264,7 @@ public class ConnectivityServiceTest {
         assertNull(mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
+        assertExtraInfoFromCmBlocked(mCellNetworkAgent);
         setRestrictBackgroundChanged(true);
         cellNetworkCallback.assertNoCallback();
 
@@ -7246,12 +7272,14 @@ public class ConnectivityServiceTest {
         cellNetworkCallback.expectBlockedStatusCallback(false, mCellNetworkAgent);
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertExtraInfoFromCmPresent(mCellNetworkAgent);
 
         setRestrictBackgroundChanged(false);
         cellNetworkCallback.assertNoCallback();
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertExtraInfoFromCmPresent(mCellNetworkAgent);
 
         mCm.unregisterNetworkCallback(cellNetworkCallback);
     }
@@ -7310,6 +7338,15 @@ public class ConnectivityServiceTest {
         assertNotNull(ni);
         assertEquals(type, ni.getType());
         assertEquals(ConnectivityManager.getNetworkTypeName(type), state, ni.getDetailedState());
+        if (state == DetailedState.CONNECTED || state == DetailedState.SUSPENDED) {
+            assertNotNull(ni.getExtraInfo());
+        } else {
+            // Technically speaking, a network that's in CONNECTING state will generally have a
+            // non-null extraInfo. This doesn't actually happen in this test because it never calls
+            // a legacy API while a network is connecting. When a network is in CONNECTING state
+            // because of legacy lockdown VPN, its extraInfo is always null.
+            assertNull(ni.getExtraInfo());
+        }
     }
 
     private void assertActiveNetworkInfo(int type, DetailedState state) {
@@ -7317,6 +7354,26 @@ public class ConnectivityServiceTest {
     }
     private void assertNetworkInfo(int type, DetailedState state) {
         checkNetworkInfo(mCm.getNetworkInfo(type), type, state);
+    }
+
+    private void assertExtraInfoFromCm(TestNetworkAgentWrapper network, boolean present) {
+        final NetworkInfo niForNetwork = mCm.getNetworkInfo(network.getNetwork());
+        final NetworkInfo niForType = mCm.getNetworkInfo(network.getLegacyType());
+        if (present) {
+            assertEquals(network.getExtraInfo(), niForNetwork.getExtraInfo());
+            assertEquals(network.getExtraInfo(), niForType.getExtraInfo());
+        } else {
+            assertNull(niForNetwork.getExtraInfo());
+            assertNull(niForType.getExtraInfo());
+        }
+    }
+
+    private void assertExtraInfoFromCmBlocked(TestNetworkAgentWrapper network) {
+        assertExtraInfoFromCm(network, false);
+    }
+
+    private void assertExtraInfoFromCmPresent(TestNetworkAgentWrapper network) {
+        assertExtraInfoFromCm(network, true);
     }
 
     // Checks that each of the |agents| receive a blocked status change callback with the specified
@@ -7633,6 +7690,7 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_VPN, DetailedState.BLOCKED);
+        assertExtraInfoFromCmBlocked(mCellNetworkAgent);
 
         // TODO: it would be nice if we could simply rely on the production code here, and have
         // LockdownVpnTracker start the VPN, have the VPN code register its NetworkAgent with
@@ -7661,6 +7719,7 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.DISCONNECTED);
         assertNetworkInfo(TYPE_VPN, DetailedState.CONNECTED);
+        assertExtraInfoFromCmPresent(mCellNetworkAgent);
         assertTrue(vpnNc.hasTransport(TRANSPORT_VPN));
         assertTrue(vpnNc.hasTransport(TRANSPORT_CELLULAR));
         assertFalse(vpnNc.hasTransport(TRANSPORT_WIFI));
@@ -7703,6 +7762,7 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_VPN, DetailedState.BLOCKED);
+        assertExtraInfoFromCmBlocked(mWiFiNetworkAgent);
 
         // The VPN comes up again on wifi.
         b1 = expectConnectivityAction(TYPE_VPN, DetailedState.CONNECTED);
@@ -7717,6 +7777,7 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_MOBILE, DetailedState.DISCONNECTED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_VPN, DetailedState.CONNECTED);
+        assertExtraInfoFromCmPresent(mWiFiNetworkAgent);
         vpnNc = mCm.getNetworkCapabilities(mMockVpn.getNetwork());
         assertTrue(vpnNc.hasTransport(TRANSPORT_VPN));
         assertTrue(vpnNc.hasTransport(TRANSPORT_WIFI));
@@ -7733,6 +7794,7 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_MOBILE, DetailedState.DISCONNECTED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_VPN, DetailedState.CONNECTED);
+        assertExtraInfoFromCmPresent(mWiFiNetworkAgent);
 
         b1 = expectConnectivityAction(TYPE_WIFI, DetailedState.DISCONNECTED);
         mWiFiNetworkAgent.disconnect();

@@ -1489,11 +1489,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // but only exists if an app asks about them or requests them. Ensure the requesting app
         // gets the type it asks for.
         filtered.setType(type);
-        final DetailedState state = isNetworkWithCapabilitiesBlocked(nc, uid, ignoreBlocked)
-                ? DetailedState.BLOCKED
-                : filtered.getDetailedState();
-        filtered.setDetailedState(getLegacyLockdownState(state),
-                "" /* reason */, null /* extraInfo */);
+        if (isNetworkWithCapabilitiesBlocked(nc, uid, ignoreBlocked)) {
+            filtered.setDetailedState(DetailedState.BLOCKED, null /* reason */,
+                    null /* extraInfo */);
+        }
+        filterForLegacyLockdown(filtered);
         return filtered;
     }
 
@@ -1569,8 +1569,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final DetailedState state = isNetworkWithCapabilitiesBlocked(nc, uid, false)
                 ? DetailedState.BLOCKED
                 : DetailedState.DISCONNECTED;
-        info.setDetailedState(getLegacyLockdownState(state),
-                "" /* reason */, null /* extraInfo */);
+        info.setDetailedState(state, null /* reason */, null /* extraInfo */);
+        filterForLegacyLockdown(info);
         return info;
     }
 
@@ -2364,9 +2364,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mContext.enforceCallingOrSelfPermission(KeepaliveTracker.PERMISSION, "ConnectivityService");
     }
 
-    // Public because it's used by mLockdownTracker.
-    public void sendConnectedBroadcast(NetworkInfo info) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
+    private void sendConnectedBroadcast(NetworkInfo info) {
         sendGeneralBroadcast(info, CONNECTIVITY_ACTION);
     }
 
@@ -5012,8 +5010,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // The legacy lockdown VPN always uses the default network.
         // If the VPN's underlying network is no longer the current default network, it means that
         // the default network has just switched, and the VPN is about to disconnect.
-        // Report that the VPN is not connected, so when the state of NetworkInfo objects
-        // overwritten by getLegacyLockdownState will be set to CONNECTING and not CONNECTED.
+        // Report that the VPN is not connected, so the state of NetworkInfo objects overwritten
+        // by filterForLegacyLockdown will be set to CONNECTING and not CONNECTED.
         final NetworkAgentInfo defaultNetwork = getDefaultNetwork();
         if (defaultNetwork == null || !defaultNetwork.network.equals(underlying[0])) {
             return null;
@@ -5022,6 +5020,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nai;
     };
 
+    // TODO: move all callers to filterForLegacyLockdown and delete this method.
+    // This likely requires making sendLegacyNetworkBroadcast take a NetworkInfo object instead of
+    // just a DetailedState object.
     private DetailedState getLegacyLockdownState(DetailedState origState) {
         if (origState != DetailedState.CONNECTED) {
             return origState;
@@ -5029,6 +5030,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return (mLockdownEnabled && getLegacyLockdownNai() == null)
                 ? DetailedState.CONNECTING
                 : DetailedState.CONNECTED;
+    }
+
+    private void filterForLegacyLockdown(NetworkInfo ni) {
+        if (!mLockdownEnabled || !ni.isConnected()) return;
+        // The legacy lockdown VPN replaces the state of every network in CONNECTED state with the
+        // state of its VPN. This is to ensure that when an underlying network connects, apps will
+        // not see a CONNECTIVITY_ACTION broadcast for a network in state CONNECTED until the VPN
+        // comes up, at which point there is a new CONNECTIVITY_ACTION broadcast for the underlying
+        // network, this time with a state of CONNECTED.
+        //
+        // Now that the legacy lockdown code lives in ConnectivityService, and no longer has access
+        // to the internal state of the Vpn object, always replace the state with CONNECTING. This
+        // is not too far off the truth, since an always-on VPN, when not connected, is always
+        // trying to reconnect.
+        if (getLegacyLockdownNai() == null) {
+            ni.setDetailedState(DetailedState.CONNECTING, "", null);
+        }
     }
 
     @Override
@@ -7914,6 +7932,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // and is still connected.
         NetworkInfo info = new NetworkInfo(nai.networkInfo);
         info.setType(type);
+        filterForLegacyLockdown(info);
         if (state != DetailedState.DISCONNECTED) {
             info.setDetailedState(state, null, info.getExtraInfo());
             sendConnectedBroadcast(info);
