@@ -33,9 +33,9 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.service.chooser.ChooserTarget;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -46,14 +46,13 @@ import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.MultiDisplayResolveInfo;
 import com.android.internal.app.chooser.SelectableTargetInfo;
 import com.android.internal.app.chooser.TargetInfo;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ChooserListAdapter extends ResolverListAdapter {
     private static final String TAG = "ChooserListAdapter";
@@ -70,8 +69,6 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
     private static final int MAX_SUGGESTED_APP_TARGETS = 4;
     private static final int MAX_CHOOSER_TARGETS_PER_APP = 2;
-    private static final int MAX_SERVICE_TARGET_APP = 8;
-    private static final int DEFAULT_DIRECT_SHARE_RANKING_SCORE = 1000;
 
     /** {@link #getBaseScore} */
     public static final float CALLER_TARGET_SCORE_BOOST = 900.f;
@@ -85,17 +82,11 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
     private int mNumShortcutResults = 0;
     private Map<DisplayResolveInfo, LoadIconTask> mIconLoaders = new HashMap<>();
+    private boolean mApplySharingAppLimits;
 
     // Reserve spots for incoming direct share targets by adding placeholders
     private ChooserTargetInfo
             mPlaceHolderTargetInfo = new ChooserActivity.PlaceHolderTargetInfo();
-    private int mValidServiceTargetsNum = 0;
-    private int mAvailableServiceTargetsNum = 0;
-    private final Map<ComponentName, Pair<List<ChooserTargetInfo>, Integer>>
-            mParkingDirectShareTargets = new HashMap<>();
-    private final Map<ComponentName, Map<String, Integer>> mChooserTargetScores = new HashMap<>();
-    private Set<ComponentName> mPendingChooserTargetService = new HashSet<>();
-    private Set<ComponentName> mShortcutComponents = new HashSet<>();
     private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
     private final List<DisplayResolveInfo> mCallerTargets = new ArrayList<>();
 
@@ -174,6 +165,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 if (mCallerTargets.size() == MAX_SUGGESTED_APP_TARGETS) break;
             }
         }
+        mApplySharingAppLimits = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.APPLY_SHARING_APP_LIMITS_IN_SYSUI,
+                true);
     }
 
     AppPredictor getAppPredictor() {
@@ -209,10 +204,6 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private void createPlaceHolders() {
         mNumShortcutResults = 0;
         mServiceTargets.clear();
-        mValidServiceTargetsNum = 0;
-        mParkingDirectShareTargets.clear();
-        mPendingChooserTargetService.clear();
-        mShortcutComponents.clear();
         for (int i = 0; i < mChooserListCommunicator.getMaxRankedTargets(); i++) {
             mServiceTargets.add(mPlaceHolderTargetInfo);
         }
@@ -508,25 +499,27 @@ public class ChooserListAdapter extends ResolverListAdapter {
         if (targets.size() == 0) {
             return;
         }
-
         final float baseScore = getBaseScore(origTarget, targetType);
         Collections.sort(targets, mBaseTargetComparator);
-
         final boolean isShortcutResult =
                 (targetType == TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER
                         || targetType == TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE);
         final int maxTargets = isShortcutResult ? mMaxShortcutTargetsPerApp
                 : MAX_CHOOSER_TARGETS_PER_APP;
+        final int targetsLimit = mApplySharingAppLimits ? Math.min(targets.size(), maxTargets)
+                : targets.size();
         float lastScore = 0;
         boolean shouldNotify = false;
-        for (int i = 0, count = Math.min(targets.size(), maxTargets); i < count; i++) {
+        for (int i = 0, count = targetsLimit; i < count; i++) {
             final ChooserTarget target = targets.get(i);
             float targetScore = target.getScore();
-            targetScore *= baseScore;
-            if (i > 0 && targetScore >= lastScore) {
-                // Apply a decay so that the top app can't crowd out everything else.
-                // This incents ChooserTargetServices to define what's truly better.
-                targetScore = lastScore * 0.95f;
+            if (mApplySharingAppLimits) {
+                targetScore *= baseScore;
+                if (i > 0 && targetScore >= lastScore) {
+                    // Apply a decay so that the top app can't crowd out everything else.
+                    // This incents ChooserTargetServices to define what's truly better.
+                    targetScore = lastScore * 0.95f;
+                }
             }
             UserHandle userHandle = getUserHandle();
             Context contextAsUser = mContext.createContextAsUser(userHandle, 0 /* flags */);
@@ -544,7 +537,8 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 Log.d(TAG, " => " + target.toString() + " score=" + targetScore
                         + " base=" + target.getScore()
                         + " lastScore=" + lastScore
-                        + " baseScore=" + baseScore);
+                        + " baseScore=" + baseScore
+                        + " applyAppLimit=" + mApplySharingAppLimits);
             }
 
             lastScore = targetScore;
@@ -580,16 +574,11 @@ public class ChooserListAdapter extends ResolverListAdapter {
         if (target == null) {
             return CALLER_TARGET_SCORE_BOOST;
         }
-
-        if (targetType == TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE) {
-            return SHORTCUT_TARGET_SCORE_BOOST;
-        }
-
         float score = super.getScore(target);
-        if (targetType == TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER) {
+        if (targetType == TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER
+                || targetType == TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE) {
             return score * SHORTCUT_TARGET_SCORE_BOOST;
         }
-
         return score;
     }
 

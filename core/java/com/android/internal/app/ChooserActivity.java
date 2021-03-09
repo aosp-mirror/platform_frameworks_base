@@ -850,9 +850,7 @@ public class ChooserActivity extends ResolverActivity implements
             final List<ShortcutManager.ShareShortcutInfo> shareShortcutInfos =
                     new ArrayList<>();
 
-            // Separate ChooserTargets ranking scores and ranked Shortcuts.
             List<AppTarget> shortcutResults = new ArrayList<>();
-            List<AppTarget> chooserTargetScores = new ArrayList<>();
             for (AppTarget appTarget : resultList) {
                 if (appTarget.getShortcutInfo() == null) {
                     continue;

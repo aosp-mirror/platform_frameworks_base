@@ -479,6 +479,14 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SHARE_USE_SERVICE_TARGETS = "share_use_service_targets";
 
+    /**
+     * (boolean) If true, SysUI provides guardrails for app usage of Direct Share by enforcing
+     * limits on number of targets per app & adjusting scores for apps providing many targets. If
+     * false, this step is skipped. This should be true unless the ranking provider configured by
+     * [some other flag] is expected to manage these incentives.
+     */
+    public static final String APPLY_SHARING_APP_LIMITS_IN_SYSUI =
+            "apply_sharing_app_limits_in_sysui";
 
     private SystemUiDeviceConfigFlags() {
     }
