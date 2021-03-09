@@ -739,8 +739,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public void onThemeChanged() {
+        boolean wasShowing = mBouncer.isShowing();
+        boolean wasScrimmed = mBouncer.isScrimmed();
+
         hideBouncer(true /* destroyView */);
         mBouncer.prepare();
+
+        if (wasShowing) showBouncer(wasScrimmed);
     }
 
     public void onKeyguardFadedAway() {
