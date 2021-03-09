@@ -19,12 +19,12 @@ package com.android.server.locksettings;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -53,12 +53,9 @@ public class ResumeOnRebootServiceProviderTests {
     Context mMockContext;
     @Mock
     PackageManager mMockPackageManager;
-    @Mock
-    ResolveInfo mMockResolvedInfo;
-    @Mock
-    ServiceInfo mMockServiceInfo;
-    @Mock
-    ComponentName mMockComponentName;
+
+    ResolveInfo mFakeResolvedInfo;
+    ServiceInfo mFakeServiceInfo;
     @Captor
     ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
@@ -66,8 +63,13 @@ public class ResumeOnRebootServiceProviderTests {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mMockContext.getUserId()).thenReturn(0);
-        when(mMockResolvedInfo.serviceInfo).thenReturn(mMockServiceInfo);
-        when(mMockServiceInfo.getComponentName()).thenReturn(mMockComponentName);
+
+        mFakeServiceInfo = new ServiceInfo();
+        mFakeServiceInfo.packageName = "fakePackageName";
+        mFakeServiceInfo.name = "fakeName";
+
+        mFakeResolvedInfo = new ResolveInfo();
+        mFakeResolvedInfo.serviceInfo = mFakeServiceInfo;
     }
 
     @Test
@@ -82,10 +84,9 @@ public class ResumeOnRebootServiceProviderTests {
     @Test
     public void serviceNotGuardedWithPermission() throws Exception {
         ArrayList<ResolveInfo> resultList = new ArrayList<>();
-        when(mMockServiceInfo.permission).thenReturn("");
-        resultList.add(mMockResolvedInfo);
-        when(mMockPackageManager.queryIntentServices(any(), any())).thenReturn(
-                resultList);
+        mFakeServiceInfo.permission = "";
+        resultList.add(mFakeResolvedInfo);
+        when(mMockPackageManager.queryIntentServices(any(), anyInt())).thenReturn(resultList);
         assertThat(new ResumeOnRebootServiceProvider(mMockContext,
                 mMockPackageManager).getServiceConnection()).isNull();
     }
@@ -93,18 +94,15 @@ public class ResumeOnRebootServiceProviderTests {
     @Test
     public void serviceResolved() throws Exception {
         ArrayList<ResolveInfo> resultList = new ArrayList<>();
-        resultList.add(mMockResolvedInfo);
-        when(mMockServiceInfo.permission).thenReturn(
-                Manifest.permission.BIND_RESUME_ON_REBOOT_SERVICE);
-        when(mMockPackageManager.queryIntentServices(any(),
-                eq(PackageManager.MATCH_SYSTEM_ONLY))).thenReturn(
-                resultList);
+        resultList.add(mFakeResolvedInfo);
+        mFakeServiceInfo.permission = Manifest.permission.BIND_RESUME_ON_REBOOT_SERVICE;
+        when(mMockPackageManager.queryIntentServices(any(), anyInt())).thenReturn(resultList);
 
         assertThat(new ResumeOnRebootServiceProvider(mMockContext,
                 mMockPackageManager).getServiceConnection()).isNotNull();
 
         verify(mMockPackageManager).queryIntentServices(mIntentArgumentCaptor.capture(),
-                eq(PackageManager.MATCH_SYSTEM_ONLY));
+                eq(PackageManager.MATCH_SYSTEM_ONLY | PackageManager.GET_SERVICES));
         assertThat(mIntentArgumentCaptor.getValue().getAction()).isEqualTo(
                 ResumeOnRebootService.SERVICE_INTERFACE);
     }
