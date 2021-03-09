@@ -25,7 +25,7 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.appPairsDividerIsInvisible
+import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import org.junit.After
 import org.junit.Before
@@ -36,17 +36,17 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test cold launch app from launcher. When the device doesn't support non-resizable in multi window
- * {@link Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW}, app pairs should not pair
+ * Test cold launch app from launcher. When the device supports non-resizable in multi window
+ * {@link Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW}, app pairs can pair
  * non-resizable apps.
  *
- * To run this test: `atest WMShellFlickerTests:AppPairsTestCannotPairNonResizeableApps`
+ * To run this test: `atest WMShellFlickerTests:AppPairsTestSupportPairNonResizeableApps`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class AppPairsTestCannotPairNonResizeableApps(
+class AppPairsTestSupportPairNonResizeableApps(
     testSpec: FlickerTestParameter
 ) : AppPairsTransition(testSpec) {
     var prevSupportNonResizableInMultiWindow = 0
@@ -58,7 +58,7 @@ class AppPairsTestCannotPairNonResizeableApps(
                 nonResizeableApp?.launchViaIntent(wmHelper)
                 // TODO pair apps through normal UX flow
                 executeShellCommand(
-                    composePairsCommand(primaryTaskId, nonResizeableTaskId, pair = true))
+                        composePairsCommand(primaryTaskId, nonResizeableTaskId, pair = true))
                 SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
             }
         }
@@ -66,11 +66,11 @@ class AppPairsTestCannotPairNonResizeableApps(
     @Before
     fun setup() {
         prevSupportNonResizableInMultiWindow = Settings.Global.getInt(context.contentResolver,
-            Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW)
-        if (prevSupportNonResizableInMultiWindow == 1) {
-            // Not support non-resizable in multi window
+                Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW)
+        if (prevSupportNonResizableInMultiWindow == 0) {
+            // Support non-resizable in multi window
             Settings.Global.putInt(context.contentResolver,
-                    Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 0)
+                    Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 1)
         }
     }
 
@@ -91,18 +91,18 @@ class AppPairsTestCannotPairNonResizeableApps(
 
     @Presubmit
     @Test
-    fun appPairsDividerIsInvisible() = testSpec.appPairsDividerIsInvisible()
+    fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
 
     @Presubmit
     @Test
-    fun onlyResizeableAppWindowVisible() {
+    fun bothAppWindowVisible() {
         val nonResizeableApp = nonResizeableApp
         require(nonResizeableApp != null) {
             "Non resizeable app not initialized"
         }
         testSpec.assertWmEnd {
             isVisible(nonResizeableApp.defaultWindowName)
-            isInvisible(primaryApp.defaultWindowName)
+            isVisible(primaryApp.defaultWindowName)
         }
     }
 
@@ -111,7 +111,7 @@ class AppPairsTestCannotPairNonResizeableApps(
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                repetitions = AppPairsHelper.TEST_REPETITIONS)
+                    repetitions = AppPairsHelper.TEST_REPETITIONS)
         }
     }
 }
