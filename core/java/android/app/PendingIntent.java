@@ -19,6 +19,9 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -1165,6 +1168,30 @@ public final class PendingIntent implements Parcelable {
         try {
             return ActivityManager.getService()
                 .getTagForIntentSender(mTarget, prefix);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Comparison operator on two PendingIntent objects, such that true is returned when they
+     * represent {@link Intent}s that are equal as per {@link Intent#filterEquals}.
+     *
+     * @param other The other PendingIntent to compare against.
+     * @return True if action, data, type, class, and categories on two intents are the same.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.GET_INTENT_SENDER_INTENT)
+    public boolean intentFilterEquals(@Nullable PendingIntent other) {
+        if (other == null) {
+            return false;
+        }
+        try {
+            return ActivityManager.getService().getIntentForIntentSender(other.mTarget)
+                    .filterEquals(getIntent());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
