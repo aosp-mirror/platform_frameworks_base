@@ -16,9 +16,7 @@
 
 package android.view.translation;
 
-import android.content.ComponentName;
 import android.os.IBinder;
-import android.service.translation.TranslationRequest;
 import android.view.autofill.AutofillId;
 import android.view.translation.TranslationSpec;
 import com.android.internal.os.IResultReceiver;
