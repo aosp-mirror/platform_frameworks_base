@@ -349,7 +349,9 @@ public class NotificationContentView extends FrameLayout {
         invalidateOutline();
         selectLayout(false /* animate */, mForceSelectNextLayout /* force */);
         mForceSelectNextLayout = false;
-        updateExpandButtons(mExpandable);
+        // TODO(b/182314698): move this to onMeasure.  This requires switching to getMeasuredHeight,
+        //  and also requires revisiting all of the logic called earlier in this method.
+        updateExpandButtonsDuringLayout(mExpandable, true /* duringLayout */);
     }
 
     @Override
@@ -1589,6 +1591,10 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void updateExpandButtons(boolean expandable) {
+        updateExpandButtonsDuringLayout(expandable, false /* duringLayout */);
+    }
+
+    private void updateExpandButtonsDuringLayout(boolean expandable, boolean duringLayout) {
         mExpandable = expandable;
         // if the expanded child has the same height as the collapsed one we hide it.
         if (mExpandedChild != null && mExpandedChild.getHeight() != 0) {
@@ -1602,14 +1608,15 @@ public class NotificationContentView extends FrameLayout {
                 expandable = false;
             }
         }
+        boolean requestLayout = duringLayout && mIsContentExpandable != expandable;
         if (mExpandedChild != null) {
-            mExpandedWrapper.updateExpandability(expandable, mExpandClickListener);
+            mExpandedWrapper.updateExpandability(expandable, mExpandClickListener, requestLayout);
         }
         if (mContractedChild != null) {
-            mContractedWrapper.updateExpandability(expandable, mExpandClickListener);
+            mContractedWrapper.updateExpandability(expandable, mExpandClickListener, requestLayout);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.updateExpandability(expandable,  mExpandClickListener);
+            mHeadsUpWrapper.updateExpandability(expandable,  mExpandClickListener, requestLayout);
         }
         mIsContentExpandable = expandable;
     }

@@ -50,7 +50,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="@dimen/conversation_content_start"
-                android:layout_marginEnd="@dimen/notification_content_margin_end"
                 android:orientation="vertical"
                 android:minHeight="68dp"
                 >
@@ -71,12 +70,18 @@
                     />
             </LinearLayout>
 
-            <!-- TODO(b/179178086): remove padding from main column when this is visible -->
-            <include layout="@layout/notification_expand_button"
+            <FrameLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|end"
-                />
+                android:layout_height="match_parent"
+                android:minWidth="@dimen/notification_content_margin_end"
+                >
+
+                <include layout="@layout/notification_expand_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+
+            </FrameLayout>
 
         </LinearLayout>
 
