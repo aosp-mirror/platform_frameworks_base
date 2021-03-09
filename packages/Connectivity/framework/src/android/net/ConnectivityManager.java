@@ -2905,10 +2905,14 @@ public class ConnectivityManager {
         ResultReceiver wrappedListener = new ResultReceiver(null) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
-                Binder.withCleanCallingIdentity(() ->
-                            executor.execute(() -> {
-                                listener.onTetheringEntitlementResult(resultCode);
-                            }));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> {
+                        listener.onTetheringEntitlementResult(resultCode);
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         };
 
