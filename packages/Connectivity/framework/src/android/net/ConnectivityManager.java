@@ -4992,10 +4992,10 @@ public class ConnectivityManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
     })
     public void requestBackgroundNetwork(@NonNull NetworkRequest request,
-            @Nullable Handler handler, @NonNull NetworkCallback networkCallback) {
+            @NonNull Handler handler, @NonNull NetworkCallback networkCallback) {
         final NetworkCapabilities nc = request.networkCapabilities;
         sendRequestForNetwork(nc, networkCallback, 0, BACKGROUND_REQUEST,
-                TYPE_NONE, handler == null ? getDefaultHandler() : new CallbackHandler(handler));
+                TYPE_NONE, new CallbackHandler(handler));
     }
 
     /**
