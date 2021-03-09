@@ -19,10 +19,15 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 import android.annotation.Nullable;
+import android.os.PowerWhitelistManager;
 import android.os.PowerWhitelistManager.ReasonCode;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimeUtils;
+
+import java.io.PrintWriter;
 
 /**
  * List of uids that are temporarily allowed to start FGS from background.
@@ -112,5 +117,28 @@ final class FgsStartTempAllowList {
 
     void remove(int uid) {
         mTempAllowListFgs.delete(uid);
+    }
+
+    void dump(PrintWriter pw) {
+        final long currentTimeNow = System.currentTimeMillis();
+        final long elapsedRealtimeNow = SystemClock.elapsedRealtime();
+        for (int i = 0; i < mTempAllowListFgs.size(); i++) {
+            final int uid = mTempAllowListFgs.keyAt(i);
+            final TempFgsAllowListEntry entry = mTempAllowListFgs.valueAt(i);
+            pw.println(
+                    "    " + UserHandle.formatUid(uid) + ": " +
+                    " callingUid=" + UserHandle.formatUid(entry.mCallingUid) +
+                    " reasonCode=" + PowerWhitelistManager.reasonCodeToString(entry.mReasonCode) +
+                    " reason=" + entry.mReason);
+            pw.print("        duration=" + entry.mDuration +
+                    "ms expiration=");
+
+            // Convert entry.mExpirationTime, which is an elapsed time since boot,
+            // to a time since epoch (i.e. System.currentTimeMillis()-based time.)
+            final long expirationInCurrentTime =
+                    currentTimeNow - elapsedRealtimeNow + entry.mExpirationTime;
+            TimeUtils.dumpTimeWithDelta(pw, expirationInCurrentTime, currentTimeNow);
+            pw.println();
+        }
     }
 }
