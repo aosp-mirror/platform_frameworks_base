@@ -437,13 +437,11 @@ public class ImageWriter implements AutoCloseable {
         // For images from other components that have non-null owner, need to detach first,
         // then attach. Images without owners must already be attachable.
         if (!ownedByMe) {
-            if (image.getOwner() == null) {
-
-            } else if ((image.getOwner() instanceof ImageReader)) {
+            if ((image.getOwner() instanceof ImageReader)) {
                 ImageReader prevOwner = (ImageReader) image.getOwner();
 
                 prevOwner.detachImage(image);
-            } else {
+            } else if (image.getOwner() != null) {
                 throw new IllegalArgumentException("Only images from ImageReader can be queued to"
                         + " ImageWriter, other image source is not supported yet!");
             }
