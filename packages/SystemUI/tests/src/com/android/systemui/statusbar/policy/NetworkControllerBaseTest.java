@@ -47,11 +47,11 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telephony.CellSignalStrength;
 import android.telephony.NetworkRegistrationInfo;
-import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
@@ -95,7 +95,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     protected NetworkControllerImpl mNetworkController;
     protected MobileSignalController mMobileSignalController;
-    protected PhoneStateListener mPhoneStateListener;
     protected SignalStrength mSignalStrength;
     protected ServiceState mServiceState;
     protected TelephonyDisplayInfo mTelephonyDisplayInfo;
@@ -211,8 +210,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setDefaultSubId(mSubId);
         setSubscriptions(mSubId);
         mMobileSignalController = mNetworkController.mMobileSignalControllers.get(mSubId);
-        mPhoneStateListener = mMobileSignalController.mPhoneStateListener;
-
         ArgumentCaptor<ConnectivityManager.NetworkCallback> callbackArg =
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
         verify(mMockCm, atLeastOnce())
@@ -340,18 +337,15 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     private void updateSignalStrength() {
         Log.d(TAG, "Sending Signal Strength: " + mSignalStrength);
-        mPhoneStateListener.onSignalStrengthsChanged(mSignalStrength);
+        mMobileSignalController.mTelephonyCallback
+                .onSignalStrengthsChanged(mSignalStrength);
     }
 
     protected void updateServiceState() {
         Log.d(TAG, "Sending Service State: " + mServiceState);
-        mPhoneStateListener.onServiceStateChanged(mServiceState);
-        mPhoneStateListener.onDisplayInfoChanged(mTelephonyDisplayInfo);
-    }
-
-    public void updateCallState(int state) {
-        // Inputs not currently used in NetworkControllerImpl.
-        mPhoneStateListener.onCallStateChanged(state, "0123456789");
+        mMobileSignalController.mTelephonyCallback.onServiceStateChanged(mServiceState);
+        mMobileSignalController.mTelephonyCallback
+                .onDisplayInfoChanged(mTelephonyDisplayInfo);
     }
 
     public void updateDataConnectionState(int dataState, int dataNetType) {
@@ -363,16 +357,17 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         when(mServiceState.getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN))
                 .thenReturn(fakeRegInfo);
         when(mTelephonyDisplayInfo.getNetworkType()).thenReturn(dataNetType);
-        mPhoneStateListener.onDataConnectionStateChanged(dataState, dataNetType);
+        mMobileSignalController.mTelephonyCallback
+                .onDataConnectionStateChanged(dataState, dataNetType);
     }
 
     public void updateDataActivity(int dataActivity) {
-        mPhoneStateListener.onDataActivity(dataActivity);
+        mMobileSignalController.mTelephonyCallback.onDataActivity(dataActivity);
     }
 
     public void setCarrierNetworkChange(boolean enable) {
         Log.d(TAG, "setCarrierNetworkChange(" + enable + ")");
-        mPhoneStateListener.onCarrierNetworkChange(enable);
+        mMobileSignalController.mTelephonyCallback.onCarrierNetworkChange(enable);
     }
 
     protected void verifyHasNoSims(boolean hasNoSimsVisible) {

@@ -1629,10 +1629,10 @@ package android.telephony {
     method public static void setMinMatchForTest(int);
   }
 
-  public class PhoneStateListener {
-    method public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
+  @Deprecated public class PhoneStateListener {
+    method @Deprecated public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
     method @Deprecated public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
-    method public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
+    method @Deprecated public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
   }
 
   public final class PreciseDataConnectionState implements android.os.Parcelable {
