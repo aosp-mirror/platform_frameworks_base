@@ -27,6 +27,7 @@ class CustomizeTileViewHorizontal(
 
     override fun handleStateChanged(state: QSTile.State) {
         super.handleStateChanged(state)
+        mShowRippleEffect = false
         mSecondLine.visibility = if (showAppLabel) View.VISIBLE else View.GONE
     }
 

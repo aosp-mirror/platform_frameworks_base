@@ -21,8 +21,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RoundRectShape
+import android.graphics.drawable.RippleDrawable
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.view.Gravity
 import android.widget.LinearLayout
@@ -38,9 +37,10 @@ open class QSTileViewHorizontal(
     collapsed: Boolean
 ) : QSTileView(context, icon, collapsed) {
 
-    protected var backgroundDrawable: ShapeDrawable? = null
+    protected var colorBackgroundDrawable: Drawable? = null
     private var paintColor = Color.WHITE
     private var paintAnimator: ValueAnimator? = null
+    private var labelAnimator: ValueAnimator? = null
 
     init {
         orientation = HORIZONTAL
@@ -90,38 +90,32 @@ open class QSTileViewHorizontal(
     }
 
     override fun newTileBackground(): Drawable? {
-        val cornerRadius = context.resources
-            .getDimensionPixelSize(R.dimen.qs_corner_radius).toFloat()
-        backgroundDrawable = ShapeDrawable(createShape(cornerRadius))
-        return backgroundDrawable
-    }
-
-    private fun createShape(cornerRadius: Float): RoundRectShape {
-        val radii = FloatArray(8)
-        radii.indices.forEach { radii[it] = cornerRadius }
-        return RoundRectShape(radii, null, null)
+        val ripple = mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
+        colorBackgroundDrawable = ripple.findDrawableByLayerId(R.id.background)
+        return ripple
     }
 
     override fun setClickable(clickable: Boolean) {
         super.setClickable(clickable)
-        background = mTileBackground
+        background = if (clickable && mShowRippleEffect) {
+            mTileBackground
+        } else {
+            colorBackgroundDrawable
+        }
     }
 
     override fun handleStateChanged(state: QSTile.State) {
         super.handleStateChanged(state)
-        if (!mCollapsedView) {
-            mSecondLine.setTextColor(mLabel.textColors)
-        }
         mLabelContainer.background = null
 
         val allowAnimations = animationsEnabled() && paintColor != Color.WHITE
         val newColor = getCircleColor(state.state)
         if (allowAnimations) {
-            animateToNewState(newColor)
+            animateBackground(newColor)
         } else {
             if (newColor != paintColor) {
-                clearAnimator()
-                backgroundDrawable?.setTintList(ColorStateList.valueOf(newColor))?.also {
+                clearBackgroundAnimator()
+                colorBackgroundDrawable?.setTintList(ColorStateList.valueOf(newColor))?.also {
                     paintColor = newColor
                 }
                 paintColor = newColor
@@ -129,14 +123,14 @@ open class QSTileViewHorizontal(
         }
     }
 
-    private fun animateToNewState(newColor: Int) {
-        if (newColor != paintColor) {
-            clearAnimator()
-            paintAnimator = ValueAnimator.ofArgb(paintColor, newColor)
+    private fun animateBackground(newBackgroundColor: Int) {
+        if (newBackgroundColor != paintColor) {
+            clearBackgroundAnimator()
+            paintAnimator = ValueAnimator.ofArgb(paintColor, newBackgroundColor)
                 .setDuration(QSIconViewImpl.QS_ANIM_LENGTH).apply {
                     addUpdateListener { animation: ValueAnimator ->
                         val c = animation.animatedValue as Int
-                        backgroundDrawable?.setTintList(ColorStateList.valueOf(c))?.also {
+                        colorBackgroundDrawable?.setTintList(ColorStateList.valueOf(c))?.also {
                             paintColor = c
                         }
                     }
@@ -145,8 +139,38 @@ open class QSTileViewHorizontal(
         }
     }
 
-    private fun clearAnimator() {
+    override fun changeLabelColor(color: ColorStateList) {
+        val allowAnimations = animationsEnabled()
+        val currentColor = mLabel.textColors.defaultColor
+        if (currentColor != color.defaultColor) {
+            clearLabelAnimator()
+            if (allowAnimations) {
+                labelAnimator = ValueAnimator.ofArgb(currentColor, color.defaultColor)
+                    .setDuration(QSIconViewImpl.QS_ANIM_LENGTH).apply {
+                        addUpdateListener {
+                            setLabelsColor(ColorStateList.valueOf(it.animatedValue as Int))
+                        }
+                        start()
+                }
+            } else {
+                setLabelsColor(color)
+            }
+        }
+    }
+
+    private fun setLabelsColor(color: ColorStateList) {
+        mLabel.setTextColor(color)
+        if (!mCollapsedView) {
+            mSecondLine.setTextColor(color)
+        }
+    }
+
+    private fun clearBackgroundAnimator() {
         paintAnimator?.cancel()?.also { paintAnimator = null }
+    }
+
+    private fun clearLabelAnimator() {
+        labelAnimator?.cancel()?.also { labelAnimator = null }
     }
 
     override fun handleExpand(dualTarget: Boolean) {}

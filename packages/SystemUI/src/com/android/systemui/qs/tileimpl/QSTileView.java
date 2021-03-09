@@ -141,7 +141,7 @@ public class QSTileView extends QSTileBaseView {
             } else {
                 labelColor = mColorLabelUnavailable;
             }
-            mLabel.setTextColor(labelColor);
+            changeLabelColor(labelColor);
             mState = state.state;
             mLabel.setText(state.label);
         }
@@ -161,6 +161,10 @@ public class QSTileView extends QSTileBaseView {
         }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
+    }
+
+    protected void changeLabelColor(ColorStateList color) {
+        mLabel.setTextColor(color);
     }
 
     protected void handleExpand(boolean dualTarget) {
