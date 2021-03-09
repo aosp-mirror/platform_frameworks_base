@@ -121,7 +121,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     protected void startHalOperation() {
         UdfpsHelper.showUdfpsOverlay(getSensorId(),
                 UdfpsHelper.getReasonFromEnrollReason(mEnrollReason),
-                mUdfpsOverlayController);
+                mUdfpsOverlayController, this);
         try {
             mCancellationSignal = getFreshDaemon().enroll(mSequentialId,
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken));
