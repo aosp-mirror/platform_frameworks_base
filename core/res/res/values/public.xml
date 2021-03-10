@@ -3071,7 +3071,6 @@
     <public name="windowSplashScreenAnimationDuration"/>
     <public name="windowSplashScreenBrandingImage"/>
     <public name="splashScreenTheme" />
-    <public name="rippleStyle" />
     <public name="maxResizeWidth" />
     <public name="maxResizeHeight" />
     <public name="targetCellWidth" />
