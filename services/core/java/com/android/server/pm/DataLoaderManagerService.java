@@ -180,6 +180,8 @@ public class DataLoaderManagerService extends SystemService {
             mId = id;
             mListener = listener;
             mDataLoader = null;
+
+            callListener(IDataLoaderStatusListener.DATA_LOADER_BINDING);
         }
 
         @Override

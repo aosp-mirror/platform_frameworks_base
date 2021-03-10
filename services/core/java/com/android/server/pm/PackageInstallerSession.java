@@ -1011,8 +1011,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         "DataLoader installation of APEX modules is not allowed.");
             }
 
-            if (this.params.dataLoaderParams.getComponentName().getPackageName()
-                    == SYSTEM_DATA_LOADER_PACKAGE && mContext.checkCallingOrSelfPermission(
+            boolean systemDataLoader = SYSTEM_DATA_LOADER_PACKAGE.equals(
+                    this.params.dataLoaderParams.getComponentName().getPackageName());
+            if (systemDataLoader && mContext.checkCallingOrSelfPermission(
                     Manifest.permission.USE_SYSTEM_DATA_LOADERS)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("You need the "
@@ -3653,6 +3654,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @Override
             public void onStatusChanged(int dataLoaderId, int status) {
                 switch (status) {
+                    case IDataLoaderStatusListener.DATA_LOADER_BINDING:
                     case IDataLoaderStatusListener.DATA_LOADER_STOPPED:
                     case IDataLoaderStatusListener.DATA_LOADER_DESTROYED:
                         return;
@@ -3763,8 +3765,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
             healthCheckParams.unhealthyMonitoringMs = INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
 
-            final boolean systemDataLoader =
-                    params.getComponentName().getPackageName() == SYSTEM_DATA_LOADER_PACKAGE;
+            final boolean systemDataLoader = SYSTEM_DATA_LOADER_PACKAGE.equals(
+                    params.getComponentName().getPackageName());
 
             final IStorageHealthListener healthListener = new IStorageHealthListener.Stub() {
                 @Override
