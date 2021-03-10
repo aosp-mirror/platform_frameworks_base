@@ -35,7 +35,6 @@ import android.telecom.TelecomManager;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.ImsSsData;
-import android.telephony.ims.SipDelegateManager;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
 
@@ -1537,15 +1536,13 @@ public class CarrierConfigManager {
             "wfc_carrier_name_override_by_pnn_bool";
 
     /**
-     * Value for {#CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING} cnfig.
-     * specifies SPN format of displaying carrier name only.
+     * Specifies SPN format of displaying carrier name only.
      *
      */
     public static final int CROSS_SIM_SPN_FORMAT_CARRIER_NAME_ONLY = 0;
 
     /**
-     * Value for {#CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING} cnfig.
-     * specifies SPN format of displaying carrier name along with "Cross-SIM calling".
+     * Specifies SPN format of displaying carrier name along with "Cross-SIM calling".
      */
     public static final int CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING = 1;
 
@@ -1554,8 +1551,8 @@ public class CarrierConfigManager {
      *
      * <p>Available options are:
      * <ul>
-     * <li>  {#CROSS_SIM_SPN_FORMAT_CARRIER_NAME_ONLY}: %s</li>
-     * <li>  {#CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING}: %s Cross-SIM Calling</li>
+     * <li>  {@link #CROSS_SIM_SPN_FORMAT_CARRIER_NAME_ONLY}: %s</li>
+     * <li>  {@link #CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING}: %s Cross-SIM Calling</li>
      * </ul>
      * %s will be filled with carrier name
      */
