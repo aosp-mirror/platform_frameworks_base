@@ -16,7 +16,6 @@
 
 package com.android.internal.jank;
 
-import static android.view.SurfaceControl.JankData.BUFFER_STUFFING;
 import static android.view.SurfaceControl.JankData.DISPLAY_HAL;
 import static android.view.SurfaceControl.JankData.JANK_APP_DEADLINE_MISSED;
 import static android.view.SurfaceControl.JankData.JANK_NONE;
@@ -42,6 +41,7 @@ import android.view.SurfaceControl.JankData.JankType;
 import android.view.ThreadedRenderer;
 import android.view.ViewRootImpl;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor.Session;
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -163,6 +163,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 }, 50);
             }
         };
+
+        // This callback has a reference to FrameTracker, remember to remove it to avoid leakage.
         viewRootWrapper.addSurfaceChangedCallback(mSurfaceChangedCallback);
     }
 
@@ -187,9 +189,13 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
      */
     public synchronized void end() {
         mEndVsyncId = mChoreographer.getVsyncId();
-        Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
-        if (mEndVsyncId == mBeginVsyncId) {
+        // Cancel the session if:
+        // 1. The session begins and ends at the same vsync id.
+        // 2. The session never begun.
+        if (mEndVsyncId == mBeginVsyncId || mBeginVsyncId == INVALID_ID) {
             cancel();
+        } else {
+            Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
         }
         // We don't remove observer here,
         // will remove it when all the frame metrics in this duration are called back.
@@ -200,11 +206,19 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
      * Cancel the trace session of the CUJ.
      */
     public synchronized void cancel() {
-        if (mBeginVsyncId == INVALID_ID || mEndVsyncId != INVALID_ID) return;
-        Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
+        // The session is ongoing, end the trace session.
+        // That means the cancel call is from external invocation, not from end().
+        if (mBeginVsyncId != INVALID_ID && mEndVsyncId == INVALID_ID) {
+            Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
+        }
         mCancelled = true;
+
+        // Always remove the observers in cancel call to avoid leakage.
         removeObservers();
-        if (mListener != null) {
+
+        // Notify the listener the session has been cancelled.
+        // We don't notify the listeners if the session never begun.
+        if (mListener != null && mBeginVsyncId != INVALID_ID) {
             mListener.onNotifyCujEvents(mSession, InteractionJankMonitor.ACTION_SESSION_CANCEL);
         }
     }
@@ -393,7 +407,11 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         }
     }
 
-    private void removeObservers() {
+    /**
+     * Remove all the registered listeners, observers and callbacks.
+     */
+    @VisibleForTesting
+    public void removeObservers() {
         mRendererWrapper.removeObserver(mObserver);
         mSurfaceControlWrapper.removeJankStatsListener(this);
         if (mSurfaceChangedCallback != null) {
