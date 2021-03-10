@@ -55,13 +55,24 @@ public:
         return mObservers.size() > 0;
     }
 
-    void reportFrameMetrics(const int64_t* stats) {
+    /**
+     * Notify observers about the metrics contained in 'stats'.
+     * If an observer is waiting for present time, notify when 'stats' has present time.
+     *
+     * If an observer does not want present time, only notify when 'hasPresentTime' is false.
+     * Never notify both types of observers from the same callback, because the callback with
+     * 'hasPresentTime' is sent at a different time than the one without.
+     */
+    void reportFrameMetrics(const int64_t* stats, bool hasPresentTime) {
         FatVector<sp<FrameMetricsObserver>, 10> copy;
         {
             std::lock_guard lock(mObserversLock);
             copy.reserve(mObservers.size());
             for (size_t i = 0; i < mObservers.size(); i++) {
-                copy.push_back(mObservers[i]);
+                const bool wantsPresentTime = mObservers[i]->waitForPresentTime();
+                if (hasPresentTime == wantsPresentTime) {
+                    copy.push_back(mObservers[i]);
+                }
             }
         }
         for (size_t i = 0; i < copy.size(); i++) {

@@ -35,7 +35,9 @@ static JNIEnv* getenv(JavaVM* vm) {
     return env;
 }
 
-HardwareRendererObserver::HardwareRendererObserver(JavaVM *vm, jobject observer) : mVm(vm) {
+HardwareRendererObserver::HardwareRendererObserver(JavaVM* vm, jobject observer,
+                                                   bool waitForPresentTime)
+        : uirenderer::FrameMetricsObserver(waitForPresentTime), mVm(vm) {
     mObserverWeak = getenv(mVm)->NewWeakGlobalRef(observer);
     LOG_ALWAYS_FATAL_IF(mObserverWeak == nullptr,
             "unable to create frame stats observer reference");
@@ -86,14 +88,16 @@ void HardwareRendererObserver::notify(const int64_t* stats) {
 }
 
 static jlong android_graphics_HardwareRendererObserver_createObserver(JNIEnv* env,
-                                                                      jobject observerObj) {
+                                                                      jobject observerObj,
+                                                                      jboolean waitForPresentTime) {
     JavaVM* vm = nullptr;
     if (env->GetJavaVM(&vm) != JNI_OK) {
         LOG_ALWAYS_FATAL("Unable to get Java VM");
         return 0;
     }
 
-    HardwareRendererObserver* observer = new HardwareRendererObserver(vm, observerObj);
+    HardwareRendererObserver* observer =
+            new HardwareRendererObserver(vm, observerObj, waitForPresentTime);
     return reinterpret_cast<jlong>(observer);
 }
 
@@ -110,10 +114,10 @@ static jint android_graphics_HardwareRendererObserver_getNextBuffer(JNIEnv* env,
 }
 
 static const std::array gMethods = {
-    MAKE_JNI_NATIVE_METHOD("nCreateObserver", "()J",
-                           android_graphics_HardwareRendererObserver_createObserver),
-    MAKE_JNI_NATIVE_METHOD("nGetNextBuffer", "(J[J)I",
-                           android_graphics_HardwareRendererObserver_getNextBuffer),
+        MAKE_JNI_NATIVE_METHOD("nCreateObserver", "(Z)J",
+                               android_graphics_HardwareRendererObserver_createObserver),
+        MAKE_JNI_NATIVE_METHOD("nGetNextBuffer", "(J[J)I",
+                               android_graphics_HardwareRendererObserver_getNextBuffer),
 };
 
 int register_android_graphics_HardwareRendererObserver(JNIEnv* env) {
