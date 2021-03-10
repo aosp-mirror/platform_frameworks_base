@@ -19,11 +19,13 @@ package android.net.vcn;
 import static android.net.vcn.VcnControlPlaneConfig.CONFIG_TYPE_IKE;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.TunnelModeChildSessionParams;
+import android.net.vcn.persistablebundleutils.IkeSessionParamsUtils;
+import android.net.vcn.persistablebundleutils.TunnelModeChildSessionParamsUtils;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
+import android.util.Log;
 
 import java.util.Objects;
 
@@ -38,14 +40,11 @@ import java.util.Objects;
 public final class VcnControlPlaneIkeConfig extends VcnControlPlaneConfig {
     private static final String TAG = VcnControlPlaneIkeConfig.class.getSimpleName();
 
-    // STOPSHIP: b/163604823 Make mIkeParams and mChildParams @NonNull when it is supported to
-    // construct mIkeParams and mChildParams from PersistableBundles.
-
     private static final String IKE_PARAMS_KEY = "mIkeParams";
-    @Nullable private final IkeSessionParams mIkeParams;
+    @NonNull private final IkeSessionParams mIkeParams;
 
     private static final String CHILD_PARAMS_KEY = "mChildParams";
-    @Nullable private final TunnelModeChildSessionParams mChildParams;
+    @NonNull private final TunnelModeChildSessionParams mChildParams;
 
     private static final ArraySet<String> BUNDLE_KEY_SET = new ArraySet<>();
 
@@ -80,11 +79,19 @@ public final class VcnControlPlaneIkeConfig extends VcnControlPlaneConfig {
         final PersistableBundle ikeParamsBundle = in.getPersistableBundle(IKE_PARAMS_KEY);
         final PersistableBundle childParamsBundle = in.getPersistableBundle(CHILD_PARAMS_KEY);
 
-        // STOPSHIP: b/163604823 Support constructing mIkeParams and mChildParams from
-        // PersistableBundles.
+        Objects.requireNonNull(ikeParamsBundle, "IKE Session Params was null");
+        Objects.requireNonNull(childParamsBundle, "Child Session Params was null");
 
-        mIkeParams = null;
-        mChildParams = null;
+        mIkeParams = IkeSessionParamsUtils.fromPersistableBundle(ikeParamsBundle);
+        mChildParams = TunnelModeChildSessionParamsUtils.fromPersistableBundle(childParamsBundle);
+
+        for (String key : in.keySet()) {
+            if (!BUNDLE_KEY_SET.contains(key)) {
+                Log.w(TAG, "Found an unexpected key in the PersistableBundle: " + key);
+            }
+        }
+
+        validate();
     }
 
     private void validate() {
@@ -101,9 +108,11 @@ public final class VcnControlPlaneIkeConfig extends VcnControlPlaneConfig {
     @NonNull
     public PersistableBundle toPersistableBundle() {
         final PersistableBundle result = super.toPersistableBundle();
-
-        // STOPSHIP: b/163604823 Support converting mIkeParams and mChildParams to
-        // PersistableBundles.
+        result.putPersistableBundle(
+                IKE_PARAMS_KEY, IkeSessionParamsUtils.toPersistableBundle(mIkeParams));
+        result.putPersistableBundle(
+                CHILD_PARAMS_KEY,
+                TunnelModeChildSessionParamsUtils.toPersistableBundle(mChildParams));
         return result;
     }
 
@@ -134,10 +143,9 @@ public final class VcnControlPlaneIkeConfig extends VcnControlPlaneConfig {
 
         VcnControlPlaneIkeConfig other = (VcnControlPlaneIkeConfig) o;
 
-        // STOPSHIP: b/163604823 Also check mIkeParams and mChildParams when it is supported to
-        // construct mIkeParams and mChildParams from PersistableBundles. They are not checked
-        // now so that VcnGatewayConnectionConfigTest and VcnConfigTest can pass.
-        return super.equals(o);
+        return super.equals(o)
+                && Objects.equals(mIkeParams, other.mIkeParams)
+                && Objects.equals(mChildParams, other.mChildParams);
     }
 
     /** @hide */

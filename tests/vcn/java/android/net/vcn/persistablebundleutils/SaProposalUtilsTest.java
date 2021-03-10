@@ -32,21 +32,25 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SaProposalUtilsTest {
+    /** Package private so that IkeSessionParamsUtilsTest can use it */
+    static IkeSaProposal buildTestIkeSaProposal() {
+        return new IkeSaProposal.Builder()
+                .addEncryptionAlgorithm(
+                        SaProposal.ENCRYPTION_ALGORITHM_3DES, SaProposal.KEY_LEN_UNUSED)
+                .addEncryptionAlgorithm(
+                        SaProposal.ENCRYPTION_ALGORITHM_AES_CBC, SaProposal.KEY_LEN_AES_128)
+                .addIntegrityAlgorithm(SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA1_96)
+                .addIntegrityAlgorithm(SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_256_128)
+                .addPseudorandomFunction(SaProposal.PSEUDORANDOM_FUNCTION_AES128_XCBC)
+                .addPseudorandomFunction(SaProposal.PSEUDORANDOM_FUNCTION_SHA2_256)
+                .addDhGroup(SaProposal.DH_GROUP_1024_BIT_MODP)
+                .addDhGroup(SaProposal.DH_GROUP_3072_BIT_MODP)
+                .build();
+    }
+
     @Test
     public void testPersistableBundleEncodeDecodeIsLosslessIkeProposal() throws Exception {
-        final IkeSaProposal proposal =
-                new IkeSaProposal.Builder()
-                        .addEncryptionAlgorithm(
-                                SaProposal.ENCRYPTION_ALGORITHM_3DES, SaProposal.KEY_LEN_UNUSED)
-                        .addEncryptionAlgorithm(
-                                SaProposal.ENCRYPTION_ALGORITHM_AES_CBC, SaProposal.KEY_LEN_AES_128)
-                        .addIntegrityAlgorithm(SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA1_96)
-                        .addIntegrityAlgorithm(SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_256_128)
-                        .addPseudorandomFunction(SaProposal.PSEUDORANDOM_FUNCTION_AES128_XCBC)
-                        .addPseudorandomFunction(SaProposal.PSEUDORANDOM_FUNCTION_SHA2_256)
-                        .addDhGroup(SaProposal.DH_GROUP_1024_BIT_MODP)
-                        .addDhGroup(SaProposal.DH_GROUP_3072_BIT_MODP)
-                        .build();
+        final IkeSaProposal proposal = buildTestIkeSaProposal();
 
         final PersistableBundle bundle = IkeSaProposalUtils.toPersistableBundle(proposal);
         final SaProposal resultProposal = IkeSaProposalUtils.fromPersistableBundle(bundle);
