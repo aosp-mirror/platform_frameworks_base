@@ -1110,6 +1110,10 @@ public final class LoadedApk {
                         mPackageName,
                         PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                         UserHandle.myUserId());
+        if (pi == null) {
+            throw new IllegalStateException("Unable to get package info for "
+                    + mPackageName + "; is package not installed?");
+        }
         /*
          * Two possible indications that this package could be
          * sharing its virtual machine with other packages:
