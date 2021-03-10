@@ -32,7 +32,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.annotation.Nullable;
 import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
 import android.content.ComponentName;
@@ -52,10 +51,8 @@ import android.util.Size;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
@@ -198,6 +195,11 @@ public class PipMenuView extends FrameLayout {
     }
 
     @Override
+    public boolean shouldDelayChildPressedState() {
+        return true;
+    }
+
+    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (!mAllowTouches) {
             return false;
@@ -285,18 +287,6 @@ public class PipMenuView extends FrameLayout {
                 repostDelayedHide(POST_INTERACTION_DISMISS_DELAY);
             }
         }
-    }
-
-    @Nullable SurfaceControl getWindowSurfaceControl() {
-        final ViewRootImpl root = getViewRootImpl();
-        if (root == null) {
-            return null;
-        }
-        final SurfaceControl out = root.getSurfaceControl();
-        if (out != null && out.isValid()) {
-            return out;
-        }
-        return null;
     }
 
     /**
@@ -398,8 +388,20 @@ public class PipMenuView extends FrameLayout {
             return true;
         });
 
+        // Update the expand button only if it should show with the menu
+        expandContainer.setVisibility(mMenuState == MENU_STATE_FULL
+                ? View.VISIBLE
+                : View.INVISIBLE);
+
+        FrameLayout.LayoutParams expandedLp =
+                (FrameLayout.LayoutParams) expandContainer.getLayoutParams();
         if (mActions.isEmpty() || mMenuState == MENU_STATE_CLOSE || mMenuState == MENU_STATE_NONE) {
             actionsContainer.setVisibility(View.INVISIBLE);
+
+            // Update the expand container margin to adjust the center of the expand button to
+            // account for the existence of the action container
+            expandedLp.topMargin = 0;
+            expandedLp.bottomMargin = 0;
         } else {
             actionsContainer.setVisibility(View.VISIBLE);
             if (mActionsGroup != null) {
@@ -455,14 +457,12 @@ public class PipMenuView extends FrameLayout {
 
             // Update the expand container margin to adjust the center of the expand button to
             // account for the existence of the action container
-            FrameLayout.LayoutParams expandedLp =
-                    (FrameLayout.LayoutParams) expandContainer.getLayoutParams();
             expandedLp.topMargin = getResources().getDimensionPixelSize(
                     R.dimen.pip_action_padding);
             expandedLp.bottomMargin = getResources().getDimensionPixelSize(
                     R.dimen.pip_expand_container_edge_margin);
-            expandContainer.requestLayout();
         }
+        expandContainer.requestLayout();
     }
 
     private void notifyMenuStateChange(int menuState, boolean resize, Runnable callback) {
