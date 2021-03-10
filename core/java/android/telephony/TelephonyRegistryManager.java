@@ -861,6 +861,7 @@ public class TelephonyRegistryManager {
             eventList.add(TelephonyCallback.EVENT_CELL_LOCATION_CHANGED);
         }
 
+        // Note: Legacy PhoneStateListeners use EVENT_LEGACY_CALL_STATE_CHANGED
         if (telephonyCallback instanceof TelephonyCallback.CallStateListener) {
             eventList.add(TelephonyCallback.EVENT_CALL_STATE_CHANGED);
         }
@@ -1000,8 +1001,10 @@ public class TelephonyRegistryManager {
             eventList.add(TelephonyCallback.EVENT_CELL_LOCATION_CHANGED);
         }
 
+        // Note: Legacy call state listeners can get the phone number which is not provided in the
+        // new version in TelephonyCallback.
         if ((eventMask & PhoneStateListener.LISTEN_CALL_STATE) != 0) {
-            eventList.add(TelephonyCallback.EVENT_CALL_STATE_CHANGED);
+            eventList.add(TelephonyCallback.EVENT_LEGACY_CALL_STATE_CHANGED);
         }
 
         if ((eventMask & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
