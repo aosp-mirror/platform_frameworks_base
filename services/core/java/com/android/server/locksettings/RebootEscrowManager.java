@@ -251,6 +251,8 @@ class RebootEscrowManager {
         }
 
         if (rebootEscrowUsers.isEmpty()) {
+            Slog.i(TAG, "No reboot escrow data found for users,"
+                    + " skipping loading escrow data");
             return;
         }
 
