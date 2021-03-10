@@ -134,7 +134,8 @@ public class SystemServicePowerCalculator extends PowerCalculator {
         // TODO(179210707): additionally account for CPU active and per cluster battery use
 
         double powerMah = 0;
-        for (int i = 0; i < mPowerEstimators.length; i++) {
+        final int size = Math.min(mPowerEstimators.length, systemServiceTimeAtCpuSpeeds.length);
+        for (int i = 0; i < size; i++) {
             powerMah += mPowerEstimators[i].calculatePower(systemServiceTimeAtCpuSpeeds[i]);
         }
 
