@@ -3875,7 +3875,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    public void testForceUpdateUserSetupComplete_userbuild() {
+    public void testForceUpdateUserSetupComplete_forcesUpdate() {
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
 
@@ -3887,34 +3887,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         DevicePolicyData userData = new DevicePolicyData(userId);
         userData.mUserSetupComplete = true;
         dpms.mUserData.put(UserHandle.USER_SYSTEM, userData);
-
-        // GIVEN it's user build
-        getServices().buildMock.isDebuggable = false;
-
-        assertThat(dpms.hasUserSetupCompleted()).isTrue();
-
-        dpm.forceUpdateUserSetupComplete();
-
-        // THEN the state in dpms is not changed
-        assertThat(dpms.hasUserSetupCompleted()).isTrue();
-    }
-
-    @Test
-    public void testForceUpdateUserSetupComplete_userDebugbuild() {
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-
-        final int userId = UserHandle.USER_SYSTEM;
-        // GIVEN userComplete is false in SettingsProvider
-        setUserSetupCompleteForUser(false, userId);
-
-        // GIVEN userComplete is true in DPM
-        DevicePolicyData userData = new DevicePolicyData(userId);
-        userData.mUserSetupComplete = true;
-        dpms.mUserData.put(UserHandle.USER_SYSTEM, userData);
-
-        // GIVEN it's userdebug build
-        getServices().buildMock.isDebuggable = true;
 
         assertThat(dpms.hasUserSetupCompleted()).isTrue();
 
