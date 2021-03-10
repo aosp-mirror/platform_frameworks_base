@@ -37,7 +37,6 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.FloatingContentCoordinator;
-import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
@@ -64,8 +63,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private static final int LEAVE_PIP_DURATION = 300;
     private static final int SHIFT_DURATION = 300;
 
+    private static final float PIP_STIFFNESS = 700f;
+    private static final float PIP_DAMPING_RATIO = SpringForce.DAMPING_RATIO_NO_BOUNCY;
+
     /** Friction to use for PIP when it moves via physics fling animations. */
-    private static final float DEFAULT_FRICTION = 2f;
+    private static final float DEFAULT_FRICTION = 1.9f;
 
     private final Context mContext;
     private final PipTaskOrganizer mPipTaskOrganizer;
@@ -119,13 +121,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     /** SpringConfig to use for fling-then-spring animations. */
     private final PhysicsAnimator.SpringConfig mSpringConfig =
-            new PhysicsAnimator.SpringConfig(
-                    SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+            new PhysicsAnimator.SpringConfig(PIP_STIFFNESS, PIP_DAMPING_RATIO);
 
     /** SpringConfig to use for springing PIP away from conflicting floating content. */
     private final PhysicsAnimator.SpringConfig mConflictResolutionSpringConfig =
-                new PhysicsAnimator.SpringConfig(
-                        SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+                new PhysicsAnimator.SpringConfig(SpringForce.STIFFNESS_LOW, PIP_DAMPING_RATIO);
 
     private final Consumer<Rect> mUpdateBoundsCallback = (Rect newBounds) -> {
         mMenuController.updateMenuLayout(newBounds);
