@@ -27,11 +27,13 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.os.IVold;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
@@ -53,6 +55,7 @@ public final class StorageSessionController {
 
     private final Object mLock = new Object();
     private final Context mContext;
+    private final UserManager mUserManager;
     @GuardedBy("mLock")
     private final SparseArray<StorageUserConnection> mConnections = new SparseArray<>();
 
@@ -63,6 +66,30 @@ public final class StorageSessionController {
 
     public StorageSessionController(Context context) {
         mContext = Objects.requireNonNull(context);
+        mUserManager = mContext.getSystemService(UserManager.class);
+    }
+
+    /**
+     * Returns userId for the volume to be used in the StorageUserConnection.
+     * If the user is a clone profile, it will use the same connection
+     * as the parent user, and hence this method returns the parent's userId. Else, it returns the
+     * volume's mountUserId
+     * @param vol for which the storage session has to be started
+     * @return userId for connection for this volume
+     */
+    public int getConnectionUserIdForVolume(VolumeInfo vol) {
+        final Context volumeUserContext = mContext.createContextAsUser(
+                UserHandle.of(vol.mountUserId), 0);
+        boolean sharesMediaWithParent = volumeUserContext.getSystemService(
+                UserManager.class).sharesMediaWithParent();
+
+        UserInfo userInfo = mUserManager.getUserInfo(vol.mountUserId);
+        if (userInfo != null && sharesMediaWithParent) {
+            // Clones use the same connection as their parent
+            return userInfo.profileGroupId;
+        } else {
+            return vol.mountUserId;
+        }
     }
 
     /**
@@ -88,7 +115,7 @@ public final class StorageSessionController {
         Slog.i(TAG, "On volume mount " + vol);
 
         String sessionId = vol.getId();
-        int userId = vol.getMountUserId();
+        int userId = getConnectionUserIdForVolume(vol);
 
         StorageUserConnection connection = null;
         synchronized (mLock) {
@@ -120,7 +147,7 @@ public final class StorageSessionController {
             return;
         }
         String sessionId = vol.getId();
-        int userId = vol.getMountUserId();
+        int userId = getConnectionUserIdForVolume(vol);
 
         StorageUserConnection connection = null;
         synchronized (mLock) {
@@ -191,7 +218,7 @@ public final class StorageSessionController {
 
         Slog.i(TAG, "On volume remove " + vol);
         String sessionId = vol.getId();
-        int userId = vol.getMountUserId();
+        int userId = getConnectionUserIdForVolume(vol);
 
         synchronized (mLock) {
             StorageUserConnection connection = mConnections.get(userId);
