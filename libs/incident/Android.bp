@@ -95,7 +95,7 @@ cc_test {
     name: "libincident_test",
     test_config: "AndroidTest.xml",
     defaults: ["libincidentpriv_defaults"],
-    test_suites: ["device-tests", "mts"],
+    test_suites: ["device-tests", "mts-statsd"],
     compile_multilib: "both",
     multilib: {
         lib64: {
