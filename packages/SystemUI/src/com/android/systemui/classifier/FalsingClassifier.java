@@ -21,7 +21,6 @@ import android.view.MotionEvent;
 import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.util.List;
-import java.util.Queue;
 
 /**
  * Base class for rules that determine False touches.
@@ -40,8 +39,8 @@ public abstract class FalsingClassifier {
         return mDataProvider.getRecentMotionEvents();
     }
 
-    Queue<? extends List<MotionEvent>> getHistoricalEvents() {
-        return mDataProvider.getHistoricalMotionEvents();
+    List<MotionEvent> getPriorMotionEvents() {
+        return mDataProvider.getPriorMotionEvents();
     }
 
     MotionEvent getFirstMotionEvent() {
