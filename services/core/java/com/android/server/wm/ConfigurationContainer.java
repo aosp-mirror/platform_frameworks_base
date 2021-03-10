@@ -367,8 +367,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * Returns {@code true} if this {@link ConfigurationContainer} provides the maximum bounds to
      * its child {@link ConfigurationContainer}s. Returns {@code false}, otherwise.
      * <p>
-     * The maximum bounds is how large a window can be expanded. Currently only
-     * {@link DisplayContent} and {@link DisplayArea} effect this property.
+     * The maximum bounds is how large a window can be expanded.
      * </p>
      */
     protected boolean providesMaxBounds() {
