@@ -6377,6 +6377,19 @@ public abstract class Context {
     }
 
     /**
+     * Creates a context with specific properties and behaviors.
+     *
+     * @param contextParams Parameters for how the new context should behave.
+     * @return A context with the specified behaviors.
+     *
+     * @see ContextParams
+     */
+    @NonNull
+    public Context createContext(@NonNull ContextParams contextParams) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Return a new Context object for the current Context but attribute to a different tag.
      * In complex apps attribution tagging can be used to distinguish between separate logical
      * parts.
