@@ -3853,6 +3853,15 @@
         <!-- Attribute whether the accessibility service wants to be able to take screenshot. -->
         <attr name="canTakeScreenshot" format="boolean" />
 
+        <!-- Attribute indicating whether the accessibility service is used to assist users with
+             disabilities. This criteria might be defined by the installer. The default is false.
+             <p>
+             Note: If this flag is false, system will show a notification after a duration to
+             inform the user about the privacy implications of the service.
+             </p>
+        -->
+        <attr name="isAccessibilityTool" format="boolean" />
+
         <!-- Animated image of the accessibility service purpose or behavior, to help users
              understand how the service can help them.-->
         <attr name="animatedImageDrawable" format="reference"/>
