@@ -42038,7 +42038,7 @@ package android.telephony {
     method public static int getDefaultSmsSubscriptionId();
     method public static int getDefaultSubscriptionId();
     method public static int getDefaultVoiceSubscriptionId();
-    method public int getDeviceToDeviceStatusSharing(int);
+    method public int getDeviceToDeviceStatusSharingPreference(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getOpportunisticSubscriptions();
     method public static int getSlotIndex(int);
     method @Nullable public int[] getSubscriptionIds(int);
@@ -42051,7 +42051,7 @@ package android.telephony {
     method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
     method public void removeOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharing(int, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingPreference(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
     method public void setSubscriptionOverrideCongested(int, boolean, @NonNull int[], long);
