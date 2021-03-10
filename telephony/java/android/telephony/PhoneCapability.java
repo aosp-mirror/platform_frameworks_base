@@ -26,6 +26,7 @@ import android.os.Parcelable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,18 +48,10 @@ public final class PhoneCapability implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "DEVICE_NR_CAPABILITY_" }, value = {
-            DEVICE_NR_CAPABILITY_NONE,
             DEVICE_NR_CAPABILITY_NSA,
             DEVICE_NR_CAPABILITY_SA,
     })
     public @interface DeviceNrCapability {}
-
-    /**
-     * Indicates DEVICE_NR_CAPABILITY_NONE determine that the device does not enable 5G NR.
-     * @hide
-     */
-    @SystemApi
-    public static final int DEVICE_NR_CAPABILITY_NONE = 0;
 
     /**
      * Indicates DEVICE_NR_CAPABILITY_NSA determine that the device enable the non-standalone
@@ -66,7 +59,7 @@ public final class PhoneCapability implements Parcelable {
      * @hide
      */
     @SystemApi
-    public static final int DEVICE_NR_CAPABILITY_NSA = 1 << 0;
+    public static final int DEVICE_NR_CAPABILITY_NSA = 1;
 
     /**
      * Indicates DEVICE_NR_CAPABILITY_SA determine that the device enable the standalone (SA)
@@ -74,7 +67,7 @@ public final class PhoneCapability implements Parcelable {
      * @hide
      */
     @SystemApi
-    public static final int DEVICE_NR_CAPABILITY_SA = 1 << 1;
+    public static final int DEVICE_NR_CAPABILITY_SA = 2;
 
     static {
         ModemInfo modemInfo1 = new ModemInfo(0, 0, true, true);
@@ -83,31 +76,34 @@ public final class PhoneCapability implements Parcelable {
         List<ModemInfo> logicalModemList = new ArrayList<>();
         logicalModemList.add(modemInfo1);
         logicalModemList.add(modemInfo2);
+        int[] deviceNrCapabilities = new int[0];
+
         DEFAULT_DSDS_CAPABILITY = new PhoneCapability(1, 1, logicalModemList, false,
-                DEVICE_NR_CAPABILITY_NONE);
+                deviceNrCapabilities);
 
         logicalModemList = new ArrayList<>();
         logicalModemList.add(modemInfo1);
         DEFAULT_SSSS_CAPABILITY = new PhoneCapability(1, 1, logicalModemList, false,
-                DEVICE_NR_CAPABILITY_NONE);
+                deviceNrCapabilities);
     }
 
     /**
-     * MaxActivePsVoice defines the maximum number of active voice calls.  For a dual sim dual
-     * standby (DSDS) modem it would be one, but for a dual sim dual active modem it would be 2.
+     * mMaxActiveVoiceSubscriptions defines the maximum subscriptions that can support
+     * simultaneous voice calls. For a dual sim dual standby (DSDS) device it would be one, but
+     * for a dual sim dual active device it would be 2.
      *
      * @hide
      */
-    private final int mMaxActivePsVoice;
+    private final int mMaxActiveVoiceSubscriptions;
 
     /**
-     * MaxActiveInternetData defines how many logical modems can have
-     * PS attached simultaneously. For example, for L+L modem it
-     * should be 2.
+     * mMaxActiveDataSubscriptions defines the maximum subscriptions that can support
+     * simultaneous data connections.
+     * For example, for L+L device it should be 2.
      *
      * @hide
      */
-    private final int mMaxActiveInternetData;
+    private final int mMaxActiveDataSubscriptions;
 
     /**
      * Whether modem supports both internet PDN up so
@@ -126,42 +122,45 @@ public final class PhoneCapability implements Parcelable {
      *
      * @hide
      */
-    private final int mDeviceNrCapability;
+    private final int[] mDeviceNrCapabilities;
 
     /** @hide */
-    public PhoneCapability(int maxActivePsVoice, int maxActiveInternetData,
+    public PhoneCapability(int maxActiveVoiceSubscriptions, int maxActiveDataSubscriptions,
             List<ModemInfo> logicalModemList, boolean networkValidationBeforeSwitchSupported,
-            int deviceNrCapability) {
-        this.mMaxActivePsVoice = maxActivePsVoice;
-        this.mMaxActiveInternetData = maxActiveInternetData;
+            int[] deviceNrCapabilities) {
+        this.mMaxActiveVoiceSubscriptions = maxActiveVoiceSubscriptions;
+        this.mMaxActiveDataSubscriptions = maxActiveDataSubscriptions;
         // Make sure it's not null.
         this.mLogicalModemList = logicalModemList == null ? new ArrayList<>() : logicalModemList;
         this.mNetworkValidationBeforeSwitchSupported = networkValidationBeforeSwitchSupported;
-        this.mDeviceNrCapability = deviceNrCapability;
+        this.mDeviceNrCapabilities = deviceNrCapabilities;
     }
 
     @Override
     public String toString() {
-        return "mMaxActivePsVoice=" + mMaxActivePsVoice
-                + " mMaxActiveInternetData=" + mMaxActiveInternetData
+        return "mMaxActiveVoiceSubscriptions=" + mMaxActiveVoiceSubscriptions
+                + " mMaxActiveDataSubscriptions=" + mMaxActiveDataSubscriptions
                 + " mNetworkValidationBeforeSwitchSupported="
                 + mNetworkValidationBeforeSwitchSupported
-                + " mDeviceNrCapability " + mDeviceNrCapability;
+                + " mDeviceNrCapability " + Arrays.toString(mDeviceNrCapabilities);
     }
 
     private PhoneCapability(Parcel in) {
-        mMaxActivePsVoice = in.readInt();
-        mMaxActiveInternetData = in.readInt();
+        mMaxActiveVoiceSubscriptions = in.readInt();
+        mMaxActiveDataSubscriptions = in.readInt();
         mNetworkValidationBeforeSwitchSupported = in.readBoolean();
         mLogicalModemList = new ArrayList<>();
         in.readList(mLogicalModemList, ModemInfo.class.getClassLoader());
-        mDeviceNrCapability = in.readInt();
+        mDeviceNrCapabilities = in.createIntArray();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mMaxActivePsVoice, mMaxActiveInternetData, mLogicalModemList,
-                mNetworkValidationBeforeSwitchSupported, mDeviceNrCapability);
+        return Objects.hash(mMaxActiveVoiceSubscriptions,
+                mMaxActiveDataSubscriptions,
+                mLogicalModemList,
+                mNetworkValidationBeforeSwitchSupported,
+                Arrays.hashCode(mDeviceNrCapabilities));
     }
 
     @Override
@@ -176,12 +175,12 @@ public final class PhoneCapability implements Parcelable {
 
         PhoneCapability s = (PhoneCapability) o;
 
-        return (mMaxActivePsVoice == s.mMaxActivePsVoice
-                && mMaxActiveInternetData == s.mMaxActiveInternetData
+        return (mMaxActiveVoiceSubscriptions == s.mMaxActiveVoiceSubscriptions
+                && mMaxActiveDataSubscriptions == s.mMaxActiveDataSubscriptions
                 && mNetworkValidationBeforeSwitchSupported
                 == s.mNetworkValidationBeforeSwitchSupported
                 && mLogicalModemList.equals(s.mLogicalModemList)
-                && mDeviceNrCapability == s.mDeviceNrCapability);
+                && Arrays.equals(mDeviceNrCapabilities, s.mDeviceNrCapabilities));
     }
 
     /**
@@ -195,11 +194,11 @@ public final class PhoneCapability implements Parcelable {
      * {@link Parcelable#writeToParcel}
      */
     public void writeToParcel(@NonNull Parcel dest, @Parcelable.WriteFlags int flags) {
-        dest.writeInt(mMaxActivePsVoice);
-        dest.writeInt(mMaxActiveInternetData);
+        dest.writeInt(mMaxActiveVoiceSubscriptions);
+        dest.writeInt(mMaxActiveDataSubscriptions);
         dest.writeBoolean(mNetworkValidationBeforeSwitchSupported);
         dest.writeList(mLogicalModemList);
-        dest.writeInt(mDeviceNrCapability);
+        dest.writeIntArray(mDeviceNrCapabilities);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<PhoneCapability> CREATOR =
@@ -214,25 +213,24 @@ public final class PhoneCapability implements Parcelable {
     };
 
     /**
-     * @return the maximum number of active packet-switched calls.  For a dual
-     * sim dual standby (DSDS) modem it would be one, but for a dual sim dual active modem it
+     * @return the maximum subscriptions that can support simultaneous voice calls. For a dual
+     * sim dual standby (DSDS) device it would be one, but for a dual sim dual active device it
      * would be 2.
      * @hide
      */
     @SystemApi
-    public @IntRange(from = 1) int getMaxActivePacketSwitchedVoiceCalls() {
-        return mMaxActivePsVoice;
+    public @IntRange(from = 1) int getMaxActiveVoiceSubscriptions() {
+        return mMaxActiveVoiceSubscriptions;
     }
 
     /**
-     * @return MaxActiveInternetData defines how many logical modems can have PS attached
-     * simultaneously.
-     * For example, for L+L modem it should be 2.
+     * @return the maximum subscriptions that can support simultaneous data connections.
+     * For example, for L+L device it should be 2.
      * @hide
      */
     @SystemApi
-    public @IntRange(from = 1) int getMaxActiveInternetData() {
-        return mMaxActiveInternetData;
+    public @IntRange(from = 1) int getMaxActiveDataSubscriptions() {
+        return mMaxActiveDataSubscriptions;
     }
 
     /**
@@ -254,13 +252,16 @@ public final class PhoneCapability implements Parcelable {
     }
 
     /**
-     * Return the device's NR capability.
+     * Return List of the device's NR capability. If the device doesn't support NR capability,
+     * then this api return empty array.
+     * @see DEVICE_NR_CAPABILITY_NSA
+     * @see DEVICE_NR_CAPABILITY_SA
      *
-     * @return {@link DeviceNrCapability} the device's NR capability.
+     * @return List of the device's NR capability.
      * @hide
      */
     @SystemApi
-    public @DeviceNrCapability int getDeviceNrCapabilityBitmask() {
-        return mDeviceNrCapability;
+    public @NonNull @DeviceNrCapability int[] getDeviceNrCapabilities() {
+        return mDeviceNrCapabilities == null ? (new int[0]) : mDeviceNrCapabilities;
     }
 }
