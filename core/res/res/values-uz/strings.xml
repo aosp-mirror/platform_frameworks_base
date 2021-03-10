@@ -204,6 +204,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"Twilight xizmati"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Vaqt mintaqasini aniqlagich (Oflayn)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS yordamida vaqtni yangilash xizmati"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Qurilmangizdagi ma’lumotlar o‘chirib tashlanadi"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administrator ilovasini ishlatib bo‘lmaydi. Qurilmada barcha ma’lumotlar o‘chirib tashlanadi.\n\nSavollaringiz bo‘lsa, administrator bilan bog‘laning."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Chop etish funksiyasi <xliff:g id="OWNER_APP">%s</xliff:g> tomonidan faolsizlantirilgan."</string>
@@ -553,7 +555,7 @@
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Biometrik tasdiqlash"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Biometrika yoki ekran qulfi"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Oʻzingizni taniting"</string>
-    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Davob etish uchun biometrik tasdiqlang"</string>
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Davom etish uchun biometrik tasdiqlang"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrik sensor ishlamayapti"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentifikatsiya bekor qilindi"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Aniqlanmadi"</string>
