@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -110,6 +111,24 @@ public class Vcn extends Handler {
     @NonNull private final VcnNetworkRequestListener mRequestListener;
     @NonNull private final VcnCallback mVcnCallback;
 
+    /**
+     * Map containing all VcnGatewayConnections and their VcnGatewayConnectionConfigs.
+     *
+     * <p>Due to potential for race conditions, VcnGatewayConnections MUST only be created and added
+     * to this map in {@link #handleNetworkRequested(NetworkRequest, int, int)}, when a VCN receives
+     * a NetworkRequest that matches a VcnGatewayConnectionConfig for this VCN's VcnConfig.
+     *
+     * <p>A VcnGatewayConnection instance MUST NEVER overwrite an existing instance - otherwise
+     * there is potential for a orphaned VcnGatewayConnection instance that does not get properly
+     * shut down.
+     *
+     * <p>Due to potential for race conditions, VcnGatewayConnections MUST only be removed from this
+     * map once they have finished tearing down, which is reported to this VCN via {@link
+     * VcnGatewayStatusCallback#onQuit()}. Once this is done, all NetworkRequests are retrieved from
+     * the NetworkProvider so that another VcnGatewayConnectionConfig can match the
+     * previously-matched request.
+     */
+    // TODO(b/182533200): remove the invariant on VcnGatewayConnection lifecycles
     @NonNull
     private final Map<VcnGatewayConnectionConfig, VcnGatewayConnection> mVcnGatewayConnections =
             new HashMap<>();
@@ -191,6 +210,19 @@ public class Vcn extends Handler {
         return Collections.unmodifiableSet(new HashSet<>(mVcnGatewayConnections.values()));
     }
 
+    /** Get current Configs and Gateways for testing purposes */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public Map<VcnGatewayConnectionConfig, VcnGatewayConnection>
+            getVcnGatewayConnectionConfigMap() {
+        return Collections.unmodifiableMap(new HashMap<>(mVcnGatewayConnections));
+    }
+
+    /** Set whether this Vcn is active for testing purposes */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public void setIsActive(boolean isActive) {
+        mIsActive.set(isActive);
+    }
+
     private class VcnNetworkRequestListener implements VcnNetworkProvider.NetworkRequestListener {
         @Override
         public void onNetworkRequested(@NonNull NetworkRequest request, int score, int providerId) {
@@ -202,11 +234,6 @@ public class Vcn extends Handler {
 
     @Override
     public void handleMessage(@NonNull Message msg) {
-        // Ignore if this Vcn is not active and we're not receiving new configs
-        if (!isActive() && msg.what != MSG_EVENT_CONFIG_UPDATED) {
-            return;
-        }
-
         switch (msg.what) {
             case MSG_EVENT_CONFIG_UPDATED:
                 handleConfigUpdated((VcnConfig) msg.obj);
@@ -237,9 +264,31 @@ public class Vcn extends Handler {
 
         mConfig = config;
 
-        // TODO(b/181815405): Reevaluate active VcnGatewayConnection(s)
+        if (mIsActive.getAndSet(true)) {
+            // VCN is already active - teardown any GatewayConnections whose configs have been
+            // removed and get all current requests
+            for (final Entry<VcnGatewayConnectionConfig, VcnGatewayConnection> entry :
+                    mVcnGatewayConnections.entrySet()) {
+                final VcnGatewayConnectionConfig gatewayConnectionConfig = entry.getKey();
+                final VcnGatewayConnection gatewayConnection = entry.getValue();
 
-        if (!mIsActive.getAndSet(true)) {
+                // GatewayConnectionConfigs must match exactly (otherwise authentication or
+                // connection details may have changed).
+                if (!mConfig.getGatewayConnectionConfigs().contains(gatewayConnectionConfig)) {
+                    if (gatewayConnection == null) {
+                        Slog.wtf(
+                                getLogTag(),
+                                "Found gatewayConnectionConfig without GatewayConnection");
+                    } else {
+                        gatewayConnection.teardownAsynchronously();
+                    }
+                }
+            }
+
+            // Trigger a re-evaluation of all NetworkRequests (to make sure any that can be
+            // satisfied start a new GatewayConnection)
+            mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
+        } else {
             // If this VCN was not previously active, it is exiting Safe Mode. Re-register the
             // request listener to get NetworkRequests again (and all cached requests).
             mVcnContext.getVcnNetworkProvider().registerListener(mRequestListener);
@@ -259,13 +308,16 @@ public class Vcn extends Handler {
     private void handleEnterSafeMode() {
         handleTeardown();
 
-        mVcnGatewayConnections.clear();
-
         mVcnCallback.onEnteredSafeMode();
     }
 
     private void handleNetworkRequested(
             @NonNull NetworkRequest request, int score, int providerId) {
+        if (!isActive()) {
+            Slog.v(getLogTag(), "Received NetworkRequest while inactive. Ignore for now");
+            return;
+        }
+
         if (score > getNetworkScore()) {
             if (VDBG) {
                 Slog.v(
@@ -318,8 +370,10 @@ public class Vcn extends Handler {
         mVcnGatewayConnections.remove(config);
 
         // Trigger a re-evaluation of all NetworkRequests (to make sure any that can be satisfied
-        // start a new GatewayConnection)
-        mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
+        // start a new GatewayConnection), but only if the Vcn is still active
+        if (isActive()) {
+            mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
+        }
     }
 
     private void handleSubscriptionsChanged(@NonNull TelephonySubscriptionSnapshot snapshot) {
