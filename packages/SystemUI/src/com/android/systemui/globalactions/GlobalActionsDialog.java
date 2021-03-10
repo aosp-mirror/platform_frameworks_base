@@ -79,7 +79,6 @@ import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.ArraySet;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.IWindowManager;
@@ -114,7 +113,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.EmergencyAffordanceManager;
-import com.android.internal.util.ScreenRecordHelper;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.view.RotationPolicy;
 import com.android.internal.widget.LockPatternUtils;
@@ -242,7 +240,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final boolean mShowSilentToggle;
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
     private final ScreenshotHelper mScreenshotHelper;
-    private final ScreenRecordHelper mScreenRecordHelper;
     private final ActivityStarter mActivityStarter;
     private final SysuiColorExtractor mSysuiColorExtractor;
     private final IStatusBarService mStatusBarService;
@@ -378,7 +375,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mEmergencyAffordanceManager = new EmergencyAffordanceManager(context);
         mScreenshotHelper = new ScreenshotHelper(context);
-        mScreenRecordHelper = new ScreenRecordHelper(context);
 
         mConfigurationController.addCallback(this);
 
@@ -979,7 +975,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     @VisibleForTesting
-    class ScreenshotAction extends SinglePressAction implements LongPressAction {
+    class ScreenshotAction extends SinglePressAction {
         final String KEY_SYSTEM_NAV_2BUTTONS = "system_nav_2buttons";
 
         public ScreenshotAction() {
@@ -1023,18 +1019,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         boolean is2ButtonNavigationEnabled() {
             return NAV_BAR_MODE_2BUTTON == mContext.getResources().getInteger(
                     com.android.internal.R.integer.config_navBarInteractionMode);
-        }
-
-
-        @Override
-        public boolean onLongPress() {
-            if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SCREENRECORD_LONG_PRESS)) {
-                mUiEventLogger.log(GlobalActionsEvent.GA_SCREENSHOT_LONG_PRESS);
-                mScreenRecordHelper.launchRecordPrompt();
-            } else {
-                onPress();
-            }
-            return true;
         }
     }
 

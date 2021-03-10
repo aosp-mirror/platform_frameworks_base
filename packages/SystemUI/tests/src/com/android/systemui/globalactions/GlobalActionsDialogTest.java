@@ -46,16 +46,12 @@ import android.service.dreams.IDreamManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.FeatureFlagUtils;
 import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowManagerPolicyConstants;
 import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.uiautomator.By;
-import androidx.test.uiautomator.UiObject2;
-import androidx.test.uiautomator.Until;
 
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.MetricsLogger;
@@ -248,22 +244,6 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mGlobalActionsDialog.makeScreenshotActionForTesting();
         screenshotAction.onPress();
         verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_SCREENSHOT_PRESS);
-    }
-
-    @Test
-    public void testShouldLogScreenshotLongPress() {
-        FeatureFlagUtils.setEnabled(mContext, FeatureFlagUtils.SCREENRECORD_LONG_PRESS, true);
-        GlobalActionsDialog.ScreenshotAction screenshotAction =
-                mGlobalActionsDialog.makeScreenshotActionForTesting();
-        screenshotAction.onLongPress();
-        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_SCREENSHOT_LONG_PRESS);
-
-        // Dismiss ScreenRecordDialog opened by the long press above.
-        final UiObject2 cancelButton = getUiDevice().wait(
-                Until.findObject(By.text(CANCEL_BUTTON)), UI_TIMEOUT_MILLIS);
-        if (cancelButton != null) {
-            cancelButton.click();
-        }
     }
 
     @Test
