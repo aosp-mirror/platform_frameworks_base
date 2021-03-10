@@ -30,6 +30,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.util.Slog;
@@ -66,7 +67,7 @@ public class FaceDownDetector implements SensorEventListener {
     private static final float MOVING_AVERAGE_WEIGHT = 0.5f;
 
     /** DeviceConfig flag name, if {@code true}, enables Face Down features. */
-    private static final String KEY_FEATURE_ENABLED = "enable_flip_to_screen_off";
+    static final String KEY_FEATURE_ENABLED = "enable_flip_to_screen_off";
 
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_FEATURE_ENABLED = true;
@@ -139,6 +140,7 @@ public class FaceDownDetector implements SensorEventListener {
             new ExponentialMovingAverage(MOVING_AVERAGE_WEIGHT);
 
     private boolean mFaceDown = false;
+    private boolean mInteractive = false;
     private boolean mActive = false;
 
     private float mPrevAcceleration = 0;
@@ -149,62 +151,64 @@ public class FaceDownDetector implements SensorEventListener {
 
     private final Handler mHandler;
     private final Runnable mUserActivityRunnable;
+    private final BroadcastReceiver mScreenReceiver;
+
+    private Context mContext;
 
     public FaceDownDetector(@NonNull Consumer<Boolean> onFlip) {
         mOnFlip = Objects.requireNonNull(onFlip);
         mHandler = new Handler(Looper.getMainLooper());
+        mScreenReceiver = new ScreenStateReceiver();
         mUserActivityRunnable = () -> {
             if (mFaceDown) {
                 exitFaceDown(USER_INTERACTION, SystemClock.uptimeMillis() - mLastFlipTime);
-                checkAndUpdateActiveState(false);
+                updateActiveState();
             }
         };
     }
 
     /** Initializes the FaceDownDetector and all necessary listeners. */
     public void systemReady(Context context) {
+        mContext = context;
         mSensorManager = context.getSystemService(SensorManager.class);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         readValuesFromDeviceConfig();
-        checkAndUpdateActiveState(true);
         DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 ActivityThread.currentApplication().getMainExecutor(),
                 (properties) -> onDeviceConfigChange(properties.getKeyset()));
+        updateActiveState();
+    }
+
+    private void registerScreenReceiver(Context context) {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        context.registerReceiver(new ScreenStateReceiver(), intentFilter);
+        context.registerReceiver(mScreenReceiver, intentFilter);
     }
 
     /**
      * Sets the active state of the detector. If false, we will not process accelerometer changes.
      */
-    private void checkAndUpdateActiveState(boolean active) {
-        if (mIsEnabled && mActive != active) {
-            final long currentTime = SystemClock.uptimeMillis();
-            // Don't make active if there was recently a user interaction while face down.
-            if (active && mPreviousResultType == USER_INTERACTION
-                    && currentTime - mPreviousResultTime  < mUserInteractionBackoffMillis) {
-                return;
-            }
-            if (DEBUG) Slog.d(TAG, "Update active - " + active);
-            mActive = active;
-            if (!active) {
-                if (mFaceDown && mPreviousResultTime != USER_INTERACTION) {
-                    mPreviousResultType = SCREEN_OFF_RESULT;
-                    mPreviousResultTime = currentTime;
-                }
-                mSensorManager.unregisterListener(this);
-                mFaceDown = false;
-                mOnFlip.accept(false);
-            } else {
+    private void updateActiveState() {
+        final long currentTime = SystemClock.uptimeMillis();
+        final boolean sawRecentInteraction = mPreviousResultType == USER_INTERACTION
+                && currentTime - mPreviousResultTime  < mUserInteractionBackoffMillis;
+        final boolean shouldBeActive = mInteractive && mIsEnabled && !sawRecentInteraction;
+        if (mActive != shouldBeActive) {
+            if (shouldBeActive) {
+                mSensorManager.registerListener(
+                        this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
                 if (mPreviousResultType == SCREEN_OFF_RESULT) {
                     logScreenOff();
                 }
-                mSensorManager.registerListener(
-                        this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            } else {
+                mSensorManager.unregisterListener(this);
+                mFaceDown = false;
+                mOnFlip.accept(false);
             }
+            mActive = shouldBeActive;
+            if (DEBUG) Slog.d(TAG, "Update active - " + shouldBeActive);
         }
     }
 
@@ -389,6 +393,7 @@ public class FaceDownDetector implements SensorEventListener {
                 case KEY_TIME_THRESHOLD_MILLIS:
                 case KEY_FEATURE_ENABLED:
                     readValuesFromDeviceConfig();
+                    updateActiveState();
                     return;
                 default:
                     Slog.i(TAG, "Ignoring change on " + key);
@@ -401,8 +406,18 @@ public class FaceDownDetector implements SensorEventListener {
         mZAccelerationThreshold = getZAccelerationThreshold();
         mZAccelerationThresholdLenient = mZAccelerationThreshold + 1.0f;
         mTimeThreshold = getTimeThreshold();
-        mIsEnabled = isEnabled();
         mUserInteractionBackoffMillis = getUserInteractionBackoffMillis();
+        final boolean oldEnabled = mIsEnabled;
+        mIsEnabled = isEnabled();
+        if (oldEnabled != mIsEnabled) {
+            if (!mIsEnabled) {
+                mContext.unregisterReceiver(mScreenReceiver);
+                mInteractive = false;
+            } else {
+                registerScreenReceiver(mContext);
+                mInteractive = mContext.getSystemService(PowerManager.class).isInteractive();
+            }
+        }
 
         Slog.i(TAG, "readValuesFromDeviceConfig():"
                 + "\nmAccelerationThreshold=" + mAccelerationThreshold
@@ -423,9 +438,11 @@ public class FaceDownDetector implements SensorEventListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                checkAndUpdateActiveState(false);
+                mInteractive = false;
+                updateActiveState();
             } else if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
-                checkAndUpdateActiveState(true);
+                mInteractive = true;
+                updateActiveState();
             }
         }
     }
