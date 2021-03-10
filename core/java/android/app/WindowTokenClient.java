@@ -85,8 +85,10 @@ public class WindowTokenClient extends IWindowToken.Stub {
             context.destroy();
             mContextRef.clear();
         }
-        // If a secondary display is detached, release all views attached to this token.
-        WindowManagerGlobal.getInstance().closeAll(this, mContextRef.getClass().getName(),
-                "WindowContext");
+        ActivityThread.currentActivityThread().getHandler().post(() -> {
+            // If the tracked window token is detached, release all views attached to this token.
+            WindowManagerGlobal.getInstance().closeAll(WindowTokenClient.this,
+                    "#onWindowTokenRemoved()", "WindowTokenClient");
+        });
     }
 }
