@@ -5523,8 +5523,6 @@ public abstract class Context {
      * {@link GameManager}.
      *
      * @see #getSystemService(String)
-     *
-     * @hide
      */
     public static final String GAME_SERVICE = "game";
 
