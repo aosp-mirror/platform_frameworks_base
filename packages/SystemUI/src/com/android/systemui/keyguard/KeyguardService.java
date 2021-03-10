@@ -149,9 +149,14 @@ public class KeyguardService extends Service {
                        RemoteAnimationTarget[] wallpapers,
                         RemoteAnimationTarget[] nonApps,
                         IRemoteAnimationFinishedCallback finishedCallback) {
-            // TODO(bc-unlock): Calls KeyguardViewMediator#setOccluded to update the state and
-            // run animation.
             try {
+                if (transit == TRANSIT_OLD_KEYGUARD_OCCLUDE) {
+                    mBinder.setOccluded(true /* isOccluded */, true /* animate */);
+                } else if (transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE) {
+                    mBinder.setOccluded(false /* isOccluded */, true /* animate */);
+                }
+                // TODO(bc-unlock): Implement occlude/unocclude animation applied on apps,
+                //  wallpapers and nonApps.
                 finishedCallback.onAnimationFinished();
             } catch (RemoteException e) {
                 Slog.e(TAG, "RemoteException");

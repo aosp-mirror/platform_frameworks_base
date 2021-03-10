@@ -258,8 +258,12 @@ public class KeyguardServiceDelegate {
         }
     }
 
+    /**
+     * @deprecated Notify occlude status change via remote animation.
+     */
+    @Deprecated
     public void setOccluded(boolean isOccluded, boolean animate) {
-        if (mKeyguardService != null) {
+        if (!WindowManagerService.sEnableRemoteKeyguardAnimation && mKeyguardService != null) {
             if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ") animate=" + animate);
             mKeyguardService.setOccluded(isOccluded, animate);
         }
