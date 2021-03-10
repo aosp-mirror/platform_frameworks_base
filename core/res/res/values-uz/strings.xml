@@ -553,7 +553,7 @@
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Biometrik tasdiqlash"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Biometrika yoki ekran qulfi"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Oʻzingizni taniting"</string>
-    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Davob etish uchun biometrik tasdiqlang"</string>
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Davom etish uchun biometrik tasdiqlang"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrik sensor ishlamayapti"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentifikatsiya bekor qilindi"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Aniqlanmadi"</string>

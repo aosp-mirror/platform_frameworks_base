@@ -550,23 +550,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Permite que la app modifique tu colección de fotos."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"leer ubicaciones de tu colección de contenido multimedia"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permite que la app lea las ubicaciones de tu colección de contenido multimedia."</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Usar datos biométricos"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Usar datos biométricos o bloqueo de pantalla"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Comprueba que eres tú"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Usa tus datos biométricos para continuar"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"No hay hardware biométrico disponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Se canceló la autenticación"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No se reconoció"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Se canceló la autenticación"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No se estableció ningún PIN, patrón ni contraseña"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Error de autenticación"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar bloqueo de pantalla"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Ingresa las credenciales de tu dispositivo para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Se detectó parcialmente la huella dactilar. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No se pudo procesar la huella dactilar. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"El sensor de huellas dactilares está sucio. Limpia el sensor y vuelve a intentarlo."</string>
@@ -589,10 +584,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo no tiene sensor de huellas dactilares."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Se inhabilitó temporalmente el sensor."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella digital"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar bloqueo de huella dactilar o pantalla"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utiliza tu huella dactilar para continuar"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -638,12 +631,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"No se admite el desbloqueo facial en este dispositivo."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Se inhabilitó temporalmente el sensor."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Rostro <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Usar desbloqueo facial"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar bloqueo facial o de pantalla"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Usa el desbloqueo facial para continuar"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ícono cara"</string>
@@ -1576,8 +1566,8 @@
     <string name="expires_on" msgid="1623640879705103121">"Expira el:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Número de serie:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Huellas digitales:"</string>
-    <string name="sha256_fingerprint" msgid="7103976380961964600">"Huella dactilar SHA-256"</string>
-    <string name="sha1_fingerprint" msgid="2339915142825390774">"Huella dactilar SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="7103976380961964600">"Huella digital SHA-256"</string>
+    <string name="sha1_fingerprint" msgid="2339915142825390774">"Huella digital SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Ver todas"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Elige actividad"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Compartir con"</string>
@@ -1966,8 +1956,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Noticias y revistas"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Mapas y navegación"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Productividad"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Accesibilidad"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Almacenamiento del dispositivo"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Depuración por USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"hora"</string>

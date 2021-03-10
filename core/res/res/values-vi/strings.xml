@@ -550,23 +550,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Cho phép ứng dụng này sửa đổi bộ sưu tập ảnh của bạn."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"đọc vị trí từ bộ sưu tập phương tiện"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Cho phép ứng dụng này đọc vị trí từ bộ sưu tập phương tiện của bạn."</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Dùng dữ liệu sinh trắc học"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Dùng dữ liệu sinh trắc học hoặc phương thức khóa màn hình"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Xác minh danh tính của bạn"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Dùng dữ liệu sinh trắc học của bạn để tiếp tục"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Không có phần cứng sinh trắc học"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Đã hủy xác thực"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Không nhận dạng được"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Đã hủy xác thực"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Chưa đặt mã PIN, hình mở khóa hoặc mật khẩu"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Lỗi khi xác thực"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Dùng phương thức khóa màn hình"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Nhập thông tin xác thực thiết bị của bạn để tiếp tục"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Đã phát hiện được một phần vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Không thể xử lý vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Cảm biến vân tay bị bẩn. Hãy làm sạch và thử lại."</string>
@@ -589,10 +584,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Thiết bị này không có cảm biến vân tay."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Đã tạm thời tắt cảm biến."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Ngón tay <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Dùng vân tay"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Dùng vân tay hoặc phương thức khóa màn hình"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Sử dụng dấu vân tay của bạn để tiếp tục"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -638,12 +631,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Thiết bị này không hỗ trợ tính năng mở khóa bằng khuôn mặt."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Đã tạm thời tắt cảm biến."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Khuôn mặt <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Dùng tính năng mở khóa bằng khuôn mặt"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Dùng khuôn mặt hoặc phương thức khóa màn hình"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Dùng tính năng mở khóa bằng khuôn mặt để tiếp tục"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Biểu tượng khuôn mặt"</string>
@@ -1966,8 +1956,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Tin tức và tạp chí"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Bản đồ và dẫn đường"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Sản xuất"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Hỗ trợ tiếp cận"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Bộ nhớ của thiết bị"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Gỡ lỗi qua USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"giờ"</string>

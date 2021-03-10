@@ -550,23 +550,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"ଆପଣଙ୍କ ଫଟୋ ସଂଗ୍ରହ ପରିବର୍ତ୍ତନ କରିବାକୁ ଆପ୍‍ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ଆପଣଙ୍କ ମିଡିଆ ସଂଗ୍ରହ ଠାରୁ ଲୋକେସନ୍‍ଗୁଡିକୁ ପଢନ୍ତୁ"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"ଆପଣଙ୍କ ମିଡିଆ ସଂଗ୍ରହ ଠାରୁ ଅବସ୍ଥାନଗୁଡିକୁ ପଢିବାକୁ ଆପ୍‍ ଅନୁମତି ଦେଇଥାଏ।"</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"ବାୟୋମେଟ୍ରିକ୍ସ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"ବାୟୋମେଟ୍ରିକ୍ସ ବା ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"ଏହା ଆପଣ ବୋଲି ଯାଞ୍ଚ କରନ୍ତୁ"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"ଜାରି ରଖିବାକୁ ଆପଣଙ୍କ ବାୟୋମେଟ୍ରିକ୍ସ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ବାୟୋମେଟ୍ରିକ୍‌ ହାର୍ଡୱେର୍‌ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ପ୍ରାମାଣିକତାକୁ ବାତିଲ୍ କରାଯାଇଛି"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"ପ୍ରାମାଣିକତାକୁ ବାତିଲ୍ କରାଯାଇଛି"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"କୌଣସି ପିନ୍, ପେଟେର୍ନ ବା ପାସ୍‍ୱର୍ଡ ସେଟ୍ ନାହିଁ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"ପ୍ରାମାଣିକରଣ କରିବା ସମୟରେ ତ୍ରୁଟି"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"ଜାରି ରଖିବାକୁ ଆପଣଙ୍କ ଡିଭାଇସର କ୍ରେଡେନ୍ସିଆଲ୍ ଲେଖନ୍ତୁ"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"ଆଂଶିକ ଟିପଚିହ୍ନ ଚିହ୍ନଟ ହେଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ଟିପଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ଟିପଚିହ୍ନ ସେନ୍ସର୍‍ ମଇଳା ହୋଇଯାଇଛି। ଦୟାକରି ସଫା କରନ୍ତୁ ଓ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
@@ -589,10 +584,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ଏହି ଡିଭାଇସ୍‌ରେ ଟିପଚିହ୍ନ ସେନ୍‍ସର୍ ନାହିଁ।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ଆଙ୍ଗୁଠି <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ଟିପଚିହ୍ନ ବା ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ଜାରି ରଖିବାକୁ ଆପଣଙ୍କ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -638,12 +631,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"ଏହି ଡିଭାଇସ୍‌ରେ ଫେସ୍ ଅନ୍‌ଲକ୍ ସମର୍ଥିତ ନୁହେଁ।"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g>ଙ୍କ ଫେସ୍‍"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"ଫେସ୍ ଅନଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ଫେସ୍ ବା ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"ଜାରି ରଖିବାକୁ ଫେସ୍ ଅନଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"ଫେସ୍ ଆଇକନ୍"</string>
@@ -1966,8 +1956,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"ଖବର ଓ ମ୍ୟାଗାଜିନ୍‍"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"ମାନଚିତ୍ର ଓ ନେଭିଗେଶନ୍‍"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ଉତ୍ପାଦକତା"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ଡିଭାଇସ୍‌ ଷ୍ଟୋରେଜ୍‌"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB ଡିବଗିଂ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ଘଣ୍ଟା"</string>

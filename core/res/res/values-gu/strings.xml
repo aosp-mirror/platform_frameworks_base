@@ -550,23 +550,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"એપને તમારો ફોટો સંગ્રહ સંશોધિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"આપના મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવા"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"એપને તમારા મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવાની મંજૂરી આપે છે."</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"બાયોમેટ્રિક્સનો ઉપયોગ કરો"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"બાયોમેટ્રિક્સ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"તે તમે જ છો એ ચકાસો"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"આગળ વધવા માટે બાયોમેટ્રિકનો ઉપયોગ કરો"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"પ્રમાણીકરણ રદ કર્યું"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"ઓળખાયેલ નથી"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"પ્રમાણીકરણ રદ કર્યું"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"કોઈ પિન, પૅટર્ન અથવા પાસવર્ડ સેટ કરેલો નથી"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"પ્રમાણિત કરવામાં ભૂલ આવી"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"ચાલુ રાખવા માટે તમારા ડિવાઇસની લૉગ ઇન વિગત દાખલ કરો"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"આંશિક ફિંગરપ્રિન્ટ મળી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ફિંગરપ્રિન્ટ પ્રક્રિયા કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ફિંગરપ્રિન્ટ સેન્સર ગંદું છે. કૃપા કરીને સાફ કરો અને ફરી પ્રયાસ કરો."</string>
@@ -589,10 +584,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"આ ડિવાઇસમાં કોઈ ફિંગરપ્રિન્ટ સેન્સર નથી."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"સેન્સર હંગામી રૂપે બંધ કર્યું છે."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"આંગળી <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ફિંગરપ્રિન્ટ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ચાલુ રાખવા માટે તમારી ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -638,12 +631,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"આ ડિવાઇસ પર ફેસ અનલૉક કરવાની સુવિધા નથી."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"સેન્સર હંગામી રૂપે બંધ કર્યું છે."</string>
     <string name="face_name_template" msgid="3877037340223318119">"ચહેરાનું <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"ફેસ અનલૉકનો ઉપયોગ કરો"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ફેસ લૉક અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"આગળ વધવા માટે ફેસ અનલૉકનો ઉપયોગ કરો"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"ચહેરા આઇકન"</string>
@@ -1966,8 +1956,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"સમાચાર અને સામાયિકો"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Maps અને નેવિગેશન"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ઉત્પાદકતા"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"ઍક્સેસિબિલિટી"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ડિવાઇસ સ્ટૉરેજ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB ડિબગિંગ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"કલાક"</string>
