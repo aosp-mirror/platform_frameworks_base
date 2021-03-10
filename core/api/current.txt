@@ -21962,16 +21962,17 @@ package android.media {
     field public static final int ERROR_PROVISIONING_CERTIFICATE = 24; // 0x18
     field public static final int ERROR_PROVISIONING_CONFIG = 25; // 0x19
     field public static final int ERROR_PROVISIONING_PARSE = 26; // 0x1a
-    field public static final int ERROR_PROVISIONING_RETRY = 27; // 0x1b
+    field public static final int ERROR_PROVISIONING_REQUEST_REJECTED = 27; // 0x1b
+    field public static final int ERROR_PROVISIONING_RETRY = 28; // 0x1c
     field public static final int ERROR_RESOURCE_BUSY = 3; // 0x3
-    field public static final int ERROR_RESOURCE_CONTENTION = 28; // 0x1c
-    field public static final int ERROR_SECURE_STOP_RELEASE = 29; // 0x1d
+    field public static final int ERROR_RESOURCE_CONTENTION = 29; // 0x1d
+    field public static final int ERROR_SECURE_STOP_RELEASE = 30; // 0x1e
     field public static final int ERROR_SESSION_NOT_OPENED = 5; // 0x5
-    field public static final int ERROR_STORAGE_READ = 30; // 0x1e
-    field public static final int ERROR_STORAGE_WRITE = 31; // 0x1f
+    field public static final int ERROR_STORAGE_READ = 31; // 0x1f
+    field public static final int ERROR_STORAGE_WRITE = 32; // 0x20
     field public static final int ERROR_UNKNOWN = 0; // 0x0
     field public static final int ERROR_UNSUPPORTED_OPERATION = 6; // 0x6
-    field public static final int ERROR_ZERO_SUBSAMPLES = 32; // 0x20
+    field public static final int ERROR_ZERO_SUBSAMPLES = 33; // 0x21
   }
 
   @Deprecated @IntDef({android.media.MediaDrm.HDCP_LEVEL_UNKNOWN, android.media.MediaDrm.HDCP_NONE, android.media.MediaDrm.HDCP_V1, android.media.MediaDrm.HDCP_V2, android.media.MediaDrm.HDCP_V2_1, android.media.MediaDrm.HDCP_V2_2, android.media.MediaDrm.HDCP_V2_3, android.media.MediaDrm.HDCP_NO_DIGITAL_OUTPUT}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MediaDrm.HdcpLevel {
