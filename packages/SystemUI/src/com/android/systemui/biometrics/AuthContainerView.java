@@ -32,8 +32,10 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -433,6 +435,29 @@ public class AuthContainerView extends LinearLayout
                     + mConfig.mPromptInfo.getAuthenticators());
         }
 
+        if (mBiometricView instanceof AuthBiometricUdfpsView) {
+            final int displayRotation = getDisplay().getRotation();
+            switch (displayRotation) {
+                case Surface.ROTATION_0:
+                    mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
+                    setScrollViewGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
+                    break;
+                case Surface.ROTATION_90:
+                    mPanelController.setPosition(AuthPanelController.POSITION_RIGHT);
+                    setScrollViewGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
+                    break;
+                case Surface.ROTATION_270:
+                    mPanelController.setPosition(AuthPanelController.POSITION_LEFT);
+                    setScrollViewGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+                    break;
+                default:
+                    Log.e(TAG, "Unsupported display rotation: " + displayRotation);
+                    mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
+                    setScrollViewGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
+                    break;
+            }
+        }
+
         if (mConfig.mSkipIntro) {
             mContainerState = STATE_SHOWING;
         } else {
@@ -474,6 +499,13 @@ public class AuthContainerView extends LinearLayout
                         .start();
             });
         }
+    }
+
+    private void setScrollViewGravity(int gravity) {
+        final FrameLayout.LayoutParams params =
+                (FrameLayout.LayoutParams) mBiometricScrollView.getLayoutParams();
+        params.gravity = gravity;
+        mBiometricScrollView.setLayoutParams(params);
     }
 
     @Override
