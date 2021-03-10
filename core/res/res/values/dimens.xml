@@ -746,7 +746,7 @@
     <dimen name="notification_right_icon_headerless_margin">20dp</dimen>
     <!-- The top margin of the right icon in the "big" notification states -->
     <!--  TODO(b/181048615): Move the large icon below the expander in big states  -->
-    <dimen name="notification_right_icon_big_margin_top">20dp</dimen>
+    <dimen name="notification_right_icon_big_margin_top">16dp</dimen>
     <!-- The size of the left icon -->
     <dimen name="notification_left_icon_size">@dimen/notification_icon_circle_size</dimen>
     <!-- The left padding of the left icon -->
