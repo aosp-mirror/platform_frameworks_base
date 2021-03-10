@@ -82,6 +82,7 @@ final class RotationResolverManagerPerUserService extends
         if (mCurrentRequest == null) {
             return;
         }
+        Slog.d(TAG, "Trying to cancel the remote request. Reason: Service destroyed.");
         cancelLocked();
 
         if (mRemoteService != null) {
@@ -118,8 +119,10 @@ final class RotationResolverManagerPerUserService extends
 
         cancellationSignalInternal.setOnCancelListener(() -> {
             synchronized (mLock) {
-                Slog.i(TAG, "Trying to cancel current request.");
-                mCurrentRequest.cancelInternal();
+                if (mCurrentRequest != null && !mCurrentRequest.mIsFulfilled) {
+                    Slog.d(TAG, "Trying to cancel the remote request. Reason: Client cancelled.");
+                    mCurrentRequest.cancelInternal();
+                }
             }
         });
 

@@ -23,8 +23,6 @@ import android.view.View;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.android.settingslib.RestrictedLockUtils;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,12 +77,5 @@ public class MainSwitchBarTest {
         mBar.hide();
 
         assertThat(mBar.getVisibility()).isEqualTo(View.GONE);
-    }
-
-    @Test
-    public void disabledByAdmin_shouldDelegateToRestrictedIcon() {
-        mBar.setDisabledByAdmin(new RestrictedLockUtils.EnforcedAdmin());
-
-        assertThat(mBar.getDelegatingView().getId()).isEqualTo(R.id.restricted_icon);
     }
 }

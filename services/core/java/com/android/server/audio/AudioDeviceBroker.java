@@ -424,7 +424,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
      * @return true if speakerphone is active, false otherwise.
      */
     /*package*/ boolean isSpeakerphoneOn() {
-        AudioDeviceAttributes device = getPreferredDeviceForComm();
+        AudioDeviceAttributes device = getPreferredCommunicationDevice();
         if (device == null) {
             return false;
         }
@@ -595,7 +595,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
      * @return true if Bluetooth SCO is active , false otherwise.
      */
     /*package*/ boolean isBluetoothScoOn() {
-        AudioDeviceAttributes device = getPreferredDeviceForComm();
+        AudioDeviceAttributes device = getPreferredCommunicationDevice();
         if (device == null) {
             return false;
         }
@@ -1021,9 +1021,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
         pw.println("\n" + prefix + "mPreferredCommunicationDevice: "
                 +  mPreferredCommunicationDevice);
+
         pw.println(prefix + "Selected Communication Device: "
                 +  ((getCommunicationDevice() == null) ? "None"
                         : new AudioDeviceAttributes(getCommunicationDevice())));
+
         pw.println(prefix + "mCommunicationStrategyId: "
                 +  mCommunicationStrategyId);
 
@@ -1213,11 +1215,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 case MSG_I_SET_MODE_OWNER_PID:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
-                            if (mModeOwnerPid != msg.arg1) {
-                                mModeOwnerPid = msg.arg1;
-                                if (msg.arg2 != AudioSystem.MODE_RINGTONE) {
-                                    onUpdateCommunicationRoute("setNewModeOwner");
-                                }
+                            mModeOwnerPid = msg.arg1;
+                            if (msg.arg2 != AudioSystem.MODE_RINGTONE) {
+                                onUpdateCommunicationRoute("setNewModeOwner");
                             }
                         }
                     }
@@ -1676,7 +1676,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
      * @return selected forced usage for communication.
      */
     @GuardedBy("mDeviceStateLock")
-    @Nullable private AudioDeviceAttributes getPreferredDeviceForComm() {
+    @Nullable private AudioDeviceAttributes getPreferredCommunicationDevice() {
         boolean btSCoOn = mBluetoothScoOn && mBtHelper.isBluetoothScoOn();
         if (btSCoOn) {
             // Use the SCO device known to BtHelper so that it matches exactly
@@ -1704,11 +1704,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
     // @GuardedBy("mSetModeLock")
     @GuardedBy("mDeviceStateLock")
     private void onUpdateCommunicationRoute(String eventSource) {
-        mPreferredCommunicationDevice = getPreferredDeviceForComm();
+        mPreferredCommunicationDevice = getPreferredCommunicationDevice();
         if (AudioService.DEBUG_COMM_RTE) {
             Log.v(TAG, "onUpdateCommunicationRoute, mPreferredCommunicationDevice: "
                     + mPreferredCommunicationDevice + " eventSource: " + eventSource);
         }
+        AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+                "onUpdateCommunicationRoute, mPreferredCommunicationDevice: "
+                + mPreferredCommunicationDevice + " eventSource: " + eventSource)));
 
         if (mPreferredCommunicationDevice == null
                 || !AudioSystem.DEVICE_OUT_ALL_SCO_SET.contains(

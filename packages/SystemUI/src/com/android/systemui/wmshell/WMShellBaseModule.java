@@ -17,6 +17,7 @@
 package com.android.systemui.wmshell;
 
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
+import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 
 import android.animation.AnimationHandler;
 import android.app.ActivityTaskManager;
@@ -61,6 +62,7 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
@@ -162,6 +164,19 @@ public abstract class WMShellBaseModule {
                  THREAD_PRIORITY_DISPLAY);
          shellAnimationThread.start();
          return new HandlerExecutor(shellAnimationThread.getThreadHandler());
+    }
+
+    /**
+     * Provides a Shell splashscreen-thread Executor
+     */
+    @WMSingleton
+    @Provides
+    @ShellSplashscreenThread
+    public static ShellExecutor provideSplashScreenExecutor() {
+        HandlerThread shellSplashscreenThread = new HandlerThread("wmshell.splashscreen",
+                THREAD_PRIORITY_TOP_APP_BOOST);
+        shellSplashscreenThread.start();
+        return new HandlerExecutor(shellSplashscreenThread.getThreadHandler());
     }
 
     /**
@@ -465,8 +480,8 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static StartingWindowController provideStartingWindowController(Context context,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new StartingWindowController(context, mainExecutor);
+            @ShellSplashscreenThread ShellExecutor executor) {
+        return new StartingWindowController(context, executor);
     }
 
     //

@@ -158,6 +158,7 @@ package android {
     field public static final String SET_WALLPAPER_HINTS = "android.permission.SET_WALLPAPER_HINTS";
     field public static final String SIGNAL_PERSISTENT_PROCESSES = "android.permission.SIGNAL_PERSISTENT_PROCESSES";
     field @Deprecated public static final String SMS_FINANCIAL_TRANSACTIONS = "android.permission.SMS_FINANCIAL_TRANSACTIONS";
+    field public static final String START_FOREGROUND_SERVICES_FROM_BACKGROUND = "android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND";
     field public static final String START_VIEW_PERMISSION_USAGE = "android.permission.START_VIEW_PERMISSION_USAGE";
     field public static final String STATUS_BAR = "android.permission.STATUS_BAR";
     field public static final String SYSTEM_ALERT_WINDOW = "android.permission.SYSTEM_ALERT_WINDOW";
@@ -10572,9 +10573,10 @@ package android.content {
 
   public static final class ContextParams.Builder {
     ctor public ContextParams.Builder();
+    ctor public ContextParams.Builder(@NonNull android.content.ContextParams);
     method @NonNull public android.content.ContextParams build();
-    method @NonNull public android.content.ContextParams.Builder setAttributionTag(@NonNull String);
-    method @NonNull public android.content.ContextParams.Builder setReceiverPackage(@NonNull String, @Nullable String);
+    method @NonNull public android.content.ContextParams.Builder setAttributionTag(@Nullable String);
+    method @NonNull public android.content.ContextParams.Builder setReceiverPackage(@Nullable String, @Nullable String);
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -11723,6 +11725,7 @@ package android.content.pm {
     field public static final int FLAG_STATE_NOT_NEEDED = 16; // 0x10
     field public static final int LAUNCH_MULTIPLE = 0; // 0x0
     field public static final int LAUNCH_SINGLE_INSTANCE = 3; // 0x3
+    field public static final int LAUNCH_SINGLE_INSTANCE_PER_TASK = 4; // 0x4
     field public static final int LAUNCH_SINGLE_TASK = 2; // 0x2
     field public static final int LAUNCH_SINGLE_TOP = 1; // 0x1
     field public static final int PERSIST_ACROSS_REBOOTS = 2; // 0x2
@@ -11966,6 +11969,14 @@ package android.content.pm {
     field public static final String ACTION_CAN_INTERACT_ACROSS_PROFILES_CHANGED = "android.content.pm.action.CAN_INTERACT_ACROSS_PROFILES_CHANGED";
   }
 
+  public class DataLoaderParams {
+    method @NonNull public static final android.content.pm.DataLoaderParams forIncremental(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public static final android.content.pm.DataLoaderParams forStreaming(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public final String getArguments();
+    method @NonNull public final android.content.ComponentName getComponentName();
+    method @NonNull public final int getType();
+  }
+
   public final class FeatureGroupInfo implements android.os.Parcelable {
     ctor public FeatureGroupInfo();
     ctor public FeatureGroupInfo(android.content.pm.FeatureGroupInfo);
@@ -12194,6 +12205,10 @@ package android.content.pm {
     field public static final String ACTION_SESSION_COMMITTED = "android.content.pm.action.SESSION_COMMITTED";
     field public static final String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
     field public static final String ACTION_SESSION_UPDATED = "android.content.pm.action.SESSION_UPDATED";
+    field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
+    field public static final int DATA_LOADER_TYPE_NONE = 0; // 0x0
+    field public static final int DATA_LOADER_TYPE_STREAMING = 1; // 0x1
+    field public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
     field public static final String EXTRA_OTHER_PACKAGE_NAME = "android.content.pm.extra.OTHER_PACKAGE_NAME";
     field public static final String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
     field public static final String EXTRA_SESSION = "android.content.pm.extra.SESSION";
@@ -12201,6 +12216,9 @@ package android.content.pm {
     field public static final String EXTRA_STATUS = "android.content.pm.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.pm.extra.STATUS_MESSAGE";
     field public static final String EXTRA_STORAGE_PATH = "android.content.pm.extra.STORAGE_PATH";
+    field public static final int LOCATION_DATA_APP = 0; // 0x0
+    field public static final int LOCATION_MEDIA_DATA = 2; // 0x2
+    field public static final int LOCATION_MEDIA_OBB = 1; // 0x1
     field public static final int STATUS_FAILURE = 1; // 0x1
     field public static final int STATUS_FAILURE_ABORTED = 3; // 0x3
     field public static final int STATUS_FAILURE_BLOCKED = 2; // 0x2
@@ -12208,6 +12226,7 @@ package android.content.pm {
     field public static final int STATUS_FAILURE_INCOMPATIBLE = 7; // 0x7
     field public static final int STATUS_FAILURE_INVALID = 4; // 0x4
     field public static final int STATUS_FAILURE_STORAGE = 6; // 0x6
+    field public static final int STATUS_PENDING_STREAMING = -2; // 0xfffffffe
     field public static final int STATUS_PENDING_USER_ACTION = -1; // 0xffffffff
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }
@@ -12215,10 +12234,12 @@ package android.content.pm {
   public static class PackageInstaller.Session implements java.io.Closeable {
     method public void abandon();
     method public void addChildSessionId(int);
+    method public void addFile(int, @NonNull String, long, @NonNull byte[], @Nullable byte[]);
     method public void close();
     method public void commit(@NonNull android.content.IntentSender);
     method public void fsync(@NonNull java.io.OutputStream) throws java.io.IOException;
     method @NonNull public int[] getChildSessionIds();
+    method @Nullable public android.content.pm.DataLoaderParams getDataLoaderParams();
     method @NonNull public String[] getNames() throws java.io.IOException;
     method public int getParentSessionId();
     method public boolean isMultiPackage();
@@ -12292,6 +12313,7 @@ package android.content.pm {
     method public void setAppLabel(@Nullable CharSequence);
     method public void setAppPackageName(@Nullable String);
     method public void setAutoRevokePermissionsMode(boolean);
+    method public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
     method public void setInstallScenario(int);
@@ -18762,7 +18784,7 @@ package android.hardware.input {
   public final class InputManager {
     method public android.view.InputDevice getInputDevice(int);
     method public int[] getInputDeviceIds();
-    method public float getMaximumObscuringOpacityForTouch();
+    method @FloatRange(from=0, to=1) public float getMaximumObscuringOpacityForTouch();
     method public void registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler);
     method public void unregisterInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener);
     method @Nullable public android.view.VerifiedInputEvent verifyInputEvent(@NonNull android.view.InputEvent);
@@ -41635,7 +41657,7 @@ package android.telephony {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int BAND_UNKNOWN = 0; // 0x0
     field public static final int CELL_BANDWIDTH_UNKNOWN = 0; // 0x0
-    field public static final int CHANNEL_NUMBER_UNKNOWN = -1; // 0xffffffff
+    field public static final int CHANNEL_NUMBER_UNKNOWN = 2147483647; // 0x7fffffff
     field public static final int CONNECTION_PRIMARY_SERVING = 1; // 0x1
     field public static final int CONNECTION_SECONDARY_SERVING = 2; // 0x2
     field public static final int CONNECTION_UNKNOWN = -1; // 0xffffffff
@@ -46405,8 +46427,8 @@ package android.view {
     method @Deprecated public int getPixelFormat();
     method @Nullable public android.graphics.ColorSpace getPreferredWideGamutColorSpace();
     method public long getPresentationDeadlineNanos();
-    method public void getRealMetrics(android.util.DisplayMetrics);
-    method public void getRealSize(android.graphics.Point);
+    method @Deprecated public void getRealMetrics(android.util.DisplayMetrics);
+    method @Deprecated public void getRealSize(android.graphics.Point);
     method @Deprecated public void getRectSize(android.graphics.Rect);
     method public float getRefreshRate();
     method public int getRotation();
@@ -50901,6 +50923,7 @@ package android.view.autofill {
 
   public final class AutofillManager {
     method public void cancel();
+    method public void clearAutofillRequestCallback();
     method public void commit();
     method public void disableAutofillServices();
     method @Nullable public android.content.ComponentName getAutofillServiceComponentName();
@@ -50926,6 +50949,7 @@ package android.view.autofill {
     method public void registerCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     method public void requestAutofill(@NonNull android.view.View);
     method public void requestAutofill(@NonNull android.view.View, int, @NonNull android.graphics.Rect);
+    method public void setAutofillRequestCallback(@NonNull java.util.concurrent.Executor, @NonNull android.view.autofill.AutofillRequestCallback);
     method public void setUserData(@Nullable android.service.autofill.UserData);
     method public void unregisterCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     field public static final String EXTRA_ASSIST_STRUCTURE = "android.view.autofill.extra.ASSIST_STRUCTURE";
@@ -50942,6 +50966,10 @@ package android.view.autofill {
     field public static final int EVENT_INPUT_HIDDEN = 2; // 0x2
     field public static final int EVENT_INPUT_SHOWN = 1; // 0x1
     field public static final int EVENT_INPUT_UNAVAILABLE = 3; // 0x3
+  }
+
+  public interface AutofillRequestCallback {
+    method public void onFillRequest(@Nullable android.view.inputmethod.InlineSuggestionsRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.FillCallback);
   }
 
   public final class AutofillValue implements android.os.Parcelable {
@@ -52267,9 +52295,8 @@ package android.view.textservice {
   }
 
   public final class TextServicesManager {
-    method @Nullable public android.view.textservice.SpellCheckerInfo getCurrentSpellChecker();
-    method @Nullable public android.view.textservice.SpellCheckerSubtype getCurrentSpellCheckerSubtype(boolean);
-    method @Nullable public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckersList();
+    method @Nullable public android.view.textservice.SpellCheckerInfo getCurrentSpellCheckerInfo();
+    method @Nullable public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckerInfos();
     method public boolean isSpellCheckerEnabled();
     method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
     method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean, int);
@@ -52285,38 +52312,77 @@ package android.view.translation {
   }
 
   public final class TranslationRequest implements android.os.Parcelable {
-    ctor public TranslationRequest(@Nullable CharSequence);
     method public int describeContents();
-    method @Nullable public android.view.autofill.AutofillId getAutofillId();
-    method @Nullable public CharSequence getTranslationText();
+    method public int getFlags();
+    method @NonNull public java.util.List<android.view.translation.TranslationRequestValue> getTranslationRequestValues();
+    method @NonNull public java.util.List<android.view.translation.ViewTranslationRequest> getViewTranslationRequests();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationRequest> CREATOR;
+    field public static final int FLAG_DICTIONARY_RESULT = 2; // 0x2
+    field public static final int FLAG_PARTIAL_RESPONSES = 8; // 0x8
+    field public static final int FLAG_TRANSLATION_RESULT = 1; // 0x1
+    field public static final int FLAG_TRANSLITERATION_RESULT = 4; // 0x4
   }
 
   public static final class TranslationRequest.Builder {
     ctor public TranslationRequest.Builder();
+    method @NonNull public android.view.translation.TranslationRequest.Builder addTranslationRequestValue(@NonNull android.view.translation.TranslationRequestValue);
+    method @NonNull public android.view.translation.TranslationRequest.Builder addViewTranslationRequest(@NonNull android.view.translation.ViewTranslationRequest);
     method @NonNull public android.view.translation.TranslationRequest build();
-    method @NonNull public android.view.translation.TranslationRequest.Builder setAutofillId(@NonNull android.view.autofill.AutofillId);
-    method @NonNull public android.view.translation.TranslationRequest.Builder setTranslationText(@NonNull CharSequence);
+    method @NonNull public android.view.translation.TranslationRequest.Builder setFlags(int);
+    method @NonNull public android.view.translation.TranslationRequest.Builder setTranslationRequestValues(@NonNull java.util.List<android.view.translation.TranslationRequestValue>);
+    method @NonNull public android.view.translation.TranslationRequest.Builder setViewTranslationRequests(@NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
+  }
+
+  public final class TranslationRequestValue implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public static android.view.translation.TranslationRequestValue forText(@NonNull CharSequence);
+    method @NonNull public CharSequence getText();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationRequestValue> CREATOR;
   }
 
   public final class TranslationResponse implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public android.util.SparseArray<android.view.translation.TranslationResponseValue> getTranslationResponseValues();
     method public int getTranslationStatus();
-    method @NonNull public java.util.List<android.view.translation.TranslationRequest> getTranslations();
+    method @NonNull public android.util.SparseArray<android.view.translation.ViewTranslationResponse> getViewTranslationResponses();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationResponse> CREATOR;
-    field public static final int TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE = 2; // 0x2
+    field public static final int TRANSLATION_STATUS_CONTEXT_UNSUPPORTED = 2; // 0x2
     field public static final int TRANSLATION_STATUS_SUCCESS = 0; // 0x0
     field public static final int TRANSLATION_STATUS_UNKNOWN_ERROR = 1; // 0x1
   }
 
   public static final class TranslationResponse.Builder {
     ctor public TranslationResponse.Builder(int);
-    method @NonNull public android.view.translation.TranslationResponse.Builder addTranslations(@NonNull android.view.translation.TranslationRequest);
     method @NonNull public android.view.translation.TranslationResponse build();
+    method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int, @NonNull android.view.translation.TranslationResponseValue);
+    method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationResponseValues(@NonNull android.util.SparseArray<android.view.translation.TranslationResponseValue>);
     method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationStatus(int);
-    method @NonNull public android.view.translation.TranslationResponse.Builder setTranslations(@NonNull java.util.List<android.view.translation.TranslationRequest>);
+    method @NonNull public android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int, @NonNull android.view.translation.ViewTranslationResponse);
+    method @NonNull public android.view.translation.TranslationResponse.Builder setViewTranslationResponses(@NonNull android.util.SparseArray<android.view.translation.ViewTranslationResponse>);
+  }
+
+  public final class TranslationResponseValue implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public static android.view.translation.TranslationResponseValue forError();
+    method @Nullable public CharSequence getDictionaryDescription();
+    method public int getStatusCode();
+    method @Nullable public CharSequence getText();
+    method @Nullable public CharSequence getTransliteration();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationResponseValue> CREATOR;
+    field public static final int STATUS_ERROR = 1; // 0x1
+    field public static final int STATUS_SUCCESS = 0; // 0x0
+  }
+
+  public static final class TranslationResponseValue.Builder {
+    ctor public TranslationResponseValue.Builder(int);
+    method @NonNull public android.view.translation.TranslationResponseValue build();
+    method @NonNull public android.view.translation.TranslationResponseValue.Builder setDictionaryDescription(@NonNull CharSequence);
+    method @NonNull public android.view.translation.TranslationResponseValue.Builder setText(@NonNull CharSequence);
+    method @NonNull public android.view.translation.TranslationResponseValue.Builder setTransliteration(@NonNull CharSequence);
   }
 
   public final class TranslationSpec implements android.os.Parcelable {
@@ -52333,6 +52399,37 @@ package android.view.translation {
     method public void destroy();
     method public boolean isDestroyed();
     method @Nullable @WorkerThread public android.view.translation.TranslationResponse translate(@NonNull android.view.translation.TranslationRequest);
+  }
+
+  public final class ViewTranslationRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.view.autofill.AutofillId getAutofillId();
+    method @NonNull public java.util.Set<java.lang.String> getKeys();
+    method @NonNull public android.view.translation.TranslationRequestValue getValue(@NonNull String);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.ViewTranslationRequest> CREATOR;
+    field public static final String ID_TEXT = "text";
+  }
+
+  public static final class ViewTranslationRequest.Builder {
+    ctor public ViewTranslationRequest.Builder(@NonNull android.view.autofill.AutofillId);
+    method @NonNull public android.view.translation.ViewTranslationRequest build();
+    method public android.view.translation.ViewTranslationRequest.Builder setValue(String, android.view.translation.TranslationRequestValue);
+  }
+
+  public final class ViewTranslationResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.view.autofill.AutofillId getAutofillId();
+    method @NonNull public java.util.Set<java.lang.String> getKeys();
+    method @NonNull public android.view.translation.TranslationResponseValue getValue(@NonNull String);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.ViewTranslationResponse> CREATOR;
+  }
+
+  public static final class ViewTranslationResponse.Builder {
+    ctor public ViewTranslationResponse.Builder(@NonNull android.view.autofill.AutofillId);
+    method @NonNull public android.view.translation.ViewTranslationResponse build();
+    method public android.view.translation.ViewTranslationResponse.Builder setValue(String, android.view.translation.TranslationResponseValue);
   }
 
 }

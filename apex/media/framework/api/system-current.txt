@@ -2,7 +2,7 @@
 package android.media {
 
   public final class MediaTranscodeManager {
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingSession enqueueRequest(@NonNull android.media.MediaTranscodeManager.TranscodingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.media.MediaTranscodeManager.OnTranscodingFinishedListener) throws java.io.FileNotFoundException, android.media.MediaTranscodingException.ServiceNotAvailableException;
+    method @Nullable public android.media.MediaTranscodeManager.TranscodingSession enqueueRequest(@NonNull android.media.MediaTranscodeManager.TranscodingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.media.MediaTranscodeManager.OnTranscodingFinishedListener);
     field public static final int PRIORITY_REALTIME = 1; // 0x1
     field public static final int TRANSCODING_TYPE_VIDEO = 1; // 0x1
   }
