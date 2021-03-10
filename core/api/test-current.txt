@@ -721,6 +721,8 @@ package android.content.pm {
 
   public class ActivityInfo extends android.content.pm.ComponentInfo implements android.os.Parcelable {
     method public static boolean isTranslucentOrFloating(android.content.res.TypedArray);
+    field public static final long FORCE_NON_RESIZE_APP = 181136395L; // 0xacbec0bL
+    field public static final long FORCE_RESIZE_APP = 174042936L; // 0xa5faf38L
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
   }
 
