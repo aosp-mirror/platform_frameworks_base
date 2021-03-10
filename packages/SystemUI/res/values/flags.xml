@@ -46,4 +46,6 @@
     <bool name="flag_navigation_bar_overlay">false</bool>
 
     <bool name="flag_pm_lite">false</bool>
+
+    <bool name="flag_alarm_tile">false</bool>
 </resources>
