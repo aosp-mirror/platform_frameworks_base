@@ -54884,6 +54884,7 @@ package android.widget {
     method public int describeContents();
     method public int getLayoutId();
     method public String getPackage();
+    method @IdRes public int getViewId();
     method @Deprecated public boolean onLoadClass(Class);
     method public void reapply(android.content.Context, android.view.View);
     method public void removeAllViews(@IdRes int);
@@ -54944,6 +54945,7 @@ package android.widget {
     method public void setTextViewText(@IdRes int, CharSequence);
     method public void setTextViewTextSize(@IdRes int, int, float);
     method public void setUri(@IdRes int, String, android.net.Uri);
+    method public void setViewId(@IdRes int);
     method public void setViewLayoutHeight(@IdRes int, float, int);
     method public void setViewLayoutHeightDimen(@IdRes int, @DimenRes int);
     method public void setViewLayoutMargin(@IdRes int, int, float, int);
