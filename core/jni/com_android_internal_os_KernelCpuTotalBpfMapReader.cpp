@@ -22,7 +22,7 @@ namespace android {
 
 static jlongArray KernelCpuTotalBpfMapReader_readInternal(JNIEnv *env, jobject) {
     auto freqTimes = android::bpf::getTotalCpuFreqTimes();
-    if (!freqTimes) return JNI_FALSE;
+    if (!freqTimes) return nullptr;
 
     std::vector<uint64_t> allTimes;
     for (const auto &vec : *freqTimes) {
@@ -32,7 +32,7 @@ static jlongArray KernelCpuTotalBpfMapReader_readInternal(JNIEnv *env, jobject) 
     }
 
     auto ar = env->NewLongArray(allTimes.size());
-    if (ar != NULL) {
+    if (ar != nullptr) {
         env->SetLongArrayRegion(ar, 0, allTimes.size(),
                                 reinterpret_cast<const jlong *>(allTimes.data()));
     }

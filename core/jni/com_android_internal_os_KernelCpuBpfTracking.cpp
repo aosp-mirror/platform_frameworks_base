@@ -30,13 +30,13 @@ static jboolean KernelCpuBpfTracking_startTrackingInternal(JNIEnv *, jobject) {
 
 static jlongArray KernelCpuBpfTracking_getFreqsInternal(JNIEnv *env, jobject) {
     auto freqs = android::bpf::getCpuFreqs();
-    if (!freqs) return NULL;
+    if (!freqs) return nullptr;
 
     std::vector<uint64_t> allFreqs;
     for (const auto &vec : *freqs) std::copy(vec.begin(), vec.end(), std::back_inserter(allFreqs));
 
     auto ar = env->NewLongArray(allFreqs.size());
-    if (ar != NULL) {
+    if (ar != nullptr) {
         env->SetLongArrayRegion(ar, 0, allFreqs.size(),
                                 reinterpret_cast<const jlong *>(allFreqs.data()));
     }
@@ -45,7 +45,7 @@ static jlongArray KernelCpuBpfTracking_getFreqsInternal(JNIEnv *env, jobject) {
 
 static jintArray KernelCpuBpfTracking_getFreqsClustersInternal(JNIEnv *env, jobject) {
     auto freqs = android::bpf::getCpuFreqs();
-    if (!freqs) return NULL;
+    if (!freqs) return nullptr;
 
     std::vector<uint32_t> freqsClusters;
     uint32_t clusters = freqs->size();
@@ -54,7 +54,7 @@ static jintArray KernelCpuBpfTracking_getFreqsClustersInternal(JNIEnv *env, jobj
     }
 
     auto ar = env->NewIntArray(freqsClusters.size());
-    if (ar != NULL) {
+    if (ar != nullptr) {
         env->SetIntArrayRegion(ar, 0, freqsClusters.size(),
                                reinterpret_cast<const jint *>(freqsClusters.data()));
     }
