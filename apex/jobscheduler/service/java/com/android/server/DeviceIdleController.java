@@ -1943,19 +1943,11 @@ public class DeviceIdleController extends SystemService
         }
 
         // duration in milliseconds
-        @Deprecated
         @Override
         public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
-                long duration, int userId, boolean sync, @Nullable String reason) {
-            addPowerSaveTempAllowlistAppInternal(callingUid, packageName, duration,
-                    userId, sync, REASON_UNKNOWN, reason);
-        }
-
-        @Override
-        public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
-                long duration, int userId, boolean sync, @ReasonCode int reasonCode,
+                long durationMs, int userId, boolean sync, @ReasonCode int reasonCode,
                 @Nullable String reason) {
-            addPowerSaveTempAllowlistAppInternal(callingUid, packageName, duration,
+            addPowerSaveTempAllowlistAppInternal(callingUid, packageName, durationMs,
                     userId, sync, reasonCode, reason);
         }
 
@@ -1963,8 +1955,8 @@ public class DeviceIdleController extends SystemService
         @Override
         public void addPowerSaveTempWhitelistAppDirect(int uid, long duration,
                 @TempAllowListType int type, boolean sync, @ReasonCode int reasonCode,
-                @Nullable String reason) {
-            addPowerSaveTempWhitelistAppDirectInternal(0, uid, duration, type, sync,
+                @Nullable String reason, int callingUid) {
+            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, duration, type, sync,
                     reasonCode, reason);
         }
 
@@ -2741,6 +2733,16 @@ public class DeviceIdleController extends SystemService
     void addPowerSaveTempAllowlistAppInternal(int callingUid, String packageName,
             long duration, int userId, boolean sync, @ReasonCode int reasonCode,
             @Nullable String reason) {
+        synchronized (this) {
+            int callingAppId = UserHandle.getAppId(callingUid);
+            if (callingAppId >= Process.FIRST_APPLICATION_UID) {
+                if (!mPowerSaveWhitelistSystemAppIds.get(callingAppId)) {
+                    throw new SecurityException(
+                            "Calling app " + UserHandle.formatUid(callingUid)
+                                    + " is not on whitelist");
+                }
+            }
+        }
         try {
             int uid = getContext().getPackageManager().getPackageUidAsUser(packageName, userId);
             addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, duration,
@@ -2760,13 +2762,6 @@ public class DeviceIdleController extends SystemService
         boolean informWhitelistChanged = false;
         int appId = UserHandle.getAppId(uid);
         synchronized (this) {
-            int callingAppId = UserHandle.getAppId(callingUid);
-            if (callingAppId >= Process.FIRST_APPLICATION_UID) {
-                if (!mPowerSaveWhitelistSystemAppIds.get(callingAppId)) {
-                    throw new SecurityException("Calling app " + UserHandle.formatUid(callingUid)
-                            + " is not on whitelist");
-                }
-            }
             duration = Math.min(duration, mConstants.MAX_TEMP_APP_ALLOWLIST_DURATION_MS);
             Pair<MutableLong, String> entry = mTempWhitelistAppIdEndTimes.get(appId);
             final boolean newEntry = entry == null;
