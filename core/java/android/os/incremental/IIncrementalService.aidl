@@ -23,6 +23,7 @@ import android.os.incremental.IStorageLoadingProgressListener;
 import android.os.incremental.IStorageHealthListener;
 import android.os.incremental.PerUidReadTimeouts;
 import android.os.incremental.StorageHealthCheckParams;
+import android.os.PersistableBundle;
 
 /** @hide */
 interface IIncrementalService {
@@ -165,4 +166,13 @@ interface IIncrementalService {
      * Register storage health status listener.
      */
     void unregisterStorageHealthListener(int storageId);
+
+    /**
+     * Metrics key for the duration in milliseconds between now and the oldest pending read. The value is a long.
+     */
+    const @utf8InCpp String METRICS_MILLIS_SINCE_OLDEST_PENDING_READ = "millisSinceOldestPendingRead";
+    /**
+     * Return a bundle containing the requested metrics keys and their values.
+     */
+    PersistableBundle getMetrics(int storageId);
 }
