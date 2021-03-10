@@ -11404,7 +11404,7 @@ package android.telephony {
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_CALL_ATTRIBUTES_CHANGED = 27; // 0x1b
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_CALL_DISCONNECT_CAUSE_CHANGED = 26; // 0x1a
     field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_CALL_FORWARDING_INDICATOR_CHANGED = 4; // 0x4
-    field @RequiresPermission(android.Manifest.permission.READ_CALL_LOG) public static final int EVENT_CALL_STATE_CHANGED = 6; // 0x6
+    field public static final int EVENT_CALL_STATE_CHANGED = 6; // 0x6
     field public static final int EVENT_CARRIER_NETWORK_CHANGED = 17; // 0x11
     field @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public static final int EVENT_CELL_INFO_CHANGED = 11; // 0xb
     field @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public static final int EVENT_CELL_LOCATION_CHANGED = 5; // 0x5
@@ -11416,6 +11416,7 @@ package android.telephony {
     field public static final int EVENT_DISPLAY_INFO_CHANGED = 21; // 0x15
     field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_EMERGENCY_NUMBER_LIST_CHANGED = 25; // 0x19
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_IMS_CALL_DISCONNECT_CAUSE_CHANGED = 28; // 0x1c
+    field @RequiresPermission(android.Manifest.permission.READ_CALL_LOG) public static final int EVENT_LEGACY_CALL_STATE_CHANGED = 36; // 0x24
     field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_MESSAGE_WAITING_INDICATOR_CHANGED = 3; // 0x3
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_OEM_HOOK_RAW = 15; // 0xf
     field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int EVENT_OUTGOING_EMERGENCY_CALL = 29; // 0x1d

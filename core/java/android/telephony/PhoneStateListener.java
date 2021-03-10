@@ -1326,12 +1326,16 @@ public class PhoneStateListener {
                     () -> mExecutor.execute(() -> psl.onCellLocationChanged(location)));
         }
 
-        public void onCallStateChanged(int state, String incomingNumber) {
+        public void onLegacyCallStateChanged(int state, String incomingNumber) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> psl.onCallStateChanged(state, incomingNumber)));
+        }
+
+        public void onCallStateChanged(int state) {
+            // Only used for the new TelephonyCallback class
         }
 
         public void onDataConnectionStateChanged(int state, int networkType) {
