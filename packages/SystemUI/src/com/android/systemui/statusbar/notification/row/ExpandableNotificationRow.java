@@ -166,7 +166,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mMaxSmallHeightLarge;
     private int mMaxSmallHeightMedia;
     private int mMaxExpandedHeight;
-    private int mMaxCallHeight;
     private int mIncreasedPaddingBetweenElements;
     private int mNotificationLaunchHeight;
     private boolean mMustStayOnScreen;
@@ -687,7 +686,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             //  them a headerless design, then remove this hack.
             smallHeight = mMaxSmallHeightLarge;
         } else if (isCallLayout) {
-            smallHeight = mMaxCallHeight;
+            smallHeight = mMaxExpandedHeight;
         } else if (mUseIncreasedCollapsedHeight && layout == mPrivateLayout) {
             smallHeight = mMaxSmallHeightLarge;
         } else {
@@ -1621,8 +1620,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_min_height_media);
         mMaxExpandedHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_height);
-        mMaxCallHeight = NotificationUtils.getFontScaledHeight(mContext,
-                R.dimen.call_notification_full_height);
         mMaxHeadsUpHeightBeforeN = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height_legacy);
         mMaxHeadsUpHeightBeforeP = NotificationUtils.getFontScaledHeight(mContext,

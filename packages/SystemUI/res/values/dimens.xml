@@ -167,10 +167,6 @@
          and the notification won't use this much, but is measured with wrap_content -->
     <dimen name="notification_messaging_actions_min_height">196dp</dimen>
 
-    <!-- Height of a call notification. Note that this is an upper bound
-     and the notification won't use this much, but is measured with wrap_content -->
-    <dimen name="call_notification_full_height">172dp</dimen>
-
     <!-- a threshold in dp per second that is considered fast scrolling -->
     <dimen name="scroll_fast_threshold">1500dp</dimen>
 
