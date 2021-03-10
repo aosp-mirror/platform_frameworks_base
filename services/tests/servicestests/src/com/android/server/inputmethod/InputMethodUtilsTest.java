@@ -60,6 +60,7 @@ public class InputMethodUtilsTest {
     private static final boolean IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE = true;
     private static final boolean IS_ASCII_CAPABLE = true;
     private static final boolean IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE = true;
+    private static final boolean CHECK_COUNTRY = true;
     private static final Locale LOCALE_EN = new Locale("en");
     private static final Locale LOCALE_EN_US = new Locale("en", "US");
     private static final Locale LOCALE_EN_GB = new Locale("en", "GB");
@@ -667,8 +668,6 @@ public class InputMethodUtilsTest {
         final InputMethodSubtype nonAutoId = createFakeInputMethodSubtype("id",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-
-        final boolean CHECK_COUNTRY = true;
 
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
