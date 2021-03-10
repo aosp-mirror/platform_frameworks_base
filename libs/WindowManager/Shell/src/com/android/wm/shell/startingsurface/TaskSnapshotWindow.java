@@ -83,7 +83,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DecorView;
 import com.android.internal.view.BaseIWindow;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ExternalThread;
 
 /**
  * This class represents a starting window that shows a snapshot.
@@ -123,7 +122,7 @@ public class TaskSnapshotWindow {
     private final Window mWindow;
     private final Surface mSurface;
     private final Runnable mClearWindowHandler;
-    private final ShellExecutor mMainExecutor;
+    private final ShellExecutor mSplashScreenExecutor;
     private SurfaceControl mSurfaceControl;
     private SurfaceControl mChildSurfaceControl;
     private final IWindowSession mSession;
@@ -252,8 +251,8 @@ public class TaskSnapshotWindow {
             TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
             int appearance, int windowFlags, int windowPrivateFlags, Rect taskBounds,
             int currentOrientation, int activityType, InsetsState topWindowInsetsState,
-            Runnable clearWindowHandler, ShellExecutor mainExecutor) {
-        mMainExecutor = mainExecutor;
+            Runnable clearWindowHandler, ShellExecutor splashScreenExecutor) {
+        mSplashScreenExecutor = splashScreenExecutor;
         mSurface = new Surface();
         mSession = WindowManagerGlobal.getWindowSession();
         mWindow = new Window();
@@ -296,7 +295,7 @@ public class TaskSnapshotWindow {
                 // Show the latest content as soon as possible for unlocking to home.
                 && mActivityType != ACTIVITY_TYPE_HOME) {
             final long delayTime = mShownTime + SIZE_MISMATCH_MINIMUM_TIME_MS - now;
-            mMainExecutor.executeDelayed(() -> remove(), delayTime);
+            mSplashScreenExecutor.executeDelayed(() -> remove(), delayTime);
             if (DEBUG) {
                 Slog.d(TAG, "Defer removing snapshot surface in " + delayTime);
             }
@@ -512,7 +511,7 @@ public class TaskSnapshotWindow {
                 MergedConfiguration mergedConfiguration, boolean forceLayout,
                 boolean alwaysConsumeSystemBars, int displayId) {
             if (mOuter != null) {
-                mOuter.mMainExecutor.execute(() -> {
+                mOuter.mSplashScreenExecutor.execute(() -> {
                     if (mergedConfiguration != null
                             && mOuter.mOrientationOnCreation
                             != mergedConfiguration.getMergedConfiguration().orientation) {
