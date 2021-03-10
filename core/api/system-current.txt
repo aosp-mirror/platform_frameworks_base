@@ -2881,9 +2881,14 @@ package android.graphics.fonts {
   }
 
   public static final class FontFamilyUpdateRequest.FontFamily {
-    ctor public FontFamilyUpdateRequest.FontFamily(@NonNull String, @NonNull java.util.List<android.graphics.fonts.FontFamilyUpdateRequest.Font>);
     method @NonNull public java.util.List<android.graphics.fonts.FontFamilyUpdateRequest.Font> getFonts();
     method @NonNull public String getName();
+  }
+
+  public static final class FontFamilyUpdateRequest.FontFamily.Builder {
+    ctor public FontFamilyUpdateRequest.FontFamily.Builder(@NonNull String, @NonNull java.util.List<android.graphics.fonts.FontFamilyUpdateRequest.Font>);
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest.FontFamily.Builder addFont(@NonNull android.graphics.fonts.FontFamilyUpdateRequest.Font);
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest.FontFamily build();
   }
 
   public final class FontFileUpdateRequest {

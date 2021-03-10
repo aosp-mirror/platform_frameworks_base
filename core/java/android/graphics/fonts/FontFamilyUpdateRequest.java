@@ -72,6 +72,45 @@ public final class FontFamilyUpdateRequest {
      * A font family definition.
      */
     public static final class FontFamily {
+
+        /**
+         * Builds a {@link FontFamily}.
+         */
+        public static final class Builder {
+            @NonNull private final String mName;
+            @NonNull private final List<Font> mFonts;
+
+            /**
+             * Constructs a {@link FontFamily.Builder}.
+             */
+            public Builder(@NonNull String name, @NonNull List<Font> fonts) {
+                Objects.requireNonNull(name);
+                Preconditions.checkStringNotEmpty(name);
+                Objects.requireNonNull(fonts);
+                Preconditions.checkCollectionElementsNotNull(fonts, "fonts");
+                Preconditions.checkCollectionNotEmpty(fonts, "fonts");
+                mName = name;
+                mFonts = new ArrayList<>(fonts);
+            }
+
+            /**
+             * Adds a {@link Font} to the builder.
+             *
+             * @return This builder object.
+             */
+            public @NonNull Builder addFont(@NonNull Font font) {
+                mFonts.add(font);
+                return this;
+            }
+
+            /**
+             * Builds a {@link FontFamily}.
+             */
+            public @NonNull FontFamily build() {
+                return new FontFamily(mName, mFonts);
+            }
+        }
+
         @NonNull
         private final String mName;
         @NonNull
@@ -90,12 +129,7 @@ public final class FontFamilyUpdateRequest {
          * @see android.graphics.Typeface#create(String, int)
          * @see Font
          */
-        public FontFamily(@NonNull String name, @NonNull List<Font> fonts) {
-            Objects.requireNonNull(name);
-            Preconditions.checkStringNotEmpty(name);
-            Objects.requireNonNull(fonts);
-            Preconditions.checkCollectionElementsNotNull(fonts, "fonts");
-            Preconditions.checkCollectionNotEmpty(fonts, "fonts");
+        private FontFamily(@NonNull String name, @NonNull List<Font> fonts) {
             mName = name;
             mFonts = fonts;
         }
