@@ -849,6 +849,7 @@ public class AppWidgetHostView extends FrameLayout {
     public void setColorResources(@NonNull SparseIntArray colorMapping) {
         mColorResources = RemoteViews.ColorResources.create(mContext, colorMapping);
         mLayoutId = -1;
+        mViewMode = VIEW_MODE_NOINIT;
         reapplyLastRemoteViews();
     }
 
@@ -863,6 +864,7 @@ public class AppWidgetHostView extends FrameLayout {
         if (mColorResources != null) {
             mColorResources = null;
             mLayoutId = -1;
+            mViewMode = VIEW_MODE_NOINIT;
             reapplyLastRemoteViews();
         }
     }
