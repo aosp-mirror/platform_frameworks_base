@@ -23,6 +23,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         AmbientDisplayPowerCalculatorTest.class,
         AudioPowerCalculatorTest.class,
+        BatteryChargeCalculatorTest.class,
         BatteryStatsCpuTimesTest.class,
         BatteryStatsBackgroundStatsTest.class,
         BatteryStatsBinderCallStatsTest.class,
@@ -49,7 +50,6 @@ import org.junit.runners.Suite;
         CameraPowerCalculatorTest.class,
         CpuPowerCalculatorTest.class,
         CustomMeasuredPowerCalculatorTest.class,
-        DischargedPowerCalculatorTest.class,
         FlashlightPowerCalculatorTest.class,
         GnssPowerCalculatorTest.class,
         IdlePowerCalculatorTest.class,

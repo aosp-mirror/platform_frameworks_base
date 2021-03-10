@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class DischargedPowerCalculatorTest {
+public class BatteryChargeCalculatorTest {
     private static final double PRECISION = 0.00001;
 
     @Rule
@@ -40,27 +40,41 @@ public class DischargedPowerCalculatorTest {
 
     @Test
     public void testDischargeTotals() {
+        BatteryChargeCalculator calculator =
+                new BatteryChargeCalculator(mStatsRule.getPowerProfile());
+
         final BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
         mStatsRule.setTime(1000, 1000);
         batteryStats.resetAllStatsCmdLocked();
         batteryStats.setNoAutoReset(true);
         batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0, 1_000_000,
-                1_000_000, 1_000_000);
+                /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0,
+                1_000_000, 1_000_000, 1_000_000);
         batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0, 2_000_000,
-                2_000_000, 2_000_000);
+                /* plugType */ 0, 85, 72, 3700, 3_000_000, 4_000_000, 0,
+                1_500_000, 1_500_000, 1_500_000);
+        batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
+                /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0,
+                2_000_000, 2_000_000, 2_000_000);
 
-        DischargedPowerCalculator calculator =
-                new DischargedPowerCalculator(mStatsRule.getPowerProfile());
-
-        final BatteryUsageStats batteryUsageStats = mStatsRule.apply(calculator);
+        BatteryUsageStats batteryUsageStats = mStatsRule.apply(calculator);
 
         assertThat(batteryUsageStats.getDischargePercentage()).isEqualTo(10);
         assertThat(batteryUsageStats.getDischargedPowerRange().getLower())
                 .isWithin(PRECISION).of(360.0);
         assertThat(batteryUsageStats.getDischargedPowerRange().getUpper())
                 .isWithin(PRECISION).of(400.0);
+        assertThat(batteryUsageStats.getBatteryTimeRemainingMs()).isEqualTo(8_000_000);
+        assertThat(batteryUsageStats.getChargeTimeRemainingMs()).isEqualTo(-1);
+
+        // Plug in
+        batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_CHARGING, 100,
+                BatteryManager.BATTERY_PLUGGED_USB, 80, 72, 3700, 2_400_000, 4_000_000, 100,
+                4_000_000, 4_000_000, 4_000_000);
+
+        batteryUsageStats = mStatsRule.apply(calculator);
+
+        assertThat(batteryUsageStats.getChargeTimeRemainingMs()).isEqualTo(100_000);
     }
 }
