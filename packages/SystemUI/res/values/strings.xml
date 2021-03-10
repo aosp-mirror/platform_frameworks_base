@@ -2651,7 +2651,7 @@
     <!-- Content description for magnification mode switch. [CHAR LIMIT=NONE] -->
     <string name="magnification_mode_switch_description">Magnification switch</string>
     <!-- A11y state description for magnification mode switch that device is in full-screen mode. [CHAR LIMIT=NONE] -->
-    <string name="magnification_mode_switch_state_full_screen">Magnify entire screen</string>
+    <string name="magnification_mode_switch_state_full_screen">Magnify full screen</string>
     <!-- A11y state description for magnification mode switch that device is in window mode. [CHAR LIMIT=NONE] -->
     <string name="magnification_mode_switch_state_window">Magnify part of screen</string>
     <!-- Click action label for magnification switch. [CHAR LIMIT=NONE] -->
