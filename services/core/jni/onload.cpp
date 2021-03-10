@@ -52,7 +52,6 @@ int register_android_server_SyntheticPasswordManager(JNIEnv* env);
 int register_android_hardware_display_DisplayViewport(JNIEnv* env);
 int register_android_server_net_NetworkStatsFactory(JNIEnv* env);
 int register_android_server_net_NetworkStatsService(JNIEnv* env);
-int register_android_server_security_VerityUtils(JNIEnv* env);
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env);
 int register_android_server_am_LowMemDetector(JNIEnv* env);
 int register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(JNIEnv* env);
@@ -106,7 +105,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_hardware_display_DisplayViewport(env);
     register_android_server_net_NetworkStatsFactory(env);
     register_android_server_net_NetworkStatsService(env);
-    register_android_server_security_VerityUtils(env);
     register_android_server_am_CachedAppOptimizer(env);
     register_android_server_am_LowMemDetector(env);
     register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(env);

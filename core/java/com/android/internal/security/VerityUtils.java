@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.security;
+package com.android.internal.security;
 
 import android.annotation.NonNull;
 import android.os.Build;
@@ -42,7 +42,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 /** Provides fsverity related operations. */
-abstract public class VerityUtils {
+public abstract class VerityUtils {
     private static final String TAG = "VerityUtils";
 
     /**
@@ -156,8 +156,8 @@ abstract public class VerityUtils {
                 return SetupResult.failed();
             }
             return SetupResult.ok(Os.dup(rfd), contentSize);
-        } catch (IOException | SecurityException | DigestException | NoSuchAlgorithmException |
-                SignatureNotFoundException | ErrnoException e) {
+        } catch (IOException | SecurityException | DigestException | NoSuchAlgorithmException
+                | SignatureNotFoundException | ErrnoException e) {
             Slog.e(TAG, "Failed to set up apk verity: ", e);
             return SetupResult.failed();
         } finally {
@@ -243,14 +243,20 @@ abstract public class VerityUtils {
         private final FileDescriptor mFileDescriptor;
         private final int mContentSize;
 
+        /** @deprecated */
+        @Deprecated
         public static SetupResult ok(@NonNull FileDescriptor fileDescriptor, int contentSize) {
             return new SetupResult(RESULT_OK, fileDescriptor, contentSize);
         }
 
+        /** @deprecated */
+        @Deprecated
         public static SetupResult skipped() {
             return new SetupResult(RESULT_SKIPPED, null, -1);
         }
 
+        /** @deprecated */
+        @Deprecated
         public static SetupResult failed() {
             return new SetupResult(RESULT_FAILED, null, -1);
         }
