@@ -849,7 +849,7 @@
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausar"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"Reproduzir"</string>
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Parar"</string>
-    <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Retroceder"</string>
+    <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Voltar"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Avançar"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Só chamadas de emergência"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Rede bloqueada"</string>

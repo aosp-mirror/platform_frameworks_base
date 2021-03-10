@@ -26,7 +26,7 @@ android_test {
         "android.test.mock",
     ],
     static_libs: [
-        "TestNetworkStackLib",
+        "NetworkStackApiStableLib",
         "androidx.test.ext.junit",
         "frameworks-net-integration-testutils",
         "kotlin-reflect",
