@@ -21,8 +21,8 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.PaintDrawable
-import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RoundRectShape
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.view.Gravity
 import android.widget.LinearLayout
@@ -34,13 +34,14 @@ import com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState
 
 // Placeholder
 private const val CORNER_RADIUS = 40f
+private val RADII = (1..8).map { CORNER_RADIUS }.toFloatArray()
 
 open class QSTileViewHorizontal(
     context: Context,
     icon: QSIconView
 ) : QSTileView(context, icon, false) {
 
-    protected var paintDrawable: PaintDrawable? = null
+    protected var backgroundDrawable: ShapeDrawable? = null
     private var paintColor = Color.WHITE
     private var paintAnimator: ValueAnimator? = null
 
@@ -74,28 +75,13 @@ open class QSTileViewHorizontal(
     }
 
     override fun newTileBackground(): Drawable? {
-        val d = super.newTileBackground()
-        if (paintDrawable == null) {
-            paintDrawable = PaintDrawable(paintColor).apply {
-                setCornerRadius(CORNER_RADIUS)
-            }
-        }
-        if (d is RippleDrawable) {
-            d.addLayer(paintDrawable)
-            return d
-        } else {
-            return paintDrawable
-        }
+        backgroundDrawable = ShapeDrawable(RoundRectShape(RADII, null, null))
+        return backgroundDrawable
     }
 
     override fun setClickable(clickable: Boolean) {
         super.setClickable(clickable)
         background = mTileBackground
-        if (clickable && mShowRippleEffect) {
-            mRipple?.setHotspotBounds(left, top, right, bottom)
-        } else {
-            mRipple?.setHotspotBounds(0, 0, 0, 0)
-        }
     }
 
     override fun handleStateChanged(state: QSTile.State) {
@@ -110,11 +96,10 @@ open class QSTileViewHorizontal(
         } else {
             if (newColor != paintColor) {
                 clearAnimator()
-                paintDrawable?.paint?.color = newColor
-                paintDrawable?.invalidateSelf()
+                backgroundDrawable?.setTintList(ColorStateList.valueOf(newColor))
+                paintColor = newColor
             }
         }
-        paintColor = newColor
     }
 
     private fun animateToNewState(newColor: Int) {
@@ -123,8 +108,9 @@ open class QSTileViewHorizontal(
             paintAnimator = ValueAnimator.ofArgb(paintColor, newColor)
                 .setDuration(QSIconViewImpl.QS_ANIM_LENGTH).apply {
                     addUpdateListener { animation: ValueAnimator ->
-                        paintDrawable?.paint?.color = animation.animatedValue as Int
-                        paintDrawable?.invalidateSelf()
+                        val c = animation.animatedValue as Int
+                        backgroundDrawable?.setTintList(ColorStateList.valueOf(c))
+                        paintColor = c
                     }
                     start()
                 }
