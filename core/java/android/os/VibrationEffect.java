@@ -1208,7 +1208,8 @@ public abstract class VibrationEffect implements Parcelable {
          *
          * @param primitiveId The primitive to add
          * @param scale The scale to apply to the intensity of the primitive.
-         * @param delay The amount of time in milliseconds to wait before playing this primitive
+         * @param delay The amount of time in milliseconds to wait before playing this primitive,
+         *              starting at the time the previous element in this composition is finished.
          * @return The {@link Composition} object to enable adding multiple primitives in one chain.
          */
         @NonNull
