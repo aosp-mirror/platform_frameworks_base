@@ -320,6 +320,26 @@ package android.net {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
   }
 
+  public final class OemNetworkPreferences implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Map<java.lang.String,java.lang.Integer> getNetworkPreferences();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.OemNetworkPreferences> CREATOR;
+    field public static final int OEM_NETWORK_PREFERENCE_OEM_PAID = 1; // 0x1
+    field public static final int OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK = 2; // 0x2
+    field public static final int OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY = 3; // 0x3
+    field public static final int OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY = 4; // 0x4
+    field public static final int OEM_NETWORK_PREFERENCE_UNINITIALIZED = 0; // 0x0
+  }
+
+  public static final class OemNetworkPreferences.Builder {
+    ctor public OemNetworkPreferences.Builder();
+    ctor public OemNetworkPreferences.Builder(@NonNull android.net.OemNetworkPreferences);
+    method @NonNull public android.net.OemNetworkPreferences.Builder addNetworkPreference(@NonNull String, int);
+    method @NonNull public android.net.OemNetworkPreferences build();
+    method @NonNull public android.net.OemNetworkPreferences.Builder clearNetworkPreference(@NonNull String);
+  }
+
   public abstract class QosCallback {
     ctor public QosCallback();
     method public void onError(@NonNull android.net.QosCallbackException);
