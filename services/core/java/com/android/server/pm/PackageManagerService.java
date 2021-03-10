@@ -3550,7 +3550,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public String getInstantAppPackageName(int callingUid) {
             // If the caller is an isolated app use the owner's uid for the lookup.
             if (Process.isIsolated(callingUid)) {
-                callingUid = mIsolatedOwners.get(callingUid);
+                callingUid = getIsolatedOwner(callingUid);
             }
             final int appId = UserHandle.getAppId(callingUid);
             final Object obj = mSettings.getSettingLPr(appId);
@@ -3560,6 +3560,19 @@ public class PackageManagerService extends IPackageManager.Stub
                 return isInstantApp ? ps.pkg.getPackageName() : null;
             }
             return null;
+        }
+
+        /**
+         * Finds the owner for the provided isolated UID. Throws IllegalStateException if no such
+         * isolated UID is found.
+         */
+        private int getIsolatedOwner(int isolatedUid) {
+            final int ownerUid = mIsolatedOwners.get(isolatedUid, -1);
+            if (ownerUid == -1) {
+                throw new IllegalStateException(
+                        "No owner UID found for isolated UID " + isolatedUid);
+            }
+            return ownerUid;
         }
 
         public String resolveExternalPackageNameLPr(AndroidPackage pkg) {
@@ -3928,7 +3941,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean isInstantAppInternalBody(String packageName, @UserIdInt int userId,
                 int callingUid) {
             if (Process.isIsolated(callingUid)) {
-                callingUid = mIsolatedOwners.get(callingUid);
+                callingUid = getIsolatedOwner(callingUid);
             }
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
             final boolean returnAllowed =
@@ -4082,7 +4095,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 @Nullable ComponentName component, @ComponentType int componentType, int userId) {
             // if we're in an isolated process, get the real calling UID
             if (Process.isIsolated(callingUid)) {
-                callingUid = mIsolatedOwners.get(callingUid);
+                callingUid = getIsolatedOwner(callingUid);
             }
             final String instantAppPkgName = getInstantAppPackageName(callingUid);
             final boolean callerIsInstantApp = instantAppPkgName != null;
