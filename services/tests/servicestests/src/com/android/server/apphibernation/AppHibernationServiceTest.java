@@ -58,6 +58,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Tests for {@link com.android.server.apphibernation.AppHibernationService}
@@ -116,8 +117,8 @@ public final class AppHibernationServiceTest {
         mAppHibernationService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         UserInfo userInfo = addUser(USER_ID_1);
-        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
         doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_1);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
 
         mAppHibernationService.mIsServiceEnabled = true;
     }
@@ -150,8 +151,8 @@ public final class AppHibernationServiceTest {
             throws RemoteException {
         // WHEN a new user is added and a package from the user is hibernated
         UserInfo user2 = addUser(USER_ID_2);
-        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(user2));
         doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(user2));
         mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_2, true);
 
         // THEN the new user's package is hibernated
@@ -188,8 +189,8 @@ public final class AppHibernationServiceTest {
         // GIVEN an unlocked user with all packages installed
         UserInfo userInfo =
                 addUser(USER_ID_2, new String[]{PACKAGE_NAME_1, PACKAGE_NAME_2, PACKAGE_NAME_3});
-        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
         doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
 
         // WHEN packages are hibernated for the user
         mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_2, true);
@@ -256,6 +257,12 @@ public final class AppHibernationServiceTest {
         @Override
         public UserManager getUserManager() {
             return mUserManager;
+        }
+
+        @Override
+        public Executor getBackgroundExecutor() {
+            // Just execute immediately in tests.
+            return r -> r.run();
         }
 
         @Override
