@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.bubbles;
 
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
@@ -28,7 +27,6 @@ import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_BOT
 import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_LEFT;
 import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_NONE;
 import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_RIGHT;
-import static com.android.wm.shell.bubbles.Bubbles.DISMISS_AGED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_BLOCKED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_GROUP_CANCELLED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_INVALID_INTENT;
@@ -42,7 +40,6 @@ import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_CHANGED;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -243,15 +240,15 @@ public class BubbleController {
         mBubbleData = data;
         mBubbleData.setListener(mBubbleDataListener);
         mBubbleData.setSuppressionChangedListener(bubble -> {
-            // Make sure NoMan knows it's not showing in the shade anymore so anyone querying it
-            // can tell.
+            // Make sure NoMan knows suppression state so that anyone querying it can tell.
             try {
                 mBarService.onBubbleNotificationSuppressionChanged(bubble.getKey(),
-                        !bubble.showInShade());
+                        !bubble.showInShade(), bubble.isSuppressed());
             } catch (RemoteException e) {
                 // Bad things have happened
             }
         });
+
         mBubbleData.setPendingIntentCancelledListener(bubble -> {
             if (bubble.getBubbleIntent() == null) {
                 return;
@@ -282,6 +279,8 @@ public class BubbleController {
 
         mBubbleIconFactory = new BubbleIconFactory(context);
         mTaskOrganizer = organizer;
+        mTaskOrganizer.addLocusIdListener((taskId, locus, visible) ->
+                mBubbleData.onLocusVisibilityChanged(taskId, locus, visible));
 
         launcherApps.registerCallback(new LauncherApps.Callback() {
             @Override
@@ -1042,6 +1041,14 @@ public class BubbleController {
                 if (update.selectedBubble != null) {
                     mSysuiProxy.updateNotificationSuppression(update.selectedBubble.getKey());
                 }
+            }
+
+            if (update.suppressedBubble != null && mStackView != null) {
+                mStackView.setBubbleVisibility(update.suppressedBubble, false);
+            }
+
+            if (update.unsuppressedBubble != null && mStackView != null) {
+                mStackView.setBubbleVisibility(update.unsuppressedBubble, true);
             }
 
             // Expanding? Apply this last.
