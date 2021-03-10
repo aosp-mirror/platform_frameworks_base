@@ -60,6 +60,7 @@ import android.util.SparseArray;
 import android.view.autofill.AutofillManagerInternal;
 import android.widget.Toast;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -955,9 +956,10 @@ public class ClipboardService extends SystemService {
                     mPm.getApplicationInfoAsUser(callingPackage, 0, userId));
             String message;
             if (sourceAppLabel != null) {
-                message = callingAppLabel + " pasted from " + sourceAppLabel;
+                message = getContext().getString(
+                        R.string.pasted_from_app, callingAppLabel, sourceAppLabel);
             } else {
-                message = callingAppLabel + " pasted from clipboard";
+                message = getContext().getString(R.string.pasted_from_clipboard, callingAppLabel);
             }
             Slog.i(TAG, message);
             Binder.withCleanCallingIdentity(() ->
