@@ -3122,6 +3122,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                     break;
                 }
+                case NetworkAgent.EVENT_TEARDOWN_DELAY_CHANGED: {
+                    if (msg.arg1 >= 0 && msg.arg1 <= NetworkAgent.MAX_TEARDOWN_DELAY_MS) {
+                        nai.teardownDelayMs = msg.arg1;
+                    } else {
+                        logwtf(nai.toShortString() + " set invalid teardown delay " + msg.arg1);
+                    }
+                }
             }
         }
 
@@ -3692,6 +3699,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mLegacyTypeTracker.remove(nai, wasDefault);
         rematchAllNetworksAndRequests();
         mLingerMonitor.noteDisconnect(nai);
+
+        // Immediate teardown.
+        if (nai.teardownDelayMs == 0) {
+            destroyNetwork(nai);
+            return;
+        }
+
+        // Delayed teardown.
+        try {
+            mNetd.networkSetPermissionForNetwork(nai.network.netId, INetd.PERMISSION_SYSTEM);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Error marking network restricted during teardown: " + e);
+        }
+        mHandler.postDelayed(() -> destroyNetwork(nai), nai.teardownDelayMs);
+    }
+
+    private void destroyNetwork(NetworkAgentInfo nai) {
         if (nai.created) {
             // Tell netd to clean up the configuration for this network
             // (routing rules, DNS, etc).
@@ -3704,7 +3728,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mDnsManager.removeNetwork(nai.network);
         }
         mNetIdManager.releaseNetId(nai.network.getNetId());
-        nai.onNetworkDisconnected();
+        nai.onNetworkDestroyed();
     }
 
     private boolean createNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
