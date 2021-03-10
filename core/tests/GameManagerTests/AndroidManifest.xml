@@ -19,7 +19,7 @@
           package="com.android.app.gamemanagertests"
           android:sharedUserId="android.uid.system" >
 
-    <application>
+    <application android:appCategory="game">
         <uses-library android:name="android.test.runner" />
     </application>
 

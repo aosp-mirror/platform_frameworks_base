@@ -37,9 +37,6 @@ import org.junit.runner.RunWith;
 @SmallTest
 @Presubmit
 public final class GameManagerTests {
-    private static final String PACKAGE_NAME_0 = "com.android.app0";
-    private static final String PACKAGE_NAME_1 = "com.android.app1";
-
     protected Context mContext;
     private GameManager mGameManager;
     private String mPackageName;
@@ -52,8 +49,6 @@ public final class GameManagerTests {
 
         // Reset the Game Mode for the test app, since it persists across invocations.
         mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_UNSUPPORTED);
-        mGameManager.setGameMode(PACKAGE_NAME_0, GameManager.GAME_MODE_UNSUPPORTED);
-        mGameManager.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_UNSUPPORTED);
     }
 
     @Test
@@ -73,14 +68,14 @@ public final class GameManagerTests {
     @Test
     public void testPrivilegedGameModeGetterSetter() {
         assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
-                mGameManager.getGameMode(PACKAGE_NAME_0));
+                mGameManager.getGameMode(mPackageName));
 
-        mGameManager.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_STANDARD);
+        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD);
         assertEquals(GameManager.GAME_MODE_STANDARD,
-                mGameManager.getGameMode(PACKAGE_NAME_1));
+                mGameManager.getGameMode(mPackageName));
 
-        mGameManager.setGameMode(PACKAGE_NAME_1, GameManager.GAME_MODE_PERFORMANCE);
+        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE);
         assertEquals(GameManager.GAME_MODE_PERFORMANCE,
-                mGameManager.getGameMode(PACKAGE_NAME_1));
+                mGameManager.getGameMode(mPackageName));
     }
 }

@@ -49,14 +49,18 @@ public class GameManagerServiceTests {
     private static final int USER_ID_2 = 1002;
 
     // Stolen from ConnectivityServiceTest.MockContext
-    class MockContext extends ContextWrapper {
+    static class MockContext extends ContextWrapper {
         private static final String TAG = "MockContext";
 
         // Map of permission name -> PermissionManager.Permission_{GRANTED|DENIED} constant
         private final HashMap<String, Integer> mMockedPermissions = new HashMap<>();
 
+        @Mock
+        private final MockPackageManager mMockPackageManager;
+
         MockContext(Context base) {
             super(base);
+            mMockPackageManager = new MockPackageManager();
         }
 
         /**
@@ -100,6 +104,11 @@ public class GameManagerServiceTests {
             if (!granted.equals(PackageManager.PERMISSION_GRANTED)) {
                 throw new SecurityException("[Test] permission denied: " + permission);
             }
+        }
+
+        @Override
+        public PackageManager getPackageManager() {
+            return mMockPackageManager;
         }
     }
 
