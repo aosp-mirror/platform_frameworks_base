@@ -136,7 +136,7 @@ public class CropView extends View {
             case MotionEvent.ACTION_UP:
                 if (mCurrentDraggingBoundary != CropBoundary.NONE) {
                     // Commit the delta to the stored crop values.
-                    commitDeltas();
+                    commitDeltas(mCurrentDraggingBoundary);
                     updateListener(event);
                 }
         }
@@ -184,12 +184,12 @@ public class CropView extends View {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                commitDeltas();
+                commitDeltas(boundary);
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                commitDeltas();
+                commitDeltas(boundary);
             }
         });
         animator.setFloatValues(0f, 1f);
@@ -228,11 +228,14 @@ public class CropView extends View {
         mCropInteractionListener = listener;
     }
 
-    private void commitDeltas() {
-        mTopCrop += mTopDelta;
-        mBottomCrop += mBottomDelta;
-        mTopDelta = 0;
-        mBottomDelta = 0;
+    private void commitDeltas(CropBoundary boundary) {
+        if (boundary == CropBoundary.TOP) {
+            mTopCrop += mTopDelta;
+            mTopDelta = 0;
+        } else if (boundary == CropBoundary.BOTTOM) {
+            mBottomCrop += mBottomDelta;
+            mBottomDelta = 0;
+        }
     }
 
     private void updateListener(MotionEvent event) {
