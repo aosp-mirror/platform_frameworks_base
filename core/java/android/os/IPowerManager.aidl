@@ -27,9 +27,9 @@ import android.os.WorkSource;
 interface IPowerManager
 {
     void acquireWakeLock(IBinder lock, int flags, String tag, String packageName, in WorkSource ws,
-            String historyTag);
+            String historyTag, int displayId);
     void acquireWakeLockWithUid(IBinder lock, int flags, String tag, String packageName,
-            int uidtoblame);
+            int uidtoblame, int displayId);
     @UnsupportedAppUsage
     void releaseWakeLock(IBinder lock, int flags);
     void updateWakeLockUids(IBinder lock, in int[] uids);
