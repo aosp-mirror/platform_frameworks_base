@@ -1915,7 +1915,7 @@
          @hide
     -->
     <permission android:name="android.permission.SUSPEND_APPS"
-        android:protectionLevel="signature|wellbeing" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows applications to discover and pair bluetooth devices.
          <p>Protection level: normal
@@ -2789,7 +2789,7 @@
 
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY"
-                android:protectionLevel="signature|recents|wellbeing"/>
+                android:protectionLevel="signature|recents|role"/>
 
     <!-- @deprecated Use {@link android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND}
          @hide
@@ -5138,7 +5138,7 @@
     <!-- @SystemApi Allows the holder to access and manage instant applications on the device.
          @hide -->
     <permission android:name="android.permission.ACCESS_INSTANT_APPS"
-            android:protectionLevel="signature|installer|verifier|wellbeing" />
+            android:protectionLevel="signature|installer|verifier|role" />
     <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS"/>
 
     <!-- Allows the holder to view the instant applications on the device.
@@ -5318,7 +5318,7 @@
     <!-- @SystemApi Allows an application to turn on / off quiet mode.
          @hide -->
     <permission android:name="android.permission.MODIFY_QUIET_MODE"
-                android:protectionLevel="signature|privileged|wellbeing|development" />
+                android:protectionLevel="signature|privileged|development" />
 
     <!-- Allows internal management of the camera framework
          @hide -->
