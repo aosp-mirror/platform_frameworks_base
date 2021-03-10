@@ -9236,6 +9236,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.print(ptw.callingUid);
                 }
             }
+            pw.println("  mFgsStartTempAllowList:");
+            mFgsStartTempAllowList.dump(pw);
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
