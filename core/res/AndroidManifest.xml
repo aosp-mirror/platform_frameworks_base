@@ -2706,9 +2706,10 @@
     <permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"
         android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier" />
 
-    <!-- @SystemApi @hide Allows an application to start foreground services from background -->
+    <!-- Allows an application to start foreground services from background, can only be granted to
+         privileged apps or app that is SMS/EMERGENCY/SYSTEM GALLERY roles. -->
     <permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
-                android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier" />
+                android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier|role"/>
 
     <!-- @SystemApi Must be required by activities that handle the intent action
          {@link Intent#ACTION_SEND_SHOW_SUSPENDED_APP_DETAILS}. This is for use by apps that
@@ -5592,6 +5593,10 @@
     <!-- Attribution for Gnss Time Update service. -->
     <attribution android:tag="GnssTimeUpdateService"
                  android:label="@string/gnss_time_update_service"/>
+    <!-- Attribution for MusicRecognitionManagerService.
+         <p>Not for use by third-party applications.</p> -->
+    <attribution android:tag="MusicRecognitionManagerService"
+        android:label="@string/music_recognition_manager_service"/>
 
     <application android:process="system"
                  android:persistent="true"

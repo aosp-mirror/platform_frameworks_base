@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -67,6 +68,10 @@ public final class MediaRouter2 {
     private static final long MANAGER_REQUEST_ID_NONE = MediaRoute2ProviderService.REQUEST_ID_NONE;
 
     @GuardedBy("sRouterLock")
+    private static Map<String, MediaRouter2> sMediaRouter2Map = new ArrayMap<>();
+    private static MediaRouter2Manager sManager;
+
+    @GuardedBy("sRouterLock")
     private static MediaRouter2 sInstance;
 
     private final Context mContext;
@@ -82,7 +87,9 @@ public final class MediaRouter2 {
     private final CopyOnWriteArrayList<ControllerCreationRequest> mControllerCreationRequests =
             new CopyOnWriteArrayList<>();
 
+    private final String mClientPackageName;
     private final String mPackageName;
+
     @GuardedBy("sRouterLock")
     final Map<String, MediaRoute2Info> mRoutes = new ArrayMap<>();
 
@@ -120,6 +127,42 @@ public final class MediaRouter2 {
         }
     }
 
+    /**
+     * Gets an instance of the media router which controls the app's media routing.
+     * Returns {@code null} if the given package name is invalid.
+     *
+     * @param clientPackageName the package name of the app to control
+     * @hide
+     */
+    //@SystemApi
+    @Nullable
+    public static MediaRouter2 getInstance(@NonNull Context context,
+            @NonNull String clientPackageName) {
+        Objects.requireNonNull(context, "context must not be null");
+        Objects.requireNonNull(clientPackageName, "clientPackageName must not be null");
+
+        PackageManager pm = context.getPackageManager();
+        try {
+            pm.getPackageInfo(clientPackageName, 0);
+        } catch (PackageManager.NameNotFoundException ex) {
+            Log.e(TAG, "Package " + clientPackageName + " not found. Ignoring.");
+            return null;
+        }
+
+        synchronized (sRouterLock) {
+            MediaRouter2 instance = sMediaRouter2Map.get(clientPackageName);
+            if (instance == null) {
+                // TODO: Add permission check here using MODIFY_AUDIO_ROUTING.
+                if (sManager == null) {
+                    sManager = MediaRouter2Manager.getInstance(context.getApplicationContext());
+                }
+                instance = new MediaRouter2(context, clientPackageName);
+                sMediaRouter2Map.put(clientPackageName, instance);
+            }
+            return instance;
+        }
+    }
+
     private MediaRouter2(Context appContext) {
         mContext = appContext;
         mMediaRouterService = IMediaRouterService.Stub.asInterface(
@@ -148,6 +191,17 @@ public final class MediaRouter2 {
             mRoutes.put(route.getId(), route);
         }
         mSystemController = new SystemRoutingController(currentSystemSessionInfo);
+
+        mClientPackageName = null;
+    }
+
+    private MediaRouter2(Context context, String clientPackageName) {
+        mClientPackageName = clientPackageName;
+        mContext = context;
+        mMediaRouterService = null;
+        mPackageName = null;
+        mHandler = new Handler(Looper.getMainLooper());
+        mSystemController = null;
     }
 
     /**
@@ -163,6 +217,19 @@ public final class MediaRouter2 {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets the target package name of the app which this media router controls.
+     * This is only non-null when the router instance is created with the target package name.
+     *
+     * @see #getInstance(Context, String)
+     * @hide
+     */
+    //@SystemApi
+    @Nullable
+    public String getClientPackageName() {
+        return mClientPackageName;
     }
 
     /**
@@ -270,6 +337,10 @@ public final class MediaRouter2 {
      */
     @NonNull
     public List<MediaRoute2Info> getRoutes() {
+        if (mClientPackageName != null) {
+            return sManager.getAvailableRoutes(mClientPackageName);
+        }
+
         synchronized (sRouterLock) {
             if (mShouldUpdateRoutes) {
                 mShouldUpdateRoutes = false;
@@ -378,6 +449,11 @@ public final class MediaRouter2 {
      * @see TransferCallback#onTransferFailure
      */
     public void transferTo(@NonNull MediaRoute2Info route) {
+        if (mClientPackageName != null) {
+            sManager.selectRoute(mClientPackageName, route);
+            return;
+        }
+
         Objects.requireNonNull(route, "route must not be null");
         Log.v(TAG, "Transferring to route: " + route);
         transfer(getCurrentController(), route);
@@ -388,6 +464,12 @@ public final class MediaRouter2 {
      * controls the media routing, this method is a no-op.
      */
     public void stop() {
+        if (mClientPackageName != null) {
+            List<RoutingSessionInfo> sessionInfos = sManager.getRoutingSessions(mClientPackageName);
+            RoutingSessionInfo sessionToRelease = sessionInfos.get(sessionInfos.size() - 1);
+            sManager.releaseSession(sessionToRelease);
+            return;
+        }
         getCurrentController().release();
     }
 
@@ -397,7 +479,13 @@ public final class MediaRouter2 {
      * @param route the route you want to transfer the media to.
      * @hide
      */
-    void transfer(@NonNull RoutingController controller, @NonNull MediaRoute2Info route) {
+    //@SystemApi
+    public void transfer(@NonNull RoutingController controller, @NonNull MediaRoute2Info route) {
+        if (mClientPackageName != null) {
+            sManager.transfer(controller.getRoutingSessionInfo(), route);
+            return;
+        }
+
         Objects.requireNonNull(controller, "controller must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
@@ -486,6 +574,14 @@ public final class MediaRouter2 {
      */
     @NonNull
     public List<RoutingController> getControllers() {
+        // TODO: Do not create the controller instances every time,
+        //       Instead, update the list using the sessions' ID and session related callbacks.
+        if (mClientPackageName != null) {
+            return sManager.getRoutingSessions(mClientPackageName).stream()
+                    .map(info -> new RoutingController(info))
+                    .collect(Collectors.toList());
+        }
+
         List<RoutingController> result = new ArrayList<>();
         result.add(0, mSystemController);
         synchronized (sRouterLock) {

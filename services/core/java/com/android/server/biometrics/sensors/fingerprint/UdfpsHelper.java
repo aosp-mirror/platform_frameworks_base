@@ -22,8 +22,11 @@ import android.content.Context;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
 import android.os.RemoteException;
 import android.util.Slog;
+
+import com.android.server.biometrics.sensors.AcquisitionClient;
 
 /**
  * Contains helper methods for under-display fingerprint HIDL.
@@ -77,12 +80,22 @@ public class UdfpsHelper {
     }
 
     public static void showUdfpsOverlay(int sensorId, int reason,
-            @Nullable IUdfpsOverlayController udfpsOverlayController) {
+            @Nullable IUdfpsOverlayController udfpsOverlayController,
+            @NonNull AcquisitionClient<?> client) {
         if (udfpsOverlayController == null) {
             return;
         }
+
+        final IUdfpsOverlayControllerCallback callback =
+                new IUdfpsOverlayControllerCallback.Stub() {
+                    @Override
+                    public void onUserCanceled() {
+                        client.onUserCanceled();
+                    }
+                };
+
         try {
-            udfpsOverlayController.showUdfpsOverlay(sensorId, reason);
+            udfpsOverlayController.showUdfpsOverlay(sensorId, reason, callback);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when showing the UDFPS overlay", e);
         }

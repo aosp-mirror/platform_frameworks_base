@@ -397,6 +397,12 @@ public class Process {
     public static final int THREAD_PRIORITY_VIDEO = -10;
 
     /**
+     * Priority we boost main thread and RT of top app to.
+     * @hide
+     */
+    public static final int THREAD_PRIORITY_TOP_APP_BOOST = -10;
+
+    /**
      * Standard priority of audio threads.  Applications can not normally
      * change to this priority.
      * Use with {@link #setThreadPriority(int)} and

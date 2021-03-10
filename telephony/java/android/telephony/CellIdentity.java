@@ -37,7 +37,7 @@ import java.util.UUID;
 public abstract class CellIdentity implements Parcelable {
 
     /** @hide */
-    public static final int INVALID_CHANNEL_NUMBER = -1;
+    public static final int INVALID_CHANNEL_NUMBER = Integer.MAX_VALUE;
 
     /**
      * parameters for validation

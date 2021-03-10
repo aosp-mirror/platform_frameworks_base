@@ -15,6 +15,8 @@
  */
 package android.hardware.fingerprint;
 
+import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
+
 /**
  * Interface for interacting with the under-display fingerprint sensor (UDFPS) overlay.
  * @hide
@@ -28,7 +30,7 @@ oneway interface IUdfpsOverlayController {
     const int REASON_AUTH_FPM_OTHER = 5; // Other FingerprintManager usage
 
     // Shows the overlay.
-    void showUdfpsOverlay(int sensorId, int reason);
+    void showUdfpsOverlay(int sensorId, int reason, IUdfpsOverlayControllerCallback callback);
 
     // Hides the overlay.
     void hideUdfpsOverlay(int sensorId);

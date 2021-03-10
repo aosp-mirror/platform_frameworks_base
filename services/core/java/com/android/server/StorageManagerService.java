@@ -4553,6 +4553,13 @@ class StorageManagerService extends IStorageManager.Stub
         private final List<StorageManagerInternal.ResetListener> mResetListeners =
                 new ArrayList<>();
 
+        @Override
+        public boolean isFuseMounted(int userId) {
+            synchronized (mLock) {
+                return mFuseMountedUser.contains(userId);
+            }
+        }
+
         /**
          * Check if fuse is running in target user, if it's running then setup its storage dirs.
          * Return true if storage dirs are mounted.

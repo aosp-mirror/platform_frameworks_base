@@ -825,6 +825,13 @@ public final class Settings {
             "android.settings.DISPLAY_SETTINGS";
 
     /**
+     * Activity Action: Show Auto Rotate configuration settings.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_AUTO_ROTATE_SETTINGS =
+            "android.settings.AUTO_ROTATE_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of Night display.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you

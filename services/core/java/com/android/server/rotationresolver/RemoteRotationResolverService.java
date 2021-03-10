@@ -87,6 +87,7 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
             synchronized (request.mLock) {
                 if (!request.mIsFulfilled) {
                     request.mCallbackInternal.onFailure(ROTATION_RESULT_FAILURE_TIMED_OUT);
+                    Slog.d(TAG, "Trying to cancel the remote request. Reason: Timed out.");
                     request.cancelInternal();
                 }
             }
@@ -139,7 +140,6 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
         void cancelInternal() {
             synchronized (mLock) {
                 if (mIsFulfilled) {
-                    Slog.v(TAG, "Trying to cancel the request that has been already fulfilled.");
                     return;
                 }
                 mIsFulfilled = true;
@@ -187,6 +187,8 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                             SystemClock.elapsedRealtime() - request.mRequestStartTimeMillis;
                     logRotationStats(request.mProposedRotation, request.mCurrentRotation, rotation,
                             timeToCalculate);
+                    Slog.d(TAG, "onSuccess:" + rotation);
+                    Slog.d(TAG, "timeToCalculate:" + timeToCalculate);
                 }
             }
 
@@ -204,6 +206,8 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                             SystemClock.elapsedRealtime() - request.mRequestStartTimeMillis;
                     logRotationStats(request.mProposedRotation, request.mCurrentRotation,
                             RESOLUTION_FAILURE, timeToCalculate);
+                    Slog.d(TAG, "onFailure:" + error);
+                    Slog.d(TAG, "timeToCalculate:" + timeToCalculate);
                 }
             }
 

@@ -26,7 +26,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -61,11 +60,12 @@ import java.util.List;
  * be smaller than the real display area because the system subtracts the space needed
  * for decor elements such as the status bar.  Use {@link WindowMetrics#getBounds()} to query the
  * application window bounds.</li>
- * <li>The real display area specifies the part of the display that contains content
- * including the system decorations.  Even so, the real display area may be smaller than the
- * physical size of the display if the window manager is emulating a smaller display
- * using (adb shell wm size).  Use the following methods to query the
- * real display area: {@link #getRealSize}, {@link #getRealMetrics}.</li>
+ * <li>The real display area specifies the part of the display that is accessible to an application
+ * in the current system state. The real display area may be smaller than the physical size of the
+ * display in a few scenarios. Use {@link WindowManager#getCurrentWindowMetrics()} to identify the
+ * current size of the activity window. UI-related work, such as choosing UI layouts, should rely
+ * upon {@link WindowMetrics#getBounds()}. See {@link #getRealSize} / {@link #getRealMetrics} for
+ * details.</li>
  * </ul>
  * </p><p>
  * A logical display does not necessarily represent a particular physical display device
@@ -1230,27 +1230,51 @@ public final class Display {
     }
 
     /**
-     * Gets the real size of the display without subtracting any window decor or
-     * applying any compatibility scale factors.
+     * Gets the size of the largest region of the display accessible to an app in the current system
+     * state, without subtracting any window decor or applying scaling factors.
      * <p>
      * The size is adjusted based on the current rotation of the display.
+     * <p></p>
+     * The returned size will fall into one of these scenarios:
+     * <ol>
+     * <li>The device has no partitions on the display. The returned value is the largest region
+     * of the display accessible to an app in the current system state, regardless of windowing
+     * mode.</li>
+     * <li>The device divides a single display into multiple partitions. An application is
+     * restricted to a portion of the display. This is common in devices where the display changes
+     * size, such as foldables or large screens. The returned size will match the portion of
+     * the display the application is restricted to.</li>
+     * <li>The window manager is emulating a different display size, using {@code adb shell wm
+     * size}. The returned size will match the emulated display size.</li>
+     * </ol>
      * </p><p>
-     * The real size may be smaller than the physical size of the screen when the
-     * window manager is emulating a smaller display (using adb shell wm size).
-     * </p><p>
-     * In general, {@link #getRealSize(Point)} and {@link WindowManager#getMaximumWindowMetrics()}
-     * report the same bounds except that certain areas of the display may not be available to
-     * windows created in the {@link WindowManager}'s {@link Context}.
-     *
-     * For example, imagine a device which has a multi-task mode that limits windows to half of the
-     * screen. In this case, {@link WindowManager#getMaximumWindowMetrics()} reports the
-     * bounds of the screen half where the window is located, while {@link #getRealSize(Point)}
-     * still reports the bounds of the whole display.
+     * The returned value is <b>unsuitable to use when sizing and placing UI elements</b>, since it
+     * does not reflect the application window size in any of these scenarios.
+     * {@link WindowManager#getCurrentWindowMetrics()} is an alternative that returns the size
+     * of the current application window, even if the window is on a device with a partitioned
+     * display. This helps prevent UI bugs where UI elements are misaligned or placed beyond the
+     * bounds of the window.
+     * <p></p>
+     * Handling multi-window mode correctly is necessary since applications are not always
+     * fullscreen. A user on a large screen device, such as a tablet or Chrome OS devices, is more
+     * likely to use multi-window modes.
+     * <p></p>
+     * For example, consider a device with a display partitioned into two halves. The user may have
+     * a fullscreen application open on the first partition. They may have two applications open in
+     * split screen (an example of multi-window mode) on the second partition, with each application
+     * consuming half of the partition. In this case,
+     * {@link WindowManager#getCurrentWindowMetrics()} reports the fullscreen window is half of the
+     * screen in size, and each split screen window is a quarter of the screen in size. On the other
+     * hand, {@link #getRealSize} reports half of the screen size for all windows, since the
+     * application windows are all restricted to their respective partitions.
+     * </p>
      *
      * @param outSize Set to the real size of the display.
-     *
-     * @see WindowManager#getMaximumWindowMetrics()
+     * @deprecated Use {@link WindowManager#getCurrentWindowMetrics()} to identify the current size
+     * of the activity window. UI-related work, such as choosing UI layouts, should rely
+     * upon {@link WindowMetrics#getBounds()}.
      */
+    @Deprecated
     public void getRealSize(Point outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -1263,16 +1287,52 @@ public final class Display {
     }
 
     /**
-     * Gets display metrics based on the real size of this display.
+     * Gets the size of the largest region of the display accessible to an app in the current system
+     * state, without subtracting any window decor or applying scaling factors.
      * <p>
      * The size is adjusted based on the current rotation of the display.
+     * <p></p>
+     * The returned size will fall into one of these scenarios:
+     * <ol>
+     * <li>The device has no partitions on the display. The returned value is the largest region
+     * of the display accessible to an app in the current system state, regardless of windowing
+     * mode.</li>
+     * <li>The device divides a single display into multiple partitions. An application is
+     * restricted to a portion of the display. This is common in devices where the display changes
+     * size, such as foldables or large screens. The returned size will match the portion of
+     * the display the application is restricted to.</li>
+     * <li>The window manager is emulating a different display size, using {@code adb shell wm
+     * size}. The returned size will match the emulated display size.</li>
+     * </ol>
      * </p><p>
-     * The real size may be smaller than the physical size of the screen when the
-     * window manager is emulating a smaller display (using adb shell wm size).
+     * The returned value is <b>unsuitable to use when sizing and placing UI elements</b>, since it
+     * does not reflect the application window size in any of these scenarios.
+     * {@link WindowManager#getCurrentWindowMetrics()} is an alternative that returns the size
+     * of the current application window, even if the window is on a device with a partitioned
+     * display. This helps prevent UI bugs where UI elements are misaligned or placed beyond the
+     * bounds of the window.
+     * <p></p>
+     * Handling multi-window mode correctly is necessary since applications are not always
+     * fullscreen. A user on a large screen device, such as a tablet or Chrome OS devices, is more
+     * likely to use multi-window modes.
+     * <p></p>
+     * For example, consider a device with a display partitioned into two halves. The user may have
+     * a fullscreen application open on the first partition. They may have two applications open in
+     * split screen (an example of multi-window mode) on the second partition, with each application
+     * consuming half of the partition. In this case,
+     * {@link WindowManager#getCurrentWindowMetrics()} reports the fullscreen window is half of the
+     * screen in size, and each split screen window is a quarter of the screen in size. On the other
+     * hand, {@link #getRealMetrics} reports half of the screen size for all windows, since the
+     * application windows are all restricted to their respective partitions.
      * </p>
      *
      * @param outMetrics A {@link DisplayMetrics} object to receive the metrics.
+     * @deprecated Use {@link WindowManager#getCurrentWindowMetrics()} to identify the current size
+     * of the activity window. UI-related work, such as choosing UI layouts, should rely
+     * upon {@link WindowMetrics#getBounds()}. Use {@link Configuration#densityDpi} to
+     * get the current density.
      */
+    @Deprecated
     public void getRealMetrics(DisplayMetrics outMetrics) {
         synchronized (this) {
             updateDisplayInfoLocked();

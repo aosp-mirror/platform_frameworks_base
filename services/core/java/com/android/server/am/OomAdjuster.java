@@ -49,6 +49,7 @@ import static android.os.Process.THREAD_GROUP_DEFAULT;
 import static android.os.Process.THREAD_GROUP_RESTRICTED;
 import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
+import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 import static android.os.Process.setProcessGroup;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
@@ -68,7 +69,6 @@ import static com.android.server.am.ActivityManagerService.TAG_BACKUP;
 import static com.android.server.am.ActivityManagerService.TAG_LRU;
 import static com.android.server.am.ActivityManagerService.TAG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
-import static com.android.server.am.ActivityManagerService.TOP_APP_PRIORITY_BOOST;
 import static com.android.server.am.AppProfiler.TAG_PSS;
 import static com.android.server.am.ProcessList.TAG_PROCESS_OBSERVERS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -343,7 +343,7 @@ public final class OomAdjuster {
         // The process group is usually critical to the response time of foreground app, so the
         // setter should apply it as soon as possible.
         final ServiceThread adjusterThread =
-                new ServiceThread(TAG, TOP_APP_PRIORITY_BOOST, false /* allowIo */);
+                new ServiceThread(TAG, THREAD_PRIORITY_TOP_APP_BOOST, false /* allowIo */);
         adjusterThread.start();
         adjusterThread.getThreadHandler().post(() -> Process.setThreadGroupAndCpuset(
                 adjusterThread.getThreadId(), THREAD_GROUP_TOP_APP));
@@ -2647,11 +2647,11 @@ public final class OomAdjuster {
                                 }
                             } else {
                                 // Boost priority for top app UI and render threads
-                                setThreadPriority(app.getPid(), TOP_APP_PRIORITY_BOOST);
+                                setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
                                 if (renderThreadTid != 0) {
                                     try {
                                         setThreadPriority(renderThreadTid,
-                                                TOP_APP_PRIORITY_BOOST);
+                                                THREAD_PRIORITY_TOP_APP_BOOST);
                                     } catch (IllegalArgumentException e) {
                                         // thread died, ignore
                                     }
@@ -2813,7 +2813,7 @@ public final class OomAdjuster {
                 // is not ready when attaching.
                 if (Process.getProcessGroup(app.getPid()) == THREAD_GROUP_TOP_APP) {
                     app.getWindowProcessController().onTopProcChanged();
-                    setThreadPriority(app.getPid(), TOP_APP_PRIORITY_BOOST);
+                    setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
                 } else {
                     fallbackReason = "not expected top priority";
                 }

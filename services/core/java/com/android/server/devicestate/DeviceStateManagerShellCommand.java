@@ -18,6 +18,7 @@ package com.android.server.devicestate;
 
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
@@ -63,14 +64,14 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
     }
 
     private void printState(PrintWriter pw) {
-        DeviceState committedState = mService.getCommittedState();
-        DeviceState baseState = mService.getBaseState();
+        Optional<DeviceState> committedState = mService.getCommittedState();
+        Optional<DeviceState> baseState = mService.getBaseState();
         Optional<DeviceState> overrideState = mService.getOverrideState();
 
-        pw.println("Committed state: " + committedState);
+        pw.println("Committed state: " + toString(committedState));
         if (overrideState.isPresent()) {
             pw.println("----------------------");
-            pw.println("Base state: " + baseState);
+            pw.println("Base state: " + toString(baseState));
             pw.println("Override state: " + overrideState.get());
         }
     }
@@ -142,5 +143,9 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
         pw.println("    Return or override device state.");
         pw.println("  print-states");
         pw.println("    Return list of currently supported device states.");
+    }
+
+    private static String toString(@NonNull Optional<DeviceState> state) {
+        return state.isPresent() ? state.get().toString() : "(none)";
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.hardware.fingerprint;
 
-package android.view.translation;
-
-parcelable TranslationData;
+/**
+ * @hide
+ */
+oneway interface IUdfpsOverlayControllerCallback {
+    // Notify system_server if the user cancels a UDFPS-related operation (enroll, auth)
+    void onUserCanceled();
+}
