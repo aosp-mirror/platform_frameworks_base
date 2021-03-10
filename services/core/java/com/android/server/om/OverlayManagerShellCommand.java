@@ -125,7 +125,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    'lowest', change priority of PACKAGE to the lowest priority.");
         out.println("    If PARENT is the special keyword 'highest', change priority of");
         out.println("    PACKAGE to the highest priority.");
-        out.println("  lookup [--verbose] PACKAGE-TO-LOAD PACKAGE:TYPE/NAME");
+        out.println("  lookup [--user USER_ID] [--verbose] PACKAGE-TO-LOAD PACKAGE:TYPE/NAME");
         out.println("    Load a package and print the value of a given resource");
         out.println("    applying the current configuration and enabled overlays.");
         out.println("    For a more fine-grained alternative, use 'idmap2 lookup'.");
@@ -365,7 +365,22 @@ final class OverlayManagerShellCommand extends ShellCommand {
         final PrintWriter out = getOutPrintWriter();
         final PrintWriter err = getErrPrintWriter();
 
-        final boolean verbose = "--verbose".equals(getNextOption());
+        int userId = UserHandle.USER_SYSTEM;
+        boolean verbose = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--verbose":
+                    verbose = true;
+                    break;
+                default:
+                    err.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
 
         final String packageToLoad = getNextArgRequired();
 
@@ -377,17 +392,15 @@ final class OverlayManagerShellCommand extends ShellCommand {
             return 1;
         }
 
-        final PackageManager pm = mContext.getPackageManager();
-        if (pm == null) {
-            err.println("Error: failed to get package manager");
-            return 1;
-        }
-
         final Resources res;
         try {
-            res = pm.getResourcesForApplication(packageToLoad);
+            res = mContext
+                .createContextAsUser(UserHandle.of(userId), /* flags */ 0)
+                .getPackageManager()
+                .getResourcesForApplication(packageToLoad);
         } catch (PackageManager.NameNotFoundException e) {
-            err.println("Error: failed to get resources for package " + packageToLoad);
+            err.println(String.format("Error: failed to get resources for package %s for user %d",
+                    packageToLoad, userId));
             return 1;
         }
         final AssetManager assets = res.getAssets();
