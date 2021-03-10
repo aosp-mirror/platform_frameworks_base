@@ -357,7 +357,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         for (int i = mDisplayGroups.size() - 1; i >= 0; i--) {
             final int groupId = mDisplayGroups.keyAt(i);
             final DisplayGroup group = mDisplayGroups.valueAt(i);
-            final boolean wasPreviouslyUpdated = mUpdatedDisplayGroups.indexOfKey(groupId) < 0;
+            final boolean wasPreviouslyUpdated = mUpdatedDisplayGroups.indexOfKey(groupId) > -1;
             final int changeCount = group.getChangeCountLocked();
 
             if (group.isEmptyLocked()) {
