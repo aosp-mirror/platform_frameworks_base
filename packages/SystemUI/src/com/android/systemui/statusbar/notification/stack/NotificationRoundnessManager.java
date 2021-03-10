@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack;
 
 import android.content.res.Resources;
 import android.util.MathUtils;
+import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
@@ -47,6 +48,10 @@ public class NotificationRoundnessManager {
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
 
+    private ExpandableView mSwipedView = null;
+    private ExpandableView mViewBeforeSwipedView = null;
+    private ExpandableView mViewAfterSwipedView = null;
+
     @Inject
     NotificationRoundnessManager(
             KeyguardBypassController keyguardBypassController,
@@ -68,6 +73,11 @@ public class NotificationRoundnessManager {
 
     boolean updateViewWithoutCallback(ExpandableView view,
             boolean animate) {
+        if (view == null
+                || view == mViewBeforeSwipedView
+                || view == mViewAfterSwipedView) {
+            return false;
+        }
         float topRoundness = getRoundness(view, true /* top */);
         float bottomRoundness = getRoundness(view, false /* top */);
         boolean topChanged = view.setTopRoundness(topRoundness, animate);
@@ -105,9 +115,60 @@ public class NotificationRoundnessManager {
         return false;
     }
 
+    void setViewsAffectedBySwipe(
+            ExpandableView viewBefore,
+            ExpandableView viewSwiped,
+            ExpandableView viewAfter,
+            boolean cornerAnimationsEnabled) {
+        if (!cornerAnimationsEnabled) {
+            return;
+        }
+        final boolean animate = true;
+
+        ExpandableView oldViewBefore = mViewBeforeSwipedView;
+        mViewBeforeSwipedView = viewBefore;
+        if (oldViewBefore != null) {
+            final float bottomRoundness = getRoundness(oldViewBefore, false /* top */);
+            oldViewBefore.setBottomRoundness(bottomRoundness,  animate);
+        }
+        if (viewBefore != null) {
+            viewBefore.setBottomRoundness(1f, animate);
+        }
+
+        ExpandableView oldSwipedview = mSwipedView;
+        mSwipedView = viewSwiped;
+        if (oldSwipedview != null) {
+            final float bottomRoundness = getRoundness(oldSwipedview, false /* top */);
+            final float topRoundness = getRoundness(oldSwipedview, true /* top */);
+            oldSwipedview.setTopRoundness(topRoundness, animate);
+            oldSwipedview.setBottomRoundness(bottomRoundness, animate);
+        }
+        if (viewSwiped != null) {
+            viewSwiped.setTopRoundness(1f, animate);
+            viewSwiped.setBottomRoundness(1f, animate);
+        }
+
+        ExpandableView oldViewAfter = mViewAfterSwipedView;
+        mViewAfterSwipedView = viewAfter;
+        if (oldViewAfter != null) {
+            final float topRoundness = getRoundness(oldViewAfter, true /* top */);
+            oldViewAfter.setTopRoundness(topRoundness, animate);
+        }
+        if (viewAfter != null) {
+            viewAfter.setTopRoundness(1f, animate);
+        }
+    }
+
     private float getRoundness(ExpandableView view, boolean top) {
+        if (view == null) {
+            return 0f;
+        }
+        if (view == mViewBeforeSwipedView
+                || view == mSwipedView
+                || view == mViewAfterSwipedView) {
+            return 1f;
+        }
         if ((view.isPinned()
-                || view.isBeingSwiped()
                 || (view.isHeadsUpAnimatingAway()) && !mExpanded)) {
             return 1.0f;
         }

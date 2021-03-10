@@ -1025,8 +1025,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             boolean clip = clipStart > start && clipStart < end
                     || clipEnd >= start && clipEnd <= end;
             clip &= !(first && mScrollAdapter.isScrolledToTop());
-            child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0)
-                    : ExpandableView.NO_ROUNDNESS);
+            child.setDistanceToTopRoundness(ExpandableView.NO_ROUNDNESS);
             first = false;
         }
     }
@@ -2292,9 +2291,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             ExpandableView child = (ExpandableView) getChildAt(i);
             if (child.getVisibility() != View.GONE
                     && !(child instanceof StackScrollerDecorView)
-                    && child != mShelf
-                    && (mSwipeHelper.getSwipedView() != child
-                        || !child.getResources().getBoolean(R.bool.flag_notif_updates))) {
+                    && child != mShelf) {
                 children.add(child);
             }
         }
@@ -4993,28 +4990,48 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSwipedOutViews.add(v);
     }
 
-    void onSwipeBegin(View v) {
-        if (v instanceof ExpandableView) {
-            ExpandableView ev = (ExpandableView) v;
-            ev.setIsBeingSwiped(true);
-            mController.getNoticationRoundessManager()
-                    .updateViewWithoutCallback(ev, true /* animate */);
+    void onSwipeBegin(View viewSwiped) {
+        if (!(viewSwiped instanceof ExpandableNotificationRow)) {
+            return;
         }
-        requestDisallowInterceptTouchEvent(true);
+        final int indexOfSwipedView = indexOfChild(viewSwiped);
+        if (indexOfSwipedView < 0) {
+            return;
+        }
+        mSectionsManager.updateFirstAndLastViewsForAllSections(
+                mSections, getChildrenWithBackground());
+        View viewBefore = null;
+        if (indexOfSwipedView > 0) {
+            viewBefore = getChildAt(indexOfSwipedView - 1);
+            if (mSectionsManager.beginsSection(viewSwiped, viewBefore)) {
+                viewBefore = null;
+            }
+        }
+        View viewAfter = null;
+        if (indexOfSwipedView < getChildCount()) {
+            viewAfter = getChildAt(indexOfSwipedView + 1);
+            if (mSectionsManager.beginsSection(viewAfter, viewSwiped)) {
+                viewAfter = null;
+            }
+        }
+        mController.getNoticationRoundessManager()
+                .setViewsAffectedBySwipe((ExpandableView) viewBefore,
+                        (ExpandableView) viewSwiped,
+                        (ExpandableView) viewAfter,
+                        getResources().getBoolean(R.bool.flag_notif_updates));
+
         updateFirstAndLastBackgroundViews();
+        requestDisallowInterceptTouchEvent(true);
         updateContinuousShadowDrawing();
         updateContinuousBackgroundDrawing();
         requestChildrenUpdate();
     }
 
-    void onSwipeEnd(View v) {
-        if (v instanceof ExpandableView) {
-            ExpandableView ev = (ExpandableView) v;
-            ev.setIsBeingSwiped(false);
-            mController.getNoticationRoundessManager()
-                    .updateViewWithoutCallback(ev, true /* animate */);
-        }
+    void onSwipeEnd() {
         updateFirstAndLastBackgroundViews();
+        mController.getNoticationRoundessManager()
+                .setViewsAffectedBySwipe(null, null, null,
+                        getResources().getBoolean(R.bool.flag_notif_updates));
     }
 
     void setTopHeadsUpEntry(NotificationEntry topEntry) {
