@@ -30425,6 +30425,7 @@ package android.os {
     field public static final String BASE_OS;
     field public static final String CODENAME;
     field public static final String INCREMENTAL;
+    field public static final int MEDIA_PERFORMANCE_CLASS;
     field public static final int PREVIEW_SDK_INT;
     field public static final String RELEASE;
     field @NonNull public static final String RELEASE_OR_CODENAME;
