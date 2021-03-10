@@ -150,6 +150,13 @@ public class StartingWindowController {
                 }
                 return false;
             }
+            if (!snapshot.getTopActivityComponent().equals(windowInfo.taskInfo.topActivity)) {
+                if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
+                    Slog.d(TAG, "isSnapshotCompatible obsoleted snapshot "
+                            + windowInfo.taskInfo.topActivity);
+                }
+                return false;
+            }
 
             final int taskRotation = windowInfo.taskInfo.configuration
                     .windowConfiguration.getRotation();
