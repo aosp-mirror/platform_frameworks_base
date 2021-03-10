@@ -106,7 +106,7 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
             PeopleSpaceTile tile = mTiles.get(i);
 
             String status = PeopleSpaceUtils.getLastInteractionString(mContext,
-                    tile.getLastInteractionTimestamp(), true);
+                    tile.getLastInteractionTimestamp());
 
             personView.setTextViewText(R.id.status, status);
             personView.setTextViewText(R.id.name, tile.getUserName().toString());

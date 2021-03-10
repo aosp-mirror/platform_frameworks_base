@@ -117,7 +117,7 @@ public class PeopleSpaceActivity extends Activity {
             String pkg = tile.getPackageName();
             String status =
                     PeopleSpaceUtils.getLastInteractionString(mContext,
-                            tile.getLastInteractionTimestamp(), true);
+                            tile.getLastInteractionTimestamp());
             tileView.setStatus(status);
 
             tileView.setName(tile.getUserName().toString());

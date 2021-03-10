@@ -25,19 +25,30 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="24dp"
         android:clipChildren="false"
         android:clipToPadding="false">
 
         <TextView
-            android:id="@+id/select_conversation"
-            android:text="@string/select_conversation_text"
-            android:layout_width="match_parent"
+            android:id="@+id/select_conversation_title"
+            android:gravity="center"
+            android:text="@string/select_conversation_title"
+            android:layout_width="wrap_content"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
             android:textSize="24sp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"/>
+
+        <TextView
+            android:id="@+id/select_conversation"
+            android:gravity="center"
+            android:text="@string/select_conversation_text"
+            android:layout_width="match_parent"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+            android:textSize="16sp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:paddingBottom="16dp" />
+            android:padding="24dp" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
