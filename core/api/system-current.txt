@@ -7567,9 +7567,11 @@ package android.net.netstats.provider {
     method public void notifyAlertReached();
     method public void notifyLimitReached();
     method public void notifyStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
+    method public void notifyWarningReached();
     method public abstract void onRequestStatsUpdate(int);
     method public abstract void onSetAlert(long);
     method public abstract void onSetLimit(@NonNull String, long);
+    method public void onSetWarningAndLimit(@NonNull String, long, long);
     field public static final int QUOTA_UNLIMITED = -1; // 0xffffffff
   }
 
