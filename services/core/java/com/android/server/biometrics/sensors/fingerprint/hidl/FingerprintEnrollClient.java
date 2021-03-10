@@ -84,7 +84,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     protected void startHalOperation() {
         UdfpsHelper.showUdfpsOverlay(getSensorId(),
                 UdfpsHelper.getReasonFromEnrollReason(mEnrollReason),
-                mUdfpsOverlayController);
+                mUdfpsOverlayController, this);
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
             getFreshDaemon().enroll(mHardwareAuthToken, getTargetUserId(), mTimeoutSec);
