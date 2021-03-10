@@ -99,15 +99,9 @@ public class HighPriorityProvider {
 
     private boolean hasHighPriorityCharacteristics(NotificationEntry entry) {
         return !hasUserSetImportance(entry)
-                && (isImportantOngoing(entry)
-                || entry.getSbn().getNotification().hasMediaSession()
+                && (entry.getSbn().getNotification().hasMediaSession()
                 || isPeopleNotification(entry)
                 || isMessagingStyle(entry));
-    }
-
-    private boolean isImportantOngoing(NotificationEntry entry) {
-        return entry.getSbn().getNotification().isForegroundService()
-                && entry.getRanking().getImportance() >= NotificationManager.IMPORTANCE_LOW;
     }
 
     private boolean isMessagingStyle(NotificationEntry entry) {

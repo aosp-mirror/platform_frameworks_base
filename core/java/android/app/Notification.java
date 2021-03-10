@@ -1611,7 +1611,8 @@ public class Notification implements Parcelable
 
         /**
          * {@code SemanticAction}: Mark the conversation associated with the notification as a
-         * priority. Note that this is only for use by the notification assistant services.
+         * priority. Note that this is only for use by the notification assistant services. The
+         * type will be ignored for actions an app adds to its own notifications.
          * @hide
          */
         @SystemApi
@@ -1619,7 +1620,8 @@ public class Notification implements Parcelable
 
         /**
          * {@code SemanticAction}: Mark content as a potential phishing attempt.
-         * Note that this is only for use by the notification assistant services.
+         * Note that this is only for use by the notification assistant services. The type will
+         * be ignored for actions an app adds to its own notifications.
          * @hide
          */
         @SystemApi
