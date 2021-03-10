@@ -2118,6 +2118,29 @@ bool IncrementalService::removeTimedJobs(TimedQueueWrapper& timedQueue, MountId 
     return true;
 }
 
+void IncrementalService::getMetrics(StorageId storageId, android::os::PersistableBundle* result) {
+    const auto duration = getMillsSinceOldestPendingRead(storageId);
+    if (duration >= 0) {
+        const auto kMetricsMillisSinceOldestPendingRead =
+                os::incremental::BnIncrementalService::METRICS_MILLIS_SINCE_OLDEST_PENDING_READ();
+        result->putLong(String16(kMetricsMillisSinceOldestPendingRead.data()), duration);
+    }
+}
+
+long IncrementalService::getMillsSinceOldestPendingRead(StorageId storageId) {
+    std::unique_lock l(mLock);
+    const auto ifs = getIfsLocked(storageId);
+    if (!ifs) {
+        LOG(ERROR) << "getMillsSinceOldestPendingRead failed, invalid storageId: " << storageId;
+        return -EINVAL;
+    }
+    if (!ifs->dataLoaderStub) {
+        LOG(ERROR) << "getMillsSinceOldestPendingRead failed, no data loader: " << storageId;
+        return -EINVAL;
+    }
+    return ifs->dataLoaderStub->elapsedMsSinceOldestPendingRead();
+}
+
 IncrementalService::DataLoaderStub::DataLoaderStub(IncrementalService& service, MountId id,
                                                    DataLoaderParamsParcel&& params,
                                                    FileSystemControlParcel&& control,
@@ -2516,9 +2539,7 @@ void IncrementalService::DataLoaderStub::updateHealthStatus(bool baseline) {
                 std::max(1000ms,
                          std::chrono::milliseconds(mHealthCheckParams.unhealthyMonitoringMs));
 
-        const auto kernelDeltaUs = kernelTsUs - mHealthBase.kernelTsUs;
-        const auto userTs = mHealthBase.userTs + std::chrono::microseconds(kernelDeltaUs);
-        const auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - userTs);
+        const auto delta = elapsedMsSinceKernelTs(now, kernelTsUs);
 
         Milliseconds checkBackAfter;
         if (delta + kTolerance < blockedTimeout) {
@@ -2548,6 +2569,13 @@ void IncrementalService::DataLoaderStub::updateHealthStatus(bool baseline) {
     }
 
     fsmStep();
+}
+
+Milliseconds IncrementalService::DataLoaderStub::elapsedMsSinceKernelTs(TimePoint now,
+                                                                        BootClockTsUs kernelTsUs) {
+    const auto kernelDeltaUs = kernelTsUs - mHealthBase.kernelTsUs;
+    const auto userTs = mHealthBase.userTs + std::chrono::microseconds(kernelDeltaUs);
+    return std::chrono::duration_cast<Milliseconds>(now - userTs);
 }
 
 const incfs::UniqueControl& IncrementalService::DataLoaderStub::initializeHealthControl() {
@@ -2581,16 +2609,15 @@ BootClockTsUs IncrementalService::DataLoaderStub::getOldestPendingReadTs() {
     if (mService.mIncFs->waitForPendingReads(control, 0ms, &mLastPendingReads) !=
                 android::incfs::WaitResult::HaveData ||
         mLastPendingReads.empty()) {
+        // Clear previous pending reads
+        mLastPendingReads.clear();
         return result;
     }
 
     LOG(DEBUG) << id() << ": pendingReads: " << control.pendingReads() << ", "
                << mLastPendingReads.size() << ": " << mLastPendingReads.front().bootClockTsUs;
 
-    for (auto&& pendingRead : mLastPendingReads) {
-        result = std::min(result, pendingRead.bootClockTsUs);
-    }
-    return result;
+    return getOldestTsFromLastPendingReads();
 }
 
 void IncrementalService::DataLoaderStub::registerForPendingReads() {
@@ -2610,6 +2637,22 @@ void IncrementalService::DataLoaderStub::registerForPendingReads() {
             },
             this);
     mService.mLooper->wake();
+}
+
+BootClockTsUs IncrementalService::DataLoaderStub::getOldestTsFromLastPendingReads() {
+    auto result = kMaxBootClockTsUs;
+    for (auto&& pendingRead : mLastPendingReads) {
+        result = std::min(result, pendingRead.bootClockTsUs);
+    }
+    return result;
+}
+
+long IncrementalService::DataLoaderStub::elapsedMsSinceOldestPendingRead() {
+    const auto oldestPendingReadKernelTs = getOldestTsFromLastPendingReads();
+    if (oldestPendingReadKernelTs == kMaxBootClockTsUs) {
+        return 0;
+    }
+    return elapsedMsSinceKernelTs(Clock::now(), oldestPendingReadKernelTs).count();
 }
 
 void IncrementalService::DataLoaderStub::unregisterFromPendingReads() {

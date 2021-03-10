@@ -348,6 +348,12 @@ binder::Status BinderIncrementalService::unregisterStorageHealthListener(int32_t
     return ok();
 }
 
+binder::Status BinderIncrementalService::getMetrics(int32_t storageId,
+                                                    android::os::PersistableBundle* _aidl_return) {
+    mImpl.getMetrics(storageId, _aidl_return);
+    return ok();
+}
+
 } // namespace android::os::incremental
 
 jlong Incremental_IncrementalService_Start(JNIEnv* env) {
