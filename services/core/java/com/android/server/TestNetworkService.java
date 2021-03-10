@@ -33,8 +33,8 @@ import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkProvider;
 import android.net.RouteInfo;
-import android.net.StringNetworkSpecifier;
 import android.net.TestNetworkInterface;
+import android.net.TestNetworkSpecifier;
 import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.Handler;
@@ -242,7 +242,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED);
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
-        nc.setNetworkSpecifier(new StringNetworkSpecifier(iface));
+        nc.setNetworkSpecifier(new TestNetworkSpecifier(iface));
         nc.setAdministratorUids(administratorUids);
         if (!isMetered) {
             nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);

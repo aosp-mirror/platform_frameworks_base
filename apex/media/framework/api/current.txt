@@ -210,12 +210,6 @@ package android.media {
     method public int getNotificationId();
   }
 
-  public class MediaTranscodingException extends java.lang.Exception {
-  }
-
-  public static final class MediaTranscodingException.ServiceNotAvailableException extends android.media.MediaTranscodingException {
-  }
-
   public final class Session2Command implements android.os.Parcelable {
     ctor public Session2Command(int);
     ctor public Session2Command(@NonNull String, @Nullable android.os.Bundle);

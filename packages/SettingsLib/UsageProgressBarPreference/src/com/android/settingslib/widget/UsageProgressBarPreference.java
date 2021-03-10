@@ -160,6 +160,7 @@ public class UsageProgressBarPreference extends Preference {
             customLayout.removeAllViews();
             customLayout.setVisibility(View.GONE);
         } else {
+            customLayout.removeAllViews();
             customLayout.addView(mCustomImageView);
             customLayout.setVisibility(View.VISIBLE);
         }

@@ -102,7 +102,7 @@ class NetworkProviderTest {
         mCm.registerNetworkProvider(provider)
         assertNotEquals(provider.getProviderId(), NetworkProvider.ID_NONE)
 
-        val specifier = StringNetworkSpecifier(UUID.randomUUID().toString())
+        val specifier = EthernetNetworkSpecifier(UUID.randomUUID().toString())
         val nr: NetworkRequest = NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_TEST)
                 .setNetworkSpecifier(specifier)
@@ -183,7 +183,7 @@ class NetworkProviderTest {
 
         mCm.registerNetworkProvider(provider)
 
-        val specifier = StringNetworkSpecifier(UUID.randomUUID().toString())
+        val specifier = EthernetNetworkSpecifier(UUID.randomUUID().toString())
         val nr: NetworkRequest = NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_TEST)
                 .setNetworkSpecifier(specifier)

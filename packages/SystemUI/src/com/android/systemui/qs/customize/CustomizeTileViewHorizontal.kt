@@ -1,7 +1,6 @@
 package com.android.systemui.qs.customize
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.view.View
 import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
@@ -41,10 +40,5 @@ class CustomizeTileViewHorizontal(
 
     override fun changeState(state: QSTile.State) {
         handleStateChanged(state)
-    }
-
-    override fun newTileBackground(): Drawable? {
-        super.newTileBackground()
-        return paintDrawable
     }
 }

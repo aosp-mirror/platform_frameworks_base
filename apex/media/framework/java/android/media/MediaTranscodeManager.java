@@ -1338,19 +1338,16 @@ public final class MediaTranscodeManager {
          * could be retried only once. After that, Client need to enqueue a new request if they want
          * to try again.
          *
-         * @throws MediaTranscodingException.ServiceNotAvailableException if the service
-         *         is temporarily unavailable due to internal service rebooting. Client could retry
-         *         again after receiving this exception.
+         * @return true if successfully resubmit the job to service. False otherwise.
          * @throws UnsupportedOperationException if the retry could not be fulfilled.
          * @hide
          */
-        public void retry() throws MediaTranscodingException.ServiceNotAvailableException {
-            retryInternal(true /*setHasRetried*/);
+        public boolean retry() {
+            return retryInternal(true /*setHasRetried*/);
         }
 
         // TODO(hkuang): Add more test for it.
-        private void retryInternal(boolean setHasRetried)
-                throws MediaTranscodingException.ServiceNotAvailableException {
+        private boolean retryInternal(boolean setHasRetried) {
             synchronized (mLock) {
                 if (mStatus == STATUS_PENDING || mStatus == STATUS_RUNNING) {
                     throw new UnsupportedOperationException(
@@ -1364,8 +1361,8 @@ public final class MediaTranscodeManager {
                 // Get the client interface.
                 ITranscodingClient client = mManager.getTranscodingClient();
                 if (client == null) {
-                    throw new MediaTranscodingException.ServiceNotAvailableException(
-                            "Service rebooting. Try again later");
+                    Log.e(TAG, "Service rebooting. Try again later");
+                    return false;
                 }
 
                 synchronized (mManager.mPendingTranscodingSessions) {
@@ -1383,13 +1380,13 @@ public final class MediaTranscodeManager {
                         // Adds the new session back into pending sessions.
                         mManager.mPendingTranscodingSessions.put(mSessionId, this);
                     } catch (RemoteException re) {
-                        throw new MediaTranscodingException.ServiceNotAvailableException(
-                                "Failed to resubmit request to Transcoding service");
+                        return false;
                     }
                     mStatus = STATUS_PENDING;
                     mHasRetried = setHasRetried ? true : false;
                 }
             }
+            return true;
         }
 
         /**
@@ -1529,24 +1526,20 @@ public final class MediaTranscodeManager {
      * <p> Upon successfully accepting the request, MediaTranscodeManager will return a
      * {@link TranscodingSession} to the client. Client should use {@link TranscodingSession} to
      * track the progress and get the result.
+     * <p> MediaTranscodeManager will return null if fails to accept the request due to service
+     * rebooting. Client could retry again after receiving null.
      *
      * @param transcodingRequest The TranscodingRequest to enqueue.
      * @param listenerExecutor   Executor on which the listener is notified.
      * @param listener           Listener to get notified when the transcoding session is finished.
      * @return A TranscodingSession for this operation.
-     * @throws FileNotFoundException if the source Uri or destination Uri could not be opened.
      * @throws UnsupportedOperationException if the request could not be fulfilled.
-     * @throws MediaTranscodingException.ServiceNotAvailableException if the service
-     *         is temporarily unavailable due to internal service rebooting. Client could retry
-     *         again after receiving this exception.
      */
-    @NonNull
+    @Nullable
     public TranscodingSession enqueueRequest(
             @NonNull TranscodingRequest transcodingRequest,
             @NonNull @CallbackExecutor Executor listenerExecutor,
-            @NonNull OnTranscodingFinishedListener listener)
-            throws FileNotFoundException,
-            MediaTranscodingException.ServiceNotAvailableException {
+            @NonNull OnTranscodingFinishedListener listener) {
         Log.i(TAG, "enqueueRequest called.");
         Objects.requireNonNull(transcodingRequest, "transcodingRequest must not be null");
         Objects.requireNonNull(listenerExecutor, "listenerExecutor must not be null");
@@ -1568,14 +1561,14 @@ public final class MediaTranscodeManager {
                         // Try to register with the service again.
                         IMediaTranscodingService service = getService(false /*retry*/);
                         if (service == null) {
-                            throw new MediaTranscodingException.ServiceNotAvailableException(
-                                    "Service rebooting. Try again later");
+                            Log.w(TAG, "Service rebooting. Try again later");
+                            return null;
                         }
                         mTranscodingClient = registerClient(service);
                         // If still fails, throws an exception to tell client to try later.
                         if (mTranscodingClient == null) {
-                            throw new MediaTranscodingException.ServiceNotAvailableException(
-                                    "Service rebooting. Try again later");
+                            Log.w(TAG, "Service rebooting. Try again later");
+                            return null;
                         }
                     }
 
@@ -1595,9 +1588,12 @@ public final class MediaTranscodeManager {
                 mPendingTranscodingSessions.put(session.getSessionId(), session);
                 return session;
             }
-        } catch (RemoteException | ServiceSpecificException ex) {
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Service rebooting. Try again later");
+            return null;
+        } catch (ServiceSpecificException ex) {
             throw new UnsupportedOperationException(
-                    "Failed to submit request to Transcoding service");
+                    "Failed to submit request to Transcoding service. Error: " + ex);
         }
     }
 }

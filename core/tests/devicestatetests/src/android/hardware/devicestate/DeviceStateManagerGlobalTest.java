@@ -208,6 +208,11 @@ public final class DeviceStateManagerGlobalTest {
             }
 
             mCallbacks.add(callback);
+            try {
+                callback.onDeviceStateInfoChanged(getInfo());
+            } catch (RemoteException e) {
+                // Do nothing. Should never happen.
+            }
         }
 
         @Override

@@ -110,6 +110,7 @@ public class CompatibilityInfo implements Parcelable {
     public final float applicationInvertedScale;
 
     @UnsupportedAppUsage
+    @Deprecated
     public CompatibilityInfo(ApplicationInfo appInfo, int screenLayout, int sw,
             boolean forceCompat) {
         this(appInfo, screenLayout, sw, forceCompat, 1f);

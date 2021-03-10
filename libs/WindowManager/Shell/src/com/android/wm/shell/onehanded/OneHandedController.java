@@ -525,7 +525,7 @@ public class OneHandedController {
 
     public void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + "states: ");
+        pw.println(TAG + "States: ");
         pw.print(innerPrefix + "mOffSetFraction=");
         pw.println(mOffSetFraction);
         pw.print(innerPrefix + "mLockedDisabled=");
@@ -533,6 +533,10 @@ public class OneHandedController {
 
         if (mDisplayAreaOrganizer != null) {
             mDisplayAreaOrganizer.dump(pw);
+        }
+
+        if (mGestureHandler != null) {
+            mGestureHandler.dump(pw);
         }
 
         if (mTouchHandler != null) {

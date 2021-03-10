@@ -21,7 +21,8 @@ import android.graphics.Rect;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.translation.TranslationRequest;
+import android.view.translation.TranslationResponseValue;
+import android.view.translation.ViewTranslationResponse;
 import android.widget.TextView;
 
 import java.util.regex.Pattern;
@@ -37,18 +38,18 @@ public class TranslationTransformationMethod implements TransformationMethod2 {
     private static final Pattern PATTERN_WHITESPACE = Pattern.compile("\\s+");
 
     @NonNull
-    private TranslationRequest mTranslationRequest;
+    private final ViewTranslationResponse mTranslationResponse;
     @Nullable
     private TransformationMethod mOriginalTranslationMethod;
     private boolean mAllowLengthChanges;
 
     /**
-     * @param request the translated result from translation service.
+     * @param response the translated result from translation service.
      * @param method the {@link TextView}'s original {@link TransformationMethod}
      */
-    public TranslationTransformationMethod(@NonNull TranslationRequest request,
+    public TranslationTransformationMethod(@NonNull ViewTranslationResponse response,
             @Nullable TransformationMethod method) {
-        mTranslationRequest = request;
+        mTranslationResponse = response;
         mOriginalTranslationMethod = method;
     }
 
@@ -66,7 +67,14 @@ public class TranslationTransformationMethod implements TransformationMethod2 {
             Log.w(TAG, "Caller did not enable length changes; not transforming to translated text");
             return source;
         }
-        CharSequence translatedText = mTranslationRequest.getTranslationText();
+        TranslationResponseValue value = mTranslationResponse.getValue("text");
+        CharSequence translatedText;
+        if (value.getStatusCode() == TranslationResponseValue.STATUS_SUCCESS) {
+            translatedText = value.getText();
+        } else {
+            translatedText = "";
+        }
+
         if (TextUtils.isEmpty(translatedText) || isWhitespace(translatedText.toString())) {
             return source;
         } else {
