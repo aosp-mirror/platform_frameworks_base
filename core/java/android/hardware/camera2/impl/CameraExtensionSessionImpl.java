@@ -61,6 +61,7 @@ import android.util.Pair;
 import android.util.Size;
 import android.view.Surface;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,6 +91,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private ImageReader mBurstCaptureImageReader = null;
     private ImageReader mStubCaptureImageReader = null;
     private ImageWriter mRepeatingRequestImageWriter = null;
+    private CameraOutputImageCallback mRepeatingRequestImageCallback = null;
+    private CameraOutputImageCallback mBurstCaptureImageCallback = null;
 
     private CameraExtensionJpegProcessor mImageJpegProcessor = null;
     private ICaptureProcessorImpl mImageProcessor = null;
@@ -400,8 +403,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     PREVIEW_QUEUE_SIZE, repeatingSurfaceInfo.mUsage);
             mCameraRepeatingSurface = mRepeatingRequestImageReader.getSurface();
         }
+        mRepeatingRequestImageCallback = new CameraOutputImageCallback(
+                mRepeatingRequestImageReader);
         mRepeatingRequestImageReader
-                .setOnImageAvailableListener(new ImageLoopbackCallback(), mHandler);
+                .setOnImageAvailableListener(mRepeatingRequestImageCallback, mHandler);
     }
 
     private void initializeBurstCapturePipeline() throws RemoteException {
@@ -440,6 +445,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                         CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT);
             }
 
+            mBurstCaptureImageCallback = new CameraOutputImageCallback(mBurstCaptureImageReader);
+            mBurstCaptureImageReader.setOnImageAvailableListener(mBurstCaptureImageCallback,
+                    mHandler);
             mCameraBurstSurface = mBurstCaptureImageReader.getSurface();
             android.hardware.camera2.extension.Size sz =
                     new android.hardware.camera2.extension.Size();
@@ -534,7 +542,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             mInternalRepeatingRequestEnabled = false;
             try {
                 return setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                        new RepeatingRequestHandler(request, executor, listener));
+                        new RepeatingRequestHandler(request, executor, listener,
+                                mRepeatingRequestImageCallback));
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to set repeating request! Extension service does not "
                         + "respond");
@@ -648,7 +657,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         return mCaptureSession.captureBurstRequests(burstRequest, new HandlerExecutor(mHandler),
-                new BurstRequestHandler(request, executor, listener, requestMap));
+                new BurstRequestHandler(request, executor, listener, requestMap,
+                        mBurstCaptureImageCallback));
     }
 
     @Override
@@ -689,7 +699,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 if (!captureStageList.isEmpty()) {
                     CaptureRequest disableRequest = createRequest(mCameraDevice, captureStageList,
                             mCameraRepeatingSurface, CameraDevice.TEMPLATE_PREVIEW);
-                    mCaptureSession.capture(disableRequest, new CloseRequestHandler(), mHandler);
+                    mCaptureSession.capture(disableRequest,
+                            new CloseRequestHandler(mRepeatingRequestImageCallback), mHandler);
                 }
 
                 mCaptureSession.close();
@@ -735,9 +746,19 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 CameraExtensionCharacteristics.unregisterClient(mExtensionClientId);
             }
 
+            if (mRepeatingRequestImageCallback != null) {
+                mRepeatingRequestImageCallback.close();
+                mRepeatingRequestImageCallback = null;
+            }
+
             if (mRepeatingRequestImageReader != null) {
                 mRepeatingRequestImageReader.close();
                 mRepeatingRequestImageReader = null;
+            }
+
+            if (mBurstCaptureImageCallback != null) {
+                mBurstCaptureImageCallback.close();
+                mBurstCaptureImageCallback = null;
             }
 
             if (mBurstCaptureImageReader != null) {
@@ -835,7 +856,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 ArrayList<CaptureStageImpl> initialRequestList = compileInitialRequestList();
                 if (!initialRequestList.isEmpty()) {
                     try {
-                        setInitialCaptureRequest(initialRequestList, new InitialRequestHandler());
+                        setInitialCaptureRequest(initialRequestList,
+                                new InitialRequestHandler(mRepeatingRequestImageCallback));
                     } catch (CameraAccessException e) {
                         Log.e(TAG, "Failed to initialize the initial capture request!");
                         status = false;
@@ -843,7 +865,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 } else {
                     try {
                         setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                                new RepeatingRequestHandler(null, null, null));
+                                new RepeatingRequestHandler(null, null, null,
+                                        mRepeatingRequestImageCallback));
                     } catch (CameraAccessException | RemoteException e) {
                         Log.e(TAG, "Failed to initialize internal repeating request!");
                         status = false;
@@ -863,6 +886,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         private final ExtensionCaptureCallback mCallbacks;
         private final CaptureRequest mClientRequest;
         private final HashMap<CaptureRequest, Integer> mCaptureRequestMap;
+        private final CameraOutputImageCallback mBurstImageCallback;
 
         private HashMap<Integer, Pair<Image, TotalCaptureResult>> mCaptureStageMap =
                 new HashMap<>();
@@ -873,12 +897,14 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         private boolean mCaptureFailed = false;
 
         public BurstRequestHandler(@NonNull CaptureRequest request, @NonNull Executor executor,
-                                   @NonNull ExtensionCaptureCallback callbacks,
-                                   @NonNull HashMap<CaptureRequest, Integer> requestMap) {
+                @NonNull ExtensionCaptureCallback callbacks,
+                @NonNull HashMap<CaptureRequest, Integer> requestMap,
+                @Nullable CameraOutputImageCallback imageCallback) {
             mClientRequest = request;
             mExecutor = executor;
             mCallbacks = callbacks;
             mCaptureRequestMap = requestMap;
+            mBurstImageCallback = imageCallback;
         }
 
         private void notifyCaptureFailed() {
@@ -893,6 +919,11 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
+
+                for (Pair<Image, TotalCaptureResult> captureStage : mCaptureStageMap.values()) {
+                    captureStage.first.close();
+                }
+                mCaptureStageMap.clear();
             }
         }
 
@@ -905,8 +936,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             boolean initialCallback = false;
             synchronized (mInterfaceLock) {
                 if ((mImageProcessor != null) && (mImageCallback == null)) {
-                    mImageCallback = new ImageCallback(mBurstCaptureImageReader);
-                    mBurstCaptureImageReader.setOnImageAvailableListener(mImageCallback, mHandler);
+                    mImageCallback = new ImageCallback();
                     initialCallback = true;
                 } else if (mImageProcessor == null) {
                     // No burst expected in this case
@@ -923,6 +953,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
+            }
+
+            if ((mBurstImageCallback != null) && (mImageCallback != null)) {
+                mBurstImageCallback.registerListener(timestamp, mImageCallback);
             }
         }
 
@@ -1062,70 +1096,62 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             }
         }
 
-        private class ImageCallback implements ImageReader.OnImageAvailableListener {
-            public ImageCallback(@NonNull ImageReader reader) {
-                //Check for any pending buffers
-                onImageAvailable(reader);
-            }
-
+        private class ImageCallback implements OnImageAvailableListener {
             @Override
-            public void onImageAvailable(ImageReader reader) {
-                Image img;
-                try {
-                    while ((!mCaptureRequestMap.isEmpty()) &&
-                            (img = reader.acquireNextImage()) != null) {
-                        long timestamp = img.getTimestamp();
-                        reader.detachImage(img);
-                        if (mCapturePendingMap.indexOfKey(timestamp) >= 0) {
-                            Integer stageId = mCapturePendingMap.get(timestamp).second;
-                            Pair<Image, TotalCaptureResult> captureStage =
-                                    mCaptureStageMap.get(stageId);
-                            if (captureStage != null) {
-                                mCaptureStageMap.put(stageId,
-                                        new Pair<>(img,
-                                                captureStage.second));
-                                checkAndFireBurstProcessing();
-                            } else {
-                                Log.e(TAG,
-                                        "Capture stage: " +
-                                                mCapturePendingMap.get(timestamp).second +
-                                                " is absent!");
-                            }
-                        } else {
-                            mCapturePendingMap.put(timestamp,
-                                    new Pair<>(img,
-                                            -1));
-                        }
+            public void onImageAvailable(ImageReader reader, Image img) {
+                if (mCaptureFailed) {
+                    img.close();
+                }
+
+                long timestamp = img.getTimestamp();
+                reader.detachImage(img);
+                if (mCapturePendingMap.indexOfKey(timestamp) >= 0) {
+                    Integer stageId = mCapturePendingMap.get(timestamp).second;
+                    Pair<Image, TotalCaptureResult> captureStage =
+                            mCaptureStageMap.get(stageId);
+                    if (captureStage != null) {
+                        mCaptureStageMap.put(stageId,
+                                new Pair<>(img,
+                                        captureStage.second));
+                        checkAndFireBurstProcessing();
+                    } else {
+                        Log.e(TAG,
+                                "Capture stage: " +
+                                        mCapturePendingMap.get(timestamp).second +
+                                        " is absent!");
                     }
-                } catch (IllegalStateException e) {
-                    // This is possible in case the maximum number of images is acquired.
+                } else {
+                    mCapturePendingMap.put(timestamp,
+                            new Pair<>(img,
+                                    -1));
                 }
             }
         }
     }
 
-    private class ImageLoopbackCallback implements ImageReader.OnImageAvailableListener {
-        @Override public void onImageAvailable(ImageReader reader) {
-            Image img;
-            try {
-                img = reader.acquireNextImage();
-            } catch (IllegalStateException e) {
-                Log.e(TAG, "Failed to acquire and loopback image!");
-                return;
-            }
-            if (img == null) {
-                Log.e(TAG,
-                        "Invalid image!");
-                return;
-            }
+    private class ImageLoopbackCallback implements OnImageAvailableListener {
+        @Override
+        public void onImageAvailable(ImageReader reader, Image img) {
             img.close();
         }
     }
 
     private class InitialRequestHandler extends CameraCaptureSession.CaptureCallback {
+        private final CameraOutputImageCallback mImageCallback;
+
+        public InitialRequestHandler(CameraOutputImageCallback imageCallback) {
+            mImageCallback = imageCallback;
+        }
+
+        @Override
+        public void onCaptureStarted(@NonNull CameraCaptureSession session,
+                @NonNull CaptureRequest request, long timestamp, long frameNumber) {
+            mImageCallback.registerListener(timestamp, new ImageLoopbackCallback());
+        }
+
         @Override
         public void onCaptureSequenceAborted(@NonNull CameraCaptureSession session,
-                                             int sequenceId) {
+                int sequenceId) {
             Log.e(TAG, "Initial capture request aborted!");
             notifyConfigurationFailure();
         }
@@ -1150,7 +1176,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                  */
                 try {
                     setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                            new RepeatingRequestHandler(null, null, null));
+                            new RepeatingRequestHandler(null, null, null,
+                                    mImageCallback));
                 } catch (CameraAccessException | RemoteException e) {
                     Log.e(TAG, "Failed to start the internal repeating request!");
                     status = false;
@@ -1164,16 +1191,92 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
     }
 
+    private interface OnImageAvailableListener {
+        public void onImageAvailable (ImageReader reader, Image img);
+    }
+
+    private class CameraOutputImageCallback implements ImageReader.OnImageAvailableListener,
+            Closeable {
+        private final ImageReader mImageReader;
+        // Map timestamp to specific images and listeners
+        private HashMap<Long, Pair<Image, OnImageAvailableListener>> mImageListenerMap =
+                new HashMap<>();
+        private boolean mOutOfBuffers = false;
+
+        CameraOutputImageCallback(ImageReader imageReader) {
+            mImageReader = imageReader;
+        }
+
+        @Override
+        public void onImageAvailable(ImageReader reader) {
+            Image img;
+            try {
+                img = reader.acquireNextImage();
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Failed to acquire image, too many images pending!");
+                mOutOfBuffers = true;
+                return;
+            }
+            if (img == null) {
+                Log.e(TAG, "Invalid image!");
+                return;
+            }
+
+            Long timestamp = img.getTimestamp();
+            if (mImageListenerMap.containsKey(timestamp)) {
+                Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.remove(timestamp);
+                if (entry.second != null) {
+                    entry.second.onImageAvailable(reader, img);
+                } else {
+                    Log.w(TAG, "Invalid image listener, dropping frame!");
+                    img.close();
+                }
+            } else {
+                mImageListenerMap.put(img.getTimestamp(), new Pair<>(img, null));
+            }
+        }
+
+        public void registerListener(Long timestamp, OnImageAvailableListener listener) {
+            if (mImageListenerMap.containsKey(timestamp)) {
+                Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.remove(timestamp);
+                if (entry.first != null) {
+                    listener.onImageAvailable(mImageReader, entry.first);
+                    if (mOutOfBuffers) {
+                        mOutOfBuffers = false;
+                        Log.w(TAG,"Out of buffers, retry!");
+                        onImageAvailable(mImageReader);
+                    }
+                } else {
+                    Log.w(TAG, "No valid image for listener with ts: " +
+                            timestamp.longValue());
+                }
+            } else {
+                mImageListenerMap.put(timestamp, new Pair<>(null, listener));
+            }
+        }
+
+        @Override
+        public void close() {
+            for (Pair<Image, OnImageAvailableListener> entry : mImageListenerMap.values()) {
+                if (entry.first != null) {
+                    entry.first.close();
+                }
+            }
+            mImageListenerMap.clear();
+        }
+    }
+
     private class CloseRequestHandler extends CameraCaptureSession.CaptureCallback {
+        private final CameraOutputImageCallback mImageCallback;
+
+        public CloseRequestHandler(CameraOutputImageCallback imageCallback) {
+            mImageCallback = imageCallback;
+        }
+
         @Override
         public void onCaptureStarted(@NonNull CameraCaptureSession session,
-                                     @NonNull CaptureRequest request,
-                                     long timestamp,
-                                     long frameNumber) {
-            synchronized (mInterfaceLock) {
-                mRepeatingRequestImageReader
-                        .setOnImageAvailableListener(new ImageLoopbackCallback(), mHandler);
-            }
+                @NonNull CaptureRequest request, long timestamp, long frameNumber) {
+            mImageCallback.registerListener(timestamp, new ImageLoopbackCallback());
         }
     }
 
@@ -1187,20 +1290,22 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         private final ExtensionCaptureCallback mCallbacks;
         private final CaptureRequest mClientRequest;
         private final boolean mClientNotificationsEnabled;
-        private ImageReader.OnImageAvailableListener mImageCallback = null;
+        private final CameraOutputImageCallback mRepeatingImageCallback;
+        private OnImageAvailableListener mImageCallback = null;
         private LongSparseArray<Pair<Image, TotalCaptureResult>> mPendingResultMap =
                 new LongSparseArray<>();
 
         private boolean mRequestUpdatedNeeded = false;
 
         public RepeatingRequestHandler(@Nullable CaptureRequest clientRequest,
-                                       @Nullable Executor executor,
-                                       @Nullable ExtensionCaptureCallback listener) {
+                @Nullable Executor executor, @Nullable ExtensionCaptureCallback listener,
+                @NonNull CameraOutputImageCallback imageCallback) {
             mClientRequest = clientRequest;
             mExecutor = executor;
             mCallbacks = listener;
             mClientNotificationsEnabled =
                     (mClientRequest != null) && (mExecutor != null) && (mCallbacks != null);
+            mRepeatingImageCallback = imageCallback;
         }
 
         @Override
@@ -1226,8 +1331,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                 new ImageForwardCallback(mRepeatingRequestImageWriter) :
                                 new ImageLoopbackCallback();
                     }
-                    mRepeatingRequestImageReader
-                            .setOnImageAvailableListener(mImageCallback, mHandler);
                 }
             }
 
@@ -1241,6 +1344,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     Binder.restoreCallingIdentity(ident);
                 }
             }
+
+            mRepeatingImageCallback.registerListener(timestamp, mImageCallback);
         }
 
         @Override
@@ -1248,8 +1353,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                              int sequenceId) {
             synchronized (mInterfaceLock) {
                 if (mInternalRepeatingRequestEnabled) {
-                    mRepeatingRequestImageReader.setOnImageAvailableListener(
-                            new ImageLoopbackCallback(), mHandler);
                     resumeInternalRepeatingRequest(true);
                 }
             }
@@ -1280,12 +1383,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     mRequestUpdatedNeeded = false;
                     resumeInternalRepeatingRequest(false);
                 } else if (mInternalRepeatingRequestEnabled) {
-                    mRepeatingRequestImageReader.setOnImageAvailableListener(
-                            new ImageLoopbackCallback(), mHandler);
                     resumeInternalRepeatingRequest(true);
-                } else {
-                    mRepeatingRequestImageReader.setOnImageAvailableListener(
-                            new ImageLoopbackCallback(), mHandler);
                 }
             }
 
@@ -1395,12 +1493,14 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                         try {
                             if (processStatus) {
                                 mExecutor.execute(() -> mCallbacks
-                                        .onCaptureProcessStarted(CameraExtensionSessionImpl.this,
+                                        .onCaptureProcessStarted(
+                                                CameraExtensionSessionImpl.this,
                                                 mClientRequest));
                             } else {
                                 mExecutor.execute(
                                         () -> mCallbacks
-                                                .onCaptureFailed(CameraExtensionSessionImpl.this,
+                                                .onCaptureFailed(
+                                                        CameraExtensionSessionImpl.this,
                                                         mClientRequest));
                             }
                         } finally {
@@ -1422,7 +1522,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             try {
                 if (internal) {
                     setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                            new RepeatingRequestHandler(null, null, null));
+                            new RepeatingRequestHandler(null, null, null,
+                                    mRepeatingImageCallback));
                 } else {
                     setRepeatingRequest(mPreviewExtender.getCaptureStage(), this);
                 }
@@ -1478,26 +1579,20 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             }
         }
 
-        private class ImageForwardCallback implements ImageReader.OnImageAvailableListener {
+        private class ImageForwardCallback implements OnImageAvailableListener {
             private final ImageWriter mOutputWriter;
 
             public ImageForwardCallback(@NonNull ImageWriter imageWriter) {
                 mOutputWriter = imageWriter;
             }
 
-            @Override public void onImageAvailable(ImageReader reader) {
-                Image img;
-                try {
-                    img = reader.acquireNextImage();
-                } catch (IllegalStateException e) {
-                    Log.e(TAG, "Failed to acquire and propagate repeating request image!");
-                    return;
-                }
+            @Override
+            public void onImageAvailable(ImageReader reader, Image img) {
                 if (img == null) {
-                    Log.e(TAG,
-                            "Invalid image!");
+                    Log.e(TAG, "Invalid image!");
                     return;
                 }
+
                 try {
                     mOutputWriter.queueInputImage(img);
                 } catch (IllegalStateException e) {
@@ -1509,13 +1604,11 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             }
         }
 
-        private class ImageProcessCallback implements ImageReader.OnImageAvailableListener {
+        private class ImageProcessCallback implements OnImageAvailableListener {
+
             @Override
-            public void onImageAvailable(ImageReader reader) {
-                Image img;
-                try {
-                    img = reader.acquireNextImage();
-                } catch (IllegalStateException e) {
+            public void onImageAvailable(ImageReader reader, Image img) {
+                if (mPendingResultMap.size() + 1 >= PREVIEW_QUEUE_SIZE) {
                     // We reached the maximum acquired images limit. This is possible in case we
                     // have capture failures that result in absent or missing capture results. In
                     // such scenario we can prune the oldest pending buffer.
@@ -1523,15 +1616,13 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                             mPendingResultMap
                                     .indexOfKey(calculatePruneThreshold(mPendingResultMap)),
                             mPendingResultMap, true);
-
-                    img = reader.acquireNextImage();
                 }
+
                 if (img == null) {
                     Log.e(TAG,
                             "Invalid preview buffer!");
                     return;
                 }
-
                 try {
                     reader.detachImage(img);
                 } catch (Exception e) {
