@@ -85,6 +85,9 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VER
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SIZE_CHANGES_SUPPORTED_METADATA;
+import static android.content.pm.ActivityInfo.SIZE_CHANGES_SUPPORTED_OVERRIDE;
+import static android.content.pm.ActivityInfo.SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -6819,8 +6822,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         aspect ratio.
      */
     boolean shouldCreateCompatDisplayInsets() {
-        if (info.supportsSizeChanges() != ActivityInfo.SIZE_CHANGES_UNSUPPORTED) {
-            return false;
+        switch (info.supportsSizeChanges()) {
+            case SIZE_CHANGES_SUPPORTED_METADATA:
+            case SIZE_CHANGES_SUPPORTED_OVERRIDE:
+                return false;
+            case SIZE_CHANGES_UNSUPPORTED_OVERRIDE:
+                return true;
+            default:
+                // Fall through
         }
         if (inMultiWindowMode() || getWindowConfiguration().hasWindowDecorCaption()) {
             final ActivityRecord root = task != null ? task.getRootActivity() : null;
