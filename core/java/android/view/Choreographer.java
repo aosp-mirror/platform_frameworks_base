@@ -744,7 +744,10 @@ public final class Choreographer {
         }
 
         try {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Choreographer#doFrame");
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                        "Choreographer#doFrame " + vsyncEventData.id);
+            }
             AnimationUtils.lockAnimationClock(frameTimeNanos / TimeUtils.NANOS_PER_MS);
 
             mFrameInfo.markInputHandlingStart();
