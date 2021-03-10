@@ -82,8 +82,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private int mAlignment = Alignment.RIGHT;
     @SizeType
     private int mSizeType = SizeType.SMALL;
+    @VisibleForTesting
     @ShapeType
-    private int mShapeType = ShapeType.OVAL;
+    int mShapeType = ShapeType.OVAL;
+    private int mTemporaryShapeType;
     @RadiusType
     private int mRadiusType = RadiusType.LEFT_HALF_OVAL;
     private int mMargin;
@@ -185,7 +187,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
                 updateLocationWith(mAlignment, mPercentageY);
                 updateMarginsWith(mAlignment);
-                updateOffsetWith(mShapeType, mAlignment);
 
                 updateInsetWith(getResources().getConfiguration().uiMode, mAlignment);
 
@@ -228,6 +229,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                         setInset(0, 0);
                     }
 
+                    mTemporaryShapeType =
+                            isMovingTowardsScreenEdge(mAlignment, currentRawX, mDownX)
+                                    ? ShapeType.HALF_OVAL
+                                    : ShapeType.OVAL;
                     final int newWindowX = currentRawX + mRelativeToPointerDownX;
                     final int newWindowY = currentRawY + mRelativeToPointerDownY;
                     mCurrentLayoutParams.x = constrain(newWindowX, MIN_WINDOW_X, getMaxWindowX());
@@ -246,10 +251,19 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                     final int endY = mCurrentLayoutParams.y;
                     snapToLocation(endX, endY);
 
+                    setShapeType(mTemporaryShapeType);
+
                     // Avoid triggering the listener of the item.
                     return true;
                 }
-                updateOffsetWith(mShapeType, mAlignment);
+
+                // Must switch the oval shape type before tapping the corresponding item in the
+                // list view, otherwise it can't work on it.
+                if (mShapeType == ShapeType.HALF_OVAL) {
+                    setShapeType(ShapeType.OVAL);
+
+                    return true;
+                }
 
                 fadeOut();
                 break;
@@ -391,6 +405,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         // In order to correspond to the correct item of list view.
         event.setLocation(currentX - mMargin, currentY - mMargin);
         return mListView.dispatchTouchEvent(event);
+    }
+
+    private boolean isMovingTowardsScreenEdge(@Alignment int side, int currentRawX, int downX) {
+        return (side == Alignment.RIGHT && currentRawX > downX)
+                || (side == Alignment.LEFT && downX > currentRawX);
     }
 
     private boolean hasExceededTouchSlop(int startX, int startY, int endX, int endY) {

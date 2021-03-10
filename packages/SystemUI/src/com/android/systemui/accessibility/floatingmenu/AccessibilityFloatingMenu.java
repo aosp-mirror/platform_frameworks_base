@@ -43,9 +43,10 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
     private static final float DEFAULT_OPACITY_VALUE = 0.55f;
     private final Context mContext;
     private final AccessibilityFloatingMenuView mMenuView;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private final ContentObserver mContentObserver =
-            new ContentObserver(new Handler(Looper.getMainLooper())) {
+            new ContentObserver(mHandler) {
                 @Override
                 public void onChange(boolean selfChange) {
                     mMenuView.onTargetsChanged(getTargets(mContext, ACCESSIBILITY_BUTTON));
@@ -53,23 +54,15 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
             };
 
     private final ContentObserver mSizeContentObserver =
-            new ContentObserver(new Handler(Looper.getMainLooper())) {
+            new ContentObserver(mHandler) {
                 @Override
                 public void onChange(boolean selfChange) {
                     mMenuView.setSizeType(getSizeType(mContext));
                 }
             };
 
-    private final ContentObserver mShapeContentObserver =
-            new ContentObserver(new Handler(Looper.getMainLooper())) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    mMenuView.setShapeType(getShapeType(mContext));
-                }
-            };
-
     private final ContentObserver mFadeOutContentObserver =
-            new ContentObserver(new Handler(Looper.getMainLooper())) {
+            new ContentObserver(mHandler) {
                 @Override
                 public void onChange(boolean selfChange) {
                     mMenuView.updateOpacityWith(isFadeEffectEnabled(mContext),
@@ -153,10 +146,6 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
                 /* notifyForDescendants */ false, mSizeContentObserver,
                 UserHandle.USER_CURRENT);
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE),
-                /* notifyForDescendants */ false, mShapeContentObserver,
-                UserHandle.USER_CURRENT);
-        mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED),
                 /* notifyForDescendants */ false, mFadeOutContentObserver,
                 UserHandle.USER_CURRENT);
@@ -169,7 +158,6 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
     private void unregisterContentObservers() {
         mContext.getContentResolver().unregisterContentObserver(mContentObserver);
         mContext.getContentResolver().unregisterContentObserver(mSizeContentObserver);
-        mContext.getContentResolver().unregisterContentObserver(mShapeContentObserver);
         mContext.getContentResolver().unregisterContentObserver(mFadeOutContentObserver);
     }
 }
