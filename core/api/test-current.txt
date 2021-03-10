@@ -1600,6 +1600,10 @@ package android.telecom {
     method @NonNull public android.telecom.ConnectionRequest.Builder setVideoState(int);
   }
 
+  public abstract class ConnectionService extends android.app.Service {
+    method public void onBindClient(@Nullable android.content.Intent);
+  }
+
 }
 
 package android.telephony {
