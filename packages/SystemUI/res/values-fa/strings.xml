@@ -116,7 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"لغو"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"هم‌رسانی"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ضبط صفحه‌نمایش لغو شد"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"ضبط صفحه‌نمایش ذخیره شد، برای مشاهده ضربه بزنید"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"قطعه ضبط‌شده از صفحه‌نمایش ذخیره شد"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"برای مشاهده ضربه بزنید"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"خطا در حذف فایل ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"مجوزها دریافت نشدند"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"خطا هنگام شروع ضبط صفحه‌نمایش"</string>
@@ -467,7 +468,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"نمایش نمایه"</string>
     <string name="user_add_user" msgid="4336657383006913022">"افزودن کاربر"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"کاربر جدید"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"پایان دادن به جلسه مهمان"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"مهمان حذف شود؟"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"همه برنامه‌ها و داده‌های این جلسه حذف خواهد شد."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"حذف"</string>

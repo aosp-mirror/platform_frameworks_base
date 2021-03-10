@@ -116,7 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Цуцлах"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Хуваалцах"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Дэлгэцийн бичлэгийг цуцалсан"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Дэлгэцийн бичлэгийг хадгалсан. Харахын тулд товшино уу"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Дэлгэцийн бичлэгийг хадгалсан"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Харахын тулд товшино уу"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Дэлгэцийн бичлэгийг устгахад алдаа гарлаа"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Зөвшөөрөл авч чадсангүй"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Дэлгэцийн бичлэгийг эхлүүлэхэд алдаа гарлаа"</string>
@@ -377,7 +378,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"АВТОМАТ"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Өнгийг урвуулах"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Өнгө залруулах горим"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Өөр тохиргоо"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Бусад тохиргоо"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Дууссан"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Холбогдсон"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Холбогдсон, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -467,11 +468,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Профайлыг харуулах"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Хэрэглэгч нэмэх"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Шинэ хэрэглэгч"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"Зочны сургалтыг дуусгах"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Зочныг хасах уу?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Энэ сешний бүх апп болон дата устах болно."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Энэ харилцан үйлдлийн бүх апп болон дата устах болно."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Хасах"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Тавтай морилно уу!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Эргэн тавтай морилно уу!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Та үргэлжлүүлэхийг хүсэж байна уу?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Дахин эхлүүлэх"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Тийм, үргэлжлүүлэх"</string>
@@ -482,7 +482,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Одоогийн хэрэглэгчийг гаргах"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ХЭРЭГЛЭГЧЭЭС ГАРАХ"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Шинэ хэрэглэгч нэмэх үү?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн аппуудыг шинэчлэх боломжтой."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Хэрэглэгчийн хязгаарт хүрсэн"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Та <xliff:g id="COUNT">%d</xliff:g> хүртэлх хэрэглэгч нэмэх боломжтой.</item>

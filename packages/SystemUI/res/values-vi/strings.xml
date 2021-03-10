@@ -116,7 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Hủy"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Chia sẻ"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Đã hủy bản ghi màn hình"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Đã lưu bản ghi màn hình, nhấn để xem"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Đã lưu bản ghi màn hình"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Nhấn để xem"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Lỗi khi xóa bản ghi màn hình"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Không được cấp đủ quyền"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Lỗi khi bắt đầu ghi màn hình"</string>
@@ -467,7 +468,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Hiển thị hồ sơ"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Thêm người dùng"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Người dùng mới"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"Kết thúc phiên khách"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Xóa phiên khách?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tất cả ứng dụng và dữ liệu trong phiên này sẽ bị xóa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Xóa"</string>
@@ -718,7 +718,7 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã thay đổi thành Im lặng"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã tăng mức độ quan trọng"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã giảm mức độ quan trọng"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiển thị cuộc trò chuyện ở đầu phần cuộc trò chuyện và dưới dạng bong bóng nổi, hiển thị ảnh hồ sơ trên màn hình khóa"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiển thị ở đầu phần cuộc trò chuyện, dưới dạng bong bóng nổi và hiển thị ảnh hồ sơ trên màn hình khóa"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cài đặt"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ các tính năng trò chuyện"</string>

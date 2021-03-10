@@ -116,7 +116,10 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"إلغاء"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"مشاركة"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"تمّ إلغاء تسجيل الشاشة."</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"تمّ حفظ تسجيل الشاشة، انقر لعرضه."</string>
+    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
+    <skip />
+    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
+    <skip />
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"حدث خطأ أثناء حذف تسجيل الشاشة."</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"تعذّر الحصول على أذونات."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"حدث خطأ في بدء تسجيل الشاشة"</string>
@@ -475,7 +478,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"عرض الملف الشخصي"</string>
     <string name="user_add_user" msgid="4336657383006913022">"إضافة مستخدم"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"مستخدم جديد"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"إنهاء جلسة الضيف"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"هل تريد إزالة جلسة الضيف؟"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"سيتم حذف كل التطبيقات والبيانات في هذه الجلسة."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"إزالة"</string>

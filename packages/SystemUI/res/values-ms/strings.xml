@@ -116,7 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Batal"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Kongsi"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Rakaman skrin dibatalkan"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Rakaman skrin disimpan, ketik untuk melihat"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Rakaman skrin disimpan"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Ketik untuk lihat"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Ralat semasa memadamkan rakaman skrin"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Gagal mendapatkan kebenaran"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Ralat semasa memulakan rakaman skrin"</string>
@@ -467,7 +468,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Tunjuk profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Tambah pengguna"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Pengguna baharu"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"Tamatkan sesi tetamu"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Alih keluar tetamu?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua apl dan data dalam sesi ini akan dipadam."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Alih keluar"</string>
@@ -718,7 +718,7 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Diturunkan Taraf kepada Senyap"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Dinilai Lebih Tinggi"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Dinilai Lebih Rendah"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Ditunjukkan di sebelah atas bahagian perbualan, muncul sebagai gelembung terapung, memaparkan gambar profil pada skrin kunci"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Ditunjukkan di sebelah atas bahagian perbualan, terpapar sebagai gelembung terapung, gambar profil dipaparkan pada skrin kunci"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Tetapan"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Keutamaan"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak menyokong ciri perbualan"</string>

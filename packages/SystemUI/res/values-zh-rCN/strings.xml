@@ -116,7 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"取消"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"分享"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"已取消录制屏幕"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"屏幕录制内容已保存，点按即可查看"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"已保存屏幕录制内容"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"点按即可查看"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"删除屏幕录制内容时出错"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"无法获取权限"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"启动屏幕录制时出错"</string>
@@ -467,7 +468,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"显示个人资料"</string>
     <string name="user_add_user" msgid="4336657383006913022">"添加用户"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新用户"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"结束访客会话"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"要移除访客吗？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"移除"</string>
@@ -502,7 +502,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"历史记录"</string>
-    <string name="notification_section_header_incoming" msgid="850925217908095197">"新"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"最新"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"静音"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"对话"</string>

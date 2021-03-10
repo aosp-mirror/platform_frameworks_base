@@ -116,7 +116,10 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"បោះបង់"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ចែករំលែក"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"បាន​បោះបង់​ការថត​សកម្មភាព​អេក្រង់"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"បានរក្សាទុក​ការថត​សកម្មភាព​អេក្រង់។ សូមចុច​ដើម្បី​មើល"</string>
+    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
+    <skip />
+    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
+    <skip />
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"មានបញ្ហា​ក្នុងការ​លុបការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"មិនអាច​ទទួលបាន​ការអនុញ្ញាត​ទេ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"មានបញ្ហា​ក្នុងការ​ចាប់ផ្ដើម​ថត​អេក្រង់"</string>
@@ -467,7 +470,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"បង្ហាញ​ប្រវត្តិរូប"</string>
     <string name="user_add_user" msgid="4336657383006913022">"បន្ថែម​អ្នកប្រើ"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"អ្នកប្រើ​ថ្មី"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"បញ្ចប់វគ្គភ្ញៀវ"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"លុប​ភ្ញៀវ​?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ទិន្នន័យ និង​កម្មវិធី​ទាំងអស់​ក្នុង​សម័យ​នេះ​នឹង​ត្រូវ​បាន​លុប។"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"លុបចេញ"</string>
