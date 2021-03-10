@@ -48,7 +48,8 @@ public class BlobStoreIdleJobService extends JobService {
     @Override
     public boolean onStopJob(final JobParameters params) {
         Slog.d(TAG, "Idle maintenance job is stopped; id=" + params.getJobId()
-                + ", reason=" + JobParameters.getReasonCodeDescription(params.getStopReason()));
+                + ", reason="
+                + JobParameters.getLegacyReasonCodeDescription(params.getLegacyStopReason()));
         return false;
     }
 

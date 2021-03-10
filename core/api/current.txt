@@ -7946,6 +7946,7 @@ package android.app.job {
     method @NonNull public android.os.PersistableBundle getExtras();
     method public int getJobId();
     method @Nullable public android.net.Network getNetwork();
+    method public int getStopReason();
     method @NonNull public android.os.Bundle getTransientExtras();
     method @Nullable public String[] getTriggeredContentAuthorities();
     method @Nullable public android.net.Uri[] getTriggeredContentUris();
@@ -7954,6 +7955,21 @@ package android.app.job {
     method public boolean isOverrideDeadlineExpired();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.job.JobParameters> CREATOR;
+    field public static final int STOP_REASON_APP_STANDBY = 12; // 0xc
+    field public static final int STOP_REASON_BACKGROUND_RESTRICTION = 11; // 0xb
+    field public static final int STOP_REASON_CANCELLED_BY_APP = 1; // 0x1
+    field public static final int STOP_REASON_CONSTRAINT_BATTERY_NOT_LOW = 5; // 0x5
+    field public static final int STOP_REASON_CONSTRAINT_CHARGING = 6; // 0x6
+    field public static final int STOP_REASON_CONSTRAINT_CONNECTIVITY = 7; // 0x7
+    field public static final int STOP_REASON_CONSTRAINT_DEVICE_IDLE = 8; // 0x8
+    field public static final int STOP_REASON_CONSTRAINT_STORAGE_NOT_LOW = 9; // 0x9
+    field public static final int STOP_REASON_DEVICE_STATE = 4; // 0x4
+    field public static final int STOP_REASON_PREEMPT = 2; // 0x2
+    field public static final int STOP_REASON_QUOTA = 10; // 0xa
+    field public static final int STOP_REASON_SYSTEM_PROCESSING = 14; // 0xe
+    field public static final int STOP_REASON_TIMEOUT = 3; // 0x3
+    field public static final int STOP_REASON_UNDEFINED = 0; // 0x0
+    field public static final int STOP_REASON_USER = 13; // 0xd
   }
 
   public abstract class JobScheduler {

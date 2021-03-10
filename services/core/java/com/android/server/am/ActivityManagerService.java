@@ -182,6 +182,7 @@ import android.app.PropertyInvalidatedCache;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
+import android.app.job.JobParameters;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
@@ -3490,7 +3491,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     // Clear its scheduled jobs
                     JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
-                    js.cancelJobsForUid(appInfo.uid, "clear data");
+                    // Clearing data is akin to uninstalling. The app is force stopped before we
+                    // get to this point, so the reason won't be checked by the app.
+                    js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER, "clear data");
 
                     // Clear its pending alarms
                     AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
