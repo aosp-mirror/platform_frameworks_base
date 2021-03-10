@@ -4804,20 +4804,20 @@ public class ConnectivityManager {
      * {@link QosCallback#onError(QosCallbackException)}.  see: {@link QosCallbackException}.
      *
      * @param socketInfo the socket information used to match QoS events
-     * @param callback receives qos events that satisfy socketInfo
      * @param executor The executor on which the callback will be invoked. The provided
      *                 {@link Executor} must run callback sequentially, otherwise the order of
-     *                 callbacks cannot be guaranteed.
+     *                 callbacks cannot be guaranteed.onQosCallbackRegistered
+     * @param callback receives qos events that satisfy socketInfo
      *
      * @hide
      */
     @SystemApi
     public void registerQosCallback(@NonNull final QosSocketInfo socketInfo,
-            @NonNull final QosCallback callback,
-            @CallbackExecutor @NonNull final Executor executor) {
+            @CallbackExecutor @NonNull final Executor executor,
+            @NonNull final QosCallback callback) {
         Objects.requireNonNull(socketInfo, "socketInfo must be non-null");
-        Objects.requireNonNull(callback, "callback must be non-null");
         Objects.requireNonNull(executor, "executor must be non-null");
+        Objects.requireNonNull(callback, "callback must be non-null");
 
         try {
             synchronized (mQosCallbackConnections) {
