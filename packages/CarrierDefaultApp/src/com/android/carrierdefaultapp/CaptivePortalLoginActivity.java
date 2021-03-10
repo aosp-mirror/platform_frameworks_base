@@ -50,7 +50,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.TrafficStatsConstants;
+import com.android.net.module.util.NetworkStackConstants;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -239,7 +239,7 @@ public class CaptivePortalLoginActivity extends Activity {
                 HttpURLConnection urlConnection = null;
                 int httpResponseCode = 500;
                 int oldTag = TrafficStats.getAndSetThreadStatsTag(
-                        TrafficStatsConstants.TAG_SYSTEM_PROBE);
+                        NetworkStackConstants.TAG_SYSTEM_PROBE);
                 try {
                     urlConnection = (HttpURLConnection) mNetwork.openConnection(
                             new URL(mCm.getCaptivePortalServerUrl()));

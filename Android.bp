@@ -820,7 +820,6 @@ filegroup {
         "core/java/com/android/internal/util/RingBufferIndices.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
-        "core/java/com/android/internal/util/TrafficStatsConstants.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
         "core/java/com/android/internal/util/TokenBucket.java",
     ],
@@ -846,7 +845,6 @@ filegroup {
         "core/java/com/android/internal/util/MessageUtils.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
-        "core/java/com/android/internal/util/TrafficStatsConstants.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
     ],
 }
