@@ -351,7 +351,8 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
 
         Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_screenrecord)
-                .setContentTitle(getResources().getString(R.string.screenrecord_save_message))
+                .setContentTitle(getResources().getString(R.string.screenrecord_save_title))
+                .setContentText(getResources().getString(R.string.screenrecord_save_text))
                 .setContentIntent(PendingIntent.getActivity(
                         this,
                         REQUEST_CODE,
