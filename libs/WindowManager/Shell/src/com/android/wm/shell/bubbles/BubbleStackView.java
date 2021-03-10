@@ -912,9 +912,6 @@ public class BubbleStackView extends FrameLayout
                     removeOnLayoutChangeListener(mOrientationChangedListener);
                 };
 
-        // This must be a separate OnDrawListener since it should be called for every draw.
-        getViewTreeObserver().addOnDrawListener(mSystemGestureExcludeUpdater);
-
         final ColorMatrix animatedMatrix = new ColorMatrix();
         final ColorMatrix darkenMatrix = new ColorMatrix();
 
@@ -1274,12 +1271,14 @@ public class BubbleStackView extends FrameLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
+        getViewTreeObserver().addOnDrawListener(mSystemGestureExcludeUpdater);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         getViewTreeObserver().removeOnPreDrawListener(mViewUpdater);
+        getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
         if (mBubbleOverflow != null) {
             mBubbleOverflow.cleanUpExpandedState();
