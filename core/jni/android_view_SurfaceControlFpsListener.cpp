@@ -84,11 +84,9 @@ void nativeDestroy(JNIEnv* env, jclass clazz, jlong ptr) {
     listener->decStrong((void*)nativeCreate);
 }
 
-void nativeRegister(JNIEnv* env, jclass clazz, jlong ptr, jlong layerObj) {
+void nativeRegister(JNIEnv* env, jclass clazz, jlong ptr, jint taskId) {
     sp<SurfaceControlFpsListener> listener = reinterpret_cast<SurfaceControlFpsListener*>(ptr);
-    auto layer = reinterpret_cast<SurfaceControl*>(layerObj);
-    sp<IBinder> layerHandle = layer != nullptr ? layer->getHandle() : nullptr;
-    if (SurfaceComposerClient::addFpsListener(layerHandle, listener) != OK) {
+    if (SurfaceComposerClient::addFpsListener(taskId, listener) != OK) {
         constexpr auto error_msg = "Couldn't addFpsListener";
         ALOGE(error_msg);
         jniThrowRuntimeException(env, error_msg);
@@ -109,7 +107,7 @@ const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         {"nativeCreate", "(Landroid/view/SurfaceControlFpsListener;)J", (void*)nativeCreate},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
-        {"nativeRegister", "(JJ)V", (void*)nativeRegister},
+        {"nativeRegister", "(JI)V", (void*)nativeRegister},
         {"nativeUnregister", "(J)V", (void*)nativeUnregister}};
 
 } // namespace
