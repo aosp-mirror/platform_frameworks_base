@@ -99,6 +99,13 @@ public class CallLog {
         public static final String LIMIT_PARAM_KEY = "limit";
 
         /**
+         * Form of {@link #CONTENT_URI} which limits the query results to a single result.
+         */
+        private static final Uri CONTENT_URI_LIMIT_1 = CONTENT_URI.buildUpon()
+                .appendQueryParameter(LIMIT_PARAM_KEY, "1")
+                .build();
+
+        /**
          * Query parameter used to specify the starting record to return.
          * <p>
          * TYPE: integer
@@ -932,11 +939,11 @@ public class CallLog {
             Cursor c = null;
             try {
                 c = resolver.query(
-                    CONTENT_URI,
+                    CONTENT_URI_LIMIT_1,
                     new String[] {NUMBER},
                     TYPE + " = " + OUTGOING_TYPE,
                     null,
-                    DEFAULT_SORT_ORDER + " LIMIT 1");
+                    DEFAULT_SORT_ORDER);
                 if (c == null || !c.moveToFirst()) {
                     return "";
                 }

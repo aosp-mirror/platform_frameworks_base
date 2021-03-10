@@ -234,7 +234,7 @@
     <item msgid="4433736508877934305">"Cap"</item>
     <item msgid="9140053004929079158">"Logcat"</item>
     <item msgid="3866871644917859262">"Systrace (gràfics)"</item>
-    <item msgid="7345673972166571060">"Pila de trucades a glGetError"</item>
+    <item msgid="7345673972166571060">"Pila de crides a glGetError"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
     <item msgid="2482978351289846212">"Desactivat"</item>

@@ -224,7 +224,7 @@
     <string name="data_connection_lte" msgid="557021044282539923">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
     <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
-    <string name="data_connection_roaming" msgid="375650836665414797">"ပြင်ပကွန်ရက်နှင့် ချိတ်ဆက်ခြင်း"</string>
+    <string name="data_connection_roaming" msgid="375650836665414797">"ပြင်ပကွန်ရက်သုံးခြင်း"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"ဆင်းကဒ်မရှိပါ။"</string>
