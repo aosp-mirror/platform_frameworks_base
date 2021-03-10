@@ -20368,6 +20368,11 @@ public class PackageManagerService extends IPackageManager.Stub
             return;
         }
 
+        if (isIncrementalPath(pkg.getPath()) && IncrementalManager.getVersion()
+                < IncrementalManager.MIN_VERSION_TO_SUPPORT_FSVERITY) {
+            return;
+        }
+
         // Collect files we care for fs-verity setup.
         ArrayMap<String, String> fsverityCandidates = new ArrayMap<>();
         if (legacyMode) {
