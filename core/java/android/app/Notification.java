@@ -5017,11 +5017,14 @@ public class Notification implements Parcelable
             }
             if (p.text != null && p.text.length() != 0
                     && (!showProgress || p.mAllowTextWithProgress)) {
-                int textId = com.android.internal.R.id.text;
-                contentView.setTextViewText(textId, processTextSpans(p.text));
-                setTextViewColorSecondary(contentView, textId, p);
-                contentView.setViewVisibility(textId, View.VISIBLE);
+                contentView.setViewVisibility(p.mTextViewId, View.VISIBLE);
+                contentView.setTextViewText(p.mTextViewId, processTextSpans(p.text));
+                setTextViewColorSecondary(contentView, p.mTextViewId, p);
                 hasSecondLine = true;
+            } else if (p.mTextViewId != R.id.text) {
+                // This alternate text view ID is not cleared by resetStandardTemplate
+                contentView.setViewVisibility(p.mTextViewId, View.GONE);
+                contentView.setTextViewText(p.mTextViewId, null);
             }
             setHeaderlessVerticalMargins(contentView, p, hasSecondLine);
 
@@ -5213,6 +5216,9 @@ public class Notification implements Parcelable
                 // views in states with a header (big states)
                 result.mHeadingExtraMarginSet.applyToView(contentView, R.id.notification_header);
                 result.mTitleMarginSet.applyToView(contentView, R.id.title);
+                // If there is no title, the text (or big_text) needs to wrap around the image
+                result.mTitleMarginSet.applyToView(contentView, p.mTextViewId);
+                contentView.setInt(p.mTextViewId, "setNumIndentLines", p.hasTitle() ? 0 : 1);
             }
         }
 
@@ -7038,16 +7044,7 @@ public class Notification implements Parcelable
                 p.title = mBigContentTitle;
             }
 
-            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(layoutId, p,
-                    result);
-
-            if (mBigContentTitle != null && mBigContentTitle.equals("")) {
-                contentView.setViewVisibility(R.id.title, View.GONE);
-            } else {
-                contentView.setViewVisibility(R.id.title, View.VISIBLE);
-            }
-
-            return contentView;
+            return mBuilder.applyStandardTemplateWithActions(layoutId, p, result);
         }
 
         /**
@@ -7640,22 +7637,16 @@ public class Notification implements Parcelable
         public RemoteViews makeBigContentView() {
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
-                    .fillTextsFrom(mBuilder).text(null);
-            RemoteViews contentView = getStandardView(mBuilder.getBigTextLayoutResource(), p, null);
+                    .textViewId(R.id.big_text)
+                    .fillTextsFrom(mBuilder);
 
+            // Replace the text with the big text, but only if the big text is not empty.
             CharSequence bigTextText = mBuilder.processLegacyText(mBigText);
-            if (TextUtils.isEmpty(bigTextText)) {
-                // In case the bigtext is null / empty fall back to the normal text to avoid a weird
-                // experience
-                bigTextText = mBuilder.processLegacyText(
-                        mBuilder.getAllExtras().getCharSequence(EXTRA_TEXT));
+            if (!TextUtils.isEmpty(bigTextText)) {
+                p.text(bigTextText);
             }
-            contentView.setTextViewText(R.id.big_text, mBuilder.processTextSpans(bigTextText));
-            mBuilder.setTextViewColorSecondary(contentView, R.id.big_text, p);
-            contentView.setViewVisibility(R.id.big_text,
-                    TextUtils.isEmpty(bigTextText) ? View.GONE : View.VISIBLE);
 
-            return contentView;
+            return getStandardView(mBuilder.getBigTextLayoutResource(), p, null /* result */);
         }
 
         /**
@@ -12111,6 +12102,21 @@ public class Notification implements Parcelable
                 if (viewId == R.id.notification_header) {
                     views.setFloat(R.id.notification_header,
                             "setTopLineExtraMarginEndDp", marginEndDp);
+                } else if (viewId == R.id.text || viewId == R.id.big_text) {
+                    if (mValueIfGone != 0) {
+                        throw new RuntimeException("Programming error: `text` and `big_text` use "
+                                + "ImageFloatingTextView which can either show a margin or not; "
+                                + "thus mValueIfGone must be 0, but it was " + mValueIfGone);
+                    }
+                    // Note that the caller must set "setNumIndentLines" to a positive int in order
+                    //  for this margin to do anything at all.
+                    views.setFloat(viewId, "setImageEndMarginDp", mValueIfVisible);
+                    views.setBoolean(viewId, "setHasImage", mRightIconVisible);
+                    // Apply just the *extra* margin as the view layout margin; this will be
+                    //  unchanged depending on the visibility of the image, but it means that the
+                    //  extra margin applies to *every* line of text instead of just indented lines.
+                    views.setViewLayoutMargin(viewId, RemoteViews.MARGIN_END,
+                            extraMarginDp, TypedValue.COMPLEX_UNIT_DIP);
                 } else {
                     views.setViewLayoutMargin(viewId, RemoteViews.MARGIN_END,
                                     marginEndDp, TypedValue.COMPLEX_UNIT_DIP);
@@ -12149,6 +12155,7 @@ public class Notification implements Parcelable
         boolean mPromotePicture;
         boolean mCallStyleActions;
         boolean mAllowTextWithProgress;
+        int mTextViewId;
         CharSequence title;
         CharSequence text;
         CharSequence headerTextSecondary;
@@ -12168,6 +12175,7 @@ public class Notification implements Parcelable
             mPromotePicture = false;
             mCallStyleActions = false;
             mAllowTextWithProgress = false;
+            mTextViewId = R.id.text;
             title = null;
             text = null;
             summaryText = null;
@@ -12224,6 +12232,11 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams promotePicture(boolean promotePicture) {
             this.mPromotePicture = promotePicture;
+            return this;
+        }
+
+        public StandardTemplateParams textViewId(int textViewId) {
+            mTextViewId = textViewId;
             return this;
         }
 

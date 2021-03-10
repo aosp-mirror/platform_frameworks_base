@@ -22,7 +22,7 @@
     android:layout_gravity="top"
     android:layout_marginTop="@dimen/notification_text_margin_top"
     android:minHeight="@dimen/notification_text_height"
-    android:ellipsize="marquee"
+    android:ellipsize="end"
     android:fadingEdge="horizontal"
     android:gravity="top"
     android:maxLines="2"
