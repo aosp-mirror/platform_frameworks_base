@@ -2655,13 +2655,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // If no apps are approved for the domain, resolve only to browsers
                 if (approvedInfos.isEmpty()) {
-                    // If the other profile has a result, include that and delegate to
-                    // ResolveActivity
+                    includeBrowser = true;
                     if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
                             > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
                         result.add(xpDomainInfo.resolveInfo);
-                    } else {
-                        includeBrowser = true;
                     }
                 } else {
                     result.addAll(approvedInfos);
@@ -2823,7 +2820,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 result.highestApprovalLevel = Math.max(mDomainVerificationManager
                         .approvalLevelForDomain(ps, intent, resultTargetUser, flags,
-                                riTargetUser.targetUserId), result.highestApprovalLevel);
+                                parentUserId), result.highestApprovalLevel);
             }
             if (result != null && result.highestApprovalLevel
                     <= DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
@@ -9992,6 +9989,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         false /*includeInstantApps*/,
                         isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, parent.id,
                                 resolvedType, 0));
+                flags |= PackageManager.MATCH_DEFAULT_ONLY;
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, flags, sourceUserId, parent.id);
                 return xpDomainInfo != null;
