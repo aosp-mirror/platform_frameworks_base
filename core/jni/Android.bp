@@ -214,6 +214,7 @@ cc_library_shared {
                 "com_android_internal_os_Zygote.cpp",
                 "com_android_internal_os_ZygoteCommandBuffer.cpp",
                 "com_android_internal_os_ZygoteInit.cpp",
+                "com_android_internal_security_VerityUtils.cpp",
                 "hwbinder/EphemeralStorage.cpp",
                 "fd_utils.cpp",
                 "android_hardware_input_InputWindowHandle.cpp",

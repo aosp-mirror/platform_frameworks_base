@@ -37,11 +37,11 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.graphics.fonts.IFontManager;
+import com.android.internal.security.VerityUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.security.VerityUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;

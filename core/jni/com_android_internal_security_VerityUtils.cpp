@@ -19,8 +19,8 @@
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
-#include "jni.h"
 #include <utils/Log.h>
+#include "jni.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -39,7 +39,7 @@ namespace android {
 
 namespace {
 
-int enableFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath, jbyteArray signature) {
+int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArray signature) {
     ScopedUtfChars path(env, filePath);
     if (path.c_str() == nullptr) {
         return EINVAL;
@@ -124,11 +124,11 @@ const JNINativeMethod sMethods[] = {
         {"measureFsverityNative", "(Ljava/lang/String;[B)I", (void *)measureFsverity},
 };
 
-}  // namespace
+} // namespace
 
-int register_android_server_security_VerityUtils(JNIEnv* env) {
-    return jniRegisterNativeMethods(env,
-            "com/android/server/security/VerityUtils", sMethods, NELEM(sMethods));
+int register_com_android_internal_security_VerityUtils(JNIEnv *env) {
+    return jniRegisterNativeMethods(env, "com/android/internal/security/VerityUtils", sMethods,
+                                    NELEM(sMethods));
 }
 
-}  // namespace android
+} // namespace android
