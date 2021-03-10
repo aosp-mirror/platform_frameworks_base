@@ -463,12 +463,12 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
 
     /**
-     * Override of task letterbox aspect ratio that is set via ADB with
-     * set-task-letterbox-aspect-ratio or via {@link
-     * com.android.internal.R.dimen.config_taskLetterboxAspectRatio} will be ignored
+     * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
+     * set-fixed-orientation-letterbox-aspect-ratio or via {@link
+     * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored
      * if it is <= this value.
      */
-    static final float MIN_TASK_LETTERBOX_ASPECT_RATIO = 1.0f;
+    static final float MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO = 1.0f;
 
     @VisibleForTesting
     WindowManagerConstants mConstants;
@@ -1003,9 +1003,9 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mAnimationsDisabled = false;
     boolean mPointerLocationEnabled = false;
 
-    // Aspect ratio of task level letterboxing, values <= MIN_TASK_LETTERBOX_ASPECT_RATIO will be
-    // ignored.
-    private volatile float mTaskLetterboxAspectRatio;
+    // Aspect ratio of letterbox for fixed orientation, values <=
+    // MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO will be ignored.
+    private volatile float mFixedOrientationLetterboxAspectRatio;
 
     /** Enum for Letterbox background type. */
     @Retention(RetentionPolicy.SOURCE)
@@ -1256,8 +1256,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mAssistantOnTopOfDream = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
 
-        mTaskLetterboxAspectRatio = context.getResources().getFloat(
-                com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
+        mFixedOrientationLetterboxAspectRatio = context.getResources().getFloat(
+                com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio);
         mLetterboxActivityCornersRadius = context.getResources().getInteger(
                 com.android.internal.R.integer.config_letterboxActivityCornersRadius);
         mLetterboxBackgroundColor = Color.valueOf(context.getResources().getColor(
@@ -3853,29 +3853,29 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Overrides the aspect ratio of task level letterboxing. If given value is <= {@link
-     * #MIN_TASK_LETTERBOX_ASPECT_RATIO}, both it and a value of {@link
-     * com.android.internal.R.dimen.config_taskLetterboxAspectRatio} will be ignored and
+     * Overrides the aspect ratio of letterbox for fixed orientation. If given value is <= {@link
+     * #MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO}, both it and a value of {@link
+     * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored and
      * the framework implementation will be used to determine the aspect ratio.
      */
-    void setTaskLetterboxAspectRatio(float aspectRatio) {
-        mTaskLetterboxAspectRatio = aspectRatio;
+    void setFixedOrientationLetterboxAspectRatio(float aspectRatio) {
+        mFixedOrientationLetterboxAspectRatio = aspectRatio;
     }
 
     /**
-     * Resets the aspect ratio of task level letterboxing to {@link
-     * com.android.internal.R.dimen.config_taskLetterboxAspectRatio}.
+     * Resets the aspect ratio of letterbox for fixed orientation to {@link
+     * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}.
      */
-    void resetTaskLetterboxAspectRatio() {
-        mTaskLetterboxAspectRatio = mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
+    void resetFixedOrientationLetterboxAspectRatio() {
+        mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio);
     }
 
     /**
-     * Gets the aspect ratio of task level letterboxing.
+     * Gets the aspect ratio of letterbox for fixed orientation.
      */
-    float getTaskLetterboxAspectRatio() {
-        return mTaskLetterboxAspectRatio;
+    float getFixedOrientationLetterboxAspectRatio() {
+        return mFixedOrientationLetterboxAspectRatio;
     }
 
     /**
