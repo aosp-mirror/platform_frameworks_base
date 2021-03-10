@@ -153,8 +153,8 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
 
     @Override
     protected void onViewAttached() {
-        if (mShowPMLiteButton) {
-            mPowerMenuLite.setVisibility(View.VISIBLE);
+        if (!mShowPMLiteButton) {
+            mPowerMenuLite.setVisibility(View.GONE);
         }
         mView.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
