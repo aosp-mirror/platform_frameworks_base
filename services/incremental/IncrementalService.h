@@ -20,12 +20,14 @@
 #include <android/content/pm/DataLoaderParamsParcel.h>
 #include <android/content/pm/FileSystemControlParcel.h>
 #include <android/content/pm/IDataLoaderStatusListener.h>
+#include <android/os/incremental/BnIncrementalService.h>
 #include <android/os/incremental/BnIncrementalServiceConnector.h>
 #include <android/os/incremental/BnStorageHealthListener.h>
 #include <android/os/incremental/BnStorageLoadingProgressListener.h>
 #include <android/os/incremental/PerUidReadTimeouts.h>
 #include <android/os/incremental/StorageHealthCheckParams.h>
 #include <binder/IAppOpsCallback.h>
+#include <binder/PersistableBundle.h>
 #include <utils/String16.h>
 #include <utils/StrongPointer.h>
 #include <ziparchive/zip_archive.h>
@@ -181,6 +183,8 @@ public:
                                  bool extractNativeLibs);
     bool waitForNativeBinariesExtraction(StorageId storage);
 
+    void getMetrics(int32_t storageId, android::os::PersistableBundle* _aidl_return);
+
     class AppOpsListener : public android::BnAppOpsCallback {
     public:
         AppOpsListener(IncrementalService& incrementalService, std::string packageName)
@@ -229,6 +233,7 @@ private:
         const content::pm::DataLoaderParamsParcel& params() const { return mParams; }
         void setHealthListener(StorageHealthCheckParams&& healthCheckParams,
                                const StorageHealthListener* healthListener);
+        long elapsedMsSinceOldestPendingRead();
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
@@ -259,6 +264,8 @@ private:
         void resetHealthControl();
 
         BootClockTsUs getOldestPendingReadTs();
+        BootClockTsUs getOldestTsFromLastPendingReads();
+        Milliseconds elapsedMsSinceKernelTs(TimePoint now, BootClockTsUs kernelTsUs);
 
         Milliseconds updateBindDelay();
 
@@ -424,6 +431,7 @@ private:
     bool removeTimedJobs(TimedQueueWrapper& timedQueue, MountId id);
     bool updateLoadingProgress(int32_t storageId,
                                const StorageLoadingProgressListener& progressListener);
+    long getMillsSinceOldestPendingRead(StorageId storage);
 
 private:
     const std::unique_ptr<VoldServiceWrapper> mVold;
