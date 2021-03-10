@@ -380,7 +380,7 @@ public final class InlineSuggestionsRequest implements Parcelable {
     /**
      * The {@link InlinePresentationSpec} for the inline suggestion tooltip in the response.
      *
-     * @see android.service.autofill.InlineTooltipPresentation
+     * @see android.service.autofill.InlinePresentation#createTooltipPresentation(Slice, InlinePresentationSpec)
      */
     @DataClass.Generated.Member
     public @Nullable InlinePresentationSpec getInlineTooltipPresentationSpec() {
@@ -685,7 +685,7 @@ public final class InlineSuggestionsRequest implements Parcelable {
         /**
          * The {@link InlinePresentationSpec} for the inline suggestion tooltip in the response.
          *
-         * @see android.service.autofill.InlineTooltipPresentation
+         * @see android.service.autofill.InlinePresentation#createTooltipPresentation(Slice, InlinePresentationSpec)s
          */
         @DataClass.Generated.Member
         public @NonNull Builder setInlineTooltipPresentationSpec(@NonNull InlinePresentationSpec value) {
