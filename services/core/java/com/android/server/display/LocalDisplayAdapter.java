@@ -850,14 +850,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             // Do not lock when calling these SurfaceControl methods because they are sync
             // operations that may block for a while when setting display power mode.
             mSurfaceControlProxy.setDesiredDisplayModeSpecs(displayToken, modeSpecs);
-
-            final int sfActiveModeId = mSurfaceControlProxy
-                    .getDynamicDisplayInfo(displayToken).activeDisplayModeId;
-            synchronized (getSyncRoot()) {
-                if (updateActiveModeLocked(sfActiveModeId)) {
-                    updateDeviceInfoLocked();
-                }
-            }
         }
 
         @Override
