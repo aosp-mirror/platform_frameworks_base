@@ -804,6 +804,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                             .get(association.getPackageName());
             if (serviceConnector != null) {
                 serviceConnector.unbind();
+                restartBleScan();
             }
         }
     }
@@ -1106,11 +1107,19 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     void onDeviceDisconnected(String address) {
-        Slog.d(LOG_TAG, "onDeviceConnected(address = " + address + ")");
+        Slog.d(LOG_TAG, "onDeviceDisconnected(address = " + address + ")");
 
         mCurrentlyConnectedDevices.remove(address);
 
-        onDeviceDisappeared(address);
+        Date lastSeen = mDevicesLastNearby.get(address);
+        if (isDeviceDisappeared(lastSeen)) {
+            onDeviceDisappeared(address);
+        }
+    }
+
+    private boolean isDeviceDisappeared(Date lastSeen) {
+        return lastSeen == null || System.currentTimeMillis() - lastSeen.getTime()
+                >= DEVICE_DISAPPEARED_UNBIND_TIMEOUT_MS;
     }
 
     private ServiceConnector<ICompanionDeviceService> getDeviceListenerServiceConnector(
@@ -1211,8 +1220,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 String address = mDevicesLastNearby.keyAt(i);
                 Date lastNearby = mDevicesLastNearby.valueAt(i);
 
-                if (System.currentTimeMillis() - lastNearby.getTime()
-                        >= DEVICE_DISAPPEARED_UNBIND_TIMEOUT_MS) {
+                if (isDeviceDisappeared(lastNearby)) {
                     for (Association association : getAllAssociations(address)) {
                         if (association.isNotifyOnDeviceNearby()) {
                             getDeviceListenerServiceConnector(association).unbind();
