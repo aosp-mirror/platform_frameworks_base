@@ -290,7 +290,7 @@
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батареянын кубаты жана трафиктин көлөмү жөнүндө билүү үчүн таптап коюңуз"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Коопсуз режим"</string>
-    <string name="android_system_label" msgid="5974767339591067210">"Android тутуму"</string>
+    <string name="android_system_label" msgid="5974767339591067210">"Android системасы"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Жеке профилге которулуу"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Жумуш профилине которулуу"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Байланыштар"</string>
@@ -306,7 +306,7 @@
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"аудио жаздыруу"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Кыймыл-аракет"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"кыймыл-аракетиңизге мүмкүнчүлүк алат"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"кыймыл-аракеттериңизге көз салып турганга мүмкүнчүлүк алат"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"сүрөт жана видео тартууга"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Чалуулар тизмеси"</string>
@@ -324,7 +324,7 @@
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Көрүнүштү чоңойтуп кичирейтет"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Экрандагы сүрөттү тууралап жайгаштырып, өлчөмүн өзгөртөт."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Жаңсоолорду аткаруу"</string>
-    <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Таптап, серпип, чымчып жана башка жаңсоолорду аткара алат."</string>
+    <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Таптап, сүрүп, чымчып жана башка жаңсоолорду аткара алат."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Манжа изинин жаңсоолору"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Түзмөктөгү манжа изинин сенсорунда жасалган жаңсоолорду жаздырып алат."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Скриншот тартып алуу"</string>
@@ -871,7 +871,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"Сиз телефонду бөгөттөн чыгарууга <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Телефон баштапкы абалына келтирилет."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> секунддан кийин кайталаңыз."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Сүрөт үлгүсүн унутуп калдыңызбы?"</string>
-    <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Каттоо эсеби менен кулпусун ачуу"</string>
+    <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Аккаунт менен кулпусун ачуу"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Өтө көп үлгү киргизүү аракети болду"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Бөгөттөн чыгарыш үчүн, Google эсебиңиз менен кириңиз."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Колдонуучунун аты (электрондук почта)"</string>
@@ -996,7 +996,7 @@
       <item quantity="other">Акыркы <xliff:g id="COUNT_1">%d</xliff:g> күн</item>
       <item quantity="one">Акыркы <xliff:g id="COUNT_0">%d</xliff:g> күн</item>
     </plurals>
-    <string name="last_month" msgid="1528906781083518683">"Өткөн ай"</string>
+    <string name="last_month" msgid="1528906781083518683">"Акыркы ай"</string>
     <string name="older" msgid="1645159827884647400">"Эскирээк"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g> күнү"</string>
     <string name="preposition_for_time" msgid="4336835286453822053">"саат <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -1186,7 +1186,7 @@
     <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Жаңыртууну издөө"</string>
     <string name="smv_application" msgid="3775183542777792638">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу (<xliff:g id="PROCESS">%2$s</xliff:g> процесси) өз алдынча иштеткен StrictMode саясатын бузду."</string>
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> процесси өзүнүн мажбурланган StrictMode саясатын бузуп койду."</string>
-    <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Телефон жаңыртылууда…"</string>
+    <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Телефон жаңырууда…"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"Планшет жаңыртылууда…"</string>
     <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Түзмөк жаңыртылууда…"</string>
     <string name="android_start_title" product="default" msgid="4036708252778757652">"Телефон күйгүзүлүүдө…"</string>
@@ -1196,7 +1196,7 @@
     <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Сактагыч ыңгайлаштырылууда."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Тутумду жаңыртуу аяктоодо…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> жаңыртылууда..."</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ичинен <xliff:g id="NUMBER_0">%1$d</xliff:g> колдонмо ыңгайлаштырылууда."</string>
+    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ичинен <xliff:g id="NUMBER_0">%1$d</xliff:g> колдонмо оптималдаштырылууда."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> даярдалууда."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Колдонмолорду иштетип баштоо"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Жүктөлүүдө"</string>
@@ -1654,8 +1654,8 @@
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өчүрүлдү."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> кызматын колдонуу үчүн үнүн чоңойтуп/кичирейтүү баскычтарын үч секунд коё бербей басып туруңуз"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Атайын мүмкүнчүлүктөр баскычын таптаганыңызда иштей турган функцияны тандаңыз:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Атайын мүмкүнчүлүктөр жаңсоосу үчүн функцияны тандаңыз (эки манжаңыз менен экрандын ылдый жагынан өйдө карай сүрүңүз):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Атайын мүмкүнчүлүктөр жаңсоосу аркылуу иштетиле турган функцияны тандаңыз (үч манжаңыз менен экрандын ылдый жагынан өйдө карай сүрүңүз):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Атайын мүмкүнчүлүктөр жаңсоосу үчүн функцияны тандаңыз (эки манжаңыз менен экранды ылдыйдан өйдө сүрүңүз):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Атайын мүмкүнчүлүктөр жаңсоосу аркылуу иштетиле турган функцияны тандаңыз (үч манжаңыз менен экранды ылдыйдан өйдө сүрүңүз):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Функцияларды которуштуруу үчүн, Атайын мүмкүнчүлүктөр баскычын басып, кармап туруңуз."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Функцияларды которуштуруу үчүн, эки манжаңыз менен өйдө сүрүп, кармап туруңуз."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Башка функцияга которулуу үчүн үч манжаңыз менен экранды өйдө сүрүп, кармап туруңуз."</string>

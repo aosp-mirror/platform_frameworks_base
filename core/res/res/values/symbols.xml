@@ -1927,6 +1927,7 @@
   <java-symbol type="fraction" name="config_dimBehindFadeDuration" />
   <java-symbol type="dimen" name="default_minimal_size_resizable_task" />
   <java-symbol type="dimen" name="default_minimal_size_pip_resizable_task" />
+  <java-symbol type="dimen" name="overridable_minimal_size_pip_resizable_task" />
   <java-symbol type="dimen" name="task_height_of_minimized_mode" />
   <java-symbol type="fraction" name="config_screenAutoBrightnessDozeScaleFactor" />
   <java-symbol type="bool" name="config_allowPriorityVibrationsInLowPowerMode" />
