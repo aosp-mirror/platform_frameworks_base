@@ -70,6 +70,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -114,6 +115,7 @@ public class LauncherAppsService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.LAUNCHER_APPS_SERVICE, mLauncherAppsImpl);
+        mLauncherAppsImpl.registerLoadingProgressForIncrementalApps();
     }
 
     static class BroadcastCookie {
@@ -1182,6 +1184,30 @@ public class LauncherAppsService extends SystemService {
         @VisibleForTesting
         void postToPackageMonitorHandler(Runnable r) {
             mCallbackHandler.post(r);
+        }
+
+        /**
+         * Check all installed apps and if a package is installed via Incremental and not fully
+         * loaded, register loading progress listener.
+         */
+        void registerLoadingProgressForIncrementalApps() {
+            final PackageManagerInternal pmInt =
+                    LocalServices.getService(PackageManagerInternal.class);
+            final List<UserHandle> users = mUm.getUserProfiles();
+            if (users == null) {
+                return;
+            }
+            for (UserHandle user : users) {
+                pmInt.forEachInstalledPackage(pkg -> {
+                    final String packageName = pkg.getPackageName();
+                    if (pmInt.getIncrementalStatesInfo(packageName, Process.myUid(),
+                            user.getIdentifier()).isLoading()) {
+                        pmInt.registerInstalledLoadingProgressCallback(packageName,
+                                new PackageLoadingProgressCallback(packageName, user),
+                                user.getIdentifier());
+                    }
+                }, user.getIdentifier());
+            }
         }
 
         public static class ShortcutChangeHandler implements LauncherApps.ShortcutChangeCallback {
