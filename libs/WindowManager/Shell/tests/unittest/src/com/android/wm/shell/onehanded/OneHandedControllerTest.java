@@ -100,6 +100,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
+                mWindowManager,
                 mMockDisplayController,
                 mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,
@@ -120,8 +121,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         final OneHandedAnimationController animationController = new OneHandedAnimationController(
                 mContext);
         OneHandedDisplayAreaOrganizer displayAreaOrganizer = new OneHandedDisplayAreaOrganizer(
-                mContext, mMockDisplayController, animationController, mMockTutorialHandler,
-                mMockBackgroundOrganizer, mMockShellMainExecutor);
+                mContext, mWindowManager, mMockDisplayController, animationController,
+                mMockTutorialHandler, mMockBackgroundOrganizer, mMockShellMainExecutor);
 
         assertThat(displayAreaOrganizer.isInOneHanded()).isFalse();
     }
