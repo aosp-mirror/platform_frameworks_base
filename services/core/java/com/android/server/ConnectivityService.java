@@ -3661,6 +3661,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                 }
             }
+            // If this NRI has a satisfier already, it is replacing an older request that
+            // has been removed. Track it.
+            final NetworkRequest activeRequest = nri.getActiveRequest();
+            if (null != activeRequest) {
+                // If there is an active request, then for sure there is a satisfier.
+                nri.getSatisfier().addRequest(activeRequest);
+            }
         }
 
         rematchAllNetworksAndRequests();
@@ -5281,14 +5288,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
             ensureAllNetworkRequestsHaveType(r);
             mRequests = initializeRequests(r);
             mNetworkRequestForCallback = nri.getNetworkRequestForCallback();
-            // Note here that the satisfier may have corresponded to an old request, that
-            // this code doesn't try to take over. While it is a small discrepancy in the
-            // structure of these requests, it will be fixed by the next rematch and it's
-            // not as bad as having an NRI not storing its real satisfier.
-            // Fixing this discrepancy would require figuring out in the copying code what
-            // is the new request satisfied by this, which is a bit complex and not very
-            // useful as no code is using it until rematch fixes it.
-            mSatisfier = nri.mSatisfier;
+            final NetworkAgentInfo satisfier = nri.getSatisfier();
+            if (null != satisfier) {
+                // If the old NRI was satisfied by an NAI, then it may have had an active request.
+                // The active request is necessary to figure out what callbacks to send, in
+                // particular then a network updates its capabilities.
+                // As this code creates a new NRI with a new set of requests, figure out which of
+                // the list of requests should be the active request. It is always the first
+                // request of the list that can be satisfied by the satisfier since the order of
+                // requests is a priority order.
+                // Note even in the presence of a satisfier there may not be an active request,
+                // when the satisfier is the no-service network.
+                NetworkRequest activeRequest = null;
+                for (final NetworkRequest candidate : r) {
+                    if (candidate.canBeSatisfiedBy(satisfier.networkCapabilities)) {
+                        activeRequest = candidate;
+                        break;
+                    }
+                }
+                setSatisfier(satisfier, activeRequest);
+            }
             mMessenger = nri.mMessenger;
             mBinder = nri.mBinder;
             mPid = nri.mPid;
