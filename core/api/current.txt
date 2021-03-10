@@ -42142,7 +42142,7 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.CallStateListener {
-    method @RequiresPermission(android.Manifest.permission.READ_CALL_LOG) public void onCallStateChanged(int, @Nullable String);
+    method public void onCallStateChanged(int);
   }
 
   public static interface TelephonyCallback.CarrierNetworkListener {
