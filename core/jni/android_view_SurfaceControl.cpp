@@ -1528,11 +1528,17 @@ static jboolean nativeGetDisplayBrightnessSupport(JNIEnv* env, jclass clazz,
 }
 
 static jboolean nativeSetDisplayBrightness(JNIEnv* env, jclass clazz, jobject displayTokenObject,
-        jfloat brightness) {
+                                           jfloat sdrBrightness, jfloat sdrBrightnessNits,
+                                           jfloat displayBrightness, jfloat displayBrightnessNits) {
     sp<IBinder> displayToken(ibinderForJavaObject(env, displayTokenObject));
     if (displayToken == nullptr) {
         return JNI_FALSE;
     }
+    gui::DisplayBrightness brightness;
+    brightness.sdrWhitePoint = sdrBrightness;
+    brightness.sdrWhitePointNits = sdrBrightnessNits;
+    brightness.displayBrightness = displayBrightness;
+    brightness.displayBrightnessNits = displayBrightnessNits;
     status_t error = SurfaceComposerClient::setDisplayBrightness(displayToken, brightness);
     return error == OK ? JNI_TRUE : JNI_FALSE;
 }
@@ -1860,7 +1866,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSyncInputWindows },
     {"nativeGetDisplayBrightnessSupport", "(Landroid/os/IBinder;)Z",
             (void*)nativeGetDisplayBrightnessSupport },
-    {"nativeSetDisplayBrightness", "(Landroid/os/IBinder;F)Z",
+    {"nativeSetDisplayBrightness", "(Landroid/os/IBinder;FFFF)Z",
             (void*)nativeSetDisplayBrightness },
     {"nativeReadTransactionFromParcel", "(Landroid/os/Parcel;)J",
             (void*)nativeReadTransactionFromParcel },
