@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
@@ -86,6 +87,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -205,6 +207,7 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.ACTIVITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -278,6 +281,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.permission.PermissionManager;
 import android.service.dreams.DreamActivity;
 import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
@@ -6955,6 +6959,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // layout traversals.
         mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
         getResolvedOverrideConfiguration().seq = mConfigurationSeq;
+
+        // Sandbox max bounds by setting it to the app bounds, if activity is letterboxed or in
+        // size compat mode.
+        if (providesMaxBounds()) {
+            if (DEBUG_CONFIGURATION) {
+                ProtoLog.d(WM_DEBUG_CONFIGURATION, "Sandbox max bounds for uid %s to bounds %s "
+                        + "due to letterboxing from mismatch with parent bounds? %s size compat "
+                        + "mode %s", getUid(),
+                        resolvedConfig.windowConfiguration.getBounds(), !matchParentBounds(),
+                        inSizeCompatMode());
+            }
+            resolvedConfig.windowConfiguration
+                    .setMaxBounds(resolvedConfig.windowConfiguration.getBounds());
+        }
     }
 
     /**
@@ -7294,6 +7312,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return mSizeCompatBounds;
         }
         return super.getBounds();
+    }
+
+    @Override
+    public boolean providesMaxBounds() {
+        // System and SystemUI should always be able to access the physical display bounds,
+        // so do not provide it with the overridden maximum bounds.
+        // TODO(b/179179513) check WindowState#mOwnerCanAddInternalSystemWindow instead
+        if (getUid() == SYSTEM_UID || PermissionManager.checkPermission(INTERNAL_SYSTEM_WINDOW,
+                getPid(), info.applicationInfo.uid) == PERMISSION_GRANTED) {
+            return false;
+        }
+        // Max bounds should be sandboxed where an activity is letterboxed (activity bounds will be
+        // smaller than task bounds) or put in size compat mode.
+        return !matchParentBounds() || inSizeCompatMode();
     }
 
     @VisibleForTesting
