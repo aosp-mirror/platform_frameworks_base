@@ -36,16 +36,21 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
+
+import java.io.PrintWriter;
 
 /**
  * The class manage swipe up and down gesture for 3-Button mode navigation,
  * others(e.g, 2-button, full gesture mode) are handled by Launcher quick steps.
+ * TODO(b/160934654) Migrate to Launcher quick steps
  */
 public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         DisplayChangeController.OnDisplayChangingListener {
@@ -72,7 +77,6 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     InputMonitor mInputMonitor;
     @VisibleForTesting
     InputEventReceiver mInputEventReceiver;
-    private final DisplayController mDisplayController;
     private final ShellExecutor mMainExecutor;
     @VisibleForTesting
     @Nullable
@@ -91,11 +95,10 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
             DisplayController displayController, ViewConfiguration viewConfig,
             ShellExecutor mainExecutor) {
         mWindowManager = windowManager;
-        mDisplayController = displayController;
         mMainExecutor = mainExecutor;
         displayController.addDisplayChangingController(this);
-        mNavGestureHeight = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_gesture_larger_height);
+        mNavGestureHeight = getNavBarSize(context,
+                displayController.getDisplayLayout(DEFAULT_DISPLAY));
         mDragDistThreshold = context.getResources().getDimensionPixelSize(
                 R.dimen.gestures_onehanded_drag_threshold);
         final float slop = viewConfig.getScaledTouchSlop();
@@ -208,10 +211,23 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         return mGestureRegion.contains(Math.round(x), Math.round(y));
     }
 
+    private int getNavBarSize(Context context, @Nullable DisplayLayout displayLayout) {
+        if (displayLayout != null) {
+            return displayLayout.navBarFrameHeight();
+        } else {
+            return isRotated()
+                    ? context.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.navigation_bar_height_landscape)
+                    : context.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_height);
+        }
+    }
+
     private void updateIsEnabled() {
         disposeInputChannel();
 
-        if (mIsEnabled && mIsThreeButtonModeEnabled) {
+        // Either OHM or swipe notification shade can activate in portrait mode only
+        if (mIsEnabled && mIsThreeButtonModeEnabled && !isRotated()) {
             final Rect displaySize = mWindowManager.getCurrentWindowMetrics().getBounds();
             // Register input event receiver to monitor the touch region of NavBar gesture height
             mGestureRegion.set(0, displaySize.height() - mNavGestureHeight, displaySize.width(),
@@ -239,6 +255,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     public void onRotateDisplay(int displayId, int fromRotation, int toRotation,
             WindowContainerTransaction t) {
         mRotation = toRotation;
+        updateIsEnabled();
     }
 
     // TODO: Use BatchedInputEventReceiver
@@ -253,6 +270,10 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         }
     }
 
+    private boolean isRotated() {
+        return mRotation == Surface.ROTATION_90 || mRotation == Surface.ROTATION_270;
+    }
+
     private boolean isValidStartAngle(float deltaX, float deltaY) {
         final float angle = (float) Math.toDegrees(Math.atan2(deltaY, deltaX));
         return angle > -(ANGLE_MAX) && angle < -(ANGLE_MIN);
@@ -265,6 +286,19 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
 
     private float squaredHypot(float x, float y) {
         return x * x + y * y;
+    }
+
+    void dump(@NonNull PrintWriter pw) {
+        final String innerPrefix = "  ";
+        pw.println(TAG + "States: ");
+        pw.print(innerPrefix + "mIsEnabled=");
+        pw.println(mIsEnabled);
+        pw.print(innerPrefix + "mNavGestureHeight=");
+        pw.println(mNavGestureHeight);
+        pw.print(innerPrefix + "mIsThreeButtonModeEnabled=");
+        pw.println(mIsThreeButtonModeEnabled);
+        pw.print(innerPrefix + "isLandscape=");
+        pw.println(isRotated());
     }
 
     /**
