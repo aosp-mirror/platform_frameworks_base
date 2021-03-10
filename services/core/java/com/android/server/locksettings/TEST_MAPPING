@@ -10,6 +10,17 @@
                     "exclude-annotation": "android.platform.test.annotations.FlakyTest"
                 }
             ]
+        },
+        {
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.locksettings."
+                },
+                {
+                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                }
+            ]
         }
     ]
 }
