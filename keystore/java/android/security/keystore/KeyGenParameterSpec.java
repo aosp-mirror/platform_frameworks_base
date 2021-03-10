@@ -467,8 +467,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      *
      * @return The numeric namespace as configured in the keystore2_key_contexts files of Android's
      *         SEPolicy.
-     *         TODO b/171806779 link to public Keystore 2.0 documentation.
-     *              See bug for more details for now.
+     *         See <a href="https://source.android.com/security/keystore#access-control">
+     *             Keystore 2.0 access control</a>
      * @hide
      */
     @SystemApi
@@ -1042,9 +1042,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * keys between system and vendor components, e.g., WIFI settings and WPA supplicant.
          *
          * @param namespace Numeric SELinux namespace as configured in keystore2_key_contexts
-         *                  of Android's SEPolicy.
-         *                  TODO b/171806779 link to public Keystore 2.0 documentation.
-         *                       See bug for more details for now.
+         *         of Android's SEPolicy.
+         *         See <a href="https://source.android.com/security/keystore#access-control">
+         *             Keystore 2.0 access control</a>
          * @return this Builder object.
          *
          * @hide
