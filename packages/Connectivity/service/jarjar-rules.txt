@@ -1,3 +1,4 @@
+rule android.sysprop.** com.android.connectivity.sysprop.@1
 rule com.android.net.module.util.** com.android.connectivity.net-utils.@1
 rule com.android.modules.utils.** com.android.connectivity.modules-utils.@1
 

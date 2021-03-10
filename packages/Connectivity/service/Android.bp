@@ -66,6 +66,7 @@ java_library {
         "net-utils-device-common",
         "net-utils-framework-common",
         "netd-client",
+        "PlatformProperties",
     ],
     apex_available: [
         "//apex_available:platform",
@@ -76,7 +77,7 @@ java_library {
 java_library {
     name: "service-connectivity",
     installable: true,
-    static_libs:[
+    static_libs: [
         "service-connectivity-pre-jarjar",
     ],
     jarjar_rules: "jarjar-rules.txt",
