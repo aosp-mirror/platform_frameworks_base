@@ -399,7 +399,7 @@ class DevicePolicyData {
      * @param adminInfoSupplier function that queries DeviceAdminInfo from PackageManager
      * @param ownerComponent device or profile owner component if any.
      */
-    static boolean load(DevicePolicyData policy, boolean isFdeDevice, JournaledFile journaledFile,
+    static void load(DevicePolicyData policy, boolean isFdeDevice, JournaledFile journaledFile,
             Function<ComponentName, DeviceAdminInfo> adminInfoSupplier,
             ComponentName ownerComponent) {
         FileInputStream stream = null;
@@ -407,7 +407,7 @@ class DevicePolicyData {
         if (VERBOSE_LOG) {
             Slog.v(TAG, "Loading data for user " + policy.mUserId + " from " + file);
         }
-        boolean needsRewrite = false;
+
         try {
             stream = new FileInputStream(file);
             TypedXmlPullParser parser = Xml.resolvePullParser(stream);
@@ -541,10 +541,6 @@ class DevicePolicyData {
                     policy.mAdminBroadcastPending = Boolean.toString(true).equals(pending);
                 } else if (TAG_INITIALIZATION_BUNDLE.equals(tag)) {
                     policy.mInitBundle = PersistableBundle.restoreFromXml(parser);
-                } else if ("active-password".equals(tag)) {
-                    // Remove password metrics from saved settings, as we no longer wish to store
-                    // these on disk
-                    needsRewrite = true;
                 } else if (TAG_PASSWORD_VALIDITY.equals(tag)) {
                     if (isFdeDevice) {
                         // This flag is only used for FDE devices
@@ -584,7 +580,6 @@ class DevicePolicyData {
 
         // Generate a list of admins from the admin map
         policy.mAdminList.addAll(policy.mAdminMap.values());
-        return needsRewrite;
     }
 
     void validatePasswordOwner() {
