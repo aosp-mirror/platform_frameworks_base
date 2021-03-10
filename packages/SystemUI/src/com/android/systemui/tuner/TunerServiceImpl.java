@@ -300,7 +300,7 @@ public class TunerServiceImpl extends TunerService {
         dialog.setButton(DialogInterface.BUTTON_NEGATIVE, mContext.getString(R.string.cancel),
                 (DialogInterface.OnClickListener) null);
         dialog.setButton(DialogInterface.BUTTON_POSITIVE,
-                mContext.getString(R.string.guest_exit_guest_dialog_remove), (d, which) -> {
+                mContext.getString(R.string.qs_customize_remove), (d, which) -> {
                     // Tell the tuner (in main SysUI process) to clear all its settings.
                     mContext.sendBroadcast(new Intent(TunerService.ACTION_CLEAR));
                     // Disable access to tuner.
