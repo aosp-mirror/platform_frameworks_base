@@ -19,7 +19,7 @@ package com.android.server.soundtrigger_middleware;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.soundtrigger.V2_0.ISoundTriggerHw;
-import android.media.soundtrigger_middleware.Status;
+import android.media.soundtrigger.Status;
 import android.os.IHwBinder;
 import android.os.RemoteException;
 import android.system.OsConstants;
@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * <li>All {@link RemoteException}s get rethrown as {@link RuntimeException}.
  * <li>All HAL malfunctions get thrown as {@link HalException}.
  * <li>All unsupported operations get thrown as {@link RecoverableException} with a
- * {@link android.media.soundtrigger_middleware.Status#OPERATION_NOT_SUPPORTED}
+ * {@link android.media.soundtrigger.Status#OPERATION_NOT_SUPPORTED}
  * code.
  * </ul>
  */

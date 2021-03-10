@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
-
-import android.media.soundtrigger_middleware.SoundModel;
-import android.media.soundtrigger_middleware.Phrase;
+package android.media.soundtrigger;
 
 /**
- * Specialized sound model for key phrase detection.
- * Proprietary representation of key phrases in binary data must match
- * information indicated by phrases field.
- * {@hide}
+ * AudioCapabilities supported by the implemented HAL driver.
+ * @hide
  */
-parcelable PhraseSoundModel {
-    /** Common part of sound model descriptor */
-    SoundModel common;
-    /** List of descriptors for key phrases supported by this sound model */
-    Phrase[] phrases;
+@VintfStability
+@Backing(type="int")
+enum AudioCapabilities {
+    /**
+     * If set the underlying module supports AEC.
+     */
+    ECHO_CANCELLATION = 1 << 0,
+    /**
+     * If set, the underlying module supports noise suppression.
+     */
+    NOISE_SUPPRESSION = 1 << 1,
 }

@@ -18,21 +18,21 @@ package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.RecognitionStatus;
+import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.Status;
 import android.media.permission.Identity;
 import android.media.permission.IdentityContext;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
-import android.media.soundtrigger_middleware.ModelParameterRange;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.RecognitionStatus;
-import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
-import android.media.soundtrigger_middleware.Status;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -112,10 +112,10 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     }
 
     private class ModuleState {
-        public @NonNull SoundTriggerModuleProperties properties;
+        public @NonNull Properties properties;
         public Set<Session> sessions = new HashSet<>();
 
-        private ModuleState(@NonNull SoundTriggerModuleProperties properties) {
+        private ModuleState(@NonNull Properties properties) {
             this.properties = properties;
         }
     }

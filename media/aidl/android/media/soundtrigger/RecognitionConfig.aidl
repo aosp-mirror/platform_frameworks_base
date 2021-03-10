@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
-import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
+import android.media.soundtrigger.PhraseRecognitionExtra;
 
 /**
  * Configuration for tuning behavior of an active recognition process.
  * {@hide}
  */
+@VintfStability
 parcelable RecognitionConfig {
     /* Capture and buffer audio for this recognition instance. */
     boolean captureRequested;
@@ -34,6 +35,6 @@ parcelable RecognitionConfig {
      */
     int audioCapabilities;
 
-    /** Opaque capture configuration data. */
+    /** Capture configuration data. Content is implementation-defined. */
     byte[] data;
 }

@@ -15,8 +15,8 @@
  */
 package android.media.soundtrigger_middleware;
 
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.PhraseRecognitionEvent;
 
 /**
  * Main interface for a client to get notifications of events coming from this module.

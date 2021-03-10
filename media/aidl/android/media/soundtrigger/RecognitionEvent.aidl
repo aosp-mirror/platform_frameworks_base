@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
 import android.media.audio.common.AudioConfig;
-import android.media.soundtrigger_middleware.RecognitionStatus;
-import android.media.soundtrigger_middleware.SoundModelType;
+import android.media.soundtrigger.RecognitionStatus;
+import android.media.soundtrigger.SoundModelType;
 
 /**
  * An event that gets sent to indicate a recognition (or aborting of the recognition process).
  * {@hide}
  */
+@VintfStability
 parcelable RecognitionEvent {
     /** Recognition status. */
-    RecognitionStatus status;
+    RecognitionStatus status = RecognitionStatus.INVALID;
     /** Event type, same as sound model type. */
-    SoundModelType type;
+    SoundModelType type = SoundModelType.INVALID;
     /** Is it possible to capture audio from this utterance buffered by the implementation. */
     boolean captureAvailable;
     /* Audio session ID. framework use. */

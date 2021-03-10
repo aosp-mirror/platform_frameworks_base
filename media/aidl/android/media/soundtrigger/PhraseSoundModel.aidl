@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
+
+import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.Phrase;
 
 /**
- * Recognition mode.
+ * Specialized sound model for key phrase detection.
+ * Proprietary representation of key phrases in binary data must match
+ * information indicated by phrases field.
  * {@hide}
  */
-@Backing(type="int")
-enum RecognitionMode {
-    /** Simple voice trigger. */
-    VOICE_TRIGGER       = 0x1,
-    /** Trigger only if one user in model identified. */
-    USER_IDENTIFICATION = 0x2,
-    /** Trigger only if one user in model authenticated. */
-    USER_AUTHENTICATION = 0x4,
-    /** Generic sound trigger. */
-    GENERIC_TRIGGER     = 0x8,
+@VintfStability
+parcelable PhraseSoundModel {
+    /** Common part of sound model descriptor */
+    SoundModel common;
+    /** List of descriptors for key phrases supported by this sound model */
+    Phrase[] phrases;
 }

@@ -32,6 +32,7 @@ package android.media.audio.common;
  *
  * {@hide}
  */
+@VintfStability
 @Backing(type="int")
 enum AudioFormat {
    INVALID = 0xFFFFFFFF,

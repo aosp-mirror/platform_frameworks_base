@@ -26,18 +26,18 @@ import android.hardware.soundtrigger.V2_1.ISoundTriggerHw;
 import android.hardware.soundtrigger.V2_4.ISoundTriggerHwCallback;
 import android.media.audio.common.AudioChannelMask;
 import android.media.audio.common.AudioFormat;
-import android.media.soundtrigger_middleware.AudioCapabilities;
-import android.media.soundtrigger_middleware.ConfidenceLevel;
-import android.media.soundtrigger_middleware.Phrase;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.RecognitionMode;
-import android.media.soundtrigger_middleware.SoundModel;
-import android.media.soundtrigger_middleware.SoundModelType;
-import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
+import android.media.soundtrigger.AudioCapabilities;
+import android.media.soundtrigger.ConfidenceLevel;
+import android.media.soundtrigger.Phrase;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseRecognitionExtra;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.RecognitionMode;
+import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.SoundModelType;
 import android.os.HidlMemoryUtil;
 import android.os.ParcelFileDescriptor;
 import android.os.SharedMemory;
@@ -184,7 +184,7 @@ public class TestUtil {
         return properties;
     }
 
-    public static void validateDefaultProperties(SoundTriggerModuleProperties properties,
+    public static void validateDefaultProperties(Properties properties,
             boolean supportConcurrentCapture) {
         assertEquals("implementor", properties.implementor);
         assertEquals("description", properties.description);

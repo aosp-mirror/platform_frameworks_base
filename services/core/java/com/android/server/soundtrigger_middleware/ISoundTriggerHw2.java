@@ -36,7 +36,7 @@ import android.os.IHwBinder;
  * <li>This interface will always include all the methods from the latest 2.x version (and thus
  * from every 2.x version) interface, with the convention that unsupported methods throw a
  * {@link RecoverableException} with a
- * {@link android.media.soundtrigger_middleware.Status#OPERATION_NOT_SUPPORTED}
+ * {@link android.media.soundtrigger.Status#OPERATION_NOT_SUPPORTED}
  * code.
  * <li>Cases where the original interface had multiple versions of a method representing the exact
  * thing, or there exists a trivial conversion between the new and old version, this interface

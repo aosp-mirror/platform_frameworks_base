@@ -21,7 +21,7 @@ import android.hardware.soundtrigger.V2_1.ISoundTriggerHw;
 import android.hardware.soundtrigger.V2_3.ModelParameterRange;
 import android.hardware.soundtrigger.V2_3.Properties;
 import android.hardware.soundtrigger.V2_3.RecognitionConfig;
-import android.media.soundtrigger_middleware.Status;
+import android.media.soundtrigger.Status;
 import android.os.IHwBinder;
 import android.os.RemoteException;
 

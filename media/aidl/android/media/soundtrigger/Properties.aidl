@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
 /**
  * Capabilities of a sound trigger module.
  * {@hide}
  */
-parcelable SoundTriggerModuleProperties {
+@VintfStability
+parcelable Properties {
     /** Implementor name */
     String   implementor;
     /** Implementation description */
@@ -44,7 +45,7 @@ parcelable SoundTriggerModuleProperties {
     int maxKeyPhrases;
     /** Maximum number of concurrent users detected */
     int maxUsers;
-    /** All supported modes. e.g RecognitionMode.VOICE_TRIGGER */
+    /** All supported modes. Bitfield, indexed by RecognitionMode. */
     int recognitionModes;
     /** Supports seamless transition from detection to capture */
     boolean     captureTransition;

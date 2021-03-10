@@ -28,17 +28,18 @@ import android.media.audio.common.AudioUsage;
  *
  * {@hide}
  */
+@VintfStability
 parcelable AudioOffloadInfo {
     int sampleRateHz;
     int channelMask;
-    AudioFormat format;
-    AudioStreamType streamType;
+    AudioFormat format = AudioFormat.INVALID;
+    AudioStreamType streamType = AudioStreamType.INVALID;
     int bitRatePerSecond;
     long durationMicroseconds;
     boolean hasVideo;
     boolean isStreaming;
     int bitWidth;
     int bufferSize;
-    AudioUsage usage;
+    AudioUsage usage = AudioUsage.INVALID;
 }
 

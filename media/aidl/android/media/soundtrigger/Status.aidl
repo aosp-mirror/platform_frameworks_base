@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
 /**
  * {@hide}
  */
+@VintfStability
 @Backing(type="int")
 enum Status {
+    /**
+     * Used as default value in parcelables to indicate that a value was not set.
+     * Should never be considered a valid setting, except for backward compatibility scenarios.
+     */
+    INVALID = -1,
     /** Success. */
     SUCCESS = 0,
     /** Failure due to resource contention. This is typically a temporary condition. */

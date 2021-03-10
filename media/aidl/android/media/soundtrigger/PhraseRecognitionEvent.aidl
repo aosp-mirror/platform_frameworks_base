@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
-import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
-import android.media.soundtrigger_middleware.RecognitionEvent;
+import android.media.soundtrigger.PhraseRecognitionExtra;
+import android.media.soundtrigger.RecognitionEvent;
 
 /**
  * An event that gets sent to indicate a phrase recognition (or aborting of the recognition
    process).
  * {@hide}
  */
+@VintfStability
 parcelable PhraseRecognitionEvent {
     /** Common recognition event. */
     RecognitionEvent common;

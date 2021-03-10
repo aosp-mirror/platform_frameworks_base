@@ -15,7 +15,7 @@
  */
 package android.media.soundtrigger_middleware;
 
-import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
+import android.media.soundtrigger.Properties;
 
 /**
  * A descriptor of an available sound trigger module, containing the handle used to reference the
@@ -26,6 +26,6 @@ parcelable SoundTriggerModuleDescriptor {
     /** Module handle to be used for attaching to it. */
     int handle;
     /** Module capabilities. */
-    SoundTriggerModuleProperties properties;
+    Properties properties;
 }
 

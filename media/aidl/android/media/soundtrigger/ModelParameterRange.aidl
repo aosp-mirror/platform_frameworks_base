@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
 /**
- * Sound model type.
+ * Value range for a model parameter.
+ *
  * {@hide}
  */
-@Backing(type="int")
-enum SoundModelType {
-    /** Unspecified sound model type */
-    UNKNOWN = -1,
-    /** Key phrase sound models */
-    KEYPHRASE = 0,
-    /** All models other than keyphrase */
-    GENERIC = 1,
+@VintfStability
+parcelable ModelParameterRange {
+    /** Minimum (inclusive) */
+    int minInclusive;
+    /** Maximum (inclusive) */
+    int maxInclusive;
 }

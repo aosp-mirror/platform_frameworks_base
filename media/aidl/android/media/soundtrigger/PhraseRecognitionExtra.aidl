@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
-import android.media.soundtrigger_middleware.ConfidenceLevel;
+import android.media.soundtrigger.ConfidenceLevel;
 
 /**
  * Specialized recognition event for key phrase detection.
  * {@hide}
  */
+@VintfStability
 parcelable PhraseRecognitionExtra {
-    // TODO(ytai): Constants / enums.
-
-    /** keyphrase ID */
+    /** Keyphrase ID */
     int id;
-    /** recognition modes used for this keyphrase */
+    /** Bitfield, indexed by RecognitionMode. */
     int recognitionModes;
-    /** confidence level for mode RECOGNITION_MODE_VOICE_TRIGGER */
+    /** Confidence level for mode RECOGNITION_MODE_VOICE_TRIGGER. Value is between 0-100. */
     int confidenceLevel;
-    /** number of user confidence levels */
+    /** Number of user confidence levels */
     ConfidenceLevel[] levels;
 }

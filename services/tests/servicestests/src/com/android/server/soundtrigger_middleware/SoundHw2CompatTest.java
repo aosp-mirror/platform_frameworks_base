@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.media.soundtrigger_middleware.Status;
+import android.media.soundtrigger.Status;
 import android.os.HwParcel;
 import android.os.IHwBinder;
 import android.os.IHwInterface;

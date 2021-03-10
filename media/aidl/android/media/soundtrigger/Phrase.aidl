@@ -13,26 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
 /**
- * Model specific parameters to be used with parameter set and get APIs.
+ * Key phrase descriptor.
  *
  * {@hide}
  */
-@Backing(type="int")
-enum ModelParameter {
-    /**
-     * Placeholder for invalid model parameter used for returning error or
-     * passing an invalid value.
-     */
-    INVALID = -1,
-
-    /**
-     * Controls the sensitivity threshold adjustment factor for a given model.
-     * Negative value corresponds to less sensitive model (high threshold) and
-     * a positive value corresponds to a more sensitive model (low threshold).
-     * Default value is 0.
-     */
-    THRESHOLD_FACTOR = 0,
+@VintfStability
+parcelable Phrase {
+    /** Unique keyphrase ID assigned at enrollment time. */
+    int id;
+    /** Recognition modes supported by this key phrase (bitfield of RecognitionMode enum). */
+    int recognitionModes;
+    /** List of users IDs associated with this key phrase. */
+    int[] users;
+    /** Locale - Java Locale style (e.g. en_US). */
+    String locale;
+    /** Phrase text. */
+    String text;
 }

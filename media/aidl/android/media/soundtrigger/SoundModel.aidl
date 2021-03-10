@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
-import android.media.soundtrigger_middleware.SoundModelType;
+import android.media.soundtrigger.SoundModelType;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -23,9 +23,10 @@ import android.os.ParcelFileDescriptor;
  * aggregation.
  * {@hide}
  */
+@VintfStability
 parcelable SoundModel {
     /** Model type. */
-    SoundModelType type;
+    SoundModelType type = SoundModelType.INVALID;
     /** Unique sound model ID. */
     String uuid;
     /**

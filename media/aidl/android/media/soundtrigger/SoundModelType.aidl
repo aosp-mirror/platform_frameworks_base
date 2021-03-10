@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
 /**
- * A recognition confidence level.
- * This type is used to represent either a threshold or an actual detection confidence level.
- *
+ * Sound model type.
  * {@hide}
  */
-parcelable ConfidenceLevel {
-    /** user ID. */
-    int userId;
+@VintfStability
+@Backing(type="int")
+enum SoundModelType {
     /**
-     * Confidence level in percent (0 - 100).
-     * <ul>
-     * <li>Min level for recognition configuration
-     * <li>Detected level for recognition event.
-     * </ul>
+     * Used as default value in parcelables to indicate that a value was not set.
+     * Should never be considered a valid setting, except for backward compatibility scenarios.
      */
-    int levelPercent;
+    INVALID = -1,
+    /** Key phrase sound models */
+    KEYPHRASE = 0,
+    /** All models other than keyphrase */
+    GENERIC = 1,
 }

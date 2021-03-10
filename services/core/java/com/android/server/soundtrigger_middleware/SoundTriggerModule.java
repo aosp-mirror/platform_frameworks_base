@@ -20,17 +20,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
 import android.hardware.soundtrigger.V2_2.ISoundTriggerHw;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.RecognitionStatus;
+import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
-import android.media.soundtrigger_middleware.ModelParameterRange;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.RecognitionStatus;
-import android.media.soundtrigger_middleware.SoundModel;
-import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
-import android.media.soundtrigger_middleware.Status;
 import android.os.IBinder;
 import android.os.IHwBinder;
 import android.os.RemoteException;
@@ -68,9 +68,8 @@ import java.util.Set;
  * <li>There is no binder instance associated with this implementation. Do not call asBinder().
  * <li>The implementation may throw a {@link RecoverableException} to indicate non-fatal,
  * recoverable faults. The error code would one of the
- * {@link android.media.soundtrigger_middleware.Status} constants. Any other exception
- * thrown should be regarded as a bug in the implementation or one of its dependencies
- * (assuming correct usage).
+ * {@link android.media.soundtrigger.Status} constants. Any other exception thrown should be
+ * regarded as a bug in the implementation or one of its dependencies (assuming correct usage).
  * <li>The implementation is designed for testability by featuring dependency injection (the
  * underlying HAL driver instances are passed to the ctor) and by minimizing dependencies
  * on Android runtime.
@@ -91,7 +90,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
     @NonNull private ISoundTriggerHw2 mHalService;
     @NonNull private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider;
     private final Set<Session> mActiveSessions = new HashSet<>();
-    private SoundTriggerModuleProperties mProperties;
+    private Properties mProperties;
 
     /**
      * Ctor.
@@ -132,7 +131,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
      * @return The properties structure.
      */
     synchronized @NonNull
-    SoundTriggerModuleProperties getProperties() {
+    Properties getProperties() {
         return mProperties;
     }
 

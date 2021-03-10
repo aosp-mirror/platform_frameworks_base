@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
 /**
- * AudioCapabilities supported by the implemented HAL driver.
- * @hide
+ * A recognition confidence level.
+ * This type is used to represent either a threshold or an actual detection confidence level.
+ *
+ * {@hide}
  */
-@Backing(type="int")
-enum AudioCapabilities {
+@VintfStability
+parcelable ConfidenceLevel {
+    /** user ID. */
+    int userId;
     /**
-     * If set the underlying module supports AEC.
+     * Confidence level in percent (0 - 100).
+     * <ul>
+     * <li>Min level for recognition configuration
+     * <li>Detected level for recognition event.
+     * </ul>
      */
-    ECHO_CANCELLATION = 1 << 0,
-    /**
-     * If set, the underlying module supports noise suppression.
-     */
-    NOISE_SUPPRESSION = 1 << 1,
+    int levelPercent;
 }

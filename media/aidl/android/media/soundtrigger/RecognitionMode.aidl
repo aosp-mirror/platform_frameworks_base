@@ -13,16 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.soundtrigger_middleware;
+package android.media.soundtrigger;
 
 /**
- * Value range for a model parameter.
- *
+ * Recognition mode.
  * {@hide}
  */
-parcelable ModelParameterRange {
-    /** Minimum (inclusive) */
-    int minInclusive;
-    /** Maximum (inclusive) */
-    int maxInclusive;
+@VintfStability
+@Backing(type="int")
+enum RecognitionMode {
+    /** Simple voice trigger. */
+    VOICE_TRIGGER       = 0x1,
+    /** Trigger only if one user in model identified. */
+    USER_IDENTIFICATION = 0x2,
+    /** Trigger only if one user in model authenticated. */
+    USER_AUTHENTICATION = 0x4,
+    /** Generic sound trigger. */
+    GENERIC_TRIGGER     = 0x8,
 }

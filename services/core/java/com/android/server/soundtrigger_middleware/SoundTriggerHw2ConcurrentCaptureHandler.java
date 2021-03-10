@@ -22,10 +22,10 @@ import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
 import android.hardware.soundtrigger.V2_3.ModelParameterRange;
 import android.hardware.soundtrigger.V2_3.Properties;
 import android.hardware.soundtrigger.V2_3.RecognitionConfig;
+import android.media.soundtrigger.RecognitionStatus;
+import android.media.soundtrigger.SoundModelType;
+import android.media.soundtrigger.Status;
 import android.media.permission.SafeCloseable;
-import android.media.soundtrigger_middleware.RecognitionStatus;
-import android.media.soundtrigger_middleware.SoundModelType;
-import android.media.soundtrigger_middleware.Status;
 import android.os.IHwBinder;
 import android.os.RemoteException;
 
