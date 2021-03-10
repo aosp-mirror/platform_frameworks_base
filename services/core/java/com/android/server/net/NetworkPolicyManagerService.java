@@ -391,7 +391,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_METERED_RESTRICTED_PACKAGES_CHANGED = 17;
     private static final int MSG_SET_NETWORK_TEMPLATE_ENABLED = 18;
     private static final int MSG_SUBSCRIPTION_PLANS_CHANGED = 19;
-    private static final int MSG_STATS_PROVIDER_LIMIT_REACHED = 20;
+    private static final int MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED = 20;
 
     private static final int UID_MSG_STATE_CHANGED = 100;
     private static final int UID_MSG_GONE = 101;
@@ -4627,7 +4627,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     mListeners.finishBroadcast();
                     return true;
                 }
-                case MSG_STATS_PROVIDER_LIMIT_REACHED: {
+                case MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED: {
                     mNetworkStats.forceUpdate();
 
                     synchronized (mNetworkPoliciesSecondLock) {
@@ -5370,9 +5370,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override
-        public void onStatsProviderLimitReached(@NonNull String tag) {
-            Log.v(TAG, "onStatsProviderLimitReached: " + tag);
-            mHandler.obtainMessage(MSG_STATS_PROVIDER_LIMIT_REACHED).sendToTarget();
+        public void onStatsProviderWarningOrLimitReached(@NonNull String tag) {
+            Log.v(TAG, "onStatsProviderWarningOrLimitReached: " + tag);
+            mHandler.obtainMessage(MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED).sendToTarget();
         }
     }
 
