@@ -410,6 +410,7 @@ import com.android.server.utils.Watched;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 import com.android.server.utils.WatchedSparseBooleanArray;
+import com.android.server.utils.WatchedSparseIntArray;
 import com.android.server.utils.Watcher;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -892,7 +893,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // that created the isolated process.
     @Watched
     @GuardedBy("mLock")
-    final SparseIntArray mIsolatedOwners = new SparseIntArray();
+    final WatchedSparseIntArray mIsolatedOwners = new WatchedSparseIntArray();
 
     /**
      * Tracks new system packages [received in an OTA] that we expect to
@@ -1795,7 +1796,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public static final int SNAPPED = 2;
 
         public final Settings settings;
-        public final SparseIntArray isolatedOwners;
+        public final WatchedSparseIntArray isolatedOwners;
         public final WatchedArrayMap<String, AndroidPackage> packages;
         public final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> sharedLibs;
         public final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> staticLibs;
@@ -1814,7 +1815,7 @@ public class PackageManagerService extends IPackageManager.Stub
         Snapshot(int type) {
             if (type == Snapshot.SNAPPED) {
                 settings = mSettings.snapshot();
-                isolatedOwners = mIsolatedOwners.clone();
+                isolatedOwners = mIsolatedOwners.snapshot();
                 packages = mPackages.snapshot();
                 sharedLibs = mSharedLibraries.snapshot();
                 staticLibs = mStaticLibsByDeclaringPackage.snapshot();
@@ -2014,7 +2015,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Cached attributes.  The names in this class are the same as the
         // names in PackageManagerService; see that class for documentation.
         private final Settings mSettings;
-        private final SparseIntArray mIsolatedOwners;
+        private final WatchedSparseIntArray mIsolatedOwners;
         private final WatchedArrayMap<String, AndroidPackage> mPackages;
         private final WatchedArrayMap<ComponentName, ParsedInstrumentation>
                 mInstrumentation;
@@ -6145,6 +6146,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mAppsFilter.registerObserver(mWatcher);
         mInstantAppRegistry.registerObserver(mWatcher);
         mSettings.registerObserver(mWatcher);
+        mIsolatedOwners.registerObserver(mWatcher);
         // If neither "build" attribute is true then this may be a mockito test, and verification
         // can fail as a false positive.
         Watchable.verifyWatchedAttributes(this, mWatcher, !(mIsEngBuild || mIsUserDebugBuild));
