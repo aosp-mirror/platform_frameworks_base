@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -1919,6 +1920,7 @@ public abstract class ConnectionService extends Service {
     /** {@inheritDoc} */
     @Override
     public final IBinder onBind(Intent intent) {
+        onBindClient(intent);
         return mBinder;
     }
 
@@ -1929,6 +1931,13 @@ public abstract class ConnectionService extends Service {
         return super.onUnbind(intent);
     }
 
+    /**
+     * Used for testing to let the test suite know when the connection service has been bound.
+     * @hide
+     */
+    @TestApi
+    public void onBindClient(@Nullable Intent intent) {
+    }
 
     /**
      * This can be used by telecom to either create a new outgoing conference call or attach
