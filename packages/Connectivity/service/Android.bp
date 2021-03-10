@@ -50,12 +50,11 @@ cc_library_shared {
 }
 
 java_library {
-    name: "service-connectivity",
+    name: "service-connectivity-pre-jarjar",
     srcs: [
+        ":framework-connectivity-shared-srcs",
         ":connectivity-service-srcs",
     ],
-    installable: true,
-    jarjar_rules: "jarjar-rules.txt",
     libs: [
         "android.net.ipsec.ike",
         "services.core",
@@ -68,6 +67,19 @@ java_library {
         "net-utils-framework-common",
         "netd-client",
     ],
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.tethering",
+    ],
+}
+
+java_library {
+    name: "service-connectivity",
+    installable: true,
+    static_libs:[
+        "service-connectivity-pre-jarjar",
+    ],
+    jarjar_rules: "jarjar-rules.txt",
     apex_available: [
         "//apex_available:platform",
         "com.android.tethering",

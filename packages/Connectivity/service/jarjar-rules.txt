@@ -1,2 +1,13 @@
 rule com.android.net.module.util.** com.android.connectivity.net-utils.@1
 rule com.android.modules.utils.** com.android.connectivity.modules-utils.@1
+
+# internal util classes
+# Exclude AsyncChannel. TODO: remove AsyncChannel usage in ConnectivityService
+rule com.android.internal.util.AsyncChannel* @0
+# Exclude LocationPermissionChecker. This is going to be moved to libs/net
+rule com.android.internal.util.LocationPermissionChecker* @0
+rule android.util.LocalLog* com.android.connectivity.util.LocalLog@1
+# android.util.IndentingPrintWriter* should use a different package name from
+# the one in com.android.internal.util
+rule android.util.IndentingPrintWriter* android.connectivity.util.IndentingPrintWriter@1
+rule com.android.internal.util.** com.android.connectivity.util.@1
