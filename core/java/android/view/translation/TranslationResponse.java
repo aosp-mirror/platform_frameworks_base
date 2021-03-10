@@ -21,13 +21,13 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.translation.TranslationService;
+import android.util.SparseArray;
 
 import com.android.internal.util.DataClass;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * Response from the {@link TranslationService}, which contains the translated result.
@@ -44,19 +44,83 @@ public final class TranslationResponse implements Parcelable {
      */
     public static final int TRANSLATION_STATUS_UNKNOWN_ERROR = 1;
     /**
-     * The language of the request is not available to be translated.
+     * The languages of the request is not available to be translated.
      */
-    public static final int TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE = 2;
+    public static final int TRANSLATION_STATUS_CONTEXT_UNSUPPORTED = 2;
 
     /**
      * The translation result status code.
      */
     private final @TranslationStatus int mTranslationStatus;
+
     /**
-     * The translation results. If there is no translation result, set it with an empty list.
+     * List of translated {@link TranslationResponseValue}s. The key of entries in this list
+     * will be their respective index in {@link TranslationRequest#getTranslationRequestValues()}.
      */
     @NonNull
-    private List<TranslationRequest> mTranslations = new ArrayList();
+    private final SparseArray<TranslationResponseValue> mTranslationResponseValues;
+
+    /**
+     * List of translated {@link ViewTranslationResponse}s. The key of entries in this list
+     * will be their respective index in {@link TranslationRequest#getViewTranslationRequests()}.
+     */
+    @NonNull
+    private final SparseArray<ViewTranslationResponse> mViewTranslationResponses;
+
+    abstract static class BaseBuilder {
+
+        /**
+         * Adds {@link TranslationResponseValue} to be translated. The input
+         * TranslationResponseValue format should match those provided by the
+         * {@link android.view.translation.Translator}'s destSpec.
+         *
+         * @param value the translated value.
+         * @return this Builder.
+         */
+        @NonNull
+        @SuppressWarnings("MissingGetterMatchingBuilder")
+        public Builder setTranslationResponseValue(int index,
+                @NonNull TranslationResponseValue value) {
+            Objects.requireNonNull(value, "value should not be null");
+            final Builder builder = (Builder) this;
+
+            if (builder.mTranslationResponseValues == null) {
+                builder.setTranslationResponseValues(new SparseArray<>());
+            }
+            builder.mTranslationResponseValues.put(index, value);
+            return builder;
+        }
+
+        /**
+         * Sets the list of {@link ViewTranslationResponse} to be translated. The input
+         * ViewTranslationResponse contains {@link TranslationResponseValue}s whose  format should
+         * match those provided by the {@link android.view.translation.Translator}'s destSpec.
+         *
+         * @param response the translated response.
+         * @return this Builder.
+         */
+        @NonNull
+        @SuppressWarnings("MissingGetterMatchingBuilder")
+        public Builder setViewTranslationResponse(int index,
+                @NonNull ViewTranslationResponse response) {
+            Objects.requireNonNull(response, "value should not be null");
+            final Builder builder = (Builder) this;
+
+            if (builder.mViewTranslationResponses == null) {
+                builder.setViewTranslationResponses(new SparseArray<>());
+            }
+            builder.mViewTranslationResponses.put(index, response);
+            return builder;
+        }
+    }
+
+    private static SparseArray<TranslationResponseValue> defaultTranslationResponseValues() {
+        return new SparseArray<>();
+    }
+
+    private static SparseArray<ViewTranslationResponse> defaultViewTranslationResponses() {
+        return new SparseArray<>();
+    }
 
 
 
@@ -78,7 +142,7 @@ public final class TranslationResponse implements Parcelable {
     @IntDef(prefix = "TRANSLATION_STATUS_", value = {
         TRANSLATION_STATUS_SUCCESS,
         TRANSLATION_STATUS_UNKNOWN_ERROR,
-        TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE
+        TRANSLATION_STATUS_CONTEXT_UNSUPPORTED
     })
     @Retention(RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
@@ -92,8 +156,8 @@ public final class TranslationResponse implements Parcelable {
                     return "TRANSLATION_STATUS_SUCCESS";
             case TRANSLATION_STATUS_UNKNOWN_ERROR:
                     return "TRANSLATION_STATUS_UNKNOWN_ERROR";
-            case TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE:
-                    return "TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE";
+            case TRANSLATION_STATUS_CONTEXT_UNSUPPORTED:
+                    return "TRANSLATION_STATUS_CONTEXT_UNSUPPORTED";
             default: return Integer.toHexString(value);
         }
     }
@@ -101,22 +165,26 @@ public final class TranslationResponse implements Parcelable {
     @DataClass.Generated.Member
     /* package-private */ TranslationResponse(
             @TranslationStatus int translationStatus,
-            @NonNull List<TranslationRequest> translations) {
+            @NonNull SparseArray<TranslationResponseValue> translationResponseValues,
+            @NonNull SparseArray<ViewTranslationResponse> viewTranslationResponses) {
         this.mTranslationStatus = translationStatus;
 
         if (!(mTranslationStatus == TRANSLATION_STATUS_SUCCESS)
                 && !(mTranslationStatus == TRANSLATION_STATUS_UNKNOWN_ERROR)
-                && !(mTranslationStatus == TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE)) {
+                && !(mTranslationStatus == TRANSLATION_STATUS_CONTEXT_UNSUPPORTED)) {
             throw new java.lang.IllegalArgumentException(
                     "translationStatus was " + mTranslationStatus + " but must be one of: "
                             + "TRANSLATION_STATUS_SUCCESS(" + TRANSLATION_STATUS_SUCCESS + "), "
                             + "TRANSLATION_STATUS_UNKNOWN_ERROR(" + TRANSLATION_STATUS_UNKNOWN_ERROR + "), "
-                            + "TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE(" + TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE + ")");
+                            + "TRANSLATION_STATUS_CONTEXT_UNSUPPORTED(" + TRANSLATION_STATUS_CONTEXT_UNSUPPORTED + ")");
         }
 
-        this.mTranslations = translations;
+        this.mTranslationResponseValues = translationResponseValues;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mTranslations);
+                NonNull.class, null, mTranslationResponseValues);
+        this.mViewTranslationResponses = viewTranslationResponses;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mViewTranslationResponses);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -130,11 +198,21 @@ public final class TranslationResponse implements Parcelable {
     }
 
     /**
-     * The translation results. If there is no translation result, set it with an empty list.
+     * List of translated {@link TranslationResponseValue}s. The key of entries in this list
+     * will be their respective index in {@link TranslationRequest#getTranslationRequestValues()}.
      */
     @DataClass.Generated.Member
-    public @NonNull List<TranslationRequest> getTranslations() {
-        return mTranslations;
+    public @NonNull SparseArray<TranslationResponseValue> getTranslationResponseValues() {
+        return mTranslationResponseValues;
+    }
+
+    /**
+     * List of translated {@link ViewTranslationResponse}s. The key of entries in this list
+     * will be their respective index in {@link TranslationRequest#getViewTranslationRequests()}.
+     */
+    @DataClass.Generated.Member
+    public @NonNull SparseArray<ViewTranslationResponse> getViewTranslationResponses() {
+        return mViewTranslationResponses;
     }
 
     @Override
@@ -145,7 +223,8 @@ public final class TranslationResponse implements Parcelable {
 
         return "TranslationResponse { " +
                 "translationStatus = " + translationStatusToString(mTranslationStatus) + ", " +
-                "translations = " + mTranslations +
+                "translationResponseValues = " + mTranslationResponseValues + ", " +
+                "viewTranslationResponses = " + mViewTranslationResponses +
         " }";
     }
 
@@ -156,7 +235,8 @@ public final class TranslationResponse implements Parcelable {
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         dest.writeInt(mTranslationStatus);
-        dest.writeParcelableList(mTranslations, flags);
+        dest.writeSparseArray(mTranslationResponseValues);
+        dest.writeSparseArray(mViewTranslationResponses);
     }
 
     @Override
@@ -171,24 +251,27 @@ public final class TranslationResponse implements Parcelable {
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         int translationStatus = in.readInt();
-        List<TranslationRequest> translations = new ArrayList<>();
-        in.readParcelableList(translations, TranslationRequest.class.getClassLoader());
+        SparseArray<TranslationResponseValue> translationResponseValues = (SparseArray) in.readSparseArray(TranslationResponseValue.class.getClassLoader());
+        SparseArray<ViewTranslationResponse> viewTranslationResponses = (SparseArray) in.readSparseArray(ViewTranslationResponse.class.getClassLoader());
 
         this.mTranslationStatus = translationStatus;
 
         if (!(mTranslationStatus == TRANSLATION_STATUS_SUCCESS)
                 && !(mTranslationStatus == TRANSLATION_STATUS_UNKNOWN_ERROR)
-                && !(mTranslationStatus == TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE)) {
+                && !(mTranslationStatus == TRANSLATION_STATUS_CONTEXT_UNSUPPORTED)) {
             throw new java.lang.IllegalArgumentException(
                     "translationStatus was " + mTranslationStatus + " but must be one of: "
                             + "TRANSLATION_STATUS_SUCCESS(" + TRANSLATION_STATUS_SUCCESS + "), "
                             + "TRANSLATION_STATUS_UNKNOWN_ERROR(" + TRANSLATION_STATUS_UNKNOWN_ERROR + "), "
-                            + "TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE(" + TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE + ")");
+                            + "TRANSLATION_STATUS_CONTEXT_UNSUPPORTED(" + TRANSLATION_STATUS_CONTEXT_UNSUPPORTED + ")");
         }
 
-        this.mTranslations = translations;
+        this.mTranslationResponseValues = translationResponseValues;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mTranslations);
+                NonNull.class, null, mTranslationResponseValues);
+        this.mViewTranslationResponses = viewTranslationResponses;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mViewTranslationResponses);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -212,10 +295,11 @@ public final class TranslationResponse implements Parcelable {
      */
     @SuppressWarnings("WeakerAccess")
     @DataClass.Generated.Member
-    public static final class Builder {
+    public static final class Builder extends BaseBuilder {
 
         private @TranslationStatus int mTranslationStatus;
-        private @NonNull List<TranslationRequest> mTranslations;
+        private @NonNull SparseArray<TranslationResponseValue> mTranslationResponseValues;
+        private @NonNull SparseArray<ViewTranslationResponse> mViewTranslationResponses;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -231,12 +315,12 @@ public final class TranslationResponse implements Parcelable {
 
             if (!(mTranslationStatus == TRANSLATION_STATUS_SUCCESS)
                     && !(mTranslationStatus == TRANSLATION_STATUS_UNKNOWN_ERROR)
-                    && !(mTranslationStatus == TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE)) {
+                    && !(mTranslationStatus == TRANSLATION_STATUS_CONTEXT_UNSUPPORTED)) {
                 throw new java.lang.IllegalArgumentException(
                         "translationStatus was " + mTranslationStatus + " but must be one of: "
                                 + "TRANSLATION_STATUS_SUCCESS(" + TRANSLATION_STATUS_SUCCESS + "), "
                                 + "TRANSLATION_STATUS_UNKNOWN_ERROR(" + TRANSLATION_STATUS_UNKNOWN_ERROR + "), "
-                                + "TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE(" + TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE + ")");
+                                + "TRANSLATION_STATUS_CONTEXT_UNSUPPORTED(" + TRANSLATION_STATUS_CONTEXT_UNSUPPORTED + ")");
             }
 
         }
@@ -253,43 +337,49 @@ public final class TranslationResponse implements Parcelable {
         }
 
         /**
-         * The translation results. If there is no translation result, set it with an empty list.
+         * List of translated {@link TranslationResponseValue}s. The key of entries in this list
+         * will be their respective index in {@link TranslationRequest#getTranslationRequestValues()}.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setTranslations(@NonNull List<TranslationRequest> value) {
+        public @NonNull Builder setTranslationResponseValues(@NonNull SparseArray<TranslationResponseValue> value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x2;
-            mTranslations = value;
+            mTranslationResponseValues = value;
             return this;
         }
 
-        /** @see #setTranslations */
+        /**
+         * List of translated {@link ViewTranslationResponse}s. The key of entries in this list
+         * will be their respective index in {@link TranslationRequest#getViewTranslationRequests()}.
+         */
         @DataClass.Generated.Member
-        public @NonNull Builder addTranslations(@NonNull TranslationRequest value) {
-            // You can refine this method's name by providing item's singular name, e.g.:
-            // @DataClass.PluralOf("item")) mItems = ...
-
-            if (mTranslations == null) setTranslations(new ArrayList<>());
-            mTranslations.add(value);
+        public @NonNull Builder setViewTranslationResponses(@NonNull SparseArray<ViewTranslationResponse> value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x4;
+            mViewTranslationResponses = value;
             return this;
         }
 
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull TranslationResponse build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x4; // Mark builder used
+            mBuilderFieldsSet |= 0x8; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x2) == 0) {
-                mTranslations = new ArrayList();
+                mTranslationResponseValues = defaultTranslationResponseValues();
+            }
+            if ((mBuilderFieldsSet & 0x4) == 0) {
+                mViewTranslationResponses = defaultViewTranslationResponses();
             }
             TranslationResponse o = new TranslationResponse(
                     mTranslationStatus,
-                    mTranslations);
+                    mTranslationResponseValues,
+                    mViewTranslationResponses);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x4) != 0) {
+            if ((mBuilderFieldsSet & 0x8) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -297,10 +387,10 @@ public final class TranslationResponse implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1609973911361L,
+            time = 1614211889478L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationResponse.java",
-            inputSignatures = "public static final  int TRANSLATION_STATUS_SUCCESS\npublic static final  int TRANSLATION_STATUS_UNKNOWN_ERROR\npublic static final  int TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE\nprivate final @android.view.translation.TranslationResponse.TranslationStatus int mTranslationStatus\nprivate @android.annotation.NonNull java.util.List<android.view.translation.TranslationRequest> mTranslations\nclass TranslationResponse extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genHiddenConstDefs=true)")
+            inputSignatures = "public static final  int TRANSLATION_STATUS_SUCCESS\npublic static final  int TRANSLATION_STATUS_UNKNOWN_ERROR\npublic static final  int TRANSLATION_STATUS_CONTEXT_UNSUPPORTED\nprivate final @android.view.translation.TranslationResponse.TranslationStatus int mTranslationStatus\nprivate final @android.annotation.NonNull android.util.SparseArray<android.view.translation.TranslationResponseValue> mTranslationResponseValues\nprivate final @android.annotation.NonNull android.util.SparseArray<android.view.translation.ViewTranslationResponse> mViewTranslationResponses\nprivate static  android.util.SparseArray<android.view.translation.TranslationResponseValue> defaultTranslationResponseValues()\nprivate static  android.util.SparseArray<android.view.translation.ViewTranslationResponse> defaultViewTranslationResponses()\nclass TranslationResponse extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int,android.view.translation.TranslationResponseValue)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int,android.view.translation.ViewTranslationResponse)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genHiddenConstDefs=true)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int,android.view.translation.TranslationResponseValue)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int,android.view.translation.ViewTranslationResponse)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

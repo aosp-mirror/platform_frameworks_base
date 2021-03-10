@@ -29,15 +29,15 @@
     <string name="profile_name_watch">watch</string>
 
     <!-- Title of the device association confirmation dialog. -->
-    <string name="confirmation_title">Set &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to manage your <xliff:g id="profile_name" example="watch">%2$s</xliff:g> - &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%3$s</xliff:g>&lt;/strong&gt;</string>
+    <string name="confirmation_title">Set &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to manage your &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
 
     <!-- Text of the device profile permissions explanation in the association dialog. -->
-    <string name="profile_summary"><xliff:g id="app_name" example="Android Wear">%1$s</xliff:g> is needed to manage your <xliff:g id="profile_name" example="watch">%2$s</xliff:g>. <xliff:g id="privileges_discplaimer" example="Android Wear will get access to your Notifications, Calendar and Contacts.">%3$s</xliff:g></string>
+    <string name="profile_summary">This app is needed to manage your <xliff:g id="profile_name" example="watch">%1$s</xliff:g>. <xliff:g id="privileges_discplaimer" example="Android Wear will get access to your Notifications, Calendar and Contacts.">%2$s</xliff:g></string>
 
     <!-- Positive button for the device-app association consent dialog [CHAR LIMIT=30] -->
-    <string name="consent_yes">Yes</string>
+    <string name="consent_yes">Allow</string>
 
     <!-- Negative button for the device-app association consent dialog [CHAR LIMIT=30] -->
-    <string name="consent_no">No thanks</string>
+    <string name="consent_no">Don\u2019t allow</string>
 
 </resources>

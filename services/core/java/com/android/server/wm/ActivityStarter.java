@@ -48,6 +48,7 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE_PER_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -1572,7 +1573,7 @@ class ActivityStarter {
                 }
             } else {
                 if (!mAvoidMoveToFront && mDoResume
-                        && mRootWindowContainer.hasVisibleWindowAboveNotificationShade(
+                        && mRootWindowContainer.hasVisibleWindowAboveButDoesNotOwnNotificationShade(
                             r.launchedFromUid)) {
                     // If the UID launching the activity has a visible window on top of the
                     // notification shade and it's launching an activity that's going to be at the
@@ -2093,7 +2094,8 @@ class ActivityStarter {
             mAddingToTask = true;
         } else if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
                 || isDocumentLaunchesIntoExisting(mLaunchFlags)
-                || isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE, LAUNCH_SINGLE_TASK)) {
+                || isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE, LAUNCH_SINGLE_TASK,
+                        LAUNCH_SINGLE_INSTANCE_PER_TASK)) {
             // In this situation we want to remove all activities from the task up to the one
             // being started. In most cases this means we are resetting the task to its initial
             // state.
@@ -2260,6 +2262,12 @@ class ActivityStarter {
         mLaunchTaskBehind = r.mLaunchTaskBehind
                 && !isLaunchModeOneOf(LAUNCH_SINGLE_TASK, LAUNCH_SINGLE_INSTANCE)
                 && (mLaunchFlags & FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
+
+        if (mLaunchMode == LAUNCH_SINGLE_INSTANCE_PER_TASK) {
+            // Adding NEW_TASK flag for singleInstancePerTask launch mode activity, so that the
+            // activity won't be launched in source record's task.
+            mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
+        }
 
         sendNewTaskResultRequestIfNeeded();
 
@@ -2529,6 +2537,14 @@ class ActivityStarter {
             }
         }
 
+        if (intentActivity != null && mLaunchMode == LAUNCH_SINGLE_INSTANCE_PER_TASK
+                && !intentActivity.getTask().getRootActivity().mActivityComponent.equals(
+                mStartActivity.mActivityComponent)) {
+            // The task could be selected due to same task affinity. Do not reuse the task while
+            // starting the singleInstancePerTask activity if it is not the task root activity.
+            intentActivity = null;
+        }
+
         if (intentActivity != null
                 && (mStartActivity.isActivityTypeHome() || intentActivity.isActivityTypeHome())
                 && intentActivity.getDisplayArea() != mPreferredTaskDisplayArea) {
@@ -2713,6 +2729,10 @@ class ActivityStarter {
 
     private boolean isLaunchModeOneOf(int mode1, int mode2) {
         return mode1 == mLaunchMode || mode2 == mLaunchMode;
+    }
+
+    private boolean isLaunchModeOneOf(int mode1, int mode2, int mode3) {
+        return mode1 == mLaunchMode || mode2 == mLaunchMode || mode3 == mLaunchMode;
     }
 
     static boolean isDocumentLaunchesIntoExisting(int flags) {

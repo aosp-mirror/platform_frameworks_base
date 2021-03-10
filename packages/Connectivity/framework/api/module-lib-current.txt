@@ -51,6 +51,14 @@ package android.net {
     field public static final String TEST_TAP_PREFIX = "testtap";
   }
 
+  public final class TestNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    ctor public TestNetworkSpecifier(@NonNull String);
+    method public int describeContents();
+    method @Nullable public String getInterfaceName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.TestNetworkSpecifier> CREATOR;
+  }
+
   public final class VpnTransportInfo implements android.os.Parcelable android.net.TransportInfo {
     ctor public VpnTransportInfo(int);
     method public int describeContents();

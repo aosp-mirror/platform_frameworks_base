@@ -330,6 +330,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 WindowManager.LayoutParams.TYPE_BOOT_PROGRESS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
         mCoreLayoutParams.setTitle(TAG);

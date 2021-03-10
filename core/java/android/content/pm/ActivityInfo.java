@@ -74,12 +74,28 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     public static final int LAUNCH_SINGLE_INSTANCE = 3;
     /**
-     * The launch mode style requested by the activity.  From the
-     * {@link android.R.attr#launchMode} attribute, one of
-     * {@link #LAUNCH_MULTIPLE},
-     * {@link #LAUNCH_SINGLE_TOP}, {@link #LAUNCH_SINGLE_TASK}, or
-     * {@link #LAUNCH_SINGLE_INSTANCE}.
+     * Constant corresponding to <code>singleInstancePerTask</code> in
+     * the {@link android.R.attr#launchMode} attribute.
      */
+    public static final int LAUNCH_SINGLE_INSTANCE_PER_TASK = 4;
+
+    /** @hide */
+    @IntDef(prefix = "LAUNCH_", value = {
+            LAUNCH_MULTIPLE,
+            LAUNCH_SINGLE_TOP,
+            LAUNCH_SINGLE_TASK,
+            LAUNCH_SINGLE_INSTANCE,
+            LAUNCH_SINGLE_INSTANCE_PER_TASK
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface LaunchMode {
+    }
+
+    /**
+     * The launch mode style requested by the activity.  From the
+     * {@link android.R.attr#launchMode} attribute.
+     */
+    @LaunchMode
     public int launchMode;
 
     /**

@@ -78,9 +78,6 @@ import java.util.Optional;
 public final class DeviceStateManagerService extends SystemService {
     private static final String TAG = "DeviceStateManagerService";
     private static final boolean DEBUG = false;
-    // The device state to use as a placeholder before callback from the DeviceStateProvider occurs.
-    private static final DeviceState UNSPECIFIED_DEVICE_STATE =
-            new DeviceState(MINIMUM_DEVICE_STATE, "UNSPECIFIED");
 
     private final Object mLock = new Object();
     @NonNull
@@ -92,11 +89,11 @@ public final class DeviceStateManagerService extends SystemService {
     @GuardedBy("mLock")
     private SparseArray<DeviceState> mDeviceStates = new SparseArray<>();
 
-    // The current committed device state. The default of UNSPECIFIED_DEVICE_STATE will be replaced
-    // by the current state after the initial callback from the DeviceStateProvider.
+    // The current committed device state. Will be empty until the first device state provided by
+    // the DeviceStateProvider is committed.
     @GuardedBy("mLock")
     @NonNull
-    private DeviceState mCommittedState = UNSPECIFIED_DEVICE_STATE;
+    private Optional<DeviceState> mCommittedState = Optional.empty();
     // The device state that is currently awaiting callback from the policy to be committed.
     @GuardedBy("mLock")
     @NonNull
@@ -105,10 +102,11 @@ public final class DeviceStateManagerService extends SystemService {
     @GuardedBy("mLock")
     private boolean mIsPolicyWaitingForState = false;
 
-    // The device state that is set by the device state provider.
+    // The device state that is set by the DeviceStateProvider. Will be empty until the first
+    // callback from the provider and then will always contain the most recent value.
     @GuardedBy("mLock")
     @NonNull
-    private DeviceState mBaseState = UNSPECIFIED_DEVICE_STATE;
+    private Optional<DeviceState> mBaseState = Optional.empty();
 
     // List of processes registered to receive notifications about changes to device state and
     // request status indexed by process id.
@@ -142,11 +140,14 @@ public final class DeviceStateManagerService extends SystemService {
     /**
      * Returns the current state the system is in. Note that the system may be in the process of
      * configuring a different state.
+     * <p>
+     * Note: This method will return {@link Optional#empty()} if called before the first state has
+     * been committed, otherwise it will return the last committed state.
      *
      * @see #getPendingState()
      */
     @NonNull
-    DeviceState getCommittedState() {
+    Optional<DeviceState> getCommittedState() {
         synchronized (mLock) {
             return mCommittedState;
         }
@@ -167,11 +168,15 @@ public final class DeviceStateManagerService extends SystemService {
     /**
      * Returns the base state. The service will configure the device to match the base state when
      * there is no active request to override the base state.
+     * <p>
+     * Note: This method will return {@link Optional#empty()} if called before a base state is
+     * provided to the service by the {@link DeviceStateProvider}, otherwise it will return the
+     * most recent provided value.
      *
      * @see #getOverrideState()
      */
     @NonNull
-    DeviceState getBaseState() {
+    Optional<DeviceState> getBaseState() {
         synchronized (mLock) {
             return mBaseState;
         }
@@ -223,9 +228,14 @@ public final class DeviceStateManagerService extends SystemService {
 
     @NonNull
     private DeviceStateInfo getDeviceStateInfoLocked() {
+        if (!mBaseState.isPresent() || !mCommittedState.isPresent()) {
+            throw new IllegalStateException("Trying to get the current DeviceStateInfo before the"
+                    + " initial state has been committed.");
+        }
+
         final int[] supportedStates = getSupportedStateIdentifiersLocked();
-        final int baseState = mBaseState.getIdentifier();
-        final int currentState = mCommittedState.getIdentifier();
+        final int baseState = mBaseState.get().getIdentifier();
+        final int currentState = mCommittedState.get().getIdentifier();
 
         return new DeviceStateInfo(supportedStates, baseState, currentState);
     }
@@ -237,6 +247,7 @@ public final class DeviceStateManagerService extends SystemService {
 
     private void updateSupportedStates(DeviceState[] supportedDeviceStates) {
         boolean updatedPendingState;
+        boolean hasBaseState;
         synchronized (mLock) {
             final int[] oldStateIdentifiers = getSupportedStateIdentifiersLocked();
 
@@ -260,9 +271,10 @@ public final class DeviceStateManagerService extends SystemService {
             }
 
             updatedPendingState = updatePendingStateLocked();
+            hasBaseState = mBaseState.isPresent();
         }
 
-        if (!updatedPendingState) {
+        if (hasBaseState && !updatedPendingState) {
             // If the change in the supported states didn't result in a change of the pending state
             // commitPendingState() will never be called and the callbacks will never be notified
             // of the change.
@@ -306,11 +318,11 @@ public final class DeviceStateManagerService extends SystemService {
             }
 
             final DeviceState baseState = baseStateOptional.get();
-            if (mBaseState.equals(baseState)) {
+            if (mBaseState.isPresent() && mBaseState.get().equals(baseState)) {
                 // Base state hasn't changed. Nothing to do.
                 return;
             }
-            mBaseState = baseState;
+            mBaseState = Optional.of(baseState);
 
             final int requestSize = mRequestRecords.size();
             for (int i = 0; i < requestSize; i++) {
@@ -351,9 +363,10 @@ public final class DeviceStateManagerService extends SystemService {
         final DeviceState stateToConfigure;
         if (!mRequestRecords.isEmpty()) {
             stateToConfigure = mRequestRecords.get(mRequestRecords.size() - 1).mRequestedState;
-        } else if (isSupportedStateLocked(mBaseState.getIdentifier())) {
+        } else if (mBaseState.isPresent()
+                && isSupportedStateLocked(mBaseState.get().getIdentifier())) {
             // Base state could have recently become unsupported after a change in supported states.
-            stateToConfigure = mBaseState;
+            stateToConfigure = mBaseState.get();
         } else {
             stateToConfigure = null;
         }
@@ -363,7 +376,7 @@ public final class DeviceStateManagerService extends SystemService {
             return false;
         }
 
-        if (stateToConfigure.equals(mCommittedState)) {
+        if (mCommittedState.isPresent() && stateToConfigure.equals(mCommittedState.get())) {
             // The state requesting to be committed already matches the current committed state.
             return false;
         }
@@ -417,15 +430,15 @@ public final class DeviceStateManagerService extends SystemService {
     private void commitPendingState() {
         // Update the current state.
         synchronized (mLock) {
+            final DeviceState newState = mPendingState.get();
             if (DEBUG) {
-                Slog.d(TAG, "Committing state: " + mPendingState);
+                Slog.d(TAG, "Committing state: " + newState);
             }
-            mCommittedState = mPendingState.get();
 
             if (!mRequestRecords.isEmpty()) {
                 final OverrideRequestRecord topRequest =
                         mRequestRecords.get(mRequestRecords.size() - 1);
-                if (topRequest.mRequestedState.getIdentifier() == mCommittedState.getIdentifier()) {
+                if (topRequest.mRequestedState.getIdentifier() == newState.getIdentifier()) {
                     // The top request could have come in while the service was awaiting callback
                     // from the policy. In that case we only set it to active if it matches the
                     // current committed state, otherwise it will be set to active when its
@@ -434,6 +447,7 @@ public final class DeviceStateManagerService extends SystemService {
                 }
             }
 
+            mCommittedState = Optional.of(newState);
             mPendingState = Optional.empty();
             updatePendingStateLocked();
         }
@@ -503,19 +517,30 @@ public final class DeviceStateManagerService extends SystemService {
     }
 
     private void registerProcess(int pid, IDeviceStateManagerCallback callback) {
+        DeviceStateInfo currentInfo;
+        ProcessRecord record;
+        // Grab the lock to register the callback and get the current state.
         synchronized (mLock) {
             if (mProcessRecords.contains(pid)) {
                 throw new SecurityException("The calling process has already registered an"
                         + " IDeviceStateManagerCallback.");
             }
 
-            ProcessRecord record = new ProcessRecord(callback, pid);
+            record = new ProcessRecord(callback, pid);
             try {
                 callback.asBinder().linkToDeath(record, 0);
             } catch (RemoteException ex) {
                 throw new RuntimeException(ex);
             }
             mProcessRecords.put(pid, record);
+
+            currentInfo = mCommittedState.isPresent() ? getDeviceStateInfoLocked() : null;
+        }
+
+        if (currentInfo != null) {
+            // If there is not a committed state we'll wait to notify the process of the initial
+            // value.
+            record.notifyDeviceStateInfoAsync(currentInfo);
         }
     }
 

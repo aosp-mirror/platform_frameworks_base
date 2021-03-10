@@ -31,6 +31,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVIT
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -382,11 +383,17 @@ public class NetworkRequest implements Parcelable {
                 return setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
                         .setSubscriptionId(subId).build());
             } catch (NumberFormatException nfe) {
-                // A StringNetworkSpecifier does not accept null or empty ("") strings. When network
-                // specifiers were strings a null string and an empty string were considered
-                // equivalent. Hence no meaning is attached to a null or empty ("") string.
-                return setNetworkSpecifier(TextUtils.isEmpty(networkSpecifier) ? null
-                        : new StringNetworkSpecifier(networkSpecifier));
+                // An EthernetNetworkSpecifier or TestNetworkSpecifier does not accept null or empty
+                // ("") strings. When network specifiers were strings a null string and an empty
+                // string were considered equivalent. Hence no meaning is attached to a null or
+                // empty ("") string.
+                if (TextUtils.isEmpty(networkSpecifier)) {
+                    return setNetworkSpecifier((NetworkSpecifier) null);
+                } else if (mNetworkCapabilities.hasTransport(TRANSPORT_TEST)) {
+                    return setNetworkSpecifier(new TestNetworkSpecifier(networkSpecifier));
+                } else {
+                    return setNetworkSpecifier(new EthernetNetworkSpecifier(networkSpecifier));
+                }
             }
         }
 

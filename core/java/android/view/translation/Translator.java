@@ -37,8 +37,6 @@ import com.android.internal.util.SyncResultReceiver;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -234,7 +232,7 @@ public class Translator {
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
      *
-     * @param request {@link TranslationRequest} request to be translated.
+     * @param request {@link TranslationRequest} request to be translate.
      *
      * @return {@link TranslationRequest} containing translated request,
      *         or null if translation could not be done.
@@ -250,17 +248,11 @@ public class Translator {
             throw new IllegalStateException(
                     "This translator has been destroyed");
         }
-        final ArrayList<TranslationRequest> requests = new ArrayList<>();
-        requests.add(request);
-        final android.service.translation.TranslationRequest internalRequest =
-                new android.service.translation.TranslationRequest
-                        .Builder(getNextRequestId(), mSourceSpec, mDestSpec, requests)
-                        .build();
 
         TranslationResponse response = null;
         try {
             final SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-            mDirectServiceBinder.onTranslationRequest(internalRequest, mId, null, receiver);
+            mDirectServiceBinder.onTranslationRequest(request, mId, null, receiver);
 
             response = receiver.getParcelableResult();
         } catch (RemoteException e) {
@@ -306,16 +298,12 @@ public class Translator {
 
     // TODO: add methods for UI-toolkit case.
     /** @hide */
-    public void requestUiTranslate(@NonNull List<TranslationRequest> requests,
+    public void requestUiTranslate(@NonNull TranslationRequest request,
             @NonNull Consumer<TranslationResponse> responseCallback) {
         if (mDirectServiceBinder == null) {
             Log.wtf(TAG, "Translator created without proper initialization.");
             return;
         }
-        final android.service.translation.TranslationRequest request =
-                new android.service.translation.TranslationRequest
-                        .Builder(getNextRequestId(), mSourceSpec, mDestSpec, requests)
-                        .build();
         final ITranslationCallback callback =
                 new TranslationResponseCallbackImpl(responseCallback);
         try {

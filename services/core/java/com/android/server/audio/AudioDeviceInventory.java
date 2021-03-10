@@ -662,6 +662,11 @@ public class AudioDeviceInventory {
 
     /*package*/ int removePreferredDevicesForStrategySync(int strategy) {
         final long identity = Binder.clearCallingIdentity();
+
+        AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+                "removePreferredDevicesForStrategySync, strategy: "
+                + strategy)).printLog(TAG));
+
         final int status = mAudioSystem.removeDevicesRoleForStrategy(
                 strategy, AudioSystem.DEVICE_ROLE_PREFERRED);
         Binder.restoreCallingIdentity(identity);
