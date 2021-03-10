@@ -550,23 +550,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"यसले एपलाई तपाईंको तस्बिरको सङ्ग्रह परिमार्जन गर्न दिन्छ।"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"आफ्नो मिडियाको सङ्ग्रहका स्थानहरू पढ्नुहोस्‌"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"यसले एपलाई तपाईंको मिडिया सङ्ग्रहका स्थानहरू पढ्न दिन्छ।"</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"बायोमेट्रिक्स प्रयोग गर्नुहोस्"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"बायोमेट्रिक्स वा स्क्रिन लक प्रयोग गर्नुहोस्"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"यो व्यक्ति तपाईं नै हो भन्ने प्रमाणित गर्नुहोस्"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"जारी राख्न आफ्नो बायोमेट्रिक प्रयोग गर्नुहोस्"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"बायोमेट्रिक हार्डवेयर उपलब्ध छैन"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"प्रमाणीकरण रद्द गरियो"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"पहिचान भएन"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"प्रमाणीकरण रद्द गरियो"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"कुनै पनि PIN, ढाँचा वा पासवर्ड सेट गरिएको छैन"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"प्रमाणित गर्ने क्रममा त्रुटि भयो"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रिन लक प्रयोग गर्नुहोस्"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"जारी राख्न आफ्नो यन्त्रको PIN, प्याटर्न वा पासवर्ड हाल्नुहोस्"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"आंशिक फिंगरप्रिन्ट पत्ता लाग्यो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फिंगरप्रिन्ट प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"फिंगरप्रिन्ट सेन्सर फोहोर छ। कृपया सफा गरेर फेरि प्रयास गर्नुहोस्।"</string>
@@ -589,10 +584,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"यो यन्त्रमा कुनै पनि फिंगरप्रिन्ट सेन्सर छैन।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"केही समयका लागि सेन्सर असक्षम पारियो।"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"औंला <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"फिंगरप्रिन्ट प्रयोग गर्नुहोस्"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"फिंगरप्रिन्ट वा स्क्रिन लक प्रयोग गर्नुहोस्"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"जारी राख्न आफ्नो फिंगरप्रिन्ट प्रयोग गर्नुहोस्"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -638,12 +631,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"यस यन्त्रमा फेस अनलक सुविधा प्रयोग गर्न मिल्दैन।"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"केही समयका लागि सेन्सर असक्षम पारियो।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"अनुहार <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"फेस अनलक प्रयोग गर्नुहोस्"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"फेस अनलक वा स्क्रिन लक प्रयोग गर्नुहोस्"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"जारी राख्न फेस अनलक प्रयोग गर्नुहोस्"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"अनुहारको आइकन"</string>
@@ -1966,8 +1956,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"समाचार तथा पत्रिकाहरू"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"नक्सा तथा नेभिगेसन"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादकत्व"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"सर्वसुलभता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"यन्त्रको भण्डारण"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB डिबग प्रक्रिया"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"घन्टा"</string>

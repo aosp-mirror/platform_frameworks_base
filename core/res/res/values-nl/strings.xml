@@ -550,23 +550,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Hiermee sta je de app toe je fotocollectie aan te passen."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"locaties van je mediacollecties bekijken"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Hiermee sta je de app toe locaties van je mediacollectie te bekijken."</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Biometrische gegevens gebruiken"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Biometrische gegevens of schermvergrendeling gebruiken"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Je identiteit verifiëren"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Gebruik je biometrische gegevens om door te gaan"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrische hardware niet beschikbaar"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Verificatie geannuleerd"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Niet herkend"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Verificatie geannuleerd"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Geen pincode, patroon of wachtwoord ingesteld"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Fout bij verificatie"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Schermvergrendeling gebruiken"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Geef de inloggegevens van je apparaat op om door te gaan"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Gedeeltelijke vingerafdruk gedetecteerd. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Kan vingerafdruk niet verwerken. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"De vingerafdruksensor moet worden schoongemaakt. Probeer het daarna opnieuw."</string>
@@ -589,10 +584,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dit apparaat heeft geen vingerafdruksensor."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor tijdelijk uitgeschakeld."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Vinger <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Vingerafdruk gebruiken"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Vingerafdruk of schermvergrendeling gebruiken"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Gebruik je vingerafdruk om door te gaan."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -638,12 +631,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Ontgrendelen via gezichtsherkenning wordt niet ondersteund op dit apparaat."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor tijdelijk uitgeschakeld."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Gezicht <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Ontgrendelen via gezichtsherkenning gebruiken"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gezicht of schermgrendeling gebruiken"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Gebruik ontgrendelen via gezichtsherkenning om door te gaan"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Gezichtspictogram"</string>
@@ -1966,8 +1956,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Nieuws en tijdschriften"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Maps en navigatie"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Productiviteit"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Toegankelijkheid"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Apparaatopslag"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-foutopsporing"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"uur"</string>
