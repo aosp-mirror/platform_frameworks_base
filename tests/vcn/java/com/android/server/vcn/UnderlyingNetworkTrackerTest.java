@@ -194,29 +194,35 @@ public class UnderlyingNetworkTrackerTest {
     }
 
     private NetworkRequest getWifiRequest() {
-        return getExpectedRequestBase()
+        return getExpectedRequestBase(true)
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .build();
     }
 
     private NetworkRequest getCellRequestForSubId(int subId) {
-        return getExpectedRequestBase()
+        return getExpectedRequestBase(false)
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                 .setNetworkSpecifier(new TelephonyNetworkSpecifier(subId))
                 .build();
     }
 
     private NetworkRequest getRouteSelectionRequest() {
-        return getExpectedRequestBase().build();
+        return getExpectedRequestBase(true).build();
     }
 
-    private NetworkRequest.Builder getExpectedRequestBase() {
-        return new NetworkRequest.Builder()
-                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                .removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
-                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED)
-                .addUnwantedCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
+    private NetworkRequest.Builder getExpectedRequestBase(boolean requireVcnManaged) {
+        final NetworkRequest.Builder builder =
+                new NetworkRequest.Builder()
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
+                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
+
+        if (requireVcnManaged) {
+            builder.addUnwantedCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
+        }
+
+        return builder;
     }
 
     @Test
