@@ -53,6 +53,9 @@
             </intent-filter>
         </activity>
 
+        <!-- The stub shared library for package visibility test -->
+        <library android:name="com.android.cts.ctsshim.shared_library" />
+
     </application>
 </manifest>
 
