@@ -19,6 +19,7 @@ package com.android.server.pm.verify.domain;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 
+import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -33,7 +34,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainVerificationInfo;
-import android.content.pm.verify.domain.DomainVerificationManager.InvalidDomainSetException;
+import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationState;
 import android.content.pm.verify.domain.DomainVerificationUserState;
 import android.content.pm.verify.domain.IDomainVerificationManager;
@@ -242,14 +243,14 @@ public class DomainVerificationService extends SystemService
             throws NameNotFoundException {
         mEnforcer.assertApprovedQuerent(mConnection.getCallingUid(), mProxy);
         synchronized (mLock) {
-            DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
-            if (pkgState == null) {
-                return null;
-            }
-
             AndroidPackage pkg = mConnection.getPackageLocked(packageName);
             if (pkg == null) {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
+            }
+
+            DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
+            if (pkgState == null) {
+                return null;
             }
 
             ArrayMap<String, Integer> hostToStateMap = new ArrayMap<>(pkgState.getStateMap());
@@ -278,30 +279,35 @@ public class DomainVerificationService extends SystemService
         }
     }
 
-    public void setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
-            int state) throws InvalidDomainSetException, NameNotFoundException {
+    @DomainVerificationManager.Error
+    public int setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
+            int state) throws NameNotFoundException {
         if (state < DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED) {
             if (state != DomainVerificationState.STATE_SUCCESS) {
-                throw new IllegalArgumentException(
-                        "Verifier can only set STATE_SUCCESS or codes greater than or equal to "
-                                + "STATE_FIRST_VERIFIER_DEFINED");
+                return DomainVerificationManager.ERROR_INVALID_STATE_CODE;
             }
         }
 
-        setDomainVerificationStatusInternal(mConnection.getCallingUid(), domainSetId, domains,
-                state);
+        return setDomainVerificationStatusInternal(mConnection.getCallingUid(), domainSetId,
+                domains, state);
     }
 
+    @DomainVerificationManager.Error
     @Override
-    public void setDomainVerificationStatusInternal(int callingUid, @NonNull UUID domainSetId,
+    public int setDomainVerificationStatusInternal(int callingUid, @NonNull UUID domainSetId,
             @NonNull Set<String> domains, int state)
-            throws InvalidDomainSetException, NameNotFoundException {
+            throws NameNotFoundException {
         mEnforcer.assertApprovedVerifier(callingUid, mProxy);
         synchronized (mLock) {
             List<String> verifiedDomains = new ArrayList<>();
 
-            DomainVerificationPkgState pkgState = getAndValidateAttachedLocked(domainSetId, domains,
+            GetAttachedResult result = getAndValidateAttachedLocked(domainSetId, domains,
                     true /* forAutoVerify */, callingUid, null /* userId */);
+            if (result.isError()) {
+                return result.getErrorCode();
+            }
+
+            DomainVerificationPkgState pkgState = result.getPkgState();
             ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
             for (String domain : domains) {
                 Integer previousState = stateMap.get(domain);
@@ -324,6 +330,7 @@ public class DomainVerificationService extends SystemService
         }
 
         mConnection.scheduleWriteSettings();
+        return DomainVerificationManager.STATUS_OK;
     }
 
     @Override
@@ -474,9 +481,9 @@ public class DomainVerificationService extends SystemService
         mConnection.scheduleWriteSettings();
     }
 
-    public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
+    public int setDomainVerificationUserSelection(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean enabled, @UserIdInt int userId)
-            throws InvalidDomainSetException, NameNotFoundException {
+            throws NameNotFoundException {
         synchronized (mLock) {
             final int callingUid = mConnection.getCallingUid();
             // Pass null for package name here and do the app visibility enforcement inside
@@ -484,14 +491,17 @@ public class DomainVerificationService extends SystemService
             // ID reason if the target app is invisible
             if (!mEnforcer.assertApprovedUserSelector(callingUid, mConnection.getCallingUserId(),
                     null /* packageName */, userId)) {
-                throw new InvalidDomainSetException(domainSetId, null,
-                        InvalidDomainSetException.REASON_ID_INVALID);
+                return DomainVerificationManager.ERROR_DOMAIN_SET_ID_INVALID;
             }
 
-            DomainVerificationPkgState pkgState = getAndValidateAttachedLocked(domainSetId, domains,
+            GetAttachedResult result = getAndValidateAttachedLocked(domainSetId, domains,
                     false /* forAutoVerify */, callingUid, userId);
-            DomainVerificationInternalUserState userState =
-                    pkgState.getOrCreateUserState(userId);
+            if (result.isError()) {
+                return result.getErrorCode();
+            }
+
+            DomainVerificationPkgState pkgState = result.getPkgState();
+            DomainVerificationInternalUserState userState = pkgState.getOrCreateUserState(userId);
 
             // Disable other packages if approving this one. Note that this check is only done for
             // enabling. This allows an escape hatch in case multiple packages somehow get selected.
@@ -509,8 +519,7 @@ public class DomainVerificationService extends SystemService
                             userId, APPROVAL_LEVEL_NONE + 1, mConnection::getPackageSettingLocked);
                     int highestApproval = packagesToLevel.second;
                     if (highestApproval > APPROVAL_LEVEL_SELECTION) {
-                        throw new InvalidDomainSetException(domainSetId, null,
-                                InvalidDomainSetException.REASON_UNABLE_TO_APPROVE);
+                        return DomainVerificationManager.ERROR_UNABLE_TO_APPROVE;
                     }
 
                     domainToApprovedPackages.put(domain, packagesToLevel.first);
@@ -550,6 +559,7 @@ public class DomainVerificationService extends SystemService
         }
 
         mConnection.scheduleWriteSettings();
+        return DomainVerificationManager.STATUS_OK;
     }
 
     @Override
@@ -642,14 +652,14 @@ public class DomainVerificationService extends SystemService
             throw DomainVerificationUtils.throwPackageUnavailable(packageName);
         }
         synchronized (mLock) {
-            DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
-            if (pkgState == null) {
-                return null;
-            }
-
             AndroidPackage pkg = mConnection.getPackageLocked(packageName);
             if (pkg == null) {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
+            }
+
+            DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
+            if (pkgState == null) {
+                return null;
             }
 
             ArraySet<String> webDomains = mCollector.collectAllWebDomains(pkg);
@@ -1096,28 +1106,25 @@ public class DomainVerificationService extends SystemService
      * @param userIdForFilter which user to filter app access to, or null if the caller has already
      *                        validated package visibility
      */
+    @CheckResult
     @GuardedBy("mLock")
-    private DomainVerificationPkgState getAndValidateAttachedLocked(@NonNull UUID domainSetId,
+    private GetAttachedResult getAndValidateAttachedLocked(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean forAutoVerify, int callingUid,
-            @Nullable Integer userIdForFilter)
-            throws InvalidDomainSetException, NameNotFoundException {
+            @Nullable Integer userIdForFilter) throws NameNotFoundException {
         if (domainSetId == null) {
-            throw new InvalidDomainSetException(null, null,
-                    InvalidDomainSetException.REASON_ID_NULL);
+            return GetAttachedResult.error(DomainVerificationManager.ERROR_DOMAIN_SET_ID_NULL);
         }
 
         DomainVerificationPkgState pkgState = mAttachedPkgStates.get(domainSetId);
         if (pkgState == null) {
-            throw new InvalidDomainSetException(domainSetId, null,
-                    InvalidDomainSetException.REASON_ID_INVALID);
+            return GetAttachedResult.error(DomainVerificationManager.ERROR_DOMAIN_SET_ID_INVALID);
         }
 
         String pkgName = pkgState.getPackageName();
 
         if (userIdForFilter != null
                 && mConnection.filterAppAccess(pkgName, callingUid, userIdForFilter)) {
-            throw new InvalidDomainSetException(domainSetId, null,
-                    InvalidDomainSetException.REASON_ID_INVALID);
+            return GetAttachedResult.error(DomainVerificationManager.ERROR_DOMAIN_SET_ID_INVALID);
         }
 
         PackageSetting pkgSetting = mConnection.getPackageSettingLocked(pkgName);
@@ -1126,8 +1133,8 @@ public class DomainVerificationService extends SystemService
         }
 
         if (CollectionUtils.isEmpty(domains)) {
-            throw new InvalidDomainSetException(domainSetId, pkgState.getPackageName(),
-                    InvalidDomainSetException.REASON_SET_NULL_OR_EMPTY);
+            return GetAttachedResult.error(
+                    DomainVerificationManager.ERROR_DOMAIN_SET_NULL_OR_EMPTY);
         }
         AndroidPackage pkg = pkgSetting.getPkg();
         ArraySet<String> declaredDomains = forAutoVerify
@@ -1135,11 +1142,10 @@ public class DomainVerificationService extends SystemService
                 : mCollector.collectAllWebDomains(pkg);
 
         if (domains.retainAll(declaredDomains)) {
-            throw new InvalidDomainSetException(domainSetId, pkgState.getPackageName(),
-                    InvalidDomainSetException.REASON_UNKNOWN_DOMAIN);
+            return GetAttachedResult.error(DomainVerificationManager.ERROR_UNKNOWN_DOMAIN);
         }
 
-        return pkgState;
+        return GetAttachedResult.success(pkgState);
     }
 
     @Override
@@ -1670,5 +1676,41 @@ public class DomainVerificationService extends SystemService
         String approvalString = approved ? "approved" : "denied";
         Slog.d(TAG + "Approval", packageName + " was " + approvalString + " for "
                 + debugObject + " for user " + userId + ": " + reason);
+    }
+
+    private static class GetAttachedResult {
+
+        @Nullable
+        private DomainVerificationPkgState mPkgState;
+
+        private int mErrorCode;
+
+        GetAttachedResult(@Nullable DomainVerificationPkgState pkgState, int errorCode) {
+            mPkgState = pkgState;
+            mErrorCode = errorCode;
+        }
+
+        @NonNull
+        static GetAttachedResult error(@DomainVerificationManager.Error int errorCode) {
+            return new GetAttachedResult(null, errorCode);
+        }
+
+        @NonNull
+        static GetAttachedResult success(@NonNull DomainVerificationPkgState pkgState) {
+            return new GetAttachedResult(pkgState, DomainVerificationManager.STATUS_OK);
+        }
+
+        @NonNull
+        DomainVerificationPkgState getPkgState() {
+            return mPkgState;
+        }
+
+        boolean isError() {
+            return mErrorCode != DomainVerificationManager.STATUS_OK;
+        }
+
+        public int getErrorCode() {
+            return mErrorCode;
+        }
     }
 }

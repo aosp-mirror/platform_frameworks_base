@@ -20,6 +20,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.content.pm.verify.domain.DomainVerificationUserState
 import android.os.Build
@@ -154,7 +155,7 @@ class DomainVerificationUserStateOverrideTest {
             .containsExactly(PKG_TWO)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun anotherPackageTakeoverFailure() {
         val service = makeService()
 
@@ -166,7 +167,8 @@ class DomainVerificationUserStateOverrideTest {
             .containsExactly(PKG_ONE)
 
         // Attempt override by package 2
-        service.setDomainVerificationUserSelection(UUID_TWO, setOf(DOMAIN_ONE), true, USER_ID)
+        assertThat(service.setDomainVerificationUserSelection(UUID_TWO, setOf(DOMAIN_ONE), true,
+                USER_ID)).isEqualTo(DomainVerificationManager.ERROR_UNABLE_TO_APPROVE)
     }
 
     private fun DomainVerificationService.stateFor(pkgName: String, host: String) =

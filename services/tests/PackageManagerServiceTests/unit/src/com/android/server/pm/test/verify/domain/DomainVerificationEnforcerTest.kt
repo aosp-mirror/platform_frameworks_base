@@ -643,12 +643,30 @@ class DomainVerificationEnforcerTest {
         }
         val target = params.construct(context)
 
+        // Legacy code can return PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED
+        // as an error code. This is distinct from the class level assertFails as unfortunately
+        // the same number, 0, is used in opposite contexts, where it does represent a failure
+        // for this legacy case, but not for the modern APIs.
+        fun assertFailsLegacy(block: () -> Any?) {
+            try {
+                val value = block()
+                if ((value as? Int)
+                        != PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED
+                ) {
+                    throw AssertionError("Expected call to return false, was $value")
+                }
+            } catch (e: SecurityException) {
+            } catch (e: PackageManager.NameNotFoundException) {
+                // Any of these 2 exceptions are considered failures, which is expected
+            }
+        }
+
         fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
             // Legacy makes no distinction by UID
             val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
             if (throws) {
                 allUids.forEach {
-                    assertFails {
+                    assertFailsLegacy {
                         runMethod(target, it, visible = true, callingUserId, targetUserId)
                     }
                 }
@@ -660,7 +678,7 @@ class DomainVerificationEnforcerTest {
 
             // Legacy doesn't use QUERY_ALL, so the invisible package should always fail
             allUids.forEach {
-                assertFails {
+                assertFailsLegacy {
                     runMethod(target, it, visible = false, callingUserId, targetUserId)
                 }
             }
@@ -786,19 +804,20 @@ class DomainVerificationEnforcerTest {
     private fun assertFails(block: () -> Any?) {
         try {
             val value = block()
-            // Some methods return false rather than throwing, so check that as well
-            if ((value as? Boolean) != false) {
-                // Can also return default value if it's a legacy call
-                if ((value as? Int)
-                    != PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED
-                ) {
-                    throw AssertionError("Expected call to return false, was $value")
-                }
+            // Some methods return false or an error rather than throwing, so check that as well
+            val valueAsBoolean = value as? Boolean
+            if (valueAsBoolean == false) {
+                // Expected failure, do not throw
+                return
+            }
+
+            val valueAsInt = value as? Int
+            if (valueAsInt != null && valueAsInt == DomainVerificationManager.STATUS_OK) {
+                throw AssertionError("Expected call to return false, was $value")
             }
         } catch (e: SecurityException) {
         } catch (e: PackageManager.NameNotFoundException) {
-        } catch (e: DomainVerificationManager.InvalidDomainSetException) {
-            // Any of these 3 exceptions are considered failures, which is expected
+            // Any of these 2 exceptions are considered failures, which is expected
         }
     }
 

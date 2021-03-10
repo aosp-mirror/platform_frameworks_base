@@ -23,6 +23,7 @@ import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_NO_RESPONSE
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_SUCCESS
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_UNMODIFIABLE
+import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.content.pm.verify.domain.DomainVerificationUserState.DOMAIN_STATE_NONE
 import android.content.pm.verify.domain.DomainVerificationUserState.DOMAIN_STATE_SELECTED
@@ -44,7 +45,6 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import java.util.UUID
-import kotlin.test.assertFailsWith
 
 class DomainVerificationPackageTest {
 
@@ -172,11 +172,11 @@ class DomainVerificationPackageTest {
                 ArraySet(setOf(DOMAIN_1)))
         service.setDomainVerificationStatusInternal(pkgName, DomainVerificationState.STATE_DENIED,
                 ArraySet(setOf(DOMAIN_3)))
-        service.setDomainVerificationUserSelection(
+        service.setUserSelection(
                 UUID_ONE, setOf(DOMAIN_2, DOMAIN_4), true, USER_ID)
 
         // Check the verifier cannot change the shell approve/deny states
-        service.setDomainVerificationStatus(UUID_ONE, setOf(DOMAIN_1, DOMAIN_3), STATE_SUCCESS)
+        service.setStatus(UUID_ONE, setOf(DOMAIN_1, DOMAIN_3), STATE_SUCCESS)
 
         assertThat(service.getInfo(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(
                 DOMAIN_1 to STATE_UNMODIFIABLE,
@@ -240,14 +240,11 @@ class DomainVerificationPackageTest {
 
         map[pkgName] = pkgAfter
 
-        assertFailsWith(IllegalArgumentException::class) {
-            service.setDomainVerificationStatus(UUID_ONE, mutableSetOf(DOMAIN_1), STATE_SUCCESS)
-        }
+        assertThat(service.setStatus(UUID_ONE, setOf(DOMAIN_1), STATE_SUCCESS))
+            .isNotEqualTo(DomainVerificationManager.STATUS_OK)
 
-        assertFailsWith(IllegalArgumentException::class) {
-            service.setDomainVerificationUserSelection(
-                    UUID_ONE, mutableSetOf(DOMAIN_2), true, USER_ID)
-        }
+        assertThat(service.setUserSelection(UUID_ONE, setOf(DOMAIN_2), true, USER_ID))
+            .isNotEqualTo(DomainVerificationManager.STATUS_OK)
 
         assertThat(service.getDomainVerificationInfo(pkgName)).isNull()
         assertThat(service.getUserState(pkgName).hostToStateMap).isEmpty()
@@ -274,8 +271,8 @@ class DomainVerificationPackageTest {
         // a live package inside the addPackage logic. It should only use the provided input.
         map[pkgName] = pkgBefore
 
-        service.setDomainVerificationStatus(UUID_ONE, setOf(DOMAIN_1), STATE_SUCCESS)
-        service.setDomainVerificationUserSelection(UUID_ONE, setOf(DOMAIN_2), true, USER_ID)
+        service.setStatus(UUID_ONE, setOf(DOMAIN_1), STATE_SUCCESS)
+        service.setUserSelection(UUID_ONE, setOf(DOMAIN_2), true, USER_ID)
 
         assertThat(service.getInfo(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(
                 DOMAIN_1 to STATE_SUCCESS,
@@ -320,14 +317,11 @@ class DomainVerificationPackageTest {
         // a live package inside the addPackage logic. It should only use the provided input.
         map[pkgName] = pkgBefore
 
-        assertFailsWith(IllegalArgumentException::class) {
-            service.setDomainVerificationStatus(UUID_ONE, mutableSetOf(DOMAIN_1), STATE_SUCCESS)
-        }
+        assertThat(service.setStatus(UUID_ONE, setOf(DOMAIN_1), STATE_SUCCESS))
+            .isNotEqualTo(DomainVerificationManager.STATUS_OK)
 
-        assertFailsWith(IllegalArgumentException::class) {
-            service.setDomainVerificationUserSelection(
-                    UUID_ONE, mutableSetOf(DOMAIN_2), true, USER_ID)
-        }
+        assertThat(service.setUserSelection(UUID_ONE, setOf(DOMAIN_2), true, USER_ID))
+            .isNotEqualTo(DomainVerificationManager.STATUS_OK)
 
         assertThat(service.getDomainVerificationInfo(pkgName)).isNull()
         assertThat(service.getUserState(pkgName).hostToStateMap).isEmpty()

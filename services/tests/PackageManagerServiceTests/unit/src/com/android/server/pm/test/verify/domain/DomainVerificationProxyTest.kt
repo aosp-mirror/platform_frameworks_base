@@ -119,7 +119,9 @@ class DomainVerificationProxyTest {
                     else -> throw IllegalArgumentException("Unexpected package name $pkgName")
                 }
             }
-            whenever(setDomainVerificationStatusInternal(anyInt(), any(), any(), anyInt()))
+            whenever(setDomainVerificationStatusInternal(anyInt(), any(), any(), anyInt())) {
+                DomainVerificationManager.STATUS_OK
+            }
         }
         collector = mockThrowOnUnmocked {
             whenever(collectValidAutoVerifyDomains(any())) {
