@@ -148,7 +148,7 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun show(
         parent: ViewGroup,
         onDismiss: Runnable,
-        startedFromGlobalActions: Boolean
+        activityContext: Context?
     ) {
         Log.d(ControlsUiController.TAG, "show()")
         this.parent = parent
@@ -156,7 +156,7 @@ class ControlsUiControllerImpl @Inject constructor (
         hidden = false
         retainCache = false
 
-        controlActionCoordinator.startedFromGlobalActions = startedFromGlobalActions
+        controlActionCoordinator.activityContext = activityContext
 
         allStructures = controlsController.get().getFavorites()
         selectedStructure = loadPreference(allStructures)
@@ -193,7 +193,7 @@ class ControlsUiControllerImpl @Inject constructor (
                 controlViewsById.clear()
                 controlsById.clear()
 
-                show(parent, onDismiss, controlActionCoordinator.startedFromGlobalActions)
+                show(parent, onDismiss, controlActionCoordinator.activityContext)
                 val showAnim = ObjectAnimator.ofFloat(parent, "alpha", 0.0f, 1.0f)
                 showAnim.setInterpolator(DecelerateInterpolator(1.0f))
                 showAnim.setDuration(FADE_IN_MILLIS)
@@ -268,7 +268,7 @@ class ControlsUiControllerImpl @Inject constructor (
         intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
         intent.putExtra(
             ControlsUiController.BACK_TO_GLOBAL_ACTIONS,
-            controlActionCoordinator.startedFromGlobalActions
+            controlActionCoordinator.activityContext == null
         )
         onDismiss.run()
 
@@ -392,6 +392,17 @@ class ControlsUiControllerImpl @Inject constructor (
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_with_favorites, parent, true)
 
+        if (controlActionCoordinator.activityContext == null) {
+            parent.requireViewById<View>(R.id.controls_spacer).apply {
+                visibility = View.VISIBLE
+            }
+        } else {
+            parent.requireViewById<ImageView>(R.id.controls_close).apply {
+                setOnClickListener { _: View -> onDismiss.run() }
+                visibility = View.VISIBLE
+            }
+        }
+
         val maxColumns = findMaxColumns()
 
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
@@ -501,6 +512,8 @@ class ControlsUiControllerImpl @Inject constructor (
 
     override fun hide() {
         hidden = true
+
+        controlActionCoordinator.activityContext = null
 
         closeDialogs(true)
         controlsController.get().unsubscribe()

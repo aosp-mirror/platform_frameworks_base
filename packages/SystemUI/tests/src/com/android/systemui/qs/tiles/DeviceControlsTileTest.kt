@@ -17,6 +17,8 @@
 package com.android.systemui.qs.tiles
 
 import android.os.Handler
+import android.content.Context
+import android.content.Intent
 import android.provider.Settings
 import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
@@ -30,7 +32,6 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
-import com.android.systemui.controls.ui.ControlsDialog
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -50,7 +51,9 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.util.Optional
@@ -80,8 +83,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
     private lateinit var controlsController: ControlsController
     @Mock
     private lateinit var featureFlags: FeatureFlags
-    @Mock
-    private lateinit var controlsDialog: ControlsDialog
     private lateinit var globalSettings: GlobalSettings
     @Mock
     private lateinit var serviceInfo: ControlsServiceInfo
@@ -95,6 +96,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
     private lateinit var tile: DeviceControlsTile
 
     private lateinit var secureSettings: SecureSettings
+    private lateinit var spiedContext: Context
     private var featureEnabled = true
 
     @Before
@@ -103,7 +105,9 @@ class DeviceControlsTileTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
         secureSettings = FakeSettings()
 
-        `when`(qsHost.context).thenReturn(mContext)
+        spiedContext = spy(mContext)
+        doNothing().`when`(spiedContext).startActivity(any(Intent::class.java))
+        `when`(qsHost.context).thenReturn(spiedContext)
         `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
         `when`(controlsController.available).thenReturn(true)
         `when`(controlsComponent.isEnabled()).thenReturn(true)
@@ -276,7 +280,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile.click()
         testableLooper.processAllMessages()
 
-        verify(controlsDialog, never()).show(any(ControlsUiController::class.java))
+        verify(spiedContext, never()).startActivity(any(Intent::class.java))
     }
 
     @Test
@@ -293,7 +297,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile.click()
         testableLooper.processAllMessages()
 
-        verify(controlsDialog).show(controlsUiController)
+        verify(spiedContext).startActivity(any(Intent::class.java))
     }
 
     @Test
@@ -311,25 +315,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile.click()
         testableLooper.processAllMessages()
 
-        verify(controlsDialog, never()).show(any(ControlsUiController::class.java))
-    }
-
-    @Test
-    fun testDialogDismissedOnDestroy() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
-
-        listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
-        testableLooper.processAllMessages()
-
-        tile.click()
-        testableLooper.processAllMessages()
-
-        tile.destroy()
-        testableLooper.processAllMessages()
-        verify(controlsDialog).dismiss()
+        verify(spiedContext, never()).startActivity(any(Intent::class.java))
     }
 
     private fun createTile(): DeviceControlsTile {
@@ -343,7 +329,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 qsLogger,
                 controlsComponent,
                 featureFlags,
-                { controlsDialog },
                 globalSettings
         )
     }

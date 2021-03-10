@@ -25,8 +25,21 @@
 
     <!-- make sure the header stays centered in the layout by adding a spacer -->
     <Space
+        android:id="@+id/controls_spacer"
         android:layout_width="@dimen/controls_header_menu_size"
-        android:layout_height="1dp" />
+        android:layout_height="1dp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/controls_close"
+        android:contentDescription="@string/accessibility_desc_close"
+        android:src="@drawable/ic_close"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:tint="@color/control_primary_text"
+        android:layout_width="@dimen/controls_header_menu_size"
+        android:layout_height="@dimen/controls_header_menu_size"
+        android:padding="12dp"
+        android:visibility="gone" />
     <!-- need to keep this outer view in order to have a correctly sized anchor
          for the dropdown menu, as well as dropdown background in the right place -->
     <LinearLayout

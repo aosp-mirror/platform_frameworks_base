@@ -2236,7 +2236,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private void showControls(ControlsUiController controller) {
             mControlsUiController = controller;
             mControlsUiController.show(mControlsView, this::dismissForControlsActivity,
-                    true /* startedFromGlobalActions */);
+                    null /* activityContext */);
         }
 
         private boolean isWalletViewAvailable() {
@@ -2465,7 +2465,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             });
             if (mControlsUiController != null) {
                 mControlsUiController.show(mControlsView, this::dismissForControlsActivity,
-                        true /* startedFromGlobalActions */);
+                        null /* activityContext */);
             }
 
             mBackgroundDrawable.setAlpha(0);
@@ -2641,7 +2641,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mGlobalActionsLayout.updateList();
             if (mControlsUiController != null) {
                 mControlsUiController.show(mControlsView, this::dismissForControlsActivity,
-                        true /* startedFromGlobalActions */);
+                        null /* activityContext */);
             }
         }
 

@@ -22,8 +22,8 @@ import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.app.Dialog
 import android.app.PendingIntent
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
-import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
@@ -35,18 +35,20 @@ import com.android.systemui.R
 import com.android.wm.shell.TaskView
 
 /**
- * A dialog that provides an {@link ActivityView}, allowing the application to provide
+ * A dialog that provides an {@link TaskView}, allowing the application to provide
  * additional information and actions pertaining to a {@link android.service.controls.Control}.
  * The activity being launched is specified by {@link android.service.controls.Control#getAppIntent}.
  */
 class DetailDialog(
-    val cvh: ControlViewHolder,
-    val activityView: TaskView,
-    val intent: Intent
-) : Dialog(cvh.context, R.style.Theme_SystemUI_Dialog_Control_DetailPanel) {
-
+    val activityContext: Context?,
+    val taskView: TaskView,
+    val intent: Intent,
+    val cvh: ControlViewHolder
+) : Dialog(
+    activityContext ?: cvh.context,
+    R.style.Theme_SystemUI_Dialog_Control_DetailPanel
+) {
     companion object {
-        private const val PANEL_TOP_OFFSET = "systemui.controls_panel_top_offset"
         /*
          * Indicate to the activity that it is being rendered in a bottomsheet, and they
          * should optimize the layout for a smaller space.
@@ -71,10 +73,19 @@ class DetailDialog(
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
 
-            activityView.startActivity(
-                    PendingIntent.getActivity(context, 0, launchIntent,
-                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
-                    null, ActivityOptions.makeBasic())
+            val options = activityContext?.let {
+                ActivityOptions.makeCustomAnimation(
+                    it,
+                    0 /* enterResId */,
+                    0 /* exitResId */
+                )
+            } ?: ActivityOptions.makeBasic()
+            taskView.startActivity(
+                PendingIntent.getActivity(context, 0, launchIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
+                null,
+                options
+            )
         }
 
         override fun onTaskRemovalStarted(taskId: Int) {
@@ -92,7 +103,10 @@ class DetailDialog(
     }
 
     init {
-        window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+        if (activityContext == null) {
+            window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+        }
+
         // To pass touches to the task inside TaskView.
         window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
@@ -100,7 +114,7 @@ class DetailDialog(
         setContentView(R.layout.controls_detail_dialog)
 
         requireViewById<ViewGroup>(R.id.controls_activity_view).apply {
-            addView(activityView)
+            addView(taskView)
         }
 
         requireViewById<ImageView>(R.id.control_detail_close).apply {
@@ -120,48 +134,34 @@ class DetailDialog(
 
         // consume all insets to achieve slide under effect
         window.getDecorView().setOnApplyWindowInsetsListener {
-            _: View, insets: WindowInsets ->
-                activityView.apply {
+            v: View, insets: WindowInsets ->
+                taskView.apply {
                     val l = getPaddingLeft()
                     val t = getPaddingTop()
                     val r = getPaddingRight()
                     setPadding(l, t, r, insets.getInsets(Type.systemBars()).bottom)
                 }
 
+                val l = v.getPaddingLeft()
+                val b = v.getPaddingBottom()
+                val r = v.getPaddingRight()
+                v.setPadding(l, insets.getInsets(Type.systemBars()).top, r, b)
+
                 WindowInsets.CONSUMED
-        }
-
-        requireViewById<ViewGroup>(R.id.control_detail_root).apply {
-            // use flag only temporarily for testing
-            val resolver = cvh.context.contentResolver
-            val defaultOffsetInPx = cvh.context.resources
-                .getDimensionPixelSize(R.dimen.controls_activity_view_top_offset)
-            val offsetInPx = Settings.Secure.getInt(resolver, PANEL_TOP_OFFSET, defaultOffsetInPx)
-
-            val lp = getLayoutParams() as ViewGroup.MarginLayoutParams
-            lp.topMargin = offsetInPx
-            setLayoutParams(lp)
-
-            setOnClickListener { dismiss() }
-            (getParent() as View).setOnClickListener { dismiss() }
         }
 
         if (ScreenDecorationsUtils.supportsRoundedCornersOnWindows(context.getResources())) {
             val cornerRadius = context.resources
                 .getDimensionPixelSize(R.dimen.controls_activity_view_corner_radius)
-            activityView.setCornerRadius(cornerRadius.toFloat())
+            taskView.setCornerRadius(cornerRadius.toFloat())
         }
-    }
 
-    override fun show() {
-        activityView.setListener(cvh.uiExecutor, stateCallback)
-
-        super.show()
+        taskView.setListener(cvh.uiExecutor, stateCallback)
     }
 
     override fun dismiss() {
         if (!isShowing()) return
-        activityView.release()
+        taskView.release()
 
         super.dismiss()
     }

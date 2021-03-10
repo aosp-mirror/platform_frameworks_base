@@ -31,6 +31,7 @@ import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.controls.management.ControlsRequestDialog
 import com.android.systemui.controls.ui.ControlActionCoordinator
 import com.android.systemui.controls.ui.ControlActionCoordinatorImpl
+import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.ControlsUiControllerImpl
 import com.android.systemui.dagger.SysUISingleton
@@ -113,4 +114,9 @@ abstract class ControlsModule {
     abstract fun provideControlsRequestDialog(
         activity: ControlsRequestDialog
     ): Activity
+
+    @Binds
+    @IntoMap
+    @ClassKey(ControlsActivity::class)
+    abstract fun provideControlsActivity(activity: ControlsActivity): Activity
 }

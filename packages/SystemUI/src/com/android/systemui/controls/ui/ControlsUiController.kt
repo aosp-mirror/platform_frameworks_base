@@ -17,6 +17,7 @@
 package com.android.systemui.controls.ui
 
 import android.content.ComponentName
+import android.content.Context
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.view.ViewGroup
@@ -30,7 +31,7 @@ interface ControlsUiController {
         public const val BACK_TO_GLOBAL_ACTIONS = "back_to_global_actions"
     }
 
-    fun show(parent: ViewGroup, onDismiss: Runnable, startedFromGlobalActions: Boolean)
+    fun show(parent: ViewGroup, onDismiss: Runnable, activityContext: Context?)
     fun hide()
 
     /**

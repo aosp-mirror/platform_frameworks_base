@@ -643,6 +643,16 @@
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
+    <style name="Theme.ControlsActivity" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowContentTransitions">false</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:statusBarColor">@*android:color/transparent</item>
+        <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
+    </style>
+
     <style name="Theme.CreateUser" parent="@style/Theme.SystemUI">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">#33000000</item>
@@ -654,30 +664,12 @@
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
-    <style name="Theme.SystemUI.Dialog.Control.DetailPanel" parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
-      <item name="android:windowAnimationStyle">@style/Animation.Bottomsheet</item>
-      <item name="android:windowFullscreen">true</item>
+     <style name="Theme.SystemUI.Dialog.Control.DetailPanel" parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
+      <item name="android:windowFullscreen">false</item>
       <item name="android:windowIsFloating">false</item>
-      <item name="android:windowBackground">@null</item>
-      <item name="android:backgroundDimEnabled">true</item>
-    </style>
-
-    <style name="Animation.Bottomsheet">
-      <item name="android:windowEnterAnimation">@anim/bottomsheet_in</item>
-      <item name="android:windowExitAnimation">@anim/bottomsheet_out</item>
-    </style>
-
-    <style name="Theme.SystemUI.Dialog.Control.LockScreen" parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
-      <item name="android:windowAnimationStyle">@style/Animation.ControlDialog</item>
-      <item name="android:windowFullscreen">true</item>
-      <item name="android:windowIsFloating">false</item>
-      <item name="android:windowBackground">@null</item>
-      <item name="android:backgroundDimEnabled">true</item>
-    </style>
-
-    <style name="Animation.ControlDialog">
-      <item name="android:windowEnterAnimation">@*android:anim/dialog_enter</item>
-      <item name="android:windowExitAnimation">@*android:anim/dialog_exit</item>
+      <item name="android:windowBackground">@android:color/black</item>
+      <item name="android:backgroundDimEnabled">false</item>
+      <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
     </style>
 
     <style name="Control" />

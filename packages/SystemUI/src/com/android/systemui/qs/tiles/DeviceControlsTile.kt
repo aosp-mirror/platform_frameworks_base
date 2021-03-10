@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles
 
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
@@ -27,7 +28,8 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE
 import com.android.systemui.controls.management.ControlsListingController
-import com.android.systemui.controls.ui.ControlsDialog
+import com.android.systemui.controls.ui.ControlsActivity
+import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -40,7 +42,6 @@ import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.util.settings.GlobalSettings
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
-import javax.inject.Provider
 
 class DeviceControlsTile @Inject constructor(
     host: QSHost,
@@ -52,7 +53,6 @@ class DeviceControlsTile @Inject constructor(
     qsLogger: QSLogger,
     private val controlsComponent: ControlsComponent,
     private val featureFlags: FeatureFlags,
-    private val dialogProvider: Provider<ControlsDialog>,
     globalSettings: GlobalSettings
 ) : QSTileImpl<QSTile.State>(
         host,
@@ -72,7 +72,6 @@ class DeviceControlsTile @Inject constructor(
     private var hasControlsApps = AtomicBoolean(false)
     private val intent = Intent(Settings.ACTION_DEVICE_CONTROLS_SETTINGS)
 
-    private var controlsDialog: ControlsDialog? = null
     private val icon = ResourceIcon.get(R.drawable.ic_device_light)
 
     private val listingCallback = object : ControlsListingController.ControlsListingCallback {
@@ -102,27 +101,19 @@ class DeviceControlsTile @Inject constructor(
     }
 
     override fun handleDestroy() {
-        dismissDialog()
         super.handleDestroy()
-    }
-
-    private fun createDialog() {
-        if (controlsDialog?.isShowing != true) {
-            controlsDialog = dialogProvider.get()
-        }
-    }
-
-    private fun dismissDialog() {
-        controlsDialog?.dismiss()?.also {
-            controlsDialog = null
-        }
     }
 
     override fun handleClick() {
         if (state.state == Tile.STATE_ACTIVE) {
             mUiHandler.post {
-                createDialog()
-                controlsDialog?.show(controlsComponent.getControlsUiController().get())
+                mHost.collapsePanels()
+                val i = Intent().apply {
+                    component = ComponentName(mContext, ControlsActivity::class.java)
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    putExtra(ControlsUiController.BACK_TO_GLOBAL_ACTIONS, false)
+                }
+                mContext.startActivity(i)
             }
         }
     }
@@ -133,9 +124,6 @@ class DeviceControlsTile @Inject constructor(
         state.contentDescription = state.label
         state.icon = icon
         if (controlsComponent.isEnabled() && hasControlsApps.get()) {
-            if (controlsDialog == null) {
-                mUiHandler.post(this::createDialog)
-            }
             if (controlsComponent.getVisibility() == AVAILABLE) {
                 state.state = Tile.STATE_ACTIVE
                 state.secondaryLabel = ""
@@ -146,7 +134,6 @@ class DeviceControlsTile @Inject constructor(
             state.stateDescription = state.secondaryLabel
         } else {
             state.state = Tile.STATE_UNAVAILABLE
-            dismissDialog()
         }
     }
 

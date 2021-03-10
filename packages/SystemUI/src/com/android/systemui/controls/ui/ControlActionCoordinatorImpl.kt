@@ -18,6 +18,7 @@ package com.android.systemui.controls.ui
 
 import android.annotation.MainThread
 import android.app.Dialog
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -60,7 +61,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
     private var pendingAction: Action? = null
     private var actionsInProgress = mutableSetOf<String>()
 
-    override var startedFromGlobalActions: Boolean = true
+    override var activityContext: Context? = null
 
     companion object {
         private const val RESPONSE_TIMEOUT_IN_MILLIS = 3000L
@@ -83,7 +84,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
         bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             if (cvh.usePanel()) {
-                showDialog(cvh, control.getAppIntent().getIntent())
+                showDetail(cvh, control.getAppIntent().getIntent())
             } else {
                 cvh.action(CommandAction(templateId))
             }
@@ -109,7 +110,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
             // Long press snould only be called when there is valid control state, otherwise ignore
             cvh.cws.control?.let {
                 cvh.layout.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                showDialog(cvh, it.getAppIntent().getIntent())
+                showDetail(cvh, it.getAppIntent().getIntent())
             }
         }, false /* blockable */))
     }
@@ -151,10 +152,16 @@ class ControlActionCoordinatorImpl @Inject constructor(
             activityStarter.dismissKeyguardThenExecute({
                 Log.d(ControlsUiController.TAG, "Device unlocked, invoking controls action")
                 if (closeDialog) {
-                    if (startedFromGlobalActions) {
+                    activityContext?.let {
+                        val i = Intent().apply {
+                            component = ComponentName(context, ControlsActivity::class.java)
+                            addFlags(
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                            putExtra(ControlsUiController.BACK_TO_GLOBAL_ACTIONS, false)
+                        }
+                        it.startActivity(i)
+                    } ?: run {
                         globalActionsComponent.handleShowGlobalActionsMenu()
-                    } else {
-                        ControlsDialog(context, broadcastDispatcher).show(lazyUiController.get())
                     }
                 } else {
                     action.invoke()
@@ -170,9 +177,9 @@ class ControlActionCoordinatorImpl @Inject constructor(
         bgExecutor.execute { vibrator.vibrate(effect) }
     }
 
-    private fun showDialog(cvh: ControlViewHolder, intent: Intent) {
+    private fun showDetail(cvh: ControlViewHolder, intent: Intent) {
         bgExecutor.execute {
-            val activities: List<ResolveInfo> = cvh.context.packageManager.queryIntentActivities(
+            val activities: List<ResolveInfo> = context.packageManager.queryIntentActivities(
                 intent,
                 PackageManager.MATCH_DEFAULT_ONLY
             )
@@ -180,8 +187,8 @@ class ControlActionCoordinatorImpl @Inject constructor(
             uiExecutor.execute {
                 // make sure the intent is valid before attempting to open the dialog
                 if (activities.isNotEmpty() && taskViewFactory.isPresent) {
-                    taskViewFactory.get().create(cvh.context, uiExecutor, {
-                        dialog = DetailDialog(cvh, it, intent).also {
+                    taskViewFactory.get().create(context, uiExecutor, {
+                        dialog = DetailDialog(activityContext, it, intent, cvh).also {
                             it.setOnDismissListener { _ -> dialog = null }
                             it.show()
                         }
