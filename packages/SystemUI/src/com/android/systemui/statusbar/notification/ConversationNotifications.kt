@@ -180,9 +180,6 @@ class ConversationNotificationManager @Inject constructor(
                                 }
                         if (changed) {
                             notificationGroupManager.updateIsolation(entry)
-                            // ensure that the conversation icon isn't hidden
-                            // (ex: if it was showing in the shelf)
-                            entry.row?.updateIconVisibilities()
                         }
                     }
                 }
