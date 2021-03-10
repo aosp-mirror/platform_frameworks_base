@@ -986,26 +986,26 @@ public abstract class BatteryStats implements Parcelable {
         public abstract void getDeferredJobsLineLocked(StringBuilder sb, int which);
 
         /**
-         * Returns the measured energy in microjoules that the display consumed while the screen
-         * was on and uid active.
-         * Will return {@link #ENERGY_DATA_UNAVAILABLE} if data is unavailable
+         * Returns the battery consumption (in microcoulombs) of the screen while on and uid active,
+         * derived from on device power measurement data.
+         * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
          *
          * {@hide}
          */
-        public abstract long getScreenOnEnergy();
+        public abstract long getScreenOnMeasuredBatteryConsumptionUC();
 
         /**
-         * Returns the energies used by this uid for each
+         * Returns the battery consumption (in microcoulombs) used by this uid for each
          * {@link android.hardware.power.stats.EnergyConsumer.ordinal} of (custom) energy consumer
          * type {@link android.hardware.power.stats.EnergyConsumerType#OTHER}).
          *
-         * @return energies (in microjoules) used since boot for each (custom) energy consumer of
-         *         type OTHER, indexed by their ordinal. Returns null if no energy reporting is
-         *         supported.
+         * @return charge (in microcoulombs) consumed since last reset for each (custom) energy
+         *         consumer of type OTHER, indexed by their ordinal. Returns null if no energy
+         *         reporting is supported.
          *
          * {@hide}
          */
-        public abstract @Nullable long[] getCustomMeasuredEnergiesMicroJoules();
+        public abstract @Nullable long[] getCustomConsumerMeasuredBatteryConsumptionUC();
 
         public static abstract class Sensor {
 
@@ -2496,40 +2496,41 @@ public abstract class BatteryStats implements Parcelable {
     };
 
     /**
-     * Returned value if energy data is unavailable
+     * Returned value if power data is unavailable
      *
      * {@hide}
      */
-    public static final long ENERGY_DATA_UNAVAILABLE = -1;
+    public static final long POWER_DATA_UNAVAILABLE = -1;
 
     /**
-     * Returns the energy in microjoules that the screen consumed while on.
-     * Will return {@link #ENERGY_DATA_UNAVAILABLE} if data is unavailable
+     * Returns the battery consumption (in microcoulombs) of the screen while on, derived from on
+     * device power measurement data.
+     * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
      *
      * {@hide}
      */
-    public abstract long getScreenOnEnergy();
+    public abstract long getScreenOnMeasuredBatteryConsumptionUC();
 
     /**
-     * Returns the energy in microjoules that the screen consumed while in doze
-     * Will return {@link #ENERGY_DATA_UNAVAILABLE} if data is unavailable
+     * Returns the battery consumption (in microcoulombs) of the screen in doze, derived from on
+     * device power measurement data.
+     * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
      *
      * {@hide}
      */
-    public abstract long getScreenDozeEnergy();
+    public abstract long getScreenDozeMeasuredBatteryConsumptionUC();
 
     /**
-     * Returns the energies used for each
+     * Returns the battery consumption (in microcoulombs) that each
      * {@link android.hardware.power.stats.EnergyConsumer.ordinal} of (custom) energy consumer
-     * type {@link android.hardware.power.stats.EnergyConsumerType#OTHER}).
+     * type {@link android.hardware.power.stats.EnergyConsumerType#OTHER}) consumed.
      *
-     * @return energies (in microjoules) used since boot for each (custom) energy consumer of
-     *         type OTHER, indexed by their ordinal. Returns null if no energy reporting is
-     *         supported.
+     * @return charge (in microcoulombs) used by each (custom) energy consumer of type OTHER,
+     * indexed by their ordinal. Returns null if no energy reporting is supported.
      *
      * {@hide}
      */
-    public abstract @Nullable long[] getCustomMeasuredEnergiesMicroJoules();
+    public abstract @Nullable long[] getCustomConsumerMeasuredBatteryConsumptionUC();
 
     public static final BitDescription[] HISTORY_STATE_DESCRIPTIONS = new BitDescription[] {
         new BitDescription(HistoryItem.STATE_CPU_RUNNING_FLAG, "running", "r"),
