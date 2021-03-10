@@ -9198,6 +9198,15 @@ package android.se.omapi {
 
 }
 
+package android.security {
+
+  public final class KeyChain {
+    method @Nullable @WorkerThread public static String getWifiKeyGrantAsUser(@NonNull android.content.Context, @NonNull android.os.UserHandle, @NonNull String);
+    method @WorkerThread public static boolean hasWifiKeyGrantAsUser(@NonNull android.content.Context, @NonNull android.os.UserHandle, @NonNull String);
+  }
+
+}
+
 package android.security.keystore {
 
   public class AndroidKeyStoreProvider extends java.security.Provider {
