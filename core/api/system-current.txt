@@ -10558,7 +10558,6 @@ package android.telephony.data {
   }
 
   public final class EpsBearerQosSessionAttributes implements android.os.Parcelable android.net.QosSessionAttributes {
-    method @NonNull public static android.telephony.data.EpsBearerQosSessionAttributes create(@NonNull android.os.Parcel);
     method public int describeContents();
     method public long getGuaranteedDownlinkBitRate();
     method public long getGuaranteedUplinkBitRate();

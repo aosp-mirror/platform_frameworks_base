@@ -184,16 +184,6 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
         mRemoteAddresses = Collections.unmodifiableList(remoteAddresses);
     }
 
-    /**
-     * Creates attributes based off of a parcel
-     * @param in the parcel
-     * @return the attributes
-     */
-    @NonNull
-    public static EpsBearerQosSessionAttributes create(@NonNull final Parcel in) {
-        return new EpsBearerQosSessionAttributes(in);
-    }
-
     @Override
     public int describeContents() {
         return 0;
