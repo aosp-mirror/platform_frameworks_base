@@ -43,7 +43,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -72,8 +71,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         val TEST_UID = CURRENT_USER_ID * UserHandle.PER_USER_RANGE
         const val TEST_PACKAGE_NAME = "test"
 
-        private const val ALL_INDICATORS =
-                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED
+        private const val LOCATION_INDICATOR =
+                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_ENABLED
         private const val MIC_CAMERA = SystemUiDeviceConfigFlags.PROPERTY_MIC_CAMERA_ENABLED
         fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
         fun <T> eq(value: T): T = Mockito.eq(value) ?: value
@@ -119,7 +118,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         deviceConfigProxy = DeviceConfigProxyFake()
 
         // Listen to everything by default
-        changeAll(true)
+        changeMicCamera(true)
+        changeLocation(true)
 
         `when`(userTracker.userProfiles).thenReturn(listOf(UserInfo(CURRENT_USER_ID, "", 0)))
 
@@ -259,9 +259,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore // TODO(b/168209929)
     fun testNotListeningWhenIndicatorsDisabled() {
-        changeAll(false)
+        changeLocation(false)
         changeMicCamera(false)
         privacyItemController.addCallback(callback)
         executor.runAllReady()
@@ -271,7 +270,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
 
     @Test
     fun testNotSendingLocationWhenOnlyMicCamera() {
-        changeAll(false)
+        changeLocation(false)
         changeMicCamera(true)
         executor.runAllReady()
 
@@ -294,7 +293,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
                 .`when`(appOpsController).getActiveAppOpsForUser(anyInt())
 
         privacyItemController.addCallback(callback)
-        changeAll(false)
+        changeLocation(false)
         changeMicCamera(true)
         executor.runAllReady()
         reset(callback) // Clean callback
@@ -521,7 +520,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     }
 
     private fun changeMicCamera(value: Boolean?) = changeProperty(MIC_CAMERA, value)
-    private fun changeAll(value: Boolean?) = changeProperty(ALL_INDICATORS, value)
+    private fun changeLocation(value: Boolean?) = changeProperty(LOCATION_INDICATOR, value)
 
     private fun changeProperty(name: String, value: Boolean?) {
         deviceConfigProxy.setProperty(

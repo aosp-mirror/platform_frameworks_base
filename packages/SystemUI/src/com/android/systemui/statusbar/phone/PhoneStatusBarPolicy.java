@@ -675,8 +675,7 @@ public class PhoneStatusBarPolicy
 
         mIconController.setIconVisibility(mSlotCamera, showCamera);
         mIconController.setIconVisibility(mSlotMicrophone, showMicrophone);
-        if (mPrivacyItemController.getAllIndicatorsAvailable()
-                || mPrivacyItemController.getLocationAvailable()) {
+        if (mPrivacyItemController.getLocationAvailable()) {
             mIconController.setIconVisibility(mSlotLocation, showLocation);
         }
         mPrivacyLogger.logStatusBarIconsVisible(showCamera, showMicrophone,  showLocation);
@@ -684,8 +683,7 @@ public class PhoneStatusBarPolicy
 
     @Override
     public void onLocationActiveChanged(boolean active) {
-        if (!mPrivacyItemController.getAllIndicatorsAvailable()
-                && !mPrivacyItemController.getLocationAvailable()) {
+        if (!mPrivacyItemController.getLocationAvailable()) {
             updateLocationFromController();
         }
     }
