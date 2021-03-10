@@ -204,6 +204,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Kitambua Saa za Eneo (Hakuna muunganisho)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Huduma ya Kusasisha Saa za GNSS"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Data iliyomo kwenye kifaa chako itafutwa"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Huwezi kutumia programu ya msimamizi. Sasa data iliyo kwenye kifaa chako itafutwa.\n\nIkiwa una maswali yoyote, wasiliana na msimamizi wa shirika lako."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Kipengele cha kuchapisha kimezimwa na <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -550,23 +552,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Inaruhusu programu kubadilisha mkusanyiko wa picha zako."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"kusoma maeneo kwenye mkusanyiko wa vipengee vyako"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Inaruhusu programu kusoma maeneo kwenye mkusanyiko wa vipengee vyako."</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Tumia bayometriki"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Tumia bayometriki au mbinu ya kufunga skrini"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Thibitisha kuwa ni wewe"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Tumia bayometriki yako ili uendelee"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Maunzi ya bayometriki hayapatikani"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Imeghairi uthibitishaji"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Hayatambuliki"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Imeghairi uthibitishaji"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Hujaweka pin, mchoro au nenosiri"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Hitilafu imetokea wakati wa uthibitishaji"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Tumia mbinu ya kufunga skrini"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Weka kitambulisho cha kifaa chako ili uendelee."</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Kitambua alama kimetambua sehemu ya alama. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Imeshindwa kuchakata alama ya kidole. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Kitambua alama ya kidole ni kichafu. Tafadhali kisafishe na ujaribu tena."</string>
@@ -589,10 +586,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Kifaa hiki hakina kitambua alama ya kidole."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Kitambuzi kimezimwa kwa muda."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Kidole cha <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Tumia alama ya kidole"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Tumia alama ya kidole au mbinu ya kufunga skrini"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Tumia alama ya kidole chako ili uendelee"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -638,12 +633,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Kufungua kwa uso hakutumiki kwenye kifaa hiki."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Kitambuzi kimezimwa kwa muda."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Uso wa <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Tumia kipengele cha kufungua kwa uso"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Tumia uso au mbinu ya kufunga skrini"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Tumia kipengele cha kufungua kwa uso ili uendelee"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Aikoni ya uso"</string>
@@ -1966,8 +1958,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Habari na Magazeti"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Ramani na Maelekezo"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Uzalishaji"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Ufikivu"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Hifadhi ya kifaa"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Utatuzi wa USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"saa"</string>

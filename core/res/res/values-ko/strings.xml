@@ -204,6 +204,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"새벽 서비스"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"시간대 감지(연결되지 않음)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 시간 업데이트 서비스"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"기기가 삭제됩니다."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"관리자 앱을 사용할 수 없습니다. 곧 기기가 삭제됩니다.\n\n궁금한 점이 있으면 조직의 관리자에게 문의하세요."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g>에 의해 사용 중지되었습니다."</string>
@@ -550,23 +552,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"앱에서 사진 컬렉션을 수정하도록 허용합니다."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"미디어 컬렉션에서 위치 읽기"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"앱에서 미디어 컬렉션의 위치를 읽도록 허용합니다."</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"생체 인식 사용"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"생체 인식 또는 화면 잠금을 사용"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"본인 확인"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"생체 인식을 사용하여 계속하세요"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"생체 인식 하드웨어를 사용할 수 없음"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"인증이 취소되었습니다."</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"인식할 수 없음"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"인증이 취소되었습니다."</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN, 패턴, 비밀번호가 설정되지 않음"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"인증 오류"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"계속하려면 기기의 사용자 인증 정보를 입력하세요"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"지문이 일부만 인식되었습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"지문 센서를 깨끗이 닦고 다시 시도하세요."</string>
@@ -589,10 +586,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"기기에 지문 센서가 없습니다."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"센서가 일시적으로 사용 중지되었습니다."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"손가락 <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"지문 사용"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"지문 또는 화면 잠금 사용"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"계속하려면 지문을 사용하세요."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -638,12 +633,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"이 기기에서는 얼굴인식 잠금해제가 지원되지 않습니다."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"센서가 일시적으로 사용 중지되었습니다."</string>
     <string name="face_name_template" msgid="3877037340223318119">"얼굴 <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"얼굴인식 잠금해제 사용"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"얼굴 또는 화면 잠금 사용"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"얼굴인식 잠금해제를 사용하여 계속하세요"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"얼굴 아이콘"</string>
@@ -1699,7 +1691,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"기능 간에 전환하려면 세 손가락을 사용하여 위로 스와이프한 다음 잠시 기다립니다."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"확대"</string>
     <string name="user_switched" msgid="7249833311585228097">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 전환하는 중…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>로 전환하는 중…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>님을 로그아웃하는 중…"</string>
     <string name="owner_name" msgid="8713560351570795743">"소유자"</string>
     <string name="error_message_title" msgid="4082495589294631966">"오류"</string>
@@ -1966,8 +1958,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"뉴스/잡지"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"지도/내비게이션"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"생산성"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"접근성"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"기기 저장용량"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB 디버깅"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"시"</string>
