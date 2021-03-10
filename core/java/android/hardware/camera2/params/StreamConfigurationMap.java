@@ -1575,7 +1575,7 @@ public final class StreamConfigurationMap {
         return sizes;
     }
 
-    /** Get the list of publically visible output formats; does not include IMPL_DEFINED */
+    /** Get the list of publicly visible output formats */
     private int[] getPublicFormats(boolean output) {
         int[] formats = new int[getPublicFormatCount(output)];
 
@@ -1746,6 +1746,21 @@ public final class StreamConfigurationMap {
         return sb.toString();
     }
 
+    /**
+     * Size comparison method used by size comparators.
+     *
+     * @hide
+     */
+    public static int compareSizes(int widthA, int heightA, int widthB, int heightB) {
+        long left = widthA * (long) heightA;
+        long right = widthB * (long) heightB;
+        if (left == right) {
+            left = widthA;
+            right = widthB;
+        }
+        return (left < right) ? -1 : (left > right ? 1 : 0);
+    }
+
     private void appendOutputsString(StringBuilder sb) {
         sb.append("Outputs(");
         int[] formats = getOutputFormats();
@@ -1843,7 +1858,10 @@ public final class StreamConfigurationMap {
         sb.append(")");
     }
 
-    private String formatToString(int format) {
+    /**
+     * @hide
+     */
+    public static String formatToString(int format) {
         switch (format) {
             case ImageFormat.YV12:
                 return "YV12";

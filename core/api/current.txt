@@ -17771,6 +17771,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_STREAM_COMBINATIONS;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MultiResolutionStreamConfigurationMap> SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SENSOR_AVAILABLE_TEST_PATTERN_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.BlackLevelPattern> SENSOR_BLACK_LEVEL_PATTERN;
@@ -18375,9 +18376,20 @@ package android.hardware.camera2 {
     field public static final int MAX_THUMBNAIL_DIMENSION = 256; // 0x100
   }
 
+  public class MultiResolutionImageReader implements java.lang.AutoCloseable {
+    method public void close();
+    method protected void finalize();
+    method public void flush();
+    method @NonNull public android.hardware.camera2.params.MultiResolutionStreamInfo getStreamInfoForImageReader(@NonNull android.media.ImageReader);
+    method @NonNull public android.view.Surface getSurface();
+    method @NonNull public static android.hardware.camera2.MultiResolutionImageReader newInstance(@NonNull java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo>, int, @IntRange(from=1) int);
+    method public void setOnImageAvailableListener(@Nullable android.media.ImageReader.OnImageAvailableListener, @Nullable java.util.concurrent.Executor);
+  }
+
   public final class TotalCaptureResult extends android.hardware.camera2.CaptureResult {
     method @NonNull public java.util.List<android.hardware.camera2.CaptureResult> getPartialResults();
-    method public java.util.Map<java.lang.String,android.hardware.camera2.CaptureResult> getPhysicalCameraResults();
+    method @Deprecated public java.util.Map<java.lang.String,android.hardware.camera2.CaptureResult> getPhysicalCameraResults();
+    method @NonNull public java.util.Map<java.lang.String,android.hardware.camera2.TotalCaptureResult> getPhysicalCameraTotalResults();
   }
 
 }
@@ -18426,9 +18438,11 @@ package android.hardware.camera2.params {
 
   public final class InputConfiguration {
     ctor public InputConfiguration(int, int, int);
+    ctor public InputConfiguration(@NonNull java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo>, int);
     method public int getFormat();
     method public int getHeight();
     method public int getWidth();
+    method public boolean isMultiResolution();
   }
 
   public final class LensShadingMap {
@@ -18471,6 +18485,20 @@ package android.hardware.camera2.params {
     field public static final int METERING_WEIGHT_MIN = 0; // 0x0
   }
 
+  public final class MultiResolutionStreamConfigurationMap {
+    method @NonNull public int[] getInputFormats();
+    method @NonNull public java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo> getInputInfo(int);
+    method @NonNull public int[] getOutputFormats();
+    method @NonNull public java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo> getOutputInfo(int);
+  }
+
+  public class MultiResolutionStreamInfo {
+    ctor public MultiResolutionStreamInfo(int, int, @NonNull String);
+    method public int getHeight();
+    method @NonNull public String getPhysicalCameraId();
+    method public int getWidth();
+  }
+
   public final class OisSample {
     ctor public OisSample(long, float, float);
     method public long getTimestamp();
@@ -18483,6 +18511,7 @@ package android.hardware.camera2.params {
     ctor public OutputConfiguration(int, @NonNull android.view.Surface);
     ctor public OutputConfiguration(@NonNull android.util.Size, @NonNull Class<T>);
     method public void addSurface(@NonNull android.view.Surface);
+    method @NonNull public static java.util.Collection<android.hardware.camera2.params.OutputConfiguration> createInstancesForMultiResolutionOutput(@NonNull android.hardware.camera2.MultiResolutionImageReader);
     method public int describeContents();
     method public void enableSurfaceSharing();
     method public int getMaxSharedSurfaceCount();
