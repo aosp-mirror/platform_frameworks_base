@@ -451,6 +451,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
                     mStatusBar.addExpansionChangedListener(mStatusBarExpansionListener);
                     mStatusBarStateController.addCallback(mStatusBarStateListener);
+                    mStatusBarStateListener.onStateChanged(mStatusBarStateController.getState());
 
                     mWindowManager.addView(mView, computeLayoutParams(animation));
                     mView.setOnTouchListener(mOnTouchListener);
