@@ -317,6 +317,8 @@ class JobConcurrencyManager {
 
         final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+        filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
         try {
             ActivityManager.getService().registerUserSwitchObserver(mGracePeriodObserver, TAG);
@@ -339,6 +341,20 @@ class JobConcurrencyManager {
                     break;
                 case Intent.ACTION_SCREEN_OFF:
                     onInteractiveStateChanged(false);
+                    break;
+                case PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED:
+                    if (mPowerManager != null && mPowerManager.isDeviceIdleMode()) {
+                        synchronized (mLock) {
+                            stopLongRunningJobsLocked("deep doze");
+                        }
+                    }
+                    break;
+                case PowerManager.ACTION_POWER_SAVE_MODE_CHANGED:
+                    if (mPowerManager != null && mPowerManager.isPowerSaveMode()) {
+                        synchronized (mLock) {
+                            stopLongRunningJobsLocked("battery saver");
+                        }
+                    }
                     break;
             }
         }
@@ -632,6 +648,18 @@ class JobConcurrencyManager {
         }
         mWorkCountTracker.resetStagingCount();
         noteConcurrency();
+    }
+
+    @GuardedBy("mLock")
+    private void stopLongRunningJobsLocked(@NonNull String debugReason) {
+        for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; ++i) {
+            final JobServiceContext jsc = mService.mActiveServices.get(i);
+            final JobStatus jobStatus = jsc.getRunningJobLocked();
+
+            if (jobStatus != null && !jsc.isWithinExecutionGuaranteeTime()) {
+                jsc.cancelExecutingJobLocked(JobParameters.REASON_TIMEOUT, debugReason);
+            }
+        }
     }
 
     private void noteConcurrency() {
