@@ -319,19 +319,19 @@ public class TelephonyIcons {
     }
 
     public static final int[] WIFI_CALL_STRENGTH_ICONS = {
-        R.drawable.ic_wifi_call_strength_1,
+        R.drawable.ic_wifi_call_strength_0,
         R.drawable.ic_wifi_call_strength_1,
         R.drawable.ic_wifi_call_strength_2,
         R.drawable.ic_wifi_call_strength_3,
-        R.drawable.ic_wifi_call_strength_3
+        R.drawable.ic_wifi_call_strength_4
     };
 
     public static final int[] MOBILE_CALL_STRENGTH_ICONS = {
-        R.drawable.ic_mobile_call_strength_1,
+        R.drawable.ic_mobile_call_strength_0,
         R.drawable.ic_mobile_call_strength_1,
         R.drawable.ic_mobile_call_strength_2,
         R.drawable.ic_mobile_call_strength_3,
-        R.drawable.ic_mobile_call_strength_3
+        R.drawable.ic_mobile_call_strength_4
     };
 }
 
