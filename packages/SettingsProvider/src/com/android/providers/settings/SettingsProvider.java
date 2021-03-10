@@ -1937,8 +1937,11 @@ public class SettingsProvider extends ContentProvider {
         if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
             return;
         }
-        checkReadableAnnotation(settingsType, settingName);
         ApplicationInfo ai = getCallingApplicationInfoOrThrow();
+        if (ai.isSystemApp() || ai.isSignedWithPlatformKey()) {
+            return;
+        }
+        checkReadableAnnotation(settingsType, settingName);
         if (!ai.isInstantApp()) {
             return;
         }
