@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-** Copyright 2012, The Android Open Source Project
+** Copyright 2021, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 -->
 
 <!-- Extends FrameLayout -->
-<com.android.systemui.qs.QSFooterView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.qs.QSFooterView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/qs_footer"
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_footer_height"
@@ -32,77 +31,70 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
-        android:gravity="end" >
+        android:orientation="vertical">
 
-        <com.android.keyguard.AlphaOptimizedLinearLayout
-            android:id="@+id/qs_footer_actions_edit_container"
-            android:layout_width="@integer/qs_footer_actions_width"
-            android:layout_height="match_parent"
-            android:layout_weight="@integer/qs_footer_actions_weight"
-            android:gravity="center_vertical|start" >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/build"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:paddingStart="@dimen/qs_tile_margin_horizontal"
+                android:paddingEnd="4dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.QS.Status"
+                android:visibility="gone" />
+
+            <com.android.systemui.qs.PageIndicator
+                android:id="@+id/footer_page_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:visibility="gone" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/qs_footer_actions_container"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical">
+
             <com.android.systemui.statusbar.AlphaOptimizedImageView
                 android:id="@android:id/edit"
-                android:layout_width="@dimen/qs_footer_action_button_size"
+                android:layout_width="0dp"
                 android:layout_height="@dimen/qs_footer_action_button_size"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
+                android:layout_weight="1"
+                android:background="@drawable/qs_footer_action_chip_background"
                 android:clickable="true"
                 android:clipToPadding="false"
                 android:contentDescription="@string/accessibility_quick_settings_edit"
                 android:focusable="true"
                 android:padding="@dimen/qs_footer_icon_padding"
                 android:src="@*android:drawable/ic_mode_edit"
-                android:tint="?android:attr/colorForeground"/>
-
-            <TextView
-                android:id="@+id/build"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:clickable="true"
-                android:gravity="center_vertical"
-                android:focusable="true"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:textAppearance="@style/TextAppearance.QS.Status"
-                android:layout_marginEnd="4dp"
-                android:visibility="gone"/>
-         </com.android.keyguard.AlphaOptimizedLinearLayout>
-
-        <com.android.systemui.qs.PageIndicator
-            android:id="@+id/footer_page_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:visibility="gone" />
-
-        <com.android.keyguard.AlphaOptimizedLinearLayout
-            android:id="@+id/qs_footer_actions_container"
-            android:layout_width="@integer/qs_footer_actions_width"
-            android:layout_height="match_parent"
-            android:layout_weight="@integer/qs_footer_actions_weight"
-            android:gravity="center_vertical|end" >
-
-            <com.android.systemui.statusbar.AlphaOptimizedImageView
-                android:id="@+id/pm_lite"
-                android:layout_width="@dimen/qs_footer_action_button_size"
-                android:layout_height="@dimen/qs_footer_action_button_size"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:clipToPadding="false"
-                android:contentDescription="@string/accessibility_quick_settings_power_menu"
-                android:focusable="true"
-                android:padding="@dimen/qs_footer_icon_padding"
-                android:src="@*android:drawable/ic_lock_power_off"
-                android:tint="?android:attr/colorForeground"
-                android:visibility="gone"
-                />
+                android:tint="?android:attr/colorForeground" />
 
             <com.android.systemui.statusbar.phone.MultiUserSwitch
                 android:id="@+id/multi_user_switch"
-                android:layout_width="@dimen/qs_footer_action_button_size"
+                android:layout_width="0dp"
                 android:layout_height="@dimen/qs_footer_action_button_size"
-                android:layout_alignParentEnd="true"
-                android:background="@drawable/ripple_drawable"
+                android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
+                android:layout_weight="1"
+                android:background="@drawable/qs_footer_action_chip_background"
                 android:focusable="true">
 
                 <ImageView
@@ -110,28 +102,30 @@
                     android:layout_width="@dimen/multi_user_avatar_expanded_size"
                     android:layout_height="@dimen/multi_user_avatar_expanded_size"
                     android:layout_gravity="center"
-                    android:scaleType="centerInside"/>
+                    android:scaleType="centerInside" />
             </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
             <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
                 android:id="@+id/settings_button_container"
-                android:layout_width="@dimen/qs_footer_action_button_size"
+                android:layout_width="0dp"
                 android:layout_height="@dimen/qs_footer_action_button_size"
+                android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
+                android:background="@drawable/qs_footer_action_chip_background"
+                android:layout_weight="1"
                 android:clipChildren="false"
                 android:clipToPadding="false">
 
                 <com.android.systemui.statusbar.phone.SettingsButton
                     android:id="@+id/settings_button"
-                    style="@android:style/Widget.Material.Button.Borderless"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="@dimen/qs_footer_action_button_size"
                     android:layout_gravity="center"
-                    android:padding="@dimen/qs_footer_icon_padding"
-                    android:background="@drawable/ripple_drawable"
                     android:contentDescription="@string/accessibility_quick_settings_settings"
-                    android:src="@drawable/ic_settings"
+                    android:background="@drawable/qs_footer_action_chip_background_borderless"
+                    android:padding="@dimen/qs_footer_icon_padding"
                     android:scaleType="centerInside"
-                    android:tint="?android:attr/colorForeground"/>
+                    android:src="@drawable/ic_settings"
+                    android:tint="?android:attr/colorForeground" />
 
                 <com.android.systemui.statusbar.AlphaOptimizedImageView
                     android:id="@+id/tuner_icon"
@@ -141,9 +135,25 @@
                     android:paddingEnd="4dp"
                     android:src="@drawable/tuner"
                     android:tint="?android:attr/textColorTertiary"
-                    android:visibility="invisible"/>
+                    android:visibility="invisible" />
 
             </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
-        </com.android.keyguard.AlphaOptimizedLinearLayout>
+
+            <com.android.systemui.statusbar.AlphaOptimizedImageView
+                android:id="@+id/pm_lite"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/qs_footer_action_button_size"
+                android:layout_weight="1"
+                android:background="@drawable/qs_footer_action_chip_background"
+                android:clickable="true"
+                android:clipToPadding="false"
+                android:focusable="true"
+                android:padding="@dimen/qs_footer_icon_padding"
+                android:src="@*android:drawable/ic_lock_power_off"
+                android:contentDescription="@string/accessibility_quick_settings_power_menu"
+                android:tint="?android:attr/colorForeground" />
+
+        </LinearLayout>
     </LinearLayout>
+
 </com.android.systemui.qs.QSFooterView>

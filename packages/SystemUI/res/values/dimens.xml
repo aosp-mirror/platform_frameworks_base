@@ -415,6 +415,9 @@
     <!-- The size of each of the icon buttons in the QS footer -->
     <dimen name="qs_footer_action_button_size">@dimen/qs_footer_height</dimen>
 
+    <!-- (48dp - 44dp) / 2 -->
+    <dimen name="qs_footer_action_inset">2dp</dimen>
+
     <!-- Margins on each side of QS Footer -->
     <dimen name="qs_footer_margin">2dp</dimen>
 

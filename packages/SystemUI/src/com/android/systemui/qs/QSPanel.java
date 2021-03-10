@@ -32,6 +32,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
@@ -127,8 +128,21 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     }
 
+    protected void inflateQSFooter(boolean newFooter) {
+        ViewStub stub = findViewById(R.id.qs_footer_stub);
+        if (stub != null) {
+            stub.setLayoutResource(
+                    newFooter ? R.layout.qs_footer_impl_two_lines : R.layout.qs_footer_impl);
+            stub.inflate();
+            mFooter = findViewById(R.id.qs_footer);
+        }
+    }
+
     void initialize(boolean sideLabels) {
         mSideLabels = sideLabels;
+
+        inflateQSFooter(sideLabels);
+
         mRegularTileLayout = createRegularTileLayout();
         mTileLayout = mRegularTileLayout;
 
@@ -344,7 +358,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mFooter = findViewById(R.id.qs_footer);
         mDivider = findViewById(R.id.divider);
     }
 

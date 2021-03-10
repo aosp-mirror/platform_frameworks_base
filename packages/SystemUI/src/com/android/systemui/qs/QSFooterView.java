@@ -94,7 +94,7 @@ public class QSFooterView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mEdit = findViewById(android.R.id.edit);
+        mEdit = requireViewById(android.R.id.edit);
 
         mPageIndicator = findViewById(R.id.footer_page_indicator);
 
@@ -104,14 +104,15 @@ public class QSFooterView extends FrameLayout {
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
 
-        mActionsContainer = findViewById(R.id.qs_footer_actions_container);
+        mActionsContainer = requireViewById(R.id.qs_footer_actions_container);
         mEditContainer = findViewById(R.id.qs_footer_actions_edit_container);
         mBuildText = findViewById(R.id.build);
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
-        ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
-
+        if (mSettingsButton.getBackground() instanceof RippleDrawable) {
+            ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
+        }
         updateResources();
 
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
@@ -143,7 +144,7 @@ public class QSFooterView extends FrameLayout {
         int defSpace = mContext.getResources().getDimensionPixelOffset(R.dimen.default_gear_space);
 
         mSettingsCogAnimator = new Builder()
-                .addFloat(mSettingsContainer, "translationX",
+                .addFloat(mSettingsButton, "translationX",
                         isLayoutRtl() ? (remaining - defSpace) : -(remaining - defSpace), 0)
                 .addFloat(mSettingsButton, "rotation", -120, 0)
                 .build();
@@ -173,12 +174,15 @@ public class QSFooterView extends FrameLayout {
 
     @Nullable
     private TouchAnimator createFooterAnimator() {
-        return new TouchAnimator.Builder()
+        TouchAnimator.Builder builder = new TouchAnimator.Builder()
                 .addFloat(mActionsContainer, "alpha", 0, 1)
-                .addFloat(mEditContainer, "alpha", 0, 1)
                 .addFloat(mPageIndicator, "alpha", 0, 1)
-                .setStartDelay(0.9f)
-                .build();
+                .addFloat(mBuildText, "alpha", 0, 1)
+                .setStartDelay(0.9f);
+        if (mEditContainer != null) {
+            builder.addFloat(mEditContainer, "alpha", 0, 1);
+        }
+        return builder.build();
     }
 
     /** */
@@ -273,8 +277,10 @@ public class QSFooterView extends FrameLayout {
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 isTunerEnabled ? View.VISIBLE : View.INVISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
-        mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.INVISIBLE);
-        mEditContainer.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
+        mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.GONE);
+        if (mEditContainer != null) {
+            mEditContainer.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
+        }
         mSettingsButton.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
 
         mBuildText.setVisibility(mExpanded && mShouldShowBuildText ? View.VISIBLE : View.GONE);
