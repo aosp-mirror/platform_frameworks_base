@@ -130,6 +130,9 @@ JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_SurfaceDequeueBuffer(J
         return result;
     }
     sBuffers[slot] = anb;
+    if (timeoutMs == 0) {
+        return android::OK;
+    }
     android::sp<android::Fence> fence(new android::Fence(fenceFd));
     int waitResult = fence->wait(timeoutMs);
     if (waitResult != android::OK) {
@@ -195,6 +198,28 @@ JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_SurfaceQueueBuffer(JNI
         sBuffers[slot] = nullptr;
     }
     return result;
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_SurfaceSetAsyncMode(JNIEnv* /* env */,
+                                                                              jclass /* clazz */,
+                                                                              jboolean async) {
+    assert(sAnw);
+    android::sp<android::Surface> surface = static_cast<android::Surface*>(sAnw);
+    return surface->setAsyncMode(async);
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_SurfaceSetDequeueTimeout(
+        JNIEnv* /* env */, jclass /* clazz */, jlong timeoutMs) {
+    assert(sAnw);
+    android::sp<android::Surface> surface = static_cast<android::Surface*>(sAnw);
+    return surface->setDequeueTimeout(timeoutMs);
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_SurfaceSetMaxDequeuedBufferCount(
+        JNIEnv* /* env */, jclass /* clazz */, jint maxDequeuedBuffers) {
+    assert(sAnw);
+    android::sp<android::Surface> surface = static_cast<android::Surface*>(sAnw);
+    return surface->setMaxDequeuedBufferCount(maxDequeuedBuffers);
 }
 
 JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_NativeWindowSetBufferCount(

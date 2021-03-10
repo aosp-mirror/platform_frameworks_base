@@ -54,7 +54,13 @@ class SurfaceProxy {
     external fun SurfaceSetScalingMode(scalingMode: Int)
     external fun SurfaceDequeueBuffer(slot: Int, timeoutMs: Int): Int
     external fun SurfaceCancelBuffer(slot: Int)
-    external fun SurfaceQueueBuffer(slot: Int, freeSlot: Boolean = true)
+    external fun SurfaceQueueBuffer(slot: Int, freeSlot: Boolean = true): Int
+    external fun SurfaceSetAsyncMode(async: Boolean): Int
+    external fun SurfaceSetDequeueTimeout(timeout: Long): Int
+    external fun SurfaceQuery(what: Int): Int
+    external fun SurfaceSetMaxDequeuedBufferCount(maxDequeuedBuffers: Int): Int
+
+    // system/native_window.h functions
     external fun NativeWindowSetBufferCount(count: Int): Int
     external fun NativeWindowSetSharedBufferMode(shared: Boolean): Int
     external fun NativeWindowSetAutoRefresh(autoRefresh: Boolean): Int
