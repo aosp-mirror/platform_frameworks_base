@@ -20,8 +20,12 @@
     <string name="chooser_title" msgid="2262294130493605839">"ជ្រើសរើស <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ដើម្បីឱ្យស្ថិតក្រោម​ការគ្រប់គ្រងរបស់ &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ឧបករណ៍"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"នាឡិកា"</string>
-    <string name="confirmation_title" msgid="4751119145078041732">"កំណត់ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ដើម្បីគ្រប់គ្រង <xliff:g id="PROFILE_NAME">%2$s</xliff:g> របស់អ្នក - &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="profile_summary" msgid="2009764182871566255">"ចាំបាច់ត្រូវមាន <xliff:g id="APP_NAME">%1$s</xliff:g> ដើម្បីគ្រប់គ្រង <xliff:g id="PROFILE_NAME">%2$s</xliff:g> របស់អ្នក។ <xliff:g id="PRIVILEGES_DISCPLAIMER">%3$s</xliff:g>"</string>
-    <string name="consent_yes" msgid="4055438216605487056">"បាទ/ចាស"</string>
-    <string name="consent_no" msgid="1335543792857823917">"ទេ អរគុណ"</string>
+    <!-- no translation found for confirmation_title (814973816731238955) -->
+    <skip />
+    <!-- no translation found for profile_summary (2059360676631420073) -->
+    <skip />
+    <!-- no translation found for consent_yes (8344487259618762872) -->
+    <skip />
+    <!-- no translation found for consent_no (2640796915611404382) -->
+    <skip />
 </resources>
