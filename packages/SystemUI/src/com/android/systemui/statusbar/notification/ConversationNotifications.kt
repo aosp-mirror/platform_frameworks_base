@@ -218,13 +218,18 @@ class ConversationNotificationManager @Inject constructor(
         })
     }
 
+    private fun ConversationState.shouldIncrementUnread(newBuilder: Notification.Builder) =
+            if (notification.flags and Notification.FLAG_ONLY_ALERT_ONCE != 0) {
+                false
+            } else {
+                val oldBuilder = Notification.Builder.recoverBuilder(context, notification)
+                Notification.areStyledNotificationsVisiblyDifferent(oldBuilder, newBuilder)
+            }
+
     fun getUnreadCount(entry: NotificationEntry, recoveredBuilder: Notification.Builder): Int =
             states.compute(entry.key) { _, state ->
                 val newCount = state?.run {
-                    val old = Notification.Builder.recoverBuilder(context, notification)
-                    val increment = Notification
-                            .areStyledNotificationsVisiblyDifferent(old, recoveredBuilder)
-                    if (increment) unreadCount + 1 else unreadCount
+                    if (shouldIncrementUnread(recoveredBuilder)) unreadCount + 1 else unreadCount
                 } ?: 1
                 ConversationState(newCount, entry.sbn.notification)
             }!!.unreadCount
