@@ -650,7 +650,6 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public Drawable getDrawable() {
-        assertUiContext("getDrawable");
         final ColorManagementProxy cmProxy = getColorManagementProxy();
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
@@ -718,7 +717,6 @@ public class WallpaperManager {
      */
     public Drawable getBuiltInDrawable(int outWidth, int outHeight, boolean scaleToFit,
             float horizontalAlignment, float verticalAlignment, @SetWallpaperFlags int which) {
-        assertUiContext("getBuiltInDrawable");
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
@@ -884,7 +882,6 @@ public class WallpaperManager {
      * null pointer if these is none.
      */
     public Drawable peekDrawable() {
-        assertUiContext("peekDrawable");
         final ColorManagementProxy cmProxy = getColorManagementProxy();
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
@@ -927,7 +924,6 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public Drawable peekFastDrawable() {
-        assertUiContext("peekFastDrawable");
         final ColorManagementProxy cmProxy = getColorManagementProxy();
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
@@ -1084,6 +1080,7 @@ public class WallpaperManager {
         return getWallpaperColors(which, mContext.getUserId());
     }
 
+    // TODO(b/181083333): add multiple root display area support on this API.
     /**
      * Get the primary colors of the wallpaper configured in the given user.
      * @param which wallpaper type. Must be either {@link #FLAG_SYSTEM} or
@@ -1094,7 +1091,7 @@ public class WallpaperManager {
      */
     @UnsupportedAppUsage
     public @Nullable WallpaperColors getWallpaperColors(int which, int userId) {
-        assertUiContext("getWallpaperColors");
+        StrictMode.assertUiContext(mContext, "getWallpaperColors");
         return sGlobals.getWallpaperColors(which, userId, mContext.getDisplayId());
     }
 
@@ -1333,7 +1330,6 @@ public class WallpaperManager {
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public int setResource(@RawRes int resid, @SetWallpaperFlags int which)
             throws IOException {
-        assertUiContext("setResource");
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
@@ -1637,6 +1633,7 @@ public class WallpaperManager {
         }
     }
 
+    // TODO(b/181083333): add multiple root display area support on this API.
     /**
      * Returns the desired minimum width for the wallpaper. Callers of
      * {@link #setBitmap(android.graphics.Bitmap)} or
@@ -1654,7 +1651,7 @@ public class WallpaperManager {
      * @see #getDesiredMinimumHeight()
      */
     public int getDesiredMinimumWidth() {
-        assertUiContext("getDesiredMinimumWidth");
+        StrictMode.assertUiContext(mContext, "getDesiredMinimumWidth");
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
@@ -1666,6 +1663,7 @@ public class WallpaperManager {
         }
     }
 
+    // TODO(b/181083333): add multiple root display area support on this API.
     /**
      * Returns the desired minimum height for the wallpaper. Callers of
      * {@link #setBitmap(android.graphics.Bitmap)} or
@@ -1683,7 +1681,7 @@ public class WallpaperManager {
      * @see #getDesiredMinimumWidth()
      */
     public int getDesiredMinimumHeight() {
-        assertUiContext("getDesiredMinimumHeight");
+        StrictMode.assertUiContext(mContext, "getDesiredMinimumHeight");
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
@@ -1695,6 +1693,7 @@ public class WallpaperManager {
         }
     }
 
+    // TODO(b/181083333): add multiple root display area support on this API.
     /**
      * For use only by the current home application, to specify the size of
      * wallpaper it would like to use.  This allows such applications to have
@@ -1714,7 +1713,7 @@ public class WallpaperManager {
      * @param minimumHeight Desired minimum height
      */
     public void suggestDesiredDimensions(int minimumWidth, int minimumHeight) {
-        assertUiContext("suggestDesiredDimensions");
+        StrictMode.assertUiContext(mContext, "suggestDesiredDimensions");
         try {
             /**
              * The framework makes no attempt to limit the window size
@@ -1757,6 +1756,7 @@ public class WallpaperManager {
         }
     }
 
+    // TODO(b/181083333): add multiple root display area support on this API.
     /**
      * Specify extra padding that the wallpaper should have outside of the display.
      * That is, the given padding supplies additional pixels the wallpaper should extend
@@ -1770,7 +1770,7 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_HINTS)
     public void setDisplayPadding(Rect padding) {
-        assertUiContext("setDisplayPadding");
+        StrictMode.assertUiContext(mContext, "setDisplayPadding");
         try {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
@@ -2023,7 +2023,6 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public void clear() throws IOException {
-        assertUiContext("clear");
         setStream(openDefaultWallpaper(mContext, FLAG_SYSTEM), null, false);
     }
 
@@ -2174,10 +2173,6 @@ public class WallpaperManager {
      */
     public ColorManagementProxy getColorManagementProxy() {
         return mCmProxy;
-    }
-
-    private void assertUiContext(final String methodName) {
-        StrictMode.assertUiContext(mContext, methodName);
     }
 
     /**
