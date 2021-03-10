@@ -1072,6 +1072,7 @@ package android {
     field public static final int panelTextAppearance = 16842850; // 0x1010062
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
+    field public static final int passwordsActivity = 16844351; // 0x101063f
     field public static final int path = 16842794; // 0x101002a
     field public static final int pathAdvancedPattern = 16844320; // 0x1010620
     field public static final int pathData = 16843781; // 0x1010405

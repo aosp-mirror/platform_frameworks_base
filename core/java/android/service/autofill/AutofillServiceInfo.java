@@ -81,6 +81,8 @@ public final class AutofillServiceInfo {
 
     @Nullable
     private final String mSettingsActivity;
+    @Nullable
+    private final String mPasswordsActivity;
 
     @Nullable
     private final ArrayMap<String, Long> mCompatibilityPackages;
@@ -118,12 +120,14 @@ public final class AutofillServiceInfo {
                 AutofillService.SERVICE_META_DATA);
         if (parser == null) {
             mSettingsActivity = null;
+            mPasswordsActivity = null;
             mCompatibilityPackages = null;
             mInlineSuggestionsEnabled = false;
             return;
         }
 
         String settingsActivity = null;
+        String passwordsActivity = null;
         ArrayMap<String, Long> compatibilityPackages = null;
         boolean inlineSuggestionsEnabled = false; // false by default.
 
@@ -144,6 +148,8 @@ public final class AutofillServiceInfo {
                             com.android.internal.R.styleable.AutofillService);
                     settingsActivity = afsAttributes.getString(
                             R.styleable.AutofillService_settingsActivity);
+                    passwordsActivity = afsAttributes.getString(
+                            R.styleable.AutofillService_passwordsActivity);
                     inlineSuggestionsEnabled = afsAttributes.getBoolean(
                             R.styleable.AutofillService_supportsInlineSuggestions, false);
                 } finally {
@@ -160,6 +166,7 @@ public final class AutofillServiceInfo {
         }
 
         mSettingsActivity = settingsActivity;
+        mPasswordsActivity = passwordsActivity;
         mCompatibilityPackages = compatibilityPackages;
         mInlineSuggestionsEnabled = inlineSuggestionsEnabled;
     }
@@ -226,6 +233,7 @@ public final class AutofillServiceInfo {
         return compatibilityPackages;
     }
 
+    @NonNull
     public ServiceInfo getServiceInfo() {
         return mServiceInfo;
     }
@@ -235,6 +243,12 @@ public final class AutofillServiceInfo {
         return mSettingsActivity;
     }
 
+    @Nullable
+    public String getPasswordsActivity() {
+        return mPasswordsActivity;
+    }
+
+    @Nullable
     public ArrayMap<String, Long> getCompatibilityPackages() {
         return mCompatibilityPackages;
     }
@@ -273,6 +287,7 @@ public final class AutofillServiceInfo {
         builder.append(getClass().getSimpleName());
         builder.append("[").append(mServiceInfo);
         builder.append(", settings:").append(mSettingsActivity);
+        builder.append(", passwords activity:").append(mPasswordsActivity);
         builder.append(", hasCompatPckgs:").append(mCompatibilityPackages != null
                 && !mCompatibilityPackages.isEmpty()).append("]");
         builder.append(", inline suggestions enabled:").append(mInlineSuggestionsEnabled);
@@ -285,6 +300,7 @@ public final class AutofillServiceInfo {
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Component: "); pw.println(getServiceInfo().getComponentName());
         pw.print(prefix); pw.print("Settings: "); pw.println(mSettingsActivity);
+        pw.print(prefix); pw.print("Passwords activity: "); pw.println(mPasswordsActivity);
         pw.print(prefix); pw.print("Compat packages: "); pw.println(mCompatibilityPackages);
         pw.print(prefix); pw.print("Inline Suggestions Enabled: ");
         pw.println(mInlineSuggestionsEnabled);
