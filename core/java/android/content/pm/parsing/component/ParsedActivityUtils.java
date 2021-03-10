@@ -16,6 +16,7 @@
 
 package android.content.pm.parsing.component;
 
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE_PER_TASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
@@ -23,6 +24,7 @@ import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageParser;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
@@ -399,6 +401,16 @@ public class ParsedActivityUtils {
 
             if (result.isError()) {
                 return input.error(result);
+            }
+        }
+
+        if (!isAlias && activity.launchMode != LAUNCH_SINGLE_INSTANCE_PER_TASK
+                && activity.metaData != null && activity.metaData.containsKey(
+                PackageParser.METADATA_ACTIVITY_LAUNCH_MODE)) {
+            final String launchMode = activity.metaData.getString(
+                    PackageParser.METADATA_ACTIVITY_LAUNCH_MODE);
+            if (launchMode != null && launchMode.equals("singleInstancePerTask")) {
+                activity.launchMode = LAUNCH_SINGLE_INSTANCE_PER_TASK;
             }
         }
 

@@ -58,7 +58,7 @@ per-file HwRemoteBinder.java = file:platform/system/libhwbinder:/OWNERS
 per-file IHwBinder.java = file:platform/system/libhwbinder:/OWNERS
 per-file IHwInterface.java = file:platform/system/libhwbinder:/OWNERS
 
-per-file GraphicsEnvironment.java = chrisforbes@google.com, cnorthrop@google.com, lpy@google.com, timvp@google.com, zzyiwei@google.com
+per-file GraphicsEnvironment.java = file:platform/frameworks/native:/opengl/OWNERS
 
 per-file *Network* = file:/services/core/java/com/android/server/net/OWNERS
 per-file *Power* = file:/services/core/java/com/android/server/power/OWNERS

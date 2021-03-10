@@ -179,8 +179,6 @@ public final class DeviceStateManagerGlobal {
     @VisibleForTesting(visibility = Visibility.PACKAGE)
     public void registerDeviceStateCallback(@NonNull DeviceStateCallback callback,
             @NonNull Executor executor) {
-        DeviceStateCallbackWrapper wrapper;
-        DeviceStateInfo currentInfo;
         synchronized (mLock) {
             int index = findCallbackLocked(callback);
             if (index != -1) {
@@ -189,25 +187,22 @@ public final class DeviceStateManagerGlobal {
             }
 
             registerCallbackIfNeededLocked();
-            if (mLastReceivedInfo == null) {
-                // Initialize the last received info with the current info if this is the first
-                // callback being registered.
-                try {
-                    mLastReceivedInfo = mDeviceStateManager.getDeviceStateInfo();
-                } catch (RemoteException ex) {
-                    throw ex.rethrowFromSystemServer();
-                }
-            }
 
-            currentInfo = new DeviceStateInfo(mLastReceivedInfo);
-
-            wrapper = new DeviceStateCallbackWrapper(callback, executor);
+            // Add the callback wrapper to the mCallbacks array after registering the callback as
+            // the callback could be triggered immediately if the mDeviceStateManager IBinder is in
+            // the same process as this instance.
+            DeviceStateCallbackWrapper wrapper = new DeviceStateCallbackWrapper(callback, executor);
             mCallbacks.add(wrapper);
-        }
 
-        wrapper.notifySupportedStatesChanged(currentInfo.supportedStates);
-        wrapper.notifyBaseStateChanged(currentInfo.baseState);
-        wrapper.notifyStateChanged(currentInfo.currentState);
+            if (mLastReceivedInfo != null) {
+                // Copy the array to prevent the callback from modifying the internal state.
+                final int[] supportedStates = Arrays.copyOf(mLastReceivedInfo.supportedStates,
+                        mLastReceivedInfo.supportedStates.length);
+                wrapper.notifySupportedStatesChanged(supportedStates);
+                wrapper.notifyBaseStateChanged(mLastReceivedInfo.baseState);
+                wrapper.notifyStateChanged(mLastReceivedInfo.currentState);
+            }
+        }
     }
 
     /**
@@ -267,7 +262,7 @@ public final class DeviceStateManagerGlobal {
             callbacks = new ArrayList<>(mCallbacks);
         }
 
-        final int diff = oldInfo == null ? 1 : info.diff(oldInfo);
+        final int diff = oldInfo == null ? ~0 : info.diff(oldInfo);
         if ((diff & DeviceStateInfo.CHANGED_SUPPORTED_STATES) > 0) {
             for (int i = 0; i < callbacks.size(); i++) {
                 // Copy the array to prevent callbacks from modifying the internal state.

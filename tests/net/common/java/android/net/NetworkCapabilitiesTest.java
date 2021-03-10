@@ -211,7 +211,7 @@ public class NetworkCapabilitiesTest {
         nc1 = new NetworkCapabilities().addTransportType(TRANSPORT_WIFI);
         nc2 = new NetworkCapabilities()
                 .addTransportType(TRANSPORT_WIFI)
-                .setNetworkSpecifier(new StringNetworkSpecifier("specs"));
+                .setNetworkSpecifier(new EthernetNetworkSpecifier("eth42"));
         assertNotEquals("", nc1.describeImmutableDifferences(nc2));
         assertEquals("", nc1.describeImmutableDifferences(nc1));
     }
@@ -671,7 +671,7 @@ public class NetworkCapabilitiesTest {
         NetworkCapabilities nc1 = new NetworkCapabilities();
         nc1.addTransportType(TRANSPORT_CELLULAR).addTransportType(TRANSPORT_WIFI);
         try {
-            nc1.setNetworkSpecifier(new StringNetworkSpecifier("specs"));
+            nc1.setNetworkSpecifier(new EthernetNetworkSpecifier("eth0"));
             fail("Cannot set NetworkSpecifier on a NetworkCapability with multiple transports!");
         } catch (IllegalStateException expected) {
             // empty
@@ -680,7 +680,7 @@ public class NetworkCapabilitiesTest {
         // Sequence 2: Transport + NetworkSpecifier + Transport
         NetworkCapabilities nc2 = new NetworkCapabilities();
         nc2.addTransportType(TRANSPORT_CELLULAR).setNetworkSpecifier(
-                new StringNetworkSpecifier("specs"));
+                new EthernetNetworkSpecifier("testtap3"));
         try {
             nc2.addTransportType(TRANSPORT_WIFI);
             fail("Cannot set a second TransportType of a network which has a NetworkSpecifier!");

@@ -46,12 +46,12 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.EthernetNetworkSpecifier;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkTemplate;
-import android.net.StringNetworkSpecifier;
 import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -240,7 +240,7 @@ public class MultipathPolicyTrackerTest {
         NetworkCapabilities capabilities = new NetworkCapabilities()
                 .addCapability(NET_CAPABILITY_INTERNET)
                 .addTransportType(TRANSPORT_CELLULAR)
-                .setNetworkSpecifier(new StringNetworkSpecifier("234"));
+                .setNetworkSpecifier(new EthernetNetworkSpecifier("eth234"));
         if (!roaming) {
             capabilities.addCapability(NET_CAPABILITY_NOT_ROAMING);
         }

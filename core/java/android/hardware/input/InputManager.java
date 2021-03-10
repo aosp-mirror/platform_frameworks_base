@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import android.Manifest;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -922,8 +923,11 @@ public final class InputManager {
      * opacity of the windows above the touch-consuming window, per UID. Check documentation of
      * {@link LayoutParams#FLAG_NOT_TOUCHABLE} for more details.
      *
+     * <p>The value returned is between 0 (inclusive) and 1 (inclusive).
+     *
      * @see LayoutParams#FLAG_NOT_TOUCHABLE
      */
+    @FloatRange(from = 0, to = 1)
     public float getMaximumObscuringOpacityForTouch() {
         Context context = ActivityThread.currentApplication();
         return Settings.Global.getFloat(context.getContentResolver(),
@@ -934,11 +938,11 @@ public final class InputManager {
     /**
      * Sets the maximum allowed obscuring opacity by UID to propagate touches.
      *
-     * For certain window types (eg. SAWs), the decision of honoring {@link LayoutParams
+     * <p>For certain window types (eg. SAWs), the decision of honoring {@link LayoutParams
      * #FLAG_NOT_TOUCHABLE} or not depends on the combined obscuring opacity of the windows
      * above the touch-consuming window.
      *
-     * For a certain UID:
+     * <p>For a certain UID:
      * <ul>
      *     <li>If it's the same as the UID of the touch-consuming window, allow it to propagate
      *     the touch.
@@ -949,7 +953,7 @@ public final class InputManager {
      *     touch, allow the UID to propagate the touch.
      * </ul>
      *
-     * This value should be between 0 (inclusive) and 1 (inclusive).
+     * <p>This value should be between 0 (inclusive) and 1 (inclusive).
      *
      * @see #getMaximumObscuringOpacityForTouch()
      *
@@ -957,7 +961,7 @@ public final class InputManager {
      */
     @TestApi
     @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void setMaximumObscuringOpacityForTouch(float opacity) {
+    public void setMaximumObscuringOpacityForTouch(@FloatRange(from = 0, to = 1) float opacity) {
         if (opacity < 0 || opacity > 1) {
             throw new IllegalArgumentException(
                     "Maximum obscuring opacity for touch should be >= 0 and <= 1");

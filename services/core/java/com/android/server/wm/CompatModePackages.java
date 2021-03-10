@@ -27,16 +27,20 @@ import android.app.AppGlobals;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AtomicFile;
+import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
@@ -119,6 +123,17 @@ public final class CompatModePackages {
     @Disabled
     private static final long DOWNSCALE_50 = 176926741L;
 
+    /**
+     * On Android TV applications that target pre-S are not expecting to receive a Window larger
+     * than 1080p, so if needed we are downscaling their Windows to 1080p.
+     * However, applications that target S and greater release version are expected to be able to
+     * handle any Window size, so we should not downscale their Windows.
+     */
+    @ChangeId
+    @Overridable
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long DO_NOT_DOWNSCALE_TO_1080P_ON_TV = 157629738L; // This is a Bug ID.
+
     private final HashMap<String, Integer> mPackages = new HashMap<String, Integer>();
 
     private static final int MSG_WRITE = 300;
@@ -138,7 +153,7 @@ public final class CompatModePackages {
                     break;
             }
         }
-    };
+    }
 
     public CompatModePackages(ActivityTaskManagerService service, File systemDir, Handler handler) {
         mService = service;
@@ -247,55 +262,53 @@ public final class CompatModePackages {
         mHandler.sendMessageDelayed(msg, 10000);
     }
 
+    public CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
+        final boolean forceCompat = getPackageCompatModeEnabledLocked(ai);
+        final float compatScale = getCompatScale(ai.packageName, ai.uid);
+        final Configuration config = mService.getGlobalConfiguration();
+        return new CompatibilityInfo(ai, config.screenLayout, config.smallestScreenWidthDp,
+                forceCompat, compatScale);
+    }
+
     float getCompatScale(String packageName, int uid) {
-        if (!CompatChanges.isChangeEnabled(
-                DOWNSCALED, packageName, UserHandle.getUserHandleForUid(uid))) {
-            return 1f;
+        final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+        if (CompatChanges.isChangeEnabled(DOWNSCALED, packageName, userHandle)) {
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_87_5, packageName, userHandle)) {
+                return 8f / 7f; // 1.14285714286
+            }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_75, packageName, userHandle)) {
+                return 4f / 3f; // 1.333333333
+            }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_62_5, packageName, userHandle)) {
+                return /* 1 / 0.625 */ 1.6f;
+            }
+            if (CompatChanges.isChangeEnabled(DOWNSCALE_50, packageName, userHandle)) {
+                return /* 1 / 0.5 */ 2f;
+            }
         }
-        if (CompatChanges.isChangeEnabled(
-                DOWNSCALE_87_5, packageName, UserHandle.getUserHandleForUid(uid))) {
-            // 8/7 == (1 / 0.875) ~= 1.14285714286
-            return 8f / 7f;
+
+        if (mService.mHasLeanbackFeature) {
+            final Configuration config = mService.getGlobalConfiguration();
+            final float density = config.densityDpi / (float) DisplayMetrics.DENSITY_DEFAULT;
+            final int smallestScreenWidthPx = (int) (config.smallestScreenWidthDp * density + .5f);
+            if (smallestScreenWidthPx > 1080 && !CompatChanges.isChangeEnabled(
+                    DO_NOT_DOWNSCALE_TO_1080P_ON_TV, packageName, userHandle)) {
+                return smallestScreenWidthPx / 1080f;
+            }
         }
-        if (CompatChanges.isChangeEnabled(
-                DOWNSCALE_75, packageName, UserHandle.getUserHandleForUid(uid))) {
-            // 4/3 == (1 / 0.75) ~= 1.333333333
-            return 4f / 3f;
-        }
-        if (CompatChanges.isChangeEnabled(
-                DOWNSCALE_62_5, packageName, UserHandle.getUserHandleForUid(uid))) {
-            // (1 / 0.625) == 1.6
-            return 1.6f;
-        }
-        if (CompatChanges.isChangeEnabled(
-                DOWNSCALE_50, packageName, UserHandle.getUserHandleForUid(uid))) {
-            return 2f;
-        }
+
         return 1f;
     }
 
-    public CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
-        final Configuration globalConfig = mService.getGlobalConfiguration();
-        final float requestedScale = getCompatScale(ai.packageName, ai.uid);
-        CompatibilityInfo ci = new CompatibilityInfo(ai, globalConfig.screenLayout,
-                globalConfig.smallestScreenWidthDp,
-                (getPackageFlags(ai.packageName) & COMPAT_FLAG_ENABLED) != 0, requestedScale);
-        //Slog.i(TAG, "*********** COMPAT FOR PKG " + ai.packageName + ": " + ci);
-        return ci;
-    }
-
     public int computeCompatModeLocked(ApplicationInfo ai) {
-        final boolean enabled = (getPackageFlags(ai.packageName)&COMPAT_FLAG_ENABLED) != 0;
-        final Configuration globalConfig = mService.getGlobalConfiguration();
-        final CompatibilityInfo info = new CompatibilityInfo(ai, globalConfig.screenLayout,
-                globalConfig.smallestScreenWidthDp, enabled);
+        final CompatibilityInfo info = compatibilityInfoForPackageLocked(ai);
         if (info.alwaysSupportsScreen()) {
             return ActivityManager.COMPAT_MODE_NEVER;
         }
         if (info.neverSupportsScreen()) {
             return ActivityManager.COMPAT_MODE_ALWAYS;
         }
-        return enabled ? ActivityManager.COMPAT_MODE_ENABLED
+        return getPackageCompatModeEnabledLocked(ai) ? ActivityManager.COMPAT_MODE_ENABLED
                 : ActivityManager.COMPAT_MODE_DISABLED;
     }
 
@@ -305,6 +318,10 @@ public final class CompatModePackages {
 
     public void setPackageAskCompatModeLocked(String packageName, boolean ask) {
         setPackageFlagLocked(packageName, COMPAT_FLAG_DONT_ASK, ask);
+    }
+
+    private boolean getPackageCompatModeEnabledLocked(ApplicationInfo ai) {
+        return (getPackageFlags(ai.packageName) & COMPAT_FLAG_ENABLED) != 0;
     }
 
     private void setPackageFlagLocked(String packageName, int flag, boolean set) {
@@ -443,9 +460,6 @@ public final class CompatModePackages {
             out.startTag(null, "compat-packages");
 
             final IPackageManager pm = AppGlobals.getPackageManager();
-            final Configuration globalConfig = mService.getGlobalConfiguration();
-            final int screenLayout = globalConfig.screenLayout;
-            final int smallestScreenWidthDp = globalConfig.smallestScreenWidthDp;
             final Iterator<Map.Entry<String, Integer>> it = pkgs.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<String, Integer> entry = it.next();
@@ -462,8 +476,7 @@ public final class CompatModePackages {
                 if (ai == null) {
                     continue;
                 }
-                CompatibilityInfo info = new CompatibilityInfo(ai, screenLayout,
-                        smallestScreenWidthDp, false);
+                final CompatibilityInfo info = compatibilityInfoForPackageLocked(ai);
                 if (info.alwaysSupportsScreen()) {
                     continue;
                 }

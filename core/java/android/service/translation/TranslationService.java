@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.translation.ITranslationDirectManager;
 import android.view.translation.TranslationManager;
+import android.view.translation.TranslationRequest;
 import android.view.translation.TranslationResponse;
 import android.view.translation.TranslationSpec;
 

@@ -31,6 +31,7 @@ import android.os.Process;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
@@ -160,19 +161,20 @@ public class UiTranslationController {
             Log.w(TAG, "Fail result from TranslationService, response: " + response);
             return;
         }
-        final List<TranslationRequest> translatedResult = response.getTranslations();
+        final SparseArray<ViewTranslationResponse> translatedResult =
+                response.getViewTranslationResponses();
         onTranslationCompleted(translatedResult);
     }
 
-    private void onTranslationCompleted(List<TranslationRequest> translatedResult) {
+    private void onTranslationCompleted(SparseArray<ViewTranslationResponse> translatedResult) {
         if (!mActivity.isResumed()) {
             return;
         }
         final int resultCount = translatedResult.size();
         synchronized (mLock) {
             for (int i = 0; i < resultCount; i++) {
-                final TranslationRequest request = translatedResult.get(i);
-                final AutofillId autofillId = request.getAutofillId();
+                final ViewTranslationResponse response = translatedResult.get(i);
+                final AutofillId autofillId = response.getAutofillId();
                 if (autofillId == null) {
                     continue;
                 }
@@ -182,7 +184,7 @@ public class UiTranslationController {
                             + " may be gone.");
                     continue;
                 }
-                mActivity.runOnUiThread(() -> view.onTranslationComplete(request));
+                mActivity.runOnUiThread(() -> view.onTranslationComplete(response));
             }
         }
     }
@@ -205,8 +207,11 @@ public class UiTranslationController {
 
     @WorkerThread
     private void sendTranslationRequest(Translator translator,
-            ArrayList<TranslationRequest> requests) {
-        translator.requestUiTranslate(requests, this::onTranslationCompleted);
+            List<ViewTranslationRequest> requests) {
+        final TranslationRequest request = new TranslationRequest.Builder()
+                .setViewTranslationRequests(requests)
+                .build();
+        translator.requestUiTranslate(request, this::onTranslationCompleted);
     }
 
     /**
@@ -215,17 +220,17 @@ public class UiTranslationController {
     private void onUiTranslationStarted(Translator translator, List<AutofillId> views) {
         synchronized (mLock) {
             // Find Views collect the translation data
-            final ArrayList<TranslationRequest> requests = new ArrayList<>();
+            final ArrayList<ViewTranslationRequest> requests = new ArrayList<>();
             final ArrayList<View> foundViews = new ArrayList<>();
             findViewsTraversalByAutofillIds(views, foundViews);
             for (int i = 0; i < foundViews.size(); i++) {
                 final View view = foundViews.get(i);
                 final int currentCount = i;
                 mActivity.runOnUiThread(() -> {
-                    final TranslationRequest translationRequest = view.onCreateTranslationRequest();
-                    if (translationRequest != null
-                            && translationRequest.getTranslationText().length() > 0) {
-                        requests.add(translationRequest);
+                    final ViewTranslationRequest request = view.onCreateTranslationRequest();
+                    if (request != null
+                            && request.getKeys().size() > 0) {
+                        requests.add(request);
                     }
                     if (currentCount == (foundViews.size() - 1)) {
                         Log.v(TAG, "onUiTranslationStarted: send " + requests.size() + " request.");
