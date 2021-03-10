@@ -357,7 +357,7 @@ public class LingerMonitorTest {
         NetworkAgentInfo nai = new NetworkAgentInfo(null, new Network(netId), info,
                 new LinkProperties(), caps, 50, mCtx, null, new NetworkAgentConfig() /* config */,
                 mConnService, mNetd, mDnsResolver, NetworkProvider.ID_NONE, Binder.getCallingUid(),
-                mQosCallbackTracker);
+                mQosCallbackTracker, new ConnectivityService.Dependencies());
         nai.everValidated = true;
         return nai;
     }

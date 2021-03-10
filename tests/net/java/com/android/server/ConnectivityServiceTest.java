@@ -1533,6 +1533,7 @@ public class ConnectivityServiceTest {
                     inv.getArgument(0), inv.getArgument(1), inv.getArgument(2));
             return mPolicyTracker;
         }).when(deps).makeMultinetworkPolicyTracker(any(), any(), any());
+        doReturn(true).when(deps).getCellular464XlatEnabled();
 
         return deps;
     }
@@ -8330,6 +8331,45 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    public void testWith464XlatDisable() throws Exception {
+        doReturn(false).when(mDeps).getCellular464XlatEnabled();
+
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        final TestNetworkCallback defaultCallback = new TestNetworkCallback();
+        final NetworkRequest networkRequest = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .build();
+        mCm.registerNetworkCallback(networkRequest, callback);
+        mCm.registerDefaultNetworkCallback(defaultCallback);
+
+        // Bring up validated cell.
+        final LinkProperties cellLp = new LinkProperties();
+        cellLp.setInterfaceName(MOBILE_IFNAME);
+        cellLp.addLinkAddress(new LinkAddress("2001:db8:1::1/64"));
+        cellLp.addRoute(new RouteInfo(new IpPrefix("::/0"), null, MOBILE_IFNAME));
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        mCellNetworkAgent.connect(true);
+        callback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        defaultCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        final int cellNetId = mCellNetworkAgent.getNetwork().netId;
+        waitForIdle();
+
+        verify(mMockDnsResolver, never()).startPrefix64Discovery(cellNetId);
+        Nat464Xlat clat = getNat464Xlat(mCellNetworkAgent);
+        assertTrue("Nat464Xlat was not IDLE", !clat.isStarted());
+
+        // This cannot happen because prefix discovery cannot succeed if it is never started.
+        mService.mResolverUnsolEventCallback.onNat64PrefixEvent(
+                makeNat64PrefixEvent(cellNetId, PREFIX_OPERATION_ADDED, "64:ff9b::", 96));
+
+        // ... but still, check that even if it did, clatd would not be started.
+        verify(mMockNetd, never()).clatdStart(anyString(), anyString());
+        assertTrue("Nat464Xlat was not IDLE", !clat.isStarted());
+    }
+
+    @Test
     public void testDataActivityTracking() throws Exception {
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
         final NetworkRequest networkRequest = new NetworkRequest.Builder()
@@ -9035,7 +9075,7 @@ public class ConnectivityServiceTest {
                 TelephonyManager.getNetworkTypeName(TelephonyManager.NETWORK_TYPE_LTE));
         return new NetworkAgentInfo(null, new Network(NET_ID), info, new LinkProperties(),
                 nc, 0, mServiceContext, null, new NetworkAgentConfig(), mService, null, null, 0,
-                INVALID_UID, mQosCallbackTracker);
+                INVALID_UID, mQosCallbackTracker, new ConnectivityService.Dependencies());
     }
 
     @Test
