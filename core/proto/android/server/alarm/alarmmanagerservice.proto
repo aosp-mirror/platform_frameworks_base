@@ -23,7 +23,7 @@ import "frameworks/base/core/proto/android/os/worksource.proto";
 import "frameworks/base/core/proto/android/server/appstatetracker.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 
-package com.android.server;
+package com.android.server.alarm;
 
 option java_multiple_files = true;
 
