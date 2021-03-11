@@ -24412,11 +24412,16 @@ package android.media.metrics {
 
   public abstract class Event {
     ctor protected Event(long);
+    method @NonNull public android.os.Bundle getMetricsBundle();
     method @IntRange(from=0xffffffff) public long getTimeSinceCreatedMillis();
+  }
+
+  public final class LogSessionId {
   }
 
   public class MediaMetricsManager {
     method @NonNull public android.media.metrics.PlaybackSession createPlaybackSession();
+    method @NonNull public android.media.metrics.RecordingSession createRecordingSession();
     field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
   }
 
@@ -24431,14 +24436,16 @@ package android.media.metrics {
     field public static final int NETWORK_TYPE_5G_NSA = 7; // 0x7
     field public static final int NETWORK_TYPE_5G_SA = 8; // 0x8
     field public static final int NETWORK_TYPE_ETHERNET = 3; // 0x3
-    field public static final int NETWORK_TYPE_NONE = 0; // 0x0
+    field public static final int NETWORK_TYPE_OFFLINE = 9; // 0x9
     field public static final int NETWORK_TYPE_OTHER = 1; // 0x1
+    field public static final int NETWORK_TYPE_UNKNOWN = 0; // 0x0
     field public static final int NETWORK_TYPE_WIFI = 2; // 0x2
   }
 
   public static final class NetworkEvent.Builder {
     ctor public NetworkEvent.Builder();
     method @NonNull public android.media.metrics.NetworkEvent build();
+    method @NonNull public android.media.metrics.NetworkEvent.Builder setMetricsBundle(@NonNull android.os.Bundle);
     method @NonNull public android.media.metrics.NetworkEvent.Builder setNetworkType(int);
     method @NonNull public android.media.metrics.NetworkEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
   }
@@ -24454,9 +24461,37 @@ package android.media.metrics {
     method @IntRange(from=java.lang.Integer.MIN_VALUE, to=java.lang.Integer.MAX_VALUE) public int getSubErrorCode();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.metrics.PlaybackErrorEvent> CREATOR;
-    field public static final int ERROR_CODE_OTHER = 1; // 0x1
-    field public static final int ERROR_CODE_RUNTIME = 2; // 0x2
-    field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
+    field public static final int ERROR_AUDIOTRACK_INIT = 17; // 0x11
+    field public static final int ERROR_AUDIOTRACK_OTHER = 19; // 0x13
+    field public static final int ERROR_AUDIOTRACK_WRITE = 18; // 0x12
+    field public static final int ERROR_DECODER_DECODE = 14; // 0xe
+    field public static final int ERROR_DECODER_INIT = 13; // 0xd
+    field public static final int ERROR_DECODER_OOM = 15; // 0xf
+    field public static final int ERROR_DECODER_OTHER = 16; // 0x10
+    field public static final int ERROR_DRM_CONTENT_ERROR = 28; // 0x1c
+    field public static final int ERROR_DRM_DISALLOWED = 26; // 0x1a
+    field public static final int ERROR_DRM_LICENSE_ERROR = 25; // 0x19
+    field public static final int ERROR_DRM_OTHER = 30; // 0x1e
+    field public static final int ERROR_DRM_PROVISIONING_FAILED = 24; // 0x18
+    field public static final int ERROR_DRM_REVOKED = 29; // 0x1d
+    field public static final int ERROR_DRM_SYSTEM_ERROR = 27; // 0x1b
+    field public static final int ERROR_DRM_UNAVAILABLE = 23; // 0x17
+    field public static final int ERROR_MEDIA_MANIFEST = 10; // 0xa
+    field public static final int ERROR_MEDIA_OTHER = 12; // 0xc
+    field public static final int ERROR_MEDIA_PARSER = 11; // 0xb
+    field public static final int ERROR_NETWORK_BAD_STATUS = 5; // 0x5
+    field public static final int ERROR_NETWORK_CLOSED = 8; // 0x8
+    field public static final int ERROR_NETWORK_CONNECT = 4; // 0x4
+    field public static final int ERROR_NETWORK_DNS = 6; // 0x6
+    field public static final int ERROR_NETWORK_OFFLINE = 3; // 0x3
+    field public static final int ERROR_NETWORK_OTHER = 9; // 0x9
+    field public static final int ERROR_NETWORK_TIMEOUT = 7; // 0x7
+    field public static final int ERROR_OTHER = 1; // 0x1
+    field public static final int ERROR_PLAYER_BEHIND_LIVE_WINDOW = 21; // 0x15
+    field public static final int ERROR_PLAYER_OTHER = 22; // 0x16
+    field public static final int ERROR_PLAYER_REMOTE = 20; // 0x14
+    field public static final int ERROR_RUNTIME = 2; // 0x2
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
   public static final class PlaybackErrorEvent.Builder {
@@ -24464,6 +24499,7 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.PlaybackErrorEvent build();
     method @NonNull public android.media.metrics.PlaybackErrorEvent.Builder setErrorCode(int);
     method @NonNull public android.media.metrics.PlaybackErrorEvent.Builder setException(@NonNull Exception);
+    method @NonNull public android.media.metrics.PlaybackErrorEvent.Builder setMetricsBundle(@NonNull android.os.Bundle);
     method @NonNull public android.media.metrics.PlaybackErrorEvent.Builder setSubErrorCode(@IntRange(from=java.lang.Integer.MIN_VALUE, to=java.lang.Integer.MAX_VALUE) int);
     method @NonNull public android.media.metrics.PlaybackErrorEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
   }
@@ -24472,10 +24508,12 @@ package android.media.metrics {
     method public int describeContents();
     method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getAudioUnderrunCount();
     method public int getContentType();
+    method @NonNull public byte[] getDrmSessionId();
     method public int getDrmType();
     method @NonNull public long[] getExperimentIds();
     method @IntRange(from=0xffffffff) public long getLocalBytesRead();
     method @IntRange(from=0xffffffff) public long getMediaDurationMillis();
+    method @NonNull public android.os.Bundle getMetricsBundle();
     method @IntRange(from=0xffffffff) public long getNetworkBytesRead();
     method @IntRange(from=0xffffffff) public long getNetworkTransferDurationMillis();
     method public int getPlaybackType();
@@ -24486,9 +24524,10 @@ package android.media.metrics {
     method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getVideoFramesDropped();
     method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getVideoFramesPlayed();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int CONTENT_TYPE_AD = 1; // 0x1
-    field public static final int CONTENT_TYPE_MAIN = 0; // 0x0
-    field public static final int CONTENT_TYPE_OTHER = 2; // 0x2
+    field public static final int CONTENT_TYPE_AD = 2; // 0x2
+    field public static final int CONTENT_TYPE_MAIN = 1; // 0x1
+    field public static final int CONTENT_TYPE_OTHER = 3; // 0x3
+    field public static final int CONTENT_TYPE_UNKNOWN = 0; // 0x0
     field @NonNull public static final android.os.Parcelable.Creator<android.media.metrics.PlaybackMetrics> CREATOR;
     field public static final int DRM_TYPE_CLEARKEY = 6; // 0x6
     field public static final int DRM_TYPE_NONE = 0; // 0x0
@@ -24497,9 +24536,10 @@ package android.media.metrics {
     field public static final int DRM_TYPE_WIDEVINE_L1 = 3; // 0x3
     field public static final int DRM_TYPE_WIDEVINE_L3 = 4; // 0x4
     field public static final int DRM_TYPE_WV_L3_FALLBACK = 5; // 0x5
-    field public static final int PLAYBACK_TYPE_LIVE = 1; // 0x1
-    field public static final int PLAYBACK_TYPE_OTHER = 2; // 0x2
-    field public static final int PLAYBACK_TYPE_VOD = 0; // 0x0
+    field public static final int PLAYBACK_TYPE_LIVE = 2; // 0x2
+    field public static final int PLAYBACK_TYPE_OTHER = 3; // 0x3
+    field public static final int PLAYBACK_TYPE_UNKNOWN = 0; // 0x0
+    field public static final int PLAYBACK_TYPE_VOD = 1; // 0x1
     field public static final int STREAM_SOURCE_DEVICE = 2; // 0x2
     field public static final int STREAM_SOURCE_MIXED = 3; // 0x3
     field public static final int STREAM_SOURCE_NETWORK = 1; // 0x1
@@ -24518,9 +24558,11 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.PlaybackMetrics build();
     method @NonNull public android.media.metrics.PlaybackMetrics.Builder setAudioUnderrunCount(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
     method @NonNull public android.media.metrics.PlaybackMetrics.Builder setContentType(int);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setDrmSessionId(@NonNull byte[]);
     method @NonNull public android.media.metrics.PlaybackMetrics.Builder setDrmType(int);
     method @NonNull public android.media.metrics.PlaybackMetrics.Builder setLocalBytesRead(@IntRange(from=0xffffffff) long);
     method @NonNull public android.media.metrics.PlaybackMetrics.Builder setMediaDurationMillis(@IntRange(from=0xffffffff) long);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setMetricsBundle(@NonNull android.os.Bundle);
     method @NonNull public android.media.metrics.PlaybackMetrics.Builder setNetworkBytesRead(@IntRange(from=0xffffffff) long);
     method @NonNull public android.media.metrics.PlaybackMetrics.Builder setNetworkTransferDurationMillis(@IntRange(from=0xffffffff) long);
     method @NonNull public android.media.metrics.PlaybackMetrics.Builder setPlaybackType(int);
@@ -24534,7 +24576,7 @@ package android.media.metrics {
 
   public final class PlaybackSession implements java.lang.AutoCloseable {
     method public void close();
-    method @NonNull public String getId();
+    method @NonNull public android.media.metrics.LogSessionId getSessionId();
     method public void reportNetworkEvent(@NonNull android.media.metrics.NetworkEvent);
     method public void reportPlaybackErrorEvent(@NonNull android.media.metrics.PlaybackErrorEvent);
     method public void reportPlaybackMetrics(@NonNull android.media.metrics.PlaybackMetrics);
@@ -24567,13 +24609,19 @@ package android.media.metrics {
   public static final class PlaybackStateEvent.Builder {
     ctor public PlaybackStateEvent.Builder();
     method @NonNull public android.media.metrics.PlaybackStateEvent build();
+    method @NonNull public android.media.metrics.PlaybackStateEvent.Builder setMetricsBundle(@NonNull android.os.Bundle);
     method @NonNull public android.media.metrics.PlaybackStateEvent.Builder setState(int);
     method @NonNull public android.media.metrics.PlaybackStateEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
   }
 
+  public final class RecordingSession implements java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public android.media.metrics.LogSessionId getSessionId();
+  }
+
   public final class TrackChangeEvent extends android.media.metrics.Event implements android.os.Parcelable {
-    ctor public TrackChangeEvent(int, int, @Nullable String, @Nullable String, @Nullable String, int, long, int, @Nullable String, @Nullable String, int, int, int, int);
     method public int describeContents();
+    method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getAudioSampleRate();
     method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getBitrate();
     method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getChannelCount();
     method @Nullable public String getCodecName();
@@ -24582,10 +24630,10 @@ package android.media.metrics {
     method @Nullable public String getLanguage();
     method @Nullable public String getLanguageRegion();
     method @Nullable public String getSampleMimeType();
-    method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getSampleRate();
     method public int getTrackChangeReason();
     method public int getTrackState();
     method public int getTrackType();
+    method @FloatRange(from=0xffffffff, to=java.lang.Float.MAX_VALUE) public float getVideoFrameRate();
     method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getWidth();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.metrics.TrackChangeEvent> CREATOR;
@@ -24604,6 +24652,7 @@ package android.media.metrics {
   public static final class TrackChangeEvent.Builder {
     ctor public TrackChangeEvent.Builder(int);
     method @NonNull public android.media.metrics.TrackChangeEvent build();
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setAudioSampleRate(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setBitrate(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setChannelCount(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setCodecName(@NonNull String);
@@ -24611,11 +24660,12 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setHeight(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setLanguage(@NonNull String);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setLanguageRegion(@NonNull String);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setMetricsBundle(@NonNull android.os.Bundle);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setSampleMimeType(@NonNull String);
-    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setSampleRate(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setTrackChangeReason(int);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setTrackState(int);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setVideoFrameRate(@FloatRange(from=0xffffffff, to=java.lang.Float.MAX_VALUE) float);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setWidth(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
   }
 
