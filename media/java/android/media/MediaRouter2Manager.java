@@ -237,6 +237,36 @@ public final class MediaRouter2Manager {
     }
 
     /**
+     * Returns a list of routes which are related to the given package name in the given route list.
+     */
+    @NonNull
+    public List<MediaRoute2Info> filterRoutesForPackage(@NonNull List<MediaRoute2Info> routes,
+            @NonNull String packageName) {
+        Objects.requireNonNull(routes, "routes must not be null");
+        Objects.requireNonNull(packageName, "packageName must not be null");
+
+        List<RoutingSessionInfo> sessions = getRoutingSessions(packageName);
+        RoutingSessionInfo sessionInfo = sessions.get(sessions.size() - 1);
+
+        List<MediaRoute2Info> result = new ArrayList<>();
+        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
+        if (preferredFeatures == null) {
+            preferredFeatures = Collections.emptyList();
+        }
+
+        synchronized (mRoutesLock) {
+            for (MediaRoute2Info route : routes) {
+                if (route.hasAnyFeatures(preferredFeatures)
+                        || sessionInfo.getSelectedRoutes().contains(route.getId())
+                        || sessionInfo.getTransferableRoutes().contains(route.getId())) {
+                    result.add(route);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
      * Gets the system routing session associated with no specific application.
      */
     @NonNull
