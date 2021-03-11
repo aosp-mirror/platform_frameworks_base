@@ -23,10 +23,11 @@ import static android.app.people.ConversationStatus.ACTIVITY_ANNIVERSARY;
 import static android.app.people.ConversationStatus.ACTIVITY_BIRTHDAY;
 import static android.app.people.ConversationStatus.ACTIVITY_GAME;
 
+import static com.android.systemui.people.PeopleSpaceUtils.EMPTY_STRING;
 import static com.android.systemui.people.PeopleSpaceUtils.INVALID_USER_ID;
-import static com.android.systemui.people.PeopleSpaceUtils.OPTIONS_PEOPLE_SPACE_TILE;
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
 import static com.android.systemui.people.PeopleSpaceUtils.USER_ID;
+import static com.android.systemui.people.widget.AppWidgetOptionsHelper.OPTIONS_PEOPLE_TILE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -104,13 +105,14 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private static final int WIDGET_ID_WITH_SHORTCUT = 1;
     private static final int SECOND_WIDGET_ID_WITH_SHORTCUT = 3;
     private static final int WIDGET_ID_WITHOUT_SHORTCUT = 2;
+    private static final int WIDGET_ID_WITH_KEY_IN_OPTIONS = 4;
     private static final String SHORTCUT_ID = "101";
     private static final String OTHER_SHORTCUT_ID = "102";
     private static final String NOTIFICATION_KEY = "0|com.android.systemui.tests|0|null|0";
     private static final String NOTIFICATION_CONTENT = "message text";
     private static final Uri URI = Uri.parse("fake_uri");
     private static final Icon ICON = Icon.createWithResource("package", R.drawable.ic_android);
-    private static final String KEY = PeopleSpaceUtils.getKey(SHORTCUT_ID, TEST_PACKAGE_A, 0);
+    private static final PeopleTileKey KEY = new PeopleTileKey(SHORTCUT_ID, 0, TEST_PACKAGE_A);
     private static final Person PERSON = new Person.Builder()
             .setName("name")
             .setKey("abc")
@@ -172,10 +174,11 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
 
+        clearStorage();
         setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
 
         Bundle options = new Bundle();
-        options.putParcelable(PeopleSpaceUtils.OPTIONS_PEOPLE_SPACE_TILE, PERSON_TILE);
+        options.putParcelable(OPTIONS_PEOPLE_TILE, PERSON_TILE);
         when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT)))
                 .thenReturn(options);
         when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITHOUT_SHORTCUT)))
@@ -395,7 +398,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
                         mBundleArgumentCaptor.capture());
         Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_SPACE_TILE);
+        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
         assertThat(tile.getStatuses()).containsExactly(status);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
@@ -439,7 +442,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
                         mBundleArgumentCaptor.capture());
         Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_SPACE_TILE);
+        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
         assertThat(tile.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tile.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
@@ -473,7 +476,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             throws Exception {
         addSecondWidgetForPersonTile();
 
-        PeopleSpaceUtils.removeStorageForTile(mContext, KEY, SECOND_WIDGET_ID_WITH_SHORTCUT);
+        PeopleSpaceUtils.removeSharedPreferencesStorageForTile(
+                mContext, KEY, SECOND_WIDGET_ID_WITH_SHORTCUT);
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setSbn(createNotification(
                         SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false))
@@ -510,7 +514,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                         mBundleArgumentCaptor.capture());
         Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
 
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_SPACE_TILE);
+        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
         assertThat(tile.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tile.getNotificationContent())
                 .isEqualTo(mContext.getString(R.string.missed_call));
@@ -536,7 +540,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                         mBundleArgumentCaptor.capture());
         Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
 
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_SPACE_TILE);
+        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
         assertThat(tile.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
         assertThat(tile.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
@@ -547,6 +551,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     public void testUpdateNotificationRemovedIfExistingTile() throws Exception {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
 
         StatusBarNotification sbn = createNotification(
                 SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false);
@@ -560,11 +565,11 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         verify(mAppWidgetManager, times(2)).updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
                 mBundleArgumentCaptor.capture());
         Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_SPACE_TILE);
+        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
         assertThat(tile.getNotificationKey()).isEqualTo(null);
         assertThat(tile.getNotificationContent()).isEqualTo(null);
         assertThat(tile.getNotificationDataUri()).isEqualTo(null);
-        verify(mAppWidgetManager, times(2)).updateAppWidget(anyInt(),
+        verify(mAppWidgetManager, times(2)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
 
@@ -585,7 +590,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         assertThat(widgetSp.getString(SHORTCUT_ID, null)).isNull();
         assertThat(widgetSp.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(INVALID_USER_ID);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-        assertThat(sp.getStringSet(KEY, new HashSet<>())).containsExactly(
+        assertThat(sp.getStringSet(KEY.toString(), new HashSet<>())).containsExactly(
                 String.valueOf(SECOND_WIDGET_ID_WITH_SHORTCUT));
         // Check listener & shortcut caching remain for other widget.
         verify(mPeopleManager, never()).unregisterConversationListener(any());
@@ -603,12 +608,95 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         assertThat(secondWidgetSp.getString(PACKAGE_NAME, null)).isNull();
         assertThat(secondWidgetSp.getString(SHORTCUT_ID, null)).isNull();
         assertThat(secondWidgetSp.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(INVALID_USER_ID);
-        assertThat(sp.getStringSet(KEY, new HashSet<>())).isEmpty();
+        assertThat(sp.getStringSet(KEY.toString(), new HashSet<>())).isEmpty();
         // Check listener is removed and shortcut is uncached.
         verify(mPeopleManager, times(1)).unregisterConversationListener(any());
         verify(mLauncherApps, times(1)).uncacheShortcuts(eq(TEST_PACKAGE_A),
                 eq(Arrays.asList(SHORTCUT_ID)), eq(UserHandle.of(0)),
                 eq(LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS));
+    }
+
+    @Test
+    public void testUpdateWidgetsWithEmptyOptionsAddsPeopleTileToOptions() throws Exception {
+        int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT};
+        when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+        when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT)))
+                .thenReturn(new Bundle());
+
+        mManager.updateWidgets(widgetIdsArray);
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        // If we had to fetch Tile from persistent storage, we want to make sure we write it to
+        // options.
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
+                        mBundleArgumentCaptor.capture());
+        Bundle bundle = mBundleArgumentCaptor.getValue();
+        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tile.getId()).isEqualTo(SHORTCUT_ID);
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+    }
+
+    @Test
+    public void testOnAppWidgetOptionsChangedNoWidgetAdded() {
+        Bundle newOptions = new Bundle();
+        newOptions.putParcelable(OPTIONS_PEOPLE_TILE, PERSON_TILE);
+        mManager.onAppWidgetOptionsChanged(SECOND_WIDGET_ID_WITH_SHORTCUT, newOptions);
+
+
+        // Check that options is not modified
+        verify(mAppWidgetManager, never()).updateAppWidgetOptions(
+                eq(SECOND_WIDGET_ID_WITH_SHORTCUT), any());
+        // Check listener is not added and shortcut is not cached.
+        verify(mPeopleManager, never()).registerConversationListener(any(), anyInt(), any(), any(),
+                any());
+        verify(mLauncherApps, never()).cacheShortcuts(any(), any(), any(), anyInt());
+        // Check no added storage.
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+        assertThat(sp.getStringSet(KEY.toString(), new HashSet<>()))
+                .doesNotContain(SECOND_WIDGET_ID_WITH_SHORTCUT);
+        SharedPreferences widgetSp = mContext.getSharedPreferences(
+                String.valueOf(SECOND_WIDGET_ID_WITH_SHORTCUT),
+                Context.MODE_PRIVATE);
+        assertThat(widgetSp.getString(PACKAGE_NAME, EMPTY_STRING)).isEqualTo(EMPTY_STRING);
+        assertThat(widgetSp.getString(SHORTCUT_ID, EMPTY_STRING)).isEqualTo(EMPTY_STRING);
+        assertThat(widgetSp.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(INVALID_USER_ID);
+
+    }
+
+    @Test
+    public void testOnAppWidgetOptionsChangedWidgetAdded() {
+        Bundle newOptions = new Bundle();
+        newOptions.putString(PeopleSpaceUtils.SHORTCUT_ID, SHORTCUT_ID);
+        newOptions.putInt(USER_ID, 0);
+        newOptions.putString(PACKAGE_NAME, TEST_PACKAGE_A);
+        when(mAppWidgetManager.getAppWidgetOptions(eq(SECOND_WIDGET_ID_WITH_SHORTCUT)))
+                .thenReturn(newOptions);
+
+        mManager.onAppWidgetOptionsChanged(SECOND_WIDGET_ID_WITH_SHORTCUT, newOptions);
+
+        verify(mAppWidgetManager, times(1)).updateAppWidgetOptions(
+                eq(SECOND_WIDGET_ID_WITH_SHORTCUT), mBundleArgumentCaptor.capture());
+        Bundle bundle = mBundleArgumentCaptor.getValue();
+        assertThat(bundle.getString(PeopleSpaceUtils.SHORTCUT_ID, EMPTY_STRING))
+                .isEqualTo(EMPTY_STRING);
+        assertThat(bundle.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(INVALID_USER_ID);
+        assertThat(bundle.getString(PACKAGE_NAME, EMPTY_STRING)).isEqualTo(EMPTY_STRING);
+        verify(mLauncherApps, times(1)).cacheShortcuts(eq(TEST_PACKAGE_A),
+                eq(Arrays.asList(SHORTCUT_ID)), eq(UserHandle.of(0)),
+                eq(LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS));
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+        assertThat(sp.getStringSet(KEY.toString(), new HashSet<>())).contains(
+                String.valueOf(SECOND_WIDGET_ID_WITH_SHORTCUT));
+        SharedPreferences widgetSp = mContext.getSharedPreferences(
+                String.valueOf(SECOND_WIDGET_ID_WITH_SHORTCUT),
+                Context.MODE_PRIVATE);
+        assertThat(widgetSp.getString(PACKAGE_NAME, EMPTY_STRING)).isEqualTo(TEST_PACKAGE_A);
+        assertThat(widgetSp.getString(PeopleSpaceUtils.SHORTCUT_ID, EMPTY_STRING))
+                .isEqualTo(SHORTCUT_ID);
+        assertThat(widgetSp.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(0);
     }
 
     /**
@@ -617,7 +705,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
      */
     private void addSecondWidgetForPersonTile() {
         Bundle options = new Bundle();
-        options.putParcelable(PeopleSpaceUtils.OPTIONS_PEOPLE_SPACE_TILE, PERSON_TILE);
+        options.putParcelable(OPTIONS_PEOPLE_TILE, PERSON_TILE);
         when(mAppWidgetManager.getAppWidgetOptions(eq(SECOND_WIDGET_ID_WITH_SHORTCUT)))
                 .thenReturn(options);
         // Set the same Person associated on another People Tile widget ID.
@@ -676,6 +764,27 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .build();
     }
 
+    private void clearStorage() {
+        SharedPreferences widgetSp1 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITH_SHORTCUT),
+                Context.MODE_PRIVATE);
+        widgetSp1.edit().clear().commit();
+        SharedPreferences widgetSp2 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITHOUT_SHORTCUT),
+                Context.MODE_PRIVATE);
+        widgetSp2.edit().clear().commit();
+        SharedPreferences widgetSp3 = mContext.getSharedPreferences(
+                String.valueOf(SECOND_WIDGET_ID_WITH_SHORTCUT),
+                Context.MODE_PRIVATE);
+        widgetSp3.edit().clear().commit();
+        SharedPreferences widgetSp4 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS),
+                Context.MODE_PRIVATE);
+        widgetSp4.edit().clear().commit();
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+        sp.edit().clear().commit();
+    }
+
     private void setStorageForTile(String shortcutId, String packageName, int widgetId) {
         SharedPreferences widgetSp = mContext.getSharedPreferences(
                 String.valueOf(widgetId),
@@ -689,7 +798,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(String.valueOf(widgetId), shortcutId);
-        String key = PeopleSpaceUtils.getKey(shortcutId, packageName, 0);
+        String key = new PeopleTileKey(shortcutId, 0, packageName).toString();
         Set<String> storedWidgetIds = new HashSet<>(sp.getStringSet(key, new HashSet<>()));
         storedWidgetIds.add(String.valueOf(widgetId));
         editor.putStringSet(key, storedWidgetIds);
