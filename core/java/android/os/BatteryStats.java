@@ -986,13 +986,13 @@ public abstract class BatteryStats implements Parcelable {
         public abstract void getDeferredJobsLineLocked(StringBuilder sb, int which);
 
         /**
-         * Returns the battery consumption (in microcoulombs) of the screen while on and uid active,
+         * Returns the battery consumption (in microcoulombs) of bluetooth for this uid,
          * derived from on device power measurement data.
          * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
          *
          * {@hide}
          */
-        public abstract long getScreenOnMeasuredBatteryConsumptionUC();
+        public abstract long getBluetoothMeasuredBatteryConsumptionUC();
 
         /**
          * Returns the battery consumption (in microcoulombs) of the uid's cpu usage, derived from
@@ -1002,6 +1002,24 @@ public abstract class BatteryStats implements Parcelable {
          * {@hide}
          */
         public abstract long getCpuMeasuredBatteryConsumptionUC();
+
+        /**
+         * Returns the battery consumption (in microcoulombs) of the screen while on and uid active,
+         * derived from on device power measurement data.
+         * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+         *
+         * {@hide}
+         */
+        public abstract long getScreenOnMeasuredBatteryConsumptionUC();
+
+        /**
+         * Returns the battery consumption (in microcoulombs) of wifi for this uid,
+         * derived from on device power measurement data.
+         * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+         *
+         * {@hide}
+         */
+        public abstract long getWifiMeasuredBatteryConsumptionUC();
 
         /**
          * Returns the battery consumption (in microcoulombs) used by this uid for each
@@ -2505,11 +2523,29 @@ public abstract class BatteryStats implements Parcelable {
     };
 
     /**
-     * Returned value if power data is unavailable
+     * Returned value if power data is unavailable.
      *
      * {@hide}
      */
-    public static final long POWER_DATA_UNAVAILABLE = -1;
+    public static final long POWER_DATA_UNAVAILABLE = -1L;
+
+    /**
+     * Returns the battery consumption (in microcoulombs) of bluetooth, derived from on
+     * device power measurement data.
+     * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+     *
+     * {@hide}
+     */
+    public abstract long getBluetoothMeasuredBatteryConsumptionUC();
+
+    /**
+     * Returns the battery consumption (in microcoulombs) of the cpu, derived from on device power
+     * measurement data.
+     * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+     *
+     * {@hide}
+     */
+    public abstract long getCpuMeasuredBatteryConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) of the screen while on, derived from on
@@ -2530,13 +2566,13 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getScreenDozeMeasuredBatteryConsumptionUC();
 
     /**
-     * Returns the battery consumption (in microcoulombs) of the cpu, derived from on device power
-     * measurement data.
+     * Returns the battery consumption (in microcoulombs) of wifi, derived from on
+     * device power measurement data.
      * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
      *
      * {@hide}
      */
-    public abstract long getCpuMeasuredBatteryConsumptionUC();
+    public abstract long getWifiMeasuredBatteryConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) that each
