@@ -127,25 +127,7 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .getPeopleNotificationType(entry))
                 .thenReturn(TYPE_NON_PERSON);
 
-        // THEN it has high priority
-        assertTrue(mHighPriorityProvider.isHighPriority(entry));
-    }
-
-    @Test
-    public void minImportanceForeground() {
-        // GIVEN notification is low importance and is associated with a foreground service
-        final Notification notification = mock(Notification.class);
-        when(notification.isForegroundService()).thenReturn(true);
-
-        final NotificationEntry entry = new NotificationEntryBuilder()
-                .setNotification(notification)
-                .setImportance(IMPORTANCE_MIN)
-                .build();
-        when(mPeopleNotificationIdentifier
-                .getPeopleNotificationType(entry))
-                .thenReturn(TYPE_NON_PERSON);
-
-        // THEN it does NOT have high priority
+        // THEN it has low priority
         assertFalse(mHighPriorityProvider.isHighPriority(entry));
     }
 
@@ -155,7 +137,6 @@ public class HighPriorityProviderTest extends SysuiTestCase {
         // to less than IMPORTANCE_DEFAULT (ie: IMPORTANCE_LOW or IMPORTANCE_MIN)
         final Notification notification = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle(""))
-                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
         final NotificationChannel channel = new NotificationChannel("a", "a",
                 IMPORTANCE_LOW);

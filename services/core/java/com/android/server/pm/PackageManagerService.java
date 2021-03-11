@@ -4482,6 +4482,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     break;
                 }
 
+                case DumpState.DUMP_PREFERRED:
+                    mSettings.dumpPreferred(pw, dumpState, packageName);
+                    break;
+
                 case DumpState.DUMP_PREFERRED_XML:
                 {
                     pw.flush();
@@ -24141,11 +24145,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
-            // TODO: This cannot be moved to ComputerEngine since some variables with collections
-            //  types in IntentResolver such as mTypeToFilter do not have a copy of `F[]`.
-            synchronized (mLock) {
-                mSettings.dumpPreferred(pw, dumpState, packageName);
-            }
+            dump(DumpState.DUMP_PREFERRED, fd, pw, dumpState);
         }
 
         if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED_XML)) {

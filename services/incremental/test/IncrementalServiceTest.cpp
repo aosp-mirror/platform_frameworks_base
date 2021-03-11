@@ -21,6 +21,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <utils/Log.h>
+#include <utils/String16.h>
 
 #include <chrono>
 #include <future>
@@ -701,6 +702,18 @@ public:
         mDataLoaderManager->getDataLoaderSuccess();
     }
 
+    void checkMillisSinceOldestPendingRead(int storageId, long expected) {
+        android::os::PersistableBundle result{};
+        mIncrementalService->getMetrics(storageId, &result);
+        int64_t value = -1;
+        ASSERT_TRUE(result.getLong(String16(BnIncrementalService::
+                                                    METRICS_MILLIS_SINCE_OLDEST_PENDING_READ()
+                                                            .c_str()),
+                                   &value));
+        ASSERT_EQ(expected, value);
+        ASSERT_EQ(1, (int)result.size());
+    }
+
 protected:
     NiceMock<MockVoldService>* mVold = nullptr;
     NiceMock<MockIncFs>* mIncFs = nullptr;
@@ -995,6 +1008,7 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnhealthyStorage) {
     ASSERT_NE(nullptr, mLooper->mCallbackData);
     ASSERT_EQ(storageId, listener->mStorageId);
     ASSERT_EQ(IStorageHealthListener::HEALTH_STATUS_OK, listener->mStatus);
+    checkMillisSinceOldestPendingRead(storageId, 0);
 
     // Looper/epoll callback.
     mIncFs->waitForPendingReadsSuccess(kFirstTimestampUs);
@@ -1020,6 +1034,8 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnhealthyStorage) {
     ASSERT_EQ(nullptr, mLooper->mCallbackData);
     ASSERT_EQ(storageId, listener->mStorageId);
     ASSERT_EQ(IStorageHealthListener::HEALTH_STATUS_BLOCKED, listener->mStatus);
+    checkMillisSinceOldestPendingRead(storageId, params.blockedTimeoutMs);
+
     // Timed callback present.
     ASSERT_EQ(storageId, mTimedQueue->mId);
     ASSERT_GE(mTimedQueue->mAfter, 1000ms);
@@ -1035,6 +1051,8 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnhealthyStorage) {
     ASSERT_EQ(nullptr, mLooper->mCallbackData);
     ASSERT_EQ(storageId, listener->mStorageId);
     ASSERT_EQ(IStorageHealthListener::HEALTH_STATUS_UNHEALTHY, listener->mStatus);
+    checkMillisSinceOldestPendingRead(storageId, params.unhealthyTimeoutMs);
+
     // Timed callback present.
     ASSERT_EQ(storageId, mTimedQueue->mId);
     ASSERT_GE(mTimedQueue->mAfter, unhealthyMonitoring);
@@ -1050,6 +1068,8 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnhealthyStorage) {
     ASSERT_EQ(nullptr, mLooper->mCallbackData);
     ASSERT_EQ(storageId, listener->mStorageId);
     ASSERT_EQ(IStorageHealthListener::HEALTH_STATUS_UNHEALTHY, listener->mStatus);
+    checkMillisSinceOldestPendingRead(storageId, params.unhealthyTimeoutMs);
+
     // Timed callback present.
     ASSERT_EQ(storageId, mTimedQueue->mId);
     ASSERT_GE(mTimedQueue->mAfter, unhealthyMonitoring);
@@ -1065,6 +1085,7 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnhealthyStorage) {
     ASSERT_NE(nullptr, mLooper->mCallbackData);
     ASSERT_EQ(storageId, listener->mStorageId);
     ASSERT_EQ(IStorageHealthListener::HEALTH_STATUS_OK, listener->mStatus);
+    checkMillisSinceOldestPendingRead(storageId, 0);
 }
 
 TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccess) {
@@ -1579,6 +1600,54 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
 
     // No callbacks anymore -> fully loaded and no readlogs.
     ASSERT_EQ(mTimedQueue->mAfter, Milliseconds());
+}
+
+TEST_F(IncrementalServiceTest, testInvalidMetricsQuery) {
+    const auto invalidStorageId = 100;
+    android::os::PersistableBundle result{};
+    mIncrementalService->getMetrics(invalidStorageId, &result);
+    int64_t expected = -1, value = -1;
+    ASSERT_FALSE(
+            result.getLong(String16(BnIncrementalService::METRICS_MILLIS_SINCE_OLDEST_PENDING_READ()
+                                            .c_str()),
+                           &value));
+    ASSERT_EQ(expected, value);
+    ASSERT_TRUE(result.empty());
+}
+
+TEST_F(IncrementalServiceTest, testNoMetrics) {
+    mVold->setIncFsMountOptionsSuccess();
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    android::os::PersistableBundle result{};
+    mIncrementalService->getMetrics(storageId, &result);
+    int64_t expected = -1, value = -1;
+    ASSERT_FALSE(
+            result.getLong(String16(BnIncrementalService::METRICS_MILLIS_SINCE_OLDEST_PENDING_READ()
+                                            .c_str()),
+                           &value));
+    ASSERT_EQ(expected, value);
+    ASSERT_EQ(0, (int)result.size());
+}
+
+TEST_F(IncrementalServiceTest, testInvalidMetricsKeys) {
+    mVold->setIncFsMountOptionsSuccess();
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
+    android::os::PersistableBundle result{};
+    mIncrementalService->getMetrics(storageId, &result);
+    int64_t expected = -1, value = -1;
+    ASSERT_FALSE(result.getLong(String16("invalid"), &value));
+    ASSERT_EQ(expected, value);
+    ASSERT_EQ(1, (int)result.size());
 }
 
 } // namespace android::os::incremental

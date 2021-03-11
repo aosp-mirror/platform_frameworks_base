@@ -979,7 +979,7 @@ public class VcnGatewayConnection extends StateMachine {
         // IkeSessionCallback.onClosedExceptionally(), which calls sessionClosed()
         if (exception != null) {
             mGatewayStatusCallback.onGatewayConnectionError(
-                    mConnectionConfig.getRequiredUnderlyingCapabilities(),
+                    mConnectionConfig.getExposedCapabilities(),
                     VCN_ERROR_CODE_INTERNAL_ERROR,
                     RuntimeException.class.getName(),
                     "Received "
@@ -1016,7 +1016,7 @@ public class VcnGatewayConnection extends StateMachine {
         }
 
         mGatewayStatusCallback.onGatewayConnectionError(
-                mConnectionConfig.getRequiredUnderlyingCapabilities(),
+                mConnectionConfig.getExposedCapabilities(),
                 errorCode,
                 exceptionClass,
                 exceptionMessage);

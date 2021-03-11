@@ -204,6 +204,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"Teenus Twilight"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Ajavööndi tuvastaja (ühenduvus puudub)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS-i aja värskendamise teenus"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Seade kustutatakse"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administraatori rakendust ei saa kasutada. Teie seade tühjendatakse nüüd.\n\nKui teil on küsimusi, võtke ühendust organisatsiooni administraatoriga."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Rakendus <xliff:g id="OWNER_APP">%s</xliff:g> on printimise keelanud."</string>
@@ -550,23 +552,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Võimaldab rakendusel muuta teie fotokogu."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"Lugeda teie meediakogus olevaid asukohti"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Võimaldab rakendusel lugeda teie meediakogus olevaid asukohti."</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Biomeetria kasutamine"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Biomeetria või ekraaniluku kasutamine"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Kinnitage oma isik"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Jätkamiseks kasutage biomeetriat"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biomeetriline riistvara ei ole saadaval"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentimine tühistati"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Ei tuvastatud"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentimine tühistati"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN-koodi, mustrit ega parooli pole määratud"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Viga autentimisel"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekraaniluku kasutamine"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Jätkamiseks sisestage seadme mandaat"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Tuvastati osaline sõrmejälg. Proovige uuesti."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sõrmejälge ei õnnestunud töödelda. Proovige uuesti."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Sõrmejäljeandur on must. Puhastage see ja proovige uuesti."</string>
@@ -589,10 +586,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Selles seadmes pole sõrmejäljeandurit."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Andur on ajutiselt keelatud."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Sõrmejälg <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Sõrmejälje kasutamine"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Sõrmejälje või ekraaniluku kasutamine"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Jätkamiseks kasutage sõrmejälge"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -638,12 +633,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Seade ei toeta Face Unlocki."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Andur on ajutiselt keelatud."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Nägu <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Face Unlocki kasutamine"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Face Unlocki või ekraaniluku kasutamine"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Jätkamiseks kasutage Face Unlocki"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Näoikoon"</string>
@@ -1966,8 +1958,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Uudised ja ajakirjad"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Kaardid ja navigeerimine"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Produktiivsus"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Juurdepääsetavus"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Seadme salvestusruum"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB silumine"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"tund"</string>

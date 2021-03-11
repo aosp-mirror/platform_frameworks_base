@@ -339,14 +339,22 @@ public class LongScreenshotActivity extends Activity {
                     }
 
                     @Override
-                    public void onComplete(ImageTileSet imageTileSet) {
+                    public void onComplete(ImageTileSet imageTileSet, int pageSize) {
                         Log.i(TAG, "Got tiles " + imageTileSet.getWidth() + " x "
                                 + imageTileSet.getHeight());
                         mPreview.setImageDrawable(imageTileSet.getDrawable());
                         updateCropLocation();
                         mMagnifierView.setDrawable(imageTileSet.getDrawable(),
                                 imageTileSet.getWidth(), imageTileSet.getHeight());
-                        mCropView.animateBoundaryTo(CropView.CropBoundary.BOTTOM, 0.5f);
+                        // Original boundaries go from the image tile set's y=0 to y=pageSize, so
+                        // we animate to that as a starting crop position.
+                        float topFraction = Math.max(0,
+                                -imageTileSet.getTop() / (float) imageTileSet.getHeight());
+                        float bottomFraction = Math.min(1f,
+                                1 - (imageTileSet.getBottom() - pageSize)
+                                        / (float) imageTileSet.getHeight());
+                        mCropView.animateBoundaryTo(CropView.CropBoundary.TOP, topFraction);
+                        mCropView.animateBoundaryTo(CropView.CropBoundary.BOTTOM, bottomFraction);
                         mBackgroundExecutor.execute(() -> saveCacheBitmap(imageTileSet));
                     }
                 });

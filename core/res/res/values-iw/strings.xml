@@ -208,6 +208,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"שירות דמדומים"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"מזהה אזור זמן (ללא צורך בקישוריות)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"‏שירות עדכון הזמן של GNSS"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"תתבצע מחיקה של המכשיר"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"לא ניתן להשתמש באפליקציה של מנהל המערכת.\n\nאם יש לך שאלות, יש ליצור קשר עם מנהל המערכת של הארגון."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ההדפסה הושבתה על ידי <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -556,23 +558,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"מאפשרת לאפליקציה לשנות את אוסף התמונות שלך."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"לקרוא מיקומים מאוסף המדיה שלך"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"מאפשרת לאפליקציה לקרוא מיקומים מאוסף המדיה שלך."</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"שימוש במידע ביומטרי"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"שימוש במידע ביומטרי בנעילת מסך"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"אימות זהותך"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"יש להשתמש במידע ביומטרי כדי להמשיך"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"חומרה ביומטרית לא זמינה"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"האימות בוטל"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"לא זוהתה"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"האימות בוטל"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"עוד לא הוגדרו קוד גישה, קו ביטול נעילה או סיסמה"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"שגיאה באימות"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"שימוש בנעילת מסך"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"יש להזין את פרטי הכניסה של המכשיר כדי להמשיך"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"זוהתה טביעת אצבע חלקית. אפשר לנסות שוב."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"לא ניתן היה לעבד את טביעת האצבע. נסה שוב."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"החיישן של טביעות האצבעות מלוכלך. צריך לנקות אותו ולנסות שוב."</string>
@@ -595,10 +592,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"במכשיר זה אין חיישן טביעות אצבע."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"החיישן מושבת באופן זמני."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"אצבע <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"שימוש בטביעת אצבע"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"שימוש בטביעת אצבע או בנעילת מסך"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"יש להשתמש בטביעת האצבע כדי להמשיך"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -644,12 +639,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"המכשיר הזה לא תומך בשחרור נעילה על ידי זיהוי פנים."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"החיישן מושבת באופן זמני."</string>
     <string name="face_name_template" msgid="3877037340223318119">"פנים <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"שחרור נעילה על ידי זיהוי פנים"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"שימוש בזיהוי פנים או בנעילת מסך"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"יש להשתמש בשחרור נעילה על ידי זיהוי פנים כדי להמשיך"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"סמל הפנים"</string>
@@ -2030,8 +2022,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"חדשות וכתבי עת"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"מפות וניווט"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"פרודוקטיביות"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"נגישות"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"שטח האחסון במכשיר"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"‏ניקוי באגים ב-USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"שעה"</string>

@@ -42,18 +42,6 @@ public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
         mMotionEvents = new LinkedList<>();
     }
 
-    /**
-     * Returns true if the most recent event in the buffer is past the expiration time.
-     *
-     * This method does not mutate the underlying data. This method does imply that, if the supplied
-     * expiration time is old enough and a new {@link MotionEvent} gets added to the buffer, all
-     * prior events would be removed.
-     */
-    public boolean isFullyExpired(long expirationMs) {
-        return mMotionEvents.isEmpty()
-                || mMotionEvents.getLast().getEventTime() <= expirationMs;
-    }
-
     private void ejectOldEvents() {
         if (mMotionEvents.isEmpty()) {
             return;

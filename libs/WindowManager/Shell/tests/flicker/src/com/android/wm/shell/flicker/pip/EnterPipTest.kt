@@ -107,7 +107,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
+                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
                     repetitions = 5)
         }
     }

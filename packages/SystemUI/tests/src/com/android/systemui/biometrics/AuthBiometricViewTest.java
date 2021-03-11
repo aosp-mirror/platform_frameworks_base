@@ -22,10 +22,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.biometrics.PromptInfo;
@@ -333,16 +331,12 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUdfpsBottomSpacerCalculation() {
+    public void testUdfpsBottomSpacerHeightForPortrait() {
         final int displayHeightPx = 3000;
         final int navbarHeightPx = 10;
         final int dialogBottomMarginPx = 20;
-
-        final View buttonBar = mock(View.class);
-        when(buttonBar.getMeasuredHeight()).thenReturn(100);
-
-        final View textIndicator = mock(View.class);
-        when(textIndicator.getMeasuredHeight()).thenReturn(200);
+        final int buttonBarHeightPx = 100;
+        final int textIndicatorHeightPx = 200;
 
         final int sensorLocationX = 540;
         final int sensorLocationY = 1600;
@@ -353,9 +347,47 @@ public class AuthBiometricViewTest extends SysuiTestCase {
                 true /* resetLockoutRequiresHardwareAuthToken */, sensorLocationX, sensorLocationY,
                 sensorRadius);
 
-        assertEquals(970, AuthBiometricUdfpsView.calculateBottomSpacerHeight(
-                displayHeightPx, navbarHeightPx, dialogBottomMarginPx, buttonBar, textIndicator,
-                props));
+        assertEquals(970,
+                AuthBiometricUdfpsView.calculateBottomSpacerHeightForPortrait(
+                        props, displayHeightPx, textIndicatorHeightPx, buttonBarHeightPx,
+                        dialogBottomMarginPx, navbarHeightPx
+                ));
+    }
+
+    @Test
+    public void testUdfpsBottomSpacerHeightForLandscape() {
+        final int titleHeightPx = 320;
+        final int subtitleHeightPx = 240;
+        final int descriptionHeightPx = 200;
+        final int topSpacerHeightPx = 550;
+        final int textIndicatorHeightPx = 190;
+        final int buttonBarHeightPx = 160;
+        final int navbarBottomInsetPx = 75;
+
+        assertEquals(885,
+                AuthBiometricUdfpsView.calculateBottomSpacerHeightForLandscape(
+                        titleHeightPx, subtitleHeightPx, descriptionHeightPx, topSpacerHeightPx,
+                        textIndicatorHeightPx, buttonBarHeightPx, navbarBottomInsetPx));
+    }
+
+    @Test
+    public void testUdfpsHorizontalSpacerWidthForLandscape() {
+        final int displayWidthPx = 3000;
+        final int dialogMarginPx = 20;
+        final int navbarHorizontalInsetPx = 75;
+
+        final int sensorLocationX = 540;
+        final int sensorLocationY = 1600;
+        final int sensorRadius = 100;
+        final FingerprintSensorPropertiesInternal props = new FingerprintSensorPropertiesInternal(
+                0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
+                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                true /* resetLockoutRequiresHardwareAuthToken */, sensorLocationX, sensorLocationY,
+                sensorRadius);
+
+        assertEquals(1205,
+                AuthBiometricUdfpsView.calculateHorizontalSpacerWidthForLandscape(
+                        props, displayWidthPx, dialogMarginPx, navbarHorizontalInsetPx));
     }
 
     private PromptInfo buildPromptInfo(boolean allowDeviceCredential) {

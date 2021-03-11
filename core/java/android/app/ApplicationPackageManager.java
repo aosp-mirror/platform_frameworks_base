@@ -3228,6 +3228,12 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void registerDexModule(@NonNull String dexModule,
             @Nullable DexModuleRegisterCallback callback) {
+        // Create the callback delegate to be passed to package manager service.
+        DexModuleRegisterCallbackDelegate callbackDelegate = null;
+        if (callback != null) {
+            callbackDelegate = new DexModuleRegisterCallbackDelegate(callback);
+        }
+
         // Check if this is a shared module by looking if the others can read it.
         boolean isSharedModule = false;
         try {
@@ -3236,16 +3242,11 @@ public class ApplicationPackageManager extends PackageManager {
                 isSharedModule = true;
             }
         } catch (ErrnoException e) {
-            callback.onDexModuleRegistered(dexModule, false,
-                    "Could not get stat the module file: " + e.getMessage());
+            if (callbackDelegate != null) {
+                callback.onDexModuleRegistered(dexModule, false,
+                        "Could not get stat the module file: " + e.getMessage());
+            }
             return;
-        }
-
-        // Module path is ok.
-        // Create the callback delegate to be passed to package manager service.
-        DexModuleRegisterCallbackDelegate callbackDelegate = null;
-        if (callback != null) {
-            callbackDelegate = new DexModuleRegisterCallbackDelegate(callback);
         }
 
         // Invoke the package manager service.

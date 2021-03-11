@@ -89,20 +89,4 @@ public class TimeLimitedMotionEventBufferTest extends SysuiTestCase {
         assertThat(mBuffer.get(0), is(eventC));
         assertThat(mBuffer.get(1), is(eventD));
     }
-
-    @Test
-    public void testFullyExpired() {
-        MotionEvent eventA = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
-        MotionEvent eventB = MotionEvent.obtain(0, 1, MotionEvent.ACTION_MOVE, 0, 0, 0);
-        MotionEvent eventC = MotionEvent.obtain(0, 2, MotionEvent.ACTION_MOVE, 0, 0, 0);
-        MotionEvent eventD = MotionEvent.obtain(0, 3, MotionEvent.ACTION_UP, 0, 0, 0);
-
-        mBuffer.add(eventA);
-        mBuffer.add(eventB);
-        mBuffer.add(eventC);
-        mBuffer.add(eventD);
-
-        assertThat(mBuffer.isFullyExpired(2), is(false));
-        assertThat(mBuffer.isFullyExpired(6), is(true));
-    }
 }

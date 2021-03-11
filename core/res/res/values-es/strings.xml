@@ -204,6 +204,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"Servicio de Twilight"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detector de zona horaria (sin conexión)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Servicio de actualización de tiempo GNSS"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Tu dispositivo se borrará"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"No se puede utilizar la aplicación de administración. Se borrarán todos los datos del dispositivo.\n\nSi tienes alguna pregunta, ponte en contacto con el administrador de tu organización."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ha inhabilitado la impresión."</string>
@@ -550,23 +552,18 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Permite que la aplicación modifique tu colección de fotos."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"leer las ubicaciones de tu colección de contenido multimedia"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permite que la aplicación lea las ubicaciones de tu colección de contenido multimedia."</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Usar biometría"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Usar biometría o bloqueo de pantalla"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifica que eres tú"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
-    <skip />
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Usa tu biometría para continuar"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biométrico no disponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autenticación cancelada"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No se reconoce"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autenticación cancelada"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No se ha definido el PIN, el patrón o la contraseña"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"No se ha podido autenticar"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar bloqueo de pantalla"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Introduce las credenciales del dispositivo para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Se ha detectado una huella digital parcial. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No se ha podido procesar la huella digital. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"El sensor de huellas digitales está sucio. Límpialo y vuelve a intentarlo."</string>
@@ -589,10 +586,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo no tiene sensor de huellas digitales."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"El sensor está inhabilitado en estos momentos."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella digital"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar huella digital o bloqueo de pantalla"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Usa tu huella digital para continuar"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -638,12 +633,9 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"El desbloqueo facial no está disponible en este dispositivo."</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"El sensor está inhabilitado en estos momentos."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
-    <skip />
+    <string name="face_app_setting_name" msgid="8130135875458467243">"Usar desbloqueo facial"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar desbloqueo facial o bloqueo de pantalla"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Usa el desbloqueo facial para continuar"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Icono cara"</string>
@@ -1966,8 +1958,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Noticias y revistas"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Mapas y navegación"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Productividad"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Accesibilidad"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Almacenamiento del dispositivo"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Depuración por USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"hora"</string>

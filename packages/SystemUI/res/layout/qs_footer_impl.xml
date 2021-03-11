@@ -89,7 +89,7 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:clipToPadding="false"
-                android:contentDescription="@string/accessibility_quick_settings_edit"
+                android:contentDescription="@string/accessibility_quick_settings_power_menu"
                 android:focusable="true"
                 android:padding="@dimen/qs_footer_icon_padding"
                 android:src="@*android:drawable/ic_lock_power_off"
