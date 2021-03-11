@@ -68,6 +68,17 @@ public class WSMeansQuantizer implements Quantizer {
         }
 
         for (int pixel : pixels) {
+            // These are pixels from the bitmap that is being quantized.
+            // Depending on the bitmap & downscaling, it may have pixels that are less than opaque
+            // Ignore those pixels.
+            ///
+            // Note: they don't _have_ to be ignored, for example, we could instead turn them
+            // opaque. Traditionally, including outside Android, quantizers ignore transparent
+            // pixels, so that strategy was chosen.
+            int alpha = (pixel >> 24);
+            if (alpha < 255) {
+                continue;
+            }
             Integer currentCount = mCountByColor.get(pixel);
             if (currentCount == null) {
                 currentCount = 0;
