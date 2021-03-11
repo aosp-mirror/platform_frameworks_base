@@ -59,6 +59,10 @@ package android.content {
     method @NonNull public android.os.UserHandle getUser();
   }
 
+  public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final String ACTION_CLEAR_DNS_CACHE = "android.intent.action.CLEAR_DNS_CACHE";
+  }
+
 }
 
 package android.content.pm {
