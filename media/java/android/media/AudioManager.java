@@ -7084,26 +7084,22 @@ public class AudioManager {
      * <pre class="prettyprint">
      * // Get an AudioManager instance
      * AudioManager audioManager = Context.getSystemService(AudioManager.class);
-     * try {
-     *     AudioDeviceInfo speakerDevice = null;
-     *     List<AudioDeviceInfo> devices = audioManager.getAvailableCommunicationDevices();
-     *     for (AudioDeviceInfo device : devices) {
-     *         if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
-     *             speakerDevice = device;
-     *             break;
-     *         }
+     * AudioDeviceInfo speakerDevice = null;
+     * List<AudioDeviceInfo> devices = audioManager.getAvailableCommunicationDevices();
+     * for (AudioDeviceInfo device : devices) {
+     *     if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
+     *         speakerDevice = device;
+     *         break;
      *     }
-     *     if (speakerDevice != null) {
-     *         // Turn speakerphone ON.
-     *         boolean result = audioManager.setCommunicationDevice(speakerDevice);
-     *         if (!result) {
-     *             // Handle error.
-     *         }
-     *         // Turn speakerphone OFF.
-     *         audioManager.clearCommunicationDevice();
+     * }
+     * if (speakerDevice != null) {
+     *     // Turn speakerphone ON.
+     *     boolean result = audioManager.setCommunicationDevice(speakerDevice);
+     *     if (!result) {
+     *         // Handle error.
      *     }
-     * } catch (IllegalArgumentException e) {
-     *     // Handle exception.
+     *     // Turn speakerphone OFF.
+     *     audioManager.clearCommunicationDevice();
      * }
      * </pre>
      * @param device the requested audio device.
