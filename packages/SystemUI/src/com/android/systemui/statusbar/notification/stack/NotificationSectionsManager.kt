@@ -318,9 +318,6 @@ class NotificationSectionsManager @Inject internal constructor(
                     (child == null || row != null && nextBucket != row.entry.bucket)
             if (isSectionBoundary && showHeaders) {
                 when (nextBucket) {
-                    BUCKET_HEADS_UP -> incomingState?.targetPosition = i + 1
-                    BUCKET_PEOPLE -> peopleState?.targetPosition = i + 1
-                    BUCKET_ALERTING -> alertingState?.targetPosition = i + 1
                     BUCKET_SILENT -> gentleState?.targetPosition = i + 1
                 }
             }
