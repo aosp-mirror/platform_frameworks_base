@@ -34,7 +34,6 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -638,10 +637,6 @@ public class NotificationChildrenContainer extends ViewGroup {
             childState.location = parentState.location;
             childState.inShelf = parentState.inShelf;
             yPosition += intrinsicHeight;
-            if (child.isExpandAnimationRunning()) {
-                launchTransitionCompensation = -ambientState.getExpandAnimationTopChange();
-            }
-
         }
         if (mOverflowNumber != null) {
             ExpandableNotificationRow overflowView = mAttachedChildren.get(Math.min(
