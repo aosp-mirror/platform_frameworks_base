@@ -4219,7 +4219,8 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
-    @TestApi public static final String TEST_NETWORK_SERVICE = "test_network";
+    @TestApi @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String TEST_NETWORK_SERVICE = "test_network";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
