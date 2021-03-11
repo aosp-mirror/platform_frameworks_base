@@ -9434,7 +9434,14 @@ package android.telephony {
     method @NonNull public static android.os.PersistableBundle getDefaultConfig();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void overrideConfig(int, @Nullable android.os.PersistableBundle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void updateConfigForPhoneId(int, String);
+    field public static final int GBA_DIGEST = 3; // 0x3
+    field public static final int GBA_ME = 1; // 0x1
+    field public static final int GBA_U = 2; // 0x2
     field public static final String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
+    field public static final String KEY_GBA_MODE_INT = "gba_mode_int";
+    field public static final String KEY_GBA_UA_SECURITY_ORGANIZATION_INT = "gba_ua_security_organization_int";
+    field public static final String KEY_GBA_UA_SECURITY_PROTOCOL_INT = "gba_ua_security_protocol_int";
+    field public static final String KEY_GBA_UA_TLS_CIPHER_SUITE_INT = "gba_ua_tls_cipher_suite_int";
     field public static final String KEY_SUPPORT_CDMA_1X_VOICE_CALLS_BOOL = "support_cdma_1x_voice_calls_bool";
   }
 
