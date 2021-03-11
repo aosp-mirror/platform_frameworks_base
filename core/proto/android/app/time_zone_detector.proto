@@ -30,3 +30,30 @@ message GeolocationTimeZoneSuggestionProto {
   repeated string zone_ids = 1;
   repeated string debug_info = 2;
 }
+
+/*
+ * An obfuscated and simplified time zone suggestion for metrics use.
+ *
+ * The suggestion's time zone IDs (which relate to location) are obfuscated by
+ * mapping them to an ordinal. When the ordinal is assigned consistently across
+ * several objects (i.e. so the same time zone ID is always mapped to the same
+ * ordinal), this allows comparisons between those objects. For example, we can
+ * answer "did these two suggestions agree?", "does the suggestion match the
+ * device's current time zone?", without leaking knowledge of location. Ordinals
+ * are also significantly more compact than full IANA TZDB IDs, albeit highly
+ * unstable and of limited use.
+ */
+message MetricsTimeZoneSuggestion {
+  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  enum Type {
+    CERTAIN = 1;
+    UNCERTAIN = 2;
+  }
+  optional Type type = 1;
+
+  // The ordinals for time zone(s) in the suggestion. Always empty for
+  // UNCERTAIN, and can be empty for CERTAIN, for example when the device is in
+  // a disputed area / on an ocean.
+  repeated uint32 time_zone_ordinals = 2;
+}
