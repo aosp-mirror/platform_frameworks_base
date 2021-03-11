@@ -217,7 +217,6 @@ import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.QosCallbackTracker;
 import com.android.server.net.NetworkPolicyManagerInternal;
-import com.android.server.utils.PriorityDump;
 
 import libcore.io.IoUtils;
 
@@ -884,27 +883,59 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
     private final LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker(this);
 
+    final LocalPriorityDump mPriorityDumper = new LocalPriorityDump();
     /**
      * Helper class which parses out priority arguments and dumps sections according to their
      * priority. If priority arguments are omitted, function calls the legacy dump command.
      */
-    private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
-        @Override
-        public void dumpHigh(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
-            doDump(fd, pw, new String[] {DIAG_ARG}, asProto);
-            doDump(fd, pw, new String[] {SHORT_ARG}, asProto);
+    private class LocalPriorityDump {
+        private static final String PRIORITY_ARG = "--dump-priority";
+        private static final String PRIORITY_ARG_HIGH = "HIGH";
+        private static final String PRIORITY_ARG_NORMAL = "NORMAL";
+
+        LocalPriorityDump() {}
+
+        private void dumpHigh(FileDescriptor fd, PrintWriter pw) {
+            doDump(fd, pw, new String[] {DIAG_ARG});
+            doDump(fd, pw, new String[] {SHORT_ARG});
         }
 
-        @Override
-        public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
-            doDump(fd, pw, args, asProto);
+        private void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args) {
+            doDump(fd, pw, args);
         }
 
-        @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
-           doDump(fd, pw, args, asProto);
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (args == null) {
+                dumpNormal(fd, pw, args);
+                return;
+            }
+
+            String priority = null;
+            for (int argIndex = 0; argIndex < args.length; argIndex++) {
+                if (args[argIndex].equals(PRIORITY_ARG) && argIndex + 1 < args.length) {
+                    argIndex++;
+                    priority = args[argIndex];
+                }
+            }
+
+            if (PRIORITY_ARG_HIGH.equals(priority)) {
+                dumpHigh(fd, pw);
+            } else if (PRIORITY_ARG_NORMAL.equals(priority)) {
+                dumpNormal(fd, pw, args);
+            } else {
+                // ConnectivityService publishes binder service using publishBinderService() with
+                // no priority assigned will be treated as NORMAL priority. Dumpsys does not send
+                // "--dump-priority" arguments to the service. Thus, dump both NORMAL and HIGH to
+                // align the legacy design.
+                // TODO: Integrate into signal dump.
+                dumpNormal(fd, pw, args);
+                pw.println();
+                pw.println("DUMP OF SERVICE HIGH connectivity");
+                pw.println();
+                dumpHigh(fd, pw);
+            }
         }
-    };
+    }
 
     /**
      * Keeps track of the number of requests made under different uids.
@@ -2603,7 +2634,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer,
             @Nullable String[] args) {
-        PriorityDump.dump(mPriorityDumper, fd, writer, args);
+        mPriorityDumper.dump(fd, writer, args);
     }
 
     private boolean checkDumpPermission(Context context, String tag, PrintWriter pw) {
@@ -2618,10 +2649,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void doDump(FileDescriptor fd, PrintWriter writer, String[] args, boolean asProto) {
+    private void doDump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         if (!checkDumpPermission(mContext, TAG, pw)) return;
-        if (asProto) return;
 
         if (CollectionUtils.contains(args, DIAG_ARG)) {
             dumpNetworkDiagnostics(pw);
