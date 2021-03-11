@@ -964,10 +964,17 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         remove(r.binder);
                     }
                 }
+                if (events.contains(TelephonyCallback.EVENT_LEGACY_CALL_STATE_CHANGED)) {
+                    try {
+                        r.callback.onLegacyCallStateChanged(mCallState[phoneId],
+                                getCallIncomingNumber(r, phoneId));
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
                 if (events.contains(TelephonyCallback.EVENT_CALL_STATE_CHANGED)) {
                     try {
-                        r.callback.onCallStateChanged(mCallState[phoneId],
-                                getCallIncomingNumber(r, phoneId));
+                        r.callback.onCallStateChanged(mCallState[phoneId]);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -1306,13 +1313,24 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         synchronized (mRecords) {
             for (Record r : mRecords) {
-                if (r.matchTelephonyCallbackEvent(TelephonyCallback.EVENT_CALL_STATE_CHANGED)
+                if (r.matchTelephonyCallbackEvent(TelephonyCallback.EVENT_LEGACY_CALL_STATE_CHANGED)
                         && (r.subId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)) {
                     try {
                         // Ensure the listener has read call log permission; if they do not return
                         // an empty phone number.
+                        // This is ONLY for legacy onCallStateChanged in PhoneStateListener.
                         String phoneNumberOrEmpty = r.canReadCallLog() ? phoneNumber : "";
-                        r.callback.onCallStateChanged(state, phoneNumberOrEmpty);
+                        r.callback.onLegacyCallStateChanged(state, phoneNumberOrEmpty);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+
+                if (r.matchTelephonyCallbackEvent(TelephonyCallback.EVENT_CALL_STATE_CHANGED)
+                        && (r.subId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)) {
+                    try {
+                        // The new callback does NOT provide the phone number.
+                        r.callback.onCallStateChanged(state);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
                     }
@@ -1341,12 +1359,25 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCallState[phoneId] = state;
                 mCallIncomingNumber[phoneId] = incomingNumber;
                 for (Record r : mRecords) {
+                    if (r.matchTelephonyCallbackEvent(
+                            TelephonyCallback.EVENT_LEGACY_CALL_STATE_CHANGED)
+                            && (r.subId == subId)
+                            && (r.subId != SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)) {
+                        try {
+                            // Only the legacy PhoneStateListener receives the phone number.
+                            String incomingNumberOrEmpty = getCallIncomingNumber(r, phoneId);
+                            r.callback.onLegacyCallStateChanged(state, incomingNumberOrEmpty);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
                     if (r.matchTelephonyCallbackEvent(TelephonyCallback.EVENT_CALL_STATE_CHANGED)
                             && (r.subId == subId)
                             && (r.subId != SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)) {
                         try {
-                            String incomingNumberOrEmpty = getCallIncomingNumber(r, phoneId);
-                            r.callback.onCallStateChanged(state, incomingNumberOrEmpty);
+                            // The phone number is not included in the new call state changed
+                            // listener.
+                            r.callback.onCallStateChanged(state);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }

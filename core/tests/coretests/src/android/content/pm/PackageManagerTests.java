@@ -2923,7 +2923,7 @@ public class PackageManagerTests extends AndroidTestCase {
         assertFalse("BaseCodePath should not be registered", callback.mSuccess);
     }
 
-    // Verify thatmodules which are not own by the calling package are not registered.
+    // Verify that modules which are not own by the calling package are not registered.
     public void testRegisterDexModuleNotOwningModule() throws Exception {
         TestDexModuleRegisterCallback callback = new TestDexModuleRegisterCallback();
         String moduleBelongingToOtherPackage = "/data/user/0/com.google.android.gms/module.apk";
@@ -2976,6 +2976,13 @@ public class PackageManagerTests extends AndroidTestCase {
         assertEquals(nonExistentApk, callback.mDexModulePath);
         assertTrue(callback.waitTillDone());
         assertFalse("DexModule registration should fail", callback.mSuccess);
+    }
+
+    // If the module does not exist on disk we should get a failure.
+    public void testRegisterDexModuleNotExistsNoCallback() throws Exception {
+        ApplicationInfo info = getContext().getApplicationInfo();
+        String nonExistentApk = Paths.get(info.dataDir, "non-existent.apk").toString();
+        getPm().registerDexModule(nonExistentApk, null);
     }
 
     // Copied from com.android.server.pm.InstructionSets because we don't have access to it here.

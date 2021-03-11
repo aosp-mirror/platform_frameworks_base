@@ -20,11 +20,9 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
 import android.telephony.emergency.EmergencyNumber;
@@ -170,12 +168,15 @@ public class TelephonyCallback {
 
     /**
      * Event for changes to the device call state.
-     *
+     * <p>
+     * Handles callbacks to {@link CallStateListener#onCallStateChanged(int)}.
+     * <p>
+     * Note: This is different from the legacy {@link #EVENT_LEGACY_CALL_STATE_CHANGED} listener
+     * which can include the phone number of the caller.  We purposely do not include the phone
+     * number as that information is not required for call state listeners going forward.
      * @hide
-     * @see CallStateListener#onCallStateChanged
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_CALL_LOG)
     public static final int EVENT_CALL_STATE_CHANGED = 6;
 
     /**
@@ -556,6 +557,18 @@ public class TelephonyCallback {
     public static final int EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED = 35;
 
     /**
+     * Event for changes to the legacy call state changed listener implemented by
+     * {@link PhoneStateListener#onCallStateChanged(int, String)}.  This listener variant is similar
+     * to the new {@link CallStateListener#onCallStateChanged(int)} with the important distinction
+     * that it CAN provide the phone number associated with a call.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_CALL_LOG)
+    public static final int EVENT_LEGACY_CALL_STATE_CHANGED = 36;
+
+    /**
      * @hide
      */
     @IntDef(prefix = {"EVENT_"}, value = {
@@ -593,7 +606,8 @@ public class TelephonyCallback {
             EVENT_BARRING_INFO_CHANGED,
             EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED,
             EVENT_DATA_ENABLED_CHANGED,
-            EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED
+            EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED,
+            EVENT_LEGACY_CALL_STATE_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -723,17 +737,9 @@ public class TelephonyCallback {
          * calling {@link TelephonyManager#getCallState()} from within this callback may return a
          * different state than the callback reports.
          *
-         * @param state       call state
-         * @param phoneNumber call phone number. If application does not have
-         *                    {@link android.Manifest.permission#READ_CALL_LOG} permission or
-         *                    carrier
-         *                    privileges (see {@link TelephonyManager#hasCarrierPrivileges}), an
-         *                    empty string will be
-         *                    passed as an argument.
+         * @param state the current call state
          */
-        @RequiresPermission(android.Manifest.permission.READ_CALL_LOG)
-        public void onCallStateChanged(@Annotation.CallState int state,
-            @Nullable String phoneNumber);
+        public void onCallStateChanged(@Annotation.CallState int state);
     }
 
     /**
@@ -1426,13 +1432,17 @@ public class TelephonyCallback {
                     () -> mExecutor.execute(() -> listener.onCellLocationChanged(location)));
         }
 
-        public void onCallStateChanged(int state, String incomingNumber) {
+        public void onLegacyCallStateChanged(int state, String incomingNumber) {
+            // Not used for TelephonyCallback; part of the AIDL which is used by both the legacy
+            // PhoneStateListener and TelephonyCallback.
+        }
+
+        public void onCallStateChanged(int state) {
             CallStateListener listener = (CallStateListener) mTelephonyCallbackWeakRef.get();
             if (listener == null) return;
 
             Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(() -> listener.onCallStateChanged(state,
-                            incomingNumber)));
+                    () -> mExecutor.execute(() -> listener.onCallStateChanged(state)));
         }
 
         public void onDataConnectionStateChanged(int state, int networkType) {

@@ -87,7 +87,7 @@ package android.animation {
 
 package android.app {
 
-  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public void onMovedToDisplay(int, android.content.res.Configuration);
   }
 
@@ -721,6 +721,8 @@ package android.content.pm {
 
   public class ActivityInfo extends android.content.pm.ComponentInfo implements android.os.Parcelable {
     method public static boolean isTranslucentOrFloating(android.content.res.TypedArray);
+    field public static final long FORCE_NON_RESIZE_APP = 181136395L; // 0xacbec0bL
+    field public static final long FORCE_RESIZE_APP = 174042936L; // 0xa5faf38L
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
   }
 
@@ -1176,7 +1178,7 @@ package android.hardware.soundtrigger {
 
 package android.inputmethodservice {
 
-  public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
+  @UiContext public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
     field public static final long FINISH_INPUT_NO_FALLBACK_CONNECTION = 156215187L; // 0x94fa793L
   }
 
@@ -2148,6 +2150,10 @@ package android.telecom {
     method @NonNull public android.telecom.ConnectionRequest.Builder setVideoState(int);
   }
 
+  public abstract class ConnectionService extends android.app.Service {
+    method public void onBindClient(@Nullable android.content.Intent);
+  }
+
 }
 
 package android.telephony {
@@ -2325,7 +2331,6 @@ package android.util {
     field public static final String FFLAG_PREFIX = "sys.fflag.";
     field public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
     field public static final String PERSIST_PREFIX = "persist.sys.fflag.override.";
-    field public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
     field public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
   }
 
@@ -2698,6 +2703,10 @@ package android.view.inputmethod {
 
   public final class InlineSuggestionsResponse implements android.os.Parcelable {
     method @NonNull public static android.view.inputmethod.InlineSuggestionsResponse newInlineSuggestionsResponse(@NonNull java.util.List<android.view.inputmethod.InlineSuggestion>);
+  }
+
+  public final class InputMethodInfo implements android.os.Parcelable {
+    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, int);
   }
 
   public final class InputMethodManager {

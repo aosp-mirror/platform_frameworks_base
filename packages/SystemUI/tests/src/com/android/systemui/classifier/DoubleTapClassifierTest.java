@@ -19,7 +19,6 @@ package com.android.systemui.classifier;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
@@ -35,8 +34,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 
 @SmallTest
@@ -47,7 +44,7 @@ public class DoubleTapClassifierTest extends ClassifierTest {
     private static final long DOUBLE_TAP_TIMEOUT_MS = 100;
 
     private List<MotionEvent> mMotionEvents = new ArrayList<>();
-    private final Deque<List<MotionEvent>> mHistoricalMotionEvents = new LinkedList<>();
+    private List<MotionEvent> mPriorMotionEvents = new ArrayList<>();
 
     @Mock
     private FalsingDataProvider mDataProvider;
@@ -64,7 +61,7 @@ public class DoubleTapClassifierTest extends ClassifierTest {
         MockitoAnnotations.initMocks(this);
         mClassifier = new DoubleTapClassifier(mDataProvider, mSingleTapClassifier, TOUCH_SLOP,
                 DOUBLE_TAP_TIMEOUT_MS);
-        doReturn(mHistoricalMotionEvents).when(mDataProvider).getHistoricalMotionEvents();
+        when(mDataProvider.getPriorMotionEvents()).thenReturn(mPriorMotionEvents);
     }
 
     @After
@@ -177,9 +174,8 @@ public class DoubleTapClassifierTest extends ClassifierTest {
     }
 
     private void archiveMotionEvents() {
-        mHistoricalMotionEvents.addFirst(mMotionEvents);
-        doReturn(mHistoricalMotionEvents).when(mDataProvider).getHistoricalMotionEvents();
+        mPriorMotionEvents = mMotionEvents;
+        when(mDataProvider.getPriorMotionEvents()).thenReturn(mPriorMotionEvents);
         mMotionEvents = new ArrayList<>();
-
     }
 }

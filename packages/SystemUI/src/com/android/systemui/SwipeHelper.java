@@ -367,7 +367,7 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     /**
-     * @param view The view to be dismissed
+     * @param animView The view to be dismissed
      * @param velocity The desired pixels/second speed at which the view should move
      * @param endAction The action to perform at the end
      * @param delay The delay after which we should start
@@ -477,12 +477,8 @@ public class SwipeHelper implements Gefingerpoken {
 
     public void snapChild(final View animView, final float targetLeft, float velocity) {
         final boolean canBeDismissed = mCallback.canChildBeDismissed(animView);
-        AnimatorUpdateListener updateListener = new AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                onTranslationUpdate(animView, (float) animation.getAnimatedValue(), canBeDismissed);
-            }
-        };
+        AnimatorUpdateListener updateListener = animation -> onTranslationUpdate(animView,
+                (float) animation.getAnimatedValue(), canBeDismissed);
 
         Animator anim = getViewTranslationAnimator(animView, targetLeft, updateListener);
         if (anim == null) {
@@ -501,8 +497,6 @@ public class SwipeHelper implements Gefingerpoken {
                 mSnappingChild = false;
                 if (!wasCancelled) {
                     updateSwipeProgressFromOffset(animView, canBeDismissed);
-                    onChildSnappedBack(animView, targetLeft);
-                    mCallback.onChildSnappedBack(animView, targetLeft);
                     resetSwipeState();
                 }
             }
@@ -513,6 +507,7 @@ public class SwipeHelper implements Gefingerpoken {
         mFlingAnimationUtils.apply(anim, getTranslation(animView), targetLeft, velocity,
                 maxDistance);
         anim.start();
+        mCallback.onChildSnappedBack(animView, targetLeft);
     }
 
     /**
@@ -594,13 +589,12 @@ public class SwipeHelper implements Gefingerpoken {
 
         if (!mIsSwiping && !mMenuRowIntercepting) {
             if (mCallback.getChildAtPosition(ev) != null) {
-
                 // We are dragging directly over a card, make sure that we also catch the gesture
                 // even if nobody else wants the touch event.
+                mTouchedView = mCallback.getChildAtPosition(ev);
                 onInterceptTouchEvent(ev);
                 return true;
             } else {
-
                 // We are not doing anything, make sure the long press callback
                 // is not still ticking like a bomb waiting to go off.
                 cancelLongPress();

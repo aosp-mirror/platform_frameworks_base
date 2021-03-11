@@ -609,20 +609,21 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         if (mVocab != null) {
             app = mVocab.getOrDefault(mPackageName, -1);
         }
-        // Check if we are within the tightest bounds beyond which
-        // we would not need to run the ML model.
-        boolean withinRange = x < mMLEnableWidth + mLeftInset
-                || x >= (mDisplaySize.x - mMLEnableWidth - mRightInset);
-        if (!withinRange) {
+
+        // Denotes whether we should proceed with the gesture. Even if it is false, we may want to
+        // log it assuming it is not invalid due to exclusion.
+        boolean withinRange = x < mEdgeWidthLeft + mLeftInset
+                || x >= (mDisplaySize.x - mEdgeWidthRight - mRightInset);
+        if (withinRange) {
             int results = -1;
-            if (mUseMLModel && (results = getBackGesturePredictionsCategory(x, y, app)) != -1) {
-                withinRange = results == 1;
-            } else {
-                // Denotes whether we should proceed with the gesture.
-                // Even if it is false, we may want to log it assuming
-                // it is not invalid due to exclusion.
-                withinRange = x < mEdgeWidthLeft + mLeftInset
-                        || x >= (mDisplaySize.x - mEdgeWidthRight - mRightInset);
+
+            // Check if we are within the tightest bounds beyond which we would not need to run the
+            // ML model
+            boolean withinMinRange = x < mMLEnableWidth + mLeftInset
+                    || x >= (mDisplaySize.x - mMLEnableWidth - mRightInset);
+            if (!withinMinRange && mUseMLModel
+                    && (results = getBackGesturePredictionsCategory(x, y, app)) != -1) {
+                withinRange = (results == 1);
             }
         }
 
@@ -726,7 +727,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 mGestureLog.removeFirst();
             }
             mGestureLog.addLast(String.format(
-                    "Gesture [%d,alw=%B,%B, %B,%B,disp=%s,wl=%d,il=%d,wr=%d,ir=%d,excl=%s]",
+                    "Gesture [%d,alw=%B,%B,%B,%B,disp=%s,wl=%d,il=%d,wr=%d,ir=%d,excl=%s]",
                     System.currentTimeMillis(), mAllowGesture, mIsOnLeftEdge, mIsBackGestureAllowed,
                     QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisplaySize,
                     mEdgeWidthLeft, mLeftInset, mEdgeWidthRight, mRightInset, mExcludeRegion));
