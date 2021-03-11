@@ -6936,18 +6936,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
         getResolvedOverrideConfiguration().seq = mConfigurationSeq;
 
-        // Sandbox max bounds by setting it to the app bounds, if activity is letterboxed or in
-        // size compat mode.
+        // Sandbox max bounds by setting it to the activity bounds, if activity is letterboxed, or
+        // has or will have mCompatDisplayInsets for size compat.
         if (providesMaxBounds()) {
-            if (DEBUG_CONFIGURATION) {
-                ProtoLog.d(WM_DEBUG_CONFIGURATION, "Sandbox max bounds for uid %s to bounds %s "
-                        + "due to letterboxing from mismatch with parent bounds? %s size compat "
-                        + "mode %s", getUid(),
-                        resolvedConfig.windowConfiguration.getBounds(), !matchParentBounds(),
-                        inSizeCompatMode());
+            mTmpBounds.set(resolvedConfig.windowConfiguration.getBounds());
+            if (mTmpBounds.isEmpty()) {
+                // When there is no override bounds, the activity will inherit the bounds from
+                // parent.
+                mTmpBounds.set(newParentConfiguration.windowConfiguration.getBounds());
             }
-            resolvedConfig.windowConfiguration
-                    .setMaxBounds(resolvedConfig.windowConfiguration.getBounds());
+            if (DEBUG_CONFIGURATION) {
+                ProtoLog.d(WM_DEBUG_CONFIGURATION, "Sandbox max bounds for uid %s to bounds %s. "
+                                + "letterboxing from mismatch with parent bounds = %s, "
+                                + "has mCompatDisplayInsets = %s, "
+                                + "should create compatDisplayInsets = %s",
+                        getUid(),
+                        mTmpBounds,
+                        !matchParentBounds(),
+                        mCompatDisplayInsets != null,
+                        shouldCreateCompatDisplayInsets());
+            }
+            resolvedConfig.windowConfiguration.setMaxBounds(mTmpBounds);
         }
     }
 
@@ -7300,8 +7309,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         // Max bounds should be sandboxed where an activity is letterboxed (activity bounds will be
-        // smaller than task bounds) or put in size compat mode.
-        return !matchParentBounds() || inSizeCompatMode();
+        // smaller than task bounds).
+        if (!matchParentBounds()) {
+            return true;
+        }
+
+        // Max bounds should be sandboxed when an activity should have compatDisplayInsets, and it
+        // will keep the same bounds and screen configuration when it was first launched regardless
+        // how its parent window changes, so that the sandbox API will provide a consistent result.
+        if (mCompatDisplayInsets != null || shouldCreateCompatDisplayInsets()) {
+            return true;
+        }
+
+        // No need to sandbox for resizable apps in multi-window because resizableActivity=true
+        // indicates that they support multi-window.
+        return false;
     }
 
     @VisibleForTesting
