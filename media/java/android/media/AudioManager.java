@@ -6729,7 +6729,7 @@ public class AudioManager {
      */
     public Map<Integer, Boolean> getSurroundFormats() {
         Map<Integer, Boolean> surroundFormats = new HashMap<>();
-        int status = AudioSystem.getSurroundFormats(surroundFormats, false);
+        int status = AudioSystem.getSurroundFormats(surroundFormats);
         if (status != AudioManager.SUCCESS) {
             // fail and bail!
             Log.e(TAG, "getSurroundFormats failed:" + status);
@@ -6762,20 +6762,17 @@ public class AudioManager {
     /**
      * @hide
      * Returns all surround formats that are reported by the connected HDMI device.
-     * The keys are not affected by calling setSurroundFormatEnabled(), and the values
-     * are not affected by calling setSurroundFormatEnabled() when in AUTO mode.
-     * This information can used to show the AUTO setting for SurroundSound.
+     * The return values are not affected by calling setSurroundFormatEnabled.
      *
-     * @return a map where the key is a surround format and
-     * the value indicates the surround format is enabled or not
+     * @return a list of surround formats
      */
-    public Map<Integer, Boolean> getReportedSurroundFormats() {
-        Map<Integer, Boolean> reportedSurroundFormats = new HashMap<>();
-        int status = AudioSystem.getSurroundFormats(reportedSurroundFormats, true);
+    public ArrayList<Integer> getReportedSurroundFormats() {
+        ArrayList<Integer> reportedSurroundFormats = new ArrayList<>();
+        int status = AudioSystem.getReportedSurroundFormats(reportedSurroundFormats);
         if (status != AudioManager.SUCCESS) {
             // fail and bail!
             Log.e(TAG, "getReportedSurroundFormats failed:" + status);
-            return new HashMap<Integer, Boolean>(); // Always return a map.
+            return new ArrayList<Integer>(); // Always return a list.
         }
         return reportedSurroundFormats;
     }
