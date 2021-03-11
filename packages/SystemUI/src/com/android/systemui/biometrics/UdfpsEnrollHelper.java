@@ -122,6 +122,8 @@ public class UdfpsEnrollHelper {
     @NonNull
     PointF getNextGuidedEnrollmentPoint() {
         final int index = mLocationsEnrolled - NUM_CENTER_TOUCHES;
-        return mGuidedEnrollmentPoints.get(index % mGuidedEnrollmentPoints.size());
+        final PointF originalPoint = mGuidedEnrollmentPoints
+                .get(index % mGuidedEnrollmentPoints.size());
+        return new PointF(originalPoint.x * 0.5f, originalPoint.y * 0.5f);
     }
 }
