@@ -70,7 +70,7 @@ android_test {
         "mockito-target-minus-junit4",
         "net-tests-utils",
         "platform-test-annotations",
-        "service-connectivity",
+        "service-connectivity-pre-jarjar",
         "services.core",
         "services.net",
     ],

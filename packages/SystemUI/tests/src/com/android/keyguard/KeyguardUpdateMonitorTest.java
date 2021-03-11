@@ -793,36 +793,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testStartUdfpsServiceOnShadeLocked() {
-        // GIVEN
-        // - bouncer isn't showing
-        // - user has authenticated since boot
-        setKeyguardBouncerVisibility(false /* isVisible */);
-        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
-
-        // WHEN the status bar state changes to SHADE_LOCKED
-        mStatusBarStateListener.onStateChanged(StatusBarState.SHADE_LOCKED);
-
-        // THEN we shouldn't listen for udfps
-        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
-    }
-
-    @Test
-    public void testStartUdfpsServiceOnFullscreenUserSwitcher() {
-        // GIVEN
-        // - bouncer isn't showing
-        // - user has authenticated since boot
-        setKeyguardBouncerVisibility(false /* isVisible */);
-        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
-
-        // WHEN the status bar state changes to FULLSCREEN_USER_SWITCHER
-        mStatusBarStateListener.onStateChanged(StatusBarState.FULLSCREEN_USER_SWITCHER);
-
-        // THEN we shouldn't listen for udfps
-        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
-    }
-
-    @Test
     public void testStartUdfpsServiceNoAuthenticationSinceLastBoot() {
         // GIVEN
         // - bouncer isn't showing

@@ -3564,6 +3564,16 @@
         <attr name="__removed2" format="boolean" />
         <!-- Specifies whether the IME supports showing inline suggestions. -->
         <attr name="supportsInlineSuggestions" format="boolean" />
+        <!-- Specify one or more configuration changes that the IME will handle itself. If not
+             specified, the IME will be restarted if any of these configuration changes happen in
+              the system.  Otherwise, the IME will remain running and its
+             {@link android.inputmethodservice.InputMethodService#onConfigurationChanged}
+             method is called with the new configuration.
+             <p>Note that all of these configuration changes can impact the
+             resource values seen by the application, so you will generally need
+             to re-retrieve all resources (including view layouts, drawables, etc)
+             to correctly handle any configuration change.-->
+        <attr name="configChanges" />
     </declare-styleable>
 
     <!-- This is the subtype of InputMethod. Subtype can describe locales (for example, en_US and
@@ -3852,6 +3862,15 @@
         <attr name="canRequestFingerprintGestures" format="boolean" />
         <!-- Attribute whether the accessibility service wants to be able to take screenshot. -->
         <attr name="canTakeScreenshot" format="boolean" />
+
+        <!-- Attribute indicating whether the accessibility service is used to assist users with
+             disabilities. This criteria might be defined by the installer. The default is false.
+             <p>
+             Note: If this flag is false, system will show a notification after a duration to
+             inform the user about the privacy implications of the service.
+             </p>
+        -->
+        <attr name="isAccessibilityTool" format="boolean" />
 
         <!-- Animated image of the accessibility service purpose or behavior, to help users
              understand how the service can help them.-->

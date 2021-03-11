@@ -120,8 +120,13 @@ public class BinderCallsStats implements BinderInternal.Observer {
                     UidEntry uidEntry = mUidEntries.get(mSendUidsToObserver.valueAt(i));
                     if (uidEntry != null) {
                         ArrayMap<CallStatKey, CallStat> callStats = uidEntry.mCallStats;
+                        final int csize = callStats.size();
+                        final ArrayList<CallStat> tmpCallStats = new ArrayList<>(csize);
+                        for (int j = 0; j < csize; j++) {
+                            tmpCallStats.add(callStats.valueAt(j).clone());
+                        }
                         mCallStatsObserver.noteCallStats(uidEntry.workSourceUid,
-                                uidEntry.incrementalCallCount, callStats.values()
+                                uidEntry.incrementalCallCount, tmpCallStats
                         );
                         uidEntry.incrementalCallCount = 0;
                         for (int j = callStats.size() - 1; j >= 0; j--) {
@@ -827,6 +832,23 @@ public class BinderCallsStats implements BinderInternal.Observer {
             this.binderClass = binderClass;
             this.transactionCode = transactionCode;
             this.screenInteractive = screenInteractive;
+        }
+
+        @Override
+        public CallStat clone() {
+            CallStat clone = new CallStat(callingUid, binderClass, transactionCode,
+                    screenInteractive);
+            clone.recordedCallCount = recordedCallCount;
+            clone.callCount = callCount;
+            clone.cpuTimeMicros = cpuTimeMicros;
+            clone.maxCpuTimeMicros = maxCpuTimeMicros;
+            clone.latencyMicros = latencyMicros;
+            clone.maxLatencyMicros = maxLatencyMicros;
+            clone.maxRequestSizeBytes = maxRequestSizeBytes;
+            clone.maxReplySizeBytes = maxReplySizeBytes;
+            clone.exceptionCount = exceptionCount;
+            clone.incrementalCallCount = incrementalCallCount;
+            return clone;
         }
 
         @Override

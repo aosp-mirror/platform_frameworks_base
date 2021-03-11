@@ -241,7 +241,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         verify(mGatewayStatusCallback)
                 .onGatewayConnectionError(
-                        eq(mConfig.getRequiredUnderlyingCapabilities()),
+                        eq(mConfig.getExposedCapabilities()),
                         eq(VCN_ERROR_CODE_INTERNAL_ERROR),
                         any(),
                         any());
@@ -275,10 +275,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         verify(mGatewayStatusCallback)
                 .onGatewayConnectionError(
-                        eq(mConfig.getRequiredUnderlyingCapabilities()),
-                        eq(expectedErrorType),
-                        any(),
-                        any());
+                        eq(mConfig.getExposedCapabilities()), eq(expectedErrorType), any(), any());
     }
 
     @Test
