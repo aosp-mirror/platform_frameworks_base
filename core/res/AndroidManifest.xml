@@ -5259,15 +5259,20 @@
     <permission android:name="android.permission.MANAGE_MUSIC_RECOGNITION"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to manage speech recognition service.
+     @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.MANAGE_SPEECH_RECOGNITION"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to manage the content suggestions service.
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_CONTENT_SUGGESTIONS"
-         android:protectionLevel="signature" />
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to manage the app predictions service.
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_APP_PREDICTIONS"
-         android:protectionLevel="signature|appPredictor" />
+        android:protectionLevel="signature|appPredictor" />
 
     <!-- @SystemApi Allows an application to manage the search ui service.
      @hide  <p>Not for use by third-party applications.</p> -->
