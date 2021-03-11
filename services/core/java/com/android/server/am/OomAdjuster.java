@@ -345,8 +345,6 @@ public final class OomAdjuster {
         final ServiceThread adjusterThread =
                 new ServiceThread(TAG, TOP_APP_PRIORITY_BOOST, false /* allowIo */);
         adjusterThread.start();
-        adjusterThread.getThreadHandler().post(() -> Process.setThreadGroupAndCpuset(
-                adjusterThread.getThreadId(), THREAD_GROUP_TOP_APP));
         return adjusterThread;
     }
 
