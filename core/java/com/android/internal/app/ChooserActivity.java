@@ -1081,7 +1081,7 @@ public class ChooserActivity extends ResolverActivity implements
 
             ClipboardManager clipboardManager = (ClipboardManager) getSystemService(
                     Context.CLIPBOARD_SERVICE);
-            clipboardManager.setPrimaryClip(clipData);
+            clipboardManager.setPrimaryClipAsPackage(clipData, getReferrerPackageName());
             Toast.makeText(getApplicationContext(), R.string.copied, Toast.LENGTH_SHORT).show();
 
             // Log share completion via copy
