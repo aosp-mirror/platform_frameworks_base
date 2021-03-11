@@ -61,6 +61,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
+import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -220,6 +221,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 new MetricsLogger(),
                 mOverviewProxyService,
                 mock(NavigationModeController.class),
+                mock(AccessibilityButtonModeObserver.class),
                 mock(StatusBarStateController.class),
                 mMockSysUiState,
                 mBroadcastDispatcher,
