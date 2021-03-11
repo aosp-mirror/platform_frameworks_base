@@ -8369,6 +8369,14 @@ public final class Settings {
         public static final String DOZE_WAKE_DISPLAY_GESTURE = "doze_wake_display_gesture";
 
         /**
+         * Gesture that wakes up the display on quick pickup, toggling between
+         * {@link Display.STATE_OFF} and {@link Display.STATE_DOZE}.
+         * @hide
+         */
+        @Readable
+        public static final String DOZE_QUICK_PICKUP_GESTURE = "doze_quick_pickup_gesture";
+
+        /**
          * Whether the device should suppress the current doze configuration and disable dozing.
          * @hide
          */
