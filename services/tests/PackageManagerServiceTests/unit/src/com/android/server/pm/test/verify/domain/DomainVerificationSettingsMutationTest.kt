@@ -265,5 +265,7 @@ class DomainVerificationSettingsMutationTest {
 
             // This doesn't check for visibility; that's done in the enforcer test
             whenever(filterAppAccess(anyString(), anyInt(), anyInt())) { false }
+            whenever(doesUserExist(0)) { true }
+            whenever(doesUserExist(10)) { true }
         }
 }

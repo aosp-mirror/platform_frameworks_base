@@ -1768,6 +1768,11 @@ public class PackageManagerService extends IPackageManager.Stub
         public int[] getAllUserIds() {
             return mUserManager.getUserIds();
         }
+
+        @Override
+        public boolean doesUserExist(@UserIdInt int userId) {
+            return mUserManager.exists(userId);
+        }
     }
 
     /**
@@ -25693,6 +25698,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!convertedFromPreCreated || !readPermissionStateForUser(userId)) {
             mPermissionManager.onUserCreated(userId);
             mLegacyPermissionManager.grantDefaultPermissions(userId);
+            mDomainVerificationManager.clearUser(userId);
         }
     }
 

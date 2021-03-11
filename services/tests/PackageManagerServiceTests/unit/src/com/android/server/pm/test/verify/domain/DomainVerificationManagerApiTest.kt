@@ -314,6 +314,8 @@ class DomainVerificationManagerApiTest {
             }).apply {
                 setConnection(mockThrowOnUnmocked {
                     whenever(filterAppAccess(anyString(), anyInt(), anyInt())) { false }
+                    whenever(doesUserExist(0)) { true }
+                    whenever(doesUserExist(1)) { true }
                     whenever(scheduleWriteSettings())
 
                     // Need to provide an internal UID so some permission checks are ignored

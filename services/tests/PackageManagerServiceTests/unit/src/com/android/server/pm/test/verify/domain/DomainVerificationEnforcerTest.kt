@@ -51,6 +51,8 @@ import java.io.File
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.test.assertFailsWith
+import kotlin.test.fail
 
 @RunWith(Parameterized::class)
 class DomainVerificationEnforcerTest {
@@ -82,46 +84,48 @@ class DomainVerificationEnforcerTest {
                         whenever(filterAppAccess(eq(INVISIBLE_PKG), anyInt(), anyInt())) {
                             true
                         }
+                        whenever(doesUserExist(anyInt())) { (arguments[0] as Int) <= 1 }
                     })
                 }
             }
 
-            val makeService: (Context) -> Triple<AtomicInteger, AtomicInteger, DomainVerificationService> =
-                {
-                    val callingUidInt = AtomicInteger(-1)
-                    val callingUserIdInt = AtomicInteger(-1)
+            val makeService: (Context) -> Triple<AtomicInteger, AtomicInteger,
+                    DomainVerificationService> = {
+                val callingUidInt = AtomicInteger(-1)
+                val callingUserIdInt = AtomicInteger(-1)
 
-                    val connection: DomainVerificationManagerInternal.Connection =
-                        mockThrowOnUnmocked {
-                            whenever(callingUid) { callingUidInt.get() }
-                            whenever(callingUserId) { callingUserIdInt.get() }
-                            whenever(getPackageSettingLocked(VISIBLE_PKG)) { visiblePkgSetting }
-                            whenever(getPackageLocked(VISIBLE_PKG)) { visiblePkg }
-                            whenever(getPackageSettingLocked(INVISIBLE_PKG)) { invisiblePkgSetting }
-                            whenever(getPackageLocked(INVISIBLE_PKG)) { invisiblePkg }
-                            whenever(schedule(anyInt(), any()))
-                            whenever(scheduleWriteSettings())
-                            whenever(filterAppAccess(eq(VISIBLE_PKG), anyInt(), anyInt())) { false }
-                            whenever(filterAppAccess(eq(INVISIBLE_PKG), anyInt(), anyInt())) {
-                                true
-                            }
+                val connection: DomainVerificationManagerInternal.Connection =
+                    mockThrowOnUnmocked {
+                        whenever(callingUid) { callingUidInt.get() }
+                        whenever(callingUserId) { callingUserIdInt.get() }
+                        whenever(getPackageSettingLocked(VISIBLE_PKG)) { visiblePkgSetting }
+                        whenever(getPackageLocked(VISIBLE_PKG)) { visiblePkg }
+                        whenever(getPackageSettingLocked(INVISIBLE_PKG)) { invisiblePkgSetting }
+                        whenever(getPackageLocked(INVISIBLE_PKG)) { invisiblePkg }
+                        whenever(schedule(anyInt(), any()))
+                        whenever(scheduleWriteSettings())
+                        whenever(filterAppAccess(eq(VISIBLE_PKG), anyInt(), anyInt())) { false }
+                        whenever(filterAppAccess(eq(INVISIBLE_PKG), anyInt(), anyInt())) {
+                            true
                         }
-                    val service = DomainVerificationService(
-                        it,
-                        mockThrowOnUnmocked { whenever(linkedApps) { ArraySet<String>() } },
-                        mockThrowOnUnmocked {
-                            whenever(
-                                isChangeEnabled(
-                                    anyLong(),
-                                    any()
-                                )
-                            ) { true }
-                        }).apply {
-                        setConnection(connection)
+                        whenever(doesUserExist(anyInt())) { (arguments[0] as Int) <= 1 }
                     }
-
-                    Triple(callingUidInt, callingUserIdInt, service)
+                val service = DomainVerificationService(
+                    it,
+                    mockThrowOnUnmocked { whenever(linkedApps) { ArraySet<String>() } },
+                    mockThrowOnUnmocked {
+                        whenever(
+                            isChangeEnabled(
+                                anyLong(),
+                                any()
+                            )
+                        ) { true }
+                    }).apply {
+                    setConnection(connection)
                 }
+
+                Triple(callingUidInt, callingUserIdInt, service)
+            }
 
             fun enforcer(
                 type: Type,
@@ -476,24 +480,7 @@ class DomainVerificationEnforcerTest {
         fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
             // User selector makes no distinction by UID
             val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
-            if (throws) {
-                allUids.forEach {
-                    assertFails {
-                        runMethod(target, it, visible = true, callingUserId, targetUserId)
-                    }
-                }
-            } else {
-                allUids.forEach {
-                    runMethod(target, it, visible = true, callingUserId, targetUserId)
-                }
-            }
-
-            // User selector doesn't use QUERY_ALL, so the invisible package should always fail
-            allUids.forEach {
-                assertFails {
-                    runMethod(target, it, visible = false, callingUserId, targetUserId)
-                }
-            }
+            runCrossUserMethod(allUids, target, callingUserId, targetUserId, throws)
         }
 
         val callingUserId = 0
@@ -530,24 +517,7 @@ class DomainVerificationEnforcerTest {
         fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
             // User selector makes no distinction by UID
             val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
-            if (throws) {
-                allUids.forEach {
-                    assertFails {
-                        runMethod(target, it, visible = true, callingUserId, targetUserId)
-                    }
-                }
-            } else {
-                allUids.forEach {
-                    runMethod(target, it, visible = true, callingUserId, targetUserId)
-                }
-            }
-
-            // User selector doesn't use QUERY_ALL, so the invisible package should always fail
-            allUids.forEach {
-                assertFails {
-                    runMethod(target, it, visible = false, callingUserId, targetUserId)
-                }
-            }
+            runCrossUserMethod(allUids, target, callingUserId, targetUserId, throws)
         }
 
         val callingUserId = 0
@@ -591,24 +561,10 @@ class DomainVerificationEnforcerTest {
         fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
             // Legacy makes no distinction by UID
             val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
-            if (throws) {
-                allUids.forEach {
-                    assertFails {
-                        runMethod(target, it, visible = true, callingUserId, targetUserId)
-                    }
-                }
-            } else {
-                allUids.forEach {
-                    runMethod(target, it, visible = true, callingUserId, targetUserId)
-                }
-            }
-
-            // Legacy doesn't use QUERY_ALL, so the invisible package should always fail
-            allUids.forEach {
-                assertFails {
-                    runMethod(target, it, visible = false, callingUserId, targetUserId)
-                }
-            }
+            // The legacy selector does a silent failure when the user IDs don't match, so it
+            // cannot verify the non-existent user ID check, as it will not throw an Exception.
+            runCrossUserMethod(allUids, target, callingUserId, targetUserId, throws,
+                verifyUserIdCheck = false)
         }
 
         val callingUserId = 0
@@ -664,24 +620,8 @@ class DomainVerificationEnforcerTest {
         fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
             // Legacy makes no distinction by UID
             val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
-            if (throws) {
-                allUids.forEach {
-                    assertFailsLegacy {
-                        runMethod(target, it, visible = true, callingUserId, targetUserId)
-                    }
-                }
-            } else {
-                allUids.forEach {
-                    runMethod(target, it, visible = true, callingUserId, targetUserId)
-                }
-            }
-
-            // Legacy doesn't use QUERY_ALL, so the invisible package should always fail
-            allUids.forEach {
-                assertFailsLegacy {
-                    runMethod(target, it, visible = false, callingUserId, targetUserId)
-                }
-            }
+            runCrossUserMethod(allUids, target, callingUserId, targetUserId, throws,
+                    assertFailsMethod = ::assertFailsLegacy)
         }
 
         val callingUserId = 0
@@ -723,17 +663,8 @@ class DomainVerificationEnforcerTest {
         fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
             // Owner querent makes no distinction by UID
             val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
-            if (throws) {
-                allUids.forEach {
-                    assertFails {
-                        runMethod(target, it, visible = true, callingUserId, targetUserId)
-                    }
-                }
-            } else {
-                allUids.forEach {
-                    runMethod(target, it, visible = true, callingUserId, targetUserId)
-                }
-            }
+            runCrossUserMethod(allUids, target, callingUserId, targetUserId, throws,
+                verifyInvisiblePkg = false)
         }
 
         val callingUserId = 0
@@ -799,6 +730,71 @@ class DomainVerificationEnforcerTest {
         val packageName = if (visible) VISIBLE_PKG else INVISIBLE_PKG
         val uuid = if (visible) VISIBLE_UUID else INVISIBLE_UUID
         return params.runMethod(target, callingUid, callingUserId, userId, packageName, uuid, proxy)
+    }
+
+    private fun runCrossUserMethod(
+        allUids: Iterable<Int>,
+        target: Any,
+        callingUserId: Int,
+        targetUserId: Int,
+        throws: Boolean,
+        verifyUserIdCheck: Boolean = true,
+        verifyInvisiblePkg: Boolean = true,
+        assertFailsMethod: (() -> Any?) -> Unit = ::assertFails,
+    ) {
+        if (throws) {
+            allUids.forEach {
+                assertFailsMethod {
+                    // When testing a non-user ID failure, send an invalid user ID.
+                    // This ensures the failure occurs before the user ID check is run.
+                    try {
+                        runMethod(target, it, visible = true, callingUserId, 100)
+                    } catch (e: SecurityException) {
+                        if (verifyUserIdCheck) {
+                            e.message?.let {
+                                if (it.contains("user ID", ignoreCase = true)
+                                    || it.contains("100")) {
+                                    fail(
+                                        "Method should not check user existence before permissions"
+                                    )
+                                }
+                            }
+                        }
+
+                        // Rethrow to allow normal fail checking logic to run
+                        throw e
+                    }
+                }
+            }
+        } else {
+            allUids.forEach {
+                runMethod(target, it, visible = true, callingUserId, targetUserId)
+            }
+        }
+
+        if (verifyInvisiblePkg) {
+            allUids.forEach {
+                assertFailsMethod {
+                    runMethod(target, it, visible = false, callingUserId, targetUserId)
+                }
+            }
+        }
+
+        if (verifyUserIdCheck) {
+            // An invalid target user ID should always fail
+            allUids.forEach {
+                assertFailsWith(SecurityException::class) {
+                    runMethod(target, it, visible = true, callingUserId, 100)
+                }
+            }
+
+            // An invalid calling user ID should always fail, although this cannot happen in prod
+            allUids.forEach {
+                assertFailsWith(SecurityException::class) {
+                    runMethod(target, it, visible = true, 100, targetUserId)
+                }
+            }
+        }
     }
 
     private fun assertFails(block: () -> Any?) {
