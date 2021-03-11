@@ -35,6 +35,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_FORCE_OPAQUE;
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
@@ -85,6 +86,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
@@ -215,6 +217,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private int mLayoutDirection;
 
     private boolean mForceNavBarHandleOpaque;
+    private Optional<Long> mHomeButtonLongPressDurationMs;
     private boolean mIsCurrentUserSetup;
 
     /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int, int) */
@@ -377,6 +380,14 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private final Runnable mAutoDim = () -> getBarTransitions().setAutoDim(true);
 
+    private final Runnable mOnVariableDurationHomeLongClick = () -> {
+        if (onHomeLongClick(mNavigationBarView.getHomeButton().getCurrentView())) {
+            mNavigationBarView.getHomeButton().getCurrentView().performHapticFeedback(
+                    HapticFeedbackConstants.LONG_PRESS,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+        }
+    };
+
     private final ContentObserver mAssistContentObserver = new ContentObserver(
             new Handler(Looper.getMainLooper())) {
         @Override
@@ -397,6 +408,13 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                     if (properties.getKeyset().contains(NAV_BAR_HANDLE_FORCE_OPAQUE)) {
                         mForceNavBarHandleOpaque = properties.getBoolean(
                                 NAV_BAR_HANDLE_FORCE_OPAQUE, /* defaultValue = */ true);
+                    }
+
+                    if (properties.getKeyset().contains(HOME_BUTTON_LONG_PRESS_DURATION_MS)) {
+                        mHomeButtonLongPressDurationMs = Optional.of(
+                            properties.getLong(HOME_BUTTON_LONG_PRESS_DURATION_MS, 0)
+                        ).filter(duration -> duration != 0);
+                        reconfigureHomeLongClick();
                     }
                 }
             };
@@ -519,6 +537,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 NAV_BAR_HANDLE_FORCE_OPAQUE,
                 /* defaultValue = */ true);
+        mHomeButtonLongPressDurationMs = Optional.of(DeviceConfig.getLong(
+            DeviceConfig.NAMESPACE_SYSTEMUI,
+            HOME_BUTTON_LONG_PRESS_DURATION_MS,
+            /* defaultValue = */ 0
+        )).filter(duration -> duration != 0);
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post, mOnPropertiesChangedListener);
 
@@ -779,6 +802,22 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
     }
 
+    private void reconfigureHomeLongClick() {
+        if (mNavigationBarView == null
+                || mNavigationBarView.getHomeButton().getCurrentView() == null) {
+            return;
+        }
+        if (mHomeButtonLongPressDurationMs.isPresent()) {
+            mNavigationBarView.getHomeButton().getCurrentView().setLongClickable(false);
+            mNavigationBarView.getHomeButton().getCurrentView().setHapticFeedbackEnabled(false);
+            mNavigationBarView.getHomeButton().setOnLongClickListener(null);
+        } else {
+            mNavigationBarView.getHomeButton().getCurrentView().setLongClickable(true);
+            mNavigationBarView.getHomeButton().getCurrentView().setHapticFeedbackEnabled(true);
+            mNavigationBarView.getHomeButton().setOnLongClickListener(this::onHomeLongClick);
+        }
+    }
+
     private int deltaRotation(int oldRotation, int newRotation) {
         int delta = newRotation - oldRotation;
         if (delta < 0) delta += 4;
@@ -789,6 +828,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         pw.println("NavigationBar (displayId=" + mDisplayId + "):");
         pw.println("  mStartingQuickSwitchRotation=" + mStartingQuickSwitchRotation);
         pw.println("  mCurrentRotation=" + mCurrentRotation);
+        pw.println("  mHomeButtonLongPressDurationMs=" + mHomeButtonLongPressDurationMs);
 
         if (mNavigationBarView != null) {
             pw.println("  mNavigationBarWindowState="
@@ -1118,7 +1158,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
-        homeButton.setOnLongClickListener(this::onHomeLongClick);
+
+        reconfigureHomeLongClick();
 
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
@@ -1128,7 +1169,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         updateScreenPinningGestures();
     }
 
-    private boolean onHomeTouch(View v, MotionEvent event) {
+    @VisibleForTesting
+    boolean onHomeTouch(View v, MotionEvent event) {
         if (mHomeBlockedThisTouch && event.getActionMasked() != MotionEvent.ACTION_DOWN) {
             return true;
         }
@@ -1148,9 +1190,13 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                         return true;
                     }
                 }
+                mHomeButtonLongPressDurationMs.ifPresent(longPressDuration -> {
+                    mHandler.postDelayed(mOnVariableDurationHomeLongClick, longPressDuration);
+                });
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                mHandler.removeCallbacks(mOnVariableDurationHomeLongClick);
                 mStatusBarLazy.get().awakenDreams();
                 break;
         }
