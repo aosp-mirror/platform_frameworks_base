@@ -4837,6 +4837,15 @@ public abstract class Context {
     public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
 
     /**
+     * System service name for the PowerExemptionManager.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @SystemApi
+    public static final String POWER_EXEMPTION_SERVICE = "power_exemption";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.admin.DevicePolicyManager} for working with global
      * device policy management.
