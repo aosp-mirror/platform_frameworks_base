@@ -1346,9 +1346,7 @@ public class NotificationContentView extends FrameLayout {
         }
         ImageView bubbleButton = layout.findViewById(com.android.internal.R.id.bubble_button);
         View actionContainer = layout.findViewById(com.android.internal.R.id.actions_container);
-        LinearLayout actionContainerLayout =
-                layout.findViewById(com.android.internal.R.id.actions_container_layout);
-        if (bubbleButton == null || actionContainer == null || actionContainerLayout == null) {
+        if (bubbleButton == null || actionContainer == null) {
             return;
         }
         boolean isPersonWithShortcut =

@@ -324,7 +324,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         StatusBarNotification notification = mContainingNotification.getEntry().getSbn();
         final Notification.Builder builder = Notification.Builder.recoverBuilder(getContext(),
                 notification.getNotification());
-        RemoteViews header = builder.makeNotificationHeader();
+        RemoteViews header = builder.makeNotificationGroupHeader();
         if (mNotificationHeader == null) {
             mNotificationHeader = (NotificationHeaderView) header.apply(getContext(), this);
             mNotificationHeader.findViewById(com.android.internal.R.id.expand_button)

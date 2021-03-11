@@ -5011,9 +5011,13 @@ public class Notification implements Parcelable
             boolean showProgress = handleProgressBar(contentView, ex, p);
             boolean hasSecondLine = showProgress;
             if (p.hasTitle()) {
-                contentView.setViewVisibility(R.id.title, View.VISIBLE);
-                contentView.setTextViewText(R.id.title, processTextSpans(p.title));
-                setTextViewColorPrimary(contentView, R.id.title, p);
+                contentView.setViewVisibility(p.mTitleViewId, View.VISIBLE);
+                contentView.setTextViewText(p.mTitleViewId, processTextSpans(p.title));
+                setTextViewColorPrimary(contentView, p.mTitleViewId, p);
+            } else if (p.mTitleViewId != R.id.title) {
+                // This alternate title view ID is not cleared by resetStandardTemplate
+                contentView.setViewVisibility(p.mTitleViewId, View.GONE);
+                contentView.setTextViewText(p.mTitleViewId, null);
             }
             if (p.text != null && p.text.length() != 0
                     && (!showProgress || p.mAllowTextWithProgress)) {
@@ -5441,6 +5445,11 @@ public class Notification implements Parcelable
                 // keep the divider visible between that title and the next text element.
                 return true;
             }
+            if (p.mHideAppName) {
+                // The app name is being hidden, so we definitely want to return here.
+                // Assume that there is a title which will replace it in the header.
+                return p.hasTitle();
+            }
             contentView.setViewVisibility(R.id.app_name_text, View.VISIBLE);
             contentView.setTextViewText(R.id.app_name_text, loadHeaderAppName());
             contentView.setTextColor(R.id.app_name_text, getSecondaryTextColor(p));
@@ -5817,7 +5826,7 @@ public class Notification implements Parcelable
          *
          * @hide
          */
-        public RemoteViews makeNotificationHeader() {
+        public RemoteViews makeNotificationGroupHeader() {
             return makeNotificationHeader(mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_GROUP_HEADER)
                     .fillTextsFrom(this));
@@ -9440,7 +9449,9 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeCallLayout(int viewType) {
+            final boolean isCollapsed = viewType == StandardTemplateParams.VIEW_TYPE_NORMAL;
             Bundle extras = mBuilder.mN.extras;
+            CharSequence title = mPerson != null ? mPerson.getName() : null;
             CharSequence text = mBuilder.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
             if (text == null) {
                 text = getDefaultText();
@@ -9452,22 +9463,26 @@ public class Notification implements Parcelable
                     .callStyleActions(true)
                     .allowTextWithProgress(true)
                     .hideLargeIcon(true)
+                    .hideAppName(isCollapsed)
+                    .titleViewId(R.id.conversation_text)
+                    .title(title)
                     .text(text)
                     .summaryText(mBuilder.processLegacyText(mVerificationText));
             mBuilder.mActions = getActionsListWithSystemActions();
             final RemoteViews contentView;
-            if (p.mViewType != StandardTemplateParams.VIEW_TYPE_NORMAL) {
-                contentView = mBuilder.applyStandardTemplateWithActions(
-                        R.layout.notification_template_material_big_call, p, null /* result */);
-            } else {
+            if (isCollapsed) {
                 contentView = mBuilder.applyStandardTemplate(
                         R.layout.notification_template_material_call, p, null /* result */);
+            } else {
+                contentView = mBuilder.applyStandardTemplateWithActions(
+                        R.layout.notification_template_material_big_call, p, null /* result */);
             }
 
             // Bind some extra conversation-specific header fields.
-            mBuilder.setTextViewColorPrimary(contentView, R.id.conversation_text, p);
-            mBuilder.setTextViewColorSecondary(contentView, R.id.app_name_divider, p);
-            contentView.setViewVisibility(R.id.app_name_divider, View.VISIBLE);
+            if (!p.mHideAppName) {
+                mBuilder.setTextViewColorSecondary(contentView, R.id.app_name_divider, p);
+                contentView.setViewVisibility(R.id.app_name_divider, View.VISIBLE);
+            }
             bindCallerVerification(contentView, p);
 
             // Bind some custom CallLayout properties
@@ -12144,12 +12159,13 @@ public class Notification implements Parcelable
         public static int VIEW_TYPE_NORMAL = 1;
         public static int VIEW_TYPE_BIG = 2;
         public static int VIEW_TYPE_HEADS_UP = 3;
-        public static int VIEW_TYPE_MINIMIZED = 4;
-        public static int VIEW_TYPE_PUBLIC = 5;
-        public static int VIEW_TYPE_GROUP_HEADER = 6;
+        public static int VIEW_TYPE_MINIMIZED = 4;    // header only for minimized state
+        public static int VIEW_TYPE_PUBLIC = 5;       // header only for automatic public version
+        public static int VIEW_TYPE_GROUP_HEADER = 6; // header only for top of group
 
         int mViewType = VIEW_TYPE_UNSPECIFIED;
         boolean mHeaderless;
+        boolean mHideAppName;
         boolean mHideTitle;
         boolean mHideActions;
         boolean mHideProgress;
@@ -12157,6 +12173,7 @@ public class Notification implements Parcelable
         boolean mPromotePicture;
         boolean mCallStyleActions;
         boolean mAllowTextWithProgress;
+        int mTitleViewId;
         int mTextViewId;
         CharSequence title;
         CharSequence text;
@@ -12170,6 +12187,7 @@ public class Notification implements Parcelable
         final StandardTemplateParams reset() {
             mViewType = VIEW_TYPE_UNSPECIFIED;
             mHeaderless = false;
+            mHideAppName = false;
             mHideTitle = false;
             mHideActions = false;
             mHideProgress = false;
@@ -12177,6 +12195,7 @@ public class Notification implements Parcelable
             mPromotePicture = false;
             mCallStyleActions = false;
             mAllowTextWithProgress = false;
+            mTitleViewId = R.id.title;
             mTextViewId = R.id.text;
             title = null;
             text = null;
@@ -12199,6 +12218,11 @@ public class Notification implements Parcelable
 
         public StandardTemplateParams headerless(boolean headerless) {
             mHeaderless = headerless;
+            return this;
+        }
+
+        public StandardTemplateParams hideAppName(boolean hideAppName) {
+            mHideAppName = hideAppName;
             return this;
         }
 
@@ -12234,6 +12258,11 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams promotePicture(boolean promotePicture) {
             this.mPromotePicture = promotePicture;
+            return this;
+        }
+
+        public StandardTemplateParams titleViewId(int titleViewId) {
+            mTitleViewId = titleViewId;
             return this;
         }
 
