@@ -102,6 +102,28 @@ public class EdgeEffect {
      */
     public static final int TYPE_STRETCH = 1;
 
+    /**
+     * The velocity threshold before the spring animation is considered settled.
+     * The idea here is that velocity should be less than 1 pixel per frame (~16ms).
+     */
+    private static final double VELOCITY_THRESHOLD = 1.0 / 0.016;
+
+    /**
+     * The value threshold before the spring animation is considered close enough to
+     * the destination to be settled. This should be around 1 pixel.
+     */
+    private static final double VALUE_THRESHOLD = 1;
+
+    /**
+     * The natural frequency of the stretch spring.
+     */
+    private static final double NATURAL_FREQUENCY = 14.4222;
+
+    /**
+     * The damping ratio of the stretch spring.
+     */
+    private static final double DAMPING_RATIO = 0.875;
+
     /** @hide */
     @IntDef({TYPE_GLOW, TYPE_STRETCH})
     @Retention(RetentionPolicy.SOURCE)
@@ -145,13 +167,12 @@ public class EdgeEffect {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private float mGlowScaleY;
     private float mDistance;
+    private float mVelocity; // only for stretch animations
 
     private float mGlowAlphaStart;
     private float mGlowAlphaFinish;
     private float mGlowScaleYStart;
     private float mGlowScaleYFinish;
-    private float mDistanceStart;
-    private float mDistanceFinish;
 
     private long mStartTime;
     private float mDuration;
@@ -273,6 +294,8 @@ public class EdgeEffect {
      */
     public void finish() {
         mState = STATE_IDLE;
+        mDistance = 0;
+        mVelocity = 0;
     }
 
     /**
@@ -327,7 +350,8 @@ public class EdgeEffect {
         mDuration = PULL_TIME;
 
         mPullDistance += deltaDistance;
-        mDistanceStart = mDistanceFinish = mDistance = Math.max(0f, mPullDistance);
+        mDistance = Math.max(0f, mPullDistance);
+        mVelocity = 0;
 
         final float absdd = Math.abs(deltaDistance);
         mGlowAlpha = mGlowAlphaStart = Math.min(MAX_ALPHA,
@@ -421,11 +445,10 @@ public class EdgeEffect {
         mState = STATE_RECEDE;
         mGlowAlphaStart = mGlowAlpha;
         mGlowScaleYStart = mGlowScaleY;
-        mDistanceStart = mDistance;
 
         mGlowAlphaFinish = 0.f;
         mGlowScaleYFinish = 0.f;
-        mDistanceFinish = 0.f;
+        mVelocity = 0.f;
 
         mStartTime = AnimationUtils.currentAnimationTimeMillis();
         mDuration = RECEDE_TIME;
@@ -442,30 +465,36 @@ public class EdgeEffect {
      * @param velocity Velocity at impact in pixels per second.
      */
     public void onAbsorb(int velocity) {
-        mState = STATE_ABSORB;
-        velocity = Math.min(Math.max(MIN_VELOCITY, Math.abs(velocity)), MAX_VELOCITY);
+        if (mEdgeEffectType == TYPE_STRETCH) {
+            mState = STATE_RECEDE;
+            mVelocity = velocity / mHeight;
+            mDistance = 0;
+            mStartTime = AnimationUtils.currentAnimationTimeMillis();
+        } else {
+            mState = STATE_ABSORB;
+            mVelocity = 0;
+            velocity = Math.min(Math.max(MIN_VELOCITY, Math.abs(velocity)), MAX_VELOCITY);
 
-        mStartTime = AnimationUtils.currentAnimationTimeMillis();
-        mDuration = 0.15f + (velocity * 0.02f);
+            mStartTime = AnimationUtils.currentAnimationTimeMillis();
+            mDuration = 0.15f + (velocity * 0.02f);
 
-        // The glow depends more on the velocity, and therefore starts out
-        // nearly invisible.
-        mGlowAlphaStart = GLOW_ALPHA_START;
-        mGlowScaleYStart = Math.max(mGlowScaleY, 0.f);
-        mDistanceStart = mDistance;
+            // The glow depends more on the velocity, and therefore starts out
+            // nearly invisible.
+            mGlowAlphaStart = GLOW_ALPHA_START;
+            mGlowScaleYStart = Math.max(mGlowScaleY, 0.f);
 
-        // Growth for the size of the glow should be quadratic to properly
-        // respond
-        // to a user's scrolling speed. The faster the scrolling speed, the more
-        // intense the effect should be for both the size and the saturation.
-        mGlowScaleYFinish = Math.min(0.025f + (velocity * (velocity / 100) * 0.00015f) / 2, 1.f);
-        // Alpha should change for the glow as well as size.
-        mGlowAlphaFinish = Math.max(
-                mGlowAlphaStart, Math.min(velocity * VELOCITY_GLOW_FACTOR * .00001f, MAX_ALPHA));
-        mTargetDisplacement = 0.5f;
-
-        // Use glow values to estimate the absorption for stretch distance.
-        mDistanceFinish = calculateDistanceFromGlowValues(mGlowScaleYFinish, mGlowAlphaFinish);
+            // Growth for the size of the glow should be quadratic to properly
+            // respond
+            // to a user's scrolling speed. The faster the scrolling speed, the more
+            // intense the effect should be for both the size and the saturation.
+            mGlowScaleYFinish = Math.min(0.025f + (velocity * (velocity / 100) * 0.00015f) / 2,
+                    1.f);
+            // Alpha should change for the glow as well as size.
+            mGlowAlphaFinish = Math.max(
+                    mGlowAlphaStart,
+                    Math.min(velocity * VELOCITY_GLOW_FACTOR * .00001f, MAX_ALPHA));
+            mTargetDisplacement = 0.5f;
+        }
     }
 
     /**
@@ -573,8 +602,8 @@ public class EdgeEffect {
             canvas.drawCircle(centerX, centerY, mRadius, mPaint);
             canvas.restoreToCount(count);
         } else if (canvas instanceof RecordingCanvas) {
-            if (mState != STATE_PULL) {
-                update();
+            if (mState == STATE_RECEDE) {
+                updateSpring();
             }
             RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
             if (mTmpMatrix == null) {
@@ -631,7 +660,7 @@ public class EdgeEffect {
         }
 
         boolean oneLastFrame = false;
-        if (mState == STATE_RECEDE && mDistance == 0) {
+        if (mState == STATE_RECEDE && mDistance == 0 && mVelocity == 0) {
             mState = STATE_IDLE;
             oneLastFrame = true;
         }
@@ -668,7 +697,7 @@ public class EdgeEffect {
 
         mGlowAlpha = mGlowAlphaStart + (mGlowAlphaFinish - mGlowAlphaStart) * interp;
         mGlowScaleY = mGlowScaleYStart + (mGlowScaleYFinish - mGlowScaleYStart) * interp;
-        mDistance = mDistanceStart + (mDistanceFinish - mDistanceStart) * interp;
+        mDistance = calculateDistanceFromGlowValues(mGlowScaleY, mGlowAlpha);
         mDisplacement = (mDisplacement + mTargetDisplacement) / 2;
 
         if (t >= 1.f - EPSILON) {
@@ -680,12 +709,10 @@ public class EdgeEffect {
 
                     mGlowAlphaStart = mGlowAlpha;
                     mGlowScaleYStart = mGlowScaleY;
-                    mDistanceStart = mDistance;
 
                     // After absorb, the glow should fade to nothing.
                     mGlowAlphaFinish = 0.f;
                     mGlowScaleYFinish = 0.f;
-                    mDistanceFinish = 0.f;
                     break;
                 case STATE_PULL:
                     mState = STATE_PULL_DECAY;
@@ -694,12 +721,10 @@ public class EdgeEffect {
 
                     mGlowAlphaStart = mGlowAlpha;
                     mGlowScaleYStart = mGlowScaleY;
-                    mDistanceStart = mDistance;
 
                     // After pull, the glow should fade to nothing.
                     mGlowAlphaFinish = 0.f;
                     mGlowScaleYFinish = 0.f;
-                    mDistanceFinish = 0.f;
                     break;
                 case STATE_PULL_DECAY:
                     mState = STATE_RECEDE;
@@ -708,6 +733,35 @@ public class EdgeEffect {
                     mState = STATE_IDLE;
                     break;
             }
+        }
+    }
+
+    private void updateSpring() {
+        final long time = AnimationUtils.currentAnimationTimeMillis();
+        final float deltaT = (time - mStartTime) / 1000f; // Convert from millis to seconds
+        if (deltaT < 0.001f) {
+            return; // Must have at least 1 ms difference
+        }
+        final double mDampedFreq = NATURAL_FREQUENCY * Math.sqrt(1 - DAMPING_RATIO * DAMPING_RATIO);
+
+        // We're always underdamped, so we can use only those equations:
+        double cosCoeff = mDistance;
+        double sinCoeff = (1 / mDampedFreq) * (DAMPING_RATIO * NATURAL_FREQUENCY
+                * mDistance + mVelocity);
+        double distance = Math.pow(Math.E, -DAMPING_RATIO * NATURAL_FREQUENCY * deltaT)
+                * (cosCoeff * Math.cos(mDampedFreq * deltaT)
+                + sinCoeff * Math.sin(mDampedFreq * deltaT));
+        double velocity = distance * (-NATURAL_FREQUENCY) * DAMPING_RATIO
+                + Math.pow(Math.E, -DAMPING_RATIO * NATURAL_FREQUENCY * deltaT)
+                * (-mDampedFreq * cosCoeff * Math.sin(mDampedFreq * deltaT)
+                + mDampedFreq * sinCoeff * Math.cos(mDampedFreq * deltaT));
+        mDistance = (float) distance;
+        mVelocity = (float) velocity;
+        mStartTime = time;
+        if (isAtEquilibrium()) {
+            mState = STATE_IDLE;
+            mDistance = 0;
+            mVelocity = 0;
         }
     }
 
@@ -725,5 +779,16 @@ public class EdgeEffect {
             return v * v / mBounds.height();
         }
         return alpha / PULL_DISTANCE_ALPHA_GLOW_FACTOR;
+    }
+
+    /**
+     * @return true if the spring used for calculating the stretch animation is
+     * considered at rest or false if it is still animating.
+     */
+    private boolean isAtEquilibrium() {
+        double velocity = mVelocity * mHeight; // in pixels/second
+        double displacement = mDistance * mHeight; // in pixels
+        return Math.abs(velocity) < VELOCITY_THRESHOLD
+                && Math.abs(displacement) < VALUE_THRESHOLD;
     }
 }
