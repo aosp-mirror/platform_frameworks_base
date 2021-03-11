@@ -128,8 +128,8 @@ public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Envir
     @Override
     public ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
         return new ConfigurationInternal.Builder(userId)
-                .setAutoDetectionFeatureSupported(
-                        mServiceConfigAccessor.isAutoDetectionFeatureSupported())
+                .setTelephonyDetectionFeatureSupported(
+                        mServiceConfigAccessor.isTelephonyTimeZoneDetectionFeatureSupported())
                 .setGeoDetectionFeatureSupported(
                         mServiceConfigAccessor.isGeoTimeZoneDetectionFeatureSupported())
                 .setAutoDetectionEnabled(isAutoDetectionEnabled())
