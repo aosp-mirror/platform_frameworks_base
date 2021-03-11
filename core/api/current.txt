@@ -49895,6 +49895,7 @@ package android.view {
 
   public interface WindowManager extends android.view.ViewManager {
     method public default void addCrossWindowBlurEnabledListener(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public default void addCrossWindowBlurEnabledListener(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @NonNull public default android.view.WindowMetrics getCurrentWindowMetrics();
     method @Deprecated public android.view.Display getDefaultDisplay();
     method @NonNull public default android.view.WindowMetrics getMaximumWindowMetrics();

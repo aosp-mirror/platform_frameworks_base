@@ -16,13 +16,19 @@
 
 package android.view;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.NonNull;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.util.ArraySet;
+import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -42,7 +48,7 @@ public final class CrossWindowBlurListeners {
     private static final Object sLock = new Object();
 
     private final BlurEnabledListenerInternal mListenerInternal = new BlurEnabledListenerInternal();
-    private final ArraySet<Consumer<Boolean>> mListeners = new ArraySet();
+    private final ArrayMap<Consumer<Boolean>, Executor> mListeners = new ArrayMap();
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private boolean mInternalListenerAttached = false;
     private boolean mCrossWindowBlurEnabled;
@@ -74,20 +80,22 @@ public final class CrossWindowBlurListeners {
         }
     }
 
-    void addListener(Consumer<Boolean> listener) {
-        if (listener == null) return;
+    void addListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Preconditions.checkNotNull(executor, "executor cannot be null");
 
         synchronized (sLock) {
             attachInternalListenerIfNeededLocked();
 
-            mListeners.add(listener);
-            notifyListenerOnMain(listener, mCrossWindowBlurEnabled);
+            mListeners.put(listener, executor);
+            notifyListener(listener, executor, mCrossWindowBlurEnabled);
         }
     }
 
 
     void removeListener(Consumer<Boolean> listener) {
-        if (listener == null) return;
+        Preconditions.checkNotNull(listener, "listener cannot be null");
 
         synchronized (sLock) {
             mListeners.remove(listener);
@@ -116,10 +124,8 @@ public final class CrossWindowBlurListeners {
         }
     }
 
-    private void notifyListenerOnMain(Consumer<Boolean> listener, boolean enabled) {
-        mMainHandler.post(() -> {
-            listener.accept(enabled);
-        });
+    private void notifyListener(Consumer<Boolean> listener, Executor executor, boolean enabled) {
+        executor.execute(() -> listener.accept(enabled));
     }
 
     private final class BlurEnabledListenerInternal extends ICrossWindowBlurEnabledListener.Stub {
@@ -128,8 +134,13 @@ public final class CrossWindowBlurListeners {
             synchronized (sLock) {
                 mCrossWindowBlurEnabled = enabled;
 
-                for (int i = 0; i < mListeners.size(); i++) {
-                    notifyListenerOnMain(mListeners.valueAt(i), enabled);
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    for (int i = 0; i < mListeners.size(); i++) {
+                        notifyListener(mListeners.keyAt(i), mListeners.valueAt(i), enabled);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(token);
                 }
             }
         }
