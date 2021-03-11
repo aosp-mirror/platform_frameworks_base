@@ -2973,7 +2973,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private class DpmsUpgradeDataProvider implements PolicyUpgraderDataProvider {
         @Override
-        public boolean isUserDeviceOwner(int userId, ComponentName who) {
+        public boolean isDeviceOwner(int userId, ComponentName who) {
             return mOwners.isDeviceOwnerUserId(userId)
                     && mOwners.getDeviceOwnerComponent().equals(who);
         }
@@ -3003,14 +3003,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return component -> findAdmin(component, userId, /* throwForMissingPermission= */
                     false);
         }
+
+        @Override
+        public int[] getUsersForUpgrade() {
+            List<UserInfo> allUsers = mUserManager.getUsers();
+            return allUsers.stream().mapToInt(u -> u.id).toArray();
+        }
     }
 
     private void performPolicyVersionUpgrade() {
-        List<UserInfo> allUsers = mUserManager.getUsers();
         PolicyVersionUpgrader upgrader = new PolicyVersionUpgrader(
                 new DpmsUpgradeDataProvider());
 
-        upgrader.upgradePolicy(allUsers.stream().mapToInt(u -> u.id).toArray(), DPMS_VERSION);
+        upgrader.upgradePolicy(DPMS_VERSION);
     }
 
     private void revertTransferOwnershipIfNecessaryLocked() {
