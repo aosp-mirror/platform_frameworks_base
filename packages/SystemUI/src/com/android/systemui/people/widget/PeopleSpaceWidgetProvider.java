@@ -22,6 +22,7 @@ import android.app.people.PeopleManager;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -67,18 +68,21 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
         ensurePeopleSpaceWidgetManagerInitialized(context);
         peopleSpaceWidgetManager.updateWidgets(appWidgetIds);
         for (int appWidgetId : appWidgetIds) {
+            if (DEBUG) Log.d(TAG, "Ensure listener is registered for widget: " + appWidgetId);
             PeopleSpaceWidgetProvider.TileConversationListener
                     newListener = new PeopleSpaceWidgetProvider.TileConversationListener();
             peopleSpaceWidgetManager.registerConversationListenerIfNeeded(appWidgetId,
                     newListener);
         }
-        return;
     }
 
-    private void ensurePeopleSpaceWidgetManagerInitialized(Context context) {
-        if (peopleSpaceWidgetManager == null) {
-            peopleSpaceWidgetManager = new PeopleSpaceWidgetManager(context);
-        }
+    /** Called when widget updates. */
+    @Override
+    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager,
+            int appWidgetId, Bundle newOptions) {
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
+        ensurePeopleSpaceWidgetManagerInitialized(context);
+        peopleSpaceWidgetManager.onAppWidgetOptionsChanged(appWidgetId, newOptions);
     }
 
     @Override
@@ -86,6 +90,12 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
         super.onDeleted(context, appWidgetIds);
         ensurePeopleSpaceWidgetManagerInitialized(context);
         peopleSpaceWidgetManager.deleteWidgets(appWidgetIds);
+    }
+
+    private void ensurePeopleSpaceWidgetManagerInitialized(Context context) {
+        if (peopleSpaceWidgetManager == null) {
+            peopleSpaceWidgetManager = new PeopleSpaceWidgetManager(context);
+        }
     }
 
     @VisibleForTesting
