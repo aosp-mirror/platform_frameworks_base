@@ -206,9 +206,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
      * Cancel the trace session of the CUJ.
      */
     public synchronized void cancel() {
-        // The session is ongoing, end the trace session.
-        // That means the cancel call is from external invocation, not from end().
-        if (mBeginVsyncId != INVALID_ID && mEndVsyncId == INVALID_ID) {
+        // We don't need to end the trace section if it never begun.
+        if (mBeginVsyncId != INVALID_ID) {
             Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
         }
         mCancelled = true;
