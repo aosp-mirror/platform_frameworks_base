@@ -580,6 +580,13 @@ public class AccessibilityServiceInfo implements Parcelable {
     private int mHtmlDescriptionRes;
 
     /**
+     * Whether the service is for accessibility.
+     *
+     * @hide
+     */
+    private boolean mIsAccessibilityTool = false;
+
+    /**
      * Creates a new instance.
      */
     public AccessibilityServiceInfo() {
@@ -708,6 +715,8 @@ public class AccessibilityServiceInfo implements Parcelable {
             if (peekedValue != null) {
                 mHtmlDescriptionRes = peekedValue.resourceId;
             }
+            mIsAccessibilityTool = asAttributes.getBoolean(
+                    R.styleable.AccessibilityService_isAccessibilityTool, false);
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException( "Unable to create context for: "
@@ -1036,6 +1045,15 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
+     * Indicates if the service is used to assist users with disabilities.
+     *
+     * @return {@code true} if the property is set to true.
+     */
+    public boolean isAccessibilityTool() {
+        return mIsAccessibilityTool;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public int describeContents() {
@@ -1061,6 +1079,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeInt(mAnimatedImageRes);
         parcel.writeInt(mHtmlDescriptionRes);
         parcel.writeString(mNonLocalizedDescription);
+        parcel.writeBoolean(mIsAccessibilityTool);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -1082,6 +1101,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         mAnimatedImageRes = parcel.readInt();
         mHtmlDescriptionRes = parcel.readInt();
         mNonLocalizedDescription = parcel.readString();
+        mIsAccessibilityTool = parcel.readBoolean();
     }
 
     @Override
@@ -1135,6 +1155,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         stringBuilder.append("settingsActivityName: ").append(mSettingsActivityName);
         stringBuilder.append(", ");
         stringBuilder.append("summary: ").append(mNonLocalizedSummary);
+        stringBuilder.append(", ");
+        stringBuilder.append("isAccessibilityTool: ").append(mIsAccessibilityTool);
         stringBuilder.append(", ");
         appendCapabilities(stringBuilder, mCapabilities);
         return stringBuilder.toString();

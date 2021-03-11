@@ -61,6 +61,12 @@ import java.util.concurrent.TimeUnit;
 /** Tests for {@link HdmiCecLocalDevicePlayback} class. */
 public class HdmiCecLocalDevicePlaybackTest {
 
+    private static final int PORT_1 = 1;
+    private static final HdmiDeviceInfo INFO_TV = new HdmiDeviceInfo(
+            ADDR_TV, 0x0000, PORT_1, HdmiDeviceInfo.DEVICE_TV,
+            0x1234, "TV",
+            HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDevicePlayback mHdmiCecLocalDevicePlayback;
@@ -159,6 +165,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
         mTestLooper.dispatchAll();
         mPlaybackLogicalAddress = mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress();
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(INFO_TV);
         mNativeWrapper.clearResultMessages();
     }
 

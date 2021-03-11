@@ -155,7 +155,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private int mCannedAnimationStartIndex = -1;
     private int mSpeedBumpIndex = -1;
     private int mIconSize;
-    private float mOpenedAmount = 0.0f;
     private boolean mDisallowNextAnimation;
     private boolean mAnimationsEnabled = true;
     private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
@@ -349,6 +348,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }
 
+    public boolean hasMaxNumDot() {
+        return mNumDots >= MAX_DOTS;
+    }
+
     private boolean areAnimationsEnabled(StatusBarIconView icon) {
         return mAnimationsEnabled || icon == mIsolatedIcon;
     }
@@ -391,7 +394,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         float overflowStart = getMaxOverflowStart();
         mVisualOverflowStart = 0;
         mFirstVisibleIconState = null;
-        boolean hasAmbient = mSpeedBumpIndex != -1 && mSpeedBumpIndex < getChildCount();
         for (int i = 0; i < childCount; i++) {
             View view = getChildAt(i);
             IconState iconState = mIconStates.get(view);
@@ -410,10 +412,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             float drawingScale = mOnLockScreen && view instanceof StatusBarIconView
                     ? ((StatusBarIconView) view).getIconScaleIncreased()
                     : 1f;
-            if (mOpenedAmount != 0.0f) {
-                noOverflowAfter = noOverflowAfter && !hasAmbient && !forceOverflow;
-            }
-            iconState.visibleState = StatusBarIconView.STATE_ICON;
+            iconState.visibleState = iconState.hidden
+                    ? StatusBarIconView.STATE_HIDDEN
+                    : StatusBarIconView.STATE_ICON;
 
             boolean isOverflowing =
                     (translationX > (noOverflowAfter ? layoutEnd - mIconSize
@@ -598,10 +599,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mSpeedBumpIndex = speedBumpIndex;
     }
 
-    public void setOpenedAmount(float expandAmount) {
-        mOpenedAmount = expandAmount;
-    }
-
     public boolean hasOverflow() {
         return mNumDots > 0;
     }
@@ -706,13 +703,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public boolean justAdded = true;
         private boolean justReplaced;
         public boolean needsCannedAnimation;
-        public boolean useFullTransitionAmount;
-        public boolean useLinearTransitionAmount;
-        public boolean translateContent;
         public int iconColor = StatusBarIconView.NO_COLOR;
         public boolean noAnimations;
-        public boolean isLastExpandIcon;
-        public int customTransformHeight = NO_VALUE;
         private final View mView;
 
         private final Consumer<Property> mCannedAnimationEndListener;
@@ -734,8 +726,15 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 StatusBarIconView icon = (StatusBarIconView) view;
                 boolean animate = false;
                 AnimationProperties animationProperties = null;
-                boolean animationsAllowed = areAnimationsEnabled(icon) && !mDisallowNextAnimation
-                        && !noAnimations;
+                final boolean isLowPriorityIconChange =
+                        (visibleState == StatusBarIconView.STATE_HIDDEN
+                                && icon.getVisibleState() == StatusBarIconView.STATE_DOT)
+                        || (visibleState == StatusBarIconView.STATE_DOT
+                            && icon.getVisibleState() == StatusBarIconView.STATE_HIDDEN);
+                final boolean animationsAllowed = areAnimationsEnabled(icon)
+                        && !mDisallowNextAnimation
+                        && !noAnimations
+                        && !isLowPriorityIconChange;
                 if (animationsAllowed) {
                     if (justAdded || justReplaced) {
                         super.applyToView(icon);
@@ -820,10 +819,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             justAdded = false;
             justReplaced = false;
             needsCannedAnimation = false;
-        }
-
-        public boolean hasCustomTransformHeight() {
-            return isLastExpandIcon && customTransformHeight != NO_VALUE;
         }
 
         @Override

@@ -1611,7 +1611,8 @@ public class Notification implements Parcelable
 
         /**
          * {@code SemanticAction}: Mark the conversation associated with the notification as a
-         * priority. Note that this is only for use by the notification assistant services.
+         * priority. Note that this is only for use by the notification assistant services. The
+         * type will be ignored for actions an app adds to its own notifications.
          * @hide
          */
         @SystemApi
@@ -1619,7 +1620,8 @@ public class Notification implements Parcelable
 
         /**
          * {@code SemanticAction}: Mark content as a potential phishing attempt.
-         * Note that this is only for use by the notification assistant services.
+         * Note that this is only for use by the notification assistant services. The type will
+         * be ignored for actions an app adds to its own notifications.
          * @hide
          */
         @SystemApi
@@ -5443,8 +5445,12 @@ public class Notification implements Parcelable
             return p.allowColorization && mN.isColorized();
         }
 
-        private boolean isCallActionColorCustomizable(StandardTemplateParams p) {
-            return isColorized(p) && mContext.getResources().getBoolean(
+        private boolean isCallActionColorCustomizable() {
+            // NOTE: this doesn't need to check StandardTemplateParams.allowColorization because
+            //  that is only used for disallowing colorization of headers for the minimized state,
+            //  and neither of those conditions applies when showing actions.
+            //  Not requiring StandardTemplateParams as an argument simplifies the creation process.
+            return mN.isColorized() && mContext.getResources().getBoolean(
                     R.bool.config_callNotificationActionColorsRequireColorized);
         }
 
@@ -5510,13 +5516,13 @@ public class Notification implements Parcelable
          */
         private @NonNull List<Notification.Action> getNonContextualActions() {
             if (mActions == null) return Collections.emptyList();
-            List<Notification.Action> contextualActions = new ArrayList<>();
+            List<Notification.Action> standardActions = new ArrayList<>();
             for (Notification.Action action : mActions) {
                 if (!action.isContextual()) {
-                    contextualActions.add(action);
+                    standardActions.add(action);
                 }
             }
-            return contextualActions;
+            return standardActions;
         }
 
         private RemoteViews applyStandardTemplateWithActions(int layoutId,
@@ -5536,16 +5542,29 @@ public class Notification implements Parcelable
             // filter them out here.
             List<Notification.Action> nonContextualActions = getNonContextualActions();
 
-            int N = nonContextualActions.size();
-            boolean emphazisedMode = mN.fullScreenIntent != null;
+            int numActions = Math.min(nonContextualActions.size(), MAX_ACTION_BUTTONS);
+            boolean emphazisedMode = mN.fullScreenIntent != null || p.mCallStyleActions;
+            if (p.mCallStyleActions) {
+                // Clear view padding to allow buttons to start on the left edge.
+                // This must be done before 'setEmphasizedMode' which sets top/bottom margins.
+                big.setViewPadding(R.id.actions, 0, 0, 0, 0);
+                // Add an optional indent that will make buttons start at the correct column when
+                // there is enough space to do so (and fall back to the left edge if not).
+                big.setInt(R.id.actions, "setCollapsibleIndentDimen",
+                        R.dimen.call_notification_collapsible_indent);
+            }
             big.setBoolean(R.id.actions, "setEmphasizedMode", emphazisedMode);
-            if (N > 0 && !p.mHideActions) {
+            if (p.mCallStyleActions) {
+                // Use "wrap_content" (unlike normal emphasized mode) and allow prioritizing the
+                // required actions (Answer, Decline, and Hang Up).
+                big.setBoolean(R.id.actions, "setPrioritizedWrapMode", true);
+            }
+            if (numActions > 0 && !p.mHideActions) {
                 big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
                 big.setViewLayoutMarginDimen(R.id.notification_action_list_margin_target,
                         RemoteViews.MARGIN_BOTTOM, 0);
-                if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
-                for (int i=0; i<N; i++) {
+                for (int i = 0; i < numActions; i++) {
                     Action action = nonContextualActions.get(i);
 
                     boolean actionHasValidInput = hasValidRemoteInput(action);
@@ -5555,6 +5574,11 @@ public class Notification implements Parcelable
                     if (actionHasValidInput && !emphazisedMode) {
                         // Clear the drawable
                         button.setInt(R.id.action0, "setBackgroundResource", 0);
+                    }
+                    if (p.mCallStyleActions && i > 0) {
+                        // Clear start margin from non-first buttons to reduce the gap between them.
+                        //  (8dp remaining gap is from all buttons' standard 4dp inset).
+                        button.setViewLayoutMarginDimen(R.id.action0, RemoteViews.MARGIN_START, 0);
                     }
                     big.addView(R.id.actions, button);
                 }
@@ -6017,7 +6041,7 @@ public class Notification implements Parcelable
                 button.setColorStateList(R.id.action0, "setButtonBackground",
                         ColorStateList.valueOf(background));
                 button.setBoolean(R.id.action0, "setHasStroke", !hasColorOverride);
-                if (p.mAllowActionIcons) {
+                if (p.mCallStyleActions) {
                     button.setImageViewIcon(R.id.action0, action.getIcon());
                     boolean priority = action.getExtras().getBoolean(CallStyle.KEY_ACTION_PRIORITY);
                     button.setBoolean(R.id.action0, "setWrapModePriority", priority);
@@ -9263,6 +9287,17 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /** @hide */
+        @Override
+        public Notification buildStyled(Notification wip) {
+            wip = super.buildStyled(wip);
+            // ensure that the actions in the builder and notification are corrected.
+            mBuilder.mActions = getActionsListWithSystemActions();
+            wip.actions = new Action[mBuilder.mActions.size()];
+            mBuilder.mActions.toArray(wip.actions);
+            return wip;
+        }
+
         /**
          * @hide
          */
@@ -9322,14 +9357,14 @@ public class Notification implements Parcelable
         }
 
         @NonNull
-        private Action makeNegativeAction(@NonNull StandardTemplateParams p) {
+        private Action makeNegativeAction() {
             if (mDeclineIntent == null) {
-                return makeAction(p, R.drawable.ic_call_decline,
+                return makeAction(R.drawable.ic_call_decline,
                         R.string.call_notification_hang_up_action,
                         mDeclineButtonColor, R.color.call_notification_decline_color,
                         mHangUpIntent);
             } else {
-                return makeAction(p, R.drawable.ic_call_decline,
+                return makeAction(R.drawable.ic_call_decline,
                         R.string.call_notification_decline_action,
                         mDeclineButtonColor, R.color.call_notification_decline_color,
                         mDeclineIntent);
@@ -9337,18 +9372,17 @@ public class Notification implements Parcelable
         }
 
         @Nullable
-        private Action makeAnswerAction(@NonNull StandardTemplateParams p) {
-            return mAnswerIntent == null ? null : makeAction(p, R.drawable.ic_call_answer,
+        private Action makeAnswerAction() {
+            return mAnswerIntent == null ? null : makeAction(R.drawable.ic_call_answer,
                     R.string.call_notification_answer_action,
                     mAnswerButtonColor, R.color.call_notification_answer_color,
                     mAnswerIntent);
         }
 
         @NonNull
-        private Action makeAction(@NonNull StandardTemplateParams p,
-                @DrawableRes int icon, @StringRes int title,
+        private Action makeAction(@DrawableRes int icon, @StringRes int title,
                 @ColorInt Integer colorInt, @ColorRes int defaultColorRes, PendingIntent intent) {
-            if (colorInt == null || !mBuilder.isCallActionColorCustomizable(p)) {
+            if (colorInt == null || !mBuilder.isCallActionColorCustomizable()) {
                 colorInt = mBuilder.mContext.getColor(defaultColorRes);
             }
             Action action = new Action.Builder(Icon.createWithResource("", icon),
@@ -9360,29 +9394,62 @@ public class Notification implements Parcelable
             return action;
         }
 
-        private ArrayList<Action> makeActionsList(@NonNull StandardTemplateParams p) {
-            final Action negativeAction = makeNegativeAction(p);
-            final Action answerAction = makeAnswerAction(p);
+        private boolean isActionAddedByCallStyle(Action action) {
+            // This is an internal extra added by the style to these actions. If an app were to add
+            // this extra to the action themselves, the action would be dropped.  :shrug:
+            return action != null && action.getExtras().getBoolean(KEY_ACTION_PRIORITY);
+        }
 
-            ArrayList<Action> actions = new ArrayList<>(MAX_ACTION_BUTTONS);
-            final Action lastAction;
-            if (answerAction == null) {
-                // If there's no answer action, put the hang up / decline action at the end
-                lastAction = negativeAction;
-            } else {
-                // Otherwise put the answer action at the end, and put the decline action at start.
-                actions.add(negativeAction);
-                lastAction = answerAction;
+        /**
+         * Gets the actions list for the call with the answer/decline/hangUp actions inserted in
+         * the correct place.  This returns the correct result even if the system actions have
+         * already been added, and even if more actions were added since then.
+         * @hide
+         */
+        @NonNull
+        public ArrayList<Action> getActionsListWithSystemActions() {
+            // Define the system actions we expect to see
+            final Action negativeAction = makeNegativeAction();
+            final Action answerAction = makeAnswerAction();
+            // Sort the expected actions into the correct order:
+            // * If there's no answer action, put the hang up / decline action at the end
+            // * Otherwise put the answer action at the end, and put the decline action at start.
+            final Action firstAction = answerAction == null ? null : negativeAction;
+            final Action lastAction = answerAction == null ? negativeAction : answerAction;
+
+            // Start creating the result list.
+            int nonContextualActionSlotsRemaining = MAX_ACTION_BUTTONS;
+            ArrayList<Action> resultActions = new ArrayList<>(MAX_ACTION_BUTTONS);
+            if (firstAction != null) {
+                resultActions.add(firstAction);
+                --nonContextualActionSlotsRemaining;
             }
-            // For consistency with the standard actions bar, contextual actions are ignored.
-            for (Action action : mBuilder.getNonContextualActions()) {
-                if (actions.size() >= MAX_ACTION_BUTTONS - 1) {
-                    break;
+
+            // Copy actions into the new list, correcting system actions.
+            if (mBuilder.mActions != null) {
+                for (Notification.Action action : mBuilder.mActions) {
+                    if (action.isContextual()) {
+                        // Always include all contextual actions
+                        resultActions.add(action);
+                    } else if (isActionAddedByCallStyle(action)) {
+                        // Drop any old versions of system actions
+                    } else {
+                        // Copy non-contextual actions; decrement the remaining action slots.
+                        resultActions.add(action);
+                        --nonContextualActionSlotsRemaining;
+                    }
+                    // If there's exactly one action slot left, fill it with the lastAction.
+                    if (nonContextualActionSlotsRemaining == 1) {
+                        resultActions.add(lastAction);
+                        --nonContextualActionSlotsRemaining;
+                    }
                 }
-                actions.add(action);
             }
-            actions.add(lastAction);
-            return actions;
+            // If there are any action slots left, the lastAction still needs to be added.
+            if (nonContextualActionSlotsRemaining >= 1) {
+                resultActions.add(lastAction);
+            }
+            return resultActions;
         }
 
         private RemoteViews makeCallLayout() {
@@ -9395,18 +9462,14 @@ public class Notification implements Parcelable
             // Bind standard template
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
-                    .allowActionIcons(true)
+                    .callStyleActions(true)
                     .allowTextWithProgress(true)
                     .hideLargeIcon(true)
                     .text(text)
                     .summaryText(mBuilder.processLegacyText(mVerificationText));
-            RemoteViews contentView = mBuilder.applyStandardTemplate(
+            mBuilder.mActions = getActionsListWithSystemActions();
+            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getCallLayoutResource(), p, null /* result */);
-
-            // Bind actions.
-            mBuilder.resetStandardTemplateWithActions(contentView);
-            mBuilder.bindSnoozeAction(contentView, p);
-            bindCallActions(contentView, p);
 
             // Bind some extra conversation-specific header fields.
             mBuilder.setTextViewColorPrimary(contentView, R.id.conversation_text, p);
@@ -9425,41 +9488,6 @@ public class Notification implements Parcelable
                     mBuilder.mN.extras);
 
             return contentView;
-        }
-
-        private void bindCallActions(RemoteViews view, StandardTemplateParams p) {
-            view.setViewVisibility(R.id.actions_container, View.VISIBLE);
-            view.setViewVisibility(R.id.actions, View.VISIBLE);
-            view.setViewLayoutMarginDimen(R.id.notification_action_list_margin_target,
-                    RemoteViews.MARGIN_BOTTOM, 0);
-
-            // Clear view padding to allow buttons to start on the left edge.
-            // This must be done before 'setEmphasizedMode' which sets top/bottom margins.
-            view.setViewPadding(R.id.actions, 0, 0, 0, 0);
-            // Add an optional indent that will make buttons start at the correct column when
-            // there is enough space to do so (and fall back to the left edge if not).
-            view.setInt(R.id.actions, "setCollapsibleIndentDimen",
-                    R.dimen.call_notification_collapsible_indent);
-
-            // Emphasize so that buttons have borders or colored backgrounds
-            boolean emphasizedMode = true;
-            view.setBoolean(R.id.actions, "setEmphasizedMode", emphasizedMode);
-            // Use "wrap_content" (unlike normal emphasized mode) and allow prioritizing the
-            // required actions (Answer, Decline, and Hang Up).
-            view.setBoolean(R.id.actions, "setPrioritizedWrapMode", true);
-
-            // Create the buttons for the generated actions list.
-            int i = 0;
-            for (Action action : makeActionsList(p)) {
-                final RemoteViews button = mBuilder.generateActionButton(action, emphasizedMode, p);
-                if (i > 0) {
-                    // Clear start margin from non-first buttons to reduce the gap between buttons.
-                    // (8dp remaining gap is from all buttons' standard 4dp inset).
-                    button.setViewLayoutMarginDimen(R.id.action0, RemoteViews.MARGIN_START, 0);
-                }
-                view.addView(R.id.actions, button);
-                ++i;
-            }
         }
 
         private void bindCallerVerification(RemoteViews contentView, StandardTemplateParams p) {
@@ -12119,7 +12147,7 @@ public class Notification implements Parcelable
         boolean mHideProgress;
         boolean mHideSnoozeButton;
         boolean mPromotePicture;
-        boolean mAllowActionIcons;
+        boolean mCallStyleActions;
         boolean mAllowTextWithProgress;
         CharSequence title;
         CharSequence text;
@@ -12138,7 +12166,7 @@ public class Notification implements Parcelable
             mHideProgress = false;
             mHideSnoozeButton = false;
             mPromotePicture = false;
-            mAllowActionIcons = false;
+            mCallStyleActions = false;
             mAllowTextWithProgress = false;
             title = null;
             text = null;
@@ -12179,8 +12207,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        final StandardTemplateParams allowActionIcons(boolean allowActionIcons) {
-            this.mAllowActionIcons = allowActionIcons;
+        final StandardTemplateParams callStyleActions(boolean callStyleActions) {
+            this.mCallStyleActions = callStyleActions;
             return this;
         }
 

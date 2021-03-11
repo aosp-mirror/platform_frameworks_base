@@ -69,7 +69,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private float mContentTranslation;
     protected boolean mLastInSection;
     protected boolean mFirstInSection;
-    boolean mIsBeingSwiped;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -172,14 +171,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     public boolean isPinned() {
         return false;
-    }
-
-    public void setIsBeingSwiped(boolean swiped) {
-        mIsBeingSwiped = swiped;
-    }
-
-    public boolean isBeingSwiped() {
-        return mIsBeingSwiped;
     }
 
     public boolean isHeadsUpAnimatingAway() {

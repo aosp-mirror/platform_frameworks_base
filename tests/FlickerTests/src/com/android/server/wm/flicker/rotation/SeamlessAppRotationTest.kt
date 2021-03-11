@@ -24,21 +24,9 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.appWindowAlwaysVisibleOnTop
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
-import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
 import com.android.server.wm.flicker.layerAlwaysVisible
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,10 +59,17 @@ class SeamlessAppRotationTest(
             }
         }
 
-    @Presubmit
+    @FlakyTest(bugId = 140855415)
     @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+
+    @FlakyTest(bugId = 147659548)
+    @Test
+    override fun noUncoveredRegions() = super.noUncoveredRegions()
 
     @Presubmit
     @Test
@@ -84,42 +79,6 @@ class SeamlessAppRotationTest(
     @Test
     fun layerAlwaysVisible() = testSpec.layerAlwaysVisible(testApp.`package`)
 
-    @FlakyTest(bugId = 140855415)
-    @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
-
-    @FlakyTest(bugId = 140855415)
-    @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
-
-    @FlakyTest(bugId = 140855415)
-    @Test
-    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
-
-    @FlakyTest(bugId = 140855415)
-    @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
-
-    @FlakyTest(bugId = 147659548)
-    @Test
-    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation,
-        testSpec.config.endRotation, allStates = false)
-
-    @FlakyTest
-    @Test
-    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales(
-        testSpec.config.startRotation, testSpec.config.endRotation)
-
-    @FlakyTest
-    @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales(
-        testSpec.config.startRotation, testSpec.config.endRotation)
-
-    @FlakyTest
-    @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry()
-
     @FlakyTest(bugId = 147659548)
     @Test
     fun appLayerRotates() {
@@ -127,10 +86,6 @@ class SeamlessAppRotationTest(
             this.coversExactly(startingPos, testApp.`package`)
         }
     }
-
-    @FlakyTest(bugId = 151179149)
-    @Test
-    fun focusDoesNotChange() = testSpec.focusDoesNotChange()
 
     companion object {
         private val testFactory = FlickerTestParameterFactory.getInstance()

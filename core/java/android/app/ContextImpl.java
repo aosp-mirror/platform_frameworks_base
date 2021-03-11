@@ -1995,7 +1995,7 @@ class ContextImpl extends Context {
                 final String errorMessage = "Tried to access visual service "
                         + SystemServiceRegistry.getSystemServiceClassName(name)
                         + " from a non-visual Context:" + getOuterContext();
-                final String message = "Visual services, such as WindowManager, WallpaperService "
+                final String message = "Visual services, such as WindowManager"
                         + "or LayoutInflater should be accessed from Activity or other visual "
                         + "Context. Use an Activity or a Context created with "
                         + "Context#createWindowContext(int, Bundle), which are adjusted to "

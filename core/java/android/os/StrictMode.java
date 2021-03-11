@@ -2274,10 +2274,9 @@ public final class StrictMode {
      */
     public static void assertUiContext(@NonNull Context context, @NonNull String methodName) {
         if (vmIncorrectContextUseEnabled() && !context.isUiContext()) {
-            final String errorMessage = "Tried to access UI related API" + methodName
+            final String errorMessage = "Tried to access UI related API:" + methodName
                     + " from a non-UI Context:" + context;
-            final String message = "UI-related services, such as WindowManager, WallpaperService "
-                    + "or LayoutInflater should be accessed from Activity or other UI "
+            final String message = methodName + " should be accessed from Activity or other UI "
                     + "Contexts. Use an Activity or a Context created with "
                     + "Context#createWindowContext(int, Bundle), which are adjusted to "
                     + "the configuration and visual bounds of an area on screen.";

@@ -170,7 +170,9 @@ public class AssistManager {
                     boolean visible = false;
                     if (mView != null) {
                         visible = mView.isShowing();
-                        mWindowManager.removeView(mView);
+                        if (mView.isAttachedToWindow()) {
+                            mWindowManager.removeView(mView);
+                        }
                     }
 
                     mView = (AssistOrbContainer) LayoutInflater.from(mContext).inflate(

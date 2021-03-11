@@ -82,7 +82,7 @@ public class SystemEmergencyHelper extends EmergencyHelper {
             TelephonyCallback.CallStateListener{
 
         @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
+        public void onCallStateChanged(int state) {
             if (state == TelephonyManager.CALL_STATE_IDLE) {
                 if (mIsInEmergencyCall) {
                     mEmergencyCallEndRealtimeMs = SystemClock.elapsedRealtime();
