@@ -506,7 +506,7 @@ package android {
     field public static final int dashGap = 16843175; // 0x10101a7
     field public static final int dashWidth = 16843174; // 0x10101a6
     field public static final int data = 16842798; // 0x101002e
-    field public static final int dataExtractionRules = 16844350; // 0x101063e
+    field public static final int dataExtractionRules = 16844349; // 0x101063d
     field public static final int datePickerDialogTheme = 16843948; // 0x10104ac
     field public static final int datePickerMode = 16843955; // 0x10104b3
     field public static final int datePickerStyle = 16843612; // 0x101035c
@@ -528,8 +528,8 @@ package android {
     field public static final int detailSocialSummary = 16843428; // 0x10102a4
     field public static final int detailsElementBackground = 16843598; // 0x101034e
     field public static final int dial = 16843010; // 0x1010102
-    field public static final int dialTint = 16844342; // 0x1010636
-    field public static final int dialTintMode = 16844343; // 0x1010637
+    field public static final int dialTint = 16844341; // 0x1010635
+    field public static final int dialTintMode = 16844342; // 0x1010636
     field public static final int dialogCornerRadius = 16844145; // 0x1010571
     field public static final int dialogIcon = 16843252; // 0x10101f4
     field public static final int dialogLayout = 16843255; // 0x10101f7
@@ -727,14 +727,14 @@ package android {
     field public static final int groupIndicator = 16843019; // 0x101010b
     field public static final int gwpAsanMode = 16844310; // 0x1010616
     field public static final int hand_hour = 16843011; // 0x1010103
-    field public static final int hand_hourTint = 16844344; // 0x1010638
-    field public static final int hand_hourTintMode = 16844345; // 0x1010639
+    field public static final int hand_hourTint = 16844343; // 0x1010637
+    field public static final int hand_hourTintMode = 16844344; // 0x1010638
     field public static final int hand_minute = 16843012; // 0x1010104
-    field public static final int hand_minuteTint = 16844346; // 0x101063a
-    field public static final int hand_minuteTintMode = 16844347; // 0x101063b
+    field public static final int hand_minuteTint = 16844345; // 0x1010639
+    field public static final int hand_minuteTintMode = 16844346; // 0x101063a
     field public static final int hand_second = 16844323; // 0x1010623
-    field public static final int hand_secondTint = 16844348; // 0x101063c
-    field public static final int hand_secondTintMode = 16844349; // 0x101063d
+    field public static final int hand_secondTint = 16844347; // 0x101063b
+    field public static final int hand_secondTintMode = 16844348; // 0x101063c
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
@@ -818,7 +818,7 @@ package android {
     field public static final int installLocation = 16843447; // 0x10102b7
     field public static final int interactiveUiTimeout = 16844181; // 0x1010595
     field public static final int interpolator = 16843073; // 0x1010141
-    field public static final int isAccessibilityTool = 16844353; // 0x1010641
+    field public static final int isAccessibilityTool = 16844352; // 0x1010640
     field public static final int isAlwaysSyncable = 16843571; // 0x1010333
     field public static final int isAsciiCapable = 16843753; // 0x10103e9
     field public static final int isAuxiliary = 16843647; // 0x101037f
@@ -970,8 +970,8 @@ package android {
     field public static final int maxLines = 16843091; // 0x1010153
     field public static final int maxLongVersionCode = 16844163; // 0x1010583
     field public static final int maxRecents = 16843846; // 0x1010446
-    field public static final int maxResizeHeight = 16844339; // 0x1010633
-    field public static final int maxResizeWidth = 16844338; // 0x1010632
+    field public static final int maxResizeHeight = 16844338; // 0x1010632
+    field public static final int maxResizeWidth = 16844337; // 0x1010631
     field public static final int maxRows = 16843059; // 0x1010133
     field public static final int maxSdkVersion = 16843377; // 0x1010271
     field public static final int maxWidth = 16843039; // 0x101011f
@@ -1074,7 +1074,7 @@ package android {
     field public static final int panelTextAppearance = 16842850; // 0x1010062
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
-    field public static final int passwordsActivity = 16844351; // 0x101063f
+    field public static final int passwordsActivity = 16844350; // 0x101063e
     field public static final int path = 16842794; // 0x101002a
     field public static final int pathAdvancedPattern = 16844320; // 0x1010620
     field public static final int pathData = 16843781; // 0x1010405
@@ -1199,7 +1199,6 @@ package android {
     field public static final int right = 16843183; // 0x10101af
     field public static final int ringtonePreferenceStyle = 16842899; // 0x1010093
     field public static final int ringtoneType = 16843257; // 0x10101f9
-    field public static final int rippleStyle = 16844337; // 0x1010631
     field public static final int rollbackDataPolicy = 16844311; // 0x1010617
     field public static final int rotation = 16843558; // 0x1010326
     field public static final int rotationAnimation = 16844090; // 0x101053a
@@ -1261,7 +1260,7 @@ package android {
     field public static final int segmentedButtonStyle = 16843568; // 0x1010330
     field public static final int selectAllOnFocus = 16843102; // 0x101015e
     field public static final int selectable = 16843238; // 0x10101e6
-    field public static final int selectableAsDefault = 16844352; // 0x1010640
+    field public static final int selectableAsDefault = 16844351; // 0x101063f
     field public static final int selectableItemBackground = 16843534; // 0x101030e
     field public static final int selectableItemBackgroundBorderless = 16843868; // 0x101045c
     field @Deprecated public static final int selectedDateVerticalBar = 16843591; // 0x1010347
@@ -1408,8 +1407,8 @@ package android {
     field public static final int tabWidgetStyle = 16842883; // 0x1010083
     field public static final int tag = 16842961; // 0x10100d1
     field public static final int targetActivity = 16843266; // 0x1010202
-    field public static final int targetCellHeight = 16844341; // 0x1010635
-    field public static final int targetCellWidth = 16844340; // 0x1010634
+    field public static final int targetCellHeight = 16844340; // 0x1010634
+    field public static final int targetCellWidth = 16844339; // 0x1010633
     field public static final int targetClass = 16842799; // 0x101002f
     field @Deprecated public static final int targetDescriptions = 16843680; // 0x10103a0
     field public static final int targetId = 16843740; // 0x10103dc
@@ -16687,13 +16686,9 @@ package android.graphics.drawable {
   public class RippleDrawable extends android.graphics.drawable.LayerDrawable {
     ctor public RippleDrawable(@NonNull android.content.res.ColorStateList, @Nullable android.graphics.drawable.Drawable, @Nullable android.graphics.drawable.Drawable);
     method public int getRadius();
-    method public int getRippleStyle();
     method public void setColor(android.content.res.ColorStateList);
     method public void setRadius(int);
-    method public void setRippleStyle(int) throws java.lang.IllegalArgumentException;
     field public static final int RADIUS_AUTO = -1; // 0xffffffff
-    field public static final int STYLE_PATTERNED = 1; // 0x1
-    field public static final int STYLE_SOLID = 0; // 0x0
   }
 
   public class RotateDrawable extends android.graphics.drawable.DrawableWrapper {
