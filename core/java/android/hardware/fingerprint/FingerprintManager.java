@@ -686,17 +686,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
-     * Revokes the current challenge.
-     * @hide
-     */
-    @RequiresPermission(MANAGE_FINGERPRINT)
-    public void revokeChallenge(int userId) {
-        // On HALs with only single in-flight challenge such as IBiometricsFingerprint@2.1,
-        // this parameter is ignored.
-        revokeChallenge(userId, 0L);
-    }
-
-    /**
      * Revokes the specified challenge.
      * @hide
      */
