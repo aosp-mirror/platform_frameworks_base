@@ -243,10 +243,18 @@ public class ShortcutManagerTestUtils {
         final UserHandle user = getParentUser(context);
         List<String> roleHolders = callWithShellPermissionIdentity(
                 () -> roleManager.getRoleHoldersAsUser(RoleManager.ROLE_HOME, user));
-        if (roleHolders.size() == 1) {
+        int size = roleHolders.size();
+        if (size == 1) {
             return roleHolders.get(0);
         }
-        fail("Failed to get the default launcher for user " + context.getUserId());
+
+        if (size > 1) {
+            fail("Too many launchers for user " + user.getIdentifier() + " using role "
+                    + RoleManager.ROLE_HOME + ": " + roleHolders);
+        } else {
+            fail("No default launcher for user " + user.getIdentifier() + " using role "
+                    + RoleManager.ROLE_HOME);
+        }
         return null;
     }
 
