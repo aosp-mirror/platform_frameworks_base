@@ -180,6 +180,9 @@
     <!-- Doze: duration to avoid false pickup gestures triggered by notification vibrations -->
     <integer name="doze_pickup_vibration_threshold">2000</integer>
 
+    <!-- Doze: quick pickup duration to stay in AOD until the next gesture is triggered -->
+    <integer name="doze_quick_pickup_aod_duration">5000</integer>
+
     <!-- Type of a sensor that provides a low-power estimate of the desired display
          brightness, suitable to listen to while the device is asleep (e.g. during
          always-on display) -->
