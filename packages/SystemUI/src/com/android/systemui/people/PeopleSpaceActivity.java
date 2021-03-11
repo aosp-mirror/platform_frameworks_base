@@ -35,6 +35,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
+import com.android.systemui.people.widget.PeopleTileKey;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 import java.util.List;
@@ -138,7 +139,9 @@ public class PeopleSpaceActivity extends Activity {
                         + mAppWidgetId);
             }
         }
-        mPeopleSpaceWidgetManager.addNewWidget(tile, mAppWidgetId);
+        PeopleTileKey key = new PeopleTileKey(
+                tile.getId(), tile.getUserHandle().getIdentifier(), tile.getPackageName());
+        mPeopleSpaceWidgetManager.addNewWidget(mAppWidgetId, key);
         finishActivity();
     }
 
