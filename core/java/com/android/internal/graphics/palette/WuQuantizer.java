@@ -129,7 +129,7 @@ public class WuQuantizer implements Quantizer {
                 red = (int) (getVolume(cube[k], mMr) / weight);
                 green = (int) (getVolume(cube[k], mMg) / weight);
                 blue = (int) (getVolume(cube[k], mMb) / weight);
-                colors[k] = ((red & 0x0ff) << 16) | ((green & 0x0ff) << 8) | (blue & 0x0ff);
+                colors[k] = (255 << 24) | (red << 16) | (green << 8) | blue;
             } else {
                 colors[k] = 0;
             }
