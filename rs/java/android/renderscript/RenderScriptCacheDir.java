@@ -23,7 +23,11 @@ import java.io.File;
 /**
  * Used only for tracking the RenderScript cache directory.
  * @hide
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  */
+@Deprecated
 public class RenderScriptCacheDir {
      /**
      * Sets the directory to use as a persistent storage for the
