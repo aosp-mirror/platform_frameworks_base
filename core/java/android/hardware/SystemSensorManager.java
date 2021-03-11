@@ -65,7 +65,7 @@ public class SystemSensorManager extends SensorManager {
     private static final int CAPPED_SAMPLING_RATE_LEVEL = SensorDirectChannel.RATE_NORMAL;
 
     private static final String HIGH_SAMPLING_RATE_SENSORS_PERMISSION =
-                                        "android.permisison.HIGH_SAMPLING_RATE_SENSORS";
+                                        "android.permission.HIGH_SAMPLING_RATE_SENSORS";
     /**
      * For apps targeting S and above, a SecurityException is thrown when they do not have
      * HIGH_SAMPLING_RATE_SENSORS permission, run in debug mode, and request sampling rates that
