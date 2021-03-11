@@ -22,20 +22,19 @@ import java.util.Random;
  * Represents a centroid in Kmeans algorithms.
  */
 public class Mean {
-    private static final Random RANDOM = new Random(0);
-
     public float[] center;
 
     /**
      * Constructor.
      *
      * @param upperBound maximum value of a dimension in the space Kmeans is optimizing in
+     * @param random used to generate a random center
      */
-    Mean(int upperBound) {
+    Mean(int upperBound, Random random) {
         center =
                 new float[]{
-                        RANDOM.nextInt(upperBound + 1), RANDOM.nextInt(upperBound + 1),
-                        RANDOM.nextInt(upperBound + 1)
+                        random.nextInt(upperBound + 1), random.nextInt(upperBound + 1),
+                        random.nextInt(upperBound + 1)
                 };
     }
 

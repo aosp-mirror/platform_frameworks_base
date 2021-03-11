@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 
@@ -57,9 +58,12 @@ public class WSMeansQuantizer implements Quantizer {
         }
 
         if (maxColors > means.length) {
+            // Always initialize Random with the same seed. Ensures the results of quantization
+            // are consistent, even when random centroids are required.
+            Random random = new Random(0x42688);
             int randomMeansToCreate = maxColors - means.length;
             for (int i = 0; i < randomMeansToCreate; i++) {
-                mMeans[means.length + i] = new Mean(100);
+                mMeans[means.length + i] = new Mean(100, random);
             }
         }
 
@@ -105,8 +109,12 @@ public class WSMeansQuantizer implements Quantizer {
     /** Create random starting centroids for K-means. */
     public static float[][] randomMeans(int maxColors, int upperBound) {
         float[][] means = new float[maxColors][];
+
+        // Always initialize Random with the same seed. Ensures the results of quantization
+        // are consistent, even when random centroids are required.
+        Random random = new Random(0x42688);
         for (int i = 0; i < maxColors; i++) {
-            means[i] = new Mean(upperBound).center;
+            means[i] = new Mean(upperBound, random).center;
         }
         return means;
     }
