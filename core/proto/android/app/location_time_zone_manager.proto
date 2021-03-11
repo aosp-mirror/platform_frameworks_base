@@ -17,6 +17,7 @@
 syntax = "proto2";
 package android.app.time;
 
+import "frameworks/base/core/proto/android/app/time_zone_detector.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 
 option java_multiple_files = true;
@@ -29,15 +30,6 @@ message LocationTimeZoneManagerServiceStateProto {
   optional GeolocationTimeZoneSuggestionProto last_suggestion = 1;
   repeated TimeZoneProviderStateProto primary_provider_states = 2;
   repeated TimeZoneProviderStateProto secondary_provider_states = 3;
-}
-
-// Represents a GeolocationTimeZoneSuggestion that can be / has been passed to the time zone
-// detector.
-message GeolocationTimeZoneSuggestionProto {
-  option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  repeated string zone_ids = 1;
-  repeated string debug_info = 2;
 }
 
 // The state tracked for a LocationTimeZoneProvider.
