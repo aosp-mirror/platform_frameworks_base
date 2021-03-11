@@ -48706,6 +48706,7 @@ package android.view {
     method @Nullable public android.graphics.drawable.Drawable getVerticalScrollbarThumbDrawable();
     method @Nullable public android.graphics.drawable.Drawable getVerticalScrollbarTrackDrawable();
     method public int getVerticalScrollbarWidth();
+    method @Nullable public android.view.ViewRoot getViewRoot();
     method @Nullable public android.view.translation.ViewTranslationCallback getViewTranslationCallback();
     method public android.view.ViewTreeObserver getViewTreeObserver();
     method public int getVisibility();
@@ -49782,6 +49783,11 @@ package android.view {
     method public android.view.ViewPropertyAnimator zBy(float);
   }
 
+  @UiThread public interface ViewRoot {
+    method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
+    method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
+  }
+
   public abstract class ViewStructure {
     ctor public ViewStructure();
     method public abstract int addChildCount(int);
@@ -49977,6 +49983,7 @@ package android.view {
     method @NonNull public java.util.List<android.graphics.Rect> getSystemGestureExclusionRects();
     method public long getTransitionBackgroundFadeDuration();
     method public android.transition.TransitionManager getTransitionManager();
+    method @Nullable public android.view.ViewRoot getViewRoot();
     method public abstract int getVolumeControlStream();
     method public android.view.WindowManager getWindowManager();
     method public final android.content.res.TypedArray getWindowStyle();
