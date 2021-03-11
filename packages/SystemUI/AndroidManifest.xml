@@ -578,7 +578,7 @@
 
         <!-- People Space UI Screen -->
         <activity android:name=".people.PeopleSpaceActivity"
-            android:label="People"
+            android:label="@string/people_tile_title"
             android:enabled="true"
             android:exported="true"
             android:theme="@android:style/Theme.Material.NoActionBar">
@@ -592,7 +592,7 @@
         <!-- People Space Widget -->
         <receiver
             android:name=".people.widget.PeopleSpaceWidgetProvider"
-            android:label="People Space"
+            android:label="@string/people_tile_title"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
