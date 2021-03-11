@@ -14218,10 +14218,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
         enforceCallerSystemUserHandle();
 
-        // no effect if it's called from user build
-        if (!mInjector.isBuildDebuggable()) {
-            return;
-        }
         final int userId = UserHandle.USER_SYSTEM;
         boolean isUserCompleted = mInjector.settingsSecureGetIntForUser(
                 Settings.Secure.USER_SETUP_COMPLETE, 0, userId) != 0;
