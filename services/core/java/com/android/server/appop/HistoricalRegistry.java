@@ -384,11 +384,10 @@ final class HistoricalRegistry {
                         callback.sendResult(new Bundle());
                         return;
                     }
-                    mPersistence.collectHistoricalOpsDLocked(result, uid, packageName,
-                            attributionTag,
-                            opNames, filter, beginTimeMillis, endTimeMillis, flags);
-
                 }
+                mPersistence.collectHistoricalOpsDLocked(result, uid, packageName,
+                        attributionTag,
+                        opNames, filter, beginTimeMillis, endTimeMillis, flags);
             }
         }
 
@@ -576,19 +575,19 @@ final class HistoricalRegistry {
                     Slog.e(LOG_TAG, "Interaction before persistence initialized");
                     return;
                 }
-                final List<HistoricalOps> history = mPersistence.readHistoryDLocked();
-                clearHistoricalRegistry();
-                if (history != null) {
-                    final int historySize = history.size();
-                    for (int i = 0; i < historySize; i++) {
-                        final HistoricalOps ops = history.get(i);
-                        ops.offsetBeginAndEndTime(offsetMillis);
-                    }
-                    if (offsetMillis < 0) {
-                        pruneFutureOps(history);
-                    }
-                    mPersistence.persistHistoricalOpsDLocked(history);
+            }
+            final List<HistoricalOps> history = mPersistence.readHistoryDLocked();
+            clearHistoricalRegistry();
+            if (history != null) {
+                final int historySize = history.size();
+                for (int i = 0; i < historySize; i++) {
+                    final HistoricalOps ops = history.get(i);
+                    ops.offsetBeginAndEndTime(offsetMillis);
                 }
+                if (offsetMillis < 0) {
+                    pruneFutureOps(history);
+                }
+                mPersistence.persistHistoricalOpsDLocked(history);
             }
         }
     }
