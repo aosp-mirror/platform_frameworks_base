@@ -416,7 +416,7 @@ public class SubscriptionManager {
      * <p>
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
      * subscription cross sim calling enabled
-     * {@link ImsMmTelManager#isCrossSimCallingEnabledByUser()}
+     * {@link ImsMmTelManager#isCrossSimCallingEnabled()}
      * while your app is running. You can also use a {@link android.app.job.JobService}
      * to ensure your app
      * is notified of changes to the {@link Uri} even when it is not running.
