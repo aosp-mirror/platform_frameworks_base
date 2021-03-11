@@ -37,7 +37,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 
 import java.io.PrintWriter;
@@ -67,7 +66,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private int mEnterExitAnimationDurationMs;
 
     private ArrayMap<WindowContainerToken, SurfaceControl> mDisplayAreaTokenMap = new ArrayMap();
-    private DisplayController mDisplayController;
     private OneHandedAnimationController mAnimationController;
     private OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
@@ -111,7 +109,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
      */
     public OneHandedDisplayAreaOrganizer(Context context,
             WindowManager windowManager,
-            DisplayController displayController,
             OneHandedAnimationController animationController,
             OneHandedTutorialHandler tutorialHandler,
             OneHandedBackgroundPanelOrganizer oneHandedBackgroundGradientOrganizer,
@@ -119,7 +116,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         super(mainExecutor);
         mWindowManager = windowManager;
         mAnimationController = animationController;
-        mDisplayController = displayController;
         mLastVisualDisplayBounds.set(getDisplayBounds());
         final int animationDurationConfig = context.getResources().getInteger(
                 R.integer.config_one_handed_translate_animation_duration);
@@ -171,10 +167,14 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
      */
     public void onRotateDisplay(int fromRotation, int toRotation, WindowContainerTransaction wct) {
         // Stop one handed without animation and reset cropped size immediately
-        final Rect newBounds = new Rect(mDefaultDisplayBounds);
+        final Rect newBounds = new Rect(getDisplayBounds());
+        // This diff rule will only filter the cases portrait <-> landscape
         final boolean isOrientationDiff = Math.abs(fromRotation - toRotation) % 2 == 1;
 
         if (isOrientationDiff) {
+            // getDisplayBounds() will return window metrics bounds which dose not update to
+            // corresponding display orientation yet, we have to manual rotate bounds
+            newBounds.set(0, 0, newBounds.bottom, newBounds.right);
             resetWindowsOffset(wct);
             mDefaultDisplayBounds.set(newBounds);
             mLastVisualDisplayBounds.set(newBounds);
@@ -293,7 +293,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     }
 
     @Nullable
-    private Rect getDisplayBounds() {
+    @VisibleForTesting
+    Rect getDisplayBounds() {
         if (mWindowManager == null) {
             Slog.e(TAG, "WindowManager instance is null! Can not get display size!");
             return new Rect();
