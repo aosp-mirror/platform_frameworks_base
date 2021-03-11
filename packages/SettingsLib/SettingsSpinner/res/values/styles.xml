@@ -18,9 +18,13 @@
 <resources>
     <style name="SettingsSpinnerTitleBar">
         <item name="android:textAppearance">?android:attr/textAppearanceButton</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:minHeight">@dimen/spinner_height</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:paddingEnd">36dp</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingTop">@dimen/spinner_padding_top_or_bottom</item>
+        <item name="android:paddingBottom">@dimen/spinner_padding_top_or_bottom</item>
     </style>
 </resources>
