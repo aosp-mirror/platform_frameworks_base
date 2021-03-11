@@ -6373,22 +6373,22 @@ package android.net.netstats.provider {
 
 package android.net.sip {
 
-  public class SipAudioCall {
-    method @Nullable public android.net.rtp.AudioGroup getAudioGroup();
-    method public void setAudioGroup(@NonNull android.net.rtp.AudioGroup);
+  @Deprecated public class SipAudioCall {
+    method @Deprecated @Nullable public android.net.rtp.AudioGroup getAudioGroup();
+    method @Deprecated public void setAudioGroup(@NonNull android.net.rtp.AudioGroup);
   }
 
-  public class SipManager {
-    method @NonNull public java.util.List<android.net.sip.SipProfile> getProfiles() throws android.net.sip.SipException;
-    field public static final String ACTION_SIP_CALL_OPTION_CHANGED = "android.net.sip.action.SIP_CALL_OPTION_CHANGED";
-    field public static final String ACTION_SIP_INCOMING_CALL = "android.net.sip.action.SIP_INCOMING_CALL";
-    field public static final String ACTION_SIP_REMOVE_PROFILE = "android.net.sip.action.SIP_REMOVE_PROFILE";
-    field public static final String ACTION_SIP_SERVICE_UP = "android.net.sip.action.SIP_SERVICE_UP";
-    field public static final String ACTION_START_SIP = "android.net.sip.action.START_SIP";
+  @Deprecated public class SipManager {
+    method @Deprecated @NonNull public java.util.List<android.net.sip.SipProfile> getProfiles() throws android.net.sip.SipException;
+    field @Deprecated public static final String ACTION_SIP_CALL_OPTION_CHANGED = "android.net.sip.action.SIP_CALL_OPTION_CHANGED";
+    field @Deprecated public static final String ACTION_SIP_INCOMING_CALL = "android.net.sip.action.SIP_INCOMING_CALL";
+    field @Deprecated public static final String ACTION_SIP_REMOVE_PROFILE = "android.net.sip.action.SIP_REMOVE_PROFILE";
+    field @Deprecated public static final String ACTION_SIP_SERVICE_UP = "android.net.sip.action.SIP_SERVICE_UP";
+    field @Deprecated public static final String ACTION_START_SIP = "android.net.sip.action.START_SIP";
   }
 
-  public class SipProfile implements java.lang.Cloneable android.os.Parcelable java.io.Serializable {
-    method public int getCallingUid();
+  @Deprecated public class SipProfile implements java.lang.Cloneable android.os.Parcelable java.io.Serializable {
+    method @Deprecated public int getCallingUid();
   }
 
 }
