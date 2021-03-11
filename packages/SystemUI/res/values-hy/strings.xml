@@ -988,7 +988,7 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Կարգավորումներ"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Եղավ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <string name="sensor_privacy_mode" msgid="4462866919026513692">"Տվիչներն անջատած են"</string>
+    <string name="sensor_privacy_mode" msgid="4462866919026513692">"Տվիչներն անջատված են"</string>
     <string name="device_services" msgid="1549944177856658705">"Սարքի ծառայություններ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Անանուն"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Հպեք՝ հավելվածը վերագործարկելու և լիաէկրան ռեժիմին անցնելու համար։"</string>
