@@ -432,14 +432,27 @@ void ASurfaceTransaction_setGeometry(ASurfaceTransaction* aSurfaceTransaction,
                                      const ARect& destination, int32_t transform) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
-    CHECK_VALID_RECT(source);
     CHECK_VALID_RECT(destination);
+
+    Rect sourceRect = static_cast<const Rect&>(source);
+    // Adjust the source so its top and left are not negative
+    sourceRect.left = std::max(sourceRect.left, 0);
+    sourceRect.top = std::max(sourceRect.top, 0);
+    LOG_ALWAYS_FATAL_IF(sourceRect.isEmpty(), "invalid arg passed as source argument");
 
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
-    transaction->setCrop(surfaceControl, static_cast<const Rect&>(source));
-    transaction->setFrame(surfaceControl, static_cast<const Rect&>(destination));
+    transaction->setCrop(surfaceControl, sourceRect);
+
+    float dsdx = (destination.right - destination.left) /
+            static_cast<float>(sourceRect.right - sourceRect.left);
+    float dsdy = (destination.bottom - destination.top) /
+            static_cast<float>(sourceRect.bottom - sourceRect.top);
+
+    transaction->setPosition(surfaceControl, destination.left - (sourceRect.left * dsdx),
+                             destination.top - (sourceRect.top * dsdy));
+    transaction->setMatrix(surfaceControl, dsdx, 0, 0, dsdy);
     transaction->setTransform(surfaceControl, transform);
     bool transformToInverseDisplay = (NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY & transform) ==
             NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY;
@@ -458,16 +471,18 @@ void ASurfaceTransaction_setSourceRect(ASurfaceTransaction* aSurfaceTransaction,
     transaction->setCrop(surfaceControl, static_cast<const Rect&>(source));
 }
 
-void ASurfaceTransaction_setPosition(ASurfaceTransaction* aSurfaceTransaction,
-                                     ASurfaceControl* aSurfaceControl, const ARect& destination) {
-    CHECK_NOT_NULL(aSurfaceTransaction);
+void ASurfaceTransaction_setPosition(ASurfaceTransaction* /* aSurfaceTransaction */,
+                                     ASurfaceControl* /* aSurfaceControl */,
+                                     const ARect& /* destination */) {
+    // TODO: Fix this function
+    /* CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
     CHECK_VALID_RECT(destination);
 
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
-    transaction->setFrame(surfaceControl, static_cast<const Rect&>(destination));
+    transaction->setFrame(surfaceControl, static_cast<const Rect&>(destination));*/
 }
 
 void ASurfaceTransaction_setTransform(ASurfaceTransaction* aSurfaceTransaction,
