@@ -653,7 +653,7 @@ public class PeopleSpaceUtils {
         }
         // TODO: Set subtext as Group Sender name once storing the name in PeopleSpaceTile.
         views.setTextViewText(R.id.subtext, PeopleSpaceUtils.getLastInteractionString(
-                context, tile.getLastInteractionTimestamp(), false));
+                context, tile.getLastInteractionTimestamp()));
         return views;
     }
 
@@ -662,7 +662,7 @@ public class PeopleSpaceUtils {
         RemoteViews views = new RemoteViews(
                 context.getPackageName(), R.layout.people_space_large_avatar_tile);
         String status = PeopleSpaceUtils.getLastInteractionString(
-                context, tile.getLastInteractionTimestamp(), true);
+                context, tile.getLastInteractionTimestamp());
         views.setTextViewText(R.id.last_interaction, status);
         return views;
     }
@@ -808,8 +808,7 @@ public class PeopleSpaceUtils {
     }
 
     /** Returns a readable status describing the {@code lastInteraction}. */
-    public static String getLastInteractionString(Context context, long lastInteraction,
-            boolean includeLastChatted) {
+    public static String getLastInteractionString(Context context, long lastInteraction) {
         if (lastInteraction == 0L) {
             Log.e(TAG, "Could not get valid last interaction");
             return context.getString(R.string.basic_status);
@@ -818,41 +817,20 @@ public class PeopleSpaceUtils {
         Duration durationSinceLastInteraction = Duration.ofMillis(now - lastInteraction);
         MeasureFormat formatter = MeasureFormat.getInstance(Locale.getDefault(),
                 MeasureFormat.FormatWidth.WIDE);
-        MeasureFormat shortFormatter = MeasureFormat.getInstance(Locale.getDefault(),
-                MeasureFormat.FormatWidth.SHORT);
         if (durationSinceLastInteraction.toHours() < MIN_HOUR) {
-            if (includeLastChatted) {
-                return context.getString(R.string.last_interaction_status_less_than,
-                        formatter.formatMeasures(new Measure(MIN_HOUR, MeasureUnit.HOUR)));
-            }
-            return context.getString(R.string.timestamp, shortFormatter.formatMeasures(
+            return context.getString(R.string.timestamp, formatter.formatMeasures(
                     new Measure(durationSinceLastInteraction.toMinutes(), MeasureUnit.MINUTE)));
         } else if (durationSinceLastInteraction.toDays() < ONE_DAY) {
-            if (includeLastChatted) {
-                return context.getString(R.string.last_interaction_status,
-                        formatter.formatMeasures(
-                                new Measure(durationSinceLastInteraction.toHours(),
-                                        MeasureUnit.HOUR)));
-            }
-            return context.getString(R.string.timestamp, shortFormatter.formatMeasures(
+            return context.getString(R.string.timestamp, formatter.formatMeasures(
                     new Measure(durationSinceLastInteraction.toHours(),
                             MeasureUnit.HOUR)));
         } else if (durationSinceLastInteraction.toDays() < DAYS_IN_A_WEEK) {
-            if (includeLastChatted) {
-                return context.getString(R.string.last_interaction_status,
-                        formatter.formatMeasures(
-                                new Measure(durationSinceLastInteraction.toDays(),
-                                        MeasureUnit.DAY)));
-            }
-            return context.getString(R.string.timestamp, shortFormatter.formatMeasures(
+            return context.getString(R.string.timestamp, formatter.formatMeasures(
                     new Measure(durationSinceLastInteraction.toHours(),
                             MeasureUnit.DAY)));
         } else {
             return context.getString(durationSinceLastInteraction.toDays() == DAYS_IN_A_WEEK
-                            ? (includeLastChatted ? R.string.last_interaction_status :
-                            R.string.timestamp) :
-                            (includeLastChatted ? R.string.last_interaction_status_over
-                                    : R.string.over_timestamp),
+                            ? R.string.timestamp : R.string.over_timestamp,
                     formatter.formatMeasures(
                             new Measure(durationSinceLastInteraction.toDays() / DAYS_IN_A_WEEK,
                                     MeasureUnit.WEEK)));
