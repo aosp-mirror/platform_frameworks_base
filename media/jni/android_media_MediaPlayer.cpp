@@ -17,6 +17,7 @@
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "MediaPlayer-JNI"
+#include "permission_utils.h"
 #include "utils/Log.h"
 
 #include <media/mediaplayer.h>
@@ -79,6 +80,8 @@ static StateExceptionFields gStateExceptionFields;
 using namespace android;
 
 using media::VolumeShaper;
+using media::permission::Identity;
+using media::permission::convertIdentity;
 
 // ----------------------------------------------------------------------------
 
@@ -946,11 +949,11 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
 
 static void
 android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-                                       jstring opPackageName)
+                                       jobject jIdentity)
 {
     ALOGV("native_setup");
-    ScopedUtfChars opPackageNameStr(env, opPackageName);
-    sp<MediaPlayer> mp = new MediaPlayer(opPackageNameStr.c_str());
+
+    sp<MediaPlayer> mp = new MediaPlayer(convertIdentity(env, jIdentity));
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
@@ -1406,7 +1409,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer_native_init},
-    {"native_setup",        "(Ljava/lang/Object;Ljava/lang/String;)V",(void *)android_media_MediaPlayer_native_setup},
+    {"native_setup",        "(Ljava/lang/Object;Landroid/media/permission/Identity;)V",(void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
     {"native_setAudioSessionId",   "(I)V",                      (void *)android_media_MediaPlayer_set_audio_session_id},

@@ -16,8 +16,10 @@
 
 package android.media.audiofx;
 
-import android.app.ActivityThread;
+import static android.media.permission.PermissionUtil.myIdentity;
+
 import android.compat.annotation.UnsupportedAppUsage;
+import android.media.permission.Identity;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -217,9 +219,11 @@ public class Visualizer {
 
         synchronized (mStateLock) {
             mState = STATE_UNINITIALIZED;
+
             // native initialization
+            // TODO b/182469354: make consistent with AudioRecord
             int result = native_setup(new WeakReference<Visualizer>(this), audioSession, id,
-                    ActivityThread.currentOpPackageName());
+                    myIdentity(null));
             if (result != SUCCESS && result != ALREADY_EXISTS) {
                 Log.e(TAG, "Error code "+result+" when initializing Visualizer.");
                 switch (result) {
@@ -686,7 +690,7 @@ public class Visualizer {
     private native final int native_setup(Object audioeffect_this,
                                           int audioSession,
                                           int[] id,
-                                          String opPackageName);
+                                          Identity identity);
 
     @GuardedBy("mStateLock")
     private native final void native_finalize();

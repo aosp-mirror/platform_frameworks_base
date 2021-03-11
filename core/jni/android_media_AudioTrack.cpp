@@ -48,6 +48,7 @@
 using namespace android;
 
 using ::android::media::VolumeShaper;
+using ::android::media::permission::Identity;
 
 // ----------------------------------------------------------------------------
 static const char* const kClassPathName = "android/media/AudioTrack";
@@ -328,7 +329,10 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
 
         // create the native AudioTrack object
         ScopedUtfChars opPackageNameStr(env, opPackageName);
-        lpTrack = new AudioTrack(opPackageNameStr.c_str());
+        // TODO b/182469354: make consistent with AudioRecord
+        Identity identity = Identity();
+        identity.packageName = std::string(opPackageNameStr.c_str());
+        lpTrack = new AudioTrack(identity);
 
         // read the AudioAttributes values
         auto paa = JNIAudioAttributeHelper::makeUnique();
@@ -390,8 +394,8 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
                                   sessionId, // audio session ID
                                   offload ? AudioTrack::TRANSFER_SYNC_NOTIF_CALLBACK
                                           : AudioTrack::TRANSFER_SYNC,
-                                  (offload || encapsulationMode) ? &offloadInfo : NULL, -1,
-                                  -1, // default uid, pid values
+                                  (offload || encapsulationMode) ? &offloadInfo : NULL,
+                                  Identity(), // default uid, pid values
                                   paa.get());
             break;
 
@@ -416,8 +420,8 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
                                   true,                   // thread can call Java
                                   sessionId,              // audio session ID
                                   AudioTrack::TRANSFER_SHARED,
-                                  NULL,   // default offloadInfo
-                                  -1, -1, // default uid, pid values
+                                  NULL,       // default offloadInfo
+                                  Identity(), // default uid, pid values
                                   paa.get());
             break;
 

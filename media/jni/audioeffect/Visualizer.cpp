@@ -34,8 +34,8 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-Visualizer::Visualizer (const String16& opPackageName)
-        :   AudioEffect(opPackageName)
+Visualizer::Visualizer (const Identity& identity)
+        :   AudioEffect(identity)
 {
 }
 
