@@ -28,13 +28,6 @@
     android:clipToPadding="false"
     android:focusable="true" >
 
-    <include
-        layout="@layout/mobile_signal_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/qs_carrier_margin_width"
-        android:visibility="gone" />
-
     <com.android.systemui.util.AutoMarqueeTextView
         android:id="@+id/qs_carrier_text"
         android:layout_width="wrap_content"
@@ -45,5 +38,12 @@
         android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true"
         android:maxEms="7"/>
+
+    <include
+        layout="@layout/mobile_signal_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/qs_carrier_margin_width"
+        android:visibility="gone" />
 
 </com.android.systemui.qs.carrier.QSCarrier>
