@@ -21892,6 +21892,7 @@ package android.media {
     method @NonNull public java.util.List<byte[]> getOfflineLicenseKeySetIds();
     method public int getOfflineLicenseState(@NonNull byte[]);
     method public int getOpenSessionCount();
+    method @Nullable public android.media.metrics.PlaybackComponent getPlaybackComponent(@NonNull byte[]);
     method @NonNull public byte[] getPropertyByteArray(String);
     method @NonNull public String getPropertyString(@NonNull String);
     method @NonNull public android.media.MediaDrm.ProvisionRequest getProvisionRequest();
