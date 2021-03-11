@@ -91,8 +91,9 @@ public final class TextClassificationConstants {
             "system_textclassifier_api_timeout_in_second";
 
     /**
-     * The max amount of characters before and after the selected text that are passed to the
-     * TextClassifier for the smart selection.
+     * The maximum amount of characters before and after the selected text that is passed to the
+     * TextClassifier for the smart selection. e.g. If this value is 100, then 100 characters before
+     * the selection and 100 characters after the selection will be passed to the TextClassifier.
      */
     private static final String SMART_SELECTION_TRIM_DELTA = "smart_selection_trim_delta";
 

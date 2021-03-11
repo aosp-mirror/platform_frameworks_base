@@ -932,18 +932,21 @@ filegroup {
     ],
 }
 
-// keep these files in sync with the package/Tethering/jarjar-rules.txt for the tethering module.
+// keep these files in sync with the package/Tethering/jarjar-rules.txt and
+// package/Connectivity/jarjar-rules.txt for the tethering module and connectivity module.
 filegroup {
-    name: "framework-tethering-shared-srcs",
+    name: "framework-connectivity-shared-srcs",
     srcs: [
         "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/LocalLog.java",
+        // This should be android.util.IndentingPrintWriter, but it's not available in all branches.
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/MessageUtils.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
+        "core/java/com/android/internal/util/WakeupMessage.java",
     ],
 }
 

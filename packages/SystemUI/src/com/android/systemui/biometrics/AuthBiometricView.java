@@ -742,6 +742,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      * @param height Height to constrain the measurements to.
      * @return See {@link AuthDialog.LayoutParams}
      */
+    @NonNull
     AuthDialog.LayoutParams onMeasureInternal(int width, int height) {
         int totalHeight = 0;
         final int numChildren = getChildCount();

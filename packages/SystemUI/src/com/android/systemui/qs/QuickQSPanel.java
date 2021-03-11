@@ -55,6 +55,11 @@ public class QuickQSPanel extends QSPanel {
         applyBottomMargin((View) mRegularTileLayout);
     }
 
+    @Override
+    protected void inflateQSFooter(boolean newFooter) {
+        // No footer
+    }
+
     private void applyBottomMargin(View view) {
         int margin = getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_bottom);
         MarginLayoutParams layoutParams = (MarginLayoutParams) view.getLayoutParams();
