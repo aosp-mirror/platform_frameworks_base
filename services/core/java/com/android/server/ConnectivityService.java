@@ -189,7 +189,6 @@ import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocationPermissionChecker;
@@ -201,7 +200,6 @@ import com.android.net.module.util.LinkPropertiesUtils.CompareOrUpdateResult;
 import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.net.module.util.PermissionUtils;
-import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.AutodestructReference;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
@@ -1064,10 +1062,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         public MultinetworkPolicyTracker makeMultinetworkPolicyTracker(
                 @NonNull Context c, @NonNull Handler h, @NonNull Runnable r) {
             return new MultinetworkPolicyTracker(c, h, r);
-        }
-
-        public IBatteryStats getBatteryStatsService() {
-            return BatteryStatsService.getService();
         }
 
         /**
