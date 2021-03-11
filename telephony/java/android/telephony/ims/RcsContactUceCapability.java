@@ -339,6 +339,7 @@ public final class RcsContactUceCapability implements Parcelable {
     }
 
     /**
+     * Retrieve the contact URI requested by the applications.
      * @return the URI representing the contact associated with the capabilities.
      */
     public @NonNull Uri getContactUri() {
