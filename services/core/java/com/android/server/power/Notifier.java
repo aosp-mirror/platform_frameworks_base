@@ -549,6 +549,7 @@ public class Notifier {
             if (!mUserActivityPending) {
                 mUserActivityPending = true;
                 Message msg = mHandler.obtainMessage(MSG_USER_ACTIVITY);
+                msg.arg1 = event;
                 msg.setAsynchronous(true);
                 mHandler.sendMessage(msg);
             }
@@ -647,7 +648,7 @@ public class Notifier {
         mSuspendBlocker.release();
     }
 
-    private void sendUserActivity() {
+    private void sendUserActivity(int event) {
         synchronized (mLock) {
             if (!mUserActivityPending) {
                 return;
@@ -657,7 +658,7 @@ public class Notifier {
         TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
         tm.notifyUserActivity();
         mPolicy.userActivity();
-        mFaceDownDetector.userActivity();
+        mFaceDownDetector.userActivity(event);
     }
 
     void postEnhancedDischargePredictionBroadcast(long delayMs) {
@@ -833,7 +834,7 @@ public class Notifier {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_USER_ACTIVITY:
-                    sendUserActivity();
+                    sendUserActivity(msg.arg1);
                     break;
                 case MSG_BROADCAST:
                     sendNextBroadcast();
