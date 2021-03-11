@@ -170,7 +170,7 @@ public class PowerExemptionManager {
     /** @hide */
     public static final int REASON_EXEMPTED_PACKAGE = 64;
     /** @hide */
-    public static final int REASON_ALLOWLISTED_PACKAGE  = 65;
+    public static final int REASON_ALLOWLISTED_PACKAGE = 65;
     /** @hide */
     public static final int REASON_APPOP = 66;
 
@@ -216,7 +216,7 @@ public class PowerExemptionManager {
      * Device idle system allow list, including EXCEPT-IDLE
      * @hide
      */
-    public static final int REASON_SYSTEM_ALLOW_LISTED  = 300;
+    public static final int REASON_SYSTEM_ALLOW_LISTED = 300;
     /** @hide */
     public static final int REASON_ALARM_MANAGER_ALARM_CLOCK = 301;
     /**

@@ -698,7 +698,8 @@ package android.content {
     field public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
     field public static final String DREAM_SERVICE = "dream";
     field public static final String FONT_SERVICE = "font";
-    field public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
+    field public static final String POWER_EXEMPTION_SERVICE = "power_exemption";
+    field @Deprecated public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 

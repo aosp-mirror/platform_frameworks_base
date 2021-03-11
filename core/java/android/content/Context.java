@@ -4833,7 +4833,8 @@ public abstract class Context {
      * @hide
      */
     @TestApi
-    @SuppressLint("ServiceName")  // TODO: This should be renamed to POWER_WHITELIST_SERVICE
+    @Deprecated
+    @SuppressLint("ServiceName")
     public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
 
     /**
@@ -4842,7 +4843,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
-    @SystemApi
+    @TestApi
     public static final String POWER_EXEMPTION_SERVICE = "power_exemption";
 
     /**
