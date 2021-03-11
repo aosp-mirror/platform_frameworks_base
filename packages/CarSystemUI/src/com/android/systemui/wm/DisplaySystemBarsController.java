@@ -25,7 +25,6 @@ import android.util.SparseArray;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IWindowManager;
 import android.view.InsetsController;
-import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.WindowInsets;
 
@@ -121,13 +120,6 @@ public class DisplaySystemBarsController extends DisplayImeController {
             if (mPackageName != null) {
                 modifyDisplayWindowInsets();
             }
-        }
-
-        @Override
-        public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls) {
-            super.insetsControlChanged(insetsState, activeControls);
-            mInsetsController.onControlsChanged(activeControls);
         }
 
         @Override
