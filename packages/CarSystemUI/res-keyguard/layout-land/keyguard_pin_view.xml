@@ -55,7 +55,7 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <com.android.keyguard.PasswordTextView
+        <com.android.systemui.car.keyguard.UnfocusablePasswordTextView
             android:id="@+id/pinEntry"
             android:layout_width="@dimen/keyguard_security_width"
             android:layout_height="@dimen/pin_entry_height"
