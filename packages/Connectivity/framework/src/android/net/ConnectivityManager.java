@@ -16,7 +16,6 @@
 package android.net;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
-import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
 import static android.net.NetworkRequest.Type.REQUEST;
@@ -1996,7 +1995,7 @@ public class ConnectivityManager {
             dup = createInvalidFd();
         }
         return new NattSocketKeepalive(mService, network, dup,
-                INVALID_RESOURCE_ID /* Unused */, source, destination, executor, callback);
+                -1 /* Unused */, source, destination, executor, callback);
     }
 
     /**
