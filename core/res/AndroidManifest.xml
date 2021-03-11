@@ -2963,6 +2963,15 @@
     <permission android:name="android.permission.SUGGEST_MANUAL_TIME_AND_ZONE"
         android:protectionLevel="signature" />
 
+    <!-- Allows system clock time suggestions from an external clock / time source to be made.
+         The nature of "external" could be highly form-factor specific. Example, times
+         obtained via the VHAL for Android Auto OS.
+         <p>Not for use by third-party applications.
+         @SystemApi @hide
+    -->
+    <permission android:name="android.permission.SUGGEST_EXTERNAL_TIME"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows applications like settings to manage configuration associated with automatic time
          and time zone detection.
          <p>Not for use by third-party applications.
