@@ -475,28 +475,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void revokeChallenge() {
-        final List<FaceSensorPropertiesInternal> faceSensorProperties =
-                getSensorPropertiesInternal();
-        if (faceSensorProperties.isEmpty()) {
-            Slog.e(TAG, "No sensors during revokeChallenge");
-        }
-        revokeChallenge(faceSensorProperties.get(0).sensorId);
-    }
-
-    /**
-     * Invalidates the current challenge.
-     *
-     * TODO(b/171335732): should take userId and challenge
-     *
-     * @hide
-     */
-    @RequiresPermission(MANAGE_BIOMETRIC)
-    public void revokeChallenge(int sensorId) {
+    public void revokeChallenge(int sensorId, int userId, long challenge) {
         if (mService != null) {
             try {
-                mService.revokeChallenge(mToken, sensorId, 0 /* userId */,
-                        mContext.getOpPackageName(), 0 /* challenge */);
+                mService.revokeChallenge(mToken, sensorId, userId,
+                        mContext.getOpPackageName(), challenge);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
