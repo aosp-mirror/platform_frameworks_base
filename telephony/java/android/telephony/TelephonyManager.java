@@ -14618,12 +14618,11 @@ public class TelephonyManager {
      * {@link #NR_DUAL_CONNECTIVITY_DISABLE_IMMEDIATE}
      * </ol>
      * @return operation result.
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public @EnableNrDualConnectivityResult int setNrDualConnectivityState(
             @NrDualConnectivityState int nrDualConnectivityState) {
         try {
