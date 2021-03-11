@@ -5803,11 +5803,11 @@ public class Notification implements Parcelable
             if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
                 return true;
             }
-            // If the big content view has no content, we can exempt the app from having to show it.
+            // Notifications with contentView and without a bigContentView, style, or actions would
+            // not have an expanded state before S, so showing the standard template expanded state
+            // usually looks wrong, so we keep it simple and don't show the expanded state.
             boolean exempt = mN.contentView != null && mN.bigContentView == null
-                    && mStyle == null && mActions.size() == 0
-                    && mN.extras.getCharSequence(EXTRA_TITLE) == null
-                    && mN.extras.getCharSequence(EXTRA_TEXT) == null;
+                    && mStyle == null && mActions.size() == 0;
             return !exempt;
         }
 
