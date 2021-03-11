@@ -25,9 +25,12 @@ import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.service.wallpaper.WallpaperService;
+import android.util.ArraySet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Size;
 import android.view.SurfaceHolder;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
@@ -54,7 +57,10 @@ public class ImageWallpaper extends WallpaperService {
     private static final @android.annotation.NonNull RectF LOCAL_COLOR_BOUNDS =
             new RectF(0, 0, 1, 1);
     private static final boolean DEBUG = false;
-    private ArrayList<RectF> mLocalColorsToAdd = new ArrayList<>();
+    private final ArrayList<RectF> mLocalColorsToAdd = new ArrayList<>();
+    private final ArraySet<RectF> mColorAreas = new ArraySet<>();
+    private float mShift;
+    private volatile int mPages;
     private HandlerThread mWorker;
     // scaled down version
     private Bitmap mMiniBitmap;
@@ -96,6 +102,10 @@ public class ImageWallpaper extends WallpaperService {
         private EglHelper mEglHelper;
         private final Runnable mFinishRenderingTask = this::finishRendering;
         private boolean mNeedRedraw;
+        private int mWidth = 1;
+        private int mHeight = 1;
+        private int mImgWidth = 1;
+        private int mImgHeight = 1;
 
         GLEngine() {
         }
@@ -111,8 +121,13 @@ public class ImageWallpaper extends WallpaperService {
             // Deferred init renderer because we need to get wallpaper by display context.
             mRenderer = getRendererInstance();
             setFixedSizeAllowed(true);
-            setOffsetNotificationsEnabled(false);
             updateSurfaceSize();
+            Rect window = getDisplayContext()
+                    .getSystemService(WindowManager.class)
+                    .getCurrentWindowMetrics()
+                    .getBounds();
+            mHeight = window.height();
+            mWidth = window.width();
             mMiniBitmap = null;
             if (mWorker != null && mWorker.getThreadHandler() != null) {
                 mWorker.getThreadHandler().post(this::updateMiniBitmap);
@@ -127,6 +142,41 @@ public class ImageWallpaper extends WallpaperService {
             return new ImageWallpaperRenderer(getDisplayContext());
         }
 
+        @Override
+        public void onOffsetsChanged(float xOffset, float yOffset,
+                float xOffsetStep, float yOffsetStep,
+                int xPixelOffset, int yPixelOffset) {
+            if (mMiniBitmap == null || mMiniBitmap.isRecycled()) return;
+            final int pages;
+            if (xOffsetStep > 0 && xOffsetStep <= 1) {
+                pages = (int) (1 / xOffsetStep + 1);
+            } else {
+                pages = 1;
+            }
+            if (pages == mPages) return;
+            mPages = pages;
+            updateShift();
+            mWorker.getThreadHandler().post(() ->
+                    computeAndNotifyLocalColors(new ArrayList<>(mColorAreas), mMiniBitmap));
+        }
+
+        private void updateShift() {
+            if (mImgHeight == 0) {
+                mShift = 0;
+                return;
+            }
+            // calculate shift
+            float imgWidth = (float) mImgWidth / (float) mImgHeight;
+            float displayWidth =
+                    (float) mWidth / (float) mHeight;
+            // if need to shift
+            if (imgWidth > displayWidth) {
+                mShift = imgWidth / imgWidth - displayWidth / imgWidth;
+            } else {
+                mShift = 0;
+            }
+        }
+
         private void updateMiniBitmap() {
             mRenderer.useBitmap(b -> {
                 int size = Math.min(b.getWidth(), b.getHeight());
@@ -134,6 +184,8 @@ public class ImageWallpaper extends WallpaperService {
                 if (size > MIN_SURFACE_WIDTH) {
                     scale = (float) MIN_SURFACE_WIDTH / (float) size;
                 }
+                mImgHeight = b.getHeight();
+                mImgWidth = b.getWidth();
                 mMiniBitmap = Bitmap.createScaledBitmap(b, Math.round(scale * b.getWidth()),
                         Math.round(scale * b.getHeight()), false);
                 computeAndNotifyLocalColors(mLocalColorsToAdd, mMiniBitmap);
@@ -173,6 +225,9 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void addLocalColorsAreas(@NonNull List<RectF> regions) {
             mWorker.getThreadHandler().post(() -> {
+                if (mColorAreas.size() + mLocalColorsToAdd.size() == 0) {
+                    setOffsetNotificationsEnabled(true);
+                }
                 Bitmap bitmap = mMiniBitmap;
                 if (bitmap == null) {
                     mLocalColorsToAdd.addAll(regions);
@@ -184,6 +239,7 @@ public class ImageWallpaper extends WallpaperService {
 
         private void computeAndNotifyLocalColors(@NonNull List<RectF> regions, Bitmap b) {
             List<WallpaperColors> colors = getLocalWallpaperColors(regions, b);
+            mColorAreas.addAll(regions);
             try {
                 notifyLocalColorsChanged(regions, colors);
             } catch (RuntimeException e) {
@@ -193,14 +249,45 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void removeLocalColorsAreas(@NonNull List<RectF> regions) {
-            // No-OP
+            mWorker.getThreadHandler().post(() -> {
+                mColorAreas.removeAll(regions);
+                mLocalColorsToAdd.removeAll(regions);
+                if (mColorAreas.size() + mLocalColorsToAdd.size() == 0) {
+                    setOffsetNotificationsEnabled(false);
+                }
+            });
+        }
+
+        private RectF pageToImgRect(RectF area) {
+            float pageWidth = 1f / (float) mPages;
+            if (pageWidth < 1 && pageWidth >= 0) pageWidth = 1;
+            float imgWidth = (float) mImgWidth / (float) mImgHeight;
+            float displayWidth =
+                    (float) mWidth / (float) mHeight;
+            float expansion = imgWidth > displayWidth ? displayWidth / imgWidth : 1;
+            int page = (int) Math.floor(area.centerX() / pageWidth);
+            float shiftWidth = mShift * page * pageWidth;
+            RectF imgArea = new RectF();
+            imgArea.bottom = area.bottom;
+            imgArea.top = area.top;
+            imgArea.left = MathUtils.constrain(area.left % pageWidth, 0, 1)
+                    * expansion + shiftWidth;
+            imgArea.right = MathUtils.constrain(area.right % pageWidth, 0, 1)
+                    * expansion + shiftWidth;
+            if (imgArea.left > imgArea.right) {
+                // take full page
+                imgArea.left = shiftWidth;
+                imgArea.right = 1 - (mShift - shiftWidth);
+            }
+            return imgArea;
         }
 
         private List<WallpaperColors> getLocalWallpaperColors(@NonNull List<RectF> areas,
                 Bitmap b) {
             List<WallpaperColors> colors = new ArrayList<>(areas.size());
+            updateShift();
             for (int i = 0; i < areas.size(); i++) {
-                RectF area = areas.get(i);
+                RectF area = pageToImgRect(areas.get(i));
                 if (area == null || !LOCAL_COLOR_BOUNDS.contains(area)) {
                     colors.add(null);
                     continue;
