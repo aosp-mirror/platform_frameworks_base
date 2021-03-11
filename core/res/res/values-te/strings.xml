@@ -1661,9 +1661,9 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ఫీచర్ల మధ్య మారడానికి, మూడు చేతి వేళ్ళతో పైకి స్వైప్ చేసి పట్టుకోండి."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"మాగ్నిఫికేషన్"</string>
     <string name="user_switched" msgid="7249833311585228097">"ప్రస్తుత వినియోగదారు <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>కి మారుస్తోంది…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> యూజర్‌కు స్విచ్ అవుతోంది…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ని లాగ్ అవుట్ చేస్తోంది…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"యజమాని"</string>
+    <string name="owner_name" msgid="8713560351570795743">"ఓనర్"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ఎర్రర్"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ఈ మార్పును మీ నిర్వాహకులు అనుమతించలేదు"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ఈ చర్యను నిర్వహించడానికి యాప్ ఏదీ కనుగొనబడలేదు"</string>
