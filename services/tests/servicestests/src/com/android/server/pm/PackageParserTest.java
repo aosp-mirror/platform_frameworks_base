@@ -48,6 +48,7 @@ import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
@@ -854,7 +855,7 @@ public class PackageParserTest {
                 .addProvider(new ParsedProvider())
                 .addService(new ParsedService())
                 .addInstrumentation(new ParsedInstrumentation())
-                .addRequestedPermission("foo7")
+                .addUsesPermission(new ParsedUsesPermission("foo7", 0))
                 .addImplicitPermission("foo25")
                 .addProtectedBroadcast("foo8")
                 .setStaticSharedLibName("foo23")
