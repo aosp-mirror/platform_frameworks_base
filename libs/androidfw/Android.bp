@@ -97,8 +97,8 @@ cc_library {
                 "libincfs",
                 "libutils",
                 "libz",
-                "libziparchive",
             ],
+            static_libs: ["libziparchive_for_incfs"],
             static: {
                 enabled: false,
             },
