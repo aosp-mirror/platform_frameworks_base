@@ -25,6 +25,7 @@ import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.Application;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
@@ -325,6 +326,33 @@ public final class CompanionDeviceManager {
         }
         try {
             return mService.getAssociationsForUser(mContext.getUser().getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks whether the bluetooth device represented by the mac address was recently associated
+     * with the companion app. This allows these devices to skip the Bluetooth pairing dialog if
+     * their pairing variant is {@link BluetoothDevice#PAIRING_VARIANT_CONSENT}.
+     *
+     * @param packageName the package name of the calling app
+     * @param deviceMacAddress the bluetooth device's mac address
+     * @param userId the calling user's identifier
+     * @return true if it was recently associated and we can bypass the dialog, false otherwise
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+    public boolean canPairWithoutPrompt(@NonNull String packageName,
+            @NonNull String deviceMacAddress, int userId) {
+        if (!checkFeaturePresent()) {
+            return false;
+        }
+        Objects.requireNonNull(packageName, "package name cannot be null");
+        Objects.requireNonNull(deviceMacAddress, "device mac address cannot be null");
+        try {
+            return mService.canPairWithoutPrompt(packageName, deviceMacAddress, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
