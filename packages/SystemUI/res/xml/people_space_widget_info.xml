@@ -20,8 +20,9 @@
     android:minResizeWidth="110dp"
     android:minResizeHeight="55dp"
     android:updatePeriodMillis="60000"
-    android:previewImage="@drawable/ic_person"
+    android:description="@string/people_tile_description"
+    android:previewLayout="@layout/people_space_placeholder_layout"
     android:resizeMode="horizontal|vertical"
     android:configure="com.android.systemui.people.PeopleSpaceActivity"
-    android:initialLayout="@layout/people_space_widget">
+    android:initialLayout="@layout/people_space_placeholder_layout">
 </appwidget-provider>
