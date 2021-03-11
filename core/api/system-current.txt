@@ -9949,11 +9949,13 @@ package android.service.resumeonreboot {
 package android.service.rotationresolver {
 
   public final class RotationResolutionRequest implements android.os.Parcelable {
+    ctor public RotationResolutionRequest(@NonNull String, int, int, boolean, long);
     method public int describeContents();
     method public int getCurrentRotation();
     method @NonNull public String getPackageName();
     method public int getProposedRotation();
     method public long getTimeoutMillis();
+    method public boolean shouldUseCamera();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.rotationresolver.RotationResolutionRequest> CREATOR;
   }

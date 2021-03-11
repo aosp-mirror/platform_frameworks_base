@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.os.CancellationSignal;
 import android.os.ShellCommand;
 import android.rotationresolver.RotationResolverInternal.RotationResolverCallbackInternal;
+import android.service.rotationresolver.RotationResolutionRequest;
 import android.text.TextUtils;
 import android.view.Surface;
 
@@ -107,8 +108,10 @@ final class RotationResolverShellCommand extends ShellCommand {
     }
 
     private int runResolveRotation() {
-        mService.resolveRotationLocked(sTestableRotationCallbackInternal, Surface.ROTATION_0,
-                Surface.ROTATION_0, "", 2000L, new CancellationSignal());
+        final RotationResolutionRequest request = new RotationResolutionRequest("",
+                Surface.ROTATION_0, Surface.ROTATION_0,  true, 2000L);
+        mService.resolveRotationLocked(sTestableRotationCallbackInternal, request,
+                new CancellationSignal());
         return 0;
     }
 
