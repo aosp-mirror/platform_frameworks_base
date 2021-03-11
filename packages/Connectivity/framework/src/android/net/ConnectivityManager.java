@@ -5040,4 +5040,21 @@ public class ConnectivityManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    // The first network ID of IPSec tunnel interface.
+    private static final int TUN_INTF_NETID_START = 0xFC00;
+    // The network ID range of IPSec tunnel interface.
+    private static final int TUN_INTF_NETID_RANGE = 0x0400;
+
+    /**
+     * Get the network ID range reserved for IPSec tunnel interfaces.
+     *
+     * @return A Range which indicates the network ID range of IPSec tunnel interface.
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @NonNull
+    public static Range<Integer> getIpSecNetIdRange() {
+        return new Range(TUN_INTF_NETID_START, TUN_INTF_NETID_START + TUN_INTF_NETID_RANGE - 1);
+    }
 }
