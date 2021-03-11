@@ -36,6 +36,8 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -430,13 +432,15 @@ public class RcsUceAdapter {
 
         /**
          * The pending request has completed successfully due to all requested contacts information
-         * being delivered.
+         * being delivered. The callback {@link #onCapabilitiesReceived(List)}
+         * for each contacts is required to be called before {@link #onComplete} is called.
          */
         void onComplete();
 
         /**
          * The pending request has resulted in an error and may need to be retried, depending on the
-         * error code.
+         * error code. The callback {@link #onCapabilitiesReceived(List)}
+         * for each contacts is required to be called before {@link #onError} is called.
          * @param errorCode The reason for the framework being unable to process the request.
          * @param retryIntervalMillis The time in milliseconds the requesting application should
          * wait before retrying, if non-zero.
@@ -483,7 +487,6 @@ public class RcsUceAdapter {
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(allOf = {Manifest.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE,
             Manifest.permission.READ_CONTACTS})
     public void requestCapabilities(@NonNull List<Uri> contactNumbers,
@@ -549,6 +552,94 @@ public class RcsUceAdapter {
     }
 
     /**
+     * Request the User Capability Exchange capabilities for one or more contacts.
+     * <p>
+     * This will return the cached capabilities of the contact and will not perform a capability
+     * poll on the network unless there are contacts being queried with stale information.
+     * <p>
+     * Be sure to check the availability of this feature using
+     * {@link ImsRcsManager#isAvailable(int, int)} and ensuring
+     * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} or
+     * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} is enabled or else
+     * this operation will fail with {@link #ERROR_NOT_AVAILABLE} or {@link #ERROR_NOT_ENABLED}.
+     *
+     * @param contactNumbers A list of numbers that the capabilities are being requested for.
+     * @param executor The executor that will be used when the request is completed and the
+     *         {@link CapabilitiesCallback} is called.
+     * @param c A one-time callback for when the request for capabilities completes or there is an
+     *         error processing the request.
+     * @throws ImsException if the subscription associated with this instance of
+     * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
+     * available. This can happen if the ImsService has crashed, for example, or if the subscription
+     * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE,
+            Manifest.permission.READ_CONTACTS})
+    public void requestCapabilities(@NonNull Collection<Uri> contactNumbers,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CapabilitiesCallback c) throws ImsException {
+        if (c == null) {
+            throw new IllegalArgumentException("Must include a non-null CapabilitiesCallback.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        if (contactNumbers == null) {
+            throw new IllegalArgumentException("Must include non-null contact number list.");
+        }
+
+        IImsRcsController imsRcsController = getIImsRcsController();
+        if (imsRcsController == null) {
+            Log.e(TAG, "requestCapabilities: IImsRcsController is null");
+            throw new ImsException("Can not find remote IMS service",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+
+        IRcsUceControllerCallback internalCallback = new IRcsUceControllerCallback.Stub() {
+            @Override
+            public void onCapabilitiesReceived(List<RcsContactUceCapability> contactCapabilities) {
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> c.onCapabilitiesReceived(contactCapabilities));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
+            }
+            @Override
+            public void onComplete() {
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> c.onComplete());
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
+            }
+            @Override
+            public void onError(int errorCode, long retryAfterMilliseconds) {
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> c.onError(errorCode, retryAfterMilliseconds));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
+            }
+        };
+
+        try {
+            imsRcsController.requestCapabilities(mSubId, mContext.getOpPackageName(),
+                    mContext.getAttributionTag(), new ArrayList(contactNumbers), internalCallback);
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.toString(), e.errorCode);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling IImsRcsController#requestCapabilities", e);
+            throw new ImsException("Remote IMS Service is not available",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
      * Ignore the device cache and perform a capability discovery for one contact, also called
      * "availability fetch."
      * <p>
@@ -569,6 +660,10 @@ public class RcsUceAdapter {
      * {@link CapabilitiesCallback} is called.
      * @param c A one-time callback for when the request for capabilities completes or there is
      * an error processing the request.
+     * @throws ImsException if the subscription associated with this instance of
+     * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
+     * available. This can happen if the ImsService has crashed, for example, or if the subscription
+     * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
      * @hide
      */
     @SystemApi
