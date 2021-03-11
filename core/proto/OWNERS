@@ -14,9 +14,10 @@ per-file settings_enums.proto=tmfang@google.com
 # Frameworks
 ogunwale@google.com
 jjaggi@google.com
+kwekua@google.com
 roosa@google.com
 per-file package_item_info.proto = toddke@google.com
-per-file usagestatsservice.proto, usagestatsservice_v2.proto = mwachens@google.com
+per-file usagestatsservice.proto, usagestatsservice_v2.proto = file:/core/java/android/app/usage/OWNERS
 per-file apphibernationservice.proto = file:/core/java/android/apphibernation/OWNERS
 
 # Biometrics
