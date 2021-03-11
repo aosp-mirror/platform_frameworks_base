@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -33,23 +32,23 @@ import androidx.annotation.Nullable;
 import com.android.systemui.R;
 
 /**
- * UDFPS animations that should be shown when enrolling.
+ * UDFPS fingerprint drawable that is shown when enrolling
  */
-public class UdfpsAnimationEnroll extends UdfpsAnimation {
+public class UdfpsEnrollDrawable extends UdfpsDrawable {
     private static final String TAG = "UdfpsAnimationEnroll";
 
     private static final float SHADOW_RADIUS = 5.f;
-    private static final float PROGRESS_BAR_RADIUS = 140.f;
+    static final float PROGRESS_BAR_RADIUS = 140.f;
 
     @NonNull private final Drawable mMovingTargetFpIcon;
     @NonNull private final Paint mSensorPaint;
     @NonNull private final Paint mBlueFill;
-    @NonNull private final Paint mBlueStroke;;
+    @NonNull private final Paint mBlueStroke;
 
     @Nullable private RectF mSensorRect;
     @Nullable private UdfpsEnrollHelper mEnrollHelper;
 
-    UdfpsAnimationEnroll(@NonNull Context context) {
+    UdfpsEnrollDrawable(@NonNull Context context) {
         super(context);
 
         mSensorPaint = new Paint(0 /* flags */);
@@ -72,20 +71,12 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
         mMovingTargetFpIcon = context.getResources().getDrawable(R.drawable.ic_fingerprint, null);
         mMovingTargetFpIcon.setTint(Color.WHITE);
         mMovingTargetFpIcon.mutate();
+
+        mFingerprintDrawable.setTint(mContext.getColor(R.color.udfps_enroll_icon));
     }
 
     void setEnrollHelper(@NonNull UdfpsEnrollHelper helper) {
         mEnrollHelper = helper;
-    }
-
-    @Override
-    protected void updateColor() {
-        mFingerprintDrawable.setTint(mContext.getColor(R.color.udfps_enroll_icon));
-    }
-
-    @Override
-    protected void onDestroy() {
-
     }
 
     @Override
@@ -98,6 +89,7 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
     protected void updateFingerprintIconBounds(@NonNull Rect bounds) {
         super.updateFingerprintIconBounds(bounds);
         mMovingTargetFpIcon.setBounds(bounds);
+        invalidateSelf();
     }
 
     @Override
@@ -117,7 +109,7 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
 
         // Draw moving target
         if (mEnrollHelper.isCenterEnrollmentComplete()) {
-            mFingerprintDrawable.setAlpha(64);
+            mFingerprintDrawable.setAlpha(mAlpha == 255 ? 64 : mAlpha);
 
             canvas.save();
             final PointF point = mEnrollHelper.getNextGuidedEnrollmentPoint();
@@ -130,33 +122,16 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
             mMovingTargetFpIcon.draw(canvas);
             canvas.restore();
         } else {
-            mFingerprintDrawable.setAlpha(255);
+            mFingerprintDrawable.setAlpha(mAlpha);
         }
-    }
-
-    @Override
-    public int getPaddingX() {
-        return (int) Math.ceil(PROGRESS_BAR_RADIUS);
-    }
-
-    @Override
-    public int getPaddingY() {
-        return (int) Math.ceil(PROGRESS_BAR_RADIUS);
     }
 
     @Override
     public void setAlpha(int alpha) {
         super.setAlpha(alpha);
         mSensorPaint.setAlpha(alpha);
-    }
-
-    @Override
-    public void setColorFilter(@Nullable ColorFilter colorFilter) {
-
-    }
-
-    @Override
-    public int getOpacity() {
-        return 0;
+        mBlueFill.setAlpha(alpha);
+        mBlueStroke.setAlpha(alpha);
+        invalidateSelf();
     }
 }
