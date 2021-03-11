@@ -25,7 +25,7 @@
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Мүчүлүштүктөр жөнүндө кабар жакында телефонго чыгат"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Мүчүлүштүк тууралуу кабарды жөнөтүү үчүн таптап коюңуз"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Мүчүлүштүк тууралуу билдирүүңүздү бөлүшүү үчүн таптап коюңуз"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Мүчүлүштүк тууралуу кабарды скриншотсуз жөнөтүү үчүн солго серпиңиз же скриншот даяр болгуча күтүңүз"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Мүчүлүштүк тууралуу кабарды скриншотсуз жөнөтүү үчүн солго сүрүңүз же скриншот даяр болгуча күтүңүз"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Мүчүлүштүк тууралуу билдирүүңүздү скриншотсуз бөлүшүү үчүн таптап коюңуз же скриншот даяр болгуча күтө туруңуз"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Мүчүлүштүк тууралуу билдирүүңүздү скриншотсуз бөлүшүү үчүн таптап коюңуз же скриншот даяр болгуча күтө туруңуз"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Мүчүлүштүктөр тууралуу билдирүүлөрдө тутумдун ар кандай таржымалдарынан алынган дайындар, ошондой эле купуя маалымат камтылышы мүмкүн (мисалы, жайгашкан жер сыяктуу). Мындай билдирүүлөрдү бир гана ишеничтүү адамдар жана колдонмолор менен бөлүшүңүз."</string>

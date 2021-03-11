@@ -71,7 +71,7 @@
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"目前登入這部裝置的使用者無法開啟無線偵錯功能。如要使用這項功能，請切換到主要使用者。"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB 連接埠已停用"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"為了避免液體或灰塵導致你的裝置受損，系統已停用 USB 連接埠，因此目前無法偵測任何配件。\n\n系統會在可繼續使用 USB 連接埠時通知你。"</string>
-    <string name="usb_port_enabled" msgid="531823867664717018">"USB 通訊埠已啟用，可偵測充電器和配件"</string>
+    <string name="usb_port_enabled" msgid="531823867664717018">"USB 連接埠已啟用，可偵測充電器和配件"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"啟用 USB 連接埠"</string>
     <string name="learn_more" msgid="4690632085667273811">"瞭解詳情"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"放大為全螢幕"</string>

@@ -967,7 +967,7 @@
     <string name="save_password_remember" msgid="6490888932657708341">"Nhớ"</string>
     <string name="save_password_never" msgid="6776808375903410659">"Chưa bao giờ"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Bạn không được phép mở trang này."</string>
-    <string name="text_copied" msgid="2531420577879738860">"Đã sao chép văn bản vào khay nhớ tạm thời."</string>
+    <string name="text_copied" msgid="2531420577879738860">"Đã sao chép văn bản vào bảng nhớ tạm thời."</string>
     <string name="copied" msgid="4675902854553014676">"Đã sao chép"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Thêm"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Trình đơn+"</string>
@@ -1092,7 +1092,7 @@
     <string name="selectAll" msgid="1532369154488982046">"Chọn tất cả"</string>
     <string name="cut" msgid="2561199725874745819">"Cắt"</string>
     <string name="copy" msgid="5472512047143665218">"Sao chép"</string>
-    <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Không sao chép được vào khay nhớ tạm"</string>
+    <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Không sao chép được vào bảng nhớ tạm"</string>
     <string name="paste" msgid="461843306215520225">"Dán"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Dán dưới dạng văn bản thuần túy"</string>
     <string name="replace" msgid="7842675434546657444">"Thay thế..."</string>
