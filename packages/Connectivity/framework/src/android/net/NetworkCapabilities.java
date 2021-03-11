@@ -2284,7 +2284,6 @@ public final class NetworkCapabilities implements Parcelable {
 
     /**
      * Gets the subscription ID set that associated to this network or request.
-     * @hide
      * @return
      */
     @NonNull
@@ -2637,8 +2636,6 @@ public final class NetworkCapabilities implements Parcelable {
          *
          * @param subIds a set that represent the subscription IDs. Empty if clean up.
          * @return this builder.
-         *
-         * @hide
          */
         @NonNull
         public Builder setSubIds(@NonNull final Set<Integer> subIds) {
