@@ -10633,7 +10633,7 @@ package android.telephony.data {
     method public int getPduSessionId();
     method public int getProtocolType();
     method public long getRetryDurationMillis();
-    method @Nullable public android.telephony.data.SliceInfo getSliceInfo();
+    method @Nullable public android.telephony.data.NetworkSliceInfo getSliceInfo();
     method @Deprecated public int getSuggestedRetryTime();
     method @NonNull public java.util.List<android.telephony.data.TrafficDescriptor> getTrafficDescriptors();
     method public void writeToParcel(android.os.Parcel, int);
@@ -10669,7 +10669,7 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setPduSessionId(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setProtocolType(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setRetryDurationMillis(long);
-    method @NonNull public android.telephony.data.DataCallResponse.Builder setSliceInfo(@Nullable android.telephony.data.SliceInfo);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setSliceInfo(@Nullable android.telephony.data.NetworkSliceInfo);
     method @Deprecated @NonNull public android.telephony.data.DataCallResponse.Builder setSuggestedRetryTime(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setTrafficDescriptors(@NonNull java.util.List<android.telephony.data.TrafficDescriptor>);
   }
@@ -10742,7 +10742,7 @@ package android.telephony.data {
     method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @NonNull android.telephony.data.DataServiceCallback);
-    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.SliceInfo, @Nullable android.telephony.data.TrafficDescriptor, boolean, @NonNull android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.NetworkSliceInfo, @Nullable android.telephony.data.TrafficDescriptor, boolean, @NonNull android.telephony.data.DataServiceCallback);
   }
 
   public class DataServiceCallback {
@@ -10772,6 +10772,32 @@ package android.telephony.data {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.EpsBearerQosSessionAttributes> CREATOR;
   }
 
+  public final class NetworkSliceInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getMappedHplmnSliceDifferentiator();
+    method public int getMappedHplmnSliceServiceType();
+    method @IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getSliceDifferentiator();
+    method public int getSliceServiceType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.NetworkSliceInfo> CREATOR;
+    field public static final int MAX_SLICE_DIFFERENTIATOR = 16777214; // 0xfffffe
+    field public static final int MIN_SLICE_DIFFERENTIATOR = -1; // 0xffffffff
+    field public static final int SLICE_DIFFERENTIATOR_NO_SLICE = -1; // 0xffffffff
+    field public static final int SLICE_SERVICE_TYPE_EMBB = 1; // 0x1
+    field public static final int SLICE_SERVICE_TYPE_MIOT = 3; // 0x3
+    field public static final int SLICE_SERVICE_TYPE_NONE = 0; // 0x0
+    field public static final int SLICE_SERVICE_TYPE_URLLC = 2; // 0x2
+  }
+
+  public static final class NetworkSliceInfo.Builder {
+    ctor public NetworkSliceInfo.Builder();
+    method @NonNull public android.telephony.data.NetworkSliceInfo build();
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setMappedHplmnSliceDifferentiator(@IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setMappedHplmnSliceServiceType(int);
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setSliceDifferentiator(@IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setSliceServiceType(int);
+  }
+
   public final class NrQosSessionAttributes implements android.os.Parcelable android.net.QosSessionAttributes {
     method public int describeContents();
     method @NonNull public java.time.Duration getBitRateWindowDuration();
@@ -10798,32 +10824,6 @@ package android.telephony.data {
     method public final int getSlotIndex();
     method public void reportThrottleStatusChanged(@NonNull java.util.List<android.telephony.data.ThrottleStatus>);
     method public final void updateQualifiedNetworkTypes(int, @NonNull java.util.List<java.lang.Integer>);
-  }
-
-  public final class SliceInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method @IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getMappedHplmnSliceDifferentiator();
-    method public int getMappedHplmnSliceServiceType();
-    method @IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getSliceDifferentiator();
-    method public int getSliceServiceType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.SliceInfo> CREATOR;
-    field public static final int MAX_SLICE_DIFFERENTIATOR = 16777214; // 0xfffffe
-    field public static final int MIN_SLICE_DIFFERENTIATOR = -1; // 0xffffffff
-    field public static final int SLICE_DIFFERENTIATOR_NO_SLICE = -1; // 0xffffffff
-    field public static final int SLICE_SERVICE_TYPE_EMBB = 1; // 0x1
-    field public static final int SLICE_SERVICE_TYPE_MIOT = 3; // 0x3
-    field public static final int SLICE_SERVICE_TYPE_NONE = 0; // 0x0
-    field public static final int SLICE_SERVICE_TYPE_URLLC = 2; // 0x2
-  }
-
-  public static final class SliceInfo.Builder {
-    ctor public SliceInfo.Builder();
-    method @NonNull public android.telephony.data.SliceInfo build();
-    method @NonNull public android.telephony.data.SliceInfo.Builder setMappedHplmnSliceDifferentiator(@IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
-    method @NonNull public android.telephony.data.SliceInfo.Builder setMappedHplmnSliceServiceType(int);
-    method @NonNull public android.telephony.data.SliceInfo.Builder setSliceDifferentiator(@IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
-    method @NonNull public android.telephony.data.SliceInfo.Builder setSliceServiceType(int);
   }
 
   public final class ThrottleStatus implements android.os.Parcelable {
