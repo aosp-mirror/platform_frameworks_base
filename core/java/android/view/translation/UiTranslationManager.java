@@ -43,6 +43,14 @@ public final class UiTranslationManager {
     private static final String TAG = "UiTranslationManager";
 
     /**
+     * The tag which uses for enabling debug log dump. To enable it, we can use command "adb shell
+     * setprop log.tag.UiTranslation DEBUG".
+     *
+     * @hide
+     */
+    public static final String LOG_TAG = "UiTranslation";
+
+    /**
      * The state caller request to disable utranslation,, it is no longer need to ui translation.
      *
      * @hide

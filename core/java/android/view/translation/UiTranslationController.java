@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -53,6 +54,11 @@ import java.util.function.Consumer;
  * @hide
  */
 public class UiTranslationController {
+
+    // TODO(b/182433547): remove Build.IS_DEBUGGABLE before ship. Enable the logging in debug build
+    //  to help the debug during the development phase
+    public static final boolean DEBUG = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG)
+            || Build.IS_DEBUGGABLE;
 
     private static final String TAG = "UiTranslationController";
     @NonNull
@@ -93,6 +99,8 @@ public class UiTranslationController {
         if (!mActivity.isResumed()) {
             return;
         }
+        Log.i(TAG, "updateUiTranslationState state: " + stateToString(state)
+                + (DEBUG ? ", views: " + views : ""));
         switch (state) {
             case STATE_UI_TRANSLATION_STARTED:
                 final Pair<TranslationSpec, TranslationSpec> specs =
@@ -149,7 +157,68 @@ public class UiTranslationController {
             translator.dump(outerPrefix, pw);
             pw.println();
         }
+        synchronized (mLock) {
+            final int viewSize = mViews.size();
+            pw.print(outerPrefix); pw.print("number views: "); pw.println(viewSize);
+            for (int i = 0; i < viewSize; i++) {
+                pw.print(outerPrefix); pw.print("#"); pw.println(i);
+                final AutofillId autofillId = mViews.keyAt(i);
+                final View view = mViews.valueAt(i).get();
+                pw.print(pfx); pw.print("autofillId: "); pw.println(autofillId);
+                pw.print(pfx); pw.print("view:"); pw.println(view);
+            }
+        }
+        // TODO(b/182433547): we will remove debug rom condition before S release then we change
+        //  change this back to "DEBUG"
+        if (Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG)) {
+            dumpViewByTraversal(outerPrefix, pw);
+        }
     }
+
+    private void dumpViewByTraversal(String outerPrefix, PrintWriter pw) {
+        final ArrayList<ViewRootImpl> roots =
+                WindowManagerGlobal.getInstance().getRootViews(mActivity.getActivityToken());
+        pw.print(outerPrefix); pw.println("Dump views:");
+        for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
+            final View rootView = roots.get(rootNum).getView();
+            if (rootView instanceof ViewGroup) {
+                dumpChildren((ViewGroup) rootView, outerPrefix, pw);
+            } else {
+                dumpViewInfo(rootView, outerPrefix, pw);
+            }
+        }
+    }
+
+    private void dumpChildren(ViewGroup viewGroup, String outerPrefix, PrintWriter pw) {
+        final int childCount = viewGroup.getChildCount();
+        for (int i = 0; i < childCount; ++i) {
+            final View child = viewGroup.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                pw.print(outerPrefix); pw.println("Children: ");
+                pw.print(outerPrefix); pw.print(outerPrefix); pw.println(child);
+                dumpChildren((ViewGroup) child, outerPrefix, pw);
+            } else {
+                pw.print(outerPrefix); pw.println("End Children: ");
+                pw.print(outerPrefix); pw.print(outerPrefix); pw.print(child);
+                dumpViewInfo(child, outerPrefix, pw);
+            }
+        }
+    }
+
+    private void dumpViewInfo(View view, String outerPrefix, PrintWriter pw) {
+        final AutofillId autofillId = view.getAutofillId();
+        pw.print(outerPrefix); pw.print("autofillId: "); pw.print(autofillId);
+        // TODO: print TranslationTransformation
+        boolean isContainsView = false;
+        synchronized (mLock) {
+            final WeakReference<View> viewRef = mViews.get(autofillId);
+            if (viewRef != null && viewRef.get() != null) {
+                isContainsView = true;
+            }
+        }
+        pw.print(outerPrefix); pw.print("isContainsView: "); pw.println(isContainsView);
+    }
+
 
     /**
      * The method is used by {@link Translator}, it will be called when the translation is done. The
@@ -171,6 +240,9 @@ public class UiTranslationController {
             return;
         }
         final int resultCount = translatedResult.size();
+        if (DEBUG) {
+            Log.v(TAG, "onTranslationCompleted: receive " + resultCount + " responses.");
+        }
         synchronized (mLock) {
             for (int i = 0; i < resultCount; i++) {
                 final ViewTranslationResponse response = translatedResult.get(i);
@@ -180,7 +252,7 @@ public class UiTranslationController {
                 }
                 final View view = mViews.get(autofillId).get();
                 if (view == null) {
-                    Log.w(TAG, "onTranslationCompleted: the Veiew for autofill id " + autofillId
+                    Log.w(TAG, "onTranslationCompleted: the view for autofill id " + autofillId
                             + " may be gone.");
                     continue;
                 }
@@ -208,6 +280,10 @@ public class UiTranslationController {
     @WorkerThread
     private void sendTranslationRequest(Translator translator,
             List<ViewTranslationRequest> requests) {
+        if (requests.size() == 0) {
+            Log.wtf(TAG, "No ViewTranslationRequest was collected.");
+            return;
+        }
         final TranslationRequest request = new TranslationRequest.Builder()
                 .setViewTranslationRequests(requests)
                 .build();
@@ -233,7 +309,8 @@ public class UiTranslationController {
                         requests.add(request);
                     }
                     if (currentCount == (foundViews.size() - 1)) {
-                        Log.v(TAG, "onUiTranslationStarted: send " + requests.size() + " request.");
+                        Log.v(TAG, "onUiTranslationStarted: collect " + requests.size()
+                                + " requests.");
                         mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
                                 UiTranslationController::sendTranslationRequest,
                                 UiTranslationController.this, translator, requests));
@@ -287,6 +364,9 @@ public class UiTranslationController {
                 for (int i = 0; i < viewCounts; i++) {
                     final View view = views.valueAt(i).get();
                     if (view == null) {
+                        if (DEBUG) {
+                            Log.d(TAG, "View was gone for autofillid = " + views.keyAt(i));
+                        }
                         continue;
                     }
                     action.accept(view);
