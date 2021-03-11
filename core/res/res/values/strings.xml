@@ -1532,6 +1532,8 @@
     <string name="biometric_dialog_default_title">Verify it\u2019s you</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with a biometric (e.g. fingerprint or face). [CHAR LIMIT=70] -->
     <string name="biometric_dialog_default_subtitle">Use your biometric to continue</string>
+    <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with a biometric (e.g. fingerprint or face) or their screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=90] -->
+    <string name="biometric_or_screen_lock_dialog_default_subtitle">Use your biometric or screen lock to continue</string>
 
     <!-- Message shown when biometric hardware is not available [CHAR LIMIT=50] -->
     <string name="biometric_error_hw_unavailable">Biometric hardware unavailable</string>
@@ -1604,6 +1606,8 @@
     <string name="fingerprint_or_screen_lock_app_setting_name">Use fingerprint or screen lock</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their fingerprint. [CHAR LIMIT=70] -->
     <string name="fingerprint_dialog_default_subtitle">Use your fingerprint to continue</string>
+    <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their fingerprint or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=90] -->
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle">Use your fingerprint or screen lock to continue</string>
 
     <!-- Array containing custom error messages from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="fingerprint_error_vendor">
@@ -1704,6 +1708,8 @@
     <string name="face_or_screen_lock_app_setting_name">Use face or screen lock</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their face. [CHAR LIMIT=70] -->
     <string name="face_dialog_default_subtitle">Use face unlock to continue</string>
+    <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their face or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=90] -->
+    <string name="face_or_screen_lock_dialog_default_subtitle">Use your face or screen lock to continue</string>
 
     <!-- Array containing custom error messages from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="face_error_vendor">
