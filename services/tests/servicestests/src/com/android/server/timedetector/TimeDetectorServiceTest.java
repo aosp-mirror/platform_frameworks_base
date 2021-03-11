@@ -209,7 +209,7 @@ public class TimeDetectorServiceTest {
     @Test(expected = SecurityException.class)
     public void testSuggestExternalTime_withoutPermission() {
         doThrow(new SecurityException("Mock"))
-                .when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
+                .when(mMockContext).enforceCallingPermission(anyString(), any());
         ExternalTimeSuggestion externalTimeSuggestion = createExternalTimeSuggestion();
 
         try {
