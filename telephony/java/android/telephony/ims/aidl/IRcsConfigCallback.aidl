@@ -25,5 +25,6 @@ oneway interface IRcsConfigCallback {
     void onAutoConfigurationErrorReceived(int errorCode, String errorString);
     void onConfigurationReset();
     void onRemoved();
+    void onPreProvisioningReceived(in byte[] config);
 }
 
