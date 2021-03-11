@@ -1627,7 +1627,7 @@ public class AppProfiler {
         dropBuilder.append(catSw.toString());
         FrameworkStatsLog.write(FrameworkStatsLog.LOW_MEM_REPORTED);
         mService.addErrorToDropBox("lowmem", null, "system_server", null,
-                null, null, tag.toString(), dropBuilder.toString(), null, null);
+                null, null, tag.toString(), dropBuilder.toString(), null, null, null, null);
         synchronized (mService) {
             long now = SystemClock.uptimeMillis();
             if (mLastMemUsageReportTime < now) {
