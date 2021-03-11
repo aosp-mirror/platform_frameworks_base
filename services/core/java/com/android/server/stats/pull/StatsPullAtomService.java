@@ -1486,7 +1486,7 @@ public class StatsPullAtomService extends SystemService {
         }
         for (int freqIndex = 0; freqIndex < timesMs.length; ++freqIndex) {
             int cluster = freqsClusters[freqIndex];
-            long freq = freqs[freqIndex];
+            int freq = (int) freqs[freqIndex];
             long timeMs = timesMs[freqIndex];
             pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, cluster, freq, timeMs));
         }
