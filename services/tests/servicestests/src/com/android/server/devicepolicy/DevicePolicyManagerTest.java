@@ -4016,6 +4016,27 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    public void testUpdateNetworkPreferenceOnStartOnStopUser() throws Exception {
+        dpms.handleStartUser(CALLER_USER_HANDLE);
+        // TODO(b/178655595)
+        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
+        //         any(UserHandle.class),
+        //         anyInt(),
+        //         any(Executor.class),
+        //         any(Runnable.class)
+        //);
+
+        dpms.handleStopUser(CALLER_USER_HANDLE);
+        // TODO(b/178655595)
+        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
+        //         any(UserHandle.class),
+        //         eq(ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT),
+        //         any(Executor.class),
+        //         any(Runnable.class)
+        //);
+    }
+
+    @Test
     public void testGetSetNetworkSlicing() throws Exception {
         assertExpectException(SecurityException.class, null,
                 () -> dpm.setNetworkSlicingEnabled(false));
@@ -4023,20 +4044,26 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertExpectException(SecurityException.class, null,
                 () -> dpm.isNetworkSlicingEnabled());
 
-        assertExpectException(SecurityException.class, null,
-                () -> dpm.isNetworkSlicingEnabledForUser(UserHandle.of(CALLER_USER_HANDLE)));
-
-        mContext.callerPermissions.add(permission.READ_NETWORK_DEVICE_CONFIG);
-        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
-        try {
-            dpm.isNetworkSlicingEnabledForUser(UserHandle.of(CALLER_USER_HANDLE));
-        } catch (SecurityException se) {
-            fail("Threw SecurityException with right permission");
-        }
-
         setupProfileOwner();
         dpm.setNetworkSlicingEnabled(false);
         assertThat(dpm.isNetworkSlicingEnabled()).isFalse();
+        // TODO(b/178655595)
+        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
+        //         any(UserHandle.class),
+        //         eq(ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT),
+        //         any(Executor.class),
+        //         any(Runnable.class)
+        //);
+
+        dpm.setNetworkSlicingEnabled(true);
+        assertThat(dpm.isNetworkSlicingEnabled()).isTrue();
+        // TODO(b/178655595)
+        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
+        //         any(UserHandle.class),
+        //         eq(ConnectivityManager.USER_PREFERENCE_ENTERPRISE),
+        //         any(Executor.class),
+        //         any(Runnable.class)
+        //);
     }
 
     @Test
