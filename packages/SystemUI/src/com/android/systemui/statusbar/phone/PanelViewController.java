@@ -1394,13 +1394,8 @@ public abstract class PanelViewController {
 
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    if (mStatusBarKeyguardViewManager.isBouncerShowing()
-                            && mFalsingManager.isFalseTap(true, 0.5)) {
-                        endMotionEvent(event, x, y, true /* forceCancel */);
-                    } else {
-                        addMovement(event);
-                        endMotionEvent(event, x, y, false /* forceCancel */);
-                    }
+                    addMovement(event);
+                    endMotionEvent(event, x, y, false /* forceCancel */);
                     InteractionJankMonitor monitor = InteractionJankMonitor.getInstance();
                     if (event.getActionMasked() == MotionEvent.ACTION_UP) {
                         monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
