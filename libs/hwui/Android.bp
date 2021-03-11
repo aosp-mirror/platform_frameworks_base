@@ -388,11 +388,10 @@ cc_defaults {
         "liblog",
         "libminikin",
         "libz",
-        "libziparchive",
         "libjpeg",
     ],
 
-    static_libs: ["libnativehelper_lazy"],
+    static_libs: ["libnativehelper_lazy", "libziparchive_for_incfs"],
 
     target: {
         android: {
