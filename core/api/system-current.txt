@@ -3104,6 +3104,7 @@ package android.hardware.hdmi {
     method @NonNull public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getConnectedDevices();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getHdmiCecEnabled();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getHdmiCecVersion();
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getHdmiCecVolumeControlEnabled();
     method public int getPhysicalAddress();
     method @Nullable public android.hardware.hdmi.HdmiPlaybackClient getPlaybackClient();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public String getPowerControlMode();
@@ -3111,6 +3112,8 @@ package android.hardware.hdmi {
     method @Nullable public android.hardware.hdmi.HdmiSwitchClient getSwitchClient();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getSystemAudioModeMuting();
     method @Nullable public android.hardware.hdmi.HdmiTvClient getTvClient();
+    method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getTvSendStandbyOnSleep();
+    method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getTvWakeOnOneTouchPlay();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public java.util.List<java.lang.String> getUserCecSettings();
     method public boolean isDeviceConnected(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
     method public void powerOffDevice(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
@@ -3119,10 +3122,13 @@ package android.hardware.hdmi {
     method public void setActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setHdmiCecEnabled(@NonNull int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setHdmiCecVersion(@NonNull int);
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setHdmiCecVolumeControlEnabled(int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setPowerControlMode(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setPowerStateChangeOnActiveSourceLost(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setStandbyMode(boolean);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setSystemAudioModeMuting(@NonNull int);
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setTvSendStandbyOnSleep(@NonNull int);
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setTvWakeOnOneTouchPlay(@NonNull int);
     field public static final String ACTION_OSD_MESSAGE = "android.hardware.hdmi.action.OSD_MESSAGE";
     field public static final int AVR_VOLUME_MUTED = 101; // 0x65
     field public static final String CEC_SETTING_NAME_HDMI_CEC_ENABLED = "hdmi_cec_enabled";
@@ -3130,6 +3136,9 @@ package android.hardware.hdmi {
     field public static final String CEC_SETTING_NAME_POWER_CONTROL_MODE = "send_standby_on_sleep";
     field public static final String CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST = "power_state_change_on_active_source_lost";
     field public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING = "system_audio_mode_muting";
+    field public static final String CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP = "tv_send_standby_on_sleep";
+    field public static final String CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY = "tv_wake_on_one_touch_play";
+    field public static final String CEC_SETTING_NAME_VOLUME_CONTROL_MODE = "volume_control_enabled";
     field public static final int CLEAR_TIMER_STATUS_CEC_DISABLE = 162; // 0xa2
     field public static final int CLEAR_TIMER_STATUS_CHECK_RECORDER_CONNECTION = 160; // 0xa0
     field public static final int CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE = 161; // 0xa1
@@ -3225,6 +3234,12 @@ package android.hardware.hdmi {
     field public static final int TIMER_STATUS_PROGRAMMED_INFO_MIGHT_NOT_ENOUGH_SPACE = 11; // 0xb
     field public static final int TIMER_STATUS_PROGRAMMED_INFO_NOT_ENOUGH_SPACE = 9; // 0x9
     field public static final int TIMER_STATUS_PROGRAMMED_INFO_NO_MEDIA_INFO = 10; // 0xa
+    field public static final int TV_SEND_STANDBY_ON_SLEEP_DISABLED = 0; // 0x0
+    field public static final int TV_SEND_STANDBY_ON_SLEEP_ENABLED = 1; // 0x1
+    field public static final int TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED = 0; // 0x0
+    field public static final int TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED = 1; // 0x1
+    field public static final int VOLUME_CONTROL_DISABLED = 0; // 0x0
+    field public static final int VOLUME_CONTROL_ENABLED = 1; // 0x1
   }
 
   public static interface HdmiControlManager.CecSettingChangeListener {
