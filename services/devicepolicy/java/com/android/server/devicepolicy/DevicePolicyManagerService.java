@@ -1588,7 +1588,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             CryptoTestHelper.runAndLogSelfTest();
         }
 
-        public String[] getPersonalAppsForSuspension(int userId) {
+        public String[] getPersonalAppsForSuspension(@UserIdInt int userId) {
             return PersonalAppsSuspensionHelper.forUser(mContext, userId)
                     .getPersonalAppsForSuspension();
         }
@@ -10617,6 +10617,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             return false;
         }
+    }
+
+    @Override
+    public List<String> listPolicyExemptApps() {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
+
+        // TODO(b/181238156): decide whether it should only list the apps set by the resources,
+        // or also the "critical" apps defined by PersonalAppsSuspensionHelper (like SMS app).
+        // If it's the latter, refactor PersonalAppsSuspensionHelper so it (or a superclass) takes
+        // the resources on constructor.
+        String[] core = mContext.getResources().getStringArray(R.array.policy_exempt_apps);
+        String[] vendor = mContext.getResources().getStringArray(R.array.vendor_policy_exempt_apps);
+
+        int size = core.length + vendor.length;
+        Set<String> apps = new ArraySet<>(size);
+        for (String app : core) {
+            apps.add(app);
+        }
+        for (String app : vendor) {
+            apps.add(app);
+        }
+
+        return new ArrayList<>(apps);
     }
 
     @Override
