@@ -305,6 +305,7 @@ public class NotificationPanelViewController extends PanelViewController {
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
     private final int mMaxKeyguardNotifications;
+    private boolean mShouldUseSplitNotificationShade;
     // Current max allowed keyguard notifications determined by measuring the panel
     private int mMaxAllowedKeyguardNotifications;
 
@@ -598,6 +599,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 mKeyguardUserSwitcherEnabled && mResources.getBoolean(
                         R.bool.config_keyguard_user_switch_opens_qs_details);
         keyguardUpdateMonitor.setKeyguardQsUserSwitchEnabled(mKeyguardQsUserSwitchEnabled);
+        mShouldUseSplitNotificationShade =
+                Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources);
         mView.setWillNotDraw(!DEBUG);
         mLayoutInflater = layoutInflater;
         mFalsingManager = falsingManager;
@@ -736,7 +739,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
         // dynamically apply the split shade value overrides.
-        if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+        if (mShouldUseSplitNotificationShade) {
             updateResources();
         }
     }
@@ -835,12 +838,13 @@ public class NotificationPanelViewController extends PanelViewController {
     public void updateResources() {
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
-
+        mShouldUseSplitNotificationShade =
+                Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources);
         // To change the constraints at runtime, all children of the ConstraintLayout must have ids
         ensureAllViewsHaveIds(mNotificationContainerParent);
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(mNotificationContainerParent);
-        if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+        if (mShouldUseSplitNotificationShade) {
             // width = 0 to take up all available space within constraints
             qsWidth = 0;
             panelWidth = 0;
@@ -1915,7 +1919,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 mBarState != KEYGUARD
                         && (!mQsExpanded
                             || mQsExpansionFromOverscroll
-                            || Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)));
+                            || mShouldUseSplitNotificationShade));
 
         if (mKeyguardUserSwitcherController != null && mQsExpanded
                 && !mStackScrollerOverscrolling) {
@@ -1987,7 +1991,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private float calculateQsTopPadding() {
         // in split shade mode we want notifications to be directly below status bar
-        if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources) && !mKeyguardShowing) {
+        if (mShouldUseSplitNotificationShade && !mKeyguardShowing) {
             return 0f;
         }
         if (mKeyguardShowing && (mQsExpandImmediate
@@ -2203,8 +2207,7 @@ public class NotificationPanelViewController extends PanelViewController {
             return true;
         }
 
-        return !Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)
-                && (isInSettings() || mIsPanelCollapseOnQQS);
+        return !mShouldUseSplitNotificationShade && (isInSettings() || mIsPanelCollapseOnQQS);
     }
 
     @Override
@@ -2631,7 +2634,7 @@ public class NotificationPanelViewController extends PanelViewController {
         super.onTrackingStarted();
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
-            if (!Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+            if (!mShouldUseSplitNotificationShade) {
                 mNotificationStackScrollLayoutController.setShouldShowShelfOnly(true);
             }
         }
@@ -2882,7 +2885,7 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     protected void updateHorizontalPanelPosition(float x) {
         if (mNotificationStackScrollLayoutController.getWidth() * 1.75f > mView.getWidth()
-                || Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+                || mShouldUseSplitNotificationShade) {
             resetHorizontalPanelPosition();
             return;
         }
@@ -3564,7 +3567,7 @@ public class NotificationPanelViewController extends PanelViewController {
         @Override
         public void onOverscrollTopChanged(float amount, boolean isRubberbanded) {
             // When in split shade, overscroll shouldn't carry through to QS
-            if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+            if (mShouldUseSplitNotificationShade) {
                 return;
             }
             cancelQsAnimation();
