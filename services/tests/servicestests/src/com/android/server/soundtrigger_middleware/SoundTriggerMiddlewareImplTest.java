@@ -58,7 +58,7 @@ import org.mockito.Mockito;
 @RunWith(JUnit4.class)
 public class SoundTriggerMiddlewareImplTest {
     @Mock
-    public ISoundTriggerHw2 mHalDriver = mock(ISoundTriggerHw2.class);
+    public ISoundTriggerHal mHalDriver = mock(ISoundTriggerHal.class);
 
     @Mock
     private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider = mock(
@@ -76,8 +76,8 @@ public class SoundTriggerMiddlewareImplTest {
         ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel> modelCaptor =
                 ArgumentCaptor.forClass(
                         android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel.class);
-        ArgumentCaptor<ISoundTriggerHw2.ModelCallback> callbackCaptor =
-                ArgumentCaptor.forClass(ISoundTriggerHw2.ModelCallback.class);
+        ArgumentCaptor<ISoundTriggerHal.ModelCallback> callbackCaptor =
+                ArgumentCaptor.forClass(ISoundTriggerHal.ModelCallback.class);
 
         when(mHalDriver.loadSoundModel(any(), any())).thenReturn(
                 hwHandle);
@@ -97,8 +97,8 @@ public class SoundTriggerMiddlewareImplTest {
         ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel>
                 modelCaptor = ArgumentCaptor.forClass(
                 android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel.class);
-        ArgumentCaptor<ISoundTriggerHw2.ModelCallback> callbackCaptor =
-                ArgumentCaptor.forClass(ISoundTriggerHw2.ModelCallback.class);
+        ArgumentCaptor<ISoundTriggerHal.ModelCallback> callbackCaptor =
+                ArgumentCaptor.forClass(ISoundTriggerHal.ModelCallback.class);
 
         when(mHalDriver.loadPhraseSoundModel(any(), any())).thenReturn(hwHandle);
         when(mAudioSessionProvider.acquireSession()).thenReturn(
@@ -618,9 +618,9 @@ public class SoundTriggerMiddlewareImplTest {
     }
 
     private static class SoundTriggerHwCallback {
-        private final ISoundTriggerHw2.ModelCallback mCallback;
+        private final ISoundTriggerHal.ModelCallback mCallback;
 
-        SoundTriggerHwCallback(ISoundTriggerHw2.ModelCallback callback) {
+        SoundTriggerHwCallback(ISoundTriggerHal.ModelCallback callback) {
             mCallback = callback;
         }
 

@@ -84,10 +84,10 @@ import java.util.Set;
  *
  * @hide
  */
-class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.GlobalCallback {
+class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHal.GlobalCallback {
     static private final String TAG = "SoundTriggerModule";
     @NonNull private final HalFactory mHalFactory;
-    @NonNull private ISoundTriggerHw2 mHalService;
+    @NonNull private ISoundTriggerHal mHalService;
     @NonNull private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider;
     private final Set<Session> mActiveSessions = new HashSet<>();
     private Properties mProperties;
@@ -169,8 +169,8 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
      * Attached to the HAL service via factory.
      */
     private void attachToHal() {
-        mHalService = new SoundTriggerHw2Enforcer(
-                new SoundTriggerHw2Watchdog(mHalFactory.create()));
+        mHalService = new SoundTriggerHalEnforcer(
+                new SoundTriggerHalWatchdog(mHalFactory.create()));
         mHalService.linkToDeath(this, 0);
         mHalService.registerCallback(this);
         mProperties = ConversionUtil.hidl2aidlProperties(mHalService.getProperties());
@@ -375,7 +375,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
          *
          * All model-based operations are delegated to this class and implemented here.
          */
-        private class Model implements ISoundTriggerHw2.ModelCallback {
+        private class Model implements ISoundTriggerHal.ModelCallback {
             public int mHandle;
             private ModelState mState = ModelState.INIT;
             private SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession mSession;

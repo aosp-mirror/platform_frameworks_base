@@ -26,15 +26,15 @@ import android.os.IHwBinder;
 import android.os.RemoteException;
 
 /**
- * This is a decorator around ISoundTriggerHw2, which implements enforcement of the maximum number
+ * This is a decorator around ISoundTriggerHal, which implements enforcement of the maximum number
  * of models supported by the HAL, for HAL implementations older than V2.4 that do not support
  * rejection of model loading at the HAL layer.
  * Since preemptive model unloading has been introduced in V2.4, it should never be used in
  * conjunction with this class, hence we don't bother considering preemtive unloading when counting
  * the number of currently loaded models.
  */
-public class SoundTriggerHw2MaxModelLimiter implements ISoundTriggerHw2 {
-    private final @NonNull ISoundTriggerHw2 mDelegate;
+public class SoundTriggerHalMaxModelLimiter implements ISoundTriggerHal {
+    private final @NonNull ISoundTriggerHal mDelegate;
     private final int mMaxModels;
 
     // This counter is used to enforce the maximum number of loaded models.
@@ -42,8 +42,8 @@ public class SoundTriggerHw2MaxModelLimiter implements ISoundTriggerHw2 {
 
     private GlobalCallback mGlobalCallback;
 
-    public SoundTriggerHw2MaxModelLimiter(
-            ISoundTriggerHw2 delegate, int maxModels) {
+    public SoundTriggerHalMaxModelLimiter(
+            ISoundTriggerHal delegate, int maxModels) {
         mDelegate = delegate;
         this.mMaxModels = maxModels;
     }

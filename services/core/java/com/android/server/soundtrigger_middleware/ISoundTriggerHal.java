@@ -55,7 +55,7 @@ import android.os.IHwBinder;
  * so that clients have access to the entire functionality without having to burden themselves with
  * compatibility, as much as possible.
  */
-interface ISoundTriggerHw2 {
+interface ISoundTriggerHal {
     /**
      * Kill and restart the HAL instance. This is typically a last resort for error recovery and may
      * result in other related services being killed.

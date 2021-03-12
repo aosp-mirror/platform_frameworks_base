@@ -31,10 +31,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * An implementation of {@link ISoundTriggerHw2}, on top of any
+ * An implementation of {@link ISoundTriggerHal}, on top of any
  * android.hardware.soundtrigger.V2_x.ISoundTriggerHw implementation. This class hides away some of
  * the details involved with retaining backward compatibility and adapts to the more pleasant syntax
- * exposed by {@link ISoundTriggerHw2}, compared to the bare driver interface.
+ * exposed by {@link ISoundTriggerHal}, compared to the bare driver interface.
  * <p>
  * Exception handling:
  * <ul>
@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * code.
  * </ul>
  */
-final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
+final class SoundTriggerHw2Compat implements ISoundTriggerHal {
     private final @NonNull Runnable mRebootRunnable;
     private final @NonNull IHwBinder mBinder;
     private @NonNull android.hardware.soundtrigger.V2_0.ISoundTriggerHw mUnderlying_2_0;
@@ -64,26 +64,26 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
     // to enforce constraints.
     private final @NonNull android.hardware.soundtrigger.V2_3.Properties mProperties;
 
-    static ISoundTriggerHw2 create(
+    static ISoundTriggerHal create(
             @NonNull ISoundTriggerHw underlying,
             @NonNull Runnable rebootRunnable,
             ICaptureStateNotifier notifier) {
         return create(underlying.asBinder(), rebootRunnable, notifier);
     }
 
-    static ISoundTriggerHw2 create(@NonNull IHwBinder binder,
+    static ISoundTriggerHal create(@NonNull IHwBinder binder,
             @NonNull Runnable rebootRunnable,
             ICaptureStateNotifier notifier) {
         SoundTriggerHw2Compat compat = new SoundTriggerHw2Compat(binder, rebootRunnable);
-        ISoundTriggerHw2 result = compat;
+        ISoundTriggerHal result = compat;
         // Add max model limiter for versions <2.4.
         if (compat.mUnderlying_2_4 == null) {
-            result = new SoundTriggerHw2MaxModelLimiter(result,
+            result = new SoundTriggerHalMaxModelLimiter(result,
                     compat.mProperties.base.maxSoundModels);
         }
         // Add concurrent capture handler for versions <2.4 which do not support concurrent capture.
         if (compat.mUnderlying_2_4 == null && !compat.mProperties.base.concurrentCapture) {
-            result = new SoundTriggerHw2ConcurrentCaptureHandler(result, notifier);
+            result = new SoundTriggerHalConcurrentCaptureHandler(result, notifier);
         }
         return result;
     }

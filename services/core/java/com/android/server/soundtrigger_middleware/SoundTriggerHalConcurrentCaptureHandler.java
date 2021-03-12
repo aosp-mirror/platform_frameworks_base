@@ -22,10 +22,10 @@ import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
 import android.hardware.soundtrigger.V2_3.ModelParameterRange;
 import android.hardware.soundtrigger.V2_3.Properties;
 import android.hardware.soundtrigger.V2_3.RecognitionConfig;
+import android.media.permission.SafeCloseable;
 import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModelType;
 import android.media.soundtrigger.Status;
-import android.media.permission.SafeCloseable;
 import android.os.IHwBinder;
 import android.os.RemoteException;
 
@@ -37,7 +37,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * This is a decorator around ISoundTriggerHw2, which implements enforcement of concurrent capture
+ * This is a decorator around ISoundTriggerHal, which implements enforcement of concurrent capture
  * constraints, for HAL implementations older than V2.4 (later versions support this feature at the
  * HAL level).
  * <p>
@@ -61,9 +61,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * joins together model events coming from the delegate module with abort events originating from
  * this layer (as result of external capture).
  */
-public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2,
+public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal,
         ICaptureStateNotifier.Listener {
-    private final @NonNull ISoundTriggerHw2 mDelegate;
+    private final @NonNull ISoundTriggerHal mDelegate;
     private GlobalCallback mGlobalCallback;
 
     /**
@@ -111,8 +111,8 @@ public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2
 
     private final @NonNull CallbackThread mCallbackThread = new CallbackThread();
 
-    public SoundTriggerHw2ConcurrentCaptureHandler(
-            @NonNull ISoundTriggerHw2 delegate,
+    public SoundTriggerHalConcurrentCaptureHandler(
+            @NonNull ISoundTriggerHal delegate,
             @NonNull ICaptureStateNotifier notifier) {
         mDelegate = delegate;
         mNotifier = notifier;
@@ -216,8 +216,8 @@ public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2
         return mDelegate.unlinkToDeath(mDeathRecipientMap.remove(recipient));
     }
 
-    private class CallbackWrapper implements ISoundTriggerHw2.ModelCallback {
-        private final @NonNull ISoundTriggerHw2.ModelCallback mDelegateCallback;
+    private class CallbackWrapper implements ISoundTriggerHal.ModelCallback {
+        private final @NonNull ISoundTriggerHal.ModelCallback mDelegateCallback;
 
         private CallbackWrapper(@NonNull ModelCallback delegateCallback) {
             mDelegateCallback = delegateCallback;

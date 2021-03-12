@@ -38,8 +38,8 @@ import java.util.Map;
  *
  * The class is thread-safe.
  */
-public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
-    private static final String TAG = "SoundTriggerHw2Enforcer";
+public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
+    private static final String TAG = "SoundTriggerHalEnforcer";
 
     /** The state of a model. */
     private enum ModelState {
@@ -51,11 +51,11 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
         PENDING_STOP,
     }
 
-    private final ISoundTriggerHw2 mUnderlying;
+    private final ISoundTriggerHal mUnderlying;
     private final Map<Integer, ModelState> mModelStates = new HashMap<>();
 
-    public SoundTriggerHw2Enforcer(
-            ISoundTriggerHw2 underlying) {
+    public SoundTriggerHalEnforcer(
+            ISoundTriggerHal underlying) {
         mUnderlying = underlying;
     }
 

@@ -30,19 +30,19 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * An {@link ISoundTriggerHw2} decorator that would enforce deadlines on all calls and reboot the
+ * An {@link ISoundTriggerHal} decorator that would enforce deadlines on all calls and reboot the
  * HAL whenever they expire.
  */
-public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
+public class SoundTriggerHalWatchdog implements ISoundTriggerHal {
     private static final long TIMEOUT_MS = 3000;
-    private static final String TAG = "SoundTriggerHw2Watchdog";
+    private static final String TAG = "SoundTriggerHalWatchdog";
 
-    private final @NonNull ISoundTriggerHw2 mUnderlying;
+    private final @NonNull ISoundTriggerHal mUnderlying;
     private final @NonNull Timer mTimer;
 
-    public SoundTriggerHw2Watchdog(@NonNull ISoundTriggerHw2 underlying) {
+    public SoundTriggerHalWatchdog(@NonNull ISoundTriggerHal underlying) {
         mUnderlying = Objects.requireNonNull(underlying);
-        mTimer = new Timer("SoundTriggerHw2Watchdog");
+        mTimer = new Timer("SoundTriggerHalWatchdog");
     }
 
     @Override
