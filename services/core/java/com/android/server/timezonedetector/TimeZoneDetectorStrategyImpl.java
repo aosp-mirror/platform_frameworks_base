@@ -371,6 +371,28 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         }
     }
 
+    @Override
+    @NonNull
+    public synchronized MetricsTimeZoneDetectorState generateMetricsState() {
+        int currentUserId = mEnvironment.getCurrentUserId();
+        // Just capture one telephony suggestion: the one that would be used right now if telephony
+        // detection is in use.
+        QualifiedTelephonyTimeZoneSuggestion bestQualifiedTelephonySuggestion =
+                findBestTelephonySuggestion();
+        TelephonyTimeZoneSuggestion telephonySuggestion =
+                bestQualifiedTelephonySuggestion == null
+                        ? null : bestQualifiedTelephonySuggestion.suggestion;
+        // A new generator is created each time: we don't want / require consistency.
+        OrdinalGenerator<String> tzIdOrdinalGenerator = new OrdinalGenerator<>();
+        return MetricsTimeZoneDetectorState.create(
+                tzIdOrdinalGenerator,
+                getConfigurationInternal(currentUserId),
+                mEnvironment.getDeviceTimeZone(),
+                getLatestManualSuggestion(),
+                telephonySuggestion,
+                getLatestGeolocationSuggestion());
+    }
+
     private static int scoreTelephonySuggestion(@NonNull TelephonyTimeZoneSuggestion suggestion) {
         int score;
         if (suggestion.getZoneId() == null) {
