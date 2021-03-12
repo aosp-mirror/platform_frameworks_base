@@ -13059,11 +13059,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return getLayout().getOffsetForHorizontal(line, x);
     }
 
+    /**
+     * Handles drag events sent by the system following a call to
+     * {@link android.view.View#startDragAndDrop(ClipData,DragShadowBuilder,Object,int)
+     * startDragAndDrop()}.
+     *
+     * <p>If this text view is not editable, delegates to the default {@link View#onDragEvent}
+     * implementation.
+     *
+     * <p>If this text view is editable, accepts all drag actions (returns true for an
+     * {@link android.view.DragEvent#ACTION_DRAG_STARTED ACTION_DRAG_STARTED} event and all
+     * subsequent drag events). While the drag is in progress, updates the cursor position
+     * to follow the touch location. Once a drop event is received, handles content insertion
+     * via {@link #performReceiveContent}.
+     *
+     * @param event The {@link android.view.DragEvent} sent by the system.
+     * The {@link android.view.DragEvent#getAction()} method returns an action type constant
+     * defined in DragEvent, indicating the type of drag event represented by this object.
+     * @return Returns true if this text view is editable and delegates to super otherwise.
+     * See {@link View#onDragEvent}.
+     */
     @Override
     public boolean onDragEvent(DragEvent event) {
+        if (mEditor == null || !mEditor.hasInsertionController()) {
+            // If this TextView is not editable, defer to the default View implementation. This
+            // will check for the presence of an OnReceiveContentListener and accept/reject
+            // drag events depending on whether the listener is/isn't set.
+            return super.onDragEvent(event);
+        }
         switch (event.getAction()) {
             case DragEvent.ACTION_DRAG_STARTED:
-                return mEditor != null && mEditor.hasInsertionController();
+                return true;
 
             case DragEvent.ACTION_DRAG_ENTERED:
                 TextView.this.requestFocus();
