@@ -406,26 +406,49 @@ public class AuthService extends SystemService {
                         mBiometricService.getCurrentModality(
                                 opPackageName, userId, callingUserId, authenticators);
 
+                final boolean isCredentialAllowed = Utils.isCredentialRequested(authenticators);
+
                 final String result;
                 switch (getCredentialBackupModality(modality)) {
                     case BiometricAuthenticator.TYPE_NONE:
                         result = null;
                         break;
+
                     case BiometricAuthenticator.TYPE_CREDENTIAL:
                         result = getContext().getString(
                                 R.string.screen_lock_dialog_default_subtitle);
                         break;
+
                     case BiometricAuthenticator.TYPE_FINGERPRINT:
-                        result = getContext().getString(
-                                R.string.fingerprint_dialog_default_subtitle);
+                        if (isCredentialAllowed) {
+                            result = getContext().getString(
+                                    R.string.fingerprint_or_screen_lock_dialog_default_subtitle);
+                        } else {
+                            result = getContext().getString(
+                                    R.string.fingerprint_dialog_default_subtitle);
+                        }
                         break;
+
                     case BiometricAuthenticator.TYPE_FACE:
-                        result = getContext().getString(R.string.face_dialog_default_subtitle);
+                        if (isCredentialAllowed) {
+                            result = getContext().getString(
+                                    R.string.face_or_screen_lock_dialog_default_subtitle);
+                        } else {
+                            result = getContext().getString(R.string.face_dialog_default_subtitle);
+                        }
                         break;
+
                     default:
-                        result = getContext().getString(R.string.biometric_dialog_default_subtitle);
+                        if (isCredentialAllowed) {
+                            result = getContext().getString(
+                                    R.string.biometric_or_screen_lock_dialog_default_subtitle);
+                        } else {
+                            result = getContext().getString(
+                                    R.string.biometric_dialog_default_subtitle);
+                        }
                         break;
                 }
+
                 return result;
             } finally {
                 Binder.restoreCallingIdentity(identity);

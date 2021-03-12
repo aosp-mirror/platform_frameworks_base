@@ -82,5 +82,65 @@
     {
       "name": "ManagedProfileLifecycleStressTest"
     }
-  ]
+  ],
+ "auto-postsubmit": [
+   // Test tag for automotive targets. These are only running in postsubmit so as to harden the
+   // automotive targets to avoid introducing additional test flake and build time. The plan for
+   // presubmit testing for auto is to augment the existing tests to cover auto use cases as well.
+   // Additionally, this tag is used in targeted test suites to limit resource usage on the test
+   // infra during the hardening phase.
+   // TODO: this tag to be removed once the above is no longer an issue.
+   {
+     "name": "FrameworksUiServicesTests",
+     "options": [
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       }
+     ]
+   },
+   {
+     "name": "ExtServicesUnitTests",
+     "options": [
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       }
+     ]
+   },
+   {
+     "name": "TestablesTests",
+     "options": [
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       }
+     ]
+   },
+   {
+     "name": "FrameworksCoreTests",
+     "options": [
+       {
+         "include-annotation": "android.platform.test.annotations.Presubmit"
+       },
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       },
+       {
+         "exclude-annotation": "org.junit.Ignore"
+       }
+     ]
+   },
+   {
+     "name": "FrameworksServicesTests",
+     "options": [
+       {
+         "include-annotation": "android.platform.test.annotations.Presubmit"
+       },
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       },
+       {
+         "exclude-annotation": "org.junit.Ignore"
+       }
+     ]
+   }
+ ]
 }

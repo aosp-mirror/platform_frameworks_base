@@ -175,6 +175,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.sysprop.NetworkProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -189,7 +190,6 @@ import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocationPermissionChecker;
@@ -201,7 +201,6 @@ import com.android.net.module.util.LinkPropertiesUtils.CompareOrUpdateResult;
 import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.net.module.util.PermissionUtils;
-import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.AutodestructReference;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
@@ -217,7 +216,6 @@ import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.QosCallbackTracker;
 import com.android.server.net.NetworkPolicyManagerInternal;
-import com.android.server.utils.PriorityDump;
 
 import libcore.io.IoUtils;
 
@@ -884,27 +882,59 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
     private final LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker(this);
 
+    final LocalPriorityDump mPriorityDumper = new LocalPriorityDump();
     /**
      * Helper class which parses out priority arguments and dumps sections according to their
      * priority. If priority arguments are omitted, function calls the legacy dump command.
      */
-    private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
-        @Override
-        public void dumpHigh(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
-            doDump(fd, pw, new String[] {DIAG_ARG}, asProto);
-            doDump(fd, pw, new String[] {SHORT_ARG}, asProto);
+    private class LocalPriorityDump {
+        private static final String PRIORITY_ARG = "--dump-priority";
+        private static final String PRIORITY_ARG_HIGH = "HIGH";
+        private static final String PRIORITY_ARG_NORMAL = "NORMAL";
+
+        LocalPriorityDump() {}
+
+        private void dumpHigh(FileDescriptor fd, PrintWriter pw) {
+            doDump(fd, pw, new String[] {DIAG_ARG});
+            doDump(fd, pw, new String[] {SHORT_ARG});
         }
 
-        @Override
-        public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
-            doDump(fd, pw, args, asProto);
+        private void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args) {
+            doDump(fd, pw, args);
         }
 
-        @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
-           doDump(fd, pw, args, asProto);
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (args == null) {
+                dumpNormal(fd, pw, args);
+                return;
+            }
+
+            String priority = null;
+            for (int argIndex = 0; argIndex < args.length; argIndex++) {
+                if (args[argIndex].equals(PRIORITY_ARG) && argIndex + 1 < args.length) {
+                    argIndex++;
+                    priority = args[argIndex];
+                }
+            }
+
+            if (PRIORITY_ARG_HIGH.equals(priority)) {
+                dumpHigh(fd, pw);
+            } else if (PRIORITY_ARG_NORMAL.equals(priority)) {
+                dumpNormal(fd, pw, args);
+            } else {
+                // ConnectivityService publishes binder service using publishBinderService() with
+                // no priority assigned will be treated as NORMAL priority. Dumpsys does not send
+                // "--dump-priority" arguments to the service. Thus, dump both NORMAL and HIGH to
+                // align the legacy design.
+                // TODO: Integrate into signal dump.
+                dumpNormal(fd, pw, args);
+                pw.println();
+                pw.println("DUMP OF SERVICE HIGH connectivity");
+                pw.println();
+                dumpHigh(fd, pw);
+            }
         }
-    };
+    }
 
     /**
      * Keeps track of the number of requests made under different uids.
@@ -1035,18 +1065,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return new MultinetworkPolicyTracker(c, h, r);
         }
 
-        public IBatteryStats getBatteryStatsService() {
-            return BatteryStatsService.getService();
-        }
-
         /**
          * @see BatteryStatsManager
          */
         public void reportNetworkInterfaceForTransports(Context context, String iface,
                 int[] transportTypes) {
-            final BatteryStatsManager  batteryStats =
+            final BatteryStatsManager batteryStats =
                     context.getSystemService(BatteryStatsManager.class);
             batteryStats.reportNetworkInterfaceForTransports(iface, transportTypes);
+        }
+
+        public boolean getCellular464XlatEnabled() {
+            return NetworkProperties.isCellular464XlatEnabled().orElse(true);
         }
     }
 
@@ -1246,8 +1276,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 new NetworkInfo(TYPE_NONE, 0, "", ""),
                 new LinkProperties(), new NetworkCapabilities(), 0, mContext,
                 null, new NetworkAgentConfig(), this, null,
-                null, 0, INVALID_UID,
-                mQosCallbackTracker);
+                null, 0, INVALID_UID, mQosCallbackTracker, mDeps);
     }
 
     private static NetworkCapabilities createDefaultNetworkCapabilitiesForUid(int uid) {
@@ -1489,11 +1518,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // but only exists if an app asks about them or requests them. Ensure the requesting app
         // gets the type it asks for.
         filtered.setType(type);
-        final DetailedState state = isNetworkWithCapabilitiesBlocked(nc, uid, ignoreBlocked)
-                ? DetailedState.BLOCKED
-                : filtered.getDetailedState();
-        filtered.setDetailedState(getLegacyLockdownState(state),
-                "" /* reason */, null /* extraInfo */);
+        if (isNetworkWithCapabilitiesBlocked(nc, uid, ignoreBlocked)) {
+            filtered.setDetailedState(DetailedState.BLOCKED, null /* reason */,
+                    null /* extraInfo */);
+        }
+        filterForLegacyLockdown(filtered);
         return filtered;
     }
 
@@ -1569,8 +1598,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final DetailedState state = isNetworkWithCapabilitiesBlocked(nc, uid, false)
                 ? DetailedState.BLOCKED
                 : DetailedState.DISCONNECTED;
-        info.setDetailedState(getLegacyLockdownState(state),
-                "" /* reason */, null /* extraInfo */);
+        info.setDetailedState(state, null /* reason */, null /* extraInfo */);
+        filterForLegacyLockdown(info);
         return info;
     }
 
@@ -2364,9 +2393,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mContext.enforceCallingOrSelfPermission(KeepaliveTracker.PERMISSION, "ConnectivityService");
     }
 
-    // Public because it's used by mLockdownTracker.
-    public void sendConnectedBroadcast(NetworkInfo info) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
+    private void sendConnectedBroadcast(NetworkInfo info) {
         sendGeneralBroadcast(info, CONNECTIVITY_ACTION);
     }
 
@@ -2603,7 +2630,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer,
             @Nullable String[] args) {
-        PriorityDump.dump(mPriorityDumper, fd, writer, args);
+        mPriorityDumper.dump(fd, writer, args);
     }
 
     private boolean checkDumpPermission(Context context, String tag, PrintWriter pw) {
@@ -2618,10 +2645,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void doDump(FileDescriptor fd, PrintWriter writer, String[] args, boolean asProto) {
+    private void doDump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         if (!checkDumpPermission(mContext, TAG, pw)) return;
-        if (asProto) return;
 
         if (CollectionUtils.contains(args, DIAG_ARG)) {
             dumpNetworkDiagnostics(pw);
@@ -5012,8 +5038,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // The legacy lockdown VPN always uses the default network.
         // If the VPN's underlying network is no longer the current default network, it means that
         // the default network has just switched, and the VPN is about to disconnect.
-        // Report that the VPN is not connected, so when the state of NetworkInfo objects
-        // overwritten by getLegacyLockdownState will be set to CONNECTING and not CONNECTED.
+        // Report that the VPN is not connected, so the state of NetworkInfo objects overwritten
+        // by filterForLegacyLockdown will be set to CONNECTING and not CONNECTED.
         final NetworkAgentInfo defaultNetwork = getDefaultNetwork();
         if (defaultNetwork == null || !defaultNetwork.network.equals(underlying[0])) {
             return null;
@@ -5022,6 +5048,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nai;
     };
 
+    // TODO: move all callers to filterForLegacyLockdown and delete this method.
+    // This likely requires making sendLegacyNetworkBroadcast take a NetworkInfo object instead of
+    // just a DetailedState object.
     private DetailedState getLegacyLockdownState(DetailedState origState) {
         if (origState != DetailedState.CONNECTED) {
             return origState;
@@ -5029,6 +5058,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return (mLockdownEnabled && getLegacyLockdownNai() == null)
                 ? DetailedState.CONNECTING
                 : DetailedState.CONNECTED;
+    }
+
+    private void filterForLegacyLockdown(NetworkInfo ni) {
+        if (!mLockdownEnabled || !ni.isConnected()) return;
+        // The legacy lockdown VPN replaces the state of every network in CONNECTED state with the
+        // state of its VPN. This is to ensure that when an underlying network connects, apps will
+        // not see a CONNECTIVITY_ACTION broadcast for a network in state CONNECTED until the VPN
+        // comes up, at which point there is a new CONNECTIVITY_ACTION broadcast for the underlying
+        // network, this time with a state of CONNECTED.
+        //
+        // Now that the legacy lockdown code lives in ConnectivityService, and no longer has access
+        // to the internal state of the Vpn object, always replace the state with CONNECTING. This
+        // is not too far off the truth, since an always-on VPN, when not connected, is always
+        // trying to reconnect.
+        if (getLegacyLockdownNai() == null) {
+            ni.setDetailedState(DetailedState.CONNECTING, "", null);
+        }
     }
 
     @Override
@@ -6106,7 +6152,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkAgentInfo nai = new NetworkAgentInfo(na,
                 new Network(mNetIdManager.reserveNetId()), new NetworkInfo(networkInfo), lp, nc,
                 currentScore, mContext, mTrackerHandler, new NetworkAgentConfig(networkAgentConfig),
-                this, mNetd, mDnsResolver, providerId, uid, mQosCallbackTracker);
+                this, mNetd, mDnsResolver, providerId, uid, mQosCallbackTracker, mDeps);
 
         // Make sure the LinkProperties and NetworkCapabilities reflect what the agent info says.
         processCapabilitiesFromAgent(nai, nc);
@@ -7914,6 +7960,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // and is still connected.
         NetworkInfo info = new NetworkInfo(nai.networkInfo);
         info.setType(type);
+        filterForLegacyLockdown(info);
         if (state != DetailedState.DISCONNECTED) {
             info.setDetailedState(state, null, info.getExtraInfo());
             sendConnectedBroadcast(info);

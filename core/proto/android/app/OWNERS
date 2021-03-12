@@ -1,1 +1,1 @@
-per-file location_time_zone_manager.proto = nfuller@google.com, mingaleev@google.com
+per-file location_time_zone_manager.proto, time_zone_detector.proto = nfuller@google.com, mingaleev@google.com

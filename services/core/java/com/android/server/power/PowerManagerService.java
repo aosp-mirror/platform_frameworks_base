@@ -180,8 +180,6 @@ public final class PowerManagerService extends SystemService
     private static final int DIRTY_VR_MODE_CHANGED = 1 << 13;
     // Dirty bit: attentive timer may have timed out
     private static final int DIRTY_ATTENTIVE = 1 << 14;
-    // Dirty bit: phone flipped to face down
-    private static final int DIRTY_FACE_DOWN = 1 << 15;
     // Dirty bit: display group power state has changed
     private static final int DIRTY_DISPLAY_GROUP_POWER_UPDATED = 1 << 16;
 
@@ -1069,8 +1067,9 @@ public final class PowerManagerService extends SystemService
                 final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout, -1L);
                 millisUntilNormalTimeout =
                         mLastUserActivityTime + screenOffTimeout - mClock.uptimeMillis();
-                mDirty |= DIRTY_FACE_DOWN;
-                updatePowerStateLocked();
+                userActivityInternal(mClock.uptimeMillis(),
+                        PowerManager.USER_ACTIVITY_EVENT_FACE_DOWN, /* flags= */0,
+                        Process.SYSTEM_UID);
             }
         }
         if (isFaceDown) {

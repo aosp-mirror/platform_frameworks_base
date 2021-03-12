@@ -28,8 +28,6 @@ import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
 import android.os.UserHandle;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Objects;
 
 /**
@@ -39,7 +37,7 @@ import java.util.Objects;
  */
 public final class ConfigurationInternal {
 
-    private final boolean mAutoDetectionSupported;
+    private final boolean mTelephonyDetectionSupported;
     private final boolean mGeoDetectionSupported;
     private final boolean mAutoDetectionEnabled;
     private final @UserIdInt int mUserId;
@@ -48,7 +46,7 @@ public final class ConfigurationInternal {
     private final boolean mGeoDetectionEnabled;
 
     private ConfigurationInternal(Builder builder) {
-        mAutoDetectionSupported = builder.mAutoDetectionSupported;
+        mTelephonyDetectionSupported = builder.mTelephonyDetectionSupported;
         mGeoDetectionSupported = builder.mGeoDetectionSupported;
         mAutoDetectionEnabled = builder.mAutoDetectionEnabled;
 
@@ -56,14 +54,16 @@ public final class ConfigurationInternal {
         mUserConfigAllowed = builder.mUserConfigAllowed;
         mLocationEnabled = builder.mLocationEnabled;
         mGeoDetectionEnabled = builder.mGeoDetectionEnabled;
-        // if mGeoDetectionSupported then mAutoDetectionSupported, i.e. mGeoDetectionSupported
-        // cannot be true if mAutoDetectionSupported == false
-        Preconditions.checkState(mAutoDetectionSupported || !mGeoDetectionSupported);
     }
 
     /** Returns true if the device supports any form of auto time zone detection. */
     public boolean isAutoDetectionSupported() {
-        return mAutoDetectionSupported;
+        return mTelephonyDetectionSupported || mGeoDetectionSupported;
+    }
+
+    /** Returns true if the device supports telephony time zone detection. */
+    public boolean isTelephonyDetectionSupported() {
+        return mTelephonyDetectionSupported;
     }
 
     /** Returns true if the device supports geolocation time zone detection. */
@@ -78,9 +78,10 @@ public final class ConfigurationInternal {
 
     /**
      * Returns true if auto time zone detection behavior is actually enabled, which can be distinct
-     * from the raw setting value. */
+     * from the raw setting value.
+     */
     public boolean getAutoDetectionEnabledBehavior() {
-        return mAutoDetectionSupported && mAutoDetectionEnabled;
+        return isAutoDetectionSupported() && mAutoDetectionEnabled;
     }
 
     /** Returns the ID of the user this configuration is associated with. */
@@ -212,7 +213,7 @@ public final class ConfigurationInternal {
         ConfigurationInternal that = (ConfigurationInternal) o;
         return mUserId == that.mUserId
                 && mUserConfigAllowed == that.mUserConfigAllowed
-                && mAutoDetectionSupported == that.mAutoDetectionSupported
+                && mTelephonyDetectionSupported == that.mTelephonyDetectionSupported
                 && mGeoDetectionSupported == that.mGeoDetectionSupported
                 && mAutoDetectionEnabled == that.mAutoDetectionEnabled
                 && mLocationEnabled == that.mLocationEnabled
@@ -221,7 +222,7 @@ public final class ConfigurationInternal {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUserId, mUserConfigAllowed, mAutoDetectionSupported,
+        return Objects.hash(mUserId, mUserConfigAllowed, mTelephonyDetectionSupported,
                 mGeoDetectionSupported, mAutoDetectionEnabled, mLocationEnabled,
                 mGeoDetectionEnabled);
     }
@@ -231,7 +232,7 @@ public final class ConfigurationInternal {
         return "ConfigurationInternal{"
                 + "mUserId=" + mUserId
                 + ", mUserConfigAllowed=" + mUserConfigAllowed
-                + ", mAutoDetectionSupported=" + mAutoDetectionSupported
+                + ", mTelephonyDetectionSupported=" + mTelephonyDetectionSupported
                 + ", mGeoDetectionSupported=" + mGeoDetectionSupported
                 + ", mAutoDetectionEnabled=" + mAutoDetectionEnabled
                 + ", mLocationEnabled=" + mLocationEnabled
@@ -247,7 +248,7 @@ public final class ConfigurationInternal {
         private final @UserIdInt int mUserId;
 
         private boolean mUserConfigAllowed;
-        private boolean mAutoDetectionSupported;
+        private boolean mTelephonyDetectionSupported;
         private boolean mGeoDetectionSupported;
         private boolean mAutoDetectionEnabled;
         private boolean mLocationEnabled;
@@ -266,7 +267,7 @@ public final class ConfigurationInternal {
         public Builder(ConfigurationInternal toCopy) {
             this.mUserId = toCopy.mUserId;
             this.mUserConfigAllowed = toCopy.mUserConfigAllowed;
-            this.mAutoDetectionSupported = toCopy.mAutoDetectionSupported;
+            this.mTelephonyDetectionSupported = toCopy.mTelephonyDetectionSupported;
             this.mGeoDetectionSupported = toCopy.mGeoDetectionSupported;
             this.mAutoDetectionEnabled = toCopy.mAutoDetectionEnabled;
             this.mLocationEnabled = toCopy.mLocationEnabled;
@@ -282,10 +283,10 @@ public final class ConfigurationInternal {
         }
 
         /**
-         * Sets whether any form of automatic time zone detection is supported on this device.
+         * Sets whether telephony time zone detection is supported on this device.
          */
-        public Builder setAutoDetectionFeatureSupported(boolean supported) {
-            mAutoDetectionSupported = supported;
+        public Builder setTelephonyDetectionFeatureSupported(boolean supported) {
+            mTelephonyDetectionSupported = supported;
             return this;
         }
 

@@ -59,8 +59,8 @@ import android.util.apk.SignatureNotFoundException;
 import android.util.apk.VerityBuilder;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.security.VerityUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.security.VerityUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;

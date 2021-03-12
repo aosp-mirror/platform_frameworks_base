@@ -37,7 +37,7 @@ static jlongArray getUidArray(JNIEnv *env, jobject sparseAr, uint32_t uid, jsize
     jlongArray ar = (jlongArray)env->CallObjectMethod(sparseAr, gSparseArrayClassInfo.get, uid);
     if (!ar) {
         ar = env->NewLongArray(sz);
-        if (ar == NULL) return ar;
+        if (ar == nullptr) return ar;
         env->CallVoidMethod(sparseAr, gSparseArrayClassInfo.put, uid, ar);
     }
     return ar;
@@ -65,7 +65,7 @@ static jboolean KernelCpuUidFreqTimeBpfMapReader_readBpfData(JNIEnv *env, jobjec
     static uint64_t lastUpdate = 0;
     uint64_t newLastUpdate = lastUpdate;
     auto sparseAr = env->GetObjectField(thiz, gmData);
-    if (sparseAr == NULL) return false;
+    if (sparseAr == nullptr) return false;
     auto data = android::bpf::getUidsUpdatedCpuFreqTimes(&newLastUpdate);
     if (!data.has_value()) return false;
 
@@ -75,7 +75,7 @@ static jboolean KernelCpuUidFreqTimeBpfMapReader_readBpfData(JNIEnv *env, jobjec
             for (const auto &subVec : times) s += subVec.size();
         }
         jlongArray ar = getUidArray(env, sparseAr, uid, s);
-        if (ar == NULL) return false;
+        if (ar == nullptr) return false;
         copy2DVecToArray(env, ar, times);
     }
     lastUpdate = newLastUpdate;
@@ -91,7 +91,7 @@ static jboolean KernelCpuUidActiveTimeBpfMapReader_readBpfData(JNIEnv *env, jobj
     static uint64_t lastUpdate = 0;
     uint64_t newLastUpdate = lastUpdate;
     auto sparseAr = env->GetObjectField(thiz, gmData);
-    if (sparseAr == NULL) return false;
+    if (sparseAr == nullptr) return false;
     auto data = android::bpf::getUidsUpdatedConcurrentTimes(&newLastUpdate);
     if (!data.has_value()) return false;
 
@@ -99,7 +99,7 @@ static jboolean KernelCpuUidActiveTimeBpfMapReader_readBpfData(JNIEnv *env, jobj
         // TODO: revise calling code so we can divide by NSEC_PER_MSEC here instead
         for (auto &time : times.active) time /= NSEC_PER_MSEC;
         jlongArray ar = getUidArray(env, sparseAr, uid, times.active.size());
-        if (ar == NULL) return false;
+        if (ar == nullptr) return false;
         env->SetLongArrayRegion(ar, 0, times.active.size(),
                                 reinterpret_cast<const jlong *>(times.active.data()));
     }
@@ -111,7 +111,7 @@ static jlongArray KernelCpuUidActiveTimeBpfMapReader_getDataDimensions(JNIEnv *e
     jlong nCpus = get_nprocs_conf();
 
     auto ar = env->NewLongArray(1);
-    if (ar != NULL) env->SetLongArrayRegion(ar, 0, 1, &nCpus);
+    if (ar != nullptr) env->SetLongArrayRegion(ar, 0, 1, &nCpus);
     return ar;
 }
 
@@ -124,7 +124,7 @@ static jboolean KernelCpuUidClusterTimeBpfMapReader_readBpfData(JNIEnv *env, job
     static uint64_t lastUpdate = 0;
     uint64_t newLastUpdate = lastUpdate;
     auto sparseAr = env->GetObjectField(thiz, gmData);
-    if (sparseAr == NULL) return false;
+    if (sparseAr == nullptr) return false;
     auto data = android::bpf::getUidsUpdatedConcurrentTimes(&newLastUpdate);
     if (!data.has_value()) return false;
 
@@ -134,7 +134,7 @@ static jboolean KernelCpuUidClusterTimeBpfMapReader_readBpfData(JNIEnv *env, job
             for (const auto &subVec : times.policy) s += subVec.size();
         }
         jlongArray ar = getUidArray(env, sparseAr, uid, s);
-        if (ar == NULL) return false;
+        if (ar == nullptr) return false;
         copy2DVecToArray(env, ar, times.policy);
     }
     lastUpdate = newLastUpdate;
@@ -143,12 +143,12 @@ static jboolean KernelCpuUidClusterTimeBpfMapReader_readBpfData(JNIEnv *env, job
 
 static jlongArray KernelCpuUidClusterTimeBpfMapReader_getDataDimensions(JNIEnv *env, jobject) {
     auto times = android::bpf::getUidConcurrentTimes(0);
-    if (!times.has_value()) return NULL;
+    if (!times.has_value()) return nullptr;
 
     std::vector<jlong> clusterCores;
     for (const auto &vec : times->policy) clusterCores.push_back(vec.size());
     auto ar = env->NewLongArray(clusterCores.size());
-    if (ar != NULL) env->SetLongArrayRegion(ar, 0, clusterCores.size(), clusterCores.data());
+    if (ar != nullptr) env->SetLongArrayRegion(ar, 0, clusterCores.size(), clusterCores.data());
     return ar;
 }
 

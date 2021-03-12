@@ -1961,6 +1961,8 @@
     <string name="config_systemWifiCoexManager" translateable="false"></string>
     <!-- The name of the package that will hold the wellbeing role. -->
     <string name="config_systemWellbeing" translatable="false"></string>
+    <!-- The name of the package that will hold the television notification handler role -->
+    <string name="config_systemTelevisionNotificationHandler" translatable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false"></string>
@@ -2269,6 +2271,9 @@
     <!-- If the sensor that wakes up the lock screen is available or not. -->
     <bool name="config_dozeWakeLockScreenSensorAvailable">false</bool>
     <integer name="config_dozeWakeLockScreenDebounce">300</integer>
+
+    <!-- Type of the quick pickup sensor. Empty if quick pickup is not supported. -->
+    <string name="config_quickPickupSensorType" translatable="false"></string>
 
     <!-- Control whether the always on display mode is available. This should only be enabled on
          devices where the display has been tuned to be power efficient in DOZE and/or DOZE_SUSPEND

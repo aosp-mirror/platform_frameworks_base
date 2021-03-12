@@ -356,9 +356,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         if (isActivityIntent || canBubble) {
             mAssistManagerLazy.get().hideAssist();
         }
-        if (shouldCollapse()) {
-            collapseOnMainThread();
-        }
 
         NotificationVisibility.NotificationLocation location =
                 NotificationLogger.getNotificationLocation(entry);
@@ -408,6 +405,12 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mMainThreadHandler.post(
                     () -> mBubblesManagerOptional.get().expandStackAndSelectBubble(entry));
         }
+
+        // expandStackAndSelectBubble won't affect shouldCollapse, so we can collapse directly even
+        // if we are not on the main thread.
+        if (shouldCollapse()) {
+            collapseOnMainThread();
+        }
     }
 
     private void startNotificationIntent(
@@ -438,6 +441,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     null, null, options);
             mMainThreadHandler.post(() -> {
                 mActivityLaunchAnimator.setLaunchResult(launchResult, isActivityIntent);
+                if (shouldCollapse()) {
+                    collapseOnMainThread();
+                }
             });
         } catch (RemoteException | PendingIntent.CanceledException e) {
             // the stack trace isn't very helpful here.
@@ -465,11 +471,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mActivityLaunchAnimator.setLaunchResult(launchResult,
                             true /* isActivityIntent */);
                     removeHUN(row);
+                    if (shouldCollapse()) {
+                        mCommandQueue.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                                true /* force */);
+                    }
                 });
-                if (shouldCollapse()) {
-                    mMainThreadHandler.post(() -> mCommandQueue.animateCollapsePanels(
-                            CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */));
-                }
             });
             return true;
         }, null, false /* afterKeyguardGone */);

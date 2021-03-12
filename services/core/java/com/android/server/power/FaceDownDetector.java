@@ -291,8 +291,10 @@ public class FaceDownDetector implements SensorEventListener {
      * The user interacted with the screen while face down, indicated the phone is in use.
      * We log this event and temporarily make this detector inactive.
      */
-    public void userActivity() {
-        mHandler.post(mUserActivityRunnable);
+    public void userActivity(int event) {
+        if (event != PowerManager.USER_ACTIVITY_EVENT_FACE_DOWN) {
+            mHandler.post(mUserActivityRunnable);
+        }
     }
 
     private void exitFaceDown(int resultType, long millisSinceFlip) {

@@ -195,6 +195,7 @@ import android.view.textclassifier.TextLinks;
 import android.view.textservice.SpellCheckerSubtype;
 import android.view.textservice.TextServicesManager;
 import android.view.translation.TranslationRequestValue;
+import android.view.translation.UiTranslationController;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 import android.widget.RemoteViews.RemoteView;
@@ -13835,6 +13836,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public ViewTranslationRequest onCreateTranslationRequest() {
         if (mText == null || mText.length() == 0) {
+            // TODO(b/182433547): remove before S release
+            if (UiTranslationController.DEBUG) {
+                Log.w(LOG_TAG, "Cannot create translation request for the empty text.");
+            }
             return null;
         }
         // Not translate password, editable text and not important for translation
@@ -13842,6 +13847,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         //  text selection apis, not support in S.
         boolean isPassword = isAnyPasswordInputType() || hasPasswordTransformationMethod();
         if (isTextEditable() || isPassword || isTextSelectable()) {
+            // TODO(b/182433547): remove before S release
+            if (UiTranslationController.DEBUG) {
+                Log.w(LOG_TAG, "Cannot create translation request. editable = " + isTextEditable()
+                        + ", isPassword = " + isPassword + ", selectable = " + isTextSelectable());
+            }
             return null;
         }
         // TODO(b/176488462): apply the view's important for translation property
@@ -13870,6 +13880,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Restore to original text content.
         if (mTranslationTransformation != null) {
             setTransformationMethod(mTranslationTransformation.getOriginalTransformationMethod());
+        } else {
+            // TODO(b/182433547): remove before S release
+            Log.w(LOG_TAG, "onPauseUiTranslation(): no translated text.");
         }
     }
 
@@ -13889,7 +13902,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mTranslationTransformation != null) {
             setTransformationMethod(mTranslationTransformation);
         } else {
-            Log.w(LOG_TAG, "onResumeTranslatedText(): no translated text.");
+            // TODO(b/182433547): remove before S release
+            Log.w(LOG_TAG, "onRestoreUiTranslation(): no translated text.");
         }
     }
 
@@ -13910,6 +13924,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mTranslationTransformation != null) {
             setTransformationMethod(mTranslationTransformation.getOriginalTransformationMethod());
             mTranslationTransformation = null;
+        } else {
+            // TODO(b/182433547): remove before S release
+            Log.w(LOG_TAG, "onFinishUiTranslation(): no translated text.");
         }
     }
 

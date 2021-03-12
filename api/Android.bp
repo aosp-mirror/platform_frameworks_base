@@ -347,3 +347,49 @@ genrule {
     out: ["combined-removed-dex.txt"],
     cmd: "$(location gen_combined_removed_dex.sh) $(location metalava) $(genDir) $(in) > $(out)",
 }
+
+genrule {
+    name: "services-system-server-current.txt",
+    srcs: [
+        ":service-permission{.system-server.api.txt}",
+        ":non-updatable-system-server-current.txt",
+    ],
+    out: ["system-server-current.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    dists: [
+        {
+            targets: ["droidcore"],
+            dir: "api",
+            dest: "system-server-current.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system-server/api",
+            dest: "merge-android.txt",
+        },
+    ],
+}
+
+genrule {
+    name: "services-system-server-removed.txt",
+    srcs: [
+        ":service-permission{.system-server.removed-api.txt}",
+        ":non-updatable-system-server-removed.txt",
+    ],
+    out: ["system-server-removed.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+    dists: [
+        {
+            targets: ["droidcore"],
+            dir: "api",
+            dest: "system-server-removed.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system-server/api",
+            dest: "merge-removed.txt",
+        },
+    ],
+}

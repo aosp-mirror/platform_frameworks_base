@@ -24,21 +24,21 @@
         android:bottom="8dp">
         <shape>
             <corners
-                android:radius="20dp"/>
+                android:radius="28dp"/>
             <solid
-                android:color="?android:attr/colorPrimary"/>
+                android:color="?android:attr/colorAccent"/>
             <stroke
-                android:color="#1f000000"
+                android:color="?android:attr/colorPrimary"
                 android:width="1dp"/>
             <size
-                android:height="32dp"/>
+                android:height="@dimen/spinner_height"/>
         </shape>
     </item>
 
     <item
         android:gravity="center|end"
-        android:width="24dp"
-        android:height="24dp"
-        android:end="4dp"
-        android:drawable="@drawable/arrow_drop_down_24dp"/>
+        android:width="18dp"
+        android:height="18dp"
+        android:end="8dp"
+        android:drawable="@drawable/arrow_drop_down"/>
 </layer-list>

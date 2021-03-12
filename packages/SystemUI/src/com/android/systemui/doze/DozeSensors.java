@@ -113,6 +113,8 @@ public class DozeSensors {
         mCallback = callback;
         mProximitySensor = proximitySensor;
 
+        boolean udfpsEnrolled =
+                authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser());
         boolean alwaysOn = mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT);
         mSensors = new TriggerSensor[] {
                 new TriggerSensor(
@@ -159,7 +161,7 @@ public class DozeSensors {
                         findSensorWithType(config.udfpsLongPressSensorType()),
                         "doze_pulse_on_auth",
                         true /* settingDef */,
-                        authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser()),
+                        udfpsEnrolled,
                         DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */,
@@ -181,6 +183,15 @@ public class DozeSensors {
                         false /* touchscreen */,
                         mConfig.getWakeLockScreenDebounce(),
                         dozeLog),
+                new TriggerSensor(
+                        findSensorWithType(config.quickPickupSensorType()),
+                        Settings.Secure.DOZE_QUICK_PICKUP_GESTURE,
+                        false /* setting default */,
+                        config.quickPickupSensorEnabled(KeyguardUpdateMonitor.getCurrentUser())
+                                && udfpsEnrolled,
+                        DozeLog.REASON_SENSOR_QUICK_PICKUP,
+                        false /* touchCoords */,
+                        false /* touchscreen */, dozeLog),
         };
 
         setProxListening(false);  // Don't immediately start listening when we register.
