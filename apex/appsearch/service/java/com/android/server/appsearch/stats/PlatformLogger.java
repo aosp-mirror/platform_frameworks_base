@@ -17,21 +17,26 @@
 package com.android.server.appsearch.stats;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.appsearch.external.localstorage.AppSearchLogger;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Random;
 
@@ -120,19 +125,18 @@ public final class PlatformLogger implements AppSearchLogger {
          * @param minTimeIntervalBetweenSamplesMillis minimum time interval apart in Milliseconds
          *                                            required for two consecutive stats logged
          * @param defaultSamplingRatio                default sampling ratio
-         * @param samplingRatios                    SparseArray to customize sampling ratio for
+         * @param samplingRatios                      SparseArray to customize sampling ratio for
          *                                            different stat types
          */
         public Config(long minTimeIntervalBetweenSamplesMillis,
                 int defaultSamplingRatio,
-                @Nullable SparseIntArray samplingRatios) {
+                @NonNull SparseIntArray samplingRatios) {
+            // TODO(b/173532925) Probably we can get rid of those three after we have p/h flags
+            // for them.
+            // e.g. we can just call DeviceConfig.get(SAMPLING_RATIO_FOR_PUT_DOCUMENTS).
             mMinTimeIntervalBetweenSamplesMillis = minTimeIntervalBetweenSamplesMillis;
             mDefaultSamplingRatio = defaultSamplingRatio;
-            if (samplingRatios != null) {
-                mSamplingRatios = samplingRatios;
-            } else {
-                mSamplingRatios = new SparseIntArray();
-            }
+            mSamplingRatios = samplingRatios;
         }
     }
 
@@ -169,7 +173,7 @@ public final class PlatformLogger implements AppSearchLogger {
         Preconditions.checkNotNull(stats);
         synchronized (mLock) {
             if (shouldLogForTypeLocked(stats.getCallType())) {
-                logToWestworldLocked(stats);
+                logStatsImplLocked(stats);
             }
         }
     }
@@ -180,7 +184,7 @@ public final class PlatformLogger implements AppSearchLogger {
         Preconditions.checkNotNull(stats);
         synchronized (mLock) {
             if (shouldLogForTypeLocked(CallStats.CALL_TYPE_PUT_DOCUMENT)) {
-                logToWestworldLocked(stats);
+                logStatsImplLocked(stats);
             }
         }
     }
@@ -201,25 +205,103 @@ public final class PlatformLogger implements AppSearchLogger {
     }
 
     @GuardedBy("mLock")
-    private void logToWestworldLocked(@NonNull CallStats stats) {
+    private void logStatsImplLocked(@NonNull CallStats stats) {
         mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
         ExtraStats extraStats = createExtraStatsLocked(stats.getGeneralStats().getPackageName(),
                 stats.getCallType());
-        /* TODO(b/173532925) Log the CallStats to Westworld
-        stats.log(..., samplingRatio, skippedSampleCount, ...)
-         */
+        String database = stats.getGeneralStats().getDatabase();
+        try {
+            int hashCodeForDatabase = calculateHashCodeMd5(database);
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_CALL_STATS_REPORTED,
+                    extraStats.mSamplingRatio,
+                    extraStats.mSkippedSampleCount,
+                    extraStats.mPackageUid,
+                    hashCodeForDatabase,
+                    stats.getGeneralStats().getStatusCode(),
+                    stats.getGeneralStats().getTotalLatencyMillis(),
+                    stats.getCallType(),
+                    stats.getEstimatedBinderLatencyMillis(),
+                    stats.getNumOperationsSucceeded(),
+                    stats.getNumOperationsFailed());
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            // TODO(b/184204720) report hashing error to Westworld
+            //  We need to set a special value(e.g. 0xFFFFFFFF) for the hashing of the database,
+            //  so in the dashboard we know there is some error for hashing.
+            //
+            // Something is wrong while calculating the hash code for database
+            // this shouldn't happen since we always use "MD5" and "UTF-8"
+            Log.e(TAG, "Error calculating hash code for database " + database, e);
+        }
     }
 
     @GuardedBy("mLock")
-    private void logToWestworldLocked(@NonNull PutDocumentStats stats) {
+    private void logStatsImplLocked(@NonNull PutDocumentStats stats) {
         mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
         ExtraStats extraStats = createExtraStatsLocked(stats.getGeneralStats().getPackageName(),
                 CallStats.CALL_TYPE_PUT_DOCUMENT);
-        /* TODO(b/173532925) Log the PutDocumentStats to Westworld
-        stats.log(..., samplingRatio, skippedSampleCount, ...)
-         */
+        String database = stats.getGeneralStats().getDatabase();
+        try {
+            int hashCodeForDatabase = calculateHashCodeMd5(database);
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_SEARCH_PUT_DOCUMENT_STATS_REPORTED,
+                    extraStats.mSamplingRatio,
+                    extraStats.mSkippedSampleCount,
+                    extraStats.mPackageUid,
+                    hashCodeForDatabase,
+                    stats.getGeneralStats().getStatusCode(),
+                    stats.getGeneralStats().getTotalLatencyMillis(),
+                    stats.getGenerateDocumentProtoLatencyMillis(),
+                    stats.getRewriteDocumentTypesLatencyMillis(),
+                    stats.getNativeLatencyMillis(),
+                    stats.getNativeDocumentStoreLatencyMillis(),
+                    stats.getNativeIndexLatencyMillis(),
+                    stats.getNativeIndexMergeLatencyMillis(),
+                    stats.getNativeDocumentSizeBytes(),
+                    stats.getNativeNumTokensIndexed(),
+                    stats.getNativeExceededMaxNumTokens());
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            // TODO(b/184204720) report hashing error to Westworld
+            //  We need to set a special value(e.g. 0xFFFFFFFF) for the hashing of the database,
+            //  so in the dashboard we know there is some error for hashing.
+            //
+            // Something is wrong while calculating the hash code for database
+            // this shouldn't happen since we always use "MD5" and "UTF-8"
+            Log.e(TAG, "Error calculating hash code for database " + database, e);
+        }
     }
 
+    /**
+     * Calculate the hash code as an integer by returning the last four bytes of its MD5.
+     *
+     * @param str a string
+     * @return hash code as an integer
+     * @throws AppSearchException if either algorithm or encoding does not exist.
+     */
+    @VisibleForTesting
+    @NonNull
+    static int calculateHashCodeMd5(@NonNull String str) throws
+            NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update(str.getBytes(/*charsetName=*/ "UTF-8"));
+        byte[] digest = md.digest();
+
+        // Since MD5 generates 16 bytes digest, we don't need to check the length here to see
+        // if it is smaller than sizeof(int)(4).
+        //
+        // We generate the same value as BigInteger(digest).intValue().
+        // BigInteger takes bytes[] and treat it as big endian. And its intValue() would get the
+        // lower 4 bytes. So here we take the last 4 bytes and treat them as big endian.
+        return (digest[12] & 0xFF) << 24
+                | (digest[13] & 0xFF) << 16
+                | (digest[14] & 0xFF) << 8
+                | (digest[15] & 0xFF);
+    }
+
+    /**
+     * Creates {@link ExtraStats} to hold additional information generated for logging.
+     *
+     * <p>This method is called by most of logToWestworldLocked functions to reduce code
+     * duplication.
+     */
     @VisibleForTesting
     @GuardedBy("mLock")
     @NonNull
