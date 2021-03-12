@@ -120,6 +120,7 @@ import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * A class that describes a view hierarchy that can be displayed in
@@ -1993,22 +1994,79 @@ public class RemoteViews implements Parcelable, Filter {
         mIsRoot = false;
     }
 
+    private static boolean hasStableId(View view) {
+        Object tag = view.getTag(com.android.internal.R.id.remote_views_stable_id);
+        return tag != null;
+    }
+
+    private static int getStableId(View view) {
+        Integer id = (Integer) view.getTag(com.android.internal.R.id.remote_views_stable_id);
+        return id == null ? ViewGroupActionAdd.NO_ID : id;
+    }
+
+    private static void setStableId(View view, int stableId) {
+        view.setTagInternal(com.android.internal.R.id.remote_views_stable_id, stableId);
+    }
+
+    // Returns the next recyclable child of the view group, or -1 if there are none.
+    private static int getNextRecyclableChild(ViewGroup vg) {
+        Integer tag = (Integer) vg.getTag(com.android.internal.R.id.remote_views_next_child);
+        return tag == null ? -1 : tag;
+    }
+
+    private static int getViewLayoutId(View v) {
+        return (Integer) v.getTag(R.id.widget_frame);
+    }
+
+    private static void setNextRecyclableChild(ViewGroup vg, int nextChild, int numChildren) {
+        if (nextChild < 0 || nextChild >= numChildren) {
+            vg.setTagInternal(com.android.internal.R.id.remote_views_next_child, -1);
+        } else {
+            vg.setTagInternal(com.android.internal.R.id.remote_views_next_child, nextChild);
+        }
+    }
+
+    private void finalizeViewRecycling(ViewGroup root) {
+        // Remove any recyclable children that were not used. nextChild should either be -1 or point
+        // to the next recyclable child that hasn't been recycled.
+        int nextChild = getNextRecyclableChild(root);
+        if (nextChild >= 0 && nextChild < root.getChildCount()) {
+            root.removeViews(nextChild, root.getChildCount() - nextChild);
+        }
+        // Make sure on the next round, we don't try to recycle if removeAllViews is not called.
+        setNextRecyclableChild(root, -1, 0);
+        // Traverse the view tree.
+        for (int i = 0; i < root.getChildCount(); i++) {
+            View child = root.getChildAt(i);
+            if (child instanceof ViewGroup && !child.isRootNamespace()) {
+                finalizeViewRecycling((ViewGroup) child);
+            }
+        }
+    }
+
     /**
      * ViewGroup methods that are related to adding Views.
      */
     private class ViewGroupActionAdd extends Action {
+        static final int NO_ID = -1;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private RemoteViews mNestedViews;
         private int mIndex;
+        private int mStableId;
 
         ViewGroupActionAdd(@IdRes int viewId, RemoteViews nestedViews) {
-            this(viewId, nestedViews, -1 /* index */);
+            this(viewId, nestedViews, -1 /* index */, NO_ID /* nestedViewId */);
         }
 
         ViewGroupActionAdd(@IdRes int viewId, RemoteViews nestedViews, int index) {
+            this(viewId, nestedViews, index, NO_ID /* nestedViewId */);
+        }
+
+        ViewGroupActionAdd(@IdRes int viewId, RemoteViews nestedViews, int index, int stableId) {
             this.viewId = viewId;
             mNestedViews = nestedViews;
             mIndex = index;
+            mStableId = stableId;
             if (nestedViews != null) {
                 configureRemoteViewsAsChild(nestedViews);
             }
@@ -2018,6 +2076,7 @@ public class RemoteViews implements Parcelable, Filter {
                 int depth, Map<Class, Object> classCookies) {
             viewId = parcel.readInt();
             mIndex = parcel.readInt();
+            mStableId = parcel.readInt();
             mNestedViews = new RemoteViews(parcel, bitmapCache, info, depth, classCookies);
             mNestedViews.addFlags(mApplyFlags);
         }
@@ -2025,12 +2084,24 @@ public class RemoteViews implements Parcelable, Filter {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(viewId);
             dest.writeInt(mIndex);
+            dest.writeInt(mStableId);
             mNestedViews.writeToParcel(dest, flags);
         }
 
         @Override
         public boolean hasSameAppInfo(ApplicationInfo parentInfo) {
             return mNestedViews.hasSameAppInfo(parentInfo);
+        }
+
+        private int findViewIndexToRecycle(ViewGroup target, RemoteViews newContent) {
+            for (int nextChild = getNextRecyclableChild(target); nextChild < target.getChildCount();
+                    nextChild++) {
+                View child = target.getChildAt(nextChild);
+                if (getStableId(child) == mStableId) {
+                    return nextChild;
+                }
+            }
+            return -1;
         }
 
         @Override
@@ -2043,10 +2114,45 @@ public class RemoteViews implements Parcelable, Filter {
                 return;
             }
 
+            // If removeAllViews was called, this returns the next potential recycled view.
+            // If there are no more views to recycle (or removeAllViews was not called), this
+            // will return -1.
+            final int nextChild = getNextRecyclableChild(target);
+            RemoteViews rvToApply = mNestedViews.getRemoteViewsToApply(context);
+            if (nextChild >= 0 && mStableId != NO_ID) {
+                // At that point, the views starting at index nextChild are the ones recyclable but
+                // not yet recycled. All views added on that round of application are placed before.
+                // Find the next view with the same stable id, or -1.
+                int recycledViewIndex = findViewIndexToRecycle(target, rvToApply);
+                if (recycledViewIndex >= 0) {
+                    View child = target.getChildAt(recycledViewIndex);
+                    if (getViewLayoutId(child) == rvToApply.getLayoutId()) {
+                        if (nextChild < recycledViewIndex) {
+                            target.removeViews(nextChild, recycledViewIndex - nextChild);
+                        }
+                        setNextRecyclableChild(target, nextChild + 1, target.getChildCount());
+                        rvToApply.reapply(context, child, handler, null /* size */, colorResources,
+                                false /* topLevel */);
+                        return;
+                    }
+                    // If we cannot recycle the views, we still remove all views in between to
+                    // avoid weird behaviors and insert the new view in place of the old one.
+                    target.removeViews(nextChild, recycledViewIndex - nextChild + 1);
+                }
+            }
+            // If we cannot recycle, insert the new view before the next recyclable child.
+
             // Inflate nested views and add as children
-            target.addView(
-                    mNestedViews.apply(context, target, handler, null /* size */, colorResources),
-                    mIndex);
+            View nestedView = rvToApply.apply(context, target, handler, null /* size */,
+                    colorResources);
+            if (mStableId != NO_ID) {
+                setStableId(nestedView, mStableId);
+            }
+            target.addView(nestedView, mIndex >= 0 ? mIndex : nextChild);
+            if (nextChild >= 0) {
+                // If we are at the end, there is no reason to try to recycle anymore
+                setNextRecyclableChild(target, nextChild + 1, target.getChildCount());
+            }
         }
 
         @Override
@@ -2063,24 +2169,91 @@ public class RemoteViews implements Parcelable, Filter {
 
             // Inflate nested views and perform all the async tasks for the child remoteView.
             final Context context = root.mRoot.getContext();
-            final AsyncApplyTask task = mNestedViews.getAsyncApplyTask(context, targetVg,
-                    null /* listener */, handler, null /* size */, colorResources);
+
+            // If removeAllViews was called, this returns the next potential recycled view.
+            // If there are no more views to recycle (or removeAllViews was not called), this
+            // will return -1.
+            final int nextChild = getNextRecyclableChild(targetVg);
+            if (nextChild >= 0 && mStableId != NO_ID) {
+                RemoteViews rvToApply = mNestedViews.getRemoteViewsToApply(context);
+                final int recycledViewIndex = target.findChildIndex(nextChild,
+                        view -> getStableId(view) == mStableId);
+                if (recycledViewIndex >= 0) {
+                    // At that point, the views starting at index nextChild are the ones
+                    // recyclable but not yet recycled. All views added on that round of
+                    // application are placed before.
+                    ViewTree recycled = target.mChildren.get(recycledViewIndex);
+                    // We can only recycle the view if the layout id is the same.
+                    if (getViewLayoutId(recycled.mRoot) == rvToApply.getLayoutId()) {
+                        if (recycledViewIndex > nextChild) {
+                            target.removeChildren(nextChild, recycledViewIndex - nextChild);
+                        }
+                        setNextRecyclableChild(targetVg, nextChild + 1, target.mChildren.size());
+                        final AsyncApplyTask reapplyTask = rvToApply.getInternalAsyncApplyTask(
+                                context,
+                                targetVg, null /* listener */, handler, null /* size */,
+                                colorResources,
+                                recycled.mRoot);
+                        final ViewTree tree = reapplyTask.doInBackground();
+                        if (tree == null) {
+                            throw new ActionException(reapplyTask.mError);
+                        }
+                        return new RuntimeAction() {
+                            @Override
+                            public void apply(View root, ViewGroup rootParent,
+                                    InteractionHandler handler, ColorResources colorResources)
+                                    throws ActionException {
+                                reapplyTask.onPostExecute(tree);
+                                if (recycledViewIndex > nextChild) {
+                                    targetVg.removeViews(nextChild, recycledViewIndex - nextChild);
+                                }
+                            }
+                        };
+                    }
+                    // If the layout id is different, still remove the children as if we recycled
+                    // the view, to insert at the same place.
+                    target.removeChildren(nextChild, recycledViewIndex - nextChild + 1);
+                    return insertNewView(context, target, handler, colorResources,
+                            () -> targetVg.removeViews(nextChild,
+                                    recycledViewIndex - nextChild + 1));
+
+                }
+            }
+            // If we cannot recycle, simply add the view at the same available slot.
+            return insertNewView(context, target, handler, colorResources, () -> {});
+        }
+
+        private Action insertNewView(Context context, ViewTree target, InteractionHandler handler,
+                ColorResources colorResources, Runnable finalizeAction) {
+            ViewGroup targetVg = (ViewGroup) target.mRoot;
+            int nextChild = getNextRecyclableChild(targetVg);
+            final AsyncApplyTask task = mNestedViews.getInternalAsyncApplyTask(context, targetVg,
+                    null /* listener */, handler, null /* size */, colorResources,
+                    null /* result */);
             final ViewTree tree = task.doInBackground();
 
             if (tree == null) {
                 throw new ActionException(task.mError);
             }
+            if (mStableId != NO_ID) {
+                setStableId(task.mResult, mStableId);
+            }
 
             // Update the global view tree, so that next call to findViewTreeById
             // goes through the subtree as well.
-            target.addChild(tree, mIndex);
+            final int insertIndex = mIndex >= 0 ? mIndex : nextChild;
+            target.addChild(tree, insertIndex);
+            if (nextChild >= 0) {
+                setNextRecyclableChild(targetVg, nextChild + 1, target.mChildren.size());
+            }
 
             return new RuntimeAction() {
                 @Override
                 public void apply(View root, ViewGroup rootParent, InteractionHandler handler,
                         ColorResources colorResources) throws ActionException {
                     task.onPostExecute(tree);
-                    targetVg.addView(task.mResult, mIndex);
+                    finalizeAction.run();
+                    targetVg.addView(task.mResult, insertIndex);
                 }
             };
         }
@@ -2148,7 +2321,14 @@ public class RemoteViews implements Parcelable, Filter {
             }
 
             if (mViewIdToKeep == REMOVE_ALL_VIEWS_ID) {
-                target.removeAllViews();
+                // Remote any view without a stable id
+                for (int i = target.getChildCount() - 1; i >= 0; i--) {
+                    if (!hasStableId(target.getChildAt(i))) {
+                        target.removeViewAt(i);
+                    }
+                }
+                // In the end, only children with a stable id (i.e. recyclable) are left.
+                setNextRecyclableChild(target, 0, target.getChildCount());
                 return;
             }
 
@@ -2170,8 +2350,8 @@ public class RemoteViews implements Parcelable, Filter {
             final ViewGroup targetVg = (ViewGroup) target.mRoot;
 
             if (mViewIdToKeep == REMOVE_ALL_VIEWS_ID) {
-                // Clear all children when there's no excepted view
-                target.mChildren = null;
+                target.mChildren.removeIf(childTree -> !hasStableId(childTree.mRoot));
+                setNextRecyclableChild(targetVg, 0, target.mChildren.size());
             } else {
                 // Remove just the children which don't match the excepted view
                 target.mChildren.removeIf(childTree -> childTree.mRoot.getId() != mViewIdToKeep);
@@ -2184,7 +2364,11 @@ public class RemoteViews implements Parcelable, Filter {
                 public void apply(View root, ViewGroup rootParent, InteractionHandler handler,
                         ColorResources colorResources) throws ActionException {
                     if (mViewIdToKeep == REMOVE_ALL_VIEWS_ID) {
-                        targetVg.removeAllViews();
+                        for (int i = targetVg.getChildCount() - 1; i >= 0; i--) {
+                            if (!hasStableId(targetVg.getChildAt(i))) {
+                                targetVg.removeViewAt(i);
+                            }
+                        }
                         return;
                     }
 
@@ -3084,6 +3268,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
         mApplication = portrait.mApplication;
         mLayoutId = portrait.mLayoutId;
+        mViewId = portrait.mViewId;
         mLightBackgroundLayoutId = portrait.mLightBackgroundLayoutId;
 
         mLandscape = landscape;
@@ -3136,6 +3321,7 @@ public class RemoteViews implements Parcelable, Filter {
         RemoteViews smallestView = findSmallestRemoteView();
         mApplication = smallestView.mApplication;
         mLayoutId = smallestView.mLayoutId;
+        mViewId = smallestView.mViewId;
         mLightBackgroundLayoutId = smallestView.mLightBackgroundLayoutId;
     }
 
@@ -3253,6 +3439,7 @@ public class RemoteViews implements Parcelable, Filter {
                     ApplicationInfo.CREATOR.createFromParcel(parcel);
             mIdealSize = parcel.readInt() == 0 ? null : SizeF.CREATOR.createFromParcel(parcel);
             mLayoutId = parcel.readInt();
+            mViewId = parcel.readInt();
             mLightBackgroundLayoutId = parcel.readInt();
 
             readActionsFromParcel(parcel, depth);
@@ -3273,6 +3460,7 @@ public class RemoteViews implements Parcelable, Filter {
             RemoteViews smallestView = findSmallestRemoteView();
             mApplication = smallestView.mApplication;
             mLayoutId = smallestView.mLayoutId;
+            mViewId = smallestView.mViewId;
             mLightBackgroundLayoutId = smallestView.mLightBackgroundLayoutId;
         } else {
             // MODE_HAS_LANDSCAPE_AND_PORTRAIT
@@ -3281,6 +3469,7 @@ public class RemoteViews implements Parcelable, Filter {
                     mClassCookies);
             mApplication = mPortrait.mApplication;
             mLayoutId = mPortrait.mLayoutId;
+            mViewId = mPortrait.mViewId;
             mLightBackgroundLayoutId = mPortrait.mLightBackgroundLayoutId;
         }
         mApplyFlags = parcel.readInt();
@@ -3455,6 +3644,29 @@ public class RemoteViews implements Parcelable, Filter {
         addAction(nestedView == null
                 ? new ViewGroupActionRemove(viewId)
                 : new ViewGroupActionAdd(viewId, nestedView));
+    }
+
+    /**
+     * Equivalent to calling {@link ViewGroup#addView(View)} after inflating the given
+     * {@link RemoteViews}. If the {@link RemoteViews} may be re-inflated or updated,
+     * {@link #removeAllViews(int)} must be called on the same {@code viewId
+     * } before the first call to this method for the behavior of this method to be predictable.
+     *
+     * The {@code stableId} will be used to identify a potential view to recycled when the remote
+     * view is inflated. Views can be re-used if inserted in the same order, potentially with
+     * some views appearing / disappearing.
+     *
+     * Note: if a view is re-used, all the actions will be re-applied on it. However, its properties
+     * are not reset, so what was applied in previous round will have an effect. As a view may be
+     * re-created at any time by the host, the RemoteViews should not rely on keeping information
+     * from previous applications and always re-set all the properties they need.
+     *
+     * @param viewId The id of the parent {@link ViewGroup} to add child into.
+     * @param nestedView {@link RemoteViews} that describes the child.
+     * @param stableId An id that is stable across different versions of RemoteViews.
+     */
+    public void addStableView(@IdRes int viewId, @NonNull RemoteViews nestedView, int stableId) {
+        addAction(new ViewGroupActionAdd(viewId, nestedView, -1 /* index */, stableId));
     }
 
     /**
@@ -4870,23 +5082,24 @@ public class RemoteViews implements Parcelable, Filter {
     public CancellationSignal applyAsync(Context context, ViewGroup parent,
             Executor executor, OnViewAppliedListener listener, InteractionHandler handler,
             SizeF size) {
-        return getAsyncApplyTask(context, parent, listener, handler, size, null /* themeColors */)
-                .startTaskOnExecutor(executor);
+        return applyAsync(context, parent, executor, listener, handler, size,
+                null /* themeColors */);
     }
 
     /** @hide */
     public CancellationSignal applyAsync(Context context, ViewGroup parent, Executor executor,
             OnViewAppliedListener listener, InteractionHandler handler, SizeF size,
             ColorResources colorResources) {
-        return getAsyncApplyTask(context, parent, listener, handler, size, colorResources)
-                .startTaskOnExecutor(executor);
+        return new AsyncApplyTask(getRemoteViewsToApply(context, size), parent, context, listener,
+                handler, colorResources, null /* result */,
+                true /* topLevel */).startTaskOnExecutor(executor);
     }
 
-    private AsyncApplyTask getAsyncApplyTask(Context context, ViewGroup parent,
+    private AsyncApplyTask getInternalAsyncApplyTask(Context context, ViewGroup parent,
             OnViewAppliedListener listener, InteractionHandler handler, SizeF size,
-            ColorResources colorResources) {
+            ColorResources colorResources, View result) {
         return new AsyncApplyTask(getRemoteViewsToApply(context, size), parent, context, listener,
-                handler, colorResources, null /* result */);
+                handler, colorResources, result, false /* topLevel */);
     }
 
     private class AsyncApplyTask extends AsyncTask<Void, Void, ViewTree>
@@ -4898,6 +5111,12 @@ public class RemoteViews implements Parcelable, Filter {
         final OnViewAppliedListener mListener;
         final InteractionHandler mHandler;
         final ColorResources mColorResources;
+        /**
+         * Whether the remote view is the top-level one (i.e. not within an action).
+         *
+         * This is only used if the result is specified (i.e. the view is being recycled).
+         */
+        final boolean mTopLevel;
 
         private View mResult;
         private ViewTree mTree;
@@ -4906,13 +5125,15 @@ public class RemoteViews implements Parcelable, Filter {
 
         private AsyncApplyTask(
                 RemoteViews rv, ViewGroup parent, Context context, OnViewAppliedListener listener,
-                InteractionHandler handler, ColorResources colorResources, View result) {
+                InteractionHandler handler, ColorResources colorResources,
+                View result, boolean topLevel) {
             mRV = rv;
             mParent = parent;
             mContext = context;
             mListener = listener;
             mColorResources = colorResources;
             mHandler = handler;
+            mTopLevel = topLevel;
 
             mResult = result;
         }
@@ -4958,6 +5179,10 @@ public class RemoteViews implements Parcelable, Filter {
                         for (Action a : mActions) {
                             a.apply(viewTree.mRoot, mParent, handler, mColorResources);
                         }
+                    }
+                    // If the parent of the view is has is a root, resolve the recycling.
+                    if (mTopLevel && mResult instanceof ViewGroup) {
+                        finalizeViewRecycling((ViewGroup) mResult);
                     }
                 } catch (Exception e) {
                     mError = e;
@@ -5011,6 +5236,14 @@ public class RemoteViews implements Parcelable, Filter {
     /** @hide */
     public void reapply(Context context, View v, InteractionHandler handler, SizeF size,
             ColorResources colorResources) {
+        reapply(context, v, handler, size, colorResources, true);
+    }
+
+    // Note: topLevel should be true only for calls on the topLevel RemoteViews, internal calls
+    // should set it to false.
+    private void reapply(Context context, View v, InteractionHandler handler, SizeF size,
+            ColorResources colorResources, boolean topLevel) {
+
         RemoteViews rvToApply = getRemoteViewsToApply(context, size);
 
         // In the case that a view has this RemoteViews applied in one orientation or size, is
@@ -5025,6 +5258,11 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         rvToApply.performApply(v, (ViewGroup) v.getParent(), handler, colorResources);
+
+        // If the parent of the view is has is a root, resolve the recycling.
+        if (topLevel && v instanceof ViewGroup) {
+            finalizeViewRecycling((ViewGroup) v);
+        }
     }
 
     /**
@@ -5068,8 +5306,8 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         return new AsyncApplyTask(rvToApply, (ViewGroup) v.getParent(),
-                context, listener, handler, colorResources, v).startTaskOnExecutor(
-                executor);
+                context, listener, handler, colorResources, v, true /* topLevel */)
+                .startTaskOnExecutor(executor);
     }
 
     private void performApply(View v, ViewGroup parent, InteractionHandler handler,
@@ -5282,6 +5520,7 @@ public class RemoteViews implements Parcelable, Filter {
                 mIdealSize.writeToParcel(dest, flags);
             }
             dest.writeInt(mLayoutId);
+            dest.writeInt(mViewId);
             dest.writeInt(mLightBackgroundLayoutId);
             writeActionsToParcel(dest);
         } else if (hasSizedRemoteViews()) {
@@ -5470,6 +5709,14 @@ public class RemoteViews implements Parcelable, Filter {
             mChildren.add(index, child);
         }
 
+        public void removeChildren(int start, int count) {
+            if (mChildren != null) {
+                for (int i = 0; i < count; i++) {
+                    mChildren.remove(start);
+                }
+            }
+        }
+
         private void addViewChild(View v) {
             // ViewTree only contains Views which can be found using findViewById.
             // If isRootNamespace is true, this view is skipped.
@@ -5499,6 +5746,28 @@ public class RemoteViews implements Parcelable, Filter {
                     }
                 }
             }
+        }
+
+        /** Find the first child for which the condition is true and return its index. */
+        public int findChildIndex(Predicate<View> condition) {
+            return findChildIndex(0, condition);
+        }
+
+        /**
+         * Find the first child, starting at {@code startIndex}, for which the condition is true and
+         * return its index.
+         */
+        public int findChildIndex(int startIndex, Predicate<View> condition) {
+            if (mChildren == null) {
+                return -1;
+            }
+
+            for (int i = startIndex; i < mChildren.size(); i++) {
+                if (condition.test(mChildren.get(i).mRoot)) {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 
@@ -5758,9 +6027,9 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     *  Set the ID of the top-level view of the XML layout.
+     * Set the ID of the top-level view of the XML layout.
      *
-     *  Set to {@link View#NO_ID} to reset and simply keep the id defined in the XML layout.
+     * Set to {@link View#NO_ID} to reset and simply keep the id defined in the XML layout.
      *
      * @throws UnsupportedOperationException if the method is called on a RemoteViews defined in
      * term of other RemoteViews (e.g. {@link #RemoteViews(RemoteViews, RemoteViews)}).

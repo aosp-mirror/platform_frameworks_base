@@ -54957,6 +54957,7 @@ package android.widget {
     ctor public RemoteViews(@NonNull java.util.Map<android.util.SizeF,android.widget.RemoteViews>);
     ctor public RemoteViews(android.widget.RemoteViews);
     ctor public RemoteViews(android.os.Parcel);
+    method public void addStableView(@IdRes int, @NonNull android.widget.RemoteViews, int);
     method public void addView(@IdRes int, android.widget.RemoteViews);
     method public android.view.View apply(android.content.Context, android.view.ViewGroup);
     method @Deprecated public android.widget.RemoteViews clone();
