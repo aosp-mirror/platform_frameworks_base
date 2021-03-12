@@ -75,7 +75,7 @@ public class WSMeansQuantizer implements Quantizer {
             // Note: they don't _have_ to be ignored, for example, we could instead turn them
             // opaque. Traditionally, including outside Android, quantizers ignore transparent
             // pixels, so that strategy was chosen.
-            int alpha = (pixel >> 24);
+            int alpha = (pixel >> 24) & 0xff;
             if (alpha < 255) {
                 continue;
             }
