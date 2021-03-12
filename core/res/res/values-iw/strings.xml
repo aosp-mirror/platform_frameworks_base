@@ -1329,7 +1329,7 @@
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"הגדרת שעה"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"הגדרת תאריך"</string>
     <string name="date_time_set" msgid="4603445265164486816">"הגדרה"</string>
-    <string name="date_time_done" msgid="8363155889402873463">"בוצע"</string>
+    <string name="date_time_done" msgid="8363155889402873463">"סיום"</string>
     <string name="perms_new_perm_prefix" msgid="6984556020395757087"><font size="12" fgcolor="#ff33b5e5">"חדש: "</font></string>
     <string name="perms_description_app" msgid="2747752389870161996">"מטעם <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="5729199278862516390">"לא דרושים אישורים"</string>
@@ -1662,7 +1662,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"‏שרטטת קו ביטול נעילה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את הנעילה של מכשיר ה-Android TV באמצעות חשבון אימייל.\n\n נסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון אימייל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"הסר"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"הסרה"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"האם להעלות את עוצמת הקול מעל לרמה המומלצת?\n\nהאזנה בעוצמת קול גבוהה למשכי זמן ממושכים עלולה לפגוע בשמיעה."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"להשתמש בקיצור הדרך לתכונת הנגישות?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"כשקיצור הדרך מופעל, לחיצה על שני לחצני עוצמת הקול למשך שלוש שניות מפעילה את תכונת הנגישות."</string>
@@ -1705,7 +1705,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"כדי לעבור בין תכונות, יש להחליק כלפי מעלה בעזרת שלוש אצבעות ולהחזיק."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"הגדלה"</string>
     <string name="user_switched" msgid="7249833311585228097">"המשתמש הנוכחי <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"עובר אל <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"מעבר אל <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"מתבצע ניתוק של <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"בעלים"</string>
     <string name="error_message_title" msgid="4082495589294631966">"שגיאה"</string>
@@ -1820,7 +1820,7 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"צפייה במסך מלא"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"כדי לצאת, פשוט מחליקים אצבע מלמעלה למטה."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"הבנתי"</string>
-    <string name="done_label" msgid="7283767013231718521">"בוצע"</string>
+    <string name="done_label" msgid="7283767013231718521">"סיום"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"מחוון שעות מעגלי"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"מחוון דקות מעגלי"</string>
     <string name="select_hours" msgid="5982889657313147347">"בחר שעות"</string>
