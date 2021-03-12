@@ -13726,4 +13726,22 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Lists apps that are exempt from policies (such as
+     * {@link #setPackagesSuspended(ComponentName, String[], boolean)}).
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_DEVICE_ADMINS)
+    public @NonNull Set<String> getPolicyExemptApps() {
+        if (mService == null) return Collections.emptySet();
+
+        try {
+            return new HashSet<>(mService.listPolicyExemptApps());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
