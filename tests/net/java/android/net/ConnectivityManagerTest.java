@@ -376,13 +376,13 @@ public class ConnectivityManagerTest {
                 eq(testPkgName), eq(testAttributionTag));
         reset(mService);
 
-        manager.requestBackgroundNetwork(request, null, callback);
+        Handler handler = new Handler(ConnectivityThread.getInstanceLooper());
+        manager.requestBackgroundNetwork(request, handler, callback);
         verify(mService).requestNetwork(eq(request.networkCapabilities),
                 eq(BACKGROUND_REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
                 eq(testPkgName), eq(testAttributionTag));
         reset(mService);
 
-        Handler handler = new Handler(ConnectivityThread.getInstanceLooper());
         manager.registerSystemDefaultNetworkCallback(callback, handler);
         verify(mService).requestNetwork(eq(null),
                 eq(TRACK_SYSTEM_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
