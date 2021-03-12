@@ -15,6 +15,7 @@
  */
 package com.android.keyguard;
 
+import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -34,7 +35,9 @@ import com.android.systemui.R;
  * Provides background color and radius animations for key pad buttons.
  */
 class NumPadAnimator {
-    private ValueAnimator mAnimator;
+    private AnimatorSet mAnimator;
+    private ValueAnimator mExpandAnimator;
+    private ValueAnimator mContractAnimator;
     private GradientDrawable mBackground;
     private RippleDrawable mRipple;
     private GradientDrawable mRippleMask;
@@ -55,18 +58,28 @@ class NumPadAnimator {
         mMargin = context.getResources().getDimensionPixelSize(R.dimen.num_pad_key_margin);
 
         // Actual values will be updated later, usually during an onLayout() call
-        mAnimator = ValueAnimator.ofFloat(0f);
-        mAnimator.setDuration(100);
-        mAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
-        mAnimator.setRepeatMode(ValueAnimator.REVERSE);
-        mAnimator.setRepeatCount(1);
-        mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        mAnimator = new AnimatorSet();
+        mExpandAnimator = ValueAnimator.ofFloat(0f, 1f);
+        mExpandAnimator.setDuration(50);
+        mExpandAnimator.setInterpolator(Interpolators.LINEAR);
+        mExpandAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator anim) {
                     mBackground.setCornerRadius((float) anim.getAnimatedValue());
                     mRippleMask.setCornerRadius((float) anim.getAnimatedValue());
                 }
         });
 
+        mContractAnimator = ValueAnimator.ofFloat(1f, 0f);
+        mContractAnimator.setStartDelay(33);
+        mContractAnimator.setDuration(417);
+        mContractAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mContractAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                public void onAnimationUpdate(ValueAnimator anim) {
+                    mBackground.setCornerRadius((float) anim.getAnimatedValue());
+                    mRippleMask.setCornerRadius((float) anim.getAnimatedValue());
+                }
+        });
+        mAnimator.playSequentially(mExpandAnimator, mContractAnimator);
     }
 
     void updateMargin(ViewGroup.MarginLayoutParams lp) {
@@ -77,7 +90,8 @@ class NumPadAnimator {
         float startRadius = height / 2f;
         float endRadius = height / 4f;
         mBackground.setCornerRadius(startRadius);
-        mAnimator.setFloatValues(startRadius, endRadius);
+        mExpandAnimator.setFloatValues(startRadius, endRadius);
+        mContractAnimator.setFloatValues(endRadius, startRadius);
     }
 
     void start() {
