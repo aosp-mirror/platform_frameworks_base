@@ -1496,6 +1496,14 @@ package android.net {
 
 package android.os {
 
+  public final class BatteryStatsManager {
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void resetBattery(boolean);
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void setBatteryLevel(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void setChargerAcOnline(boolean, boolean);
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void suspendBatteryInput();
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void unplugBattery(boolean);
+  }
+
   public class Build {
     method public static boolean is64BitAbi(String);
     field public static final boolean IS_EMULATOR;
