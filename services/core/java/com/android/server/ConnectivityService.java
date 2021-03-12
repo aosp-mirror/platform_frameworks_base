@@ -1725,7 +1725,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         // No need to check mLockdownEnabled. If it's true, getVpnUnderlyingNetworks returns null.
-        final Network[] networks = getVpnUnderlyingNetworks(Binder.getCallingUid());
+        final Network[] networks = getVpnUnderlyingNetworks(mDeps.getCallingUid());
         if (null != networks) {
             for (final Network network : networks) {
                 final NetworkCapabilities nc = getNetworkCapabilitiesInternal(network);
@@ -3638,7 +3638,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 log("Replacing " + existingRequest.mRequests.get(0) + " with "
                         + nri.mRequests.get(0) + " because their intents matched.");
             }
-            handleReleaseNetworkRequest(existingRequest.mRequests.get(0), getCallingUid(),
+            handleReleaseNetworkRequest(existingRequest.mRequests.get(0), mDeps.getCallingUid(),
                     /* callOnUnavailable */ false);
         }
         handleRegisterNetworkRequest(nri);
@@ -5700,14 +5700,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void releasePendingNetworkRequestWithDelay(PendingIntent operation) {
         mHandler.sendMessageDelayed(
                 mHandler.obtainMessage(EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT,
-                getCallingUid(), 0, operation), mReleasePendingIntentDelayMs);
+                mDeps.getCallingUid(), 0, operation), mReleasePendingIntentDelayMs);
     }
 
     @Override
     public void releasePendingNetworkRequest(PendingIntent operation) {
         Objects.requireNonNull(operation, "PendingIntent cannot be null.");
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT,
-                getCallingUid(), 0, operation));
+                mDeps.getCallingUid(), 0, operation));
     }
 
     // In order to implement the compatibility measure for pre-M apps that call
@@ -5804,7 +5804,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public void releaseNetworkRequest(NetworkRequest networkRequest) {
         ensureNetworkRequestHasType(networkRequest);
         mHandler.sendMessage(mHandler.obtainMessage(
-                EVENT_RELEASE_NETWORK_REQUEST, getCallingUid(), 0, networkRequest));
+                EVENT_RELEASE_NETWORK_REQUEST, mDeps.getCallingUid(), 0, networkRequest));
     }
 
     private void handleRegisterNetworkProvider(NetworkProviderInfo npi) {
@@ -8282,7 +8282,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final NetworkAgentInfo vpn = getVpnForUid(uid);
         if (vpn == null || getVpnType(vpn) != VpnManager.TYPE_VPN_SERVICE
-                || vpn.networkCapabilities.getOwnerUid() != Binder.getCallingUid()) {
+                || vpn.networkCapabilities.getOwnerUid() != mDeps.getCallingUid()) {
             return INVALID_UID;
         }
 
