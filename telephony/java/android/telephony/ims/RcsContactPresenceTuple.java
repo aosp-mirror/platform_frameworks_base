@@ -24,7 +24,6 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -372,22 +371,6 @@ public final class RcsContactPresenceTuple implements Parcelable {
          * The optional timestamp indicating the data and time of the status change of this tuple.
          * Per RFC3863 section 4.1.7, the timestamp is formatted as an IMPP datetime format
          * string per RFC3339.
-         * @hide
-         */
-        public @NonNull Builder setTimestamp(@NonNull String timestamp) {
-            try {
-                mPresenceTuple.mTimestamp =
-                        DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from);
-            } catch (DateTimeParseException e) {
-                Log.d(LOG_TAG, "Parse timestamp failed " + e);
-            }
-            return this;
-        }
-
-        /**
-         * The optional timestamp indicating the data and time of the status change of this tuple.
-         * Per RFC3863 section 4.1.7, the timestamp is formatted as an IMPP datetime format
-         * string per RFC3339.
          */
         public @NonNull Builder setTime(@NonNull Instant timestamp) {
             mPresenceTuple.mTimestamp = timestamp;
@@ -515,14 +498,6 @@ public final class RcsContactPresenceTuple implements Parcelable {
     /** @return the SIP URI contained in the contact element of the tuple if it exists. */
     public @Nullable Uri getContactUri() {
         return mContactUri;
-    }
-
-    /**
-     * @return the timestamp element contained in the tuple if it exists
-     * @hide
-     */
-    public @Nullable String getTimestamp() {
-        return (mTimestamp == null) ? null : mTimestamp.toString();
     }
 
     /** @return the timestamp element contained in the tuple if it exists */

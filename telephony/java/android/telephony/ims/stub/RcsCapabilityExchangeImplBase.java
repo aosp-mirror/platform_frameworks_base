@@ -386,41 +386,6 @@ public class RcsCapabilityExchangeImplBase {
      * {@link SubscribeResponseCallback#onTerminated(String, long)} must be called for the
      * framework to finish listening for NOTIFY responses.
      *
-     * @param uris A {@link List} of the {@link Uri}s that the framework is requesting the UCE
-     * capabilities for.
-     * @param cb The callback of the subscribe request.
-     * @hide
-     */
-    // executor used is defined in the constructor.
-    @SuppressLint("ExecutorRegistration")
-    public void subscribeForCapabilities(@NonNull List<Uri> uris,
-            @NonNull SubscribeResponseCallback cb) {
-        // Stub - to be implemented by service
-        Log.w(LOG_TAG, "subscribeForCapabilities called with no implementation.");
-        try {
-            cb.onCommandError(COMMAND_CODE_NOT_SUPPORTED);
-        } catch (ImsException e) {
-            // Do not do anything, this is a stub implementation.
-        }
-    }
-
-    /**
-     * The user capabilities of one or multiple contacts have been requested by the framework.
-     * <p>
-     * The implementer must follow up this call with an
-     * {@link SubscribeResponseCallback#onCommandError} call to indicate this operation has failed.
-     * The response from the network to the SUBSCRIBE request must be sent back to the framework
-     * using {@link SubscribeResponseCallback#onNetworkResponse(int, String)}.
-     * As NOTIFY requests come in from the network, the requested contact’s capabilities should be
-     * sent back to the framework using
-     * {@link SubscribeResponseCallback#onNotifyCapabilitiesUpdate(List<String>}) and
-     * {@link SubscribeResponseCallback#onResourceTerminated(List<Pair<Uri, String>>)}
-     * should be called with the presence information for the contacts specified.
-     * <p>
-     * Once the subscription is terminated,
-     * {@link SubscribeResponseCallback#onTerminated(String, long)} must be called for the
-     * framework to finish listening for NOTIFY responses.
-     *
      * @param uris A {@link Collection} of the {@link Uri}s that the framework is requesting the
      * UCE capabilities for.
      * @param cb The callback of the subscribe request.
