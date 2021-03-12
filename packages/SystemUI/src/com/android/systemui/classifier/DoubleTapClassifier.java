@@ -53,7 +53,7 @@ public class DoubleTapClassifier extends FalsingClassifier {
         StringBuilder reason = new StringBuilder();
 
         if (firstTapEvents == null) {
-            return Result.falsed(1, "Only one gesture recorded");
+            return Result.falsed(0, "Only one gesture recorded");
         }
 
         return !isDoubleTap(firstTapEvents, secondTapEvents, reason)

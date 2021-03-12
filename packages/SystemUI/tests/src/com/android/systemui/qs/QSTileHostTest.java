@@ -49,6 +49,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSFactory;
@@ -360,6 +361,7 @@ public class QSTileHostTest extends SysuiTestCase {
                     host,
                     mLooper.getLooper(),
                     new Handler(mLooper.getLooper()),
+                    new FalsingManagerFake(),
                     mock(MetricsLogger.class),
                     mock(StatusBarStateController.class),
                     mock(ActivityStarter.class),
