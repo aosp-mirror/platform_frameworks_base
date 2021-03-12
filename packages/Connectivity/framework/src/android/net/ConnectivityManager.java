@@ -20,6 +20,7 @@ import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
 import static android.net.NetworkRequest.Type.REQUEST;
+import static android.net.NetworkRequest.Type.TRACK_BEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
 import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 import static android.net.QosCallback.QosCallbackRegistrationException;
@@ -4190,6 +4191,18 @@ public class ConnectivityManager {
     }
 
     /**
+     * @hide
+     */
+    // TODO: Make it public api.
+    @SuppressLint("ExecutorRegistration")
+    public void registerBestMatchingNetworkCallback(@NonNull NetworkRequest request,
+            @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
+        final NetworkCapabilities nc = request.networkCapabilities;
+        final CallbackHandler cbHandler = new CallbackHandler(handler);
+        sendRequestForNetwork(nc, networkCallback, 0, TRACK_BEST, TYPE_NONE, cbHandler);
+    }
+
+    /**
      * Requests bandwidth update for a given {@link Network} and returns whether the update request
      * is accepted by ConnectivityService. Once accepted, ConnectivityService will poll underlying
      * network connection for updated bandwidth information. The caller will be notified via
@@ -4979,10 +4992,10 @@ public class ConnectivityManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
     })
     public void requestBackgroundNetwork(@NonNull NetworkRequest request,
-            @Nullable Handler handler, @NonNull NetworkCallback networkCallback) {
+            @NonNull Handler handler, @NonNull NetworkCallback networkCallback) {
         final NetworkCapabilities nc = request.networkCapabilities;
         sendRequestForNetwork(nc, networkCallback, 0, BACKGROUND_REQUEST,
-                TYPE_NONE, handler == null ? getDefaultHandler() : new CallbackHandler(handler));
+                TYPE_NONE, new CallbackHandler(handler));
     }
 
     /**
