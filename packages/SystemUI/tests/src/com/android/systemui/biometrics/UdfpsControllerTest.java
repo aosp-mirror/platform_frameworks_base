@@ -246,20 +246,4 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // THEN the illumination is hidden
         verify(mUdfpsView).stopIllumination();
     }
-
-    @Test
-    public void registersAndUnregistersViewForCallbacks() throws RemoteException {
-        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
-        mFgExecutor.runAllReady();
-        verify(mStatusBarStateController).addCallback(mUdfpsController.mStatusBarStateListener);
-        verify(mStatusBar).addExpansionChangedListener(
-                mUdfpsController.mStatusBarExpansionListener);
-
-        mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
-        mFgExecutor.runAllReady();
-        verify(mStatusBarStateController).removeCallback(mUdfpsController.mStatusBarStateListener);
-        verify(mStatusBar).removeExpansionChangedListener(
-                mUdfpsController.mStatusBarExpansionListener);
-    }
 }

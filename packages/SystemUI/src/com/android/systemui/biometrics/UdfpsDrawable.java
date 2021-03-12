@@ -17,10 +17,10 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
+import android.graphics.ColorFilter;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,24 +28,24 @@ import androidx.annotation.Nullable;
 import com.android.systemui.R;
 
 /**
- * Abstract base class for animations that should be drawn when the finger is not touching the
+ * Abstract base class for drawable displayed when the finger is not touching the
  * sensor area.
  */
-public abstract class UdfpsAnimation extends Drawable {
-    protected abstract void updateColor();
-    protected abstract void onDestroy();
-
+public abstract class UdfpsDrawable extends Drawable {
     @NonNull protected final Context mContext;
     @NonNull protected final Drawable mFingerprintDrawable;
-    @Nullable private View mView;
     private boolean mIlluminationShowing;
 
-    public UdfpsAnimation(@NonNull Context context) {
+    int mAlpha = 255; // 0 - 255
+    public UdfpsDrawable(@NonNull Context context) {
         mContext = context;
         mFingerprintDrawable = context.getResources().getDrawable(R.drawable.ic_fingerprint, null);
         mFingerprintDrawable.mutate();
     }
 
+    /**
+     * @param sensorRect the rect coordinates for the sensor area
+     */
     public void onSensorRectUpdated(@NonNull RectF sensorRect) {
         final int margin =  (int) sensorRect.height() / 8;
 
@@ -56,17 +56,17 @@ public abstract class UdfpsAnimation extends Drawable {
         updateFingerprintIconBounds(bounds);
     }
 
+    /**
+     * Bounds for the fingerprint icon
+     */
     protected void updateFingerprintIconBounds(@NonNull Rect bounds) {
         mFingerprintDrawable.setBounds(bounds);
     }
 
     @Override
     public void setAlpha(int alpha) {
-        mFingerprintDrawable.setAlpha(alpha);
-    }
-
-    public void setAnimationView(UdfpsAnimationView view) {
-        mView = view;
+        mAlpha = alpha;
+        mFingerprintDrawable.setAlpha(mAlpha);
     }
 
     boolean isIlluminationShowing() {
@@ -77,23 +77,12 @@ public abstract class UdfpsAnimation extends Drawable {
         mIlluminationShowing = showing;
     }
 
-    /**
-     * @return The amount of padding that's needed on each side of the sensor, in pixels.
-     */
-    public int getPaddingX() {
-        return 0;
+    @Override
+    public void setColorFilter(@Nullable ColorFilter colorFilter) {
     }
 
-    /**
-     * @return The amount of padding that's needed on each side of the sensor, in pixels.
-     */
-    public int getPaddingY() {
+    @Override
+    public int getOpacity() {
         return 0;
-    }
-
-    protected void postInvalidateView() {
-        if (mView != null) {
-            mView.postInvalidate();
-        }
     }
 }
