@@ -57,6 +57,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.DeadSystemException;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -120,6 +121,8 @@ public class WallpaperManager {
     /** {@hide} */
     private static final String VALUE_CMF_COLOR =
             android.os.SystemProperties.get("ro.boot.hardware.color");
+    /** {@hide} */
+    private static final String WALLPAPER_CMF_PATH = "/wallpaper/image/";
 
     /**
      * Activity Action: Show settings for choosing wallpaper. Do not use directly to construct
@@ -2066,22 +2069,17 @@ public class WallpaperManager {
             return null;
         } else {
             whichProp = PROP_WALLPAPER;
-            final int defaultColorResId = context.getResources().getIdentifier(
-                    "default_wallpaper_" + VALUE_CMF_COLOR, "drawable", "android");
-            defaultResId =
-                    defaultColorResId == 0 ? com.android.internal.R.drawable.default_wallpaper
-                            : defaultColorResId;
+            defaultResId = com.android.internal.R.drawable.default_wallpaper;
         }
         final String path = SystemProperties.get(whichProp);
-        if (!TextUtils.isEmpty(path)) {
-            final File file = new File(path);
-            if (file.exists()) {
-                try {
-                    return new FileInputStream(file);
-                } catch (IOException e) {
-                    // Ignored, fall back to platform default below
-                }
-            }
+        final InputStream wallpaperInputStream = getWallpaperInputStream(path);
+        if (wallpaperInputStream != null) {
+            return wallpaperInputStream;
+        }
+        final String cmfPath = getCmfWallpaperPath();
+        final InputStream cmfWallpaperInputStream = getWallpaperInputStream(cmfPath);
+        if (cmfWallpaperInputStream != null) {
+            return cmfWallpaperInputStream;
         }
         try {
             return context.getResources().openRawResource(defaultResId);
@@ -2089,6 +2087,25 @@ public class WallpaperManager {
             // no default defined for this device; this is not a failure
         }
         return null;
+    }
+
+    private static InputStream getWallpaperInputStream(String path) {
+        if (!TextUtils.isEmpty(path)) {
+            final File file = new File(path);
+            if (file.exists()) {
+                try {
+                    return new FileInputStream(file);
+                } catch (IOException e) {
+                    // Ignored, fall back to platform default
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String getCmfWallpaperPath() {
+        return Environment.getProductDirectory() + WALLPAPER_CMF_PATH + "default_wallpaper_"
+                + VALUE_CMF_COLOR;
     }
 
     /**
