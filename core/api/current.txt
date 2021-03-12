@@ -26136,10 +26136,6 @@ package android.net {
     ctor public NetworkSpecifier();
   }
 
-  public class ParseException extends java.lang.RuntimeException {
-    field public String response;
-  }
-
   public abstract class PlatformVpnProfile {
     method public final int getType();
     method @NonNull public final String getTypeString();
