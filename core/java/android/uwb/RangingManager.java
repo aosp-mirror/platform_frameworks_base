@@ -17,6 +17,7 @@
 package android.uwb;
 
 import android.annotation.NonNull;
+import android.os.CancellationSignal;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.util.Log;
@@ -44,9 +45,11 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
      * @param executor {@link Executor} to run callbacks
      * @param callbacks {@link RangingSession.Callback} to associate with the {@link RangingSession}
      *                  that is being opened.
-     * @return a new {@link RangingSession}
+     * @return a {@link CancellationSignal} that may be used to cancel the opening of the
+     *         {@link RangingSession}.
      */
-    public RangingSession openSession(@NonNull PersistableBundle params, @NonNull Executor executor,
+    public CancellationSignal openSession(@NonNull PersistableBundle params,
+            @NonNull Executor executor,
             @NonNull RangingSession.Callback callbacks) {
         SessionHandle sessionHandle;
         try {
@@ -66,7 +69,9 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
             RangingSession session =
                     new RangingSession(executor, callbacks, mAdapter, sessionHandle);
             mRangingSessionTable.put(sessionHandle, session);
-            return session;
+            CancellationSignal cancellationSignal = new CancellationSignal();
+            cancellationSignal.setOnCancelListener(() -> session.close());
+            return cancellationSignal;
         }
     }
 
