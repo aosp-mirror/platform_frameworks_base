@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.RemoteException;
 import android.os.ServiceManager.ServiceNotFoundException;
-import android.os.ShellCommand;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto;
@@ -103,32 +102,6 @@ class ImeTracingServerImpl extends ImeTracing {
                     // Source not recognised.
                     Log.w(TAG, "Request to add to buffer, but source not recognised.");
             }
-        }
-    }
-
-    /**
-     * Responds to a shell command of the format "adb shell cmd input_method ime tracing <command>"
-     *
-     * @param shell The shell command to process
-     * @return {@code 0} if the command was valid and successfully processed, {@code -1} otherwise
-     */
-    @Override
-    public int onShellCommand(ShellCommand shell) {
-        PrintWriter pw = shell.getOutPrintWriter();
-        String cmd = shell.getNextArgRequired();
-        switch (cmd) {
-            case "start":
-                startTrace(pw);
-                return 0;
-            case "stop":
-                stopTrace(pw);
-                return 0;
-            default:
-                pw.println("Unknown command: " + cmd);
-                pw.println("Input method trace options:");
-                pw.println("  start: Start tracing");
-                pw.println("  stop: Stop tracing");
-                return -1;
         }
     }
 
