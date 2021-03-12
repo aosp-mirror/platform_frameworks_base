@@ -1010,6 +1010,16 @@ public class ProvisioningManager {
                 }
             }
 
+            @Override
+            public void onPreProvisioningReceived(byte[] configXml) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onPreProvisioningReceived(configXml));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+
             private void setExecutor(Executor executor) {
                 mExecutor = executor;
             }
@@ -1022,7 +1032,7 @@ public class ProvisioningManager {
          * due to various triggers defined in GSMA RCC.14 for ACS(auto configuration
          * server) or other operator defined triggers. If RCS provisioning is already
          * completed at the time of callback registration, then this method shall be
-         * invoked with the current configuration
+         * invoked with the current configuration.
          * @param configXml The RCS configuration XML received by OTA. It is defined
          * by GSMA RCC.07.
          */
@@ -1054,6 +1064,20 @@ public class ProvisioningManager {
          * invoked after the subscription has become inactive
          */
         public void onRemoved() {}
+
+        /**
+         * Some carriers using ACS (auto configuration server) may send a carrier-specific
+         * pre-provisioning configuration XML if the user has not been provisioned for RCS
+         * services yet. When this provisioning XML is received, the framework will move
+         * into a "not provisioned" state for RCS. In order for provisioning to proceed,
+         * the application must parse this configuration XML and perform the carrier specific
+         * opt-in flow for RCS services. If the user accepts, {@link #triggerRcsReconfiguration}
+         * must be called in order for the device to move out of this state and try to fetch
+         * the RCS provisioning information.
+         *
+         * @param configXml the pre-provisioning config in carrier specified format.
+         */
+        public void onPreProvisioningReceived(@NonNull byte[] configXml) {}
 
         /**@hide*/
         public final IRcsConfigCallback getBinder() {
