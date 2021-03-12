@@ -13038,6 +13038,7 @@ package android.telephony.ims {
     method public void onAutoConfigurationErrorReceived(int, @NonNull String);
     method public void onConfigurationChanged(@NonNull byte[]);
     method public void onConfigurationReset();
+    method public void onPreProvisioningReceived(@NonNull byte[]);
     method public void onRemoved();
   }
 
@@ -13507,6 +13508,7 @@ package android.telephony.ims.stub {
     method public int getConfigInt(int);
     method public String getConfigString(int);
     method public final void notifyAutoConfigurationErrorReceived(int, @NonNull String);
+    method public final void notifyPreProvisioningReceived(@NonNull byte[]);
     method public final void notifyProvisionedValueChanged(int, int);
     method public final void notifyProvisionedValueChanged(int, String);
     method public void notifyRcsAutoConfigurationReceived(@NonNull byte[], boolean);
