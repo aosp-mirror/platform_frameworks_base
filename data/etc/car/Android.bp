@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-
 // Privapp permission whitelist files
 
 package {
@@ -150,7 +148,6 @@ prebuilt_etc {
     sub_dir: "permissions",
     src: "com.android.car.rotary.xml",
     filename_from_src: true,
-    system_ext_specific: true,
 }
 
 prebuilt_etc {
