@@ -167,6 +167,7 @@ public abstract class PanelViewController {
     private boolean mIgnoreXTouchSlop;
     private boolean mExpandLatencyTracking;
     private final PanelView mView;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     protected final Resources mResources;
     protected final KeyguardStateController mKeyguardStateController;
     protected final SysuiStatusBarStateController mStatusBarStateController;
@@ -235,12 +236,14 @@ public abstract class PanelViewController {
             FalsingManager falsingManager, DozeLog dozeLog,
             KeyguardStateController keyguardStateController,
             SysuiStatusBarStateController statusBarStateController, VibratorHelper vibratorHelper,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             LatencyTracker latencyTracker,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             AmbientState ambientState) {
         mAmbientState = ambientState;
         mView = view;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -1391,8 +1394,13 @@ public abstract class PanelViewController {
 
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    addMovement(event);
-                    endMotionEvent(event, x, y, false /* forceCancel */);
+                    if (mStatusBarKeyguardViewManager.isBouncerShowing()
+                            && mFalsingManager.isFalseTap(true, 0.5)) {
+                        endMotionEvent(event, x, y, true /* forceCancel */);
+                    } else {
+                        addMovement(event);
+                        endMotionEvent(event, x, y, false /* forceCancel */);
+                    }
                     InteractionJankMonitor monitor = InteractionJankMonitor.getInstance();
                     if (event.getActionMasked() == MotionEvent.ACTION_UP) {
                         monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);

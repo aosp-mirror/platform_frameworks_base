@@ -46,7 +46,7 @@ public class DoubleTapClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
         List<MotionEvent> secondTapEvents = getRecentMotionEvents();
         List<MotionEvent> firstTapEvents = getPriorMotionEvents();
 

@@ -124,7 +124,7 @@ public abstract class FalsingClassifier {
      * See also {@link #classifyGesture(double, double)}.
      */
     Result classifyGesture() {
-        return calculateFalsingResult(0, 0);
+        return calculateFalsingResult(0.5, 0);
     }
 
     /**
@@ -135,16 +135,16 @@ public abstract class FalsingClassifier {
      *
      * See also {@link #classifyGesture()}.
      */
-    Result classifyGesture(double historyPenalty, double historyConfidence) {
-        return calculateFalsingResult(historyPenalty, historyConfidence);
+    Result classifyGesture(double historyBelief, double historyConfidence) {
+        return calculateFalsingResult(historyBelief, historyConfidence);
     }
 
     /**
      * Calculate a result based on available data.
      *
-     * When passed a historyConfidence of 0, the history penalty should be wholly ignored.
+     * When passed a historyConfidence of 0, the history belief should be wholly ignored.
      */
-    abstract Result calculateFalsingResult(double historyPenalty, double historyConfidence);
+    abstract Result calculateFalsingResult(double historyBelief, double historyConfidence);
 
     /** */
     public static void logDebug(String msg) {
@@ -164,7 +164,7 @@ public abstract class FalsingClassifier {
     /**
      * A Falsing result that encapsulates the boolean result along with confidence and a reason.
      */
-    static class Result {
+    public static class Result {
         private final boolean mFalsed;
         private final double mConfidence;
         private final String mReason;
@@ -193,14 +193,14 @@ public abstract class FalsingClassifier {
         /**
          * Construct a "falsed" result indicating that a gesture should be treated as accidental.
          */
-        static Result falsed(double confidence, String reason) {
+        public static Result falsed(double confidence, String reason) {
             return new Result(true, confidence, reason);
         }
 
         /**
          * Construct a "passed" result indicating that a gesture should be allowed.
          */
-        static Result passed(double confidence) {
+        public static Result passed(double confidence) {
             return new Result(false, confidence, null);
         }
     }

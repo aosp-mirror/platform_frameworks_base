@@ -76,7 +76,7 @@ public class FalsingManagerFake implements FalsingManager {
     }
 
     @Override
-    public boolean isFalseTap(boolean robustCheck) {
+    public boolean isFalseTap(boolean robustCheck, double falsePenalty) {
         return robustCheck ? mIsFalseRobustTap : mIsFalseTap;
     }
 
