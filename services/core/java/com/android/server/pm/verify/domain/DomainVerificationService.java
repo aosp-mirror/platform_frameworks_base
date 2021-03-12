@@ -1330,83 +1330,50 @@ public class DomainVerificationService extends SystemService
             @NonNull Function<String, PackageSetting> pkgSettingFunction) {
         String domain = intent.getData().getHost();
 
-        // Collect package names
-        ArrayMap<String, Integer> packageApprovals = new ArrayMap<>();
+        // Collect valid infos
+        ArrayMap<ResolveInfo, Integer> infoApprovals = new ArrayMap<>();
         int infosSize = infos.size();
         for (int index = 0; index < infosSize; index++) {
-            packageApprovals.put(infos.get(index).getComponentInfo().packageName,
-                    APPROVAL_LEVEL_NONE);
+            final ResolveInfo info = infos.get(index);
+            // Only collect for intent filters that can auto resolve
+            if (info.isAutoResolutionAllowed()) {
+                infoApprovals.put(info, null);
+            }
         }
 
         // Find all approval levels
-        int highestApproval = fillMapWithApprovalLevels(packageApprovals, domain, userId,
+        int highestApproval = fillMapWithApprovalLevels(infoApprovals, domain, userId,
                 pkgSettingFunction);
         if (highestApproval == APPROVAL_LEVEL_NONE) {
             return Pair.create(emptyList(), highestApproval);
         }
 
-        // Filter to highest, non-zero packages
-        ArraySet<String> approvedPackages = new ArraySet<>();
-        int approvalsSize = packageApprovals.size();
-        for (int index = 0; index < approvalsSize; index++) {
-            if (packageApprovals.valueAt(index) == highestApproval) {
-                approvedPackages.add(packageApprovals.keyAt(index));
+        // Filter to highest, non-zero infos
+        for (int index = infoApprovals.size() - 1; index >= 0; index--) {
+            if (infoApprovals.valueAt(index) != highestApproval) {
+                infoApprovals.removeAt(index);
             }
         }
 
-        ArraySet<String> filteredPackages = new ArraySet<>();
-        if (highestApproval == APPROVAL_LEVEL_LEGACY_ASK) {
+        if (highestApproval != APPROVAL_LEVEL_LEGACY_ASK) {
             // To maintain legacy behavior while the Settings API is not implemented,
             // show the chooser if all approved apps are marked ask, skipping the
             // last app, last declaration filtering.
-            filteredPackages.addAll(approvedPackages);
-        } else {
-            // Filter to last installed package
-            long latestInstall = Long.MIN_VALUE;
-            int approvedSize = approvedPackages.size();
-            for (int index = 0; index < approvedSize; index++) {
-                String packageName = approvedPackages.valueAt(index);
-                PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
-                if (pkgSetting == null) {
-                    continue;
-                }
-                long installTime = pkgSetting.getFirstInstallTime();
-                if (installTime > latestInstall) {
-                    latestInstall = installTime;
-                    filteredPackages.clear();
-                    filteredPackages.add(packageName);
-                } else if (installTime == latestInstall) {
-                    filteredPackages.add(packageName);
-                }
-            }
+            filterToLastFirstInstalled(infoApprovals, pkgSettingFunction);
         }
 
-        // Filter to approved ResolveInfos
-        ArrayMap<String, List<ResolveInfo>> approvedInfos = new ArrayMap<>();
-        for (int index = 0; index < infosSize; index++) {
-            ResolveInfo info = infos.get(index);
-            String packageName = info.getComponentInfo().packageName;
-            if (filteredPackages.contains(packageName)) {
-                List<ResolveInfo> infosPerPackage = approvedInfos.get(packageName);
-                if (infosPerPackage == null) {
-                    infosPerPackage = new ArrayList<>();
-                    approvedInfos.put(packageName, infosPerPackage);
-                }
-                infosPerPackage.add(info);
-            }
+        // Easier to transform into list as the filterToLastDeclared method
+        // requires swapping indexes, which doesn't work with ArrayMap keys
+        final int size = infoApprovals.size();
+        List<ResolveInfo> finalList = new ArrayList<>(size);
+        for (int index = 0; index < size; index++) {
+            finalList.add(infoApprovals.keyAt(index));
         }
 
-        List<ResolveInfo> finalList;
-        if (highestApproval == APPROVAL_LEVEL_LEGACY_ASK) {
-            // If legacy ask, skip the last declaration filtering
-            finalList = new ArrayList<>();
-            int size = approvedInfos.size();
-            for (int index = 0; index < size; index++) {
-                finalList.addAll(approvedInfos.valueAt(index));
-            }
-        } else {
+        // If legacy ask, skip the last declaration filtering
+        if (highestApproval != APPROVAL_LEVEL_LEGACY_ASK) {
             // Find the last declared ResolveInfo per package
-            finalList = filterToLastDeclared(approvedInfos, pkgSettingFunction);
+            filterToLastDeclared(finalList, pkgSettingFunction);
         }
 
         return Pair.create(finalList, highestApproval);
@@ -1415,68 +1382,127 @@ public class DomainVerificationService extends SystemService
     /**
      * @return highest approval level found
      */
-    private int fillMapWithApprovalLevels(@NonNull ArrayMap<String, Integer> inputMap,
+    @ApprovalLevel
+    private int fillMapWithApprovalLevels(@NonNull ArrayMap<ResolveInfo, Integer> inputMap,
             @NonNull String domain, @UserIdInt int userId,
             @NonNull Function<String, PackageSetting> pkgSettingFunction) {
         int highestApproval = APPROVAL_LEVEL_NONE;
         int size = inputMap.size();
         for (int index = 0; index < size; index++) {
-            String packageName = inputMap.keyAt(index);
+            if (inputMap.valueAt(index) != null) {
+                // Already filled by previous iteration
+                continue;
+            }
+
+            ResolveInfo info = inputMap.keyAt(index);
+            final String packageName = info.getComponentInfo().packageName;
             PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
             if (pkgSetting == null) {
-                inputMap.setValueAt(index, APPROVAL_LEVEL_NONE);
+                fillInfoMapForSamePackage(inputMap, packageName, APPROVAL_LEVEL_NONE);
                 continue;
             }
             int approval = approvalLevelForDomain(pkgSetting, domain, userId, domain);
             highestApproval = Math.max(highestApproval, approval);
-            inputMap.setValueAt(index, approval);
+            fillInfoMapForSamePackage(inputMap, packageName, approval);
         }
 
         return highestApproval;
     }
 
-    @NonNull
-    private List<ResolveInfo> filterToLastDeclared(
-            @NonNull ArrayMap<String, List<ResolveInfo>> inputMap,
-            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
-        List<ResolveInfo> finalList = new ArrayList<>(inputMap.size());
+    private void fillInfoMapForSamePackage(@NonNull ArrayMap<ResolveInfo, Integer> inputMap,
+            @NonNull String targetPackageName, @ApprovalLevel int level) {
+        final int size = inputMap.size();
+        for (int index = 0; index < size; index++) {
+            final String packageName = inputMap.keyAt(index).getComponentInfo().packageName;
+            if (Objects.equals(targetPackageName, packageName)) {
+                inputMap.setValueAt(index, level);
+            }
+        }
+    }
 
-        int inputSize = inputMap.size();
-        for (int inputIndex = 0; inputIndex < inputSize; inputIndex++) {
-            String packageName = inputMap.keyAt(inputIndex);
-            List<ResolveInfo> infos = inputMap.valueAt(inputIndex);
+    @NonNull
+    private void filterToLastFirstInstalled(@NonNull ArrayMap<ResolveInfo, Integer> inputMap,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
+        // First, find the package with the latest first install time
+        String targetPackageName = null;
+        long latestInstall = Long.MIN_VALUE;
+        final int size = inputMap.size();
+        for (int index = 0; index < size; index++) {
+            ResolveInfo info = inputMap.keyAt(index);
+            String packageName = info.getComponentInfo().packageName;
             PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
+            if (pkgSetting == null) {
+                continue;
+            }
+
+            long installTime = pkgSetting.getFirstInstallTime();
+            if (installTime > latestInstall) {
+                latestInstall = installTime;
+                targetPackageName = packageName;
+            }
+        }
+
+        // Then, remove all infos that don't match the package
+        for (int index = inputMap.size() - 1; index >= 0; index--) {
+            ResolveInfo info = inputMap.keyAt(index);
+            if (!Objects.equals(targetPackageName, info.getComponentInfo().packageName)) {
+                inputMap.removeAt(index);
+            }
+        }
+    }
+
+    @NonNull
+    private void filterToLastDeclared(@NonNull List<ResolveInfo> inputList,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
+        // Must call size each time as the size of the list will decrease
+        for (int index = 0; index < inputList.size(); index++) {
+            ResolveInfo info = inputList.get(index);
+            String targetPackageName = info.getComponentInfo().packageName;
+            PackageSetting pkgSetting = pkgSettingFunction.apply(targetPackageName);
             AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
             if (pkg == null) {
                 continue;
             }
 
-            ResolveInfo result = null;
-            int highestIndex = -1;
-            int infosSize = infos.size();
-            for (int infoIndex = 0; infoIndex < infosSize; infoIndex++) {
-                ResolveInfo info = infos.get(infoIndex);
-                List<ParsedActivity> activities = pkg.getActivities();
-                int activitiesSize = activities.size();
-                for (int activityIndex = 0; activityIndex < activitiesSize; activityIndex++) {
-                    if (Objects.equals(activities.get(activityIndex).getComponentName(),
-                            info.getComponentInfo().getComponentName())) {
-                        if (activityIndex > highestIndex) {
-                            highestIndex = activityIndex;
-                            result = info;
-                        }
-                        break;
-                    }
+            ResolveInfo result = info;
+            int highestIndex = indexOfIntentFilterEntry(pkg, result);
+
+            // Search backwards so that lower results can be removed as they're found
+            for (int searchIndex = inputList.size() - 1; searchIndex >= index + 1; searchIndex--) {
+                ResolveInfo searchInfo = inputList.get(searchIndex);
+                if (!Objects.equals(targetPackageName, searchInfo.getComponentInfo().packageName)) {
+                    continue;
                 }
+
+                int entryIndex = indexOfIntentFilterEntry(pkg, searchInfo);
+                if (entryIndex > highestIndex) {
+                    highestIndex = entryIndex;
+                    result = searchInfo;
+                }
+
+                // Always remove the entry so that the current index
+                // is left as the sole candidate of the target package
+                inputList.remove(searchIndex);
             }
 
-            // Shouldn't be null, but might as well be safe
-            if (result != null) {
-                finalList.add(result);
+            // Swap the current index for the result, leaving this as
+            // the only entry with the target package name
+            inputList.set(index, result);
+        }
+    }
+
+    private int indexOfIntentFilterEntry(@NonNull AndroidPackage pkg,
+            @NonNull ResolveInfo target) {
+        List<ParsedActivity> activities = pkg.getActivities();
+        int activitiesSize = activities.size();
+        for (int activityIndex = 0; activityIndex < activitiesSize; activityIndex++) {
+            if (Objects.equals(activities.get(activityIndex).getComponentName(),
+                    target.getComponentInfo().getComponentName())) {
+                return activityIndex;
             }
         }
 
-        return finalList;
+        return -1;
     }
 
     @Override
@@ -1484,8 +1510,7 @@ public class DomainVerificationService extends SystemService
             @NonNull List<ResolveInfo> candidates,
             @PackageManager.ResolveInfoFlags int resolveInfoFlags, @UserIdInt int userId) {
         String packageName = pkgSetting.getName();
-        if (!DomainVerificationUtils.isDomainVerificationIntent(intent, candidates,
-                resolveInfoFlags)) {
+        if (!DomainVerificationUtils.isDomainVerificationIntent(intent, resolveInfoFlags)) {
             if (DEBUG_APPROVAL) {
                 debugApproval(packageName, intent, userId, false, "not valid intent");
             }

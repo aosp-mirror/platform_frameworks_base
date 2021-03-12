@@ -2644,8 +2644,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // We'll want to include browser possibilities in a few cases
             boolean includeBrowser = false;
 
-            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, candidates,
-                            matchFlags)) {
+            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, matchFlags)) {
                 result.addAll(undefinedList);
                 // Maybe add one for the other profile.
                 if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
