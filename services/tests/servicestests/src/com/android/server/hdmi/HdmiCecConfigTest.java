@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,7 @@ import static org.testng.Assert.assertThrows;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.hdmi.HdmiControlManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -34,6 +36,8 @@ import android.provider.Settings.Global;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+
+import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -61,265 +65,118 @@ public final class HdmiCecConfigTest {
     @Mock private HdmiCecConfig.StorageAdapter mStorageAdapter;
     @Mock private HdmiCecConfig.SettingChangeListener mSettingChangeListener;
 
+    private void setBooleanResource(int resId, boolean value) {
+        Resources resources = mContext.getResources();
+        doReturn(value).when(resources).getBoolean(resId);
+    }
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mContext = InstrumentationRegistry.getTargetContext();
-    }
-
-    @Test
-    public void getAllCecSettings_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThat(hdmiCecConfig.getAllSettings()).isEmpty();
-    }
-
-    @Test
-    public void getAllCecSettings_Empty() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
-        assertThat(hdmiCecConfig.getAllSettings()).isEmpty();
+        mContext = FakeHdmiCecConfig.buildContext(InstrumentationRegistry.getTargetContext());
     }
 
     @Test
     public void getAllCecSettings_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"false\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getAllSettings())
                 .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
-                                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
+                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                    HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
+                    HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+                    HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                    HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+                    HdmiControlManager
+                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU);
     }
 
     @Test
-    public void getUserCecSettings_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThat(hdmiCecConfig.getUserSettings()).isEmpty();
-    }
-
-    @Test
-    public void getUserCecSettings_Empty() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
-        assertThat(hdmiCecConfig.getUserSettings()).isEmpty();
-    }
-
-    @Test
-    public void getUserCecSettings_OnlyMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+    public void getUserCecSettings_BasicSanity() {
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getUserSettings())
                 .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
-                                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
+                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                    HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
+                    HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+                    HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                    HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+                    HdmiControlManager
+                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU);
     }
 
     @Test
     public void getUserCecSettings_WithOverride() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>",
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"false\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>");
+        setBooleanResource(R.bool.config_cecHdmiCecEnabled_userConfigurable, false);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getUserSettings())
-                .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
-    }
-
-    @Test
-    public void isStringValueType_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.isStringValueType("foo"));
+                .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                    HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
+                    HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+                    HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                    HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+                    HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+                    HdmiControlManager
+                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU);
     }
 
     @Test
     public void isStringValueType_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.isStringValueType("foo"));
     }
 
     @Test
     public void isStringValueType_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertTrue(hdmiCecConfig.isStringValueType(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE));
     }
 
     @Test
-    public void isIntValueType_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.isIntValueType("foo"));
-    }
-
-    @Test
     public void isIntValueType_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.isIntValueType("foo"));
     }
 
     @Test
     public void isIntValueType_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertTrue(hdmiCecConfig.isIntValueType(
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED));
     }
 
     @Test
-    public void getAllowedStringValues_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.getAllowedStringValues("foo"));
-    }
-
-    @Test
     public void getAllowedStringValues_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getAllowedStringValues("foo"));
     }
 
     @Test
     public void getAllowedStringValues_InvalidValueType() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getAllowedStringValues(
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED));
@@ -327,21 +184,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getAllowedStringValues_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getAllowedStringValues(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
                 .containsExactly(HdmiControlManager.POWER_CONTROL_MODE_TV,
@@ -350,41 +193,25 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
-    public void getAllowedIntValues_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.getAllowedIntValues("foo"));
+    public void getAllowedStringValues_WithOverride() {
+        setBooleanResource(R.bool.config_cecPowerControlModeNone_allowed, false);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
+        assertThat(hdmiCecConfig.getAllowedStringValues(
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
+                .containsExactly(HdmiControlManager.POWER_CONTROL_MODE_TV,
+                                 HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
     }
 
     @Test
     public void getAllowedIntValues_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getAllowedIntValues("foo"));
     }
 
     @Test
     public void getAllowedIntValues_InvalidValueType() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getAllowedIntValues(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE));
@@ -392,20 +219,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getAllowedIntValues_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getAllowedIntValues(
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED))
                 .containsExactly(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED,
@@ -413,62 +227,24 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
-    public void getAllowedIntValues_HexValues() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0x00\" />"
-                + "      <value int-value=\"0x01\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"0x01\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+    public void getAllowedIntValues_WithOverride() {
+        setBooleanResource(R.bool.config_cecHdmiCecControlDisabled_allowed, false);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getAllowedIntValues(
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED))
-                .containsExactly(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED,
-                                 HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
-    }
-
-    @Test
-    public void getDefaultStringValue_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.getDefaultStringValue("foo"));
+                .containsExactly(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
     }
 
     @Test
     public void getDefaultStringValue_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getDefaultStringValue("foo"));
     }
 
     @Test
     public void getDefaultStringValue_InvalidValueType() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getDefaultStringValue(
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED));
@@ -476,62 +252,46 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getDefaultStringValue_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getDefaultStringValue(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
                 .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_TV);
     }
 
     @Test
-    public void getDefaultIntValue_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.getDefaultIntValue("foo"));
+    public void getDefaultStringValue_WithOverride() {
+        setBooleanResource(R.bool.config_cecPowerControlModeTv_default, false);
+        setBooleanResource(R.bool.config_cecPowerControlModeBroadcast_default, true);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
+        assertThat(hdmiCecConfig.getDefaultStringValue(
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
+                .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
+    }
+
+    @Test
+    public void getDefaultStringValue_MultipleDefaults() {
+        setBooleanResource(R.bool.config_cecPowerControlModeBroadcast_default, true);
+        assertThrows(RuntimeException.class,
+                () -> new HdmiCecConfig(mContext, mStorageAdapter));
+    }
+
+    @Test
+    public void getDefaultStringValue_NoDefault() {
+        setBooleanResource(R.bool.config_cecPowerControlModeTv_default, false);
+        assertThrows(RuntimeException.class,
+                () -> new HdmiCecConfig(mContext, mStorageAdapter));
     }
 
     @Test
     public void getDefaultIntValue_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getDefaultIntValue("foo"));
     }
 
     @Test
     public void getDefaultIntValue_InvalidValueType() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getDefaultIntValue(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE));
@@ -539,81 +299,32 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getDefaultIntValue_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getDefaultIntValue(
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED))
                 .isEqualTo(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
     }
 
     @Test
-    public void getDefaultIntValue_HexValue() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0x00\" />"
-                + "      <value int-value=\"0x01\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"0x01\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+    public void getDefaultIntValue_WithOverride() {
+        setBooleanResource(R.bool.config_cecHdmiCecControlEnabled_default, false);
+        setBooleanResource(R.bool.config_cecHdmiCecControlDisabled_default, true);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getDefaultIntValue(
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED))
-                .isEqualTo(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
-    }
-
-    @Test
-    public void getStringValue_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.getStringValue("foo"));
+                .isEqualTo(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
     }
 
     @Test
     public void getStringValue_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getStringValue("foo"));
     }
 
     @Test
     public void getStringValue_InvalidType() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getStringValue(
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED));
@@ -625,21 +336,7 @@ public final class HdmiCecConfigTest {
                   Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
                   HdmiControlManager.POWER_CONTROL_MODE_TV))
             .thenReturn(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getStringValue(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
                 .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
@@ -652,61 +349,22 @@ public final class HdmiCecConfigTest {
                   HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE))
                 .thenReturn(
                         HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"power_state_change_on_active_source_lost\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"none\" />"
-                + "      <value string-value=\"standby_now\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"none\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getStringValue(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST))
                 .isEqualTo(HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
     }
 
     @Test
-    public void getIntValue_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.getIntValue("foo"));
-    }
-
-    @Test
     public void getIntValue_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getIntValue("foo"));
     }
 
     @Test
     public void getIntValue_InvalidType() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.getIntValue(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE));
@@ -718,45 +376,7 @@ public final class HdmiCecConfigTest {
                   Global.HDMI_CONTROL_ENABLED,
                   Integer.toString(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED)))
             .thenReturn(Integer.toString(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED));
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
-        assertThat(hdmiCecConfig.getIntValue(
-                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED))
-                .isEqualTo(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
-    }
-
-    @Test
-    public void getIntValue_GlobalSetting_HexValue() {
-        when(mStorageAdapter.retrieveGlobalSetting(
-                  Global.HDMI_CONTROL_ENABLED,
-                  Integer.toHexString(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED)))
-            .thenReturn(Integer.toString(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED));
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0x0\" />"
-                + "      <value int-value=\"0x1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"0x1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getIntValue(
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED))
                 .isEqualTo(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
@@ -768,61 +388,23 @@ public final class HdmiCecConfigTest {
                   HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
                   Integer.toString(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_ENABLED)))
                 .thenReturn(Integer.toString(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED));
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"system_audio_mode_muting\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getIntValue(
                     HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING))
                 .isEqualTo(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED);
     }
 
     @Test
-    public void setStringValue_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.setStringValue("foo", "bar"));
-    }
-
-    @Test
     public void setStringValue_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.setStringValue("foo", "bar"));
     }
 
     @Test
     public void setStringValue_NotConfigurable() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"false\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        setBooleanResource(R.bool.config_cecSendStandbyOnSleep_userConfigurable, false);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.setStringValue(
                         HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
@@ -831,21 +413,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setStringValue_InvalidValue() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.setStringValue(
                         HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
@@ -854,21 +422,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setStringValue_GlobalSetting_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"send_standby_on_sleep\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"to_tv\" />"
-                + "      <value string-value=\"broadcast\" />"
-                + "      <value string-value=\"none\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"to_tv\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         hdmiCecConfig.setStringValue(HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                                HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
         verify(mStorageAdapter).storeGlobalSetting(
@@ -878,20 +432,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setStringValue_SharedPref_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"power_state_change_on_active_source_lost\""
-                + "           value-type=\"string\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value string-value=\"none\" />"
-                + "      <value string-value=\"standby_now\" />"
-                + "    </allowed-values>"
-                + "    <default-value string-value=\"none\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         hdmiCecConfig.setStringValue(
                   HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                   HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
@@ -901,40 +442,16 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
-    public void setIntValue_NoMasterXml() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter, null, null);
-        assertThrows(IllegalArgumentException.class,
-                () -> hdmiCecConfig.setIntValue("foo", 0));
-    }
-
-    @Test
     public void setIntValue_InvalidSetting() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.setIntValue("foo", 0));
     }
 
     @Test
     public void setIntValue_NotConfigurable() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"false\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        setBooleanResource(R.bool.config_cecHdmiCecEnabled_userConfigurable, false);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.setIntValue(
                         HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
@@ -943,20 +460,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setIntValue_InvalidValue() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.setIntValue(
                         HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
@@ -965,43 +469,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setIntValue_GlobalSetting_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0\" />"
-                + "      <value int-value=\"1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
-        hdmiCecConfig.setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
-                                  HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
-        verify(mStorageAdapter).storeGlobalSetting(
-                  Global.HDMI_CONTROL_ENABLED,
-                  Integer.toString(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED));
-    }
-
-    @Test
-    public void setIntValue_GlobalSetting_HexValue() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                + "<cec-settings>"
-                + "  <setting name=\"hdmi_cec_enabled\""
-                + "           value-type=\"int\""
-                + "           user-configurable=\"true\">"
-                + "    <allowed-values>"
-                + "      <value int-value=\"0x0\" />"
-                + "      <value int-value=\"0x1\" />"
-                + "    </allowed-values>"
-                + "    <default-value int-value=\"0x1\" />"
-                + "  </setting>"
-                + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         hdmiCecConfig.setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                                   HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
         verify(mStorageAdapter).storeGlobalSetting(
@@ -1011,20 +479,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setIntValue_SharedPref_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                        + "<cec-settings>"
-                        + "  <setting name=\"system_audio_mode_muting\""
-                        + "           value-type=\"int\""
-                        + "           user-configurable=\"true\">"
-                        + "    <allowed-values>"
-                        + "      <value int-value=\"0\" />"
-                        + "      <value int-value=\"1\" />"
-                        + "    </allowed-values>"
-                        + "    <default-value int-value=\"1\" />"
-                        + "  </setting>"
-                        + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         hdmiCecConfig.setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
                 HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED);
@@ -1035,20 +490,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void registerChangeListener_SharedPref_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                        + "<cec-settings>"
-                        + "  <setting name=\"system_audio_mode_muting\""
-                        + "           value-type=\"int\""
-                        + "           user-configurable=\"true\">"
-                        + "    <allowed-values>"
-                        + "      <value int-value=\"0\" />"
-                        + "      <value int-value=\"1\" />"
-                        + "    </allowed-values>"
-                        + "    <default-value int-value=\"1\" />"
-                        + "  </setting>"
-                        + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         hdmiCecConfig.registerChangeListener(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
                 mSettingChangeListener);
@@ -1061,20 +503,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void removeChangeListener_SharedPref_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                        + "<cec-settings>"
-                        + "  <setting name=\"system_audio_mode_muting\""
-                        + "           value-type=\"int\""
-                        + "           user-configurable=\"true\">"
-                        + "    <allowed-values>"
-                        + "      <value int-value=\"0\" />"
-                        + "      <value int-value=\"1\" />"
-                        + "    </allowed-values>"
-                        + "    <default-value int-value=\"1\" />"
-                        + "  </setting>"
-                        + "</cec-settings>", null);
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         hdmiCecConfig.registerChangeListener(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
                 mSettingChangeListener);
@@ -1100,20 +529,7 @@ public final class HdmiCecConfigTest {
         String originalValue = Global.getString(mContext.getContentResolver(),
                 Global.HDMI_CONTROL_ENABLED);
         try {
-            HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                    mContext, mStorageAdapter,
-                    "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                            + "<cec-settings>"
-                            + "  <setting name=\"hdmi_cec_enabled\""
-                            + "           value-type=\"int\""
-                            + "           user-configurable=\"true\">"
-                            + "    <allowed-values>"
-                            + "      <value int-value=\"0\" />"
-                            + "      <value int-value=\"1\" />"
-                            + "    </allowed-values>"
-                            + "    <default-value int-value=\"1\" />"
-                            + "  </setting>"
-                            + "</cec-settings>", null);
+            HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
             hdmiCecConfig.registerGlobalSettingsObserver(mTestLooper.getLooper());
             HdmiCecConfig.SettingChangeListener latchUpdateListener =
                     new HdmiCecConfig.SettingChangeListener() {

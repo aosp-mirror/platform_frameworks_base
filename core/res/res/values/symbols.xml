@@ -4224,4 +4224,97 @@
   <java-symbol type="bool" name="config_voice_data_sms_auto_fallback" />
 
   <java-symbol type="bool" name="config_enableOneHandedKeyguard" />
+
+  <!-- CEC Configuration -->
+  <java-symbol type="bool" name="config_cecHdmiCecEnabled_userConfigurable" />
+  <java-symbol type="bool" name="config_cecHdmiCecControlEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecHdmiCecControlEnabled_default" />
+  <java-symbol type="bool" name="config_cecHdmiCecControlDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecHdmiCecControlDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecHdmiCecVersion_userConfigurable" />
+  <java-symbol type="bool" name="config_cecHdmiCecVersion14b_allowed" />
+  <java-symbol type="bool" name="config_cecHdmiCecVersion14b_default" />
+  <java-symbol type="bool" name="config_cecHdmiCecVersion20_allowed" />
+  <java-symbol type="bool" name="config_cecHdmiCecVersion20_default" />
+
+  <java-symbol type="bool" name="config_cecSendStandbyOnSleep_userConfigurable" />
+  <java-symbol type="bool" name="config_cecPowerControlModeTv_allowed" />
+  <java-symbol type="bool" name="config_cecPowerControlModeTv_default" />
+  <java-symbol type="bool" name="config_cecPowerControlModeBroadcast_allowed" />
+  <java-symbol type="bool" name="config_cecPowerControlModeBroadcast_default" />
+  <java-symbol type="bool" name="config_cecPowerControlModeNone_allowed" />
+  <java-symbol type="bool" name="config_cecPowerControlModeNone_default" />
+
+  <java-symbol type="bool" name="config_cecPowerStateChangeOnActiveSourceLost_userConfigurable" />
+  <java-symbol type="bool" name="config_cecPowerStateChangeOnActiveSourceLostNone_allowed" />
+  <java-symbol type="bool" name="config_cecPowerStateChangeOnActiveSourceLostNone_default" />
+  <java-symbol type="bool" name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_allowed" />
+  <java-symbol type="bool" name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default" />
+
+  <java-symbol type="bool" name="config_cecSystemAudioModeMuting_userConfigurable" />
+  <java-symbol type="bool" name="config_cecSystemAudioModeMutingEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecSystemAudioModeMutingEnabled_default" />
+  <java-symbol type="bool" name="config_cecSystemAudioModeMutingDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecSystemAudioModeMutingDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecVolumeControlMode_userConfigurable" />
+  <java-symbol type="bool" name="config_cecVolumeControlModeEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecVolumeControlModeEnabled_default" />
+  <java-symbol type="bool" name="config_cecVolumeControlModeDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecVolumeControlModeDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecTvWakeOnOneTouchPlay_userConfigurable" />
+  <java-symbol type="bool" name="config_cecTvWakeOnOneTouchPlayEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecTvWakeOnOneTouchPlayEnabled_default" />
+  <java-symbol type="bool" name="config_cecTvWakeOnOneTouchPlayDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecTvWakeOnOneTouchPlayDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecTvSendStandbyOnSleep_userConfigurable" />
+  <java-symbol type="bool" name="config_cecTvSendStandbyOnSleepEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecTvSendStandbyOnSleepEnabled_default" />
+  <java-symbol type="bool" name="config_cecTvSendStandbyOnSleepDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecTvSendStandbyOnSleepDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecRcProfileTv_userConfigurable" />
+  <java-symbol type="bool" name="config_cecRcProfileTvNone_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileTvNone_default" />
+  <java-symbol type="bool" name="config_cecRcProfileTvOne_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileTvOne_default" />
+  <java-symbol type="bool" name="config_cecRcProfileTvTwo_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileTvTwo_default" />
+  <java-symbol type="bool" name="config_cecRcProfileTvThree_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileTvThree_default" />
+  <java-symbol type="bool" name="config_cecRcProfileTvFour_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileTvFour_default" />
+
+  <java-symbol type="bool" name="config_cecRcProfileSourceRootMenu_userConfigurable" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceRootMenuHandled_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceRootMenuHandled_default" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceRootMenuNotHandled_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceRootMenuNotHandled_default" />
+
+  <java-symbol type="bool" name="config_cecRcProfileSourceSetupMenu_userConfigurable" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceSetupMenuHandled_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceSetupMenuHandled_default" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceSetupMenuNotHandled_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceSetupMenuNotHandled_default" />
+
+  <java-symbol type="bool" name="config_cecRcProfileSourceContentsMenu_userConfigurable" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceContentsMenuHandled_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceContentsMenuHandled_default" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceContentsMenuNotHandled_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceContentsMenuNotHandled_default" />
+
+  <java-symbol type="bool" name="config_cecRcProfileSourceTopMenu_userConfigurable" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceTopMenuHandled_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceTopMenuHandled_default" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceTopMenuNotHandled_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceTopMenuNotHandled_default" />
+
+  <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenu_userConfigurable" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuHandled_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuHandled_default" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed" />
+  <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default" />
 </resources>
