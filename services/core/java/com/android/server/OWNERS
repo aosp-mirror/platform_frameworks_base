@@ -19,6 +19,7 @@ per-file ServiceWatcher.java = sooniln@google.com
 
 per-file *Alarm* = file:/apex/jobscheduler/OWNERS
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
+per-file *Battery* = file:/BATTERY_STATS_OWNERS
 per-file *Bluetooth* = file:/core/java/android/bluetooth/OWNERS
 per-file *Gnss* = file:/services/core/java/com/android/server/location/OWNERS
 per-file *Location* = file:/services/core/java/com/android/server/location/OWNERS
