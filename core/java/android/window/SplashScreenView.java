@@ -46,6 +46,8 @@ import android.widget.FrameLayout;
 import com.android.internal.R;
 import com.android.internal.policy.DecorView;
 
+import java.util.function.Consumer;
+
 /**
  * <p>The view which allows an activity to customize its splash screen exit animation.</p>
  *
@@ -77,7 +79,8 @@ public final class SplashScreenView extends FrameLayout {
 
     private Animatable mAnimatableIcon;
     private ValueAnimator mAnimator;
-
+    private Runnable mAnimationFinishListener;
+    private Consumer<Canvas> mOnDrawCallback;
     // cache original window and status
     private Window mWindow;
     private boolean mDrawBarBackground;
@@ -85,7 +88,7 @@ public final class SplashScreenView extends FrameLayout {
     private int mNavigationBarColor;
 
     /**
-     * Internal builder to create a SplashScreenWindowView object.
+     * Internal builder to create a SplashScreenView object.
      * @hide
      */
     public static class Builder {
@@ -391,7 +394,7 @@ public final class SplashScreenView extends FrameLayout {
      * Get the initial background color of this view.
      * @hide
      */
-    @ColorInt int getInitBackgroundColor() {
+    public @ColorInt int getInitBackgroundColor() {
         return mInitBackgroundColor;
     }
 

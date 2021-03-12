@@ -16,7 +16,9 @@
 
 package com.android.wm.shell.startingsurface;
 
+import android.graphics.Rect;
 import android.os.IBinder;
+import android.view.SurfaceControl;
 import android.window.StartingWindowInfo;
 
 import java.util.function.BiConsumer;
@@ -31,7 +33,8 @@ public interface StartingSurface {
     /**
      * Called when the content of a task is ready to show, starting window can be removed.
      */
-    void removeStartingWindow(int taskId);
+    void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
+            boolean playRevealAnimation);
     /**
      * Called when the Task wants to copy the splash screen.
      * @param taskId

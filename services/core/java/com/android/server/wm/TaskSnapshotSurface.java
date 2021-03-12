@@ -281,13 +281,14 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     @Override
-    public void remove() {
+    public void remove(boolean animate) {
         synchronized (mService.mGlobalLock) {
             final long now = SystemClock.uptimeMillis();
             if (mSizeMismatch && now - mShownTime < SIZE_MISMATCH_MINIMUM_TIME_MS
                     // Show the latest content as soon as possible for unlocking to home.
                     && mActivityType != ACTIVITY_TYPE_HOME) {
-                mHandler.postAtTime(this::remove, mShownTime + SIZE_MISMATCH_MINIMUM_TIME_MS);
+                mHandler.postAtTime(() -> remove(false /* prepareAnimation */),
+                        mShownTime + SIZE_MISMATCH_MINIMUM_TIME_MS);
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
                         "Defer removing snapshot surface in %dms", (now - mShownTime));
 
@@ -517,7 +518,7 @@ class TaskSnapshotSurface implements StartingSurface {
                 // The orientation of the screen is changing. We better remove the snapshot ASAP as
                 // we are going to wait on the new window in any case to unfreeze the screen, and
                 // the starting window is not needed anymore.
-                sHandler.post(mOuter::remove);
+                sHandler.post(() -> mOuter.remove(false /* prepareAnimation */));
             }
             if (reportDraw) {
                 sHandler.obtainMessage(MSG_REPORT_DRAW, mOuter).sendToTarget();
