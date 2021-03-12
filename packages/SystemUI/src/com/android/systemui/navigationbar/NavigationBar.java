@@ -35,6 +35,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_FORCE_OPAQUE;
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
@@ -85,6 +86,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
@@ -111,6 +113,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
@@ -156,7 +159,8 @@ import dagger.Lazy;
  * Contains logic for a navigation bar view.
  */
 public class NavigationBar implements View.OnAttachStateChangeListener,
-        Callbacks, NavigationModeController.ModeChangedListener, DisplayManager.DisplayListener {
+        Callbacks, NavigationModeController.ModeChangedListener,
+        AccessibilityButtonModeObserver.ModeChangedListener, DisplayManager.DisplayListener {
 
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
@@ -184,6 +188,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final OverviewProxyService mOverviewProxyService;
     private final NavigationModeController mNavigationModeController;
+    private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
     private final Optional<Pip> mPipOptional;
@@ -212,6 +217,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private int mLayoutDirection;
 
     private boolean mForceNavBarHandleOpaque;
+    private Optional<Long> mHomeButtonLongPressDurationMs;
     private boolean mIsCurrentUserSetup;
 
     /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int, int) */
@@ -222,6 +228,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private boolean mTransientShown;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
+    private int mA11yBtnMode;
     private LightBarController mLightBarController;
     private AutoHideController mAutoHideController;
 
@@ -373,6 +380,14 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private final Runnable mAutoDim = () -> getBarTransitions().setAutoDim(true);
 
+    private final Runnable mOnVariableDurationHomeLongClick = () -> {
+        if (onHomeLongClick(mNavigationBarView.getHomeButton().getCurrentView())) {
+            mNavigationBarView.getHomeButton().getCurrentView().performHapticFeedback(
+                    HapticFeedbackConstants.LONG_PRESS,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+        }
+    };
+
     private final ContentObserver mAssistContentObserver = new ContentObserver(
             new Handler(Looper.getMainLooper())) {
         @Override
@@ -394,6 +409,13 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                         mForceNavBarHandleOpaque = properties.getBoolean(
                                 NAV_BAR_HANDLE_FORCE_OPAQUE, /* defaultValue = */ true);
                     }
+
+                    if (properties.getKeyset().contains(HOME_BUTTON_LONG_PRESS_DURATION_MS)) {
+                        mHomeButtonLongPressDurationMs = Optional.of(
+                            properties.getLong(HOME_BUTTON_LONG_PRESS_DURATION_MS, 0)
+                        ).filter(duration -> duration != 0);
+                        reconfigureHomeLongClick();
+                    }
                 }
             };
 
@@ -414,6 +436,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             MetricsLogger metricsLogger,
             OverviewProxyService overviewProxyService,
             NavigationModeController navigationModeController,
+            AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             StatusBarStateController statusBarStateController,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
@@ -441,7 +464,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mOverviewProxyService = overviewProxyService;
         mNavigationModeController = navigationModeController;
-        mNavBarMode = navigationModeController.addListener(this);
+        mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
         mPipOptional = pipOptional;
@@ -451,6 +474,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mHandler = mainHandler;
         mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
+
+        mNavBarMode = mNavigationModeController.addListener(this);
+        mAccessibilityButtonModeObserver.addListener(this);
+        mA11yBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
     }
 
     public View getView() {
@@ -510,6 +537,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 NAV_BAR_HANDLE_FORCE_OPAQUE,
                 /* defaultValue = */ true);
+        mHomeButtonLongPressDurationMs = Optional.of(DeviceConfig.getLong(
+            DeviceConfig.NAMESPACE_SYSTEMUI,
+            HOME_BUTTON_LONG_PRESS_DURATION_MS,
+            /* defaultValue = */ 0
+        )).filter(duration -> duration != 0);
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post, mOnPropertiesChangedListener);
 
@@ -524,6 +556,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mContext.getSystemService(WindowManager.class).removeViewImmediate(
                 mNavigationBarView.getRootView());
         mNavigationModeController.removeListener(this);
+        mAccessibilityButtonModeObserver.removeListener(this);
 
         mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
@@ -769,6 +802,22 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
     }
 
+    private void reconfigureHomeLongClick() {
+        if (mNavigationBarView == null
+                || mNavigationBarView.getHomeButton().getCurrentView() == null) {
+            return;
+        }
+        if (mHomeButtonLongPressDurationMs.isPresent()) {
+            mNavigationBarView.getHomeButton().getCurrentView().setLongClickable(false);
+            mNavigationBarView.getHomeButton().getCurrentView().setHapticFeedbackEnabled(false);
+            mNavigationBarView.getHomeButton().setOnLongClickListener(null);
+        } else {
+            mNavigationBarView.getHomeButton().getCurrentView().setLongClickable(true);
+            mNavigationBarView.getHomeButton().getCurrentView().setHapticFeedbackEnabled(true);
+            mNavigationBarView.getHomeButton().setOnLongClickListener(this::onHomeLongClick);
+        }
+    }
+
     private int deltaRotation(int oldRotation, int newRotation) {
         int delta = newRotation - oldRotation;
         if (delta < 0) delta += 4;
@@ -779,6 +828,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         pw.println("NavigationBar (displayId=" + mDisplayId + "):");
         pw.println("  mStartingQuickSwitchRotation=" + mStartingQuickSwitchRotation);
         pw.println("  mCurrentRotation=" + mCurrentRotation);
+        pw.println("  mHomeButtonLongPressDurationMs=" + mHomeButtonLongPressDurationMs);
 
         if (mNavigationBarView != null) {
             pw.println("  mNavigationBarWindowState="
@@ -1108,7 +1158,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
-        homeButton.setOnLongClickListener(this::onHomeLongClick);
+
+        reconfigureHomeLongClick();
 
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
@@ -1118,7 +1169,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         updateScreenPinningGestures();
     }
 
-    private boolean onHomeTouch(View v, MotionEvent event) {
+    @VisibleForTesting
+    boolean onHomeTouch(View v, MotionEvent event) {
         if (mHomeBlockedThisTouch && event.getActionMasked() != MotionEvent.ACTION_DOWN) {
             return true;
         }
@@ -1138,9 +1190,13 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                         return true;
                     }
                 }
+                mHomeButtonLongPressDurationMs.ifPresent(longPressDuration -> {
+                    mHandler.postDelayed(mOnVariableDurationHomeLongClick, longPressDuration);
+                });
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                mHandler.removeCallbacks(mOnVariableDurationHomeLongClick);
                 mStatusBarLazy.get().awakenDreams();
                 break;
         }
@@ -1391,6 +1447,12 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             outFeedbackEnabled[0] = feedbackEnabled;
         }
 
+        // If accessibility button is floating menu mode, click and long click state should be
+        // disabled.
+        if (mA11yBtnMode == Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
+            return 0;
+        }
+
         return (requestingServices >= 1 ? SYSUI_STATE_A11Y_BUTTON_CLICKABLE : 0)
                 | (requestingServices >= 2 ? SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE : 0);
     }
@@ -1473,6 +1535,12 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (!canShowSecondaryHandle()) {
             resetSecondaryHandle();
         }
+    }
+
+    @Override
+    public void onAccessibilityButtonModeChanged(int mode) {
+        mA11yBtnMode = mode;
+        updateAccessibilityServicesState(mAccessibilityManager);
     }
 
     public void disableAnimationsDuringHide(long delay) {

@@ -14,8 +14,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-       android:shape="rectangle">
-    <solid android:color="?android:attr/colorBackground" />
-    <corners android:radius="@dimen/notification_corner_radius" />
-</shape>
+
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    style="@style/SettingsSpinnerTitleBar"
+    android:gravity="center_vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/settings_spinner_dropdown_background"/>

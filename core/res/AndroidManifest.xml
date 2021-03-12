@@ -506,6 +506,8 @@
     <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_FAILED" />
     <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_SUCCEEDED" />
     <protected-broadcast android:name="com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION" />
+    <protected-broadcast android:name="com.android.server.ACTION_PROFILE_OFF_DEADLINE" />
+    <protected-broadcast android:name="com.android.server.ACTION_TURN_PROFILE_ON_NOTIFICATION" />
 
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_ADDED" />
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNLOCKED" />
@@ -5257,15 +5259,20 @@
     <permission android:name="android.permission.MANAGE_MUSIC_RECOGNITION"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to manage speech recognition service.
+     @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.MANAGE_SPEECH_RECOGNITION"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to manage the content suggestions service.
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_CONTENT_SUGGESTIONS"
-         android:protectionLevel="signature" />
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to manage the app predictions service.
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_APP_PREDICTIONS"
-         android:protectionLevel="signature|appPredictor" />
+        android:protectionLevel="signature|appPredictor" />
 
     <!-- @SystemApi Allows an application to manage the search ui service.
      @hide  <p>Not for use by third-party applications.</p> -->

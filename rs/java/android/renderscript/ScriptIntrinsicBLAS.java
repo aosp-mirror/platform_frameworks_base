@@ -29,7 +29,11 @@ import java.lang.annotation.RetentionPolicy;
  *
  * For detailed description of BLAS, please refer to http://www.netlib.org/blas/
  *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
     private Allocation mLUT;
 

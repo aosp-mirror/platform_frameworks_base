@@ -138,10 +138,10 @@ public final class PlaybackStateEvent extends Event implements Parcelable {
     public PlaybackStateEvent(
             int state,
             long timeSinceCreatedMillis,
-            Bundle extras) {
+            @Nullable Bundle extras) {
         this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
         this.mState = state;
-        this.mExtras = extras.deepCopy();
+        this.mExtras = extras == null ? null : extras.deepCopy();
     }
 
     /**

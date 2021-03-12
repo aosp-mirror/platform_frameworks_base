@@ -31,6 +31,7 @@ import android.content.pm.ServiceInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.rotationresolver.RotationResolverInternal;
+import android.service.rotationresolver.RotationResolutionRequest;
 import android.view.Surface;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -58,6 +59,7 @@ public class RotationResolverManagerPerUserServiceTest {
     private Context mContext;
     private CancellationSignal mCancellationSignal;
     private RotationResolverManagerPerUserService mService;
+    private RotationResolutionRequest mRequest;
 
     @Before
     public void setUp() throws RemoteException {
@@ -79,9 +81,10 @@ public class RotationResolverManagerPerUserServiceTest {
 
         mCancellationSignal = new CancellationSignal();
 
+        mRequest = new RotationResolutionRequest("", Surface.ROTATION_0, Surface.ROTATION_0,
+                true, 1000L);
         this.mService.mCurrentRequest = new RemoteRotationResolverService.RotationRequest(
-                mMockCallbackInternal, Surface.ROTATION_0, Surface.ROTATION_0, "", 1000L,
-                mCancellationSignal);
+                mMockCallbackInternal, mRequest, mCancellationSignal);
 
         this.mService.getMaster().mIsServiceEnabled = true;
 
@@ -99,8 +102,7 @@ public class RotationResolverManagerPerUserServiceTest {
         RotationResolverInternal.RotationResolverCallbackInternal callbackInternal =
                 Mockito.mock(RotationResolverInternal.RotationResolverCallbackInternal.class);
 
-        mService.resolveRotationLocked(callbackInternal, Surface.ROTATION_0, Surface.ROTATION_0,
-                "", 1000L, mCancellationSignal);
+        mService.resolveRotationLocked(callbackInternal, mRequest, mCancellationSignal);
         verify(callbackInternal).onSuccess(anyInt());
     }
 
@@ -110,8 +112,7 @@ public class RotationResolverManagerPerUserServiceTest {
                 Mockito.mock(RotationResolverInternal.RotationResolverCallbackInternal.class);
 
         final CancellationSignal cancellationSignal = new CancellationSignal();
-        mService.resolveRotationLocked(callbackInternal, Surface.ROTATION_0, Surface.ROTATION_0,
-                "", 1000L, cancellationSignal);
+        mService.resolveRotationLocked(callbackInternal, mRequest, cancellationSignal);
         cancellationSignal.cancel();
     }
 
@@ -132,7 +133,7 @@ public class RotationResolverManagerPerUserServiceTest {
 
         @Override
         public void resolveRotationLocked(RotationRequest request) {
-            request.mCallbackInternal.onSuccess(request.mProposedRotation);
+            request.mCallbackInternal.onSuccess(request.mRemoteRequest.getProposedRotation());
         }
     }
 }

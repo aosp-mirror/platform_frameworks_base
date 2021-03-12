@@ -320,7 +320,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installScratch() throws IOException, InterruptedException {
+    private void installScratch() throws IOException {
         final long scratchSize = mDynSystem.suggestScratchSize();
         Thread thread = new Thread() {
             @Override
@@ -347,7 +347,11 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 publishProgress(progress);
             }
 
-            Thread.sleep(100);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // Ignore the error.
+            }
         }
 
         if (mInstallationSession == null) {
@@ -361,7 +365,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installUserdata() throws IOException, InterruptedException {
+    private void installUserdata() throws IOException {
         Thread thread = new Thread(() -> {
             mInstallationSession = mDynSystem.createPartition("userdata", mUserdataSize, false);
         });
@@ -383,7 +387,11 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 publishProgress(progress);
             }
 
-            Thread.sleep(100);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // Ignore the error.
+            }
         }
 
         if (mInstallationSession == null) {
@@ -397,8 +405,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installImages()
-            throws IOException, InterruptedException, ImageValidationException {
+    private void installImages() throws IOException, ImageValidationException {
         if (mStream != null) {
             if (mIsZip) {
                 installStreamingZipUpdate();
@@ -410,14 +417,12 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installStreamingGzUpdate()
-            throws IOException, InterruptedException, ImageValidationException {
+    private void installStreamingGzUpdate() throws IOException, ImageValidationException {
         Log.d(TAG, "To install a streaming GZ update");
         installImage("system", mSystemSize, new GZIPInputStream(mStream));
     }
 
-    private void installStreamingZipUpdate()
-            throws IOException, InterruptedException, ImageValidationException {
+    private void installStreamingZipUpdate() throws IOException, ImageValidationException {
         Log.d(TAG, "To install a streaming ZIP update");
 
         ZipInputStream zis = new ZipInputStream(mStream);
@@ -432,8 +437,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installLocalZipUpdate()
-            throws IOException, InterruptedException, ImageValidationException {
+    private void installLocalZipUpdate() throws IOException, ImageValidationException {
         Log.d(TAG, "To install a local ZIP update");
 
         Enumeration<? extends ZipEntry> entries = mZipFile.entries();
@@ -449,7 +453,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     }
 
     private boolean installImageFromAnEntry(ZipEntry entry, InputStream is)
-            throws IOException, InterruptedException, ImageValidationException {
+            throws IOException, ImageValidationException {
         String name = entry.getName();
 
         Log.d(TAG, "ZipEntry: " + name);
@@ -473,7 +477,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     }
 
     private void installImage(String partitionName, long uncompressedSize, InputStream is)
-            throws IOException, InterruptedException, ImageValidationException {
+            throws IOException, ImageValidationException {
 
         SparseInputStream sis = new SparseInputStream(new BufferedInputStream(is));
 
@@ -504,7 +508,11 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 return;
             }
 
-            Thread.sleep(100);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // Ignore the error.
+            }
         }
 
         if (mInstallationSession == null) {

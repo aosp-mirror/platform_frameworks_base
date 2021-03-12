@@ -5775,11 +5775,14 @@ public final class ActivityThread extends ClientTransactionHandler
             // ResourcesImpl constructions.
             final int diff = activity.mCurrentConfig.diffPublicOnly(newConfig);
 
-            if (diff == 0 && !shouldUpdateWindowMetricsBounds(activity.mCurrentConfig, newConfig)
-                    && !movedToDifferentDisplay && mResourcesManager.isSameResourcesOverrideConfig(
-                            activityToken, amOverrideConfig)) {
-                // Nothing significant, don't proceed with updating and reporting.
-                return null;
+            if (diff == 0) {
+                if (!shouldUpdateWindowMetricsBounds(activity.mCurrentConfig, newConfig)
+                        && !movedToDifferentDisplay
+                        && mResourcesManager.isSameResourcesOverrideConfig(
+                                activityToken, amOverrideConfig)) {
+                    // Nothing significant, don't proceed with updating and reporting.
+                    return null;
+                }
             } else if ((~activity.mActivityInfo.getRealConfigChanged() & diff) == 0) {
                 // If this activity doesn't handle any of the config changes, then don't bother
                 // calling onConfigurationChanged. Otherwise, report to the activity for the

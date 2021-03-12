@@ -45,8 +45,11 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
+import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.ModeSwitchesController;
 import com.android.systemui.accessibility.SystemActions;
+import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
@@ -212,6 +215,7 @@ public class DependencyProvider {
             MetricsLogger metricsLogger,
             OverviewProxyService overviewProxyService,
             NavigationModeController navigationModeController,
+            AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             StatusBarStateController statusBarStateController,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
@@ -236,6 +240,7 @@ public class DependencyProvider {
                 metricsLogger,
                 overviewProxyService,
                 navigationModeController,
+                accessibilityButtonModeObserver,
                 statusBarStateController,
                 sysUiFlagsContainer,
                 broadcastDispatcher,
@@ -251,6 +256,16 @@ public class DependencyProvider {
                 uiEventLogger,
                 navBarOverlayController,
                 configurationController);
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    public AccessibilityFloatingMenuController provideAccessibilityFloatingMenuController(
+            Context context, AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
+            AccessibilityButtonModeObserver accessibilityButtonModeObserver) {
+        return new AccessibilityFloatingMenuController(context, accessibilityButtonTargetsObserver,
+                accessibilityButtonModeObserver);
     }
 
     /** */

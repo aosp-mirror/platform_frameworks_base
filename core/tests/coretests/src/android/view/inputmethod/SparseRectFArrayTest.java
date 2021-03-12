@@ -62,20 +62,20 @@ public class SparseRectFArrayTest {
 
     @Test
     public void testBuilder() throws Exception {
-        final RectF TEMP_RECT = new RectF(10.0f, 20.0f, 30.0f, 40.0f);
-        final int TEMP_FLAGS = 0x1234;
+        final RectF testRect = new RectF(10.0f, 20.0f, 30.0f, 40.0f);
+        final int testFlags = 0x1234;
 
         final SparseRectFArrayBuilder builder = new SparseRectFArrayBuilder();
-        builder.append(100, TEMP_RECT.left, TEMP_RECT.top, TEMP_RECT.right, TEMP_RECT.bottom,
-                TEMP_FLAGS);
+        builder.append(100, testRect.left, testRect.top, testRect.right, testRect.bottom,
+                testFlags);
         assertNull(builder.build().get(-1));
         assertNull(builder.build().get(0));
         assertNull(builder.build().get(99));
         assertEquals(0, builder.build().getFlags(99, 0 /* valueIfKeyNotFound */));
         assertEquals(1, builder.build().getFlags(99, 1 /* valueIfKeyNotFound */));
-        assertEquals(TEMP_RECT, builder.build().get(100));
-        assertEquals(TEMP_FLAGS, builder.build().getFlags(100, 0 /* valueIfKeyNotFound */));
-        assertEquals(TEMP_FLAGS, builder.build().getFlags(100, 1 /* valueIfKeyNotFound */));
+        assertEquals(testRect, builder.build().get(100));
+        assertEquals(testFlags, builder.build().getFlags(100, 0 /* valueIfKeyNotFound */));
+        assertEquals(testFlags, builder.build().getFlags(100, 1 /* valueIfKeyNotFound */));
         assertNull(builder.build().get(101));
         assertEquals(0, builder.build().getFlags(101, 0 /* valueIfKeyNotFound */));
         assertEquals(1, builder.build().getFlags(101, 1 /* valueIfKeyNotFound */));

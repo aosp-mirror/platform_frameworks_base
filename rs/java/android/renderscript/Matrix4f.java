@@ -22,7 +22,11 @@ import android.compat.annotation.UnsupportedAppUsage;
 /**
  * Class for exposing the native RenderScript rs_matrix4x4 type back to the Android system.
  *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public class Matrix4f {
 
     /**

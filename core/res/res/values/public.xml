@@ -3071,7 +3071,6 @@
     <public name="windowSplashScreenAnimationDuration"/>
     <public name="windowSplashScreenBrandingImage"/>
     <public name="splashScreenTheme" />
-    <public name="rippleStyle" />
     <public name="maxResizeWidth" />
     <public name="maxResizeHeight" />
     <public name="targetCellWidth" />
@@ -3175,6 +3174,8 @@
     <public name="config_systemWifiCoexManager" />
     <!-- @hide @SystemApi -->
     <public name="config_systemWellbeing" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemTelevisionNotificationHandler" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">
