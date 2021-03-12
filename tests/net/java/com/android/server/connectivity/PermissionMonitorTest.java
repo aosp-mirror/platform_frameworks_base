@@ -48,18 +48,22 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.net.INetd;
 import android.net.UidRange;
+import android.net.Uri;
 import android.os.Build;
 import android.os.SystemConfigManager;
 import android.os.UserHandle;
@@ -70,12 +74,11 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.LocalServices;
-import com.android.server.pm.PackageList;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalAnswers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -112,7 +115,6 @@ public class PermissionMonitorTest {
     @Mock private Context mContext;
     @Mock private PackageManager mPackageManager;
     @Mock private INetd mNetdService;
-    @Mock private PackageManagerInternal mMockPmi;
     @Mock private UserManager mUserManager;
     @Mock private PermissionMonitor.Dependencies mDeps;
     @Mock private SystemConfigManager mSystemConfigManager;
@@ -131,16 +133,14 @@ public class PermissionMonitorTest {
         when(mContext.getSystemService(Context.SYSTEM_CONFIG_SERVICE))
                 .thenReturn(mSystemConfigManager);
         when(mSystemConfigManager.getSystemPermissionUids(anyString())).thenReturn(new int[0]);
+        final Context asUserCtx = mock(Context.class, AdditionalAnswers.delegatesTo(mContext));
+        doReturn(UserHandle.ALL).when(asUserCtx).getUser();
+        when(mContext.createContextAsUser(eq(UserHandle.ALL), anyInt())).thenReturn(asUserCtx);
 
         mPermissionMonitor = spy(new PermissionMonitor(mContext, mNetdService, mDeps));
 
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
-        LocalServices.addService(PackageManagerInternal.class, mMockPmi);
-        when(mMockPmi.getPackageList(any())).thenReturn(new PackageList(new ArrayList<String>(),
-                  /* observer */ null));
         when(mPackageManager.getInstalledPackages(anyInt())).thenReturn(/* empty app list */ null);
         mPermissionMonitor.startMonitoring();
-        verify(mMockPmi).getPackageList(mPermissionMonitor);
     }
 
     private boolean hasRestrictedNetworkPermission(String partition, int targetSdkVersion, int uid,
@@ -770,4 +770,32 @@ public class PermissionMonitorTest {
                 INetd.PERMISSION_INTERNET | INetd.PERMISSION_UPDATE_DEVICE_STATS,
                 new int[]{ MOCK_UID2 });
     }
+
+    @Test
+    public void testIntentReceiver() throws Exception {
+        final NetdServiceMonitor mNetdServiceMonitor = new NetdServiceMonitor(mNetdService);
+        final ArgumentCaptor<BroadcastReceiver> receiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mContext, times(1)).registerReceiver(receiverCaptor.capture(), any(), any(), any());
+        final BroadcastReceiver receiver = receiverCaptor.getValue();
+
+        // Verify receiving PACKAGE_ADDED intent.
+        final Intent addedIntent = new Intent(Intent.ACTION_PACKAGE_ADDED,
+                Uri.fromParts("package", MOCK_PACKAGE1, null /* fragment */));
+        addedIntent.putExtra(Intent.EXTRA_UID, MOCK_UID1);
+        setPackagePermissions(MOCK_PACKAGE1, MOCK_UID1,
+                new String[] { INTERNET, UPDATE_DEVICE_STATS });
+        receiver.onReceive(mContext, addedIntent);
+        mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET
+                | INetd.PERMISSION_UPDATE_DEVICE_STATS, new int[] { MOCK_UID1 });
+
+        // Verify receiving PACKAGE_REMOVED intent.
+        when(mPackageManager.getPackagesForUid(MOCK_UID1)).thenReturn(null);
+        final Intent removedIntent = new Intent(Intent.ACTION_PACKAGE_REMOVED,
+                Uri.fromParts("package", MOCK_PACKAGE1, null /* fragment */));
+        removedIntent.putExtra(Intent.EXTRA_UID, MOCK_UID1);
+        receiver.onReceive(mContext, removedIntent);
+        mNetdServiceMonitor.expectPermission(INetd.PERMISSION_UNINSTALLED, new int[] { MOCK_UID1 });
+    }
+
 }
