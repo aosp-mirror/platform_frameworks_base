@@ -19,6 +19,7 @@ package com.android.systemui.people.widget;
 import static com.android.systemui.people.PeopleSpaceUtils.EMPTY_STRING;
 import static com.android.systemui.people.PeopleSpaceUtils.INVALID_USER_ID;
 
+import android.app.people.PeopleSpaceTile;
 import android.text.TextUtils;
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -35,6 +36,12 @@ public class PeopleTileKey {
         mShortcutId = shortcutId;
         mUserId = userId;
         mPackageName = packageName;
+    }
+
+    public PeopleTileKey(PeopleSpaceTile tile) {
+        mShortcutId = tile.getId();
+        mUserId = tile.getUserHandle().getIdentifier();
+        mPackageName = tile.getPackageName();
     }
 
     public PeopleTileKey(NotificationEntry entry) {
@@ -81,7 +88,7 @@ public class PeopleTileKey {
      */
     @Override
     public String toString() {
-        if (!isValid()) return null;
+        if (!isValid()) return EMPTY_STRING;
         return mShortcutId + "/" + mUserId + "/" + mPackageName;
     }
 
