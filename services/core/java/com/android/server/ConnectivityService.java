@@ -55,6 +55,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
+import static android.net.NetworkRequest.Type.LISTEN_FOR_BEST;
 import static android.net.shared.NetworkMonitorUtils.isPrivateDnsValidationRequired;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.VPN_UID;
@@ -3663,6 +3664,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mNetworkRequestInfoLogs.log("REGISTER " + nri);
             for (final NetworkRequest req : nri.mRequests) {
                 mNetworkRequests.put(req, nri);
+                // TODO: Consider update signal strength for other types.
                 if (req.isListen()) {
                     for (final NetworkAgentInfo network : mNetworkAgentInfos) {
                         if (req.networkCapabilities.hasSignalStrength()
@@ -3755,18 +3757,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // listen requests won't keep up a network satisfying it. If this is not a multilayer
         // request, return immediately. For multilayer requests, check to see if any of the
         // multilayer requests may have a potential satisfier.
-        if (!nri.isMultilayerRequest() && nri.mRequests.get(0).isListen()) {
+        if (!nri.isMultilayerRequest() && (nri.mRequests.get(0).isListen()
+                || nri.mRequests.get(0).isListenForBest())) {
             return false;
         }
         for (final NetworkRequest req : nri.mRequests) {
             // This multilayer listen request is satisfied therefore no further requests need to be
             // evaluated deeming this network not a potential satisfier.
-            if (req.isListen() && nri.getActiveRequest() == req) {
+            if ((req.isListen() || req.isListenForBest()) && nri.getActiveRequest() == req) {
                 return false;
             }
             // As non-multilayer listen requests have already returned, the below would only happen
             // for a multilayer request therefore continue to the next request if available.
-            if (req.isListen()) {
+            if (req.isListen() || req.isListenForBest()) {
                 continue;
             }
             // If this Network is already the highest scoring Network for a request, or if
@@ -5549,8 +5552,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 //  request if the app changes network state. http://b/29964605
                 enforceMeteredApnPolicy(networkCapabilities);
                 break;
-            case TRACK_BEST:
-                throw new UnsupportedOperationException("Not implemented yet");
+            case LISTEN_FOR_BEST:
+                enforceAccessPermission();
+                networkCapabilities = new NetworkCapabilities(networkCapabilities);
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported request type " + reqType);
         }
@@ -5558,11 +5563,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ensureSufficientPermissionsForRequest(networkCapabilities,
                 Binder.getCallingPid(), callingUid, callingPackageName);
 
-        // Set the UID range for this request to the single UID of the requester, or to an empty
-        // set of UIDs if the caller has the appropriate permission and UIDs have not been set.
+        // Enforce FOREGROUND if the caller does not have permission to use background network.
+        if (reqType == LISTEN_FOR_BEST) {
+            restrictBackgroundRequestForCaller(networkCapabilities);
+        }
+
+        // Set the UID range for this request to the single UID of the requester, unless the
+        // requester has the permission to specify other UIDs.
         // This will overwrite any allowed UIDs in the requested capabilities. Though there
         // are no visible methods to set the UIDs, an app could use reflection to try and get
         // networks for other apps so it's essential that the UIDs are overwritten.
+        // Also set the requester UID and package name in the request.
         restrictRequestUidsForCallerAndSetRequestorInfo(networkCapabilities,
                 callingUid, callingPackageName);
 
