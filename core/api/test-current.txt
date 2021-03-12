@@ -2548,6 +2548,7 @@ package android.view {
     method public default int getDisplayImePolicy(int);
     method public default void holdLock(android.os.IBinder, int);
     method public default void setDisplayImePolicy(int, int);
+    method public default void setForceCrossWindowBlurDisabled(boolean);
     method public default void setShouldShowSystemDecors(int, boolean);
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);
     method public default boolean shouldShowSystemDecors(int);

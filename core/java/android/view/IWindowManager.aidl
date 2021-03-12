@@ -816,4 +816,6 @@ interface IWindowManager
      * @param listener the listener to be unregistered
      */
     void unregisterCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener);
+
+    void setForceCrossWindowBlurDisabled(boolean disable);
 }

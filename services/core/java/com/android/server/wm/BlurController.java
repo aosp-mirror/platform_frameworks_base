@@ -22,12 +22,17 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.view.ICrossWindowBlurEnabledListener;
 
+import com.android.internal.annotations.GuardedBy;
+
 final class BlurController {
 
     private final RemoteCallbackList<ICrossWindowBlurEnabledListener>
             mBlurEnabledListeners = new RemoteCallbackList<>();
     private final Object mLock = new Object();
+    @GuardedBy("mLock")
     boolean mBlurEnabled;
+    @GuardedBy("mLock")
+    boolean mBlurForceDisabled;
 
     BlurController() {
         mBlurEnabled = CROSS_WINDOW_BLUR_SUPPORTED;
@@ -46,19 +51,24 @@ final class BlurController {
         mBlurEnabledListeners.unregister(listener);
     }
 
-    private void updateBlurEnabled() {
-        // TODO: add other factors disabling blurs
-        final boolean newEnabled = CROSS_WINDOW_BLUR_SUPPORTED;
+    void setForceCrossWindowBlurDisabled(boolean disable) {
         synchronized (mLock) {
-            if (mBlurEnabled == newEnabled) {
-                return;
-            }
-            mBlurEnabled = newEnabled;
-            notifyBlurEnabledChanged(newEnabled);
+            mBlurForceDisabled = disable;
+            updateBlurEnabledLocked();
         }
+
     }
 
-    private void notifyBlurEnabledChanged(boolean enabled) {
+    private void updateBlurEnabledLocked() {
+        final boolean newEnabled = CROSS_WINDOW_BLUR_SUPPORTED && !mBlurForceDisabled;
+        if (mBlurEnabled == newEnabled) {
+            return;
+        }
+        mBlurEnabled = newEnabled;
+        notifyBlurEnabledChangedLocked(newEnabled);
+    }
+
+    private void notifyBlurEnabledChangedLocked(boolean enabled) {
         int i = mBlurEnabledListeners.beginBroadcast();
         while (i > 0) {
             i--;
@@ -71,6 +81,4 @@ final class BlurController {
         }
         mBlurEnabledListeners.finishBroadcast();
     }
-
-
 }
