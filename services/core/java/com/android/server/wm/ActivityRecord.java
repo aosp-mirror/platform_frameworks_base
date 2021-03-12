@@ -663,13 +663,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // naturally.
     private boolean mInSizeCompatModeForBounds = false;
 
-    // Whether this activity is letterboxed for fixed orientation. If letterboxed due to fixed
-    // orientation then aspect ratio restrictions are also already respected.
+    // Bounds populated in resolveFixedOrientationConfiguration when this activity is letterboxed
+    // for fixed orientation. If not null, they are used as parent container in
+    // resolveSizeCompatModeConfiguration and in a constructor of CompatDisplayInsets. If
+    // letterboxed due to fixed orientation then aspect ratio restrictions are also respected.
     // This happens when an activity has fixed orientation which doesn't match orientation of the
     // parent because a display is ignoring orientation request or fixed to user rotation.
     // See WindowManagerService#getIgnoreOrientationRequest and
     // WindowManagerService#getFixedToUserRotation for more context.
-    private boolean mIsLetterboxedForFixedOrientationAndAspectRatio = false;
+    @Nullable
+    private Rect mLetterboxBoundsForFixedOrientationAndAspectRatio;
 
     // activity is not displayed?
     // TODO: rename to mNoDisplay
@@ -6855,7 +6858,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
-    private void updateCompatDisplayInsets(@Nullable Rect fixedOrientationBounds) {
+    private void updateCompatDisplayInsets() {
         if (mCompatDisplayInsets != null || !shouldCreateCompatDisplayInsets()) {
             // The override configuration is set only once in size compatibility mode.
             return;
@@ -6883,7 +6886,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // The role of CompatDisplayInsets is like the override bounds.
         mCompatDisplayInsets =
-                new CompatDisplayInsets(mDisplayContent, this, fixedOrientationBounds);
+                new CompatDisplayInsets(
+                        mDisplayContent, this, mLetterboxBoundsForFixedOrientationAndAspectRatio);
     }
 
     @VisibleForTesting
@@ -6937,8 +6941,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 || windowingMode == WINDOWING_MODE_FULLSCREEN) {
             resolveFixedOrientationConfiguration(newParentConfiguration);
         }
-        final Rect fixedOrientationBounds = isLetterboxedForFixedOrientationAndAspectRatio()
-                ? new Rect(resolvedConfig.windowConfiguration.getBounds()) : null;
 
         if (mCompatDisplayInsets != null) {
             resolveSizeCompatModeConfiguration(newParentConfiguration);
@@ -6958,7 +6960,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (mVisibleRequested) {
-            updateCompatDisplayInsets(fixedOrientationBounds);
+            updateCompatDisplayInsets();
         }
 
         // TODO(b/175212232): Consolidate position logic from each "resolve" method above here.
@@ -6993,7 +6995,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * WindowManagerService#getIgnoreOrientationRequest} for more context.
      */
     boolean isLetterboxedForFixedOrientationAndAspectRatio() {
-        return mIsLetterboxedForFixedOrientationAndAspectRatio;
+        return mLetterboxBoundsForFixedOrientationAndAspectRatio != null;
     }
 
     /**
@@ -7004,7 +7006,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * in this methiod.
      */
     private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig) {
-        mIsLetterboxedForFixedOrientationAndAspectRatio = false;
+        mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
         if (handlesOrientationChangeFromDescendant()) {
             // No need to letterbox because of fixed orientation. Display will handle
             // fixed-orientation requests.
@@ -7081,7 +7083,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Calculate app bounds using fixed orientation bounds because they will be needed later
         // for comparison with size compat app bounds in {@link resolveSizeCompatModeConfiguration}.
         task.computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
-        mIsLetterboxedForFixedOrientationAndAspectRatio = true;
+        mLetterboxBoundsForFixedOrientationAndAspectRatio = new Rect(resolvedBounds);
     }
 
     /**
@@ -7627,6 +7629,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (getConfiguration().equals(mTmpConfig) && !forceNewConfig && !displayChanged) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration & display "
                     + "unchanged in %s", this);
+            // It's possible that resolveOverrideConfiguration was called before mVisibleRequested
+            // became true and mCompatDisplayInsets may not have been created so ensure
+            // that mCompatDisplayInsets is created here.
+            if (mVisibleRequested) {
+                updateCompatDisplayInsets();
+            }
             return true;
         }
 
