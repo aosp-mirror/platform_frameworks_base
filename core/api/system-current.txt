@@ -6409,12 +6409,12 @@ package android.net.util {
 package android.net.vcn {
 
   public class VcnManager {
-    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void addVcnNetworkPolicyListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.vcn.VcnManager.VcnNetworkPolicyListener);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void addVcnNetworkPolicyChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.vcn.VcnManager.VcnNetworkPolicyChangeListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.vcn.VcnNetworkPolicyResult applyVcnNetworkPolicy(@NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties);
-    method public void removeVcnNetworkPolicyListener(@NonNull android.net.vcn.VcnManager.VcnNetworkPolicyListener);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void removeVcnNetworkPolicyChangeListener(@NonNull android.net.vcn.VcnManager.VcnNetworkPolicyChangeListener);
   }
 
-  public static interface VcnManager.VcnNetworkPolicyListener {
+  public static interface VcnManager.VcnNetworkPolicyChangeListener {
     method public void onPolicyChanged();
   }
 
