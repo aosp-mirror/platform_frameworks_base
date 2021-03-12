@@ -210,15 +210,20 @@ public class BrightLineFalsingManager implements FalsingManager {
 
         if (robustCheck) {
             if (mDataProvider.isJustUnlockedWithFace()) {
+                // Immediately pass if a face is detected.
                 mPriorResults = Collections.singleton(FalsingClassifier.Result.passed(1));
+                return false;
+            } else if (!isFalseDoubleTap()) {
+                // We must check double tapping before other heuristics. This is because
+                // the double tap will fail if there's only been one tap. We don't want that
+                // failure to be recorded in mPriorResults.
                 return false;
             } else if (mHistoryTracker.falseBelief() > TAP_CONFIDENCE_THRESHOLD) {
                 mPriorResults = Collections.singleton(
-                        FalsingClassifier.Result.falsed(0.1, "bad history"));
+                        FalsingClassifier.Result.falsed(0, "bad history"));
                 return true;
             } else {
-                mPriorResults = Collections.singleton(
-                        FalsingClassifier.Result.falsed(falsePenalty, "no face detected"));
+                mPriorResults = Collections.singleton(FalsingClassifier.Result.passed(0.1));
                 return false;
             }
         }

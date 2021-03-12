@@ -168,6 +168,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     @Test
     public void testIsFalseTap_RobustCheck_NoFaceAuth() {
         when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mPassedResult);
+        when(mDoubleTapClassifier.classifyGesture()).thenReturn(mFalsedResult);
         when(mHistoryTracker.falseBelief()).thenReturn(1.0);
         mFalsingDataProvider.setJustUnlockedWithFace(false);
         assertThat(mBrightLineFalsingManager.isFalseTap(true, 0)).isTrue();
