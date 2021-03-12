@@ -4317,4 +4317,7 @@
   <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuHandled_default" />
   <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed" />
   <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default" />
+
+  <java-symbol type="id" name="remote_views_next_child" />
+  <java-symbol type="id" name="remote_views_stable_id" />
 </resources>
