@@ -2985,8 +2985,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void screenTurningOff(ScreenOffListener listener) {
-        mTaskSnapshotController.screenTurningOff(listener);
+    public void screenTurningOff(int displayId, ScreenOffListener listener) {
+        mTaskSnapshotController.screenTurningOff(displayId, listener);
     }
 
     @Override
