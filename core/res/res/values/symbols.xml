@@ -1712,8 +1712,6 @@
   <java-symbol type="dimen" name="status_bar_height" />
   <java-symbol type="dimen" name="display_cutout_touchable_region_size" />
   <java-symbol type="dimen" name="quick_qs_offset_height" />
-  <java-symbol type="dimen" name="quick_qs_total_height" />
-  <java-symbol type="dimen" name="quick_qs_total_height_with_media" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
   <java-symbol type="drawable" name="ic_jog_dial_unlock" />
