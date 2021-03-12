@@ -12300,20 +12300,13 @@ package android.util {
 package android.uwb {
 
   public final class AngleMeasurement implements android.os.Parcelable {
+    ctor public AngleMeasurement(double, double, double);
     method public int describeContents();
     method @FloatRange(from=0.0, to=1.0) public double getConfidenceLevel();
     method @FloatRange(from=0.0, to=3.141592653589793) public double getErrorRadians();
     method @FloatRange(from=-3.141592653589793, to=3.141592653589793) public double getRadians();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.uwb.AngleMeasurement> CREATOR;
-  }
-
-  public static final class AngleMeasurement.Builder {
-    ctor public AngleMeasurement.Builder();
-    method @NonNull public android.uwb.AngleMeasurement build();
-    method @NonNull public android.uwb.AngleMeasurement.Builder setConfidenceLevel(double);
-    method @NonNull public android.uwb.AngleMeasurement.Builder setErrorRadians(double);
-    method @NonNull public android.uwb.AngleMeasurement.Builder setRadians(double);
   }
 
   public final class AngleOfArrivalMeasurement implements android.os.Parcelable {
@@ -12325,10 +12318,9 @@ package android.uwb {
   }
 
   public static final class AngleOfArrivalMeasurement.Builder {
-    ctor public AngleOfArrivalMeasurement.Builder();
+    ctor public AngleOfArrivalMeasurement.Builder(@NonNull android.uwb.AngleMeasurement);
     method @NonNull public android.uwb.AngleOfArrivalMeasurement build();
     method @NonNull public android.uwb.AngleOfArrivalMeasurement.Builder setAltitude(@NonNull android.uwb.AngleMeasurement);
-    method @NonNull public android.uwb.AngleOfArrivalMeasurement.Builder setAzimuth(@NonNull android.uwb.AngleMeasurement);
   }
 
   public final class DistanceMeasurement implements android.os.Parcelable {
