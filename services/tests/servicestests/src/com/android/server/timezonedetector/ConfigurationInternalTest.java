@@ -46,7 +46,7 @@ public class ConfigurationInternalTest {
     public void test_unrestricted() {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
-                .setAutoDetectionFeatureSupported(true)
+                .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
@@ -108,7 +108,7 @@ public class ConfigurationInternalTest {
     public void test_restricted() {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(false)
-                .setAutoDetectionFeatureSupported(true)
+                .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
@@ -170,7 +170,7 @@ public class ConfigurationInternalTest {
     public void test_autoDetectNotSupported() {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
-                .setAutoDetectionFeatureSupported(false)
+                .setTelephonyDetectionFeatureSupported(false)
                 .setGeoDetectionFeatureSupported(false)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
@@ -232,7 +232,7 @@ public class ConfigurationInternalTest {
     public void test_geoDetectNotSupported() {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
-                .setAutoDetectionFeatureSupported(true)
+                .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(false)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)

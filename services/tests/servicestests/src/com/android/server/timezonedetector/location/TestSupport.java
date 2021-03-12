@@ -44,7 +44,7 @@ final class TestSupport {
             @UserIdInt int userId, boolean geoDetectionEnabled) {
         return new ConfigurationInternal.Builder(userId)
                 .setUserConfigAllowed(true)
-                .setAutoDetectionFeatureSupported(true)
+                .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
