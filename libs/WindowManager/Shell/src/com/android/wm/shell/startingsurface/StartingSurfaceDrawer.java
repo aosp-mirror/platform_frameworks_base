@@ -267,21 +267,31 @@ public class StartingSurfaceDrawer {
         final int taskId = taskInfo.taskId;
         SplashScreenView sView = null;
         try {
-            sView = mSplashscreenContentDrawer.makeSplashScreenContentView(context, iconRes,
-                            splashscreenContentResId[0]);
             final View view = win.getDecorView();
             final WindowManager wm = mContext.getSystemService(WindowManager.class);
-            if (postAddWindow(taskId, appToken, view, wm, params)) {
+            // splash screen content will be deprecated after S.
+            sView = SplashscreenContentDrawer.makeSplashscreenContent(
+                    context, splashscreenContentResId[0]);
+            final boolean splashscreenContentCompatible = sView != null;
+            if (splashscreenContentCompatible) {
+                win.setContentView(sView);
+            } else {
+                sView = mSplashscreenContentDrawer.makeSplashScreenContentView(context, iconRes);
                 win.setContentView(sView);
                 sView.cacheRootWindow(win);
             }
+            postAddWindow(taskId, appToken, view, wm, params);
         } catch (RuntimeException e) {
             // don't crash if something else bad happens, for example a
             // failure loading resources because we are loading from an app
             // on external storage that has been unmounted.
-            Slog.w(TAG, " failed creating starting window", e);
+            Slog.w(TAG, " failed creating starting window at taskId: " + taskId, e);
+            sView = null;
         } finally {
-            setSplashScreenRecord(taskId, sView);
+            final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
+            if (record != null) {
+                record.setSplashScreenView(sView);
+            }
         }
     }
 
@@ -328,7 +338,7 @@ public class StartingSurfaceDrawer {
         ActivityTaskManager.getInstance().onSplashScreenViewCopyFinished(taskId, parcelable);
     }
 
-    protected boolean postAddWindow(int taskId, IBinder appToken, View view, WindowManager wm,
+    protected void postAddWindow(int taskId, IBinder appToken, View view, WindowManager wm,
             WindowManager.LayoutParams params) {
         boolean shouldSaveView = true;
         try {
@@ -349,20 +359,12 @@ public class StartingSurfaceDrawer {
             removeWindowNoAnimate(taskId);
             saveSplashScreenRecord(taskId, view);
         }
-        return shouldSaveView;
     }
 
     private void saveSplashScreenRecord(int taskId, View view) {
         final StartingWindowRecord tView = new StartingWindowRecord(view,
                 null/* TaskSnapshotWindow */);
         mStartingWindowRecords.put(taskId, tView);
-    }
-
-    private void setSplashScreenRecord(int taskId, SplashScreenView splashScreenView) {
-        final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
-        if (record != null) {
-            record.setSplashScreenView(splashScreenView);
-        }
     }
 
     private void removeWindowNoAnimate(int taskId) {
