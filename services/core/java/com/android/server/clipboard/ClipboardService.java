@@ -950,34 +950,36 @@ public class ClipboardService extends SystemService {
         }
         clipboard.mNotifiedUids.put(uid, true);
 
-        // Retrieve the app label of the source of the clip data
-        CharSequence sourceAppLabel = null;
-        if (clipboard.mPrimaryClipPackage != null) {
-            try {
-                sourceAppLabel = mPm.getApplicationLabel(mPm.getApplicationInfoAsUser(
-                        clipboard.mPrimaryClipPackage, 0, userId));
-            } catch (PackageManager.NameNotFoundException e) {
-                // leave label as null
+        Binder.withCleanCallingIdentity(() -> {
+            // Retrieve the app label of the source of the clip data
+            CharSequence sourceAppLabel = null;
+            if (clipboard.mPrimaryClipPackage != null) {
+                try {
+                    sourceAppLabel = mPm.getApplicationLabel(mPm.getApplicationInfoAsUser(
+                            clipboard.mPrimaryClipPackage, 0, userId));
+                } catch (PackageManager.NameNotFoundException e) {
+                    // leave label as null
+                }
             }
-        }
 
-        try {
-            CharSequence callingAppLabel = mPm.getApplicationLabel(
-                    mPm.getApplicationInfoAsUser(callingPackage, 0, userId));
-            String message;
-            if (sourceAppLabel != null) {
-                message = getContext().getString(
-                        R.string.pasted_from_app, callingAppLabel, sourceAppLabel);
-            } else {
-                message = getContext().getString(R.string.pasted_from_clipboard, callingAppLabel);
+            try {
+                CharSequence callingAppLabel = mPm.getApplicationLabel(
+                        mPm.getApplicationInfoAsUser(callingPackage, 0, userId));
+                String message;
+                if (sourceAppLabel != null) {
+                    message = getContext().getString(
+                            R.string.pasted_from_app, callingAppLabel, sourceAppLabel);
+                } else {
+                    message = getContext().getString(
+                            R.string.pasted_from_clipboard, callingAppLabel);
+                }
+                Slog.i(TAG, message);
+                Toast.makeText(
+                        getContext(), UiThread.get().getLooper(), message, Toast.LENGTH_SHORT)
+                        .show();
+            } catch (PackageManager.NameNotFoundException e) {
+                // do nothing
             }
-            Slog.i(TAG, message);
-            Binder.withCleanCallingIdentity(() ->
-                    Toast.makeText(getContext(), UiThread.get().getLooper(), message,
-                            Toast.LENGTH_SHORT)
-                            .show());
-        } catch (PackageManager.NameNotFoundException e) {
-            // do nothing
-        }
+        });
     }
 }
