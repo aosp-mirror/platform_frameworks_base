@@ -44,6 +44,7 @@ import android.net.SocketKeepalive.Callback;
 import android.net.TetheringManager.StartTetheringCallback;
 import android.net.TetheringManager.TetheringEventCallback;
 import android.net.TetheringManager.TetheringRequest;
+import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -1315,7 +1316,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Returns an array of {@link android.net.NetworkCapabilities} objects, representing
+     * Returns an array of {@link NetworkCapabilities} objects, representing
      * the Networks that applications run by the given user will use by default.
      * @hide
      */
@@ -1395,11 +1396,19 @@ public class ConnectivityManager {
     }
 
     /**
-     * Get the {@link android.net.NetworkCapabilities} for the given {@link Network}.  This
+     * Get the {@link NetworkCapabilities} for the given {@link Network}.  This
      * will return {@code null} if the network is unknown.
      *
+     * This will remove any location sensitive data in {@link TransportInfo} embedded in
+     * {@link NetworkCapabilities#getTransportInfo()}. Some transport info instances like
+     * {@link android.net.wifi.WifiInfo} contain location sensitive information. Retrieving
+     * this location sensitive information (subject to app's location permissions) will be
+     * noted by system. To include any location sensitive data in {@link TransportInfo},
+     * use a {@link NetworkCallback} with
+     * {@link NetworkCallback#FLAG_INCLUDE_LOCATION_INFO} flag.
+     *
      * @param network The {@link Network} object identifying the network in question.
-     * @return The {@link android.net.NetworkCapabilities} for the network, or {@code null}.
+     * @return The {@link NetworkCapabilities} for the network, or {@code null}.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     @Nullable
@@ -3245,6 +3254,54 @@ public class ConnectivityManager {
      */
     public static class NetworkCallback {
         /**
+         * No flags associated with this callback.
+         * @hide
+         */
+        public static final int FLAG_NONE = 0;
+        /**
+         * Use this flag to include any location sensitive data in {@link NetworkCapabilities} sent
+         * via {@link #onCapabilitiesChanged(Network, NetworkCapabilities)}.
+         * <p>
+         * These include:
+         * <li> Some transport info instances (retrieved via
+         * {@link NetworkCapabilities#getTransportInfo()}) like {@link android.net.wifi.WifiInfo}
+         * contain location sensitive information.
+         * <li> OwnerUid (retrieved via {@link NetworkCapabilities#getOwnerUid()} is location
+         * sensitive for wifi suggestor apps (i.e using {@link WifiNetworkSuggestion}).</li>
+         * </p>
+         * <p>
+         * Note:
+         * <li> Retrieving this location sensitive information (subject to app's location
+         * permissions) will be noted by system. </li>
+         * <li> Without this flag any {@link NetworkCapabilities} provided via the callback does
+         * not include location sensitive info.
+         * </p>
+         */
+        public static final int FLAG_INCLUDE_LOCATION_INFO = 1 << 0;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, prefix = "FLAG_", value = {
+                FLAG_NONE,
+                FLAG_INCLUDE_LOCATION_INFO
+        })
+        public @interface Flag { }
+
+        /**
+         * All the valid flags for error checking.
+         */
+        private static final int VALID_FLAGS = FLAG_INCLUDE_LOCATION_INFO;
+
+        public NetworkCallback() {
+            this(FLAG_NONE);
+        }
+
+        public NetworkCallback(@Flag int flags) {
+            Preconditions.checkArgument((flags & VALID_FLAGS) == flags);
+            mFlags = flags;
+        }
+
+        /**
          * Called when the framework connects to a new network to evaluate whether it satisfies this
          * request. If evaluation succeeds, this callback may be followed by an {@link #onAvailable}
          * callback. There is no guarantee that this new network will satisfy any requests, or that
@@ -3381,7 +3438,7 @@ public class ConnectivityManager {
          * calling these methods while in a callback may return an outdated or even a null object.
          *
          * @param network The {@link Network} whose capabilities have changed.
-         * @param networkCapabilities The new {@link android.net.NetworkCapabilities} for this
+         * @param networkCapabilities The new {@link NetworkCapabilities} for this
          *                            network.
          */
         public void onCapabilitiesChanged(@NonNull Network network,
@@ -3450,6 +3507,7 @@ public class ConnectivityManager {
         public void onBlockedStatusChanged(@NonNull Network network, boolean blocked) {}
 
         private NetworkRequest networkRequest;
+        private final int mFlags;
     }
 
     /**
@@ -3639,14 +3697,15 @@ public class ConnectivityManager {
                 }
                 Messenger messenger = new Messenger(handler);
                 Binder binder = new Binder();
+                final int callbackFlags = callback.mFlags;
                 if (reqType == LISTEN) {
                     request = mService.listenForNetwork(
-                            need, messenger, binder, callingPackageName,
+                            need, messenger, binder, callbackFlags, callingPackageName,
                             getAttributionTag());
                 } else {
                     request = mService.requestNetwork(
                             need, reqType.ordinal(), messenger, timeoutMs, binder, legacyType,
-                            callingPackageName, getAttributionTag());
+                            callbackFlags, callingPackageName, getAttributionTag());
                 }
                 if (request != null) {
                     sCallbacks.put(request, callback);
@@ -3693,7 +3752,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}.
+     * Request a network to satisfy a set of {@link NetworkCapabilities}.
      *
      * <p>This method will attempt to find the best network that matches the passed
      * {@link NetworkRequest}, and to bring up one that does if none currently satisfies the
@@ -3777,7 +3836,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}.
+     * Request a network to satisfy a set of {@link NetworkCapabilities}.
      *
      * This method behaves identically to {@link #requestNetwork(NetworkRequest, NetworkCallback)}
      * but runs all the callbacks on the passed Handler.
@@ -3799,7 +3858,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}, limited
+     * Request a network to satisfy a set of {@link NetworkCapabilities}, limited
      * by a timeout.
      *
      * This function behaves identically to the non-timed-out version
@@ -3834,7 +3893,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}, limited
+     * Request a network to satisfy a set of {@link NetworkCapabilities}, limited
      * by a timeout.
      *
      * This method behaves identically to
@@ -3879,7 +3938,7 @@ public class ConnectivityManager {
 
 
     /**
-     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}.
+     * Request a network to satisfy a set of {@link NetworkCapabilities}.
      *
      * This function behaves identically to the version that takes a NetworkCallback, but instead
      * of {@link NetworkCallback} a {@link PendingIntent} is used.  This means
@@ -4911,7 +4970,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}, but
+     * Request a network to satisfy a set of {@link NetworkCapabilities}, but
      * does not cause any networks to retain the NET_CAPABILITY_FOREGROUND capability. This can
      * be used to request that the system provide a network without causing the network to be
      * in the foreground.
