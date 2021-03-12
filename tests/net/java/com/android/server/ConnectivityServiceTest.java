@@ -8978,7 +8978,7 @@ public class ConnectivityServiceTest {
 
         final int expectedOwnerUidWithoutIncludeFlag =
                 shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag
-                        ? Process.myUid() : INVALID_UID;
+                        ? myUid : INVALID_UID;
         assertEquals(expectedOwnerUidWithoutIncludeFlag, getOwnerUidNetCapsPermission(
                 myUid, myUid, false /* includeLocationSensitiveInfo */));
 
@@ -8997,22 +8997,26 @@ public class ConnectivityServiceTest {
 
     }
 
+    private void verifyOwnerUidAndTransportInfoNetCapsPermissionPreS() {
+        verifyOwnerUidAndTransportInfoNetCapsPermission(
+                // Ensure that owner uid is included even if the request asks to remove it (which is
+                // the default) since the app has necessary permissions and targetSdk < S.
+                true, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
+                true, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
+                // Ensure that location info is removed if the request asks to remove it even if the
+                // app has necessary permissions.
+                false, /* shouldInclLocationSensitiveTransportInfoWithoutIncludeFlag */
+                true /* shouldInclLocationSensitiveTransportInfoWithIncludeFlag */
+        );
+    }
+
     @Test
-    public void testCreateWithLocationInfoSanitizedWithFineLocationAfterQ()
+    public void testCreateWithLocationInfoSanitizedWithFineLocationAfterQPreS()
             throws Exception {
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
-        verifyOwnerUidAndTransportInfoNetCapsPermission(
-                // Ensure that we include owner uid even if the request asks to remove it since the
-                // app has necessary permissions and targetSdk < S.
-                true, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
-                true, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
-                false, /* shouldInclLocationSensitiveTransportInfoWithoutIncludeFlag */
-                // Ensure that we remove location info if the request asks to remove it even if the
-                // app has necessary permissions.
-                true /* shouldInclLocationSensitiveTransportInfoWithIncludeFlag */
-        );
+        verifyOwnerUidAndTransportInfoNetCapsPermissionPreS();
     }
 
     @Test
@@ -9021,16 +9025,7 @@ public class ConnectivityServiceTest {
         setupLocationPermissions(Build.VERSION_CODES.R, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
-        verifyOwnerUidAndTransportInfoNetCapsPermission(
-                // Ensure that we include owner uid even if the request asks to remove it since the
-                // app has necessary permissions and targetSdk < S.
-                true, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
-                true, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
-                false, /* shouldInclLocationSensitiveTransportInfoWithoutIncludeFlag */
-                // Ensure that we remove location info if the request asks to remove it even if the
-                // app has necessary permissions.
-                true /* shouldInclLocationSensitiveTransportInfoWithIncludeFlag */
-        );
+        verifyOwnerUidAndTransportInfoNetCapsPermissionPreS();
     }
 
     @Test
@@ -9041,13 +9036,13 @@ public class ConnectivityServiceTest {
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
         verifyOwnerUidAndTransportInfoNetCapsPermission(
-                // Ensure that we owner UID if the request asks us to remove it even if the app
-                // has necessary permissions since targetSdk >= S.
+                // Ensure that the owner UID is removed if the request asks us to remove it even
+                // if the app has necessary permissions since targetSdk >= S.
                 false, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
                 true, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
-                false, /* shouldInclLocationSensitiveTransportInfoWithoutIncludeFlag */
-                // Ensure that we remove location info if the request asks to remove it even if the
+                // Ensure that location info is removed if the request asks to remove it even if the
                 // app has necessary permissions.
+                false, /* shouldInclLocationSensitiveTransportInfoWithoutIncludeFlag */
                 true /* shouldInclLocationSensitiveTransportInfoWithIncludeFlag */
         );
     }
@@ -9058,15 +9053,15 @@ public class ConnectivityServiceTest {
         setupLocationPermissions(Build.VERSION_CODES.P, true, AppOpsManager.OPSTR_COARSE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
 
+        verifyOwnerUidAndTransportInfoNetCapsPermissionPreS();
+    }
+
+    private void verifyOwnerUidAndTransportInfoNetCapsNotIncluded() {
         verifyOwnerUidAndTransportInfoNetCapsPermission(
-                // Ensure that we owner UID if the request asks us to remove it even if the app
-                // has necessary permissions since targetSdk >= S.
-                true, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
-                true, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
+                false, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
+                false, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
                 false, /* shouldInclLocationSensitiveTransportInfoWithoutIncludeFlag */
-                // Ensure that we remove location info if the request asks to remove it even if the
-                // app has necessary permissions.
-                true /* shouldInclLocationSensitiveTransportInfoWithIncludeFlag */
+                false /* shouldInclLocationSensitiveTransportInfoWithIncludeFlag */
         );
     }
 
@@ -9076,12 +9071,7 @@ public class ConnectivityServiceTest {
         setupLocationPermissions(Build.VERSION_CODES.Q, false, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
-        verifyOwnerUidAndTransportInfoNetCapsPermission(
-                false, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
-                false, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
-                false, /* shouldInclLocationSensitiveTransportInfoWithoutIncludeFlag */
-                false /* shouldInclLocationSensitiveTransportInfoWithIncludeFlag */
-        );
+        verifyOwnerUidAndTransportInfoNetCapsNotIncluded();
     }
 
     @Test
@@ -9103,26 +9093,17 @@ public class ConnectivityServiceTest {
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_COARSE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        verifyOwnerUidAndTransportInfoNetCapsPermission(
-                false, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
-                false, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
-                false, /* shouldInclLocationSensitiveTransportInfoWithoutIncludeFlag */
-                false /* shouldInclLocationSensitiveTransportInfoWithIncludeFlag */
-        );
+        verifyOwnerUidAndTransportInfoNetCapsNotIncluded();
     }
 
     @Test
-    public void testCreateWithLocationInfoSanitizedWithoutLocationPermission()
+    public void testCreateWithLocationInfoSanitizedWithCoarseLocationAfterS()
             throws Exception {
         // Test that not having fine location permission leads to sanitization.
-        setupLocationPermissions(Build.VERSION_CODES.Q, true, null /* op */, null /* perm */);
+        setupLocationPermissions(Build.VERSION_CODES.S, true, AppOpsManager.OPSTR_COARSE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        verifyOwnerUidAndTransportInfoNetCapsPermission(
-                false, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
-                false, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
-                false, /* shouldInclLocationSensitiveTransportInfoWithoutIncludeFlag */
-                false /* shouldInclLocationSensitiveTransportInfoWithIncludeFlag */
-        );
+        verifyOwnerUidAndTransportInfoNetCapsNotIncluded();
     }
 
     @Test

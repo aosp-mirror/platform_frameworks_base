@@ -3409,6 +3409,8 @@ public class ConnectivityManager {
          * not include location sensitive info.
          * </p>
          */
+        // Note: Some existing fields which are location sensitive may still be included without
+        // this flag if the app targets SDK < S (to maintain backwards compatibility).
         public static final int FLAG_INCLUDE_LOCATION_INFO = 1 << 0;
 
         /** @hide */
