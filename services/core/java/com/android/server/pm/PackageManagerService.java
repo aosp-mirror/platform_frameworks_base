@@ -27803,13 +27803,23 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private static String getDefaultTimeouts() {
-        return DeviceConfig.getString(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                PROPERTY_INCFS_DEFAULT_TIMEOUTS, "");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getString(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_INCFS_DEFAULT_TIMEOUTS, "");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private static String getKnownDigestersList() {
-        return DeviceConfig.getString(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                PROPERTY_KNOWN_DIGESTERS_LIST, "");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getString(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_KNOWN_DIGESTERS_LIST, "");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
