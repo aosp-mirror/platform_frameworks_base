@@ -349,6 +349,7 @@ import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.AttributeCache;
+import com.android.internal.security.VerityUtils;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -401,7 +402,6 @@ import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV2;
 import com.android.server.rollback.RollbackManagerInternal;
-import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -1978,6 +1978,8 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean shouldFilterApplicationLocked(@Nullable PackageSetting ps, int callingUid,
                 @Nullable ComponentName component, @ComponentType int componentType, int userId);
         boolean shouldFilterApplicationLocked(@Nullable PackageSetting ps, int callingUid,
+                int userId);
+        boolean shouldFilterApplicationLocked(@NonNull SharedUserSetting sus, int callingUid,
                 int userId);
         int bestDomainVerificationStatus(int status1, int status2);
         int checkUidPermission(String permName, int uid);
@@ -4140,6 +4142,19 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean shouldFilterApplicationLocked(
                 @Nullable PackageSetting ps, int callingUid, int userId) {
             return shouldFilterApplicationLocked(ps, callingUid, null, TYPE_UNKNOWN, userId);
+        }
+
+        /**
+         * @see #shouldFilterApplicationLocked(PackageSetting, int, ComponentName, int, int)
+         */
+        public boolean shouldFilterApplicationLocked(@NonNull SharedUserSetting sus, int callingUid,
+                int userId) {
+            boolean filterApp = true;
+            for (int index = sus.packages.size() - 1; index >= 0 && filterApp; index--) {
+                filterApp &= shouldFilterApplicationLocked(sus.packages.valueAt(index),
+                        callingUid, /* component */ null, TYPE_UNKNOWN, userId);
+            }
+            return filterApp;
         }
 
         /**
@@ -7904,6 +7919,15 @@ public class PackageManagerService extends IPackageManager.Stub
             ps, callingUid, userId);
     }
 
+    /**
+     * @see #shouldFilterApplicationLocked(PackageSetting, int, ComponentName, int, int)
+     */
+    @GuardedBy("mLock")
+    private boolean shouldFilterApplicationLocked(@NonNull SharedUserSetting sus, int callingUid,
+            int userId) {
+        return liveComputer().shouldFilterApplicationLocked(sus, callingUid, userId);
+    }
+
     @GuardedBy("mLock")
     private boolean filterSharedLibPackageLPr(@Nullable PackageSetting ps, int uid, int userId,
             int flags) {
@@ -8970,7 +8994,6 @@ public class PackageManagerService extends IPackageManager.Stub
     public int checkUidSignatures(int uid1, int uid2) {
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
-        final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
         // Map to base uids.
         final int appId1 = UserHandle.getAppId(uid1);
         final int appId2 = UserHandle.getAppId(uid2);
@@ -8981,10 +9004,11 @@ public class PackageManagerService extends IPackageManager.Stub
             Object obj = mSettings.getSettingLPr(appId1);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
-                    if (isCallerInstantApp) {
+                    final SharedUserSetting sus = (SharedUserSetting) obj;
+                    if (shouldFilterApplicationLocked(sus, callingUid, callingUserId)) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    p1SigningDetails = ((SharedUserSetting) obj).signatures.mSigningDetails;
+                    p1SigningDetails = sus.signatures.mSigningDetails;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
                     if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
@@ -9000,10 +9024,11 @@ public class PackageManagerService extends IPackageManager.Stub
             obj = mSettings.getSettingLPr(appId2);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
-                    if (isCallerInstantApp) {
+                    final SharedUserSetting sus = (SharedUserSetting) obj;
+                    if (shouldFilterApplicationLocked(sus, callingUid, callingUserId)) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    p2SigningDetails = ((SharedUserSetting) obj).signatures.mSigningDetails;
+                    p2SigningDetails = sus.signatures.mSigningDetails;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
                     if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
@@ -9092,11 +9117,11 @@ public class PackageManagerService extends IPackageManager.Stub
             final Object obj = mSettings.getSettingLPr(appId);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
-                    final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
-                    if (isCallerInstantApp) {
+                    final SharedUserSetting sus = (SharedUserSetting) obj;
+                    if (shouldFilterApplicationLocked(sus, callingUid, callingUserId)) {
                         return false;
                     }
-                    signingDetails = ((SharedUserSetting)obj).signatures.mSigningDetails;
+                    signingDetails = sus.signatures.mSigningDetails;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
                     if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
@@ -9221,16 +9246,19 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+        final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
         synchronized (mLock) {
             final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
+                if (shouldFilterApplicationLocked(sus, callingUid, callingUserId)) {
+                    return null;
+                }
                 return sus.name + ":" + sus.userId;
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
-                if (shouldFilterApplicationLocked(
-                        ps, callingUid, UserHandle.getUserId(callingUid))) {
+                if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                     return null;
                 }
                 return ps.name;
@@ -9248,6 +9276,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+        final int callingUserId = UserHandle.getUserId(callingUid);
         final String[] names = new String[uids.length];
         synchronized (mLock) {
             for (int i = uids.length - 1; i >= 0; i--) {
@@ -9255,11 +9284,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 final Object obj = mSettings.getSettingLPr(appId);
                 if (obj instanceof SharedUserSetting) {
                     final SharedUserSetting sus = (SharedUserSetting) obj;
-                    names[i] = "shared:" + sus.name;
+                    if (shouldFilterApplicationLocked(sus, callingUid, callingUserId)) {
+                        names[i] = null;
+                    } else {
+                        names[i] = "shared:" + sus.name;
+                    }
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
-                    if (shouldFilterApplicationLocked(
-                            ps, callingUid, UserHandle.getUserId(callingUid))) {
+                    if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                         names[i] = null;
                     } else {
                         names[i] = ps.name;
@@ -9301,16 +9333,19 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
+        final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
         synchronized (mLock) {
             final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
+                if (shouldFilterApplicationLocked(sus, callingUid, callingUserId)) {
+                    return 0;
+                }
                 return sus.pkgFlags;
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
-                if (shouldFilterApplicationLocked(
-                        ps, callingUid, UserHandle.getUserId(callingUid))) {
+                if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                     return 0;
                 }
                 return ps.pkgFlags;
@@ -9325,16 +9360,19 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
+        final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
         synchronized (mLock) {
             final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
+                if (shouldFilterApplicationLocked(sus, callingUid, callingUserId)) {
+                    return 0;
+                }
                 return sus.pkgPrivateFlags;
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
-                if (shouldFilterApplicationLocked(
-                        ps, callingUid, UserHandle.getUserId(callingUid))) {
+                if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                     return 0;
                 }
                 return ps.pkgPrivateFlags;

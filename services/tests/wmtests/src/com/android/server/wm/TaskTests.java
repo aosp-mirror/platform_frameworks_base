@@ -26,6 +26,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -276,5 +277,16 @@ public class TaskTests extends WindowTestsBase {
         assertTrue(leafTask1.handlesOrientationChangeFromDescendant());
         // Orientation request from standard activity in multi window will not be handled.
         assertFalse(leafTask2.handlesOrientationChangeFromDescendant());
+    }
+
+    @Test
+    public void testAlwaysOnTop() {
+        final Task task = createTaskStackOnDisplay(mDisplayContent);
+        task.setAlwaysOnTop(true);
+        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        assertTrue(task.isAlwaysOnTop());
+
+        task.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, true /* set */);
+        assertFalse(task.isAlwaysOnTop());
     }
 }

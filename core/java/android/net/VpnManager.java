@@ -16,12 +16,15 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -56,18 +59,21 @@ import java.util.List;
  */
 public class VpnManager {
     /** Type representing a lack of VPN @hide */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int TYPE_VPN_NONE = -1;
 
     /**
      * A VPN created by an app using the {@link VpnService} API.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int TYPE_VPN_SERVICE = 1;
 
     /**
      * A VPN created using a {@link VpnManager} API such as {@link #startProvisionedVpnProfile}.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int TYPE_VPN_PLATFORM = 2;
 
     /**
@@ -76,6 +82,7 @@ public class VpnManager {
      * @hide
      */
     @Deprecated
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int TYPE_VPN_LEGACY = 3;
 
     /**

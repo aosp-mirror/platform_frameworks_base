@@ -2125,6 +2125,14 @@ package android.service.watchdog {
 
 }
 
+package android.speech {
+
+  public class SpeechRecognizer {
+    method public void setTemporaryOnDeviceRecognizer(@Nullable android.content.ComponentName);
+  }
+
+}
+
 package android.telecom {
 
   public static class Call.Details {

@@ -195,6 +195,13 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     private ReferenceWithHistory<GeolocationTimeZoneSuggestion> mLatestGeoLocationSuggestion =
             new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
+    /**
+     * The latest manual suggestion received.
+     */
+    @GuardedBy("this")
+    private ReferenceWithHistory<ManualTimeZoneSuggestion> mLatestManualSuggestion =
+            new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
+
     @GuardedBy("this")
     private final List<Dumpable> mDumpables = new ArrayList<>();
 
@@ -286,6 +293,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
         if (currentUserConfig.getGeoDetectionEnabledBehavior()) {
             // Only store a geolocation suggestion if geolocation detection is currently enabled.
+            // See also clearGeolocationSuggestionIfNeeded().
             mLatestGeoLocationSuggestion.set(suggestion);
 
             // Now perform auto time zone detection. The new suggestion may be used to modify the
@@ -323,6 +331,12 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
                     + ", cause=" + cause);
             return false;
         }
+
+        // Record the manual suggestion for debugging / metrics (but only if manual detection is
+        // currently enabled).
+        // Note: This is not used to set the device back to a previous manual suggestion if the user
+        // later disables automatic time zone detection.
+        mLatestManualSuggestion.set(suggestion);
 
         setDeviceTimeZoneIfRequired(timeZoneId, cause);
         return true;
@@ -619,6 +633,11 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         mTimeZoneChangesLog.dump(ipw);
         ipw.decreaseIndent(); // level 2
 
+        ipw.println("Manual suggestion history:");
+        ipw.increaseIndent(); // level 2
+        mLatestManualSuggestion.dump(ipw);
+        ipw.decreaseIndent(); // level 2
+
         ipw.println("Geolocation suggestion history:");
         ipw.increaseIndent(); // level 2
         mLatestGeoLocationSuggestion.dump(ipw);
@@ -633,6 +652,14 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         for (Dumpable dumpable : mDumpables) {
             dumpable.dump(ipw, args);
         }
+    }
+
+    /**
+     * A method used to inspect strategy state during tests. Not intended for general use.
+     */
+    @VisibleForTesting
+    public synchronized ManualTimeZoneSuggestion getLatestManualSuggestion() {
+        return mLatestManualSuggestion.get();
     }
 
     /**

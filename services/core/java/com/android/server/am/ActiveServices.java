@@ -20,7 +20,6 @@ import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
-import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -75,7 +74,6 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.BroadcastOptions;
 import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
@@ -1217,7 +1215,18 @@ public final class ActiveServices {
     void killMisbehavingService(ServiceRecord r,
             int appUid, int appPid, String localPackageName) {
         synchronized (mAm) {
-            stopServiceLocked(r, false);
+            if (!r.destroying) {
+                // This service is still alive, stop it.
+                stopServiceLocked(r, false);
+            } else {
+                // Check if there is another instance of it being started in parallel,
+                // if so, stop that too to avoid spamming the system.
+                final ServiceMap smap = getServiceMapLocked(r.userId);
+                final ServiceRecord found = smap.mServicesByInstanceName.remove(r.instanceName);
+                if (found != null) {
+                    stopServiceLocked(found, false);
+                }
+            }
             mAm.crashApplication(appUid, appPid, localPackageName, -1,
                     "Bad notification for startForeground", true /*force*/);
         }

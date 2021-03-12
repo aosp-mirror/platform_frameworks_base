@@ -34,11 +34,11 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.CancellationSignal;
 import android.rotationresolver.RotationResolverInternal;
+import android.service.rotationresolver.RotationResolutionRequest;
 import android.service.rotationresolver.RotationResolverService;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
-import android.view.Surface;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -95,14 +95,14 @@ final class RotationResolverManagerPerUserService extends
     @VisibleForTesting
     void resolveRotationLocked(
             @NonNull RotationResolverInternal.RotationResolverCallbackInternal callbackInternal,
-            @Surface.Rotation int proposedRotation, @Surface.Rotation int currentRotation,
-            String packageName, long timeoutMillis,
+            @NonNull RotationResolutionRequest request,
             @NonNull CancellationSignal cancellationSignalInternal) {
 
         if (!isServiceAvailableLocked()) {
             Slog.w(TAG, "Service is not available at this moment.");
             callbackInternal.onFailure(ROTATION_RESULT_FAILURE_CANCELLED);
-            logRotationStats(proposedRotation, currentRotation, RESOLUTION_UNAVAILABLE);
+            logRotationStats(request.getProposedRotation(), request.getCurrentRotation(),
+                    RESOLUTION_UNAVAILABLE);
             return;
         }
 
@@ -114,8 +114,7 @@ final class RotationResolverManagerPerUserService extends
         }
 
         mCurrentRequest = new RemoteRotationResolverService.RotationRequest(callbackInternal,
-                proposedRotation, currentRotation, packageName, timeoutMillis,
-                cancellationSignalInternal);
+                request, cancellationSignalInternal);
 
         cancellationSignalInternal.setOnCancelListener(() -> {
             synchronized (mLock) {

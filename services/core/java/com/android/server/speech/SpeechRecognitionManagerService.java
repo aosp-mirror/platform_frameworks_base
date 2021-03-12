@@ -16,6 +16,8 @@
 
 package com.android.server.speech;
 
+import static android.Manifest.permission.MANAGE_SPEECH_RECOGNITION;
+
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
@@ -24,6 +26,7 @@ import android.os.IBinder;
 import android.os.UserHandle;
 import android.speech.IRecognitionServiceManager;
 import android.speech.IRecognitionServiceManagerCallback;
+import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.server.infra.AbstractMasterSystemService;
@@ -42,6 +45,8 @@ public final class SpeechRecognitionManagerService extends
                 SpeechRecognitionManagerServiceImpl> {
     private static final String TAG = SpeechRecognitionManagerService.class.getSimpleName();
 
+    private static final int MAX_TEMP_SERVICE_SUBSTITUTION_DURATION_MS = 60_000;
+
     public SpeechRecognitionManagerService(@NonNull Context context) {
         super(context,
                 // TODO(b/176578753): think if we want to favor the particular service here.
@@ -55,6 +60,16 @@ public final class SpeechRecognitionManagerService extends
     public void onStart() {
         SpeechRecognitionManagerServiceStub serviceStub = new SpeechRecognitionManagerServiceStub();
         publishBinderService(Context.SPEECH_RECOGNITION_SERVICE, serviceStub);
+    }
+
+    @Override
+    protected void enforceCallingPermissionForManagement() {
+        getContext().enforceCallingPermission(MANAGE_SPEECH_RECOGNITION, TAG);
+    }
+
+    @Override
+    protected int getMaximumTemporaryServiceDurationMs() {
+        return MAX_TEMP_SERVICE_SUBSTITUTION_DURATION_MS;
     }
 
     @Override
@@ -76,6 +91,22 @@ public final class SpeechRecognitionManagerService extends
                 SpeechRecognitionManagerServiceImpl service = getServiceForUserLocked(userId);
                 service.createSessionLocked(componentName, clientToken, onDevice, callback);
             }
+        }
+
+        @Override
+        public void setTemporaryComponent(ComponentName componentName) {
+            int userId = UserHandle.getCallingUserId();
+            if (componentName == null) {
+                resetTemporaryService(userId);
+                Slog.i(TAG, "Reset temporary service for user " + userId);
+                return;
+            }
+            setTemporaryService(
+                    userId,
+                    componentName.flattenToString(),
+                    MAX_TEMP_SERVICE_SUBSTITUTION_DURATION_MS);
+            Slog.i(TAG, "SpeechRecognition temporarily set to " + componentName + " for "
+                    + MAX_TEMP_SERVICE_SUBSTITUTION_DURATION_MS + "ms");
         }
     }
 }

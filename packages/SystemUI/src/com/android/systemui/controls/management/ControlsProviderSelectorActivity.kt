@@ -32,7 +32,7 @@ import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsController
-import com.android.systemui.controls.ui.ControlsDialog
+import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -116,7 +116,11 @@ class ControlsProviderSelectorActivity @Inject constructor(
         if (backToGlobalActions) {
             globalActionsComponent.handleShowGlobalActionsMenu()
         } else {
-            ControlsDialog(applicationContext, broadcastDispatcher).show(uiController)
+            val i = Intent().apply {
+                component = ComponentName(applicationContext, ControlsActivity::class.java)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(i)
         }
         animateExitAndFinish()
     }

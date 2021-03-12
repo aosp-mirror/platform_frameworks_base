@@ -224,10 +224,9 @@ public class NotificationBackgroundView extends View {
     }
 
     /**
-     * Sets the current top and bottom roundness amounts for this background, between 0.0 (not
-     * rounded) and 1.0 (maximally rounded).
+     * Sets the current top and bottom radius for this background.
      */
-    public void setRoundness(float topRoundness, float bottomRoundness) {
+    public void setRadius(float topRoundness, float bottomRoundness) {
         if (topRoundness == mCornerRadii[0] && bottomRoundness == mCornerRadii[4]) {
             return;
         }

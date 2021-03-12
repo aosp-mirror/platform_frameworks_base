@@ -21,7 +21,6 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.security.GateKeeper;
-import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
@@ -237,7 +236,7 @@ public class PlatformKeyManager {
         if (!isKeyLoaded(userId, generationId)) {
             throw new UnrecoverableKeyException("KeyStore doesn't contain key " + alias);
         }
-        AndroidKeyStoreSecretKey key = (AndroidKeyStoreSecretKey) mKeyStore.getKey(
+        SecretKey key = (SecretKey) mKeyStore.getKey(
                 alias, /*password=*/ null);
         return new PlatformEncryptionKey(generationId, key);
     }
@@ -289,7 +288,7 @@ public class PlatformKeyManager {
         if (!isKeyLoaded(userId, generationId)) {
             throw new UnrecoverableKeyException("KeyStore doesn't contain key " + alias);
         }
-        AndroidKeyStoreSecretKey key = (AndroidKeyStoreSecretKey) mKeyStore.getKey(
+        SecretKey key = (SecretKey) mKeyStore.getKey(
                 alias, /*password=*/ null);
         return new PlatformDecryptionKey(generationId, key);
     }

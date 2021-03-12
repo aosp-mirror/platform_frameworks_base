@@ -29,6 +29,7 @@ import android.os.UserHandle;
 import android.security.IFileIntegrityService;
 import android.util.Slog;
 
+import com.android.internal.security.VerityUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
