@@ -20,6 +20,14 @@ package android.app.usage {
 
 }
 
+package android.content {
+
+  public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final String ACTION_CLEAR_DNS_CACHE = "android.intent.action.CLEAR_DNS_CACHE";
+  }
+
+}
+
 package android.net {
 
   public final class EthernetNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
