@@ -164,6 +164,10 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
         reloadColors();
     }
 
+    NumPadKey[] getButtons() {
+        return mButtons;
+    }
+
     /**
      * By default, the new layout will be enabled. When false, revert to the old style.
      */

@@ -39,7 +39,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.classifier.SingleTapClassifier;
 
 public class KeyguardSimPinViewController
         extends KeyguardPinBasedInputViewController<KeyguardSimPinView> {
@@ -80,10 +79,10 @@ public class KeyguardSimPinViewController
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
             TelephonyManager telephonyManager, FalsingCollector falsingCollector,
-            SingleTapClassifier singleTapClassifier, boolean isNewLayoutEnabled) {
+            boolean isNewLayoutEnabled) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
-                falsingCollector, singleTapClassifier);
+                falsingCollector);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mTelephonyManager = telephonyManager;
         mSimImageView = mView.findViewById(R.id.keyguard_sim);
