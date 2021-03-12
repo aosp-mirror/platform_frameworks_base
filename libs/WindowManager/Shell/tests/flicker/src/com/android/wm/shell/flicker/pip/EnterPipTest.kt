@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -49,7 +50,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
 
     @Presubmit
     @Test
-    fun pipWindowBecomesVisible() {
+    fun pipAppWindowAlwaysVisible() {
         testSpec.assertWm {
             this.showsAppWindow(pipApp.defaultWindowName)
         }
@@ -60,6 +61,16 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     fun pipLayerBecomesVisible() {
         testSpec.assertLayers {
             this.isVisible(pipApp.launcherName)
+        }
+    }
+
+    @Postsubmit
+    @Test
+    fun pipWindowBecomesVisible() {
+        testSpec.assertWm {
+            invoke("pipWindowIsNotVisible") { !it.wmState.hasPipWindow() }
+                .then()
+                .invoke("pipWindowIsVisible") { it.wmState.hasPipWindow() }
         }
     }
 
