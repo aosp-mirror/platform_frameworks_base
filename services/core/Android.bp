@@ -107,7 +107,6 @@ java_library_static {
         ":platform-compat-overrides",
         ":display-device-config",
         ":display-layout-config",
-        ":cec-config",
         ":device-state-config",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
@@ -128,7 +127,6 @@ java_library_static {
     ],
 
     required: [
-        "cec_config.xml",
         "gps_debug.conf",
         "protolog.conf.json.gz",
     ],
@@ -191,11 +189,6 @@ java_library {
 java_library_host {
     name: "core_cts_test_resources",
     srcs: ["java/com/android/server/notification/SmallHash.java"]
-}
-
-prebuilt_etc {
-    name: "cec_config.xml",
-    src: "java/com/android/server/hdmi/cec_config.xml",
 }
 
 prebuilt_etc {
