@@ -34,7 +34,8 @@ public final class OverrideAllowedState implements Parcelable {
             DISABLED_NON_TARGET_SDK,
             DISABLED_TARGET_SDK_TOO_HIGH,
             DEFERRED_VERIFICATION,
-            LOGGING_ONLY_CHANGE
+            LOGGING_ONLY_CHANGE,
+            PLATFORM_TOO_OLD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {
@@ -65,6 +66,10 @@ public final class OverrideAllowedState implements Parcelable {
      * Change is marked as logging only, and cannot be toggled.
      */
     public static final int LOGGING_ONLY_CHANGE = 5;
+    /**
+     * Change is gated by a target sdk version newer than the current platform sdk version.
+     */
+    public static final int PLATFORM_TOO_OLD = 6;
 
     @State
     public final int state;
@@ -123,6 +128,11 @@ public final class OverrideAllowedState implements Parcelable {
                 throw new SecurityException(String.format(
                         "Cannot override %1$d because it is marked as a logging-only change.",
                         changeId));
+            case PLATFORM_TOO_OLD:
+                throw new SecurityException(String.format(
+                        "Cannot override %1$d for %2$s because the change's targetSdk threshold "
+                                + "(%3$d) is above the platform sdk.",
+                        changeId, packageName, changeIdTargetSdk));
         }
     }
 
@@ -170,6 +180,8 @@ public final class OverrideAllowedState implements Parcelable {
                 return "DEFERRED_VERIFICATION";
             case LOGGING_ONLY_CHANGE:
                 return "LOGGING_ONLY_CHANGE";
+            case PLATFORM_TOO_OLD:
+                return "PLATFORM_TOO_OLD";
         }
         return "UNKNOWN";
     }

@@ -74,12 +74,14 @@ final class CompatConfig {
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
 
     private final OverrideValidatorImpl mOverrideValidator;
+    private final AndroidBuildClassifier mAndroidBuildClassifier;
     private Context mContext;
     private File mOverridesFile;
 
     @VisibleForTesting
     CompatConfig(AndroidBuildClassifier androidBuildClassifier, Context context) {
         mOverrideValidator = new OverrideValidatorImpl(androidBuildClassifier, context, this);
+        mAndroidBuildClassifier = androidBuildClassifier;
         mContext = context;
     }
 
@@ -133,7 +135,7 @@ final class CompatConfig {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
                 CompatChange c = mChanges.valueAt(i);
-                if (!c.isEnabled(app)) {
+                if (!c.isEnabled(app, mAndroidBuildClassifier)) {
                     disabled.add(c.getId());
                 }
             }
@@ -175,7 +177,7 @@ final class CompatConfig {
                 // we know nothing about this change: default behaviour is enabled.
                 return true;
             }
-            return c.isEnabled(app);
+            return c.isEnabled(app, mAndroidBuildClassifier);
         }
     }
 
@@ -475,7 +477,7 @@ final class CompatConfig {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
                 CompatChange c = mChanges.valueAt(i);
-                if (c.isEnabled(applicationInfo)) {
+                if (c.isEnabled(applicationInfo, mAndroidBuildClassifier)) {
                     enabled.add(c.getId());
                 } else {
                     disabled.add(c.getId());
