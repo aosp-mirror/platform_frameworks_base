@@ -31,14 +31,17 @@ import static android.os.Process.SYSTEM_UID;
 import static com.android.net.module.util.CollectionUtils.toIntArray;
 
 import android.annotation.NonNull;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageManagerInternal;
 import android.net.INetd;
 import android.net.UidRange;
+import android.net.Uri;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -54,7 +57,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.net.module.util.CollectionUtils;
-import com.android.server.LocalServices;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,7 +73,7 @@ import java.util.Set;
  *
  * @hide
  */
-public class PermissionMonitor implements PackageManagerInternal.PackageListObserver {
+public class PermissionMonitor {
     private static final String TAG = "PermissionMonitor";
     private static final boolean DBG = true;
     protected static final Boolean SYSTEM = Boolean.TRUE;
@@ -83,6 +85,7 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
     private final SystemConfigManager mSystemConfigManager;
     private final INetd mNetd;
     private final Dependencies mDeps;
+    private final Context mContext;
 
     @GuardedBy("this")
     private final Set<UserHandle> mUsers = new HashSet<>();
@@ -101,6 +104,25 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
     // added/removed.
     @GuardedBy("this")
     private final Set<Integer> mAllApps = new HashSet<>();
+
+    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+            final Uri packageData = intent.getData();
+            final String packageName =
+                    packageData != null ? packageData.getSchemeSpecificPart() : null;
+
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                onPackageAdded(packageName, uid);
+            } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                onPackageRemoved(packageName, uid);
+            } else {
+                Log.wtf(TAG, "received unexpected intent: " + action);
+            }
+        }
+    };
 
     /**
      * Dependencies of PermissionMonitor, for injection in tests.
@@ -127,6 +149,7 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         mSystemConfigManager = context.getSystemService(SystemConfigManager.class);
         mNetd = netd;
         mDeps = deps;
+        mContext = context;
     }
 
     // Intended to be called only once at startup, after the system is ready. Installs a broadcast
@@ -134,12 +157,14 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
     public synchronized void startMonitoring() {
         log("Monitoring");
 
-        PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-        if (pmi != null) {
-            pmi.getPackageList(this);
-        } else {
-            loge("failed to get the PackageManagerInternal service");
-        }
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addDataScheme("package");
+        mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */).registerReceiver(
+                mIntentReceiver, intentFilter, null /* broadcastPermission */,
+                null /* scheduler */);
+
         List<PackageInfo> apps = mPackageManager.getInstalledPackages(GET_PERMISSIONS
                 | MATCH_ANY_USER);
         if (apps == null) {
@@ -347,9 +372,10 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
      *
      * @hide
      */
-    @Override
     public synchronized void onPackageAdded(@NonNull final String packageName, final int uid) {
-        sendPackagePermissionsForUid(uid, getPermissionForUid(uid));
+        // TODO: Netd is using appId for checking traffic permission. Correct the methods that are
+        //  using appId instead of uid actually
+        sendPackagePermissionsForUid(UserHandle.getAppId(uid), getPermissionForUid(uid));
 
         // If multiple packages share a UID (cf: android:sharedUserId) and ask for different
         // permissions, don't downgrade (i.e., if it's already SYSTEM, leave it as is).
@@ -384,9 +410,10 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
      *
      * @hide
      */
-    @Override
     public synchronized void onPackageRemoved(@NonNull final String packageName, final int uid) {
-        sendPackagePermissionsForUid(uid, getPermissionForUid(uid));
+        // TODO: Netd is using appId for checking traffic permission. Correct the methods that are
+        //  using appId instead of uid actually
+        sendPackagePermissionsForUid(UserHandle.getAppId(uid), getPermissionForUid(uid));
 
         // If the newly-removed package falls within some VPN's uid range, update Netd with it.
         // This needs to happen before the mApps update below, since removeBypassingUids() depends
@@ -430,19 +457,6 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
             apps.put(uid, NETWORK);  // doesn't matter which permission we pick here
             update(mUsers, apps, false);
         }
-    }
-
-    /**
-     * Called when a package is changed.
-     *
-     * @param packageName The name of the changed package.
-     * @param uid The uid of the changed package.
-     *
-     * @hide
-     */
-    @Override
-    public synchronized void onPackageChanged(@NonNull final String packageName, final int uid) {
-        sendPackagePermissionsForUid(uid, getPermissionForUid(uid));
     }
 
     private static int getNetdPermissionMask(String[] requestedPermissions,
