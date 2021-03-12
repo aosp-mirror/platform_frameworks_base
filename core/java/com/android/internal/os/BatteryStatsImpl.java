@@ -6976,6 +6976,11 @@ public class BatteryStatsImpl extends BatteryStats {
         return getPowerBucketConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_SCREEN_DOZE);
     }
 
+    @Override
+    public long getCpuMeasuredBatteryConsumptionUC() {
+        return getPowerBucketConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_CPU);
+    }
+
     /**
      * Returns the consumption (in microcoulombs) that the given standard power bucket consumed.
      * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable
@@ -8480,6 +8485,11 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public long getScreenOnMeasuredBatteryConsumptionUC() {
             return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON);
+        }
+
+        @Override
+        public long getCpuMeasuredBatteryConsumptionUC() {
+            return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_CPU);
         }
 
         void initNetworkActivityLocked() {
