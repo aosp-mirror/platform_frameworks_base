@@ -33,7 +33,11 @@ import android.os.RemoteException;
 import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.ImsSsData;
+import android.telephony.ims.SipDelegateManager;
+import android.telephony.ims.feature.MmTelFeature;
+import android.telephony.ims.feature.RcsFeature;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
@@ -3941,6 +3945,43 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "enable_presence_publish_bool";
 
         /**
+         * Each string in this array contains a mapping between the service-id and version portion
+         * of the service-description element and the associated IMS feature tag(s) that are
+         * associated with each element (see RCC.07 Table 7).
+         * <p>
+         * Each string contains 3 parts, which define the mapping between service-description and
+         * feature tag(s) that must be present in the IMS REGISTER for the RCS service to be
+         * published as part of the RCS PUBLISH procedure:
+         * [service-id]|[version]|[desc]|[feature_tag];[feature_tag];...
+         * <ul>
+         *   <li>[service-id]: the service-id element associated with the RCS capability.</li>
+         *   <li>[version]: The version element associated with that service-id</li>
+         *   <li>[desc]: The optional desecription element associated with that service-id</li>
+         *   <li>[feature_tag];[feature_tag]: The list of all feature tags associated with this
+         *       capability that MUST ALL be present in the IMS registration for this this
+         *       capability to be published to the network.</li>
+         * </ul>
+         * <p>
+         * Features managed by the framework will be considered capable when the ImsService reports
+         * that those services are capable via the
+         * {@link MmTelFeature#notifyCapabilitiesStatusChanged(MmTelFeature.MmTelCapabilities)} or
+         * {@link RcsFeature#notifyCapabilitiesStatusChanged(RcsFeature.RcsImsCapabilities)} APIs.
+         * For RCS services not managed by the framework, the capability of these services are
+         * determined by looking at the feature tags associated with the IMS registration using the
+         * {@link ImsRegistrationAttributes} API and mapping them to the service-description map.
+         * <p>
+         * The framework contains a default value of this key, which is based off of RCC.07
+         * specification. Capabilities based of carrier extensions may be added to this list on a
+         * carrier-by-carrier basis as required in order to support additional services in the
+         * PUBLISH. If this list contains a service-id and version that overlaps with the default,
+         * it will override the framework default.
+         * @hide
+         */
+        @SystemApi
+        public static final String KEY_PUBLISH_SERVICE_DESC_FEATURE_TAG_MAP_OVERRIDE_STRING_ARRAY =
+                KEY_PREFIX + "publish_service_desc_feature_tag_map_override_string_array";
+
+        /**
          * Flag indicating whether or not this carrier supports the exchange of phone numbers with
          * the carrier's RCS presence server in order to retrieve the RCS capabilities of requested
          * contacts used in the RCS User Capability Exchange (UCE) procedure. See RCC.71, section 3
@@ -3999,6 +4040,8 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT, 4000);
             defaults.putBoolean(KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_PUBLISH_BOOL, false);
+            defaults.putStringArray(KEY_PUBLISH_SERVICE_DESC_FEATURE_TAG_MAP_OVERRIDE_STRING_ARRAY,
+                    new String[] {});
             defaults.putBoolean(KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, true);
