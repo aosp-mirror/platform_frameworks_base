@@ -3060,7 +3060,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Also stage .dm.fsv_sig. .dm may be required to install with fs-verity signature on
         // supported on older devices.
         maybeStageFsveritySignatureLocked(dexMetadataFile, targetDexMetadataFile,
-                VerityUtils.isFsVeritySupported() && DexMetadataHelper.isFsVerityRequired());
+                DexMetadataHelper.isFsVerityRequired());
     }
 
     private void storeBytesToInstallationFile(final String localPath, final String absolutePath,
