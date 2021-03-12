@@ -189,7 +189,6 @@ import android.util.SparseIntArray;
 import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocationPermissionChecker;
 import com.android.internal.util.MessageUtils;
@@ -345,8 +344,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private String mCurrentTcpBufferSizes;
 
     private static final SparseArray<String> sMagicDecoderRing = MessageUtils.findMessageNames(
-            new Class[] { AsyncChannel.class, ConnectivityService.class, NetworkAgent.class,
-                    NetworkAgentInfo.class });
+            new Class[] { ConnectivityService.class, NetworkAgent.class, NetworkAgentInfo.class });
 
     private enum ReapUnvalidatedNetworks {
         // Tear down networks that have no chance (e.g. even if validated) of becoming
@@ -2892,22 +2890,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             super(looper);
         }
 
-        private boolean maybeHandleAsyncChannelMessage(Message msg) {
-            switch (msg.what) {
-                default:
-                    return false;
-                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
-                    handleAsyncChannelHalfConnect(msg);
-                    break;
-                }
-                case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
-                    handleAsyncChannelDisconnected(msg);
-                    break;
-                }
-            }
-            return true;
-        }
-
         private void maybeHandleNetworkAgentMessage(Message msg) {
             final Pair<NetworkAgentInfo, Object> arg = (Pair<NetworkAgentInfo, Object>) msg.obj;
             final NetworkAgentInfo nai = arg.first;
@@ -3199,8 +3181,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         @Override
         public void handleMessage(Message msg) {
-            if (!maybeHandleAsyncChannelMessage(msg)
-                    && !maybeHandleNetworkMonitorMessage(msg)
+            if (!maybeHandleNetworkMonitorMessage(msg)
                     && !maybeHandleNetworkAgentInfoMessage(msg)) {
                 maybeHandleNetworkAgentMessage(msg);
             }
@@ -3464,21 +3445,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return false;
     }
 
-    private void handleAsyncChannelHalfConnect(Message msg) {
-        ensureRunningOnConnectivityServiceThread();
-        if (mNetworkProviderInfos.containsKey(msg.replyTo)) {
-            if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                if (VDBG) log("NetworkFactory connected");
-                // Finish setting up the full connection
-                NetworkProviderInfo npi = mNetworkProviderInfos.get(msg.replyTo);
-                sendAllRequestsToProvider(npi);
-            } else {
-                loge("Error connecting NetworkFactory");
-                mNetworkProviderInfos.remove(msg.obj);
-            }
-        }
-    }
-
     private void handleNetworkAgentRegistered(Message msg) {
         final NetworkAgentInfo nai = (NetworkAgentInfo) msg.obj;
         if (!mNetworkAgentInfos.contains(nai)) {
@@ -3507,14 +3473,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (mNetworkAgentInfos.contains(nai)) {
             disconnectAndDestroyNetwork(nai);
         }
-    }
-
-    // This is a no-op if it's called with a message designating a provider that has
-    // already been destroyed, because its reference will not be found in the relevant
-    // maps.
-    private void handleAsyncChannelDisconnected(Message msg) {
-        NetworkProviderInfo npi = mNetworkProviderInfos.remove(msg.replyTo);
-        if (DBG && npi != null) log("unregisterNetworkFactory for " + npi.name);
     }
 
     // Destroys a network, remove references to it from the internal state managed by
@@ -5159,8 +5117,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         private final IBinder.DeathRecipient mDeathRecipient;
         public final int providerId;
 
-        NetworkProviderInfo(String name, Messenger messenger, AsyncChannel asyncChannel,
-                int providerId, @NonNull IBinder.DeathRecipient deathRecipient) {
+        NetworkProviderInfo(String name, Messenger messenger, int providerId,
+                @NonNull IBinder.DeathRecipient deathRecipient) {
             this.name = name;
             this.messenger = messenger;
             this.providerId = providerId;
@@ -5836,8 +5794,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public int registerNetworkProvider(Messenger messenger, String name) {
         enforceNetworkFactoryOrSettingsPermission();
         NetworkProviderInfo npi = new NetworkProviderInfo(name, messenger,
-                null /* asyncChannel */, nextNetworkProviderId(),
-                () -> unregisterNetworkProvider(messenger));
+                nextNetworkProviderId(), () -> unregisterNetworkProvider(messenger));
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_PROVIDER, npi));
         return npi.providerId;
     }
