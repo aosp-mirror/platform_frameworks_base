@@ -3790,7 +3790,7 @@ public class Editor {
         }
 
         public SuggestionsPopupWindow() {
-            mCursorWasVisibleBeforeSuggestions = mCursorVisible;
+            mCursorWasVisibleBeforeSuggestions = mTextView.isCursorVisibleFromAttr();
         }
 
         @Override
@@ -3957,7 +3957,7 @@ public class Editor {
             }
 
             if (updateSuggestions()) {
-                mCursorWasVisibleBeforeSuggestions = mCursorVisible;
+                mCursorWasVisibleBeforeSuggestions = mTextView.isCursorVisibleFromAttr();
                 mTextView.setCursorVisible(false);
                 mIsShowingUp = true;
                 super.show();
