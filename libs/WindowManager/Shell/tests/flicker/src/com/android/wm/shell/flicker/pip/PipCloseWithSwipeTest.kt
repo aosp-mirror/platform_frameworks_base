@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -51,40 +51,40 @@ class PipCloseWithSwipeTest(testSpec: FlickerTestParameter) : PipCloseTransition
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarLayerIsAlwaysVisible() = super.navBarLayerIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerIsAlwaysVisible() = super.statusBarLayerIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun pipWindowBecomesInvisible() = super.pipWindowBecomesInvisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun pipLayerBecomesInvisible() = super.pipLayerBecomesInvisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerRotatesScales() =
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun noUncoveredRegions() = super.noUncoveredRegions()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 }
