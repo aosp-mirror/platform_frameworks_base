@@ -93,7 +93,7 @@ class AppSearchMigrationHelperImpl implements AppSearchMigrationHelper {
                             migrator.transform(
                                     currentVersion,
                                     finalVersion,
-                                    searchResultPage.getResults().get(i).getDocument());
+                                    searchResultPage.getResults().get(i).getGenericDocument());
                     Bundle bundle = newDocument.getBundle();
                     Parcel parcel = Parcel.obtain();
                     parcel.writeBundle(bundle);
