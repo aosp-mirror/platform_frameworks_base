@@ -114,10 +114,10 @@ public final class QosSocketInfo implements Parcelable {
         try {
             return new InetSocketAddress(InetAddress.getByAddress(address), port);
         } catch (final UnknownHostException e) {
-            /* The catch block was purposely left empty.  UnknownHostException will never be thrown
+            /* This can never happen. UnknownHostException will never be thrown
                since the address provided is numeric and non-null. */
+            throw new RuntimeException("UnknownHostException on numeric address", e);
         }
-        return new InetSocketAddress();
     }
 
     @Override
