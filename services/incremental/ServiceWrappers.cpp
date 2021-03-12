@@ -329,6 +329,14 @@ public:
     }
 };
 
+class RealClockWrapper final : public ClockWrapper {
+public:
+    RealClockWrapper() = default;
+    ~RealClockWrapper() = default;
+
+    TimePoint now() const final { return Clock::now(); }
+};
+
 RealServiceManager::RealServiceManager(sp<IServiceManager> serviceManager, JNIEnv* env)
       : mServiceManager(std::move(serviceManager)), mJvm(RealJniWrapper::getJvm(env)) {}
 
@@ -386,6 +394,10 @@ std::unique_ptr<TimedQueueWrapper> RealServiceManager::getProgressUpdateJobQueue
 
 std::unique_ptr<FsWrapper> RealServiceManager::getFs() {
     return std::make_unique<RealFsWrapper>();
+}
+
+std::unique_ptr<ClockWrapper> RealServiceManager::getClock() {
+    return std::make_unique<RealClockWrapper>();
 }
 
 static JavaVM* getJavaVm(JNIEnv* env) {
