@@ -45,6 +45,7 @@ import com.android.server.FgThread;
 import com.android.server.SystemService;
 import com.android.server.timezonedetector.ServiceConfigAccessor;
 import com.android.server.timezonedetector.TimeZoneDetectorInternal;
+import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderMetricsLogger;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -297,7 +298,9 @@ public class LocationTimeZoneManagerService extends Binder {
                     R.string.config_primaryLocationTimeZoneProviderPackageName
             );
         }
-        return new BinderLocationTimeZoneProvider(mThreadingDomain, PRIMARY_PROVIDER_NAME, proxy);
+        ProviderMetricsLogger providerMetricsLogger = new RealProviderMetricsLogger(0);
+        return new BinderLocationTimeZoneProvider(
+                providerMetricsLogger, mThreadingDomain, PRIMARY_PROVIDER_NAME, proxy);
     }
 
     @NonNull
@@ -317,7 +320,9 @@ public class LocationTimeZoneManagerService extends Binder {
                     R.string.config_secondaryLocationTimeZoneProviderPackageName
             );
         }
-        return new BinderLocationTimeZoneProvider(mThreadingDomain, SECONDARY_PROVIDER_NAME, proxy);
+        ProviderMetricsLogger providerMetricsLogger = new RealProviderMetricsLogger(1);
+        return new BinderLocationTimeZoneProvider(
+                providerMetricsLogger, mThreadingDomain, SECONDARY_PROVIDER_NAME, proxy);
     }
 
     /** Used for bug triage and in tests to simulate provider events. */
