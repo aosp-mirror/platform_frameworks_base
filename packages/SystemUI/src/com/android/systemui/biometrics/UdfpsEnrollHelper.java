@@ -100,13 +100,13 @@ public class UdfpsEnrollHelper {
 
     }
 
-    void setListener(@NonNull Listener listener) {
+    void setListener(Listener listener) {
         mListener = listener;
 
         // Only notify during setListener if enrollment is already in progress, so the progress
         // bar can be updated. If enrollment has not started yet, the progress bar will be empty
         // anyway.
-        if (mTotalSteps != -1) {
+        if (mListener != null && mTotalSteps != -1) {
             mListener.onEnrollmentProgress(mRemainingSteps, mTotalSteps);
         }
     }

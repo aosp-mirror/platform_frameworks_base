@@ -17,26 +17,25 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
-import android.util.AttributeSet;
+import android.graphics.Canvas;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 /**
- * Class that coordinates non-HBM animations during other usage of FingerprintManager (not
- * including Keyguard).
+ * Draws udfps fingerprint if sensor isn't illuminating.
  */
-public class UdfpsAnimationViewFpmOther extends UdfpsAnimationView {
+public class UdfpsFpDrawable extends UdfpsDrawable {
 
-    private final UdfpsAnimationFpmOther mAnimation;
-
-    public UdfpsAnimationViewFpmOther(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        mAnimation = new UdfpsAnimationFpmOther(context);
+    UdfpsFpDrawable(@NonNull Context context) {
+        super(context);
     }
 
-    @Nullable
     @Override
-    protected UdfpsAnimation getUdfpsAnimation() {
-        return mAnimation;
+    public void draw(@NonNull Canvas canvas) {
+        if (isIlluminationShowing()) {
+            return;
+        }
+
+        mFingerprintDrawable.draw(canvas);
     }
 }
