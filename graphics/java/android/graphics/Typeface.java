@@ -25,6 +25,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
@@ -167,6 +168,21 @@ public class Typeface {
     @Deprecated
     static final Map<String, android.graphics.FontFamily[]> sSystemFallbackMap =
             Collections.emptyMap();
+
+    /**
+     * Returns the shared memory that used for creating Typefaces.
+     *
+     * @return A SharedMemory used for creating Typeface. Maybe null if the lazy initialization is
+     *         disabled or inside SystemServer or Zygote.
+     * @hide
+     */
+    @TestApi
+    public static @Nullable SharedMemory getSystemFontMapSharedMemory() {
+        if (ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+            Objects.requireNonNull(sSystemFontMapSharedMemory);
+        }
+        return sSystemFontMapSharedMemory;
+    }
 
     /**
      * @hide
@@ -1196,8 +1212,13 @@ public class Typeface {
         }
     }
 
-    /** @hide */
-    public static SharedMemory serializeFontMap(Map<String, Typeface> fontMap)
+    /**
+     * Create a serialized system font mappings.
+     *
+     * @hide
+     */
+    @TestApi
+    public static @NonNull SharedMemory serializeFontMap(@NonNull Map<String, Typeface> fontMap)
             throws IOException, ErrnoException {
         long[] nativePtrs = new long[fontMap.size()];
         // The name table will not be large, so let's create a byte array in memory.
@@ -1229,9 +1250,14 @@ public class Typeface {
     }
 
     // buffer's byte order should be BIG_ENDIAN.
-    /** @hide */
-    @VisibleForTesting
-    public static Map<String, Typeface> deserializeFontMap(ByteBuffer buffer) throws IOException {
+    /**
+     * Deserialize the font mapping from the serialized byte buffer.
+     *
+     * @hide
+     */
+    @TestApi
+    public static @NonNull Map<String, Typeface> deserializeFontMap(@NonNull ByteBuffer buffer)
+            throws IOException {
         Map<String, Typeface> fontMap = new ArrayMap<>();
         int typefacesBytesCount = buffer.getInt();
         long[] nativePtrs = nativeReadTypefaces(buffer.slice());
