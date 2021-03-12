@@ -1450,6 +1450,8 @@ public class ConnectivityServiceTest {
         applicationInfo.targetSdkVersion = Build.VERSION_CODES.Q;
         when(mPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), any()))
                 .thenReturn(applicationInfo);
+        when(mPackageManager.getTargetSdkVersion(anyString()))
+                .thenReturn(applicationInfo.targetSdkVersion);
         when(mSystemConfigManager.getSystemPermissionUids(anyString())).thenReturn(new int[0]);
 
         // InstrumentationTestRunner prepares a looper, but AndroidJUnitRunner does not.
@@ -3756,8 +3758,8 @@ public class ConnectivityServiceTest {
             networkCapabilities.addTransportType(TRANSPORT_WIFI)
                     .setNetworkSpecifier(new MatchAllNetworkSpecifier());
             mService.requestNetwork(networkCapabilities, NetworkRequest.Type.REQUEST.ordinal(),
-                    null, 0, null, ConnectivityManager.TYPE_WIFI, mContext.getPackageName(),
-                    getAttributionTag());
+                    null, 0, null, ConnectivityManager.TYPE_WIFI, NetworkCallback.FLAG_NONE,
+                    mContext.getPackageName(), getAttributionTag());
         });
 
         class NonParcelableSpecifier extends NetworkSpecifier {
@@ -8763,6 +8765,7 @@ public class ConnectivityServiceTest {
         applicationInfo.targetSdkVersion = targetSdk;
         when(mPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), any()))
                 .thenReturn(applicationInfo);
+        when(mPackageManager.getTargetSdkVersion(any())).thenReturn(targetSdk);
 
         when(mLocationManager.isLocationEnabledForUser(any())).thenReturn(locationToggle);
 
@@ -8777,102 +8780,183 @@ public class ConnectivityServiceTest {
         }
     }
 
-    private int getOwnerUidNetCapsForCallerPermission(int ownerUid, int callerUid) {
+    private int getOwnerUidNetCapsPermission(int ownerUid, int callerUid,
+            boolean includeLocationSensitiveInfo) {
         final NetworkCapabilities netCap = new NetworkCapabilities().setOwnerUid(ownerUid);
 
         return mService.createWithLocationInfoSanitizedIfNecessaryWhenParceled(
-                netCap, callerUid, mContext.getPackageName(), getAttributionTag()).getOwnerUid();
+                netCap, includeLocationSensitiveInfo, callerUid,
+                mContext.getPackageName(), getAttributionTag())
+                .getOwnerUid();
     }
 
-    private void verifyWifiInfoCopyNetCapsForCallerPermission(
-            int callerUid, boolean shouldMakeCopyWithLocationSensitiveFieldsParcelable) {
+    private void verifyWifiInfoCopyNetCapsPermission(
+            int callerUid, boolean includeLocationSensitiveInfo,
+            boolean shouldMakeCopyWithLocationSensitiveFieldsParcelable) {
         final WifiInfo wifiInfo = mock(WifiInfo.class);
         when(wifiInfo.hasLocationSensitiveFields()).thenReturn(true);
         final NetworkCapabilities netCap = new NetworkCapabilities().setTransportInfo(wifiInfo);
 
         mService.createWithLocationInfoSanitizedIfNecessaryWhenParceled(
-                netCap, callerUid, mContext.getPackageName(), getAttributionTag());
+                netCap, includeLocationSensitiveInfo, callerUid,
+                mContext.getPackageName(), getAttributionTag());
         verify(wifiInfo).makeCopy(eq(shouldMakeCopyWithLocationSensitiveFieldsParcelable));
     }
 
+    private void verifyOwnerUidAndWifiInfoNetCapsPermission(
+            boolean shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag,
+            boolean shouldInclLocationSensitiveOwnerUidWithIncludeFlag,
+            boolean shouldInclLocationSensitiveWifiInfoWithoutIncludeFlag,
+            boolean shouldInclLocationSensitiveWifiInfoWithIncludeFlag) {
+        final int myUid = Process.myUid();
+
+        final int expectedOwnerUidWithoutIncludeFlag =
+                shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag
+                        ? Process.myUid() : INVALID_UID;
+        assertEquals(expectedOwnerUidWithoutIncludeFlag, getOwnerUidNetCapsPermission(
+                myUid, myUid, false /* includeLocationSensitiveInfo */));
+
+        final int expectedOwnerUidWithIncludeFlag =
+                shouldInclLocationSensitiveOwnerUidWithIncludeFlag ? myUid : INVALID_UID;
+        assertEquals(expectedOwnerUidWithIncludeFlag, getOwnerUidNetCapsPermission(
+                myUid, myUid, true /* includeLocationSensitiveInfo */));
+
+        verifyWifiInfoCopyNetCapsPermission(myUid,
+                false, /* includeLocationSensitiveInfo */
+                shouldInclLocationSensitiveWifiInfoWithoutIncludeFlag);
+
+        verifyWifiInfoCopyNetCapsPermission(myUid,
+                true, /* includeLocationSensitiveInfo */
+                shouldInclLocationSensitiveWifiInfoWithIncludeFlag);
+
+    }
+
     @Test
-    public void testCreateForCallerWithLocationInfoSanitizedWithFineLocationAfterQ()
+    public void testCreateWithLocationInfoSanitizedWithFineLocationAfterQ()
             throws Exception {
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
-        final int myUid = Process.myUid();
-        assertEquals(myUid, getOwnerUidNetCapsForCallerPermission(myUid, myUid));
-
-        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
-                true /* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
+        verifyOwnerUidAndWifiInfoNetCapsPermission(
+                // Ensure that we include owner uid even if the request asks to remove it since the
+                // app has necessary permissions and targetSdk < S.
+                true, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
+                true, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
+                false, /* shouldInclLocationSensitiveWifiInfoWithoutIncludeFlag */
+                // Ensure that we remove location info if the request asks to remove it even if the
+                // app has necessary permissions.
+                true /* shouldInclLocationSensitiveWifiInfoWithIncludeFlag */
+        );
     }
 
     @Test
-    public void testCreateForCallerWithLocationInfoSanitizedWithCoarseLocationPreQ()
+    public void testCreateWithLocationInfoSanitizedWithFineLocationPreSWithAndWithoutCallbackFlag()
+            throws Exception {
+        setupLocationPermissions(Build.VERSION_CODES.R, true, AppOpsManager.OPSTR_FINE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+
+        verifyOwnerUidAndWifiInfoNetCapsPermission(
+                // Ensure that we include owner uid even if the request asks to remove it since the
+                // app has necessary permissions and targetSdk < S.
+                true, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
+                true, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
+                false, /* shouldInclLocationSensitiveWifiInfoWithoutIncludeFlag */
+                // Ensure that we remove location info if the request asks to remove it even if the
+                // app has necessary permissions.
+                true /* shouldInclLocationSensitiveWifiInfoWithIncludeFlag */
+        );
+    }
+
+    @Test
+    public void
+            testCreateWithLocationInfoSanitizedWithFineLocationAfterSWithAndWithoutCallbackFlag()
+            throws Exception {
+        setupLocationPermissions(Build.VERSION_CODES.S, true, AppOpsManager.OPSTR_FINE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+
+        verifyOwnerUidAndWifiInfoNetCapsPermission(
+                // Ensure that we owner UID if the request asks us to remove it even if the app
+                // has necessary permissions since targetSdk >= S.
+                false, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
+                true, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
+                false, /* shouldInclLocationSensitiveWifiInfoWithoutIncludeFlag */
+                // Ensure that we remove location info if the request asks to remove it even if the
+                // app has necessary permissions.
+                true /* shouldInclLocationSensitiveWifiInfoWithIncludeFlag */
+        );
+    }
+
+    @Test
+    public void testCreateWithLocationInfoSanitizedWithCoarseLocationPreQ()
             throws Exception {
         setupLocationPermissions(Build.VERSION_CODES.P, true, AppOpsManager.OPSTR_COARSE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        final int myUid = Process.myUid();
-        assertEquals(myUid, getOwnerUidNetCapsForCallerPermission(myUid, myUid));
-
-        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
-                true /* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
+        verifyOwnerUidAndWifiInfoNetCapsPermission(
+                // Ensure that we owner UID if the request asks us to remove it even if the app
+                // has necessary permissions since targetSdk >= S.
+                true, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
+                true, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
+                false, /* shouldInclLocationSensitiveWifiInfoWithoutIncludeFlag */
+                // Ensure that we remove location info if the request asks to remove it even if the
+                // app has necessary permissions.
+                true /* shouldInclLocationSensitiveWifiInfoWithIncludeFlag */
+        );
     }
 
     @Test
-    public void testCreateForCallerWithLocationInfoSanitizedLocationOff() throws Exception {
+    public void testCreateWithLocationInfoSanitizedLocationOff() throws Exception {
         // Test that even with fine location permission, and UIDs matching, the UID is sanitized.
         setupLocationPermissions(Build.VERSION_CODES.Q, false, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
-        final int myUid = Process.myUid();
-        assertEquals(Process.INVALID_UID, getOwnerUidNetCapsForCallerPermission(myUid, myUid));
-
-        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
-                false/* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
+        verifyOwnerUidAndWifiInfoNetCapsPermission(
+                false, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
+                false, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
+                false, /* shouldInclLocationSensitiveWifiInfoWithoutIncludeFlag */
+                false /* shouldInclLocationSensitiveWifiInfoWithIncludeFlag */
+        );
     }
 
     @Test
-    public void testCreateForCallerWithLocationInfoSanitizedWrongUid() throws Exception {
+    public void testCreateWithLocationInfoSanitizedWrongUid() throws Exception {
         // Test that even with fine location permission, not being the owner leads to sanitization.
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
         final int myUid = Process.myUid();
-        assertEquals(Process.INVALID_UID, getOwnerUidNetCapsForCallerPermission(myUid + 1, myUid));
-
-        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
-                true /* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
+        assertEquals(Process.INVALID_UID,
+                getOwnerUidNetCapsPermission(myUid + 1, myUid,
+                        true /* includeLocationSensitiveInfo */));
     }
 
     @Test
-    public void testCreateForCallerWithLocationInfoSanitizedWithCoarseLocationAfterQ()
+    public void testCreateWithLocationInfoSanitizedWithCoarseLocationAfterQ()
             throws Exception {
         // Test that not having fine location permission leads to sanitization.
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_COARSE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        // Test that without the location permission, the owner field is sanitized.
-        final int myUid = Process.myUid();
-        assertEquals(Process.INVALID_UID, getOwnerUidNetCapsForCallerPermission(myUid, myUid));
-
-        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
-                false/* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
+        verifyOwnerUidAndWifiInfoNetCapsPermission(
+                false, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
+                false, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
+                false, /* shouldInclLocationSensitiveWifiInfoWithoutIncludeFlag */
+                false /* shouldInclLocationSensitiveWifiInfoWithIncludeFlag */
+        );
     }
 
     @Test
-    public void testCreateForCallerWithLocationInfoSanitizedWithoutLocationPermission()
+    public void testCreateWithLocationInfoSanitizedWithoutLocationPermission()
             throws Exception {
+        // Test that not having fine location permission leads to sanitization.
         setupLocationPermissions(Build.VERSION_CODES.Q, true, null /* op */, null /* perm */);
 
-        // Test that without the location permission, the owner field is sanitized.
-        final int myUid = Process.myUid();
-        assertEquals(Process.INVALID_UID, getOwnerUidNetCapsForCallerPermission(myUid, myUid));
-
-        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
-                false/* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
+        verifyOwnerUidAndWifiInfoNetCapsPermission(
+                false, /* shouldInclLocationSensitiveOwnerUidWithoutIncludeFlag */
+                false, /* shouldInclLocationSensitiveOwnerUidWithIncludeFlag */
+                false, /* shouldInclLocationSensitiveWifiInfoWithoutIncludeFlag */
+                false /* shouldInclLocationSensitiveWifiInfoWithIncludeFlag */
+        );
     }
 
     private void setupConnectionOwnerUid(int vpnOwnerUid, @VpnManager.VpnType int vpnType)
@@ -9463,8 +9547,8 @@ public class ConnectivityServiceTest {
             assertThrows("Expect throws for invalid request type " + reqTypeInt,
                     IllegalArgumentException.class,
                     () -> mService.requestNetwork(nc, reqTypeInt, null, 0, null,
-                            ConnectivityManager.TYPE_NONE, mContext.getPackageName(),
-                            getAttributionTag())
+                            ConnectivityManager.TYPE_NONE, NetworkCallback.FLAG_NONE,
+                            mContext.getPackageName(), getAttributionTag())
             );
         }
     }
