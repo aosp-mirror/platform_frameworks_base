@@ -5649,7 +5649,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
+    public NetworkRequest requestNetwork(int asUid, NetworkCapabilities networkCapabilities,
             int reqTypeInt, Messenger messenger, int timeoutMs, IBinder binder,
             int legacyType, int callbackFlags, @NonNull String callingPackageName,
             @Nullable String callingAttributionTag) {
@@ -5661,6 +5661,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         final NetworkCapabilities defaultNc = mDefaultRequest.mRequests.get(0).networkCapabilities;
         final int callingUid = mDeps.getCallingUid();
+        // Privileged callers can track the default network of another UID by passing in a UID.
+        if (asUid != Process.INVALID_UID) {
+            enforceSettingsPermission();
+        } else {
+            asUid = callingUid;
+        }
         final NetworkRequest.Type reqType;
         try {
             reqType = NetworkRequest.Type.values()[reqTypeInt];
@@ -5670,10 +5676,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         switch (reqType) {
             case TRACK_DEFAULT:
                 // If the request type is TRACK_DEFAULT, the passed {@code networkCapabilities}
-                // is unused and will be replaced by ones appropriate for the caller.
-                // This allows callers to keep track of the default network for their app.
+                // is unused and will be replaced by ones appropriate for the UID (usually, the
+                // calling app). This allows callers to keep track of the default network.
                 networkCapabilities = copyDefaultNetworkCapabilitiesForUid(
-                        defaultNc, callingUid, callingUid, callingPackageName);
+                        defaultNc, asUid, callingUid, callingPackageName);
                 enforceAccessPermission();
                 break;
             case TRACK_SYSTEM_DEFAULT:
@@ -5725,7 +5731,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, legacyType,
                 nextNetworkRequestId(), reqType);
         final NetworkRequestInfo nri = getNriToRegister(
-                callingUid, networkRequest, messenger, binder, callbackFlags,
+                asUid, networkRequest, messenger, binder, callbackFlags,
                 callingAttributionTag);
         if (DBG) log("requestNetwork for " + nri);
 
@@ -9574,7 +9580,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     callbackRequest,
                     copyNetworkRequestsForUid(
                             trackingNri.mRequests, callbackRequest.mAsUid,
-                            request.getRequestorUid(), request.getRequestorPackageName())));
+                            callbackRequest.mUid, request.getRequestorPackageName())));
         }
         return callbackRequestsToRegister;
     }
