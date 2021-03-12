@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.IpSecAlgorithm;
 import android.net.IpSecConfig;
@@ -47,6 +48,7 @@ import android.os.Process;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
+import android.util.Range;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -647,9 +649,9 @@ public class IpSecServiceTest {
 
     @Test
     public void testReserveNetId() {
-        int start = mIpSecService.TUN_INTF_NETID_START;
-        for (int i = 0; i < mIpSecService.TUN_INTF_NETID_RANGE; i++) {
-            assertEquals(start + i, mIpSecService.reserveNetId());
+        final Range<Integer> netIdRange = ConnectivityManager.getIpSecNetIdRange();
+        for (int netId = netIdRange.getLower(); netId <= netIdRange.getUpper(); netId++) {
+            assertEquals(netId, mIpSecService.reserveNetId());
         }
 
         // Check that resource exhaustion triggers an exception
@@ -661,7 +663,7 @@ public class IpSecServiceTest {
 
         // Now release one and try again
         int releasedNetId =
-                mIpSecService.TUN_INTF_NETID_START + mIpSecService.TUN_INTF_NETID_RANGE / 2;
+                netIdRange.getLower() + (netIdRange.getUpper() - netIdRange.getLower()) / 2;
         mIpSecService.releaseNetId(releasedNetId);
         assertEquals(releasedNetId, mIpSecService.reserveNetId());
     }

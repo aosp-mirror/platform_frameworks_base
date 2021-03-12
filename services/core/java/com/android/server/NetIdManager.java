@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.annotation.NonNull;
+import android.net.ConnectivityManager;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -31,7 +32,7 @@ public class NetIdManager {
     // Sequence number for Networks; keep in sync with system/netd/NetworkController.cpp
     public static final int MIN_NET_ID = 100; // some reserved marks
     // Top IDs reserved by IpSecService
-    public static final int MAX_NET_ID = 65535 - IpSecService.TUN_INTF_NETID_RANGE;
+    public static final int MAX_NET_ID = ConnectivityManager.getIpSecNetIdRange().getLower() - 1;
 
     @GuardedBy("mNetIdInUse")
     private final SparseBooleanArray mNetIdInUse = new SparseBooleanArray();
