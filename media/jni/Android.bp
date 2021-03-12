@@ -84,6 +84,7 @@ cc_library_shared {
         "android.hardware.drm@1.4",
         "android.hidl.memory@1.0",
         "android.hidl.token@1.0-utils",
+        "media_permission-aidl-cpp",
     ],
 
     header_libs: [
@@ -182,7 +183,7 @@ cc_library_shared {
         "libnativehelper",
         "libutils",
         "tv_tuner_aidl_interface-ndk_platform",
-        "tv_tuner_resource_manager_aidl_interface-ndk_platform"
+        "tv_tuner_resource_manager_aidl_interface-ndk_platform",
     ],
 
     static_libs: [
@@ -212,4 +213,3 @@ cc_library_shared {
         "-Wunreachable-code",
     ],
 }
-

@@ -17,12 +17,15 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "SoundPool::Stream"
 #include <utils/Log.h>
+#include<android/media/permission/Identity.h>
 
 #include "Stream.h"
 
 #include "StreamManager.h"
 
 namespace android::soundpool {
+
+using media::permission::Identity;
 
 Stream::~Stream()
 {
@@ -326,15 +329,17 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
 
             // do not create a new audio track if current track is compatible with sound parameters
 
+            Identity identity = Identity();
+            identity.packageName = mStreamManager->getOpPackageName();
+            // TODO b/182469354 make consistent with AudioRecord, add util for native source
             newTrack = new AudioTrack(streamType, sampleRate, sound->getFormat(),
                     channelMask, sound->getIMemory(), AUDIO_OUTPUT_FLAG_FAST,
                     staticCallback, userData,
                     0 /*default notification frames*/, AUDIO_SESSION_ALLOCATE,
                     AudioTrack::TRANSFER_DEFAULT,
-                    nullptr /*offloadInfo*/, -1 /*uid*/, -1 /*pid*/,
+                    nullptr /*offloadInfo*/, identity,
                     mStreamManager->getAttributes(),
-                    false /*doNotReconnect*/, 1.0f /*maxRequiredSpeed*/,
-                    mStreamManager->getOpPackageName());
+                    false /*doNotReconnect*/, 1.0f /*maxRequiredSpeed*/);
             // Set caller name so it can be logged in destructor.
             // MediaMetricsConstants.h: AMEDIAMETRICS_PROP_CALLERNAME_VALUE_SOUNDPOOL
             newTrack->setCallerName("soundpool");

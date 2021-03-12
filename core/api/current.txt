@@ -20564,6 +20564,7 @@ package android.media {
     method @NonNull public android.media.AudioRecord.Builder setAudioPlaybackCaptureConfig(@NonNull android.media.AudioPlaybackCaptureConfiguration);
     method public android.media.AudioRecord.Builder setAudioSource(int) throws java.lang.IllegalArgumentException;
     method public android.media.AudioRecord.Builder setBufferSizeInBytes(int) throws java.lang.IllegalArgumentException;
+    method @NonNull public android.media.AudioRecord.Builder setContext(@NonNull android.content.Context);
     method @NonNull public android.media.AudioRecord.Builder setPrivacySensitive(boolean);
   }
 
@@ -22737,7 +22738,8 @@ package android.media {
   }
 
   public class MediaRecorder implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {
-    ctor public MediaRecorder();
+    ctor @Deprecated public MediaRecorder();
+    ctor public MediaRecorder(@NonNull android.content.Context);
     method public void addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler);
     method protected void finalize();
     method public java.util.List<android.media.MicrophoneInfo> getActiveMicrophones() throws java.io.IOException;

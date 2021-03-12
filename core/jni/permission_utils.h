@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.media.permission;
 
-/**
- * A collection of identity-related information, required for permission enforcement.
- *
- * {@hide}
- */
-parcelable Identity {
-    /** Linux user ID. */
-    int uid = -1;
-    /** Linux process ID. */
-    int pid = -1;
-    /** Package name. If null, the first package owned by the given uid will be assumed. */
-    @nullable @utf8InCpp String packageName;
-    /** Attribution tag. Mostly used for diagnostic purposes. */
-    @nullable @utf8InCpp String attributionTag;
+#pragma once
+
+#include <android/media/permission/Identity.h>
+#include <jni.h>
+
+namespace android::media::permission {
+
+Identity convertIdentity(JNIEnv* env, const jobject& jIdentity);
 }
+
+int register_android_media_permission_Identity(JNIEnv* env);

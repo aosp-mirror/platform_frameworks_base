@@ -27,6 +27,9 @@ aidl_interface {
 aidl_interface {
     name: "media_permission-aidl",
     unstable: true,
+    host_supported: true,
+    vendor_available: true,
+    double_loadable: true,
     local_include_dir: "aidl",
     srcs: [
         "aidl/android/media/permission/Identity.aidl",
