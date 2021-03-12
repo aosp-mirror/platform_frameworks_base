@@ -26,7 +26,7 @@ final class SystemMemoryUtil {
     private SystemMemoryUtil() {}
 
     static Metrics getMetrics() {
-        int totalIonKb = (int) Debug.getIonHeapsSizeKb();
+        int totalIonKb = (int) Debug.getDmabufHeapTotalExportedKb();
         int gpuTotalUsageKb = (int) Debug.getGpuTotalUsageKb();
         int gpuDmaBufUsageKb = (int) Debug.getGpuDmaBufUsageKb();
         int dmaBufTotalExportedKb = (int) Debug.getDmabufTotalExportedKb();
