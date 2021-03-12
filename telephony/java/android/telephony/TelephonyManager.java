@@ -9135,9 +9135,7 @@ public class TelephonyManager {
     /**
      * Set the user-set status for enriched calling with call composer.
      *
-     * @param status user-set status for enriched calling with call composer;
-     *               it must be either {@link #CALL_COMPOSER_STATUS_ON} or
-     *               {@link #CALL_COMPOSER_STATUS_OFF}.
+     * @param status user-set status for enriched calling with call composer.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
