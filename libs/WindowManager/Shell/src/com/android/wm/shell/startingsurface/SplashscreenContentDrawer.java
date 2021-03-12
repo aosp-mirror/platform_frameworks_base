@@ -31,12 +31,14 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.util.Slog;
+import android.view.SurfaceControl;
 import android.window.SplashScreenView;
 
 import com.android.internal.R;
 import com.android.internal.graphics.palette.Palette;
 import com.android.internal.graphics.palette.Quantizer;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
+import com.android.wm.shell.common.TransactionPool;
 
 import java.util.List;
 
@@ -56,15 +58,25 @@ public class SplashscreenContentDrawer {
     // also 108*108 pixels, then do not enlarge this icon if only need to show foreground icon.
     private static final float ENLARGE_FOREGROUND_ICON_THRESHOLD = (72f * 72f) / (108f * 108f);
     private final Context mContext;
-    private final int mMaxIconAnimationDuration;
+    private final int mMaxAnimatableIconDuration;
 
     private int mIconSize;
     private int mBrandingImageWidth;
     private int mBrandingImageHeight;
+    private final int mAppRevealDuration;
+    private final int mIconExitDuration;
+    private int mMainWindowShiftLength;
+    private int mIconNormalExitDistance;
+    private int mIconEarlyExitDistance;
+    private final TransactionPool mTransactionPool;
 
-    SplashscreenContentDrawer(Context context, int maxIconAnimationDuration) {
+    SplashscreenContentDrawer(Context context, int maxAnimatableIconDuration,
+            int iconExitAnimDuration, int appRevealAnimDuration, TransactionPool pool) {
         mContext = context;
-        mMaxIconAnimationDuration = maxIconAnimationDuration;
+        mMaxAnimatableIconDuration = maxAnimatableIconDuration;
+        mAppRevealDuration = appRevealAnimDuration;
+        mIconExitDuration = iconExitAnimDuration;
+        mTransactionPool = pool;
     }
 
     private void updateDensity() {
@@ -74,6 +86,12 @@ public class SplashscreenContentDrawer {
                 com.android.wm.shell.R.dimen.starting_surface_brand_image_width);
         mBrandingImageHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.starting_surface_brand_image_height);
+        mMainWindowShiftLength = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.starting_surface_exit_animation_window_shift_length);
+        mIconNormalExitDistance = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.starting_surface_normal_exit_icon_distance);
+        mIconEarlyExitDistance = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.starting_surface_early_exit_icon_distance);
     }
 
     private int getSystemBGColor() {
@@ -119,7 +137,7 @@ public class SplashscreenContentDrawer {
         if (attrs.mReplaceIcon != null) {
             iconDrawable = attrs.mReplaceIcon;
             animationDuration = Math.max(0,
-                    Math.min(attrs.mAnimationDuration, mMaxIconAnimationDuration));
+                    Math.min(attrs.mAnimationDuration, mMaxAnimatableIconDuration));
         } else {
             iconDrawable = iconRes != 0 ? context.getDrawable(iconRes)
                     : context.getPackageManager().getDefaultActivityIcon();
@@ -439,8 +457,8 @@ public class SplashscreenContentDrawer {
         }
 
         /**
-         * For ColorDrawable only.
-         * There will be only one color so don't spend too much resource for it.
+         * For ColorDrawable only. There will be only one color so don't spend too much resource for
+         * it.
          */
         private static class SingleColorTester implements ColorTester {
             private final ColorDrawable mColorDrawable;
@@ -472,9 +490,8 @@ public class SplashscreenContentDrawer {
         }
 
         /**
-         * For any other Drawable except ColorDrawable.
-         * This will use the Palette API to check the color information and use a quantizer to
-         * filter out transparent colors when needed.
+         * For any other Drawable except ColorDrawable. This will use the Palette API to check the
+         * color information and use a quantizer to filter out transparent colors when needed.
          */
         private static class ComplexDrawableTester implements ColorTester {
             private static final int MAX_BITMAP_SIZE = 40;
@@ -592,5 +609,18 @@ public class SplashscreenContentDrawer {
                 }
             }
         }
+    }
+
+    /**
+     * Create and play the default exit animation for splash screen view.
+     */
+    void applyExitAnimation(SplashScreenView view, SurfaceControl leash,
+            Rect frame, boolean isEarlyExit, Runnable finishCallback) {
+        final SplashScreenExitAnimation animation = new SplashScreenExitAnimation(view, leash,
+                frame, mAppRevealDuration, mIconExitDuration, mMainWindowShiftLength,
+                isEarlyExit ? mIconEarlyExitDistance : mIconNormalExitDistance, mTransactionPool,
+                finishCallback);
+        animation.prepareAnimations();
+        animation.startAnimations();
     }
 }

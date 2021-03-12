@@ -238,8 +238,9 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         /**
          * Removes the starting window surface. Do not hold the window manager lock when calling
          * this method!
+         * @param animate Whether need to play the default exit animation for starting window.
          */
-        void remove();
+        void remove(boolean animate);
     }
 
     /**
