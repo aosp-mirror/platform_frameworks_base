@@ -320,7 +320,8 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
             // audio track while the new one is being started and avoids processing them with
             // wrong audio audio buffer size  (mAudioBufferSize)
             auto toggle = mToggle ^ 1;
-            void* userData = (void*)((uintptr_t)this | toggle);
+            // NOLINTNEXTLINE(performance-no-int-to-ptr)
+            void* userData = reinterpret_cast<void*>((uintptr_t)this | toggle);
             audio_channel_mask_t soundChannelMask = sound->getChannelMask();
             // When sound contains a valid channel mask, use it as is.
             // Otherwise, use stream count to calculate channel mask.
@@ -391,6 +392,7 @@ exit:
 void Stream::staticCallback(int event, void* user, void* info)
 {
     const auto userAsInt = (uintptr_t)user;
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
     auto stream = reinterpret_cast<Stream*>(userAsInt & ~1);
     stream->callback(event, info, int(userAsInt & 1), 0 /* tries */);
 }
