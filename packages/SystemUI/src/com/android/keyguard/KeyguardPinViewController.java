@@ -23,7 +23,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.classifier.SingleTapClassifier;
 
 public class KeyguardPinViewController
         extends KeyguardPinBasedInputViewController<KeyguardPINView> {
@@ -35,11 +34,10 @@ public class KeyguardPinViewController
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
-            FalsingCollector falsingCollector, SingleTapClassifier singleTapClassifier,
-            boolean isNewLayoutEnabled) {
+            FalsingCollector falsingCollector, boolean isNewLayoutEnabled) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
-                falsingCollector, singleTapClassifier);
+                falsingCollector);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         view.setIsNewLayoutEnabled(isNewLayoutEnabled);
     }

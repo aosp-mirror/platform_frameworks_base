@@ -75,6 +75,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     private View mDeleteButton;
     @Mock
     private View mOkButton;
+    private NumPadKey[] mButtons = new NumPadKey[]{};
 
     private KeyguardPinBasedInputViewController mKeyguardPinViewController;
 
@@ -86,6 +87,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
         when(mPinBasedInputView.getPasswordTextViewId()).thenReturn(1);
         when(mPinBasedInputView.findViewById(1)).thenReturn(mPasswordEntry);
         when(mPinBasedInputView.isAttachedToWindow()).thenReturn(true);
+        when(mPinBasedInputView.getButtons()).thenReturn(mButtons);
         when(mPinBasedInputView.findViewById(R.id.keyguard_message_area))
                 .thenReturn(mKeyguardMessageArea);
         when(mPinBasedInputView.findViewById(R.id.delete_button))
@@ -95,7 +97,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
         mKeyguardPinViewController = new KeyguardPinBasedInputViewController(mPinBasedInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
-                mFalsingCollector, mSingleTapClassifier) {
+                mFalsingCollector) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);
