@@ -4027,7 +4027,8 @@ public class ConnectivityServiceTest {
         grantUsingBackgroundNetworksPermissionForUid(Binder.getCallingUid());
         final TestNetworkCallback cellBgCallback = new TestNetworkCallback();
         mCm.requestBackgroundNetwork(new NetworkRequest.Builder()
-                .addTransportType(TRANSPORT_CELLULAR).build(), null, cellBgCallback);
+                .addTransportType(TRANSPORT_CELLULAR).build(),
+                mCsHandlerThread.getThreadHandler(), cellBgCallback);
 
         // Make callbacks for monitoring.
         final NetworkRequest request = new NetworkRequest.Builder().build();
@@ -11025,5 +11026,13 @@ public class ConnectivityServiceTest {
         waitForIdle();
         verifyNoNetwork();
         mCm.unregisterNetworkCallback(cellCb);
+    }
+
+    @Test
+    public void testRegisterBestMatchingNetworkCallback() throws Exception {
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        assertThrows(UnsupportedOperationException.class,
+                () -> mCm.registerBestMatchingNetworkCallback(request, new NetworkCallback(),
+                        mCsHandlerThread.getThreadHandler()));
     }
 }
