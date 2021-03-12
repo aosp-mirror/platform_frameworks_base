@@ -2811,44 +2811,44 @@
     <!-- Text to display when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_copy_toast">Build number copied to clipboard.</string>
 
-    <!-- Status for last interaction with exact time [CHAR LIMIT=120] -->
-    <string name="last_interaction_status" translatable="false">Last chatted <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
-    <!-- Status for last interaction when less than a certain time window [CHAR LIMIT=120] -->
-    <string name="last_interaction_status_less_than" translatable="false">Last chatted less than <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
-    <!-- Status for last interaction when over a certain time window [CHAR LIMIT=120] -->
-    <string name="last_interaction_status_over" translatable="false">Last chatted over <xliff:g id="duration" example="1 week">%1$s</xliff:g> ago</string>
-    <!-- Status for conversation without interaction data [CHAR LIMIT=120] -->
-    <string name="basic_status" translatable="false">Open conversation</string>
-    <!-- Status for conversation without interaction data [CHAR LIMIT=120] -->
-    <string name="select_conversation_text" translatable="false">Select one conversation to show in your widget:</string>
-    <!-- Timestamp for notification with exact time [CHAR LIMIT=120] -->
-    <string name="timestamp" translatable="false"><xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
-    <!-- Timestamp for notification when less than a certain time window [CHAR LIMIT=120] -->
-    <string name="less_than_timestamp" translatable="false">Less than <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
-    <!-- Timestamp for notification when over a certain time window [CHAR LIMIT=120] -->
-    <string name="over_timestamp" translatable="false">Over <xliff:g id="duration" example="1 week">%1$s</xliff:g> ago</string>
-    <!-- Status text for a birthday today [CHAR LIMIT=30] -->
-    <string name="birthday_status" translatable="false">Birthday</string>
-    <!-- Status text for an upcoming birthday [CHAR LIMIT=30] -->
-    <string name="upcoming_birthday_status" translatable="false">Birthday soon</string>
-    <!-- Status text for an anniversary [CHAR LIMIT=30] -->
-    <string name="anniversary_status" translatable="false">Anniversary</string>
-    <!-- Status text for sharing location [CHAR LIMIT=30] -->
-    <string name="location_status" translatable="false">Sharing location</string>
-    <!-- Status text for a new story posted [CHAR LIMIT=30] -->
-    <string name="new_story_status" translatable="false">New story</string>
-    <!-- Status text for watching a video [CHAR LIMIT=30] -->
-    <string name="video_status" translatable="false">Watching</string>
-    <!-- Status text for listening to audio [CHAR LIMIT=30] -->
-    <string name="audio_status" translatable="false">Listening</string>
-    <!-- Status text for playing a game [CHAR LIMIT=30] -->
-    <string name="game_status" translatable="false">Playing</string>
-    <!-- Empty user name before user has selected a friend [CHAR LIMIT=30] -->
-    <string name="empty_user_name" translatable="false">Your friend</string>
-    <!-- Empty status shown before user has selected a friend [CHAR LIMIT=30] -->
-    <string name="empty_status" translatable="false">Their status</string>
-    <!-- Default text for missed call notifications [CHAR LIMIT=30] -->
-    <string name="missed_call" translatable="false">Missed call</string>
+     <!-- Status for conversation without interaction data [CHAR LIMIT=120] -->
+    <string name="basic_status">Open conversation</string>
+    <!--Title text for Conversation widget set up screen [CHAR LIMIT=180] -->
+    <string name="select_conversation_title">Conversation widgets</string>
+    <!--Text explaining to tap a conversation to select it show in their Conversation widget [CHAR LIMIT=180] -->
+    <string name="select_conversation_text">Tap a conversation to add it to your Home screen</string>
+    <!-- Timestamp for notification with exact time [CHAR LIMIT=25] -->
+    <string name="timestamp"><xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
+    <!-- Timestamp for notification when less than a certain time window [CHAR LIMIT=25] -->
+    <string name="less_than_timestamp">Less than <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
+    <!-- Timestamp for notification when over a certain time window [CHAR LIMIT=25] -->
+    <string name="over_timestamp">Over <xliff:g id="duration" example="1 week">%1$s</xliff:g> ago</string>
+    <!-- Status text on the Conversation widget for a birthday today [CHAR LIMIT=20] -->
+    <string name="birthday_status">Birthday</string>
+    <!-- Status text on the Conversation widget for an upcoming birthday [CHAR LIMIT=20] -->
+    <string name="upcoming_birthday_status">Birthday soon</string>
+    <!-- Status text on the Conversation widget for an anniversary [CHAR LIMIT=20] -->
+    <string name="anniversary_status">Anniversary</string>
+    <!-- Status text on the Conversation widget for sharing location [CHAR LIMIT=20] -->
+    <string name="location_status">Sharing location</string>
+    <!-- Status text on the Conversation widget for a new story posted [CHAR LIMIT=20] -->
+    <string name="new_story_status">New story</string>
+    <!-- Status text on the Conversation widget for watching a video [CHAR LIMIT=20] -->
+    <string name="video_status">Watching</string>
+    <!-- Status text on the Conversation widget for listening to audio [CHAR LIMIT=20] -->
+    <string name="audio_status">Listening</string>
+    <!-- Status text on the Conversation widget for playing a game [CHAR LIMIT=20] -->
+    <string name="game_status">Playing</string>
+    <!-- Empty user name before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
+    <string name="empty_user_name">Friends</string>
+    <!-- Empty status shown before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
+    <string name="empty_status">Let’s chat tonight!</string>
+    <!-- Default text for missed call notifications on their Conversation widget [CHAR LIMIT=20] -->
+    <string name="missed_call">Missed call</string>
+    <!-- Description text for adding a Conversation widget [CHAR LIMIT=100] -->
+    <string name="people_tile_description">See recent messages, missed calls, and status updates</string>
+    <!-- Title text displayed for the Conversation widget [CHAR LIMIT=50] -->
+    <string name="people_tile_title">Conversation</string>
 
     <!-- Title to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->

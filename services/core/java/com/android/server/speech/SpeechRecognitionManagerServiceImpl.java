@@ -100,6 +100,9 @@ final class SpeechRecognitionManagerServiceImpl extends
         }
 
         if (serviceComponent == null) {
+            if (mMaster.debug) {
+                Slog.i(TAG, "Service component is undefined, responding with error.");
+            }
             tryRespondWithError(callback, SpeechRecognizer.ERROR_CLIENT);
             return;
         }
@@ -213,6 +216,10 @@ final class SpeechRecognitionManagerServiceImpl extends
     @Nullable
     private ComponentName getOnDeviceComponentNameLocked() {
         final String serviceName = getComponentNameLocked();
+        if (mMaster.debug) {
+            Slog.i(TAG, "Resolved component name: " + serviceName);
+        }
+
         if (serviceName == null) {
             if (mMaster.verbose) {
                 Slog.v(TAG, "ensureRemoteServiceLocked(): no service component name.");
@@ -241,6 +248,11 @@ final class SpeechRecognitionManagerServiceImpl extends
                                         service.getServiceComponentName().equals(serviceComponent))
                                 .findFirst();
                 if (existingService.isPresent()) {
+
+                    if (mMaster.debug) {
+                        Slog.i(TAG, "Reused existing connection to " + serviceComponent);
+                    }
+
                     return existingService.get();
                 }
             }
@@ -252,6 +264,10 @@ final class SpeechRecognitionManagerServiceImpl extends
             Set<RemoteSpeechRecognitionService> valuesByCaller =
                     mRemoteServicesByUid.computeIfAbsent(callingUid, key -> new HashSet<>());
             valuesByCaller.add(service);
+
+            if (mMaster.debug) {
+                Slog.i(TAG, "Creating a new connection to " + serviceComponent);
+            }
 
             return service;
         }

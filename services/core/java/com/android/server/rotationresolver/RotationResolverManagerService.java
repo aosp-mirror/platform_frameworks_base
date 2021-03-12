@@ -35,6 +35,7 @@ import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.rotationresolver.RotationResolverInternal;
+import android.service.rotationresolver.RotationResolutionRequest;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -158,8 +159,9 @@ public class RotationResolverManagerService extends
                 if (mIsServiceEnabled) {
                     final RotationResolverManagerPerUserService service = getServiceForUserLocked(
                             UserHandle.getCallingUserId());
-                    service.resolveRotationLocked(callbackInternal, proposedRotation,
-                            currentRotation, /* packageName */ "", timeout,
+                    final RotationResolutionRequest request = new RotationResolutionRequest("",
+                            currentRotation, proposedRotation, true, timeout);
+                    service.resolveRotationLocked(callbackInternal, request,
                             cancellationSignalInternal);
                 } else {
                     Slog.w(TAG, "Rotation Resolver service is disabled.");

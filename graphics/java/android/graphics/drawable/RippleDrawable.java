@@ -110,17 +110,6 @@ import java.util.Arrays;
  * </pre>
  *
  * @attr ref android.R.styleable#RippleDrawable_color
- *
- * To change the ripple style, assign the value of "solid" or "patterned" to the android:rippleStyle
- * attribute.
- *
- * <pre>
- * <code>&lt;!-- A red ripple masked against an opaque rectangle. --/>
- * &lt;ripple android:rippleStyle="patterned">
- * &lt;/ripple></code>
- * </pre>
- *
- * @attr ref android.R.styleable#RippleDrawable_rippleStyle
  */
 public class RippleDrawable extends LayerDrawable {
     /**
@@ -132,12 +121,14 @@ public class RippleDrawable extends LayerDrawable {
     /**
      * Ripple style where a solid circle is drawn. This is also the default style
      * @see #setRippleStyle(int)
+     * @hide
      */
     public static final int STYLE_SOLID = 0;
     /**
      * Ripple style where a circle shape with a patterned,
      * noisy interior expands from the hotspot to the bounds".
      * @see #setRippleStyle(int)
+     * @hide
      */
     public static final int STYLE_PATTERNED = 1;
 
@@ -1248,6 +1239,7 @@ public class RippleDrawable extends LayerDrawable {
      * @see #STYLE_PATTERNED
      *
      * @param style The style of the ripple
+     * @hide
      */
     public void setRippleStyle(@RippleStyle int style) throws IllegalArgumentException {
         if (style == STYLE_SOLID || style == STYLE_PATTERNED) {
@@ -1260,6 +1252,7 @@ public class RippleDrawable extends LayerDrawable {
     /**
      * Get the current ripple style
      * @return Ripple style
+     * @hide
      */
     public @RippleStyle int getRippleStyle() {
         return mState.mRippleStyle;

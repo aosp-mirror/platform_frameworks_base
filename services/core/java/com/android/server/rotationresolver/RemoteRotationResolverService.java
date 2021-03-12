@@ -77,9 +77,7 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
 
     @GuardedBy("mLock")
     public void resolveRotationLocked(RotationRequest request) {
-        final RotationResolutionRequest remoteRequest = new RotationResolutionRequest(
-                request.mProposedRotation, request.mCurrentRotation, request.mPackageName,
-                request.mTimeoutMillis);
+        final RotationResolutionRequest remoteRequest = request.mRemoteRequest;
         post(service -> service.resolveRotation(request.mIRotationResolverCallback, remoteRequest));
 
         // schedule a timeout.
@@ -91,7 +89,7 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                     request.cancelInternal();
                 }
             }
-        }, request.mTimeoutMillis);
+        }, request.mRemoteRequest.getTimeoutMillis());
     }
 
     @VisibleForTesting
@@ -109,28 +107,18 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
         @GuardedBy("mLock")
         boolean mIsFulfilled;
 
-        private final long mTimeoutMillis;
-
         @VisibleForTesting
-        final int mProposedRotation;
-
-        private final int mCurrentRotation;
-        private final String mPackageName;
+        final RotationResolutionRequest mRemoteRequest;
 
         boolean mIsDispatched;
         private final Object mLock = new Object();
         private final long mRequestStartTimeMillis;
 
         RotationRequest(
-                @NonNull RotationResolverInternal.RotationResolverCallbackInternal
-                        callbackInternal, int proposedRotation, int currentRotation,
-                String packageName, long timeoutMillis,
-                @NonNull CancellationSignal cancellationSignal) {
-            mTimeoutMillis = timeoutMillis;
+                @NonNull RotationResolverInternal.RotationResolverCallbackInternal callbackInternal,
+                RotationResolutionRequest request, @NonNull CancellationSignal cancellationSignal) {
             mCallbackInternal = callbackInternal;
-            mProposedRotation = proposedRotation;
-            mCurrentRotation = currentRotation;
-            mPackageName = packageName;
+            mRemoteRequest = request;
             mIRotationResolverCallback = new RotationResolverCallback(this);
             mCancellationSignalInternal = cancellationSignal;
             mRequestStartTimeMillis = SystemClock.elapsedRealtime();
@@ -185,8 +173,8 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                     request.mCallbackInternal.onSuccess(rotation);
                     final long timeToCalculate =
                             SystemClock.elapsedRealtime() - request.mRequestStartTimeMillis;
-                    logRotationStats(request.mProposedRotation, request.mCurrentRotation, rotation,
-                            timeToCalculate);
+                    logRotationStats(request.mRemoteRequest.getProposedRotation(),
+                            request.mRemoteRequest.getCurrentRotation(), rotation, timeToCalculate);
                     Slog.d(TAG, "onSuccess:" + rotation);
                     Slog.d(TAG, "timeToCalculate:" + timeToCalculate);
                 }
@@ -204,8 +192,9 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                     request.mCallbackInternal.onFailure(error);
                     final long timeToCalculate =
                             SystemClock.elapsedRealtime() - request.mRequestStartTimeMillis;
-                    logRotationStats(request.mProposedRotation, request.mCurrentRotation,
-                            RESOLUTION_FAILURE, timeToCalculate);
+                    logRotationStats(request.mRemoteRequest.getProposedRotation(),
+                            request.mRemoteRequest.getCurrentRotation(), RESOLUTION_FAILURE,
+                            timeToCalculate);
                     Slog.d(TAG, "onFailure:" + error);
                     Slog.d(TAG, "timeToCalculate:" + timeToCalculate);
                 }

@@ -39,15 +39,13 @@ import java.util.Objects;
  */
 class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
 
-    private static final String TAG = LocationTimeZoneManagerService.TAG;
-
     @NonNull private final LocationTimeZoneProviderProxy mProxy;
 
     BinderLocationTimeZoneProvider(
             @NonNull ThreadingDomain threadingDomain,
             @NonNull String providerName,
             @NonNull LocationTimeZoneProviderProxy proxy) {
-        super(threadingDomain, providerName);
+        super(threadingDomain, providerName, new ZoneInfoDbTimeZoneIdValidator());
         mProxy = Objects.requireNonNull(proxy);
     }
 

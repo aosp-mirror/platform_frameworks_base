@@ -439,7 +439,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mUserSetupComplete;
     private int mQsNotificationTopPadding;
-    private float mExpandOffset;
     private boolean mHideIconsDuringNotificationLaunch = true;
     private int mStackScrollerMeasuringPass;
     private ArrayList<Consumer<ExpandableNotificationRow>>
@@ -2444,8 +2443,7 @@ public class NotificationPanelViewController extends PanelViewController {
             }
             startHeight = -mQs.getQsMinExpansionHeight();
         }
-        float translation = MathUtils.lerp(startHeight, 0, Math.min(1.0f, appearAmount))
-                + mExpandOffset;
+        float translation = MathUtils.lerp(startHeight, 0, Math.min(1.0f, appearAmount));
         return Math.min(0, translation);
     }
 
@@ -3185,16 +3183,16 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public void applyExpandAnimationParams(ExpandAnimationParameters params) {
-        mExpandOffset = params != null ? params.getTopChange() : 0;
-        updateQsExpansion();
-        if (params != null) {
-            boolean hideIcons = params.getProgress(
-                    ActivityLaunchAnimator.ANIMATION_DELAY_ICON_FADE_IN, 100) == 0.0f;
-            if (hideIcons != mHideIconsDuringNotificationLaunch) {
-                mHideIconsDuringNotificationLaunch = hideIcons;
-                if (!hideIcons) {
-                    mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
-                }
+        if (params == null) {
+            return;
+        }
+
+        boolean hideIcons = params.getProgress(
+                ActivityLaunchAnimator.ANIMATION_DELAY_ICON_FADE_IN, 100) == 0.0f;
+        if (hideIcons != mHideIconsDuringNotificationLaunch) {
+            mHideIconsDuringNotificationLaunch = hideIcons;
+            if (!hideIcons) {
+                mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
             }
         }
     }

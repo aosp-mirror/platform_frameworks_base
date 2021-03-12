@@ -38,7 +38,8 @@ public class VcnGatewayConnectionDisconnectingStateTest extends VcnGatewayConnec
     public void setUp() throws Exception {
         super.setUp();
 
-        mGatewayConnection.setIkeSession(mGatewayConnection.buildIkeSession());
+        mGatewayConnection.setIkeSession(
+                mGatewayConnection.buildIkeSession(TEST_UNDERLYING_NETWORK_RECORD_2.network));
 
         // ensure that mGatewayConnection has an underlying Network before entering
         // DisconnectingState

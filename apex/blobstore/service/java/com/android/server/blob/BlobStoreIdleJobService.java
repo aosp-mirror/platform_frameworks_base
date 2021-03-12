@@ -42,7 +42,7 @@ public class BlobStoreIdleJobService extends JobService {
             blobStoreManagerInternal.onIdleMaintenance();
             jobFinished(params, false);
         });
-        return false;
+        return true;
     }
 
     @Override

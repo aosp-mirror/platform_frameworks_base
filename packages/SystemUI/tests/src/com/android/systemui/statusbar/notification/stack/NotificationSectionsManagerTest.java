@@ -322,23 +322,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPeopleFiltering_addHeadersFromShowingOnlyGentle() {
-        enablePeopleFiltering();
-
-        setStackState(
-                GENTLE_HEADER,
-                PERSON,
-                ALERTING,
-                GENTLE);
-        mSectionsManager.updateSectionBoundaries();
-
-        verify(mNssl).changeViewPosition(mSectionsManager.getSilentHeaderView(), 2);
-        verify(mNssl).addView(mSectionsManager.getAlertingHeaderView(), 1);
-        verify(mNssl).addView(mSectionsManager.getPeopleHeaderView(), 0);
-    }
-
-    @Test
-    public void testPeopleFiltering_addAllHeaders() {
+    public void testPeopleFiltering_onlyAddSilentHeader() {
         enablePeopleFiltering();
 
         setStackState(
@@ -348,26 +332,6 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         verify(mNssl).addView(mSectionsManager.getSilentHeaderView(), 2);
-        verify(mNssl).addView(mSectionsManager.getAlertingHeaderView(), 1);
-        verify(mNssl).addView(mSectionsManager.getPeopleHeaderView(), 0);
-    }
-
-    @Test
-    public void testPeopleFiltering_moveAllHeaders() {
-        enablePeopleFiltering();
-
-        setStackState(
-                PEOPLE_HEADER,
-                ALERTING_HEADER,
-                GENTLE_HEADER,
-                PERSON,
-                ALERTING,
-                GENTLE);
-        mSectionsManager.updateSectionBoundaries();
-
-        verify(mNssl).changeViewPosition(mSectionsManager.getSilentHeaderView(), 4);
-        verify(mNssl).changeViewPosition(mSectionsManager.getAlertingHeaderView(), 2);
-        verify(mNssl).changeViewPosition(mSectionsManager.getPeopleHeaderView(), 0);
     }
 
     @Test
@@ -385,9 +349,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         verifyMockStack(
-                ChildType.INCOMING_HEADER,
                 ChildType.HEADS_UP,
-                ChildType.PEOPLE_HEADER,
                 ChildType.PERSON,
                 ChildType.GENTLE_HEADER,
                 ChildType.GENTLE
@@ -408,10 +370,8 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         verifyMockStack(
-                ChildType.INCOMING_HEADER,
                 ChildType.HEADS_UP,
                 ChildType.HEADS_UP,
-                ChildType.PEOPLE_HEADER,
                 ChildType.PERSON
         );
     }
@@ -428,7 +388,6 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         verifyMockStack(
-                ChildType.PEOPLE_HEADER,
                 ChildType.PERSON,
                 ChildType.PERSON
         );
@@ -444,9 +403,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         );
         mSectionsManager.updateSectionBoundaries();
         verifyMockStack(
-                ChildType.INCOMING_HEADER,
                 ChildType.HEADS_UP,
-                ChildType.PEOPLE_HEADER,
                 ChildType.PERSON
         );
     }
@@ -467,12 +424,9 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         verifyMockStack(
-                ChildType.INCOMING_HEADER,
                 ChildType.HEADS_UP,
                 ChildType.FSN,
-                ChildType.PEOPLE_HEADER,
                 ChildType.PERSON,
-                ChildType.ALERTING_HEADER,
                 ChildType.ALERTING,
                 ChildType.GENTLE_HEADER,
                 ChildType.GENTLE
@@ -517,7 +471,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRemoveIncomingHeader() {
+    public void testRemoveNonSilentHeader() {
         enablePeopleFiltering();
         enableMediaControls();
 
@@ -539,9 +493,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
         verifyMockStack(
                 ChildType.MEDIA_CONTROLS,
-                ChildType.PEOPLE_HEADER,
                 ChildType.PERSON,
-                ChildType.ALERTING_HEADER,
                 ChildType.ALERTING,
                 ChildType.ALERTING,
                 ChildType.ALERTING,
@@ -569,13 +521,10 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         verifyMockStack(
-                ChildType.INCOMING_HEADER,
                 ChildType.HEADS_UP,
                 ChildType.HEADS_UP,
                 ChildType.HEADS_UP,
-                ChildType.PEOPLE_HEADER,
                 ChildType.PERSON,
-                ChildType.ALERTING_HEADER,
                 ChildType.ALERTING
         );
     }
@@ -593,7 +542,6 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         verifyMockStack(
-                ChildType.ALERTING_HEADER,
                 ChildType.PERSON,
                 ChildType.ALERTING,
                 ChildType.GENTLE_HEADER,
