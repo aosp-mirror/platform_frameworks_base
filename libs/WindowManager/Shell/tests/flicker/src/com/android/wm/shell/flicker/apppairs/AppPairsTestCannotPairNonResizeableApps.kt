@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.apppairs
 
 import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -58,6 +59,14 @@ class AppPairsTestCannotPairNonResizeableApps(
                 SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
             }
         }
+
+    @FlakyTest
+    @Test
+    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+
+    @FlakyTest
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test
