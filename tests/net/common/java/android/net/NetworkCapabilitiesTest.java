@@ -28,6 +28,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE;
@@ -44,6 +45,10 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
 import static android.net.NetworkCapabilities.UNRESTRICTED_CAPABILITIES;
 import static android.os.Process.INVALID_UID;
 
+import static com.android.modules.utils.build.SdkLevel.isAtLeastR;
+import static com.android.modules.utils.build.SdkLevel.isAtLeastS;
+import static com.android.testutils.MiscAsserts.assertEmpty;
+import static com.android.testutils.MiscAsserts.assertThrows;
 import static com.android.testutils.ParcelUtils.assertParcelSane;
 import static com.android.testutils.ParcelUtils.assertParcelingIsLossless;
 import static com.android.testutils.ParcelUtils.parcelingRoundTrip;
@@ -67,7 +72,6 @@ import android.util.ArraySet;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.modules.utils.build.SdkLevel;
 import com.android.testutils.CompatUtil;
 import com.android.testutils.DevSdkIgnoreRule;
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
@@ -85,20 +89,15 @@ import java.util.Set;
 public class NetworkCapabilitiesTest {
     private static final String TEST_SSID = "TEST_SSID";
     private static final String DIFFERENT_TEST_SSID = "DIFFERENT_TEST_SSID";
+    private static final int TEST_SUBID1 = 1;
+    private static final int TEST_SUBID2 = 2;
+    private static final int TEST_SUBID3 = 3;
 
     @Rule
     public DevSdkIgnoreRule mDevSdkIgnoreRule = new DevSdkIgnoreRule();
 
     private DiscoverySession mDiscoverySession = Mockito.mock(DiscoverySession.class);
     private PeerHandle mPeerHandle = Mockito.mock(PeerHandle.class);
-
-    private boolean isAtLeastR() {
-        return SdkLevel.isAtLeastR();
-    }
-
-    private boolean isAtLeastS() {
-        return SdkLevel.isAtLeastS();
-    }
 
     @Test
     public void testMaybeMarkCapabilitiesRestricted() {
@@ -305,7 +304,9 @@ public class NetworkCapabilitiesTest {
             .setUids(uids)
             .addCapability(NET_CAPABILITY_EIMS)
             .addCapability(NET_CAPABILITY_NOT_METERED);
-        if (isAtLeastR()) {
+        if (isAtLeastS()) {
+            netCap.setSubIds(Set.of(TEST_SUBID1, TEST_SUBID2));
+        } else if (isAtLeastR()) {
             netCap.setOwnerUid(123);
             netCap.setAdministratorUids(new int[] {5, 11});
         }
@@ -380,7 +381,7 @@ public class NetworkCapabilitiesTest {
 
     private void testParcelSane(NetworkCapabilities cap) {
         if (isAtLeastS()) {
-            assertParcelSane(cap, 16);
+            assertParcelSane(cap, 17);
         } else if (isAtLeastR()) {
             assertParcelSane(cap, 15);
         } else {
@@ -614,6 +615,20 @@ public class NetworkCapabilitiesTest {
         assertFalse(nc2.appliesToUid(12));
         assertTrue(nc1.appliesToUid(22));
         assertTrue(nc2.appliesToUid(22));
+
+        // Verify the subscription id list can be combined only when they are equal.
+        if (isAtLeastS()) {
+            nc1.setSubIds(Set.of(TEST_SUBID1, TEST_SUBID2));
+            nc2.setSubIds(Set.of(TEST_SUBID2));
+            assertThrows(IllegalStateException.class, () -> nc2.combineCapabilities(nc1));
+
+            nc2.setSubIds(Set.of());
+            assertThrows(IllegalStateException.class, () -> nc2.combineCapabilities(nc1));
+
+            nc2.setSubIds(Set.of(TEST_SUBID2, TEST_SUBID1));
+            nc2.combineCapabilities(nc1);
+            assertEquals(Set.of(TEST_SUBID2, TEST_SUBID1), nc2.getSubIds());
+        }
     }
 
     @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
@@ -762,6 +777,24 @@ public class NetworkCapabilitiesTest {
         nc1.setUids(uidRange(10, 13));
         nc2.set(nc1);  // Overwrites, as opposed to combineCapabilities
         assertEquals(nc1, nc2);
+
+        if (isAtLeastS()) {
+            assertThrows(NullPointerException.class, () -> nc1.setSubIds(null));
+            nc1.setSubIds(Set.of());
+            nc2.set(nc1);
+            assertEquals(nc1, nc2);
+
+            nc1.setSubIds(Set.of(TEST_SUBID1));
+            nc2.set(nc1);
+            assertEquals(nc1, nc2);
+
+            nc2.setSubIds(Set.of(TEST_SUBID2, TEST_SUBID1));
+            nc2.set(nc1);
+            assertEquals(nc1, nc2);
+
+            nc2.setSubIds(Set.of(TEST_SUBID3, TEST_SUBID2));
+            assertNotEquals(nc1, nc2);
+        }
     }
 
     @Test
@@ -840,6 +873,50 @@ public class NetworkCapabilitiesTest {
                     .build();
             fail("Should not set null into setAdministratorUids");
         } catch (NullPointerException expected) { }
+    }
+
+    private static NetworkCapabilities capsWithSubIds(Integer ... subIds) {
+        // Since the NetworkRequest would put NOT_VCN_MANAGED capabilities in general, for
+        // every NetworkCapabilities that simulates networks needs to add it too in order to
+        // satisfy these requests.
+        final NetworkCapabilities nc = new NetworkCapabilities.Builder()
+                .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
+                .setSubIds(new ArraySet<>(subIds)).build();
+        assertEquals(new ArraySet<>(subIds), nc.getSubIds());
+        return nc;
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.R)
+    public void testSubIds() throws Exception {
+        final NetworkCapabilities ncWithoutId = capsWithSubIds();
+        final NetworkCapabilities ncWithId = capsWithSubIds(TEST_SUBID1);
+        final NetworkCapabilities ncWithOtherIds = capsWithSubIds(TEST_SUBID1, TEST_SUBID3);
+        final NetworkCapabilities ncWithoutRequestedIds = capsWithSubIds(TEST_SUBID3);
+
+        final NetworkRequest requestWithoutId = new NetworkRequest.Builder().build();
+        assertEmpty(requestWithoutId.networkCapabilities.getSubIds());
+        final NetworkRequest requestWithIds = new NetworkRequest.Builder()
+                .setSubIds(Set.of(TEST_SUBID1, TEST_SUBID2)).build();
+        assertEquals(Set.of(TEST_SUBID1, TEST_SUBID2),
+                requestWithIds.networkCapabilities.getSubIds());
+
+        assertFalse(requestWithIds.canBeSatisfiedBy(ncWithoutId));
+        assertTrue(requestWithIds.canBeSatisfiedBy(ncWithOtherIds));
+        assertFalse(requestWithIds.canBeSatisfiedBy(ncWithoutRequestedIds));
+        assertTrue(requestWithIds.canBeSatisfiedBy(ncWithId));
+        assertTrue(requestWithoutId.canBeSatisfiedBy(ncWithoutId));
+        assertTrue(requestWithoutId.canBeSatisfiedBy(ncWithId));
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.R)
+    public void testEqualsSubIds() throws Exception {
+        assertEquals(capsWithSubIds(), capsWithSubIds());
+        assertNotEquals(capsWithSubIds(), capsWithSubIds(TEST_SUBID1));
+        assertEquals(capsWithSubIds(TEST_SUBID1), capsWithSubIds(TEST_SUBID1));
+        assertNotEquals(capsWithSubIds(TEST_SUBID1), capsWithSubIds(TEST_SUBID2));
+        assertNotEquals(capsWithSubIds(TEST_SUBID1), capsWithSubIds(TEST_SUBID2, TEST_SUBID1));
+        assertEquals(capsWithSubIds(TEST_SUBID1, TEST_SUBID2),
+                capsWithSubIds(TEST_SUBID2, TEST_SUBID1));
     }
 
     @Test
@@ -1022,5 +1099,11 @@ public class NetworkCapabilitiesTest {
             fail("Should not set null into NetworkCapabilities.Builder");
         } catch (NullPointerException expected) { }
         assertEquals(nc, new NetworkCapabilities.Builder(nc).build());
+
+        if (isAtLeastS()) {
+            final NetworkCapabilities nc2 = new NetworkCapabilities.Builder()
+                    .setSubIds(Set.of(TEST_SUBID1)).build();
+            assertEquals(Set.of(TEST_SUBID1), nc2.getSubIds());
+        }
     }
 }
