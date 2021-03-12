@@ -351,6 +351,7 @@ genrule {
 genrule {
     name: "services-system-server-current.txt",
     srcs: [
+        ":service-media-s{.system-server.api.txt}",
         ":service-permission{.system-server.api.txt}",
         ":non-updatable-system-server-current.txt",
     ],
@@ -374,6 +375,7 @@ genrule {
 genrule {
     name: "services-system-server-removed.txt",
     srcs: [
+        ":service-media-s{.system-server.removed-api.txt}",
         ":service-permission{.system-server.removed-api.txt}",
         ":non-updatable-system-server-removed.txt",
     ],
