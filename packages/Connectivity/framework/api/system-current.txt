@@ -296,6 +296,7 @@ package android.net {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.NetworkCapabilities.Builder setRequestorUid(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkCapabilities.Builder setSignalStrength(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.NetworkCapabilities.Builder setSsid(@Nullable String);
+    method @NonNull public android.net.NetworkCapabilities.Builder setSubIds(@NonNull java.util.Set<java.lang.Integer>);
     method @NonNull public android.net.NetworkCapabilities.Builder setTransportInfo(@Nullable android.net.TransportInfo);
   }
 
