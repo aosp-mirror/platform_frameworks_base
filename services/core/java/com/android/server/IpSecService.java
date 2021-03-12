@@ -56,6 +56,7 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Range;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -756,13 +757,9 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    // These values have been reserved in NetIdManager
-    @VisibleForTesting static final int TUN_INTF_NETID_START = 0xFC00;
-
-    public static final int TUN_INTF_NETID_RANGE = 0x0400;
-
     private final SparseBooleanArray mTunnelNetIds = new SparseBooleanArray();
-    private int mNextTunnelNetIdIndex = 0;
+    final Range<Integer> mNetIdRange = ConnectivityManager.getIpSecNetIdRange();
+    private int mNextTunnelNetId = mNetIdRange.getLower();
 
     /**
      * Reserves a netId within the range of netIds allocated for IPsec tunnel interfaces
@@ -775,11 +772,13 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @VisibleForTesting
     int reserveNetId() {
+        final int range = mNetIdRange.getUpper() - mNetIdRange.getLower() + 1;
         synchronized (mTunnelNetIds) {
-            for (int i = 0; i < TUN_INTF_NETID_RANGE; i++) {
-                int index = mNextTunnelNetIdIndex;
-                int netId = index + TUN_INTF_NETID_START;
-                if (++mNextTunnelNetIdIndex >= TUN_INTF_NETID_RANGE) mNextTunnelNetIdIndex = 0;
+            for (int i = 0; i < range; i++) {
+                final int netId = mNextTunnelNetId;
+                if (++mNextTunnelNetId > mNetIdRange.getUpper()) {
+                    mNextTunnelNetId = mNetIdRange.getLower();
+                }
                 if (!mTunnelNetIds.get(netId)) {
                     mTunnelNetIds.put(netId, true);
                     return netId;
