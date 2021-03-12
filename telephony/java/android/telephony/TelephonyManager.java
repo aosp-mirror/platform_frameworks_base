@@ -15243,13 +15243,17 @@ public class TelephonyManager {
      * </ul>
      * @param appType icc application type, like {@link #APPTYPE_USIM} or {@link
      * #APPTYPE_ISIM} or {@link#APPTYPE_UNKNOWN}
-     * @param nafId Network Application Function(NAF) fully qualified domain name and
-     * the selected GBA mode. It shall contain two parts delimited by "@" sign. The first
-     * part is the constant string "3GPP-bootstrapping" (GBA_ME),
-     * "3GPP-bootstrapping-uicc" (GBA_ U), or "3GPP-bootstrapping-digest" (GBA_Digest),
-     * and the latter part shall be the FQDN of the NAF (e.g.
-     * "3GPP-bootstrapping@naf1.operator.com" or "3GPP-bootstrapping-uicc@naf1.operator.com",
-     * or "3GPP-bootstrapping-digest@naf1.operator.com").
+     * @param nafId A URI to specify Network Application Function(NAF) fully qualified domain
+     * name (FQDN) and the selected GBA mode. The authority of the URI must contain two parts
+     * delimited by "@" sign. The first part is the constant string "3GPP-bootstrapping" (GBA_ME),
+     * "3GPP-bootstrapping-uicc" (GBA_ U), or "3GPP-bootstrapping-digest" (GBA_Digest).
+     * The second part shall be the FQDN of the NAF. The scheme of the URI is not actually used
+     * for the authentication, which may be set the same as the resource that the application is
+     * going to access. For example, the nafId can be
+     * "https://3GPP-bootstrapping@naf1.operator.com",
+     * "https://3GPP-bootstrapping-uicc@naf1.operator.com",
+     * "https://3GPP-bootstrapping-digest@naf1.operator.com",
+     * "ftps://3GPP-bootstrapping-digest@naf1.operator.com".
      * @param securityProtocol Security protocol identifier between UE and NAF.  See
      * 3GPP TS 33.220 Annex H. Application can use
      * {@link UaSecurityProtocolIdentifier#createDefaultUaSpId},
