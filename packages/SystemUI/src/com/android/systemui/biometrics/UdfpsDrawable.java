@@ -61,12 +61,14 @@ public abstract class UdfpsDrawable extends Drawable {
      */
     protected void updateFingerprintIconBounds(@NonNull Rect bounds) {
         mFingerprintDrawable.setBounds(bounds);
+        invalidateSelf();
     }
 
     @Override
     public void setAlpha(int alpha) {
         mAlpha = alpha;
         mFingerprintDrawable.setAlpha(mAlpha);
+        invalidateSelf();
     }
 
     boolean isIlluminationShowing() {
@@ -74,7 +76,11 @@ public abstract class UdfpsDrawable extends Drawable {
     }
 
     void setIlluminationShowing(boolean showing) {
+        if (mIlluminationShowing == showing) {
+            return;
+        }
         mIlluminationShowing = showing;
+        invalidateSelf();
     }
 
     @Override

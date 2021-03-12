@@ -21,6 +21,7 @@ import android.graphics.PointF;
 import android.view.View;
 
 import com.android.systemui.R;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -32,14 +33,20 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
     @NonNull private final UdfpsEnrollHelper mEnrollHelper;
 
     protected UdfpsEnrollViewController(
-            UdfpsEnrollView view,
+            @NonNull UdfpsEnrollView view,
             @NonNull UdfpsEnrollHelper enrollHelper,
-            StatusBarStateController statusBarStateController,
-            StatusBar statusBar) {
-        super(view, statusBarStateController, statusBar);
+            @NonNull StatusBarStateController statusBarStateController,
+            @NonNull StatusBar statusBar,
+            @NonNull DumpManager dumpManager) {
+        super(view, statusBarStateController, statusBar, dumpManager);
         mEnrollHelper = enrollHelper;
         mProgressBar = mView.findViewById(R.id.progress_bar);
         mView.setEnrollHelper(mEnrollHelper);
+    }
+
+    @Override
+    @NonNull String getTag() {
+        return "UdfpsEnrollViewController";
     }
 
     @Override

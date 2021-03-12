@@ -44,8 +44,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -91,6 +93,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private StatusBar mStatusBar;
     @Mock
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock
+    private DumpManager mDumpManager;
+    @Mock
     private IUdfpsOverlayControllerCallback mUdfpsOverlayControllerCallback;
 
     private FakeExecutor mFgExecutor;
@@ -129,7 +135,9 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mWindowManager,
                 mStatusBarStateController,
                 mFgExecutor,
-                mStatusBar);
+                mStatusBar,
+                mStatusBarKeyguardViewManager,
+                mDumpManager);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
 

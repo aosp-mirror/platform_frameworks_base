@@ -36,14 +36,14 @@ import com.android.systemui.doze.DozeReceiver;
 public class UdfpsKeyguardDrawable extends UdfpsDrawable implements DozeReceiver {
 
     private static final String TAG = "UdfpsAnimationKeyguard";
-    private final int mLockScreenColor;
     private final int mAmbientDisplayColor;
 
     @NonNull private final Context mContext;
-    private final int mMaxBurnInOffsetX;
-    private final int mMaxBurnInOffsetY;
+    private int mLockScreenColor;
 
     // AOD anti-burn-in offsets
+    private final int mMaxBurnInOffsetX;
+    private final int mMaxBurnInOffsetY;
     private float mInterpolatedDarkAmount;
     private float mBurnInOffsetX;
     private float mBurnInOffsetY;
@@ -93,6 +93,12 @@ public class UdfpsKeyguardDrawable extends UdfpsDrawable implements DozeReceiver
 
     void onDozeAmountChanged(float linear, float eased) {
         mInterpolatedDarkAmount = eased;
+        updateAodPositionAndColor();
+    }
+
+    void setLockScreenColor(int color) {
+        if (mLockScreenColor == color) return;
+        mLockScreenColor = color;
         updateAodPositionAndColor();
     }
 }
