@@ -257,4 +257,12 @@ oneway interface IStatusBar
      * file descriptor passed in.
      */
      void passThroughShellCommand(in String[] args, in ParcelFileDescriptor pfd);
+
+    /**
+     * Enables/disables the navigation bar luma sampling.
+     *
+     * @param displayId the id of the display to notify.
+     * @param enable {@code true} if enable, otherwise set to {@code false}.
+     */
+    void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable);
 }

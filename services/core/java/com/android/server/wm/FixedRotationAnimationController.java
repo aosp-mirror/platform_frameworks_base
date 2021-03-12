@@ -37,10 +37,15 @@ public class FixedRotationAnimationController extends FadeAnimationController {
         super(displayContent);
         final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
         mStatusBar = displayPolicy.getStatusBar();
-        // Do not animate movable navigation bar (e.g. non-gesture mode).
+
+        final RecentsAnimationController controller =
+                displayContent.mWmService.getRecentsAnimationController();
+        final boolean navBarControlledByRecents =
+                controller != null && controller.isNavigationBarAttachedToApp();
+        // Do not animate movable navigation bar (e.g. non-gesture mode) or when the navigation bar
+        // is currently controlled by recents animation.
         mNavigationBar = !displayPolicy.navigationBarCanMove()
-                ? displayPolicy.getNavigationBar()
-                : null;
+                && !navBarControlledByRecents ? displayPolicy.getNavigationBar() : null;
     }
 
     /** Applies show animation on the previously hidden window tokens. */

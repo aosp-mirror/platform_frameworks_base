@@ -141,6 +141,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     private static final int MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND = 57 << MSG_SHIFT;
     //TODO(b/169175022) Update name and when feature name is locked.
     private static final int MSG_EMERGENCY_ACTION_LAUNCH_GESTURE      = 58 << MSG_SHIFT;
+    private static final int MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED = 59 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -369,6 +370,11 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          * Handles a window manager shell logging command.
          */
         default void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd) {}
+
+        /**
+         * @see IStatusBar#setNavigationBarLumaSamplingEnabled(int, boolean)
+         */
+        default void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {}
     }
 
     public CommandQueue(Context context) {
@@ -1019,6 +1025,14 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
+    public void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED, displayId,
+                    enable ? 1 : 0).sendToTarget();
+        }
+    }
+
+    @Override
     public void passThroughShellCommand(String[] args, ParcelFileDescriptor pfd) {
         final FileOutputStream fos = new FileOutputStream(pfd.getFileDescriptor());
         final PrintWriter pw = new PrintWriter(fos);
@@ -1399,6 +1413,12 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                         Log.e(TAG, "Failed to handle logging command", e);
                     }
                     args.recycle();
+                    break;
+                case MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setNavigationBarLumaSamplingEnabled(msg.arg1,
+                                msg.arg2 != 0);
+                    }
                     break;
             }
         }
