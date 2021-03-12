@@ -706,6 +706,10 @@ package android.content {
     method public int getDisplayId();
   }
 
+  public class SyncAdapterType implements android.os.Parcelable {
+    method @Nullable public String getPackageName();
+  }
+
 }
 
 package android.content.integrity {
