@@ -35,32 +35,18 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.ArrayMap;
-import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ConcurrentUtils;
-import com.android.server.hdmi.cec.config.CecSettings;
-import com.android.server.hdmi.cec.config.Setting;
-import com.android.server.hdmi.cec.config.Value;
-import com.android.server.hdmi.cec.config.XmlParser;
 
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.Executor;
-
-import javax.xml.datatype.DatatypeConfigurationException;
 
 /**
  * The {@link HdmiCecConfig} class is used for getting information about
@@ -74,16 +60,16 @@ public class HdmiCecConfig {
     private static final String SHARED_PREFS_DIR = "shared_prefs";
     private static final String SHARED_PREFS_NAME = "cec_config.xml";
 
+    private static final int STORAGE_SYSPROPS = 0;
+    private static final int STORAGE_GLOBAL_SETTINGS = 1;
+    private static final int STORAGE_SHARED_PREFS = 2;
+
     @IntDef({
         STORAGE_SYSPROPS,
         STORAGE_GLOBAL_SETTINGS,
         STORAGE_SHARED_PREFS,
     })
     private @interface Storage {}
-
-    private static final int STORAGE_SYSPROPS = 0;
-    private static final int STORAGE_GLOBAL_SETTINGS = 1;
-    private static final int STORAGE_SHARED_PREFS = 2;
 
     private static final String VALUE_TYPE_STRING = "string";
     private static final String VALUE_TYPE_INT = "int";
@@ -96,8 +82,6 @@ public class HdmiCecConfig {
 
     @NonNull private final Context mContext;
     @NonNull private final StorageAdapter mStorageAdapter;
-    @Nullable private final CecSettings mSystemConfig;
-    @Nullable private final CecSettings mVendorOverride;
 
     private final Object mLock = new Object();
 
@@ -106,6 +90,18 @@ public class HdmiCecConfig {
             mSettingChangeListeners = new ArrayMap<>();
 
     private SettingsObserver mSettingsObserver;
+
+    private LinkedHashMap<String, Setting> mSettings = new LinkedHashMap<>();
+
+    /**
+     * Exception thrown when the CEC Configuration setup verification fails.
+     * This usually means a settings lacks default value or storage/storage key.
+     */
+    public static class VerificationException extends RuntimeException {
+        public VerificationException(String message) {
+            super(message);
+        }
+    }
 
     /**
      * Listener used to get notifications when value of a setting changes.
@@ -202,91 +198,297 @@ public class HdmiCecConfig {
         }
     }
 
+    private class Value {
+        private final String mStringValue;
+        private final Integer mIntValue;
+
+        Value(@NonNull String value) {
+            mStringValue = value;
+            mIntValue = null;
+        }
+
+        Value(@NonNull Integer value) {
+            mStringValue = null;
+            mIntValue = value;
+        }
+
+        String getStringValue() {
+            return mStringValue;
+        }
+
+        Integer getIntValue() {
+            return mIntValue;
+        }
+    }
+
+    private class Setting {
+        @NonNull private final Context mContext;
+        @NonNull private final @CecSettingName String mName;
+        private final boolean mUserConfigurable;
+
+        private Value mDefaultValue = null;
+        private List<Value> mAllowedValues = new ArrayList<>();
+
+        Setting(@NonNull Context context,
+                @NonNull @CecSettingName String name,
+                int userConfResId) {
+            mContext = context;
+            mName = name;
+            mUserConfigurable = mContext.getResources().getBoolean(userConfResId);
+        }
+
+        public @CecSettingName String getName() {
+            return mName;
+        }
+
+        public @ValueType String getValueType() {
+            return getDefaultValue().getStringValue() != null
+                    ? VALUE_TYPE_STRING
+                    : VALUE_TYPE_INT;
+        }
+
+        public Value getDefaultValue() {
+            if (mDefaultValue == null) {
+                throw new VerificationException("Invalid CEC setup for '"
+                    + this.getName() + "' setting. "
+                    + "Setting has no default value.");
+            }
+            return mDefaultValue;
+        }
+
+        public boolean getUserConfigurable() {
+            return mUserConfigurable;
+        }
+
+        private void registerValue(@NonNull Value value,
+                                   int allowedResId, int defaultResId) {
+            if (mContext.getResources().getBoolean(allowedResId)) {
+                mAllowedValues.add(value);
+                if (mContext.getResources().getBoolean(defaultResId)) {
+                    if (mDefaultValue != null) {
+                        throw new VerificationException("Invalid CEC setup for '"
+                            + this.getName() + "' setting. "
+                            + "Setting already has a default value.");
+                    }
+                    mDefaultValue = value;
+                }
+            }
+        }
+
+        public void registerValue(@NonNull String value, int allowedResId,
+                                  int defaultResId) {
+            registerValue(new Value(value), allowedResId, defaultResId);
+        }
+
+        public void registerValue(int value, int allowedResId,
+                                  int defaultResId) {
+            registerValue(new Value(value), allowedResId, defaultResId);
+        }
+
+
+        public List<Value> getAllowedValues() {
+            return mAllowedValues;
+        }
+    }
+
     @VisibleForTesting
     HdmiCecConfig(@NonNull Context context,
-                  @NonNull StorageAdapter storageAdapter,
-                  @Nullable CecSettings systemConfig,
-                  @Nullable CecSettings vendorOverride) {
+                  @NonNull StorageAdapter storageAdapter) {
         mContext = context;
         mStorageAdapter = storageAdapter;
-        mSystemConfig = systemConfig;
-        mVendorOverride = vendorOverride;
-        if (mSystemConfig == null) {
-            Slog.i(TAG, "CEC system configuration XML missing.");
-        }
-        if (mVendorOverride == null) {
-            Slog.i(TAG, "CEC OEM configuration override XML missing.");
-        }
+
+        Setting hdmiCecEnabled = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                R.bool.config_cecHdmiCecEnabled_userConfigurable);
+        hdmiCecEnabled.registerValue(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED,
+                R.bool.config_cecHdmiCecControlEnabled_allowed,
+                R.bool.config_cecHdmiCecControlEnabled_default);
+        hdmiCecEnabled.registerValue(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED,
+                R.bool.config_cecHdmiCecControlDisabled_allowed,
+                R.bool.config_cecHdmiCecControlDisabled_default);
+
+        Setting hdmiCecVersion = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                R.bool.config_cecHdmiCecVersion_userConfigurable);
+        hdmiCecVersion.registerValue(HdmiControlManager.HDMI_CEC_VERSION_1_4_B,
+                R.bool.config_cecHdmiCecVersion14b_allowed,
+                R.bool.config_cecHdmiCecVersion14b_default);
+        hdmiCecVersion.registerValue(HdmiControlManager.HDMI_CEC_VERSION_2_0,
+                R.bool.config_cecHdmiCecVersion20_allowed,
+                R.bool.config_cecHdmiCecVersion20_default);
+
+        Setting powerControlMode = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                R.bool.config_cecSendStandbyOnSleep_userConfigurable);
+        powerControlMode.registerValue(HdmiControlManager.POWER_CONTROL_MODE_TV,
+                R.bool.config_cecPowerControlModeTv_allowed,
+                R.bool.config_cecPowerControlModeTv_default);
+        powerControlMode.registerValue(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST,
+                R.bool.config_cecPowerControlModeBroadcast_allowed,
+                R.bool.config_cecPowerControlModeBroadcast_default);
+        powerControlMode.registerValue(HdmiControlManager.POWER_CONTROL_MODE_NONE,
+                R.bool.config_cecPowerControlModeNone_allowed,
+                R.bool.config_cecPowerControlModeNone_default);
+
+        Setting powerStateChangeOnActiveSourceLost = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                R.bool.config_cecPowerStateChangeOnActiveSourceLost_userConfigurable);
+        powerStateChangeOnActiveSourceLost.registerValue(
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE,
+                R.bool.config_cecPowerStateChangeOnActiveSourceLostNone_allowed,
+                R.bool.config_cecPowerStateChangeOnActiveSourceLostNone_default);
+        powerStateChangeOnActiveSourceLost.registerValue(
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW,
+                R.bool.config_cecPowerStateChangeOnActiveSourceLostStandbyNow_allowed,
+                R.bool.config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default);
+
+        Setting systemAudioModeMuting = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
+                R.bool.config_cecSystemAudioModeMuting_userConfigurable);
+        systemAudioModeMuting.registerValue(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_ENABLED,
+                R.bool.config_cecSystemAudioModeMutingEnabled_allowed,
+                R.bool.config_cecSystemAudioModeMutingEnabled_default);
+        systemAudioModeMuting.registerValue(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED,
+                R.bool.config_cecSystemAudioModeMutingDisabled_allowed,
+                R.bool.config_cecSystemAudioModeMutingDisabled_default);
+
+        Setting volumeControlMode = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+                R.bool.config_cecVolumeControlMode_userConfigurable);
+        volumeControlMode.registerValue(HdmiControlManager.VOLUME_CONTROL_ENABLED,
+                R.bool.config_cecVolumeControlModeEnabled_allowed,
+                R.bool.config_cecVolumeControlModeEnabled_default);
+        volumeControlMode.registerValue(HdmiControlManager.VOLUME_CONTROL_DISABLED,
+                R.bool.config_cecVolumeControlModeDisabled_allowed,
+                R.bool.config_cecVolumeControlModeDisabled_default);
+
+        Setting tvWakeOnOneTouchPlay = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                R.bool.config_cecTvWakeOnOneTouchPlay_userConfigurable);
+        tvWakeOnOneTouchPlay.registerValue(HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED,
+                R.bool.config_cecTvWakeOnOneTouchPlayEnabled_allowed,
+                R.bool.config_cecTvWakeOnOneTouchPlayEnabled_default);
+        tvWakeOnOneTouchPlay.registerValue(HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED,
+                R.bool.config_cecTvWakeOnOneTouchPlayDisabled_allowed,
+                R.bool.config_cecTvWakeOnOneTouchPlayDisabled_default);
+
+        Setting tvSendStandbyOnSleep = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+                R.bool.config_cecTvSendStandbyOnSleep_userConfigurable);
+        tvSendStandbyOnSleep.registerValue(HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED,
+                R.bool.config_cecTvSendStandbyOnSleepEnabled_allowed,
+                R.bool.config_cecTvSendStandbyOnSleepEnabled_default);
+        tvSendStandbyOnSleep.registerValue(HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_DISABLED,
+                R.bool.config_cecTvSendStandbyOnSleepDisabled_allowed,
+                R.bool.config_cecTvSendStandbyOnSleepDisabled_default);
+
+        Setting rcProfileTv = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
+                R.bool.config_cecRcProfileTv_userConfigurable);
+        rcProfileTv.registerValue(HdmiControlManager.RC_PROFILE_TV_NONE,
+                R.bool.config_cecRcProfileTvNone_allowed,
+                R.bool.config_cecRcProfileTvNone_default);
+        rcProfileTv.registerValue(HdmiControlManager.RC_PROFILE_TV_ONE,
+                R.bool.config_cecRcProfileTvOne_allowed,
+                R.bool.config_cecRcProfileTvOne_default);
+        rcProfileTv.registerValue(HdmiControlManager.RC_PROFILE_TV_TWO,
+                R.bool.config_cecRcProfileTvTwo_allowed,
+                R.bool.config_cecRcProfileTvTwo_default);
+        rcProfileTv.registerValue(HdmiControlManager.RC_PROFILE_TV_THREE,
+                R.bool.config_cecRcProfileTvThree_allowed,
+                R.bool.config_cecRcProfileTvThree_default);
+        rcProfileTv.registerValue(HdmiControlManager.RC_PROFILE_TV_FOUR,
+                R.bool.config_cecRcProfileTvFour_allowed,
+                R.bool.config_cecRcProfileTvFour_default);
+
+        Setting rcProfileSourceRootMenu = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+                R.bool.config_cecRcProfileSourceRootMenu_userConfigurable);
+        rcProfileSourceRootMenu.registerValue(
+                HdmiControlManager.RC_PROFILE_SOURCE_ROOT_MENU_HANDLED,
+                R.bool.config_cecRcProfileSourceRootMenuHandled_allowed,
+                R.bool.config_cecRcProfileSourceRootMenuHandled_default);
+        rcProfileSourceRootMenu.registerValue(
+                HdmiControlManager.RC_PROFILE_SOURCE_ROOT_MENU_NOT_HANDLED,
+                R.bool.config_cecRcProfileSourceRootMenuNotHandled_allowed,
+                R.bool.config_cecRcProfileSourceRootMenuNotHandled_default);
+
+        Setting rcProfileSourceSetupMenu = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+                R.bool.config_cecRcProfileSourceSetupMenu_userConfigurable);
+        rcProfileSourceSetupMenu.registerValue(
+                HdmiControlManager.RC_PROFILE_SOURCE_SETUP_MENU_HANDLED,
+                R.bool.config_cecRcProfileSourceSetupMenuHandled_allowed,
+                R.bool.config_cecRcProfileSourceSetupMenuHandled_default);
+        rcProfileSourceSetupMenu.registerValue(
+                HdmiControlManager.RC_PROFILE_SOURCE_SETUP_MENU_NOT_HANDLED,
+                R.bool.config_cecRcProfileSourceSetupMenuNotHandled_allowed,
+                R.bool.config_cecRcProfileSourceSetupMenuNotHandled_default);
+
+        Setting rcProfileSourceContentsMenu = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+                R.bool.config_cecRcProfileSourceContentsMenu_userConfigurable);
+        rcProfileSourceContentsMenu.registerValue(
+                HdmiControlManager.RC_PROFILE_SOURCE_CONTENTS_MENU_HANDLED,
+                R.bool.config_cecRcProfileSourceContentsMenuHandled_allowed,
+                R.bool.config_cecRcProfileSourceContentsMenuHandled_default);
+        rcProfileSourceContentsMenu.registerValue(
+                HdmiControlManager.RC_PROFILE_SOURCE_CONTENTS_MENU_NOT_HANDLED,
+                R.bool.config_cecRcProfileSourceContentsMenuNotHandled_allowed,
+                R.bool.config_cecRcProfileSourceContentsMenuNotHandled_default);
+
+        Setting rcProfileSourceTopMenu = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+                R.bool.config_cecRcProfileSourceTopMenu_userConfigurable);
+        rcProfileSourceTopMenu.registerValue(
+                HdmiControlManager.RC_PROFILE_SOURCE_TOP_MENU_HANDLED,
+                R.bool.config_cecRcProfileSourceTopMenuHandled_allowed,
+                R.bool.config_cecRcProfileSourceTopMenuHandled_default);
+        rcProfileSourceTopMenu.registerValue(
+                HdmiControlManager.RC_PROFILE_SOURCE_TOP_MENU_NOT_HANDLED,
+                R.bool.config_cecRcProfileSourceTopMenuNotHandled_allowed,
+                R.bool.config_cecRcProfileSourceTopMenuNotHandled_default);
+
+        Setting rcProfileSourceMediaContextSensitiveMenu = registerSetting(
+                HdmiControlManager
+                    .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
+                R.bool.config_cecRcProfileSourceMediaContextSensitiveMenu_userConfigurable);
+        rcProfileSourceMediaContextSensitiveMenu.registerValue(
+                HdmiControlManager.RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_HANDLED,
+                R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuHandled_allowed,
+                R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuHandled_default);
+        rcProfileSourceMediaContextSensitiveMenu.registerValue(
+                HdmiControlManager.RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_NOT_HANDLED,
+                R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed,
+                R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default);
+
+        verifySettings();
     }
 
     HdmiCecConfig(@NonNull Context context) {
-        this(context, new StorageAdapter(context),
-             readSettingsFromFile(Environment.buildPath(Environment.getRootDirectory(),
-                                                        ETC_DIR, CONFIG_FILE)),
-             readSettingsFromFile(Environment.buildPath(Environment.getVendorDirectory(),
-                                                        ETC_DIR, CONFIG_FILE)));
+        this(context, new StorageAdapter(context));
     }
 
-    @Nullable
-    private static CecSettings readSettingsFromFile(@NonNull File file) {
-        if (!file.exists()) {
-            return null;
-        }
-        if (!file.isFile()) {
-            Slog.e(TAG, "CEC configuration is not a file: " + file + ", skipping.");
-            return null;
-        }
-        try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
-            return XmlParser.read(in);
-        } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
-            Slog.e(TAG, "Encountered an error while reading/parsing CEC config file: " + file, e);
-        }
-        return null;
+    private Setting registerSetting(@NonNull @CecSettingName String name,
+                               int userConfResId) {
+        Setting setting = new Setting(mContext, name, userConfResId);
+        mSettings.put(name, setting);
+        return setting;
     }
 
-    @NonNull
-    @VisibleForTesting
-    static HdmiCecConfig createFromStrings(@NonNull Context context,
-                                           @NonNull StorageAdapter storageAdapter,
-                                           @Nullable String productConfigXml,
-                                           @Nullable String vendorOverrideXml) {
-        CecSettings productConfig = null;
-        CecSettings vendorOverride = null;
-        try {
-            if (productConfigXml != null) {
-                productConfig = XmlParser.read(
-                        new ByteArrayInputStream(productConfigXml.getBytes()));
-            }
-            if (vendorOverrideXml != null) {
-                vendorOverride = XmlParser.read(
-                        new ByteArrayInputStream(vendorOverrideXml.getBytes()));
-            }
-        } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
-            Slog.e(TAG, "Encountered an error while reading/parsing CEC config strings", e);
+    private void verifySettings() {
+        for (Setting setting: mSettings.values()) {
+            // This will throw an exception when a setting
+            // doesn't have a default value assigned.
+            setting.getDefaultValue();
+            getStorage(setting);
+            getStorageKey(setting);
         }
-        return new HdmiCecConfig(context, storageAdapter, productConfig, vendorOverride);
     }
 
     @Nullable
     private Setting getSetting(@NonNull String name) {
-        if (mSystemConfig == null) {
-            return null;
-        }
-        if (mVendorOverride != null) {
-            // First read from the vendor override.
-            for (Setting setting : mVendorOverride.getSetting()) {
-                if (setting.getName().equals(name)) {
-                    return setting;
-                }
-            }
-        }
-        // If not found, try the system config.
-        for (Setting setting : mSystemConfig.getSetting()) {
-            if (setting.getName().equals(name)) {
-                return setting;
-            }
-        }
-        return null;
+        return mSettings.containsKey(name) ? mSettings.get(name) : null;
     }
 
     @Storage
@@ -322,7 +524,7 @@ public class HdmiCecConfig {
                     .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU:
                 return STORAGE_SHARED_PREFS;
             default:
-                throw new RuntimeException("Invalid CEC setting '" + setting.getName()
+                throw new VerificationException("Invalid CEC setting '" + setting.getName()
                         + "' storage.");
         }
     }
@@ -359,7 +561,7 @@ public class HdmiCecConfig {
                     .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU:
                 return setting.getName();
             default:
-                throw new RuntimeException("Invalid CEC setting '" + setting.getName()
+                throw new VerificationException("Invalid CEC setting '" + setting.getName()
                     + "' storage key.");
         }
     }
@@ -394,10 +596,6 @@ public class HdmiCecConfig {
             mStorageAdapter.storeSharedPref(storageKey, value);
             notifySettingChanged(setting);
         }
-    }
-
-    private int getIntValue(@NonNull Value value) {
-        return Integer.decode(value.getIntValue());
     }
 
     private void notifyGlobalSettingChanged(String setting) {
@@ -533,41 +731,20 @@ public class HdmiCecConfig {
      * Returns a list of all settings based on the XML metadata.
      */
     public @CecSettingName List<String> getAllSettings() {
-        if (mSystemConfig == null) {
-            return new ArrayList<String>();
-        }
-        List<String> allSettings = new ArrayList<String>();
-        for (Setting setting : mSystemConfig.getSetting()) {
-            allSettings.add(setting.getName());
-        }
-        return allSettings;
+        return new ArrayList<>(mSettings.keySet());
     }
 
     /**
      * Returns a list of user-modifiable settings based on the XML metadata.
      */
     public @CecSettingName List<String> getUserSettings() {
-        if (mSystemConfig == null) {
-            return new ArrayList<String>();
-        }
-        Set<String> userSettings = new HashSet<String>();
-        // First read from the system config.
-        for (Setting setting : mSystemConfig.getSetting()) {
+        List<String> settings = new ArrayList<>();
+        for (Setting setting: mSettings.values()) {
             if (setting.getUserConfigurable()) {
-                userSettings.add(setting.getName());
+                settings.add(setting.getName());
             }
         }
-        if (mVendorOverride != null) {
-            // Next either add or remove based on the vendor override.
-            for (Setting setting : mVendorOverride.getSetting()) {
-                if (setting.getUserConfigurable()) {
-                    userSettings.add(setting.getName());
-                } else {
-                    userSettings.remove(setting.getName());
-                }
-            }
-        }
-        return new ArrayList(userSettings);
+        return settings;
     }
 
     /**
@@ -607,7 +784,7 @@ public class HdmiCecConfig {
                     + "' is not a string-type setting.");
         }
         List<String> allowedValues = new ArrayList<String>();
-        for (Value allowedValue : setting.getAllowedValues().getValue()) {
+        for (Value allowedValue : setting.getAllowedValues()) {
             allowedValues.add(allowedValue.getStringValue());
         }
         return allowedValues;
@@ -626,8 +803,8 @@ public class HdmiCecConfig {
                     + "' is not a string-type setting.");
         }
         List<Integer> allowedValues = new ArrayList<Integer>();
-        for (Value allowedValue : setting.getAllowedValues().getValue()) {
-            allowedValues.add(getIntValue(allowedValue));
+        for (Value allowedValue : setting.getAllowedValues()) {
+            allowedValues.add(allowedValue.getIntValue());
         }
         return allowedValues;
     }
@@ -659,7 +836,7 @@ public class HdmiCecConfig {
             throw new IllegalArgumentException("Setting '" + name
                     + "' is not a string-type setting.");
         }
-        return getIntValue(getSetting(name).getDefaultValue());
+        return getSetting(name).getDefaultValue().getIntValue();
     }
 
     /**
@@ -691,7 +868,7 @@ public class HdmiCecConfig {
                     + "' is not a int-type setting.");
         }
         HdmiLogger.debug("Getting CEC setting value '" + name + "'.");
-        String defaultValue = Integer.toString(getIntValue(setting.getDefaultValue()));
+        String defaultValue = Integer.toString(setting.getDefaultValue().getIntValue());
         String value = retrieveValue(setting, defaultValue);
         return Integer.parseInt(value);
     }
