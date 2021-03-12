@@ -9333,6 +9333,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         dumpResources(pw, mContext, "vendor_cross_profile_apps", R.array.vendor_cross_profile_apps);
         dumpResources(pw, mContext, "config_packagesExemptFromSuspension",
                 R.array.config_packagesExemptFromSuspension);
+        dumpResources(pw, mContext, "policy_exempt_apps", R.array.policy_exempt_apps);
+        dumpResources(pw, mContext, "vendor_policy_exempt_apps", R.array.vendor_policy_exempt_apps);
         pw.decreaseIndent();
         pw.println();
     }
