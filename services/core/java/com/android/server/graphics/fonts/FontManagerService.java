@@ -31,6 +31,7 @@ import android.os.SharedMemory;
 import android.os.ShellCallback;
 import android.system.ErrnoException;
 import android.text.FontConfig;
+import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -148,10 +149,24 @@ public final class FontManagerService extends IFontManager.Stub {
 
     /* package */ static class OtfFontFileParser implements UpdatableFontDir.FontFileParser {
         @Override
-        public String getPostScriptName(File file) throws IOException {
+        public String getCanonicalFileName(File file) throws IOException {
             ByteBuffer buffer = mmap(file);
             try {
-                return FontFileUtil.getPostScriptName(buffer, 0);
+                String psName = FontFileUtil.getPostScriptName(buffer, 0);
+                int isType1Font = FontFileUtil.isPostScriptType1Font(buffer, 0);
+                int isCollection = FontFileUtil.isCollectionFont(buffer);
+
+                if (TextUtils.isEmpty(psName) || isType1Font == -1 || isCollection == -1) {
+                    return null;
+                }
+
+                String extension;
+                if (isCollection == 1) {
+                    extension = isType1Font == 1 ? ".otc" : ".ttc";
+                } else {
+                    extension = isType1Font == 1 ? ".otf" : ".ttf";
+                }
+                return psName + extension;
             } finally {
                 NioUtils.freeDirectBuffer(buffer);
             }
