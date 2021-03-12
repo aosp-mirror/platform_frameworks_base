@@ -31,8 +31,10 @@ import android.util.imetracing.ImeTracing;
 import android.util.imetracing.InputConnectionHelper;
 import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.DumpableInputConnection;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
@@ -49,7 +51,9 @@ import com.android.internal.inputmethod.IIntResultCallback;
 import com.android.internal.inputmethod.ISurroundingTextResultCallback;
 import com.android.internal.os.SomeArgs;
 
-public abstract class IInputConnectionWrapper extends IInputContext.Stub {
+import java.lang.ref.WeakReference;
+
+public final class IInputConnectionWrapper extends IInputContext.Stub {
     private static final String TAG = "IInputConnectionWrapper";
     private static final boolean DEBUG = false;
 
@@ -90,9 +94,12 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private Looper mMainLooper;
     private Handler mH;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
     @GuardedBy("mLock")
     private boolean mFinished = false;
+
+    private final InputMethodManager mParentInputMethodManager;
+    private final WeakReference<View> mServedView;
 
     class MyHandler extends Handler {
         MyHandler(Looper looper) {
@@ -104,11 +111,15 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
             executeMessage(msg);
         }
     }
-    
-    public IInputConnectionWrapper(Looper mainLooper, @NonNull InputConnection inputConnection) {
+
+    public IInputConnectionWrapper(@NonNull Looper mainLooper,
+            @NonNull InputConnection inputConnection,
+            @NonNull InputMethodManager inputMethodManager, @Nullable View servedView) {
         mInputConnection = inputConnection;
         mMainLooper = mainLooper;
         mH = new MyHandler(mMainLooper);
+        mParentInputMethodManager = inputMethodManager;
+        mServedView = new WeakReference<>(servedView);
     }
 
     @Nullable
@@ -118,21 +129,70 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         }
     }
 
-    protected Looper getLooper() {
-        synchronized (mMainLooper) {
-            return mMainLooper;
-        }
-    }
-
-    protected boolean isFinished() {
+    private boolean isFinished() {
         synchronized (mLock) {
             return mFinished;
         }
     }
 
-    protected abstract boolean isActive();
+    public boolean isActive() {
+        return mParentInputMethodManager.isActive() && !isFinished();
+    }
 
-    protected abstract InputMethodManager getIMM();
+    public View getServedView() {
+        return mServedView.get();
+    }
+
+    public void deactivate() {
+        if (isFinished()) {
+            // This is a small performance optimization.  Still only the 1st call of
+            // reportFinish() will take effect.
+            return;
+        }
+        closeConnection();
+
+        // Notify the app that the InputConnection was closed.
+        final View servedView = mServedView.get();
+        if (servedView != null) {
+            final Handler handler = servedView.getHandler();
+            // The handler is null if the view is already detached. When that's the case, for
+            // now, we simply don't dispatch this callback.
+            if (handler != null) {
+                if (DEBUG) {
+                    Log.v(TAG, "Calling View.onInputConnectionClosed: view=" + servedView);
+                }
+                if (handler.getLooper().isCurrentThread()) {
+                    servedView.onInputConnectionClosedInternal();
+                } else {
+                    handler.post(servedView::onInputConnectionClosedInternal);
+                }
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "IInputConnectionWrapper{"
+                + "connection=" + getInputConnection()
+                + " finished=" + isFinished()
+                + " mParentInputMethodManager.isActive()=" + mParentInputMethodManager.isActive()
+                + " mServedView=" + mServedView.get()
+                + "}";
+    }
+
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        synchronized (mLock) {
+            // Check that the call is initiated in the main thread of the current InputConnection
+            // {@link InputConnection#getHandler} since the messages to IInputConnectionWrapper are
+            // executed on this thread. Otherwise the messages are dispatched to the correct thread
+            // in IInputConnectionWrapper, but this is not wanted while dumpng, for performance
+            // reasons.
+            if ((mInputConnection instanceof DumpableInputConnection)
+                    && Looper.myLooper() == mMainLooper) {
+                ((DumpableInputConnection) mInputConnection).dumpDebug(proto, fieldId);
+            }
+        }
+    }
 
     public void getTextAfterCursor(int length, int flags, ICharSequenceResultCallback callback) {
         dispatchMessage(mH.obtainMessage(DO_GET_TEXT_AFTER_CURSOR, length, flags, callback));
@@ -159,6 +219,10 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         args.arg3 = flags;
         args.arg4 = callback;
         dispatchMessage(mH.obtainMessage(DO_GET_SURROUNDING_TEXT, flags, 0 /* unused */, args));
+    }
+
+    public void setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
+         // no-op
     }
 
     public void getCursorCapsMode(int reqModes, IIntResultCallback callback) {
@@ -309,7 +373,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         icProto = InputConnectionHelper.buildGetTextAfterCursorProto(msg.arg1,
                                 msg.arg2, result);
                         ImeTracing.getInstance().triggerClientDump(
-                                TAG + "#getTextAfterCursor", getIMM(), icProto);
+                                TAG + "#getTextAfterCursor", mParentInputMethodManager, icProto);
                     }
                     try {
                         callback.onResult(result);
@@ -339,7 +403,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         icProto = InputConnectionHelper.buildGetTextBeforeCursorProto(msg.arg1,
                                 msg.arg2, result);
                         ImeTracing.getInstance().triggerClientDump(
-                                TAG + "#getTextBeforeCursor", getIMM(), icProto);
+                                TAG + "#getTextBeforeCursor", mParentInputMethodManager, icProto);
                     }
                     try {
                         callback.onResult(result);
@@ -368,7 +432,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                     if (ImeTracing.getInstance().isEnabled()) {
                         icProto = InputConnectionHelper.buildGetSelectedTextProto(msg.arg1, result);
                         ImeTracing.getInstance().triggerClientDump(
-                                TAG + "#getSelectedText", getIMM(), icProto);
+                                TAG + "#getSelectedText", mParentInputMethodManager, icProto);
                     }
                     try {
                         callback.onResult(result);
@@ -402,7 +466,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         icProto = InputConnectionHelper.buildGetSurroundingTextProto(beforeLength,
                                 afterLength, flags, result);
                         ImeTracing.getInstance().triggerClientDump(
-                                TAG + "#getSurroundingText", getIMM(), icProto);
+                                TAG + "#getSurroundingText", mParentInputMethodManager, icProto);
                     }
                     try {
                         callback.onResult(result);
@@ -432,7 +496,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         icProto = InputConnectionHelper.buildGetCursorCapsModeProto(msg.arg1,
                                 result);
                         ImeTracing.getInstance().triggerClientDump(
-                                TAG + "#getCursorCapsMode", getIMM(), icProto);
+                                TAG + "#getCursorCapsMode", mParentInputMethodManager, icProto);
                     }
                     try {
                         callback.onResult(result);
@@ -464,7 +528,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         icProto = InputConnectionHelper.buildGetExtractedTextProto(request,
                                 msg.arg1, result);
                         ImeTracing.getInstance().triggerClientDump(
-                                TAG + "#getExtractedText", getIMM(), icProto);
+                                TAG + "#getExtractedText", mParentInputMethodManager, icProto);
                     }
                     try {
                         callback.onResult(result);
