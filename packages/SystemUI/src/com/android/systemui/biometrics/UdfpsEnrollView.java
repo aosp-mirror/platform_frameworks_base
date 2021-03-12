@@ -18,32 +18,36 @@ package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.R;
 
 /**
- * Class that coordinates non-HBM animations during keyguard authentication.
+ * View corresponding with udfps_enroll_view.xml
  */
-public class UdfpsAnimationViewKeyguard extends UdfpsAnimationView {
-    @Nullable private UdfpsAnimationKeyguard mAnimation;
+public class UdfpsEnrollView extends UdfpsAnimationView {
+    private final UdfpsEnrollDrawable mFingerprintDrawable;
+    private ImageView mFingerprintView;
 
-    public UdfpsAnimationViewKeyguard(Context context, @Nullable AttributeSet attrs) {
+    public UdfpsEnrollView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        mFingerprintDrawable = new UdfpsEnrollDrawable(mContext);
     }
 
-    void setStatusBarStateController(@NonNull StatusBarStateController statusBarStateController) {
-        if (mAnimation == null) {
-            mAnimation = new UdfpsAnimationKeyguard(getContext(), statusBarStateController);
-            mAnimation.setAnimationView(this);
-        }
-    }
-
-    @Nullable
     @Override
-    protected UdfpsAnimation getUdfpsAnimation() {
-        return mAnimation;
+    protected void onFinishInflate() {
+        mFingerprintView = findViewById(R.id.udfps_enroll_animation_fp_view);
+        mFingerprintView.setImageDrawable(mFingerprintDrawable);
+    }
+
+    @Override
+    public UdfpsDrawable getDrawable() {
+        return mFingerprintDrawable;
+    }
+
+    void setEnrollHelper(UdfpsEnrollHelper enrollHelper) {
+        mFingerprintDrawable.setEnrollHelper(enrollHelper);
     }
 }

@@ -14,9 +14,26 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.systemui.biometrics.UdfpsAnimationViewKeyguard
+<com.android.systemui.biometrics.UdfpsEnrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/udfps_animation_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-</com.android.systemui.biometrics.UdfpsAnimationViewKeyguard>
+
+    <!-- Enrollment progress bar -->
+    <com.android.systemui.biometrics.UdfpsProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:max="100"
+        android:padding="@dimen/udfps_enroll_progress_thickness"
+        android:progress="0"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+    <!-- Fingerprint -->
+    <ImageView
+        android:id="@+id/udfps_enroll_animation_fp_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</com.android.systemui.biometrics.UdfpsEnrollView>

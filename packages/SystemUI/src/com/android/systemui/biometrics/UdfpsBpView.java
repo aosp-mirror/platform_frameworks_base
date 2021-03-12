@@ -24,19 +24,22 @@ import androidx.annotation.Nullable;
 /**
  * Class that coordinates non-HBM animations during BiometricPrompt.
  *
+ * Currently doesn't draw anything.
+ *
  * Note that {@link AuthBiometricUdfpsView} also shows UDFPS animations. At some point we should
- * de-dupe this if necessary. This will probably happen once the top-level TODO in UdfpsController
- * is completed (inflate operation-specific views, instead of inflating generic udfps_view and
- * adding operation-specific animations to it).
+ * de-dupe this if necessary.
  */
-public class UdfpsAnimationViewBp extends UdfpsAnimationView {
-    public UdfpsAnimationViewBp(Context context, @Nullable AttributeSet attrs) {
+public class UdfpsBpView extends UdfpsAnimationView {
+    private UdfpsFpDrawable mFingerprintDrawable;
+
+    public UdfpsBpView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        // Drawable isn't ever added to the view, so we don't currently show anything
+        mFingerprintDrawable = new UdfpsFpDrawable(mContext);
     }
 
-    @Nullable
     @Override
-    protected UdfpsAnimation getUdfpsAnimation() {
-        return null;
+    UdfpsDrawable getDrawable() {
+        return mFingerprintDrawable;
     }
 }
