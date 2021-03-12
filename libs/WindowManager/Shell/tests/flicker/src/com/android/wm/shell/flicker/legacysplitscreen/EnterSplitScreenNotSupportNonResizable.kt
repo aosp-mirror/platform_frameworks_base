@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.platform.test.annotations.Postsubmit
+import android.provider.Settings
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -28,7 +30,9 @@ import com.android.server.wm.flicker.helpers.openQuickstep
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,27 +40,31 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test open non-resizable activity will auto exit split screen mode
- * To run this test: `atest WMShellFlickerTests:EnterSplitScreenNonResizableNotDock`
+ * Test enter split screen from non-resizable activity. When the device doesn't support
+ * non-resizable in multi window, there should be no button to enter split screen for non-resizable
+ * activity.
+ *
+ * To run this test: `atest WMShellFlickerTests:EnterSplitScreenNotSupportNonResizable`
  */
+@Postsubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@FlakyTest(bugId = 173875043)
-class EnterSplitScreenNonResizableNotDock(
+class EnterSplitScreenNotSupportNonResizable(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
+    var prevSupportNonResizableInMultiWindow = 0
+
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
-            super.transition(this, configuration)
-            teardown {
+            cleanSetup(this, configuration)
+            setup {
                 eachRun {
-                    nonResizeableApp.exit(wmHelper)
+                    nonResizeableApp.launchViaIntent(wmHelper)
                 }
             }
             transitions {
-                nonResizeableApp.launchViaIntent(wmHelper)
                 device.openQuickstep(wmHelper)
                 if (device.canSplitScreen(wmHelper)) {
                     Assert.fail("Non-resizeable app should not enter split screen")
@@ -71,8 +79,23 @@ class EnterSplitScreenNonResizableNotDock(
             nonResizeableApp.defaultWindowName,
             splitScreenApp.defaultWindowName)
 
-    @Test
-    fun dockedStackDividerIsInvisible() = testSpec.dockedStackDividerIsInvisible()
+    @Before
+    fun setup() {
+        prevSupportNonResizableInMultiWindow = Settings.Global.getInt(context.contentResolver,
+                Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW)
+        if (prevSupportNonResizableInMultiWindow == 1) {
+            // Not support non-resizable in multi window
+            Settings.Global.putInt(context.contentResolver,
+                    Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 0)
+        }
+    }
+
+    @After
+    fun teardown() {
+        Settings.Global.putInt(context.contentResolver,
+                Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
+                prevSupportNonResizableInMultiWindow)
+    }
 
     @FlakyTest(bugId = 178447631)
     @Test
@@ -82,6 +105,9 @@ class EnterSplitScreenNonResizableNotDock(
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    @Test
+    fun dockedStackDividerIsInvisible() = testSpec.dockedStackDividerIsInvisible()
 
     @Test
     fun appWindowIsVisible() {
