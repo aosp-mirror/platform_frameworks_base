@@ -16,13 +16,6 @@
 
 package android.os;
 
-import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
-import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
-import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
-import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT;
-import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT_UI;
-import static android.app.ActivityManager.PROCESS_STATE_TOP;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,7 +26,6 @@ import android.content.Context;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,9 +35,11 @@ import java.util.List;
  * placed on the temporary whitelist are removed from that whitelist after a predetermined amount of
  * time.
  *
+ * @deprecated Use {@link PowerExemptionManager} instead
  * @hide
  */
 @SystemApi
+@Deprecated
 @SystemService(Context.POWER_WHITELIST_MANAGER)
 public class PowerWhitelistManager {
     private final Context mContext;
@@ -53,21 +47,23 @@ public class PowerWhitelistManager {
     // TODO: migrate to PowerWhitelistController
     private final IDeviceIdleController mService;
 
+    private final PowerExemptionManager mPowerExemptionManager;
+
     /**
      * Indicates that an unforeseen event has occurred and the app should be whitelisted to handle
      * it.
      */
-    public static final int EVENT_UNSPECIFIED = 0;
+    public static final int EVENT_UNSPECIFIED = PowerExemptionManager.EVENT_UNSPECIFIED;
 
     /**
      * Indicates that an SMS event has occurred and the app should be whitelisted to handle it.
      */
-    public static final int EVENT_SMS = 1;
+    public static final int EVENT_SMS = PowerExemptionManager.EVENT_SMS;
 
     /**
      * Indicates that an MMS event has occurred and the app should be whitelisted to handle it.
      */
-    public static final int EVENT_MMS = 2;
+    public static final int EVENT_MMS = PowerExemptionManager.EVENT_MMS;
 
     /**
      * @hide
@@ -84,12 +80,14 @@ public class PowerWhitelistManager {
     /**
      * Allow the temp allowlist behavior, plus allow foreground service start from background.
      */
-    public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0;
+    public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED =
+            PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
     /**
      * Only allow the temp allowlist behavior, not allow foreground service start from
      * background.
      */
-    public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED = 1;
+    public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED =
+            PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
 
     /**
      * The list of temp allowlist types.
@@ -107,73 +105,83 @@ public class PowerWhitelistManager {
      * BG-FGS-launch is denied.
      * @hide
      */
-    public static final int REASON_DENIED = -1;
+    public static final int REASON_DENIED = PowerExemptionManager.REASON_DENIED;
 
     /* Reason code range 0-9 are reserved for default reasons */
     /**
      * The default reason code if reason is unknown.
      */
-    public static final int REASON_UNKNOWN = 0;
+    public static final int REASON_UNKNOWN = PowerExemptionManager.REASON_UNKNOWN;
     /**
      * Use REASON_OTHER if there is no better choice.
      */
-    public static final int REASON_OTHER = 1;
+    public static final int REASON_OTHER = PowerExemptionManager.REASON_OTHER;
 
     /* Reason code range 10-49 are reserved for BG-FGS-launch allowed proc states */
     /** @hide */
-    public static final int REASON_PROC_STATE_PERSISTENT = 10;
+    public static final int REASON_PROC_STATE_PERSISTENT =
+            PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
     /** @hide */
-    public static final int REASON_PROC_STATE_PERSISTENT_UI = 11;
+    public static final int REASON_PROC_STATE_PERSISTENT_UI =
+            PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI;
     /** @hide */
-    public static final int REASON_PROC_STATE_TOP = 12;
+    public static final int REASON_PROC_STATE_TOP = PowerExemptionManager.REASON_PROC_STATE_TOP;
     /** @hide */
-    public static final int REASON_PROC_STATE_BTOP = 13;
+    public static final int REASON_PROC_STATE_BTOP = PowerExemptionManager.REASON_PROC_STATE_BTOP;
     /** @hide */
-    public static final int REASON_PROC_STATE_FGS = 14;
+    public static final int REASON_PROC_STATE_FGS = PowerExemptionManager.REASON_PROC_STATE_FGS;
     /** @hide */
-    public static final int REASON_PROC_STATE_BFGS = 15;
+    public static final int REASON_PROC_STATE_BFGS = PowerExemptionManager.REASON_PROC_STATE_BFGS;
 
     /* Reason code range 50-99 are reserved for BG-FGS-launch allowed reasons */
     /** @hide */
-    public static final int REASON_UID_VISIBLE = 50;
+    public static final int REASON_UID_VISIBLE = PowerExemptionManager.REASON_UID_VISIBLE;
     /** @hide */
-    public static final int REASON_SYSTEM_UID = 51;
+    public static final int REASON_SYSTEM_UID = PowerExemptionManager.REASON_SYSTEM_UID;
     /** @hide */
-    public static final int REASON_ACTIVITY_STARTER = 52;
+    public static final int REASON_ACTIVITY_STARTER = PowerExemptionManager.REASON_ACTIVITY_STARTER;
     /** @hide */
-    public static final int REASON_START_ACTIVITY_FLAG = 53;
+    public static final int REASON_START_ACTIVITY_FLAG =
+            PowerExemptionManager.REASON_START_ACTIVITY_FLAG;
     /** @hide */
-    public static final int REASON_FGS_BINDING = 54;
+    public static final int REASON_FGS_BINDING = PowerExemptionManager.REASON_FGS_BINDING;
     /** @hide */
-    public static final int REASON_DEVICE_OWNER = 55;
+    public static final int REASON_DEVICE_OWNER = PowerExemptionManager.REASON_DEVICE_OWNER;
     /** @hide */
-    public static final int REASON_PROFILE_OWNER = 56;
+    public static final int REASON_PROFILE_OWNER = PowerExemptionManager.REASON_PROFILE_OWNER;
     /** @hide */
-    public static final int REASON_COMPANION_DEVICE_MANAGER = 57;
+    public static final int REASON_COMPANION_DEVICE_MANAGER =
+            PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
     /**
      * START_ACTIVITIES_FROM_BACKGROUND permission.
      * @hide
      */
-    public static final int REASON_BACKGROUND_ACTIVITY_PERMISSION = 58;
+    public static final int REASON_BACKGROUND_ACTIVITY_PERMISSION =
+            PowerExemptionManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
     /**
      * START_FOREGROUND_SERVICES_FROM_BACKGROUND permission.
      * @hide
      */
-    public static final int REASON_BACKGROUND_FGS_PERMISSION = 59;
+    public static final int REASON_BACKGROUND_FGS_PERMISSION =
+            PowerExemptionManager.REASON_BACKGROUND_FGS_PERMISSION;
     /** @hide */
-    public static final int REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION = 60;
+    public static final int REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION =
+            PowerExemptionManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
     /** @hide */
-    public static final int REASON_INSTR_BACKGROUND_FGS_PERMISSION = 61;
+    public static final int REASON_INSTR_BACKGROUND_FGS_PERMISSION =
+            PowerExemptionManager.REASON_INSTR_BACKGROUND_FGS_PERMISSION;
     /** @hide */
-    public static final int REASON_SYSTEM_ALERT_WINDOW_PERMISSION = 62;
+    public static final int REASON_SYSTEM_ALERT_WINDOW_PERMISSION =
+            PowerExemptionManager.REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
     /** @hide */
-    public static final int REASON_DEVICE_DEMO_MODE = 63;
+    public static final int REASON_DEVICE_DEMO_MODE = PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
     /** @hide */
-    public static final int REASON_EXEMPTED_PACKAGE = 64;
+    public static final int REASON_EXEMPTED_PACKAGE = PowerExemptionManager.REASON_EXEMPTED_PACKAGE;
     /** @hide */
-    public static final int REASON_ALLOWLISTED_PACKAGE  = 65;
+    public static final int REASON_ALLOWLISTED_PACKAGE =
+            PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
     /** @hide */
-    public static final int REASON_APPOP = 66;
+    public static final int REASON_APPOP = PowerExemptionManager.REASON_APPOP;
 
     /* BG-FGS-launch is allowed by temp-allowlist or system-allowlist.
        Reason code for temp and system allowlist starts here.
@@ -181,117 +189,128 @@ public class PowerWhitelistManager {
     /**
      * Set temp-allowlist for location geofence purpose.
      */
-    public static final int REASON_GEOFENCING = 100;
+    public static final int REASON_GEOFENCING = PowerExemptionManager.REASON_GEOFENCING;
     /**
      * Set temp-allowlist for server push messaging.
      */
-    public static final int REASON_PUSH_MESSAGING = 101;
+    public static final int REASON_PUSH_MESSAGING = PowerExemptionManager.REASON_PUSH_MESSAGING;
     /**
      * Set temp-allowlist for server push messaging over the quota.
      */
-    public static final int REASON_PUSH_MESSAGING_OVER_QUOTA = 102;
+    public static final int REASON_PUSH_MESSAGING_OVER_QUOTA =
+            PowerExemptionManager.REASON_PUSH_MESSAGING_OVER_QUOTA;
     /**
      * Set temp-allowlist for activity recognition.
      */
-    public static final int REASON_ACTIVITY_RECOGNITION = 103;
+    public static final int REASON_ACTIVITY_RECOGNITION =
+            PowerExemptionManager.REASON_ACTIVITY_RECOGNITION;
 
     /* Reason code range 200-299 are reserved for broadcast actions */
     /**
      * Broadcast ACTION_BOOT_COMPLETED.
      * @hide
      */
-    public static final int REASON_BOOT_COMPLETED = 200;
+    public static final int REASON_BOOT_COMPLETED = PowerExemptionManager.REASON_BOOT_COMPLETED;
     /**
      * Broadcast ACTION_PRE_BOOT_COMPLETED.
      * @hide
      */
-    public static final int REASON_PRE_BOOT_COMPLETED = 201;
+    public static final int REASON_PRE_BOOT_COMPLETED =
+            PowerExemptionManager.REASON_PRE_BOOT_COMPLETED;
     /**
      * Broadcast ACTION_LOCKED_BOOT_COMPLETED.
      * @hide
      */
-    public static final int REASON_LOCKED_BOOT_COMPLETED = 202;
+    public static final int REASON_LOCKED_BOOT_COMPLETED =
+            PowerExemptionManager.REASON_LOCKED_BOOT_COMPLETED;
 
     /* Reason code range 300-399 are reserved for other internal reasons */
     /**
      * Device idle system allowlist, including EXCEPT-IDLE
      * @hide
      */
-    public static final int REASON_SYSTEM_ALLOW_LISTED  = 300;
+    public static final int REASON_SYSTEM_ALLOW_LISTED =
+            PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
     /** @hide */
-    public static final int REASON_ALARM_MANAGER_ALARM_CLOCK = 301;
+    public static final int REASON_ALARM_MANAGER_ALARM_CLOCK =
+            PowerExemptionManager.REASON_ALARM_MANAGER_ALARM_CLOCK;
     /**
      * AlarmManagerService.
      * @hide
      */
-    public static final int REASON_ALARM_MANAGER_WHILE_IDLE = 302;
+    public static final int REASON_ALARM_MANAGER_WHILE_IDLE =
+            PowerExemptionManager.REASON_ALARM_MANAGER_WHILE_IDLE;
     /**
      * ActiveServices.
      * @hide
      */
-    public static final int REASON_SERVICE_LAUNCH = 303;
+    public static final int REASON_SERVICE_LAUNCH = PowerExemptionManager.REASON_SERVICE_LAUNCH;
     /**
      * KeyChainSystemService.
      * @hide
      */
-    public static final int REASON_KEY_CHAIN = 304;
+    public static final int REASON_KEY_CHAIN = PowerExemptionManager.REASON_KEY_CHAIN;
     /**
      * PackageManagerService.
      * @hide
      */
-    public static final int REASON_PACKAGE_VERIFIER = 305;
+    public static final int REASON_PACKAGE_VERIFIER = PowerExemptionManager.REASON_PACKAGE_VERIFIER;
     /**
      * SyncManager.
      * @hide
      */
-    public static final int REASON_SYNC_MANAGER = 306;
+    public static final int REASON_SYNC_MANAGER = PowerExemptionManager.REASON_SYNC_MANAGER;
     /**
      * DomainVerificationProxyV1.
      * @hide
      */
-    public static final int REASON_DOMAIN_VERIFICATION_V1 = 307;
+    public static final int REASON_DOMAIN_VERIFICATION_V1 =
+            PowerExemptionManager.REASON_DOMAIN_VERIFICATION_V1;
     /**
      * DomainVerificationProxyV2.
      * @hide
      */
-    public static final int REASON_DOMAIN_VERIFICATION_V2 = 308;
+    public static final int REASON_DOMAIN_VERIFICATION_V2 =
+            PowerExemptionManager.REASON_DOMAIN_VERIFICATION_V2;
     /** @hide */
     public static final int REASON_VPN = 309;
     /**
      * NotificationManagerService.
      * @hide
      */
-    public static final int REASON_NOTIFICATION_SERVICE = 310;
+    public static final int REASON_NOTIFICATION_SERVICE =
+            PowerExemptionManager.REASON_NOTIFICATION_SERVICE;
     /**
      * Broadcast ACTION_MY_PACKAGE_REPLACED.
      * @hide
      */
-    public static final int REASON_PACKAGE_REPLACED = 311;
+    public static final int REASON_PACKAGE_REPLACED = PowerExemptionManager.REASON_PACKAGE_REPLACED;
     /**
      * LocationProviderManager.
      * @hide
      */
-    public static final int REASON_LOCATION_PROVIDER = 312;
+    public static final int REASON_LOCATION_PROVIDER =
+            PowerExemptionManager.REASON_LOCATION_PROVIDER;
     /**
      * MediaButtonReceiver.
      * @hide
      */
-    public static final int REASON_MEDIA_BUTTON = 313;
+    public static final int REASON_MEDIA_BUTTON = PowerExemptionManager.REASON_MEDIA_BUTTON;
     /**
      * InboundSmsHandler.
      * @hide
      */
-    public static final int REASON_EVENT_SMS = 314;
+    public static final int REASON_EVENT_SMS = PowerExemptionManager.REASON_EVENT_SMS;
     /**
      * InboundSmsHandler.
      * @hide
      */
-    public static final int REASON_EVENT_MMS = 315;
+    public static final int REASON_EVENT_MMS = PowerExemptionManager.REASON_EVENT_MMS;
     /**
      * Shell app.
      * @hide
      */
-    public static final int REASON_SHELL = 316;
+    public static final int REASON_SHELL = PowerExemptionManager.REASON_SHELL;
 
     /**
      * The list of BG-FGS-Launch and temp-allowlist reason code.
@@ -360,26 +379,29 @@ public class PowerWhitelistManager {
     public PowerWhitelistManager(@NonNull Context context) {
         mContext = context;
         mService = context.getSystemService(DeviceIdleManager.class).getService();
+        mPowerExemptionManager = context.getSystemService(PowerExemptionManager.class);
     }
 
     /**
      * Add the specified package to the permanent power save whitelist.
+     *
+     * @deprecated Use {@link PowerExemptionManager#addToPermanentAllowList(String)} instead
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public void addToWhitelist(@NonNull String packageName) {
-        addToWhitelist(Collections.singletonList(packageName));
+        mPowerExemptionManager.addToPermanentAllowList(packageName);
     }
 
     /**
      * Add the specified packages to the permanent power save whitelist.
+     *
+     * @deprecated Use {@link PowerExemptionManager#addToPermanentAllowList(List)} instead
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public void addToWhitelist(@NonNull List<String> packageNames) {
-        try {
-            mService.addPowerSaveWhitelistApps(packageNames);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPowerExemptionManager.addToPermanentAllowList(packageNames);
     }
 
     /**
@@ -388,19 +410,13 @@ public class PowerWhitelistManager {
      *
      * @param includingIdle Set to true if the app should be whitelisted from device idle as well
      *                      as other power save restrictions
+     * @deprecated Use {@link PowerExemptionManager#getAllowListedAppIds(boolean)} instead
      * @hide
      */
+    @Deprecated
     @NonNull
     public int[] getWhitelistedAppIds(boolean includingIdle) {
-        try {
-            if (includingIdle) {
-                return mService.getAppIdWhitelist();
-            } else {
-                return mService.getAppIdWhitelistExceptIdle();
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mPowerExemptionManager.getAllowListedAppIds(includingIdle);
     }
 
     /**
@@ -409,18 +425,12 @@ public class PowerWhitelistManager {
      *
      * @param includingIdle Set to true if the app should be whitelisted from device
      *                      idle as well as other power save restrictions
+     * @deprecated Use {@link PowerExemptionManager#isAllowListed(String, boolean)} instead
      * @hide
      */
+    @Deprecated
     public boolean isWhitelisted(@NonNull String packageName, boolean includingIdle) {
-        try {
-            if (includingIdle) {
-                return mService.isPowerSaveWhitelistApp(packageName);
-            } else {
-                return mService.isPowerSaveWhitelistExceptIdleApp(packageName);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mPowerExemptionManager.isAllowListed(packageName, includingIdle);
     }
 
     /**
@@ -429,14 +439,12 @@ public class PowerWhitelistManager {
      * whitelisted by default by the system cannot be removed.
      *
      * @param packageName The app to remove from the whitelist
+     * @deprecated Use {@link PowerExemptionManager#removeFromAllowList(String)} instead
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public void removeFromWhitelist(@NonNull String packageName) {
-        try {
-            mService.removePowerSaveWhitelistApp(packageName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPowerExemptionManager.removeFromAllowList(packageName);
     }
 
     /**
@@ -446,16 +454,14 @@ public class PowerWhitelistManager {
      * @param durationMs  How long to keep the app on the temp whitelist for (in milliseconds)
      * @param reasonCode one of {@link ReasonCode}, use {@link #REASON_UNKNOWN} if not sure.
      * @param reason a optional human readable reason string, could be null or empty string.
+     * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowList(
+     *             String, long, int, String)} instead
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public void whitelistAppTemporarily(@NonNull String packageName, long durationMs,
             @ReasonCode int reasonCode, @Nullable String reason) {
-        try {
-            mService.addPowerSaveTempWhitelistApp(packageName, durationMs, mContext.getUserId(),
-                    reasonCode, reason);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPowerExemptionManager.addToTemporaryAllowList(packageName, durationMs, reasonCode, reason);
     }
 
     /**
@@ -463,12 +469,14 @@ public class PowerWhitelistManager {
      *
      * @param packageName The package to add to the temp whitelist
      * @param durationMs  How long to keep the app on the temp whitelist for (in milliseconds)
-     * @deprecated Use {@link #whitelistAppTemporarily(String, long, int, String)} instead
+     * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowList(
+     *             String, long, int, String)} instead
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public void whitelistAppTemporarily(@NonNull String packageName, long durationMs) {
-        whitelistAppTemporarily(packageName, durationMs, REASON_UNKNOWN, packageName);
+        mPowerExemptionManager.addToTemporaryAllowList(
+                packageName, durationMs, REASON_UNKNOWN, packageName);
     }
 
     /**
@@ -481,13 +489,15 @@ public class PowerWhitelistManager {
      * @param reason      A human-readable reason explaining why the app is temp whitelisted. Only
      *                    used for logging purposes. Could be null or empty string.
      * @return The duration (in milliseconds) that the app is whitelisted for
-     * @deprecated Use {@link #whitelistAppTemporarilyForEvent(String, int, int, String)} instead
+     * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowListForEvent(
+     *             String, int, int, String)} instead
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public long whitelistAppTemporarilyForEvent(@NonNull String packageName,
             @WhitelistEvent int event, @Nullable String reason) {
-        return whitelistAppTemporarilyForEvent(packageName, event, REASON_UNKNOWN, reason);
+        return mPowerExemptionManager.addToTemporaryAllowListForEvent(
+                packageName, event, REASON_UNKNOWN, reason);
     }
 
     /**
@@ -501,47 +511,25 @@ public class PowerWhitelistManager {
      * @param reason      A human-readable reason explaining why the app is temp whitelisted. Only
      *                    used for logging purposes. Could be null or empty string.
      * @return The duration (in milliseconds) that the app is whitelisted for
+     * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowListForEvent(
+     *             String, int, int, String)} instead
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public long whitelistAppTemporarilyForEvent(@NonNull String packageName,
             @WhitelistEvent int event, @ReasonCode int reasonCode, @Nullable String reason) {
-        try {
-            switch (event) {
-                case EVENT_MMS:
-                    return mService.addPowerSaveTempWhitelistAppForMms(
-                            packageName, mContext.getUserId(), reasonCode, reason);
-                case EVENT_SMS:
-                    return mService.addPowerSaveTempWhitelistAppForSms(
-                            packageName, mContext.getUserId(), reasonCode, reason);
-                case EVENT_UNSPECIFIED:
-                default:
-                    return mService.whitelistAppTemporarily(
-                            packageName, mContext.getUserId(), reasonCode, reason);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mPowerExemptionManager.addToTemporaryAllowListForEvent(
+                packageName, event, reasonCode, reason);
     }
 
     /**
      * @hide
+     *
+     * @deprecated Use {@link PowerExemptionManager#getReasonCodeFromProcState(int)} instead
      */
+    @Deprecated
     public static @ReasonCode int getReasonCodeFromProcState(int procState) {
-        if (procState <= PROCESS_STATE_PERSISTENT) {
-            return REASON_PROC_STATE_PERSISTENT;
-        } else if (procState <= PROCESS_STATE_PERSISTENT_UI) {
-            return REASON_PROC_STATE_PERSISTENT_UI;
-        } else if (procState <= PROCESS_STATE_TOP) {
-            return REASON_PROC_STATE_TOP;
-        } else if (procState <= PROCESS_STATE_BOUND_TOP) {
-            return REASON_PROC_STATE_BTOP;
-        } else if (procState <= PROCESS_STATE_FOREGROUND_SERVICE) {
-            return REASON_PROC_STATE_FGS;
-        } else if (procState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
-            return REASON_PROC_STATE_BFGS;
-        } else {
-            return REASON_DENIED;
-        }
+        return PowerExemptionManager.getReasonCodeFromProcState(procState);
     }
 
     /**
@@ -549,111 +537,10 @@ public class PowerWhitelistManager {
      * @hide
      * @param reasonCode
      * @return string name of the reason code.
+     * @deprecated Use {@link PowerExemptionManager#reasonCodeToString(int)} instead
      */
+    @Deprecated
     public static String reasonCodeToString(@ReasonCode int reasonCode) {
-        switch (reasonCode) {
-            case REASON_DENIED:
-                return "DENIED";
-            case REASON_UNKNOWN:
-                return "UNKNOWN";
-            case REASON_OTHER:
-                return "OTHER";
-            case REASON_PROC_STATE_PERSISTENT:
-                return "PROC_STATE_PERSISTENT";
-            case REASON_PROC_STATE_PERSISTENT_UI:
-                return "PROC_STATE_PERSISTENT_UI";
-            case REASON_PROC_STATE_TOP:
-                return "PROC_STATE_TOP";
-            case REASON_PROC_STATE_BTOP:
-                return "PROC_STATE_BTOP";
-            case REASON_PROC_STATE_FGS:
-                return "PROC_STATE_FGS";
-            case REASON_PROC_STATE_BFGS:
-                return "PROC_STATE_BFGS";
-            case REASON_UID_VISIBLE:
-                return "UID_VISIBLE";
-            case REASON_SYSTEM_UID:
-                return "SYSTEM_UID";
-            case REASON_ACTIVITY_STARTER:
-                return "ACTIVITY_STARTER";
-            case REASON_START_ACTIVITY_FLAG:
-                return "START_ACTIVITY_FLAG";
-            case REASON_FGS_BINDING:
-                return "FGS_BINDING";
-            case REASON_DEVICE_OWNER:
-                return "DEVICE_OWNER";
-            case REASON_PROFILE_OWNER:
-                return "PROFILE_OWNER";
-            case REASON_COMPANION_DEVICE_MANAGER:
-                return "COMPANION_DEVICE_MANAGER";
-            case REASON_BACKGROUND_ACTIVITY_PERMISSION:
-                return "BACKGROUND_ACTIVITY_PERMISSION";
-            case REASON_BACKGROUND_FGS_PERMISSION:
-                return "BACKGROUND_FGS_PERMISSION";
-            case REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION:
-                return "INSTR_BACKGROUND_ACTIVITY_PERMISSION";
-            case REASON_INSTR_BACKGROUND_FGS_PERMISSION:
-                return "INSTR_BACKGROUND_FGS_PERMISSION";
-            case REASON_SYSTEM_ALERT_WINDOW_PERMISSION:
-                return "SYSTEM_ALERT_WINDOW_PERMISSION";
-            case REASON_DEVICE_DEMO_MODE:
-                return "DEVICE_DEMO_MODE";
-            case REASON_EXEMPTED_PACKAGE:
-                return "EXEMPTED_PACKAGE";
-            case REASON_ALLOWLISTED_PACKAGE:
-                return "ALLOWLISTED_PACKAGE";
-            case REASON_APPOP:
-                return "APPOP";
-            case REASON_GEOFENCING:
-                return "GEOFENCING";
-            case REASON_PUSH_MESSAGING:
-                return "PUSH_MESSAGING";
-            case REASON_PUSH_MESSAGING_OVER_QUOTA:
-                return "PUSH_MESSAGING_OVER_QUOTA";
-            case REASON_ACTIVITY_RECOGNITION:
-                return "ACTIVITY_RECOGNITION";
-            case REASON_BOOT_COMPLETED:
-                return "BOOT_COMPLETED";
-            case REASON_PRE_BOOT_COMPLETED:
-                return "PRE_BOOT_COMPLETED";
-            case REASON_LOCKED_BOOT_COMPLETED:
-                return "LOCKED_BOOT_COMPLETED";
-            case REASON_SYSTEM_ALLOW_LISTED:
-                return "SYSTEM_ALLOW_LISTED";
-            case REASON_ALARM_MANAGER_ALARM_CLOCK:
-                return "ALARM_MANAGER_ALARM_CLOCK";
-            case REASON_ALARM_MANAGER_WHILE_IDLE:
-                return "ALARM_MANAGER_WHILE_IDLE";
-            case REASON_SERVICE_LAUNCH:
-                return "SERVICE_LAUNCH";
-            case REASON_KEY_CHAIN:
-                return "KEY_CHAIN";
-            case REASON_PACKAGE_VERIFIER:
-                return "PACKAGE_VERIFIER";
-            case REASON_SYNC_MANAGER:
-                return "SYNC_MANAGER";
-            case REASON_DOMAIN_VERIFICATION_V1:
-                return "DOMAIN_VERIFICATION_V1";
-            case REASON_DOMAIN_VERIFICATION_V2:
-                return "DOMAIN_VERIFICATION_V2";
-            case REASON_VPN:
-                return "VPN";
-            case REASON_NOTIFICATION_SERVICE:
-                return "NOTIFICATION_SERVICE";
-            case REASON_PACKAGE_REPLACED:
-                return "PACKAGE_REPLACED";
-            case REASON_LOCATION_PROVIDER:
-                return "LOCATION_PROVIDER";
-            case REASON_MEDIA_BUTTON:
-                return "MEDIA_BUTTON";
-            case REASON_EVENT_SMS:
-                return "EVENT_SMS";
-            case REASON_EVENT_MMS:
-                return "EVENT_MMS";
-            case REASON_SHELL:
-                return "SHELL";
-            default:
-                return  "(unknown:" + reasonCode + ")";
-        }
+        return PowerExemptionManager.reasonCodeToString(reasonCode);
     }
 }
