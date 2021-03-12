@@ -2818,7 +2818,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * @param launchParams   The resolved launch params to use.
      * @param realCallingPid The pid from {@link ActivityStarter#setRealCallingPid}
      * @param realCallingUid The uid from {@link ActivityStarter#setRealCallingUid}
-     * @return The roott task to use for the launch or INVALID_TASK_ID.
+     * @return The root task to use for the launch or INVALID_TASK_ID.
      */
     Task getLaunchRootTask(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable Task candidateTask, boolean onTop,
@@ -2887,7 +2887,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // Falling back to default task container
                 taskDisplayArea = taskDisplayArea.mDisplayContent.getDefaultTaskDisplayArea();
                 rootTask = taskDisplayArea.getOrCreateRootTask(r, options, candidateTask,
-                        activityType, onTop);
+                        launchParams, activityType, onTop);
                 if (rootTask != null) {
                     return rootTask;
                 }
@@ -2942,7 +2942,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        return container.getOrCreateRootTask(r, options, candidateTask, activityType, onTop);
+        return container.getOrCreateRootTask(
+                r, options, candidateTask, launchParams, activityType, onTop);
     }
 
     /** @return true if activity record is null or can be launched on provided display. */
