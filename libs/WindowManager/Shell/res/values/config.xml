@@ -51,4 +51,10 @@
 
     <!-- maximum animation duration for the icon when entering the starting window -->
     <integer name="max_starting_window_intro_icon_anim_duration">1000</integer>
+
+    <!-- Animation duration when exit starting window: icon going away -->
+    <integer name="starting_window_icon_exit_anim_duration">166</integer>
+
+    <!-- Animation duration when exit starting window: reveal app -->
+    <integer name="starting_window_app_reveal_anim_duration">333</integer>
 </resources>

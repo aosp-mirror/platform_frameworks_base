@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
@@ -100,9 +101,14 @@ public class TaskOrganizer extends WindowOrganizer {
 
     /**
      * Called when the Task want to remove the starting window.
+     * @param leash A persistent leash for the top window in this task. Release it once exit
+     *              animation has finished.
+     * @param frame Window frame of the top window.
+     * @param playRevealAnimation Play vanish animation.
      */
     @BinderThread
-    public void removeStartingWindow(int taskId) {}
+    public void removeStartingWindow(int taskId, @Nullable SurfaceControl leash,
+            @Nullable Rect frame, boolean playRevealAnimation) {}
 
     /**
      * Called when the Task want to copy the splash screen.
@@ -217,15 +223,16 @@ public class TaskOrganizer extends WindowOrganizer {
 
     private final ITaskOrganizer mInterface = new ITaskOrganizer.Stub() {
         @Override
-
         public void addStartingWindow(StartingWindowInfo windowInfo,
                 IBinder appToken) {
             mExecutor.execute(() -> TaskOrganizer.this.addStartingWindow(windowInfo, appToken));
         }
 
         @Override
-        public void removeStartingWindow(int taskId) {
-            mExecutor.execute(() -> TaskOrganizer.this.removeStartingWindow(taskId));
+        public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
+                boolean playRevealAnimation) {
+            mExecutor.execute(() -> TaskOrganizer.this.removeStartingWindow(taskId, leash, frame,
+                    playRevealAnimation));
         }
 
         @Override
