@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.Display;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
@@ -624,7 +625,7 @@ class TaskSnapshotController {
     /**
      * Called when screen is being turned off.
      */
-    void screenTurningOff(ScreenOffListener listener) {
+    void screenTurningOff(int displayId, ScreenOffListener listener) {
         if (shouldDisableSnapshots()) {
             listener.onScreenOff();
             return;
@@ -635,7 +636,7 @@ class TaskSnapshotController {
             try {
                 synchronized (mService.mGlobalLock) {
                     mTmpTasks.clear();
-                    mService.mRoot.forAllTasks(task -> {
+                    mService.mRoot.getDisplayContent(displayId).forAllTasks(task -> {
                         // Since RecentsAnimation will handle task snapshot while switching apps
                         // with the best capture timing (e.g. IME window capture), No need
                         // additional task capture while task is controlled by RecentsAnimation.
@@ -645,7 +646,7 @@ class TaskSnapshotController {
                     });
                     // Allow taking snapshot of home when turning screen off to reduce the delay of
                     // waking from secure lock to home.
-                    final boolean allowSnapshotHome =
+                    final boolean allowSnapshotHome = displayId == Display.DEFAULT_DISPLAY &&
                             mService.mPolicy.isKeyguardSecure(mService.mCurrentUserId);
                     snapshotTasks(mTmpTasks, allowSnapshotHome);
                 }
