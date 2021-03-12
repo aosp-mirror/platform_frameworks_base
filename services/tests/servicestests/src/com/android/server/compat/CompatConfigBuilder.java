@@ -120,6 +120,11 @@ class CompatConfigBuilder {
         return this;
     }
 
+    CompatConfigBuilder addEnabledSinceApexChangeWithId(int sdk, long id) {
+        mChanges.add(new CompatChange(id, "", -1, sdk, false, false, "", false));
+        return this;
+    }
+
     CompatConfig build() {
         CompatConfig config = new CompatConfig(mBuildClassifier, mContext);
         config.forceNonDebuggableFinalForTest(false);
