@@ -19,9 +19,12 @@ package android.telecom;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -30,6 +33,7 @@ import com.android.internal.telecom.ICallDiagnosticService;
 import com.android.internal.telecom.ICallDiagnosticServiceAdapter;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * The platform supports a single OEM provided {@link CallDiagnosticService}, as defined by the
@@ -51,6 +55,11 @@ import java.util.Map;
  * </service>
  * }
  * </pre>
+ * <p>
+ * <h2>Threading Model</h2>
+ * By default, all incoming IPC from Telecom in this service and in the {@link DiagnosticCall}
+ * instances will take place on the main thread.  You can override {@link #getExecutor()} in your
+ * implementation to provide your own {@link Executor}.
  * @hide
  */
 @SystemApi
@@ -83,7 +92,7 @@ public abstract class CallDiagnosticService extends Service {
 
         @Override
         public void updateCallAudioState(CallAudioState callAudioState) throws RemoteException {
-            onCallAudioStateChanged(callAudioState);
+            getExecutor().execute(() -> onCallAudioStateChanged(callAudioState));
         }
 
         @Override
@@ -133,8 +142,18 @@ public abstract class CallDiagnosticService extends Service {
      */
     private final Map<String, Call.Details> mCallByTelecomCallId = new ArrayMap<>();
     private final Map<String, DiagnosticCall> mDiagnosticCallByTelecomCallId = new ArrayMap<>();
+    private final Object mLock = new Object();
     private ICallDiagnosticServiceAdapter mAdapter;
 
+    /**
+     * Handles binding to the {@link CallDiagnosticService}.
+     *
+     * @param intent The Intent that was used to bind to this service,
+     * as given to {@link android.content.Context#bindService
+     * Context.bindService}.  Note that any extras that were included with
+     * the Intent at that point will <em>not</em> be seen here.
+     * @return
+     */
     @Nullable
     @Override
     public IBinder onBind(@NonNull Intent intent) {
@@ -143,11 +162,29 @@ public abstract class CallDiagnosticService extends Service {
     }
 
     /**
+     * Returns the {@link Executor} to use for incoming IPS from Telecom into your service
+     * implementation.
+     * <p>
+     * Override this method in your {@link CallDiagnosticService} implementation to provide the
+     * executor you want to use for incoming IPC.
+     *
+     * @return the {@link Executor} to use for incoming IPC from Telecom to
+     * {@link CallDiagnosticService} and {@link DiagnosticCall}.
+     */
+    @SuppressLint("OnNameExpected")
+    @NonNull public Executor getExecutor() {
+        return new HandlerExecutor(Handler.createAsync(getMainLooper()));
+    }
+
+    /**
      * Telecom calls this method on the {@link CallDiagnosticService} with details about a new call
      * which was added to Telecom.
      * <p>
      * The {@link CallDiagnosticService} returns an implementation of {@link DiagnosticCall} to be
      * used for the lifespan of this call.
+     * <p>
+     * Calls to this method will use the {@link CallDiagnosticService}'s {@link Executor}; see
+     * {@link CallDiagnosticService#getExecutor()} for more information.
      *
      * @param call The details of the new call.
      * @return An instance of {@link DiagnosticCall} which the {@link CallDiagnosticService}
@@ -160,6 +197,10 @@ public abstract class CallDiagnosticService extends Service {
     /**
      * Telecom calls this method when a previous created {@link DiagnosticCall} is no longer needed.
      * This happens when Telecom is no longer tracking the call in question.
+     * <p>
+     * Calls to this method will use the {@link CallDiagnosticService}'s {@link Executor}; see
+     * {@link CallDiagnosticService#getExecutor()} for more information.
+     *
      * @param call The diagnostic call which is no longer tracked by Telecom.
      */
     public abstract void onRemoveDiagnosticCall(@NonNull DiagnosticCall call);
@@ -169,6 +210,9 @@ public abstract class CallDiagnosticService extends Service {
      * changes.
      * <p>
      * Audio state is common to all calls.
+     * <p>
+     * Calls to this method will use the {@link CallDiagnosticService}'s {@link Executor}; see
+     * {@link CallDiagnosticService#getExecutor()} for more information.
      *
      * @param audioState The new audio state.
      */
@@ -178,6 +222,10 @@ public abstract class CallDiagnosticService extends Service {
     /**
      * Telecom calls this method when a {@link BluetoothCallQualityReport} is received from the
      * bluetooth stack.
+     * <p>
+     * Calls to this method will use the {@link CallDiagnosticService}'s {@link Executor}; see
+     * {@link CallDiagnosticService#getExecutor()} for more information.
+     *
      * @param qualityReport the {@link BluetoothCallQualityReport}.
      */
     public abstract void onBluetoothCallQualityReportReceived(
@@ -199,15 +247,22 @@ public abstract class CallDiagnosticService extends Service {
         String telecomCallId = parcelableCall.getId();
         Log.i(this, "handleCallAdded: callId=%s - added", telecomCallId);
         Call.Details newCallDetails = Call.Details.createFromParcelableCall(parcelableCall);
-        mCallByTelecomCallId.put(telecomCallId, newCallDetails);
-
-        DiagnosticCall diagnosticCall = onInitializeDiagnosticCall(newCallDetails);
-        if (diagnosticCall == null) {
-            throw new IllegalArgumentException("A valid DiagnosticCall instance was not provided.");
+        synchronized (mLock) {
+            mCallByTelecomCallId.put(telecomCallId, newCallDetails);
         }
-        diagnosticCall.setListener(mDiagnosticCallListener);
-        diagnosticCall.setCallId(telecomCallId);
-        mDiagnosticCallByTelecomCallId.put(telecomCallId, diagnosticCall);
+
+        getExecutor().execute(() -> {
+            DiagnosticCall diagnosticCall = onInitializeDiagnosticCall(newCallDetails);
+            if (diagnosticCall == null) {
+                throw new IllegalArgumentException(
+                        "A valid DiagnosticCall instance was not provided.");
+            }
+            synchronized (mLock) {
+                diagnosticCall.setListener(mDiagnosticCallListener);
+                diagnosticCall.setCallId(telecomCallId);
+                mDiagnosticCallByTelecomCallId.put(telecomCallId, diagnosticCall);
+            }
+        });
     }
 
     /**
@@ -220,10 +275,12 @@ public abstract class CallDiagnosticService extends Service {
         String telecomCallId = parcelableCall.getId();
         Log.i(this, "handleCallUpdated: callId=%s - updated", telecomCallId);
         Call.Details newCallDetails = Call.Details.createFromParcelableCall(parcelableCall);
-
-        DiagnosticCall diagnosticCall = mDiagnosticCallByTelecomCallId.get(telecomCallId);
-        mCallByTelecomCallId.put(telecomCallId, newCallDetails);
-        diagnosticCall.handleCallUpdated(newCallDetails);
+        DiagnosticCall diagnosticCall;
+        synchronized (mLock) {
+            diagnosticCall = mDiagnosticCallByTelecomCallId.get(telecomCallId);
+            mCallByTelecomCallId.put(telecomCallId, newCallDetails);
+        }
+        getExecutor().execute(() -> diagnosticCall.handleCallUpdated(newCallDetails));
     }
 
     /**
@@ -236,10 +293,19 @@ public abstract class CallDiagnosticService extends Service {
         if (mCallByTelecomCallId.containsKey(telecomCallId)) {
             mCallByTelecomCallId.remove(telecomCallId);
         }
-        if (mDiagnosticCallByTelecomCallId.containsKey(telecomCallId)) {
-            DiagnosticCall call = mDiagnosticCallByTelecomCallId.remove(telecomCallId);
-            // Inform the service of the removed call.
-            onRemoveDiagnosticCall(call);
+
+        DiagnosticCall diagnosticCall;
+        synchronized (mLock) {
+            if (mDiagnosticCallByTelecomCallId.containsKey(telecomCallId)) {
+                diagnosticCall = mDiagnosticCallByTelecomCallId.remove(telecomCallId);
+            } else {
+                diagnosticCall = null;
+            }
+        }
+
+        // Inform the service of the removed call.
+        if (diagnosticCall != null) {
+            getExecutor().execute(() -> onRemoveDiagnosticCall(diagnosticCall));
         }
     }
 
@@ -252,8 +318,14 @@ public abstract class CallDiagnosticService extends Service {
      */
     private void handleReceivedD2DMessage(@NonNull String callId, int message, int value) {
         Log.i(this, "handleReceivedD2DMessage: callId=%s, msg=%d/%d", callId, message, value);
-        DiagnosticCall diagnosticCall = mDiagnosticCallByTelecomCallId.get(callId);
-        diagnosticCall.onReceiveDeviceToDeviceMessage(message, value);
+        DiagnosticCall diagnosticCall;
+        synchronized (mLock) {
+            diagnosticCall = mDiagnosticCallByTelecomCallId.get(callId);
+        }
+        if (diagnosticCall != null) {
+            getExecutor().execute(
+                    () -> diagnosticCall.onReceiveDeviceToDeviceMessage(message, value));
+        }
     }
 
     /**
@@ -265,7 +337,7 @@ public abstract class CallDiagnosticService extends Service {
     private void handleBluetoothCallQualityReport(@NonNull BluetoothCallQualityReport
             qualityReport) {
         Log.i(this, "handleBluetoothCallQualityReport; report=%s", qualityReport);
-        onBluetoothCallQualityReportReceived(qualityReport);
+        getExecutor().execute(() -> onBluetoothCallQualityReportReceived(qualityReport));
     }
 
     /**
