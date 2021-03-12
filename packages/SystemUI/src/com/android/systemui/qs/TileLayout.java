@@ -25,6 +25,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     protected int mColumns;
     protected int mCellWidth;
+    protected int mCellHeightResId = R.dimen.qs_tile_height;
     protected int mCellHeight;
     protected int mMaxCellHeight;
     protected int mCellMarginHorizontal;
@@ -118,7 +119,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         final Resources res = mContext.getResources();
         mResourceColumns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
         updateColumns();
-        mMaxCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
+        mMaxCellHeight = mContext.getResources().getDimensionPixelSize(mCellHeightResId);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
         mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
@@ -235,7 +236,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         layoutTileRecords(mRecords.size());
     }
 
-    private int getRowTop(int row) {
+    protected int getRowTop(int row) {
         return row * (mCellHeight + mCellMarginVertical) + mCellMarginTop;
     }
 

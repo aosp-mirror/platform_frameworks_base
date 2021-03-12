@@ -26,6 +26,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.android.settingslib.Utils;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -116,7 +118,8 @@ public class QSTileView extends QSTileBaseView {
         }
     }
 
-    private boolean shouldLabelBeSingleLine() {
+    protected boolean shouldLabelBeSingleLine() {
+        if (mCollapsedView) return true;
         if (mLabel.getLineCount() > mMaxLabelLines) {
             return true;
         } else if (!TextUtils.isEmpty(mSecondLine.getText())
@@ -138,14 +141,14 @@ public class QSTileView extends QSTileBaseView {
             } else {
                 labelColor = mColorLabelUnavailable;
             }
-            mLabel.setTextColor(labelColor);
+            changeLabelColor(labelColor);
             mState = state.state;
             mLabel.setText(state.label);
         }
         if (!Objects.equals(mSecondLine.getText(), state.secondaryLabel)) {
             mSecondLine.setText(state.secondaryLabel);
-            mSecondLine.setVisibility(TextUtils.isEmpty(state.secondaryLabel) ? View.GONE
-                    : View.VISIBLE);
+            mSecondLine.setVisibility(TextUtils.isEmpty(state.secondaryLabel) || mCollapsedView
+                    ? View.GONE : View.VISIBLE);
         }
         boolean dualTarget = mDualTargetAllowed && state.dualTarget;
         handleExpand(dualTarget);
@@ -158,6 +161,10 @@ public class QSTileView extends QSTileBaseView {
         }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
+    }
+
+    protected void changeLabelColor(ColorStateList color) {
+        mLabel.setTextColor(color);
     }
 
     protected void handleExpand(boolean dualTarget) {
@@ -177,5 +184,11 @@ public class QSTileView extends QSTileBaseView {
 
     public TextView getAppLabel() {
         return mSecondLine;
+    }
+
+    @Nullable
+    @Override
+    public View getLabelContainer() {
+        return mLabelContainer;
     }
 }
