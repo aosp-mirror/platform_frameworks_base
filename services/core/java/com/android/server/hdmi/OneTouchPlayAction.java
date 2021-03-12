@@ -89,7 +89,7 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         mSource = source();
         sendCommand(HdmiCecMessageBuilder.buildTextViewOn(getSourceAddress(), mTargetAddress));
 
-        boolean targetOnBefore = getTargetDevicePowerStatus(mSource, mTargetAddress,
+        boolean is20TargetOnBefore = mIsCec20 && getTargetDevicePowerStatus(mSource, mTargetAddress,
                 HdmiControlManager.POWER_STATUS_UNKNOWN) == HdmiControlManager.POWER_STATUS_ON;
         broadcastActiveSource();
         // If the device is not an audio system itself, request the connected audio system to
@@ -98,18 +98,23 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
             sendCommand(HdmiCecMessageBuilder.buildSystemAudioModeRequest(getSourceAddress(),
                     Constants.ADDR_AUDIO_SYSTEM, getSourcePath(), true));
         }
-        int targetPowerStatus = getTargetDevicePowerStatus(mSource, mTargetAddress,
-                HdmiControlManager.POWER_STATUS_UNKNOWN);
-        if (!mIsCec20 || targetPowerStatus == HdmiControlManager.POWER_STATUS_UNKNOWN) {
+
+        if (!mIsCec20) {
             queryDevicePowerStatus();
-        } else if (targetPowerStatus == HdmiControlManager.POWER_STATUS_ON) {
-            if (!targetOnBefore) {
-                // Suppress 2nd <Active Source> message if the target device was already on when
-                // the 1st one was sent.
-                broadcastActiveSource();
+        } else {
+            int targetPowerStatus = getTargetDevicePowerStatus(mSource, mTargetAddress,
+                    HdmiControlManager.POWER_STATUS_UNKNOWN);
+            if (targetPowerStatus == HdmiControlManager.POWER_STATUS_UNKNOWN) {
+                queryDevicePowerStatus();
+            } else if (targetPowerStatus == HdmiControlManager.POWER_STATUS_ON) {
+                if (!is20TargetOnBefore) {
+                    // Suppress 2nd <Active Source> message if the target device was already on when
+                    // the 1st one was sent.
+                    broadcastActiveSource();
+                }
+                finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+                return true;
             }
-            finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-            return true;
         }
         mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
