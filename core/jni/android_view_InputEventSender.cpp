@@ -34,6 +34,8 @@
 
 #include "core_jni_helpers.h"
 
+using android::base::Result;
+
 namespace android {
 
 // Log debug messages about the dispatch cycle.
@@ -197,16 +199,9 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
     ScopedLocalRef<jobject> senderObj(env, NULL);
     bool skipCallbacks = false;
     for (;;) {
-        uint32_t publishedSeq;
-        bool handled;
-        std::function<void(uint32_t seq, bool handled, nsecs_t consumeTime)> callback =
-                [&publishedSeq, &handled](uint32_t inSeq, bool inHandled,
-                                          nsecs_t inConsumeTime) -> void {
-            publishedSeq = inSeq;
-            handled = inHandled;
-        };
-        status_t status = mInputPublisher.receiveFinishedSignal(callback);
-        if (status) {
+        Result<InputPublisher::Finished> result = mInputPublisher.receiveFinishedSignal();
+        if (!result.ok()) {
+            const status_t status = result.error().code();
             if (status == WOULD_BLOCK) {
                 return OK;
             }
@@ -215,7 +210,7 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
             return status;
         }
 
-        auto it = mPublishedSeqMap.find(publishedSeq);
+        auto it = mPublishedSeqMap.find(result->seq);
         if (it == mPublishedSeqMap.end()) {
             continue;
         }
@@ -225,9 +220,9 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
 
         if (kDebugDispatchCycle) {
             ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, "
-                    "pendingEvents=%zu.",
-                    getInputChannelName().c_str(), seq, handled ? "true" : "false",
-                    mPublishedSeqMap.size());
+                  "pendingEvents=%zu.",
+                  getInputChannelName().c_str(), seq, result->handled ? "true" : "false",
+                  mPublishedSeqMap.size());
         }
 
         if (!skipCallbacks) {
@@ -241,8 +236,9 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
             }
 
             env->CallVoidMethod(senderObj.get(),
-                    gInputEventSenderClassInfo.dispatchInputEventFinished,
-                    jint(seq), jboolean(handled));
+                                gInputEventSenderClassInfo.dispatchInputEventFinished,
+                                static_cast<jint>(result->seq),
+                                static_cast<jboolean>(result->handled));
             if (env->ExceptionCheck()) {
                 ALOGE("Exception dispatching finished signal.");
                 skipCallbacks = true;
