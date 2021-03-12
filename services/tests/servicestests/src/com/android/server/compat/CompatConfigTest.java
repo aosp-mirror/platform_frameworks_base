@@ -602,12 +602,12 @@ public class CompatConfigTest {
                 .addEnableSinceSdkChangeWithId(2, 2L)
                 .build();
         compatConfig.forceNonDebuggableFinalForTest(true);
-        compatConfig.initOverrides(overridesFile);
+        compatConfig.initOverrides(overridesFile, new File(""));
         when(mPackageManager.getApplicationInfo(eq("foo.bar"), anyInt()))
                 .thenReturn(ApplicationInfoBuilder.create()
-                                .withPackageName("foo.bar")
-                                .debuggable()
-                                .build());
+                        .withPackageName("foo.bar")
+                        .debuggable()
+                        .build());
         when(mPackageManager.getApplicationInfo(eq("bar.baz"), anyInt()))
                 .thenThrow(new NameNotFoundException());
 
@@ -649,7 +649,7 @@ public class CompatConfigTest {
                 .addEnableSinceSdkChangeWithId(2, 2L)
                 .build();
         compatConfig.forceNonDebuggableFinalForTest(true);
-        compatConfig.initOverrides(overridesFile);
+        compatConfig.initOverrides(overridesFile, new File(""));
 
         compatConfig.addOverrides(new CompatibilityOverrideConfig(Collections.singletonMap(1L,
                 new PackageOverride.Builder()
@@ -673,11 +673,11 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testLoadOverridesRaw() throws Exception {
+    public void testInitOverridesRaw() throws Exception {
         File tempDir = createTempDir();
         File overridesFile = new File(tempDir, "overrides.xml");
         // Change 1 is enabled for foo.bar (validated)
-        // Change 2 is disabled for bar.baz (deferred)
+        // Change 2 is disabled for bar.baz (raw)
         String xmlData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                 + "<overrides>\n"
                 + "    <change-overrides changeId=\"1\">\n"
@@ -709,7 +709,7 @@ public class CompatConfigTest {
                 .addEnableSinceSdkChangeWithId(2, 2L)
                 .build();
         compatConfig.forceNonDebuggableFinalForTest(true);
-        compatConfig.initOverrides(overridesFile);
+        compatConfig.initOverrides(overridesFile, new File(""));
         ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
                 .withPackageName("foo.bar")
                 .withVersionCode(100L)
@@ -728,7 +728,7 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testLoadOverridesDeferred() throws Exception {
+    public void testInitOverridesDeferred() throws Exception {
         File tempDir = createTempDir();
         File overridesFile = new File(tempDir, "overrides.xml");
         // Change 1 is enabled for foo.bar (validated)
@@ -754,7 +754,7 @@ public class CompatConfigTest {
                 .addEnableSinceSdkChangeWithId(2, 2L)
                 .build();
         compatConfig.forceNonDebuggableFinalForTest(true);
-        compatConfig.initOverrides(overridesFile);
+        compatConfig.initOverrides(overridesFile, new File(""));
         ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
                 .withPackageName("foo.bar")
                 .debuggable()
@@ -766,5 +766,116 @@ public class CompatConfigTest {
 
         assertThat(compatConfig.isChangeEnabled(1L, applicationInfo)).isTrue();
         assertThat(compatConfig.willChangeBeEnabled(2L, "bar.baz")).isFalse();
+    }
+
+    @Test
+    public void testInitOverridesWithStaticFile() throws Exception {
+        File tempDir = createTempDir();
+        File dynamicOverridesFile = new File(tempDir, "dynamic_overrides.xml");
+        File staticOverridesFile = new File(tempDir, "static_overrides.xml");
+        // Change 1 is enabled for foo.bar (raw)
+        // Change 2 is disabled for bar.baz (raw)
+        String dynamicXmlData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                + "<overrides>"
+                +    "<change-overrides changeId=\"1\">"
+                +        "<raw>"
+                + "            <raw-override-value packageName=\"foo.bar\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"true\">\n"
+                + "            </raw-override-value>\n"
+                +        "</raw>"
+                +    "</change-overrides>"
+                +    "<change-overrides changeId=\"2\">"
+                +        "<raw>"
+                + "            <raw-override-value packageName=\"bar.baz\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"false\">\n"
+                + "            </raw-override-value>\n"
+                +        "</raw>"
+                +    "</change-overrides>"
+                + "</overrides>";
+        writeToFile(tempDir, "dynamic_overrides.xml", dynamicXmlData);
+        // Change 2 is enabled for foo.bar and bar.baz (raw)
+        // Change 3 is enabled for bar.baz (raw)
+        String staticXmlData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                + "<overrides>"
+                +    "<change-overrides changeId=\"2\">"
+                +        "<raw>"
+                + "            <raw-override-value packageName=\"foo.bar\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"true\">\n"
+                + "            </raw-override-value>\n"
+                + "            <raw-override-value packageName=\"bar.baz\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"true\">\n"
+                + "            </raw-override-value>\n"
+                +        "</raw>"
+                +    "</change-overrides>"
+                +    "<change-overrides changeId=\"3\">"
+                +        "<raw>"
+                + "            <raw-override-value packageName=\"bar.baz\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"true\">\n"
+                + "            </raw-override-value>\n"
+                +        "</raw>"
+                +    "</change-overrides>"
+                + "</overrides>";
+        writeToFile(tempDir, "static_overrides.xml", staticXmlData);
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1L)
+                .addDisabledChangeWithId(2L)
+                .addDisabledChangeWithId(3L)
+                .build();
+        compatConfig.forceNonDebuggableFinalForTest(true);
+        // Adding an override that will be cleared after initOverrides is called.
+        compatConfig.addOverride(1L, "bar.baz", true);
+        compatConfig.initOverrides(dynamicOverridesFile, staticOverridesFile);
+        when(mPackageManager.getApplicationInfo(eq("foo.bar"), anyInt()))
+                .thenThrow(new NameNotFoundException());
+        when(mPackageManager.getApplicationInfo(eq("bar.baz"), anyInt()))
+                .thenThrow(new NameNotFoundException());
+
+        assertThat(compatConfig.willChangeBeEnabled(1L, "foo.bar")).isTrue();
+        assertThat(compatConfig.willChangeBeEnabled(2L, "foo.bar")).isTrue();
+        assertThat(compatConfig.willChangeBeEnabled(2L, "bar.baz")).isFalse();
+        assertThat(compatConfig.willChangeBeEnabled(3L, "bar.baz")).isTrue();
+        assertThat(readFile(dynamicOverridesFile))
+                .isEqualTo("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+                + "<overrides>\n"
+                + "    <change-overrides changeId=\"1\">\n"
+                + "        <validated>\n"
+                + "        </validated>\n"
+                + "        <raw>\n"
+                + "            <raw-override-value packageName=\"foo.bar\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"true\">\n"
+                + "            </raw-override-value>\n"
+                + "        </raw>\n"
+                + "    </change-overrides>\n"
+                + "    <change-overrides changeId=\"2\">\n"
+                + "        <validated>\n"
+                + "        </validated>\n"
+                + "        <raw>\n"
+                + "            <raw-override-value packageName=\"foo.bar\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"true\">\n"
+                + "            </raw-override-value>\n"
+                + "            <raw-override-value packageName=\"bar.baz\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"false\">\n"
+                + "            </raw-override-value>\n"
+                + "        </raw>\n"
+                + "    </change-overrides>\n"
+                + "    <change-overrides changeId=\"3\">\n"
+                + "        <validated>\n"
+                + "        </validated>\n"
+                + "        <raw>\n"
+                + "            <raw-override-value packageName=\"bar.baz\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"true\">\n"
+                + "            </raw-override-value>\n"
+                + "        </raw>\n"
+                + "    </change-overrides>\n"
+                + "</overrides>\n");
     }
 }
