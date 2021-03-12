@@ -20,11 +20,8 @@
     android:id="@+id/control_detail_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginVertical="@dimen/controls_activity_view_top_offset"
-    android:layout_marginHorizontal="@dimen/controls_activity_view_side_offset"
-    android:padding="8dp"
     android:orientation="vertical"
-    android:background="@drawable/controls_dialog_bg">
+    android:background="@android:color/black">
 
   <com.android.systemui.globalactions.MinHeightScrollView
       android:layout_width="match_parent"

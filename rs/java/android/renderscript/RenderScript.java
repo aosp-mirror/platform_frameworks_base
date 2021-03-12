@@ -44,7 +44,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p>For more information about creating an application that uses RenderScript, read the
  * <a href="{@docRoot}guide/topics/renderscript/index.html">RenderScript</a> developer guide.</p>
  * </div>
+ *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public class RenderScript {
     static final long TRACE_TAG = Trace.TRACE_TAG_RS;
 

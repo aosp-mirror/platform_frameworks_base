@@ -32,7 +32,6 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.RemoteException;
 import android.security.GateKeeper;
-import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
@@ -59,6 +58,7 @@ import java.security.UnrecoverableKeyException;
 import java.util.List;
 
 import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -575,7 +575,7 @@ public class PlatformKeyManagerTest {
         return (KeyProtection) mProtectionParameterCaptor.getValue();
     }
 
-    private AndroidKeyStoreSecretKey generateAndroidKeyStoreKey() throws Exception {
+    private SecretKey generateAndroidKeyStoreKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(
                 KEY_ALGORITHM,
                 ANDROID_KEY_STORE_PROVIDER);
@@ -584,7 +584,7 @@ public class PlatformKeyManagerTest {
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .build());
-        return (AndroidKeyStoreSecretKey) keyGenerator.generateKey();
+        return keyGenerator.generateKey();
     }
 
     class PlatformKeyManagerTestable extends PlatformKeyManager {

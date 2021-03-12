@@ -987,7 +987,8 @@ public class DevicePolicyManager {
      * The default for this extra is {@code false} - by default, the admin of a fully-managed
      * device has the ability to grant sensors-related permissions.
      *
-     * <p>Use with {@link #ACTION_PROVISION_MANAGED_DEVICE} only.
+     * <p>Use only for device owner provisioning.
+     * @see #ACTION_GET_PROVISIONING_MODE
      */
     public static final String EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT =
             "android.app.extra.PROVISIONING_PERMISSION_GRANT_OPT_OUT";
@@ -11838,7 +11839,7 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * Force update user setup completed status. This API has no effect on user build.
+     * Force update user setup completed status.
      * @throws {@link SecurityException} if the caller has no
      *         {@code android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS} or the caller is
      *         not {@link UserHandle#SYSTEM_USER}

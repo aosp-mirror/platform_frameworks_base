@@ -22,8 +22,9 @@ import static android.app.people.ConversationStatus.ACTIVITY_GAME;
 import static android.app.people.ConversationStatus.ACTIVITY_NEW_STORY;
 import static android.app.people.ConversationStatus.AVAILABILITY_AVAILABLE;
 
-import static com.android.systemui.people.PeopleSpaceUtils.OPTIONS_PEOPLE_SPACE_TILE;
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
+import static com.android.systemui.people.PeopleSpaceUtils.getPeopleTileFromPersistentStorage;
+import static com.android.systemui.people.widget.AppWidgetOptionsHelper.OPTIONS_PEOPLE_TILE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -76,6 +77,7 @@ import android.widget.TextView;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.people.widget.PeopleTileKey;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -232,7 +234,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
 
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         Bundle options = new Bundle();
-        options.putParcelable(OPTIONS_PEOPLE_SPACE_TILE, PERSON_TILE);
+        options.putParcelable(OPTIONS_PEOPLE_TILE, PERSON_TILE);
 
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
         when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT)))
@@ -500,7 +502,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .build();
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromVisibleNotifications(mContext, tile,
-                        Map.of(PeopleSpaceUtils.getKey(mNotificationEntry1), mNotificationEntry1));
+                        Map.of(new PeopleTileKey(mNotificationEntry1), mNotificationEntry1));
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
     }
@@ -515,7 +517,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .build();
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromVisibleNotifications(mContext, tile,
-                        Map.of(PeopleSpaceUtils.getKey(mNotificationEntry1), mNotificationEntry1));
+                        Map.of(new PeopleTileKey(mNotificationEntry1), mNotificationEntry1));
 
         assertThat(actual.getNotificationContent()).isEqualTo(null);
     }
@@ -818,6 +820,23 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
     }
 
+    @Test
+    public void testGetPeopleTileFromPersistentStorageExistingConversation()
+            throws Exception {
+        when(mPeopleManager.getConversation(PACKAGE_NAME, 0, SHORTCUT_ID_1)).thenReturn(
+                getConversationChannelWithoutTimestamp(SHORTCUT_ID_1));
+        PeopleTileKey key = new PeopleTileKey(SHORTCUT_ID_1, 0, PACKAGE_NAME);
+        PeopleSpaceTile tile = getPeopleTileFromPersistentStorage(mContext, key, mPeopleManager);
+        assertThat(tile.getId()).isEqualTo(key.getShortcutId());
+    }
+
+    @Test
+    public void testGetPeopleTileFromPersistentStorageNoConversation() {
+        PeopleTileKey key = new PeopleTileKey(SHORTCUT_ID_2, 0, PACKAGE_NAME);
+        PeopleSpaceTile tile = getPeopleTileFromPersistentStorage(mContext, key, mPeopleManager);
+        assertThat(tile).isNull();
+    }
+
     private ConversationChannelWrapper getConversationChannelWrapper(String shortcutId,
             boolean importantConversation, long lastInteractionTimestamp) throws Exception {
         ConversationChannelWrapper convo = new ConversationChannelWrapper();
@@ -841,6 +860,15 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 lastInteractionTimestamp, false);
         when(mPeopleManager.getLastInteraction(anyString(), anyInt(),
                 eq(shortcutId))).thenReturn(lastInteractionTimestamp);
+        return convo;
+    }
+
+    private ConversationChannel getConversationChannelWithoutTimestamp(String shortcutId)
+            throws Exception {
+        ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext, shortcutId).setLongLabel(
+                "name").build();
+        ConversationChannel convo = new ConversationChannel(shortcutInfo, 0, null, null,
+                0L, false);
         return convo;
     }
 }

@@ -520,6 +520,12 @@ public class LocationTimeZoneManagerService extends Binder {
         }
     }
 
+    static void infoLog(String msg) {
+        if (Log.isLoggable(TAG, Log.INFO)) {
+            Slog.i(TAG, msg);
+        }
+    }
+
     static void warnLog(String msg) {
         warnLog(msg, null);
     }

@@ -22,7 +22,12 @@ import android.util.SparseArray;
 /**
  * The parent class for all executable scripts. This should not be used by
  * applications.
+ *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public class Script extends BaseObj {
 
     /**

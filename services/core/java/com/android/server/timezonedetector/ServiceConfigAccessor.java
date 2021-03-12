@@ -115,10 +115,15 @@ public final class ServiceConfigAccessor {
 
     /** Returns {@code true} if any form of automatic time zone detection is supported. */
     public boolean isAutoDetectionFeatureSupported() {
-        return deviceHasTelephonyNetwork() || isGeoTimeZoneDetectionFeatureSupported();
+        return isTelephonyTimeZoneDetectionFeatureSupported()
+                || isGeoTimeZoneDetectionFeatureSupported();
     }
 
-    private boolean deviceHasTelephonyNetwork() {
+    /**
+     * Returns {@code true} if the telephony-based time zone detection feature is supported on the
+     * device.
+     */
+    public boolean isTelephonyTimeZoneDetectionFeatureSupported() {
         // TODO b/150583524 Avoid the use of a deprecated API.
         return mContext.getSystemService(ConnectivityManager.class)
                 .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
