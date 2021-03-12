@@ -26550,236 +26550,236 @@ package android.net.nsd {
 
 package android.net.rtp {
 
-  public class AudioCodec {
-    method public static android.net.rtp.AudioCodec getCodec(int, String, String);
-    method public static android.net.rtp.AudioCodec[] getCodecs();
-    field public static final android.net.rtp.AudioCodec AMR;
-    field public static final android.net.rtp.AudioCodec GSM;
-    field public static final android.net.rtp.AudioCodec GSM_EFR;
-    field public static final android.net.rtp.AudioCodec PCMA;
-    field public static final android.net.rtp.AudioCodec PCMU;
-    field public final String fmtp;
-    field public final String rtpmap;
-    field public final int type;
+  @Deprecated public class AudioCodec {
+    method @Deprecated public static android.net.rtp.AudioCodec getCodec(int, String, String);
+    method @Deprecated public static android.net.rtp.AudioCodec[] getCodecs();
+    field @Deprecated public static final android.net.rtp.AudioCodec AMR;
+    field @Deprecated public static final android.net.rtp.AudioCodec GSM;
+    field @Deprecated public static final android.net.rtp.AudioCodec GSM_EFR;
+    field @Deprecated public static final android.net.rtp.AudioCodec PCMA;
+    field @Deprecated public static final android.net.rtp.AudioCodec PCMU;
+    field @Deprecated public final String fmtp;
+    field @Deprecated public final String rtpmap;
+    field @Deprecated public final int type;
   }
 
-  public class AudioGroup {
+  @Deprecated public class AudioGroup {
     ctor @Deprecated public AudioGroup();
-    ctor public AudioGroup(@NonNull android.content.Context);
-    method public void clear();
-    method public int getMode();
-    method public android.net.rtp.AudioStream[] getStreams();
-    method public void sendDtmf(int);
-    method public void setMode(int);
-    field public static final int MODE_ECHO_SUPPRESSION = 3; // 0x3
-    field public static final int MODE_MUTED = 1; // 0x1
-    field public static final int MODE_NORMAL = 2; // 0x2
-    field public static final int MODE_ON_HOLD = 0; // 0x0
+    ctor @Deprecated public AudioGroup(@NonNull android.content.Context);
+    method @Deprecated public void clear();
+    method @Deprecated public int getMode();
+    method @Deprecated public android.net.rtp.AudioStream[] getStreams();
+    method @Deprecated public void sendDtmf(int);
+    method @Deprecated public void setMode(int);
+    field @Deprecated public static final int MODE_ECHO_SUPPRESSION = 3; // 0x3
+    field @Deprecated public static final int MODE_MUTED = 1; // 0x1
+    field @Deprecated public static final int MODE_NORMAL = 2; // 0x2
+    field @Deprecated public static final int MODE_ON_HOLD = 0; // 0x0
   }
 
-  public class AudioStream extends android.net.rtp.RtpStream {
-    ctor public AudioStream(java.net.InetAddress) throws java.net.SocketException;
-    method public android.net.rtp.AudioCodec getCodec();
-    method public int getDtmfType();
-    method public android.net.rtp.AudioGroup getGroup();
-    method public final boolean isBusy();
-    method public void join(android.net.rtp.AudioGroup);
-    method public void setCodec(android.net.rtp.AudioCodec);
-    method public void setDtmfType(int);
+  @Deprecated public class AudioStream extends android.net.rtp.RtpStream {
+    ctor @Deprecated public AudioStream(java.net.InetAddress) throws java.net.SocketException;
+    method @Deprecated public android.net.rtp.AudioCodec getCodec();
+    method @Deprecated public int getDtmfType();
+    method @Deprecated public android.net.rtp.AudioGroup getGroup();
+    method @Deprecated public final boolean isBusy();
+    method @Deprecated public void join(android.net.rtp.AudioGroup);
+    method @Deprecated public void setCodec(android.net.rtp.AudioCodec);
+    method @Deprecated public void setDtmfType(int);
   }
 
-  public class RtpStream {
-    method public void associate(java.net.InetAddress, int);
-    method public java.net.InetAddress getLocalAddress();
-    method public int getLocalPort();
-    method public int getMode();
-    method public java.net.InetAddress getRemoteAddress();
-    method public int getRemotePort();
-    method public boolean isBusy();
-    method public void release();
-    method public void setMode(int);
-    field public static final int MODE_NORMAL = 0; // 0x0
-    field public static final int MODE_RECEIVE_ONLY = 2; // 0x2
-    field public static final int MODE_SEND_ONLY = 1; // 0x1
+  @Deprecated public class RtpStream {
+    method @Deprecated public void associate(java.net.InetAddress, int);
+    method @Deprecated public java.net.InetAddress getLocalAddress();
+    method @Deprecated public int getLocalPort();
+    method @Deprecated public int getMode();
+    method @Deprecated public java.net.InetAddress getRemoteAddress();
+    method @Deprecated public int getRemotePort();
+    method @Deprecated public boolean isBusy();
+    method @Deprecated public void release();
+    method @Deprecated public void setMode(int);
+    field @Deprecated public static final int MODE_NORMAL = 0; // 0x0
+    field @Deprecated public static final int MODE_RECEIVE_ONLY = 2; // 0x2
+    field @Deprecated public static final int MODE_SEND_ONLY = 1; // 0x1
   }
 
 }
 
 package android.net.sip {
 
-  public class SipAudioCall {
-    ctor public SipAudioCall(android.content.Context, android.net.sip.SipProfile);
-    method public void answerCall(int) throws android.net.sip.SipException;
-    method public void attachCall(android.net.sip.SipSession, String) throws android.net.sip.SipException;
-    method public void close();
-    method public void continueCall(int) throws android.net.sip.SipException;
-    method public void endCall() throws android.net.sip.SipException;
-    method public android.net.sip.SipProfile getLocalProfile();
-    method public android.net.sip.SipProfile getPeerProfile();
-    method public int getState();
-    method public void holdCall(int) throws android.net.sip.SipException;
-    method public boolean isInCall();
-    method public boolean isMuted();
-    method public boolean isOnHold();
-    method public void makeCall(android.net.sip.SipProfile, android.net.sip.SipSession, int) throws android.net.sip.SipException;
-    method public void sendDtmf(int);
-    method public void sendDtmf(int, android.os.Message);
-    method public void setListener(android.net.sip.SipAudioCall.Listener);
-    method public void setListener(android.net.sip.SipAudioCall.Listener, boolean);
-    method public void setSpeakerMode(boolean);
-    method public void startAudio();
-    method public void toggleMute();
+  @Deprecated public class SipAudioCall {
+    ctor @Deprecated public SipAudioCall(android.content.Context, android.net.sip.SipProfile);
+    method @Deprecated public void answerCall(int) throws android.net.sip.SipException;
+    method @Deprecated public void attachCall(android.net.sip.SipSession, String) throws android.net.sip.SipException;
+    method @Deprecated public void close();
+    method @Deprecated public void continueCall(int) throws android.net.sip.SipException;
+    method @Deprecated public void endCall() throws android.net.sip.SipException;
+    method @Deprecated public android.net.sip.SipProfile getLocalProfile();
+    method @Deprecated public android.net.sip.SipProfile getPeerProfile();
+    method @Deprecated public int getState();
+    method @Deprecated public void holdCall(int) throws android.net.sip.SipException;
+    method @Deprecated public boolean isInCall();
+    method @Deprecated public boolean isMuted();
+    method @Deprecated public boolean isOnHold();
+    method @Deprecated public void makeCall(android.net.sip.SipProfile, android.net.sip.SipSession, int) throws android.net.sip.SipException;
+    method @Deprecated public void sendDtmf(int);
+    method @Deprecated public void sendDtmf(int, android.os.Message);
+    method @Deprecated public void setListener(android.net.sip.SipAudioCall.Listener);
+    method @Deprecated public void setListener(android.net.sip.SipAudioCall.Listener, boolean);
+    method @Deprecated public void setSpeakerMode(boolean);
+    method @Deprecated public void startAudio();
+    method @Deprecated public void toggleMute();
   }
 
-  public static class SipAudioCall.Listener {
-    ctor public SipAudioCall.Listener();
-    method public void onCallBusy(android.net.sip.SipAudioCall);
-    method public void onCallEnded(android.net.sip.SipAudioCall);
-    method public void onCallEstablished(android.net.sip.SipAudioCall);
-    method public void onCallHeld(android.net.sip.SipAudioCall);
-    method public void onCalling(android.net.sip.SipAudioCall);
-    method public void onChanged(android.net.sip.SipAudioCall);
-    method public void onError(android.net.sip.SipAudioCall, int, String);
-    method public void onReadyToCall(android.net.sip.SipAudioCall);
-    method public void onRinging(android.net.sip.SipAudioCall, android.net.sip.SipProfile);
-    method public void onRingingBack(android.net.sip.SipAudioCall);
+  @Deprecated public static class SipAudioCall.Listener {
+    ctor @Deprecated public SipAudioCall.Listener();
+    method @Deprecated public void onCallBusy(android.net.sip.SipAudioCall);
+    method @Deprecated public void onCallEnded(android.net.sip.SipAudioCall);
+    method @Deprecated public void onCallEstablished(android.net.sip.SipAudioCall);
+    method @Deprecated public void onCallHeld(android.net.sip.SipAudioCall);
+    method @Deprecated public void onCalling(android.net.sip.SipAudioCall);
+    method @Deprecated public void onChanged(android.net.sip.SipAudioCall);
+    method @Deprecated public void onError(android.net.sip.SipAudioCall, int, String);
+    method @Deprecated public void onReadyToCall(android.net.sip.SipAudioCall);
+    method @Deprecated public void onRinging(android.net.sip.SipAudioCall, android.net.sip.SipProfile);
+    method @Deprecated public void onRingingBack(android.net.sip.SipAudioCall);
   }
 
-  public class SipErrorCode {
-    method public static String toString(int);
-    field public static final int CLIENT_ERROR = -4; // 0xfffffffc
-    field public static final int CROSS_DOMAIN_AUTHENTICATION = -11; // 0xfffffff5
-    field public static final int DATA_CONNECTION_LOST = -10; // 0xfffffff6
-    field public static final int INVALID_CREDENTIALS = -8; // 0xfffffff8
-    field public static final int INVALID_REMOTE_URI = -6; // 0xfffffffa
-    field public static final int IN_PROGRESS = -9; // 0xfffffff7
-    field public static final int NO_ERROR = 0; // 0x0
-    field public static final int PEER_NOT_REACHABLE = -7; // 0xfffffff9
-    field public static final int SERVER_ERROR = -2; // 0xfffffffe
-    field public static final int SERVER_UNREACHABLE = -12; // 0xfffffff4
-    field public static final int SOCKET_ERROR = -1; // 0xffffffff
-    field public static final int TIME_OUT = -5; // 0xfffffffb
-    field public static final int TRANSACTION_TERMINTED = -3; // 0xfffffffd
+  @Deprecated public class SipErrorCode {
+    method @Deprecated public static String toString(int);
+    field @Deprecated public static final int CLIENT_ERROR = -4; // 0xfffffffc
+    field @Deprecated public static final int CROSS_DOMAIN_AUTHENTICATION = -11; // 0xfffffff5
+    field @Deprecated public static final int DATA_CONNECTION_LOST = -10; // 0xfffffff6
+    field @Deprecated public static final int INVALID_CREDENTIALS = -8; // 0xfffffff8
+    field @Deprecated public static final int INVALID_REMOTE_URI = -6; // 0xfffffffa
+    field @Deprecated public static final int IN_PROGRESS = -9; // 0xfffffff7
+    field @Deprecated public static final int NO_ERROR = 0; // 0x0
+    field @Deprecated public static final int PEER_NOT_REACHABLE = -7; // 0xfffffff9
+    field @Deprecated public static final int SERVER_ERROR = -2; // 0xfffffffe
+    field @Deprecated public static final int SERVER_UNREACHABLE = -12; // 0xfffffff4
+    field @Deprecated public static final int SOCKET_ERROR = -1; // 0xffffffff
+    field @Deprecated public static final int TIME_OUT = -5; // 0xfffffffb
+    field @Deprecated public static final int TRANSACTION_TERMINTED = -3; // 0xfffffffd
   }
 
-  public class SipException extends java.lang.Exception {
-    ctor public SipException();
-    ctor public SipException(String);
-    ctor public SipException(String, Throwable);
+  @Deprecated public class SipException extends java.lang.Exception {
+    ctor @Deprecated public SipException();
+    ctor @Deprecated public SipException(String);
+    ctor @Deprecated public SipException(String, Throwable);
   }
 
-  public class SipManager {
-    method public void close(String) throws android.net.sip.SipException;
-    method public android.net.sip.SipSession createSipSession(android.net.sip.SipProfile, android.net.sip.SipSession.Listener) throws android.net.sip.SipException;
-    method public static String getCallId(android.content.Intent);
-    method public static String getOfferSessionDescription(android.content.Intent);
-    method public android.net.sip.SipSession getSessionFor(android.content.Intent) throws android.net.sip.SipException;
-    method public static boolean isApiSupported(android.content.Context);
-    method public static boolean isIncomingCallIntent(android.content.Intent);
-    method public boolean isOpened(String) throws android.net.sip.SipException;
-    method public boolean isRegistered(String) throws android.net.sip.SipException;
-    method public static boolean isSipWifiOnly(android.content.Context);
-    method public static boolean isVoipSupported(android.content.Context);
-    method public android.net.sip.SipAudioCall makeAudioCall(android.net.sip.SipProfile, android.net.sip.SipProfile, android.net.sip.SipAudioCall.Listener, int) throws android.net.sip.SipException;
-    method public android.net.sip.SipAudioCall makeAudioCall(String, String, android.net.sip.SipAudioCall.Listener, int) throws android.net.sip.SipException;
-    method public static android.net.sip.SipManager newInstance(android.content.Context);
-    method public void open(android.net.sip.SipProfile) throws android.net.sip.SipException;
-    method public void open(android.net.sip.SipProfile, android.app.PendingIntent, android.net.sip.SipRegistrationListener) throws android.net.sip.SipException;
-    method public void register(android.net.sip.SipProfile, int, android.net.sip.SipRegistrationListener) throws android.net.sip.SipException;
-    method public void setRegistrationListener(String, android.net.sip.SipRegistrationListener) throws android.net.sip.SipException;
-    method public android.net.sip.SipAudioCall takeAudioCall(android.content.Intent, android.net.sip.SipAudioCall.Listener) throws android.net.sip.SipException;
-    method public void unregister(android.net.sip.SipProfile, android.net.sip.SipRegistrationListener) throws android.net.sip.SipException;
-    field public static final String EXTRA_CALL_ID = "android:sipCallID";
-    field public static final String EXTRA_OFFER_SD = "android:sipOfferSD";
-    field public static final int INCOMING_CALL_RESULT_CODE = 101; // 0x65
+  @Deprecated public class SipManager {
+    method @Deprecated public void close(String) throws android.net.sip.SipException;
+    method @Deprecated public android.net.sip.SipSession createSipSession(android.net.sip.SipProfile, android.net.sip.SipSession.Listener) throws android.net.sip.SipException;
+    method @Deprecated public static String getCallId(android.content.Intent);
+    method @Deprecated public static String getOfferSessionDescription(android.content.Intent);
+    method @Deprecated public android.net.sip.SipSession getSessionFor(android.content.Intent) throws android.net.sip.SipException;
+    method @Deprecated public static boolean isApiSupported(android.content.Context);
+    method @Deprecated public static boolean isIncomingCallIntent(android.content.Intent);
+    method @Deprecated public boolean isOpened(String) throws android.net.sip.SipException;
+    method @Deprecated public boolean isRegistered(String) throws android.net.sip.SipException;
+    method @Deprecated public static boolean isSipWifiOnly(android.content.Context);
+    method @Deprecated public static boolean isVoipSupported(android.content.Context);
+    method @Deprecated public android.net.sip.SipAudioCall makeAudioCall(android.net.sip.SipProfile, android.net.sip.SipProfile, android.net.sip.SipAudioCall.Listener, int) throws android.net.sip.SipException;
+    method @Deprecated public android.net.sip.SipAudioCall makeAudioCall(String, String, android.net.sip.SipAudioCall.Listener, int) throws android.net.sip.SipException;
+    method @Deprecated public static android.net.sip.SipManager newInstance(android.content.Context);
+    method @Deprecated public void open(android.net.sip.SipProfile) throws android.net.sip.SipException;
+    method @Deprecated public void open(android.net.sip.SipProfile, android.app.PendingIntent, android.net.sip.SipRegistrationListener) throws android.net.sip.SipException;
+    method @Deprecated public void register(android.net.sip.SipProfile, int, android.net.sip.SipRegistrationListener) throws android.net.sip.SipException;
+    method @Deprecated public void setRegistrationListener(String, android.net.sip.SipRegistrationListener) throws android.net.sip.SipException;
+    method @Deprecated public android.net.sip.SipAudioCall takeAudioCall(android.content.Intent, android.net.sip.SipAudioCall.Listener) throws android.net.sip.SipException;
+    method @Deprecated public void unregister(android.net.sip.SipProfile, android.net.sip.SipRegistrationListener) throws android.net.sip.SipException;
+    field @Deprecated public static final String EXTRA_CALL_ID = "android:sipCallID";
+    field @Deprecated public static final String EXTRA_OFFER_SD = "android:sipOfferSD";
+    field @Deprecated public static final int INCOMING_CALL_RESULT_CODE = 101; // 0x65
   }
 
-  public class SipProfile implements java.lang.Cloneable android.os.Parcelable java.io.Serializable {
-    method public int describeContents();
-    method public String getAuthUserName();
-    method public boolean getAutoRegistration();
-    method public String getDisplayName();
-    method public String getPassword();
-    method public int getPort();
-    method public String getProfileName();
-    method public String getProtocol();
-    method public String getProxyAddress();
-    method public boolean getSendKeepAlive();
-    method public String getSipDomain();
-    method public String getUriString();
-    method public String getUserName();
-    method public void setCallingUid(int);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.sip.SipProfile> CREATOR;
+  @Deprecated public class SipProfile implements java.lang.Cloneable android.os.Parcelable java.io.Serializable {
+    method @Deprecated public int describeContents();
+    method @Deprecated public String getAuthUserName();
+    method @Deprecated public boolean getAutoRegistration();
+    method @Deprecated public String getDisplayName();
+    method @Deprecated public String getPassword();
+    method @Deprecated public int getPort();
+    method @Deprecated public String getProfileName();
+    method @Deprecated public String getProtocol();
+    method @Deprecated public String getProxyAddress();
+    method @Deprecated public boolean getSendKeepAlive();
+    method @Deprecated public String getSipDomain();
+    method @Deprecated public String getUriString();
+    method @Deprecated public String getUserName();
+    method @Deprecated public void setCallingUid(int);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated public static final android.os.Parcelable.Creator<android.net.sip.SipProfile> CREATOR;
   }
 
-  public static class SipProfile.Builder {
-    ctor public SipProfile.Builder(android.net.sip.SipProfile);
-    ctor public SipProfile.Builder(String) throws java.text.ParseException;
-    ctor public SipProfile.Builder(String, String) throws java.text.ParseException;
-    method public android.net.sip.SipProfile build();
-    method public android.net.sip.SipProfile.Builder setAuthUserName(String);
-    method public android.net.sip.SipProfile.Builder setAutoRegistration(boolean);
-    method public android.net.sip.SipProfile.Builder setDisplayName(String);
-    method public android.net.sip.SipProfile.Builder setOutboundProxy(String);
-    method public android.net.sip.SipProfile.Builder setPassword(String);
-    method public android.net.sip.SipProfile.Builder setPort(int) throws java.lang.IllegalArgumentException;
-    method public android.net.sip.SipProfile.Builder setProfileName(String);
-    method public android.net.sip.SipProfile.Builder setProtocol(String) throws java.lang.IllegalArgumentException;
-    method public android.net.sip.SipProfile.Builder setSendKeepAlive(boolean);
+  @Deprecated public static class SipProfile.Builder {
+    ctor @Deprecated public SipProfile.Builder(android.net.sip.SipProfile);
+    ctor @Deprecated public SipProfile.Builder(String) throws java.text.ParseException;
+    ctor @Deprecated public SipProfile.Builder(String, String) throws java.text.ParseException;
+    method @Deprecated public android.net.sip.SipProfile build();
+    method @Deprecated public android.net.sip.SipProfile.Builder setAuthUserName(String);
+    method @Deprecated public android.net.sip.SipProfile.Builder setAutoRegistration(boolean);
+    method @Deprecated public android.net.sip.SipProfile.Builder setDisplayName(String);
+    method @Deprecated public android.net.sip.SipProfile.Builder setOutboundProxy(String);
+    method @Deprecated public android.net.sip.SipProfile.Builder setPassword(String);
+    method @Deprecated public android.net.sip.SipProfile.Builder setPort(int) throws java.lang.IllegalArgumentException;
+    method @Deprecated public android.net.sip.SipProfile.Builder setProfileName(String);
+    method @Deprecated public android.net.sip.SipProfile.Builder setProtocol(String) throws java.lang.IllegalArgumentException;
+    method @Deprecated public android.net.sip.SipProfile.Builder setSendKeepAlive(boolean);
   }
 
-  public interface SipRegistrationListener {
-    method public void onRegistering(String);
-    method public void onRegistrationDone(String, long);
-    method public void onRegistrationFailed(String, int, String);
+  @Deprecated public interface SipRegistrationListener {
+    method @Deprecated public void onRegistering(String);
+    method @Deprecated public void onRegistrationDone(String, long);
+    method @Deprecated public void onRegistrationFailed(String, int, String);
   }
 
-  public final class SipSession {
-    method public void answerCall(String, int);
-    method public void changeCall(String, int);
-    method public void endCall();
-    method public String getCallId();
-    method public String getLocalIp();
-    method public android.net.sip.SipProfile getLocalProfile();
-    method public android.net.sip.SipProfile getPeerProfile();
-    method public int getState();
-    method public boolean isInCall();
-    method public void makeCall(android.net.sip.SipProfile, String, int);
-    method public void register(int);
-    method public void setListener(android.net.sip.SipSession.Listener);
-    method public void unregister();
+  @Deprecated public final class SipSession {
+    method @Deprecated public void answerCall(String, int);
+    method @Deprecated public void changeCall(String, int);
+    method @Deprecated public void endCall();
+    method @Deprecated public String getCallId();
+    method @Deprecated public String getLocalIp();
+    method @Deprecated public android.net.sip.SipProfile getLocalProfile();
+    method @Deprecated public android.net.sip.SipProfile getPeerProfile();
+    method @Deprecated public int getState();
+    method @Deprecated public boolean isInCall();
+    method @Deprecated public void makeCall(android.net.sip.SipProfile, String, int);
+    method @Deprecated public void register(int);
+    method @Deprecated public void setListener(android.net.sip.SipSession.Listener);
+    method @Deprecated public void unregister();
   }
 
-  public static class SipSession.Listener {
-    ctor public SipSession.Listener();
-    method public void onCallBusy(android.net.sip.SipSession);
-    method public void onCallChangeFailed(android.net.sip.SipSession, int, String);
-    method public void onCallEnded(android.net.sip.SipSession);
-    method public void onCallEstablished(android.net.sip.SipSession, String);
-    method public void onCalling(android.net.sip.SipSession);
-    method public void onError(android.net.sip.SipSession, int, String);
-    method public void onRegistering(android.net.sip.SipSession);
-    method public void onRegistrationDone(android.net.sip.SipSession, int);
-    method public void onRegistrationFailed(android.net.sip.SipSession, int, String);
-    method public void onRegistrationTimeout(android.net.sip.SipSession);
-    method public void onRinging(android.net.sip.SipSession, android.net.sip.SipProfile, String);
-    method public void onRingingBack(android.net.sip.SipSession);
+  @Deprecated public static class SipSession.Listener {
+    ctor @Deprecated public SipSession.Listener();
+    method @Deprecated public void onCallBusy(android.net.sip.SipSession);
+    method @Deprecated public void onCallChangeFailed(android.net.sip.SipSession, int, String);
+    method @Deprecated public void onCallEnded(android.net.sip.SipSession);
+    method @Deprecated public void onCallEstablished(android.net.sip.SipSession, String);
+    method @Deprecated public void onCalling(android.net.sip.SipSession);
+    method @Deprecated public void onError(android.net.sip.SipSession, int, String);
+    method @Deprecated public void onRegistering(android.net.sip.SipSession);
+    method @Deprecated public void onRegistrationDone(android.net.sip.SipSession, int);
+    method @Deprecated public void onRegistrationFailed(android.net.sip.SipSession, int, String);
+    method @Deprecated public void onRegistrationTimeout(android.net.sip.SipSession);
+    method @Deprecated public void onRinging(android.net.sip.SipSession, android.net.sip.SipProfile, String);
+    method @Deprecated public void onRingingBack(android.net.sip.SipSession);
   }
 
-  public static class SipSession.State {
-    method public static String toString(int);
-    field public static final int DEREGISTERING = 2; // 0x2
-    field public static final int INCOMING_CALL = 3; // 0x3
-    field public static final int INCOMING_CALL_ANSWERING = 4; // 0x4
-    field public static final int IN_CALL = 8; // 0x8
-    field public static final int NOT_DEFINED = 101; // 0x65
-    field public static final int OUTGOING_CALL = 5; // 0x5
-    field public static final int OUTGOING_CALL_CANCELING = 7; // 0x7
-    field public static final int OUTGOING_CALL_RING_BACK = 6; // 0x6
-    field public static final int PINGING = 9; // 0x9
-    field public static final int READY_TO_CALL = 0; // 0x0
-    field public static final int REGISTERING = 1; // 0x1
+  @Deprecated public static class SipSession.State {
+    method @Deprecated public static String toString(int);
+    field @Deprecated public static final int DEREGISTERING = 2; // 0x2
+    field @Deprecated public static final int INCOMING_CALL = 3; // 0x3
+    field @Deprecated public static final int INCOMING_CALL_ANSWERING = 4; // 0x4
+    field @Deprecated public static final int IN_CALL = 8; // 0x8
+    field @Deprecated public static final int NOT_DEFINED = 101; // 0x65
+    field @Deprecated public static final int OUTGOING_CALL = 5; // 0x5
+    field @Deprecated public static final int OUTGOING_CALL_CANCELING = 7; // 0x7
+    field @Deprecated public static final int OUTGOING_CALL_RING_BACK = 6; // 0x6
+    field @Deprecated public static final int PINGING = 9; // 0x9
+    field @Deprecated public static final int READY_TO_CALL = 0; // 0x0
+    field @Deprecated public static final int REGISTERING = 1; // 0x1
   }
 
 }
