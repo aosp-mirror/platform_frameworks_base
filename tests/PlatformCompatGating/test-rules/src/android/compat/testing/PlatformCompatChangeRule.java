@@ -94,17 +94,16 @@ public class PlatformCompatChangeRule extends CoreCompatChangeRule {
             if (platformCompat == null) {
                 throw new IllegalStateException("Could not get IPlatformCompat service!");
             }
-            uiAutomation.adoptShellPermissionIdentity(
-                    Manifest.permission.LOG_COMPAT_CHANGE,
-                    Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG,
-                    Manifest.permission.READ_COMPAT_CHANGE_CONFIG);
+            adoptShellPermissions(uiAutomation);
             Compatibility.setOverrides(mConfig);
             try {
                 platformCompat.setOverridesForTest(new CompatibilityChangeConfig(mConfig),
                         packageName);
                 try {
+                    uiAutomation.dropShellPermissionIdentity();
                     mTestStatement.evaluate();
                 } finally {
+                    adoptShellPermissions(uiAutomation);
                     platformCompat.clearOverridesForTest(packageName);
                 }
             } catch (RemoteException e) {
@@ -113,6 +112,13 @@ public class PlatformCompatChangeRule extends CoreCompatChangeRule {
                 uiAutomation.dropShellPermissionIdentity();
                 Compatibility.clearOverrides();
             }
+        }
+
+        private static void adoptShellPermissions(UiAutomation uiAutomation) {
+            uiAutomation.adoptShellPermissionIdentity(
+                    Manifest.permission.LOG_COMPAT_CHANGE,
+                    Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG,
+                    Manifest.permission.READ_COMPAT_CHANGE_CONFIG);
         }
     }
 }
