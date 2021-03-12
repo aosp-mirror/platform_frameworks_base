@@ -16,9 +16,10 @@
 
 #include <android_runtime/AndroidRuntime.h>
 
-#include <input/KeyCharacterMap.h>
-#include <input/Input.h>
 #include <binder/Parcel.h>
+#include <input/Input.h>
+#include <input/InputDevice.h>
+#include <input/KeyCharacterMap.h>
 
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
@@ -73,6 +74,10 @@ jobject android_view_KeyCharacterMap_create(JNIEnv* env, int32_t deviceId,
 
     return env->NewObject(gKeyCharacterMapClassInfo.clazz, gKeyCharacterMapClassInfo.ctor,
                           reinterpret_cast<jlong>(nativeMap));
+}
+
+static jobject nativeObtainEmptyKeyCharacterMap(JNIEnv* env, jobject /* clazz */, jint deviceId) {
+    return android_view_KeyCharacterMap_create(env, deviceId, nullptr);
 }
 
 static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj) {
@@ -224,33 +229,37 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
     return result;
 }
 
+static jboolean nativeEquals(JNIEnv* env, jobject clazz, jlong ptr1, jlong ptr2) {
+    const std::shared_ptr<KeyCharacterMap>& map1 =
+            (reinterpret_cast<NativeKeyCharacterMap*>(ptr1))->getMap();
+    const std::shared_ptr<KeyCharacterMap>& map2 =
+            (reinterpret_cast<NativeKeyCharacterMap*>(ptr2))->getMap();
+    if (map1 == nullptr || map2 == nullptr) {
+        return map1 == map2;
+    }
+    return static_cast<jboolean>(*map1 == *map2);
+}
 
 /*
  * JNI registration.
  */
 
 static const JNINativeMethod g_methods[] = {
-    /* name, signature, funcPtr */
-    { "nativeReadFromParcel", "(Landroid/os/Parcel;)J",
-            (void*)nativeReadFromParcel },
-    { "nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
-            (void*)nativeWriteToParcel },
-    { "nativeDispose", "(J)V",
-            (void*)nativeDispose },
-    { "nativeGetCharacter", "(JII)C",
-            (void*)nativeGetCharacter },
-    { "nativeGetFallbackAction", "(JIILandroid/view/KeyCharacterMap$FallbackAction;)Z",
-            (void*)nativeGetFallbackAction },
-    { "nativeGetNumber", "(JI)C",
-            (void*)nativeGetNumber },
-    { "nativeGetMatch", "(JI[CI)C",
-            (void*)nativeGetMatch },
-    { "nativeGetDisplayLabel", "(JI)C",
-            (void*)nativeGetDisplayLabel },
-    { "nativeGetKeyboardType", "(J)I",
-            (void*)nativeGetKeyboardType },
-    { "nativeGetEvents", "(J[C)[Landroid/view/KeyEvent;",
-            (void*)nativeGetEvents },
+        /* name, signature, funcPtr */
+        {"nativeReadFromParcel", "(Landroid/os/Parcel;)J", (void*)nativeReadFromParcel},
+        {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V", (void*)nativeWriteToParcel},
+        {"nativeDispose", "(J)V", (void*)nativeDispose},
+        {"nativeGetCharacter", "(JII)C", (void*)nativeGetCharacter},
+        {"nativeGetFallbackAction", "(JIILandroid/view/KeyCharacterMap$FallbackAction;)Z",
+         (void*)nativeGetFallbackAction},
+        {"nativeGetNumber", "(JI)C", (void*)nativeGetNumber},
+        {"nativeGetMatch", "(JI[CI)C", (void*)nativeGetMatch},
+        {"nativeGetDisplayLabel", "(JI)C", (void*)nativeGetDisplayLabel},
+        {"nativeGetKeyboardType", "(J)I", (void*)nativeGetKeyboardType},
+        {"nativeGetEvents", "(J[C)[Landroid/view/KeyEvent;", (void*)nativeGetEvents},
+        {"nativeObtainEmptyKeyCharacterMap", "(I)Landroid/view/KeyCharacterMap;",
+         (void*)nativeObtainEmptyKeyCharacterMap},
+        {"nativeEquals", "(JJ)Z", (void*)nativeEquals},
 };
 
 int register_android_view_KeyCharacterMap(JNIEnv* env)
