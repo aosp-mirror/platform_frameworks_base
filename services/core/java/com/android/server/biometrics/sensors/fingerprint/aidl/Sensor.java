@@ -512,7 +512,8 @@ class Sensor {
 
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                     BiometricsProtoEnums.MODALITY_FINGERPRINT,
-                    BiometricsProtoEnums.ISSUE_HAL_DEATH);
+                    BiometricsProtoEnums.ISSUE_HAL_DEATH,
+                    -1 /* sensorId */);
         }
 
         mScheduler.recordCrashState();
