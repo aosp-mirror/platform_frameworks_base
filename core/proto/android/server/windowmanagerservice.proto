@@ -346,6 +346,7 @@ message ActivityRecordProto {
     optional int32 proc_id = 29;
     optional bool translucent = 30;
     optional bool pip_auto_enter_enabled = 31;
+    optional bool in_size_compat_mode = 32;
 }
 
 /* represents WindowToken */
@@ -406,7 +407,7 @@ message WindowStateProto {
     optional int64 finished_seamless_rotation_frame = 40;
     optional WindowFramesProto window_frames = 41;
     optional bool force_seamless_rotation = 42;
-    optional bool in_size_compat_mode = 43;
+    optional bool has_compat_scale = 43;
     optional float global_scale = 44;
 }
 
