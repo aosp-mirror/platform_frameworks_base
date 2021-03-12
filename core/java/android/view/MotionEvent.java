@@ -485,6 +485,15 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int FLAG_CANCELED = 0x20;
 
     /**
+     * This flag indicates that the event will not cause a focus change if it is directed to an
+     * unfocused window, even if it an {@link #ACTION_DOWN}. This is typically used with pointer
+     * gestures to allow the user to direct gestures to an unfocused window without bringing the
+     * window into focus.
+     * @hide
+     */
+    public static final int FLAG_NO_FOCUS_CHANGE = 0x40;
+
+    /**
      * Private flag that indicates when the system has detected that this motion event
      * may be inconsistent with respect to the sequence of previously delivered motion events,
      * such as when a pointer move event is sent but the pointer is not down.
