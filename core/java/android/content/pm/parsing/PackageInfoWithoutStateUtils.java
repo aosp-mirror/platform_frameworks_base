@@ -482,6 +482,7 @@ public class PackageInfoWithoutStateUtils {
         ai.rotationAnimation = a.getRotationAnimation();
         ai.colorMode = a.getColorMode();
         ai.windowLayout = a.getWindowLayout();
+        ai.attributionTags = a.getAttributionTags();
         if ((flags & PackageManager.GET_META_DATA) != 0) {
             ai.metaData = a.getMetaData();
         }
