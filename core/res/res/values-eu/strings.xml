@@ -305,8 +305,8 @@
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"atzitu gailuko argazkiak, multimedia-edukia eta fitxategiak"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofonoa"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"grabatu audioa"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Ariketa fisikoa"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ariketa fisikoak atzitu"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Jarduera fisiko"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"jarduera fisikoa atzitu"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Deien erregistroa"</string>
@@ -433,8 +433,8 @@
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"Aplikazioak edonoiz erabil dezake mikrofonoa audioa grabatzeko."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"bidali aginduak SIM txartelera"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"SIM txartelera aginduak bidaltzeko aukera ematen die aplikazioei. Oso arriskutsua da."</string>
-    <string name="permlab_activityRecognition" msgid="1782303296053990884">"hauteman ariketa fisikoa"</string>
-    <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Aplikazioak ariketa fisikoa hauteman dezake."</string>
+    <string name="permlab_activityRecognition" msgid="1782303296053990884">"hauteman jarduera fisiko"</string>
+    <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Aplikazioak jarduera fisiko hauteman dezake."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Aplikazioak edonoiz erabil dezake kamera argazkiak ateratzeko eta bideoak grabatzeko."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"eman sistemako kamerak atzitzeko baimena aplikazio edo zerbitzu bati argazkiak ateratzeko eta bideoak grabatzeko"</string>
