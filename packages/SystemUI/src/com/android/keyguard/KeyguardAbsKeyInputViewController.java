@@ -35,12 +35,15 @@ import com.android.keyguard.EmergencyButton.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardAbsKeyInputView.KeyDownListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingClassifier;
+import com.android.systemui.classifier.FalsingCollector;
 
 public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKeyInputView>
         extends KeyguardInputViewController<T> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final LockPatternUtils mLockPatternUtils;
     private final LatencyTracker mLatencyTracker;
+    private final FalsingCollector mFalsingCollector;
     private CountDownTimer mCountdownTimer;
     protected KeyguardMessageAreaController mMessageAreaController;
     private boolean mDismissing;
@@ -70,11 +73,12 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             LockPatternUtils lockPatternUtils,
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
-            LatencyTracker latencyTracker) {
+            LatencyTracker latencyTracker, FalsingCollector falsingCollector) {
         super(view, securityMode, keyguardSecurityCallback);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
+        mFalsingCollector = falsingCollector;
         KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
         mMessageAreaController = messageAreaControllerFactory.create(kma);
     }
@@ -256,6 +260,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     }
 
     protected void onUserInput() {
+        mFalsingCollector.updateFalseConfidence(FalsingClassifier.Result.passed(0.6));
         getKeyguardSecurityCallback().userActivity();
         getKeyguardSecurityCallback().onUserInput();
         mMessageAreaController.setMessage("");

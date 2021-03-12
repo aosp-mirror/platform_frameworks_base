@@ -21,7 +21,6 @@ import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
-import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 import android.os.Handler;
 import android.os.Looper;
@@ -35,6 +34,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
@@ -50,13 +50,15 @@ public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             MetricsLogger metricsLogger,
+            FalsingManager falsingManager,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             IndividualSensorPrivacyController sensorPrivacyController,
             KeyguardStateController keyguardStateController) {
-        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
-                activityStarter, qsLogger, sensorPrivacyController, keyguardStateController);
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger, sensorPrivacyController,
+                keyguardStateController);
     }
 
     @Override

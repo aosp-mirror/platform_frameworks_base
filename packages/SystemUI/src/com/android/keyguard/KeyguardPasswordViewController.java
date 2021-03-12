@@ -40,6 +40,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -112,9 +113,10 @@ public class KeyguardPasswordViewController
             LatencyTracker latencyTracker,
             InputMethodManager inputMethodManager,
             @Main DelayableExecutor mainExecutor,
-            @Main Resources resources) {
+            @Main Resources resources,
+            FalsingCollector falsingCollector) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
-                messageAreaControllerFactory, latencyTracker);
+                messageAreaControllerFactory, latencyTracker, falsingCollector);
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mInputMethodManager = inputMethodManager;
         mMainExecutor = mainExecutor;

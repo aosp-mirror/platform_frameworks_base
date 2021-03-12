@@ -26,6 +26,8 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_STATUS_BAR_STATE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -55,7 +57,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSEvent;
@@ -90,6 +94,7 @@ public class QSTileImplTest extends SysuiTestCase {
     private QSTileHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
+    private final FalsingManagerFake mFalsingManager = new FalsingManagerFake();
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -112,7 +117,7 @@ public class QSTileImplTest extends SysuiTestCase {
 
         Handler mainHandler = new Handler(mTestableLooper.getLooper());
 
-        mTile = new TileImpl(mHost, mTestableLooper.getLooper(), mainHandler,
+        mTile = new TileImpl(mHost, mTestableLooper.getLooper(), mainHandler, mFalsingManager,
                 mMetricsLogger, mStatusBarStateController, mActivityStarter, mQsLogger);
         mTile.setTileSpec(SPEC);
     }
@@ -141,6 +146,19 @@ public class QSTileImplTest extends SysuiTestCase {
         verify(mMetricsLogger).write(mLogCaptor.capture());
         assertEquals(StatusBarState.SHADE, mLogCaptor.getValue()
                 .getTaggedData(FIELD_STATUS_BAR_STATE));
+    }
+
+    @Test
+    public void testClick_falsing() {
+        mFalsingManager.setFalseRobustTap(true);
+        mTile.click();
+        mTestableLooper.processAllMessages();
+        assertThat(mTile.mClicked).isFalse();
+
+        mFalsingManager.setFalseRobustTap(false);
+        mTile.click();
+        mTestableLooper.processAllMessages();
+        assertThat(mTile.mClicked).isTrue();
     }
 
     @Test
@@ -360,17 +378,20 @@ public class QSTileImplTest extends SysuiTestCase {
     }
 
     private static class TileImpl extends QSTileImpl<QSTile.BooleanState> {
+        boolean mClicked;
+
         protected TileImpl(
                 QSHost host,
                 Looper backgroundLooper,
                 Handler mainHandler,
+                FalsingManager falsingManager,
                 MetricsLogger metricsLogger,
                 StatusBarStateController statusBarStateController,
                 ActivityStarter activityStarter,
                 QSLogger qsLogger
         ) {
-            super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
-                    activityStarter, qsLogger);
+            super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                    statusBarStateController, activityStarter, qsLogger);
             getState().state = Tile.STATE_ACTIVE;
         }
 
@@ -381,7 +402,7 @@ public class QSTileImplTest extends SysuiTestCase {
 
         @Override
         protected void handleClick() {
-
+            mClicked = true;
         }
 
         @Override

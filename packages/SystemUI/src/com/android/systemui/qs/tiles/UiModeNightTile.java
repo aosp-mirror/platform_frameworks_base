@@ -32,6 +32,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
@@ -66,6 +67,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
             QSHost host,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
+            FalsingManager falsingManager,
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
@@ -74,8 +76,8 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
             BatteryController batteryController,
             LocationController locationController
     ) {
-        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
-                activityStarter, qsLogger);
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger);
         mBatteryController = batteryController;
         mUiModeManager = host.getUserContext().getSystemService(UiModeManager.class);
         mLocationController = locationController;
