@@ -575,8 +575,8 @@ public class NotificationPanelViewController extends PanelViewController {
             FeatureFlags featureFlags) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
-                latencyTracker, flingAnimationUtilsBuilder.get(), statusBarTouchableRegionManager,
-                ambientState);
+                statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
+                statusBarTouchableRegionManager, ambientState);
         mView = view;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;

@@ -33,6 +33,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
+import com.android.systemui.classifier.SingleTapClassifier;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,6 +70,8 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     private LiftToActivateListener mLiftToactivateListener;
     private FalsingCollector mFalsingCollector = new FalsingCollectorFake();
     @Mock
+    private SingleTapClassifier mSingleTapClassifier;
+    @Mock
     private View mDeleteButton;
     @Mock
     private View mOkButton;
@@ -92,7 +95,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
         mKeyguardPinViewController = new KeyguardPinBasedInputViewController(mPinBasedInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
-                mFalsingCollector) {
+                mFalsingCollector, mSingleTapClassifier) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);
