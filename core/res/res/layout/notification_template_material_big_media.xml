@@ -20,17 +20,8 @@
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#00000000"
     android:tag="bigMediaNarrow"
     >
-    <!-- The size will actually be determined at runtime -->
-    <ImageView
-        android:id="@+id/right_icon"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_gravity="top|end"
-        android:scaleType="centerCrop"
-        />
 
     <include
         layout="@layout/notification_template_header"
@@ -49,46 +40,27 @@
             android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="46dp"
+            android:layout_marginTop="@dimen/notification_content_margin_top"
             android:layout_marginStart="@dimen/notification_content_margin_start"
             android:layout_marginBottom="@dimen/notification_content_margin"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:orientation="vertical"
             >
-            <!-- TODO(b/172652345): fix the media style -->
-            <!--<include layout="@layout/notification_template_part_line1"/>-->
-            <!--<include layout="@layout/notification_template_text"/>-->
-
-            <TextView android:id="@+id/title"
-                android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:fadingEdge="horizontal"
-                android:textAlignment="viewStart"
-                />
-
-            <com.android.internal.widget.ImageFloatingTextView
-                style="@style/Widget.DeviceDefault.Notification.Text"
-                android:id="@+id/text"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/notification_text_height"
-                android:layout_gravity="top"
-                android:layout_marginTop="0.5dp"
-                android:ellipsize="marquee"
-                android:fadingEdge="horizontal"
-                android:gravity="top"
-                android:singleLine="true"
-                android:textAlignment="viewStart"
-                />
+            <include layout="@layout/notification_template_part_line1"/>
+            <include layout="@layout/notification_template_text"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/media_actions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-21dp"
+            android:paddingStart="44dp"
+            android:paddingEnd="44dp"
+            android:paddingBottom="@dimen/media_notification_actions_padding_bottom"
+            android:gravity="top"
             android:orientation="horizontal"
             android:layoutDirection="ltr"
-            style="@style/NotificationMediaActionContainer"
             >
 
             <include
@@ -117,10 +89,8 @@
                 />
         </LinearLayout>
 
-        <ViewStub
-            android:id="@+id/notification_media_seekbar_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
     </LinearLayout>
+
+    <include layout="@layout/notification_template_right_icon" />
+
 </com.android.internal.widget.MediaNotificationView>
