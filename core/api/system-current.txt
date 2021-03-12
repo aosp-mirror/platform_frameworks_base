@@ -10363,6 +10363,7 @@ package android.telecom {
 
   public abstract class CallDiagnosticService extends android.app.Service {
     ctor public CallDiagnosticService();
+    method @NonNull public java.util.concurrent.Executor getExecutor();
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onBluetoothCallQualityReportReceived(@NonNull android.telecom.BluetoothCallQualityReport);
     method public abstract void onCallAudioStateChanged(@NonNull android.telecom.CallAudioState);
@@ -10435,16 +10436,12 @@ package android.telecom {
     ctor public DiagnosticCall();
     method public final void clearDiagnosticMessage(int);
     method public final void displayDiagnosticMessage(int, @NonNull CharSequence);
-    method @NonNull public android.telecom.Call.Details getCallDetails();
     method public abstract void onCallDetailsChanged(@NonNull android.telecom.Call.Details);
     method @Nullable public abstract CharSequence onCallDisconnected(int, int);
     method @Nullable public abstract CharSequence onCallDisconnected(@NonNull android.telephony.ims.ImsReasonInfo);
     method public abstract void onCallQualityReceived(@NonNull android.telephony.CallQuality);
     method public abstract void onReceiveDeviceToDeviceMessage(int, int);
     method public final void sendDeviceToDeviceMessage(int, int);
-    field public static final int AUDIO_CODEC_AMR_NB = 3; // 0x3
-    field public static final int AUDIO_CODEC_AMR_WB = 2; // 0x2
-    field public static final int AUDIO_CODEC_EVS = 1; // 0x1
     field public static final int BATTERY_STATE_CHARGING = 3; // 0x3
     field public static final int BATTERY_STATE_GOOD = 2; // 0x2
     field public static final int BATTERY_STATE_LOW = 1; // 0x1
@@ -10454,9 +10451,6 @@ package android.telecom {
     field public static final int MESSAGE_CALL_NETWORK_TYPE = 1; // 0x1
     field public static final int MESSAGE_DEVICE_BATTERY_STATE = 3; // 0x3
     field public static final int MESSAGE_DEVICE_NETWORK_COVERAGE = 4; // 0x4
-    field public static final int NETWORK_TYPE_IWLAN = 2; // 0x2
-    field public static final int NETWORK_TYPE_LTE = 1; // 0x1
-    field public static final int NETWORK_TYPE_NR = 3; // 0x3
   }
 
   public abstract class InCallService extends android.app.Service {
