@@ -401,6 +401,10 @@ package android.net {
     method public android.net.NetworkRequest.Builder setNetworkSpecifier(android.net.NetworkSpecifier);
   }
 
+  public class ParseException extends java.lang.RuntimeException {
+    field public String response;
+  }
+
   public class ProxyInfo implements android.os.Parcelable {
     ctor public ProxyInfo(@Nullable android.net.ProxyInfo);
     method public static android.net.ProxyInfo buildDirectProxy(String, int);
