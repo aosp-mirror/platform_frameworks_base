@@ -30,6 +30,7 @@ import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_ANAL
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGITAL;
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
 
+import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -1146,6 +1147,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 && getAvrDeviceInfo() != null;
     }
 
+    @Nullable
     @ServiceThreadOnly
     HdmiDeviceInfo getAvrDeviceInfo() {
         assertRunOnServiceThread();
@@ -1156,6 +1158,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return getSafeAvrDeviceInfo() != null;
     }
 
+    @Nullable
     HdmiDeviceInfo getSafeAvrDeviceInfo() {
         return mService.getHdmiCecNetwork().getSafeCecDeviceInfo(Constants.ADDR_AUDIO_SYSTEM);
     }
