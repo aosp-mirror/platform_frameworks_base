@@ -56,6 +56,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -200,8 +201,11 @@ public class AppOpsManager {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
     public static final long SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE = 151105954L;
 
+    private static final String FULL_LOG = "privacy_attribution_tag_full_log_enabled";
 
     private static final int MAX_UNFORWARDED_OPS = 10;
+
+    private static Boolean sFullLog = null;
 
     final Context mContext;
 
@@ -6972,6 +6976,26 @@ public class AppOpsManager {
     AppOpsManager(Context context, IAppOpsService service) {
         mContext = context;
         mService = service;
+
+        if (mContext != null) {
+            final PackageManager pm = mContext.getPackageManager();
+            try {
+                if (pm != null && pm.checkPermission(Manifest.permission.READ_DEVICE_CONFIG,
+                        mContext.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
+                    DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
+                            mContext.getMainExecutor(), properties -> {
+                                if (properties.getKeyset().contains(FULL_LOG)) {
+                                    sFullLog = properties.getBoolean(FULL_LOG, false);
+                                }
+                            });
+                    return;
+                }
+            } catch (Exception e) {
+                // This manager was made before DeviceConfig is ready, so it's a low-level
+                // system app. We likely don't care about its logs.
+            }
+        }
+        sFullLog = false;
     }
 
     /**
@@ -9110,10 +9134,20 @@ public class AppOpsManager {
 
         StringBuilder sb = new StringBuilder();
         for (int i = firstInteresting; i <= lastInteresting; i++) {
+            if (sFullLog == null) {
+                try {
+                    sFullLog = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                            FULL_LOG, false);
+                } catch (SecurityException e) {
+                    // This should not happen, but it may, in rare cases
+                    sFullLog = false;
+                }
+            }
+
             if (i != firstInteresting) {
                 sb.append('\n');
             }
-            if (sb.length() + trace[i].toString().length() > 600) {
+            if (!sFullLog && sb.length() + trace[i].toString().length() > 600) {
                 break;
             }
             sb.append(trace[i]);
