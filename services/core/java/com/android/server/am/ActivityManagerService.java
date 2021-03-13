@@ -44,11 +44,11 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
-import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
+import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerWhitelistManager.REASON_SYSTEM_ALLOW_LISTED;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Process.BLUETOOTH_UID;
@@ -273,6 +273,9 @@ import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
+import android.os.incremental.IIncrementalService;
+import android.os.incremental.IncrementalManager;
+import android.os.incremental.IncrementalMetrics;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
@@ -7697,18 +7700,32 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     void handleApplicationCrashInner(String eventType, ProcessRecord r, String processName,
             ApplicationErrorReport.CrashInfo crashInfo) {
-        boolean isPackageLoading = false;
+        boolean isIncremental = false;
+        float loadingProgress = 1;
+        long millisSinceOldestPendingRead = 0;
         // Notify package manager service to possibly update package state
         if (r != null && r.info != null && r.info.packageName != null) {
+            final String codePath = r.info.getCodePath();
             mPackageManagerInt.notifyPackageCrashOrAnr(r.info.packageName);
             IncrementalStatesInfo incrementalStatesInfo =
                     mPackageManagerInt.getIncrementalStatesInfo(r.info.packageName, r.uid,
                             r.userId);
-            isPackageLoading = incrementalStatesInfo.isLoading();
-            if (isPackageLoading) {
-                // Report in the main log that the package is still loading
-                Slog.e(TAG, "App crashed when package " + r.info.packageName + " is "
-                        + ((int) (incrementalStatesInfo.getProgress() * 100)) + "% loaded.");
+            if (incrementalStatesInfo != null) {
+                loadingProgress = incrementalStatesInfo.getProgress();
+            }
+            isIncremental = IncrementalManager.isIncrementalPath(codePath);
+            if (isIncremental) {
+                // Report in the main log about the incremental package
+                Slog.e(TAG, "App crashed on incremental package " + r.info.packageName
+                        + " which is " + ((int) (loadingProgress * 100)) + "% loaded.");
+                final IBinder incrementalService = ServiceManager.getService(
+                        Context.INCREMENTAL_SERVICE);
+                if (incrementalService != null) {
+                    final IncrementalManager incrementalManager = new IncrementalManager(
+                            IIncrementalService.Stub.asInterface(incrementalService));
+                    IncrementalMetrics metrics = incrementalManager.getMetrics(codePath);
+                    millisSinceOldestPendingRead = metrics.getMillisSinceOldestPendingRead();
+                }
             }
         }
 
@@ -7737,7 +7754,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 processName.equals("system_server") ? ServerProtoEnums.SYSTEM_SERVER
                         : (r != null) ? r.getProcessClassEnum()
                                       : ServerProtoEnums.ERROR_SOURCE_UNKNOWN,
-                isPackageLoading
+                isIncremental, loadingProgress, millisSinceOldestPendingRead
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE

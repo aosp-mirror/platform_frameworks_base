@@ -155,8 +155,8 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         private final InputMethodManager mInputMethodManager;
         private final DelayableExecutor mMainExecutor;
         private final Resources mResources;
-        private LiftToActivateListener mLiftToActivateListener;
-        private TelephonyManager mTelephonyManager;
+        private final LiftToActivateListener mLiftToActivateListener;
+        private final TelephonyManager mTelephonyManager;
         private final FalsingCollector mFalsingCollector;
         private final boolean mIsNewLayoutEnabled;
 
@@ -167,8 +167,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 KeyguardMessageAreaController.Factory messageAreaControllerFactory,
                 InputMethodManager inputMethodManager, @Main DelayableExecutor mainExecutor,
                 @Main Resources resources, LiftToActivateListener liftToActivateListener,
-                TelephonyManager telephonyManager,
-                FalsingCollector falsingCollector,
+                TelephonyManager telephonyManager, FalsingCollector falsingCollector,
                 FeatureFlags featureFlags) {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
@@ -189,12 +188,13 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             if (keyguardInputView instanceof KeyguardPatternView) {
                 return new KeyguardPatternViewController((KeyguardPatternView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
-                        keyguardSecurityCallback, mLatencyTracker, mMessageAreaControllerFactory);
+                        keyguardSecurityCallback, mLatencyTracker, mFalsingCollector,
+                        mMessageAreaControllerFactory);
             } else if (keyguardInputView instanceof KeyguardPasswordView) {
                 return new KeyguardPasswordViewController((KeyguardPasswordView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mInputMethodManager, mMainExecutor, mResources);
+                        mInputMethodManager, mMainExecutor, mResources, mFalsingCollector);
             } else if (keyguardInputView instanceof KeyguardPINView) {
                 return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
@@ -204,14 +204,14 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 return new KeyguardSimPinViewController((KeyguardSimPinView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, mTelephonyManager,
-                        mFalsingCollector, mIsNewLayoutEnabled);
+                        mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
+                        mIsNewLayoutEnabled);
             } else if (keyguardInputView instanceof KeyguardSimPukView) {
                 return new KeyguardSimPukViewController((KeyguardSimPukView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, mTelephonyManager,
-                        mFalsingCollector, mIsNewLayoutEnabled);
+                        mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
+                        mIsNewLayoutEnabled);
             }
 
             throw new RuntimeException("Unable to find controller for " + keyguardInputView);

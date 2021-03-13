@@ -31,6 +31,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.content.LocusId;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArrayMap;
@@ -307,9 +308,10 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     }
 
     @Override
-    public void removeStartingWindow(int taskId) {
+    public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
+            boolean playRevealAnimation) {
         if (mStartingSurface != null) {
-            mStartingSurface.removeStartingWindow(taskId);
+            mStartingSurface.removeStartingWindow(taskId, leash, frame, playRevealAnimation);
         }
     }
 

@@ -29,6 +29,7 @@ import android.util.Log;
 import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.security.VerityUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +77,8 @@ public class DexMetadataHelper {
      * Returns whether fs-verity is required to install a dex metadata
      */
     public static boolean isFsVerityRequired() {
-        return SystemProperties.getBoolean(PROPERTY_DM_FSVERITY_REQUIRED, false);
+        return VerityUtils.isFsVeritySupported()
+                && SystemProperties.getBoolean(PROPERTY_DM_FSVERITY_REQUIRED, false);
     }
 
     /**

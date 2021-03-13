@@ -18,7 +18,6 @@ package com.android.systemui.classifier;
 
 import static com.android.systemui.classifier.FalsingManagerProxy.FALSING_SUCCESS;
 import static com.android.systemui.classifier.FalsingModule.BRIGHT_LINE_GESTURE_CLASSIFERS;
-import static com.android.systemui.classifier.FalsingModule.DOUBLE_TAP_TIMEOUT_MS;
 
 import android.net.Uri;
 import android.os.Build;
@@ -29,11 +28,9 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.classifier.FalsingDataProvider.SessionListener;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.sensors.ThresholdSensor;
 
 import java.io.FileDescriptor;
@@ -63,14 +60,13 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     private static final int RECENT_INFO_LOG_SIZE = 40;
     private static final int RECENT_SWIPE_LOG_SIZE = 20;
+    private static final double TAP_CONFIDENCE_THRESHOLD = 0.7;
 
     private final FalsingDataProvider mDataProvider;
     private final DockManager mDockManager;
     private final SingleTapClassifier mSingleTapClassifier;
     private final DoubleTapClassifier mDoubleTapClassifier;
     private final HistoryTracker mHistoryTracker;
-    private final DelayableExecutor mDelayableExecutor;
-    private final long mDoubleTapTimeMs;
     private final boolean mTestHarness;
     private final MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
@@ -98,19 +94,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                 @Override
         public void onGestureComplete(long completionTimeMs) {
             if (mPriorResults != null) {
-                // Single taps that may become double taps don't get added right away.
-                if (mClassifyAsSingleTap) {
-                    Collection<FalsingClassifier.Result> singleTapResults = mPriorResults;
-                    mSingleTapHistoryCanceller = mDelayableExecutor.executeDelayed(
-                            () -> {
-                                mSingleTapHistoryCanceller = null;
-                                mHistoryTracker.addResults(singleTapResults, completionTimeMs);
-                            },
-                            mDoubleTapTimeMs);
-                    mClassifyAsSingleTap = false;  // Don't treat things as single taps by default.
-                } else {
-                    mHistoryTracker.addResults(mPriorResults, completionTimeMs);
-                }
+                mHistoryTracker.addResults(mPriorResults, completionTimeMs);
                 mPriorResults = null;
             } else {
                 // Gestures that were not classified get treated as a false.
@@ -123,17 +107,13 @@ public class BrightLineFalsingManager implements FalsingManager {
     };
 
     private Collection<FalsingClassifier.Result> mPriorResults;
-    private boolean mClassifyAsSingleTap;
-    private Runnable mSingleTapHistoryCanceller;
 
     @Inject
     public BrightLineFalsingManager(FalsingDataProvider falsingDataProvider,
             DockManager dockManager, MetricsLogger metricsLogger,
             @Named(BRIGHT_LINE_GESTURE_CLASSIFERS) Set<FalsingClassifier> classifiers,
             SingleTapClassifier singleTapClassifier, DoubleTapClassifier doubleTapClassifier,
-            HistoryTracker historyTracker, @Main DelayableExecutor delayableExecutor,
-            @Named(DOUBLE_TAP_TIMEOUT_MS) long doubleTapTimeMs,
-            @TestHarness boolean testHarness) {
+            HistoryTracker historyTracker, @TestHarness boolean testHarness) {
         mDataProvider = falsingDataProvider;
         mDockManager = dockManager;
         mMetricsLogger = metricsLogger;
@@ -141,8 +121,6 @@ public class BrightLineFalsingManager implements FalsingManager {
         mSingleTapClassifier = singleTapClassifier;
         mDoubleTapClassifier = doubleTapClassifier;
         mHistoryTracker = historyTracker;
-        mDelayableExecutor = delayableExecutor;
-        mDoubleTapTimeMs = doubleTapTimeMs;
         mTestHarness = testHarness;
 
         mDataProvider.addSessionListener(mSessionListener);
@@ -158,7 +136,6 @@ public class BrightLineFalsingManager implements FalsingManager {
     public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
         boolean result;
 
-        mClassifyAsSingleTap = false;
         mDataProvider.setInteractionType(interactionType);
 
         if (!mTestHarness && !mDataProvider.isJustUnlockedWithFace() && !mDockManager.isDocked()) {
@@ -166,7 +143,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                     mClassifiers.stream().map(falsingClassifier -> {
                         FalsingClassifier.Result classifierResult =
                                 falsingClassifier.classifyGesture(
-                                        mHistoryTracker.falsePenalty(),
+                                        mHistoryTracker.falseBelief(),
                                         mHistoryTracker.falseConfidence());
                         if (classifierResult.isFalse()) {
                             logInfo(String.format(
@@ -217,9 +194,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public boolean isFalseTap(boolean robustCheck) {
-        mClassifyAsSingleTap = true;
-
+    public boolean isFalseTap(boolean robustCheck, double falsePenalty) {
         FalsingClassifier.Result singleTapResult =
                 mSingleTapClassifier.isTap(mDataProvider.getRecentMotionEvents());
         mPriorResults = Collections.singleton(singleTapResult);
@@ -233,14 +208,24 @@ public class BrightLineFalsingManager implements FalsingManager {
             return true;
         }
 
-        // TODO(b/172655679): More heuristics to come. For now, allow touches through if face-authed
         if (robustCheck) {
-            boolean result = !mDataProvider.isJustUnlockedWithFace();
-            mPriorResults = Collections.singleton(
-                    result ? FalsingClassifier.Result.falsed(0.1, "no face detected")
-                            : FalsingClassifier.Result.passed(1));
-
-            return result;
+            if (mDataProvider.isJustUnlockedWithFace()) {
+                // Immediately pass if a face is detected.
+                mPriorResults = Collections.singleton(FalsingClassifier.Result.passed(1));
+                return false;
+            } else if (!isFalseDoubleTap()) {
+                // We must check double tapping before other heuristics. This is because
+                // the double tap will fail if there's only been one tap. We don't want that
+                // failure to be recorded in mPriorResults.
+                return false;
+            } else if (mHistoryTracker.falseBelief() > TAP_CONFIDENCE_THRESHOLD) {
+                mPriorResults = Collections.singleton(
+                        FalsingClassifier.Result.falsed(0, "bad history"));
+                return true;
+            } else {
+                mPriorResults = Collections.singleton(FalsingClassifier.Result.passed(0.1));
+                return false;
+            }
         }
 
         return false;
@@ -248,7 +233,6 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseDoubleTap() {
-        mClassifyAsSingleTap = false;
         FalsingClassifier.Result result = mDoubleTapClassifier.classifyGesture();
         mPriorResults = Collections.singleton(result);
         if (result.isFalse()) {
@@ -257,12 +241,6 @@ public class BrightLineFalsingManager implements FalsingManager {
             String reason = result.getReason();
             if (reason != null) {
                 logInfo(reason);
-            }
-        } else {
-            // A valid double tap prevents an invalid single tap from going into history.
-            if (mSingleTapHistoryCanceller != null) {
-                mSingleTapHistoryCanceller.run();
-                mSingleTapHistoryCanceller = null;
             }
         }
         return result.isFalse();

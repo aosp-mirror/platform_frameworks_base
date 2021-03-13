@@ -248,6 +248,27 @@ public:
         }
         return binder::Status::ok();
     }
+    binder::Status bindToDataLoaderNotOkWithNoDelay(int32_t mountId,
+                                                    const DataLoaderParamsParcel& params,
+                                                    int bindDelayMs,
+                                                    const sp<IDataLoaderStatusListener>& listener,
+                                                    bool* _aidl_return) {
+        CHECK(bindDelayMs == 0) << bindDelayMs;
+        *_aidl_return = false;
+        return binder::Status::ok();
+    }
+    binder::Status bindToDataLoaderBindingWithNoDelay(int32_t mountId,
+                                                      const DataLoaderParamsParcel& params,
+                                                      int bindDelayMs,
+                                                      const sp<IDataLoaderStatusListener>& listener,
+                                                      bool* _aidl_return) {
+        CHECK(bindDelayMs == 0) << bindDelayMs;
+        *_aidl_return = true;
+        if (listener) {
+            listener->onStatusChanged(mId, IDataLoaderStatusListener::DATA_LOADER_BINDING);
+        }
+        return binder::Status::ok();
+    }
     binder::Status bindToDataLoaderOkWith10sDelay(int32_t mountId,
                                                   const DataLoaderParamsParcel& params,
                                                   int bindDelayMs,
@@ -557,6 +578,21 @@ public:
     }
 };
 
+class MockClockWrapper : public ClockWrapper {
+public:
+    MOCK_CONST_METHOD0(now, TimePoint());
+
+    void start() { ON_CALL(*this, now()).WillByDefault(Invoke(this, &MockClockWrapper::getClock)); }
+    template <class Delta>
+    void advance(Delta delta) {
+        mClock += delta;
+    }
+
+    TimePoint getClock() const { return mClock; }
+
+    TimePoint mClock = Clock::now();
+};
+
 class MockStorageHealthListener : public os::incremental::BnStorageHealthListener {
 public:
     MOCK_METHOD2(onHealthStatus, binder::Status(int32_t storageId, int32_t status));
@@ -594,7 +630,7 @@ public:
                        std::unique_ptr<MockLooperWrapper> looper,
                        std::unique_ptr<MockTimedQueueWrapper> timedQueue,
                        std::unique_ptr<MockTimedQueueWrapper> progressUpdateJobQueue,
-                       std::unique_ptr<MockFsWrapper> fs)
+                       std::unique_ptr<MockFsWrapper> fs, std::unique_ptr<MockClockWrapper> clock)
           : mVold(std::move(vold)),
             mDataLoaderManager(std::move(dataLoaderManager)),
             mIncFs(std::move(incfs)),
@@ -603,7 +639,8 @@ public:
             mLooper(std::move(looper)),
             mTimedQueue(std::move(timedQueue)),
             mProgressUpdateJobQueue(std::move(progressUpdateJobQueue)),
-            mFs(std::move(fs)) {}
+            mFs(std::move(fs)),
+            mClock(std::move(clock)) {}
     std::unique_ptr<VoldServiceWrapper> getVoldService() final { return std::move(mVold); }
     std::unique_ptr<DataLoaderManagerWrapper> getDataLoaderManager() final {
         return std::move(mDataLoaderManager);
@@ -619,6 +656,7 @@ public:
         return std::move(mProgressUpdateJobQueue);
     }
     std::unique_ptr<FsWrapper> getFs() final { return std::move(mFs); }
+    std::unique_ptr<ClockWrapper> getClock() final { return std::move(mClock); }
 
 private:
     std::unique_ptr<MockVoldService> mVold;
@@ -630,6 +668,7 @@ private:
     std::unique_ptr<MockTimedQueueWrapper> mTimedQueue;
     std::unique_ptr<MockTimedQueueWrapper> mProgressUpdateJobQueue;
     std::unique_ptr<MockFsWrapper> mFs;
+    std::unique_ptr<MockClockWrapper> mClock;
 };
 
 // --- IncrementalServiceTest ---
@@ -657,6 +696,8 @@ public:
         mProgressUpdateJobQueue = progressUpdateJobQueue.get();
         auto fs = std::make_unique<NiceMock<MockFsWrapper>>();
         mFs = fs.get();
+        auto clock = std::make_unique<NiceMock<MockClockWrapper>>();
+        mClock = clock.get();
         mIncrementalService = std::make_unique<
                 IncrementalService>(MockServiceManager(std::move(vold),
                                                        std::move(dataloaderManager),
@@ -664,12 +705,13 @@ public:
                                                        std::move(jni), std::move(looper),
                                                        std::move(timedQueue),
                                                        std::move(progressUpdateJobQueue),
-                                                       std::move(fs)),
+                                                       std::move(fs), std::move(clock)),
                                     mRootDir.path);
         mDataLoaderParcel.packageName = "com.test";
         mDataLoaderParcel.arguments = "uri";
         mDataLoaderManager->unbindFromDataLoaderSuccess();
         mIncrementalService->onSystemReady();
+        mClock->start();
         setupSuccess();
     }
 
@@ -724,6 +766,7 @@ protected:
     NiceMock<MockTimedQueueWrapper>* mTimedQueue = nullptr;
     NiceMock<MockTimedQueueWrapper>* mProgressUpdateJobQueue = nullptr;
     NiceMock<MockFsWrapper>* mFs = nullptr;
+    NiceMock<MockClockWrapper>* mClock = nullptr;
     NiceMock<MockDataLoader>* mDataLoader = nullptr;
     std::unique_ptr<IncrementalService> mIncrementalService;
     TemporaryDir mRootDir;
@@ -827,6 +870,119 @@ TEST_F(IncrementalServiceTest, testDataLoaderDestroyedAndDelayed) {
 
     // Simulated crash/other connection breakage.
 
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith10sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith100sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith1000sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith10000sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith10000sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
+}
+
+TEST_F(IncrementalServiceTest, testDataLoaderOnRestart) {
+    mIncFs->waitForPendingReadsSuccess();
+    mIncFs->openMountSuccess();
+
+    constexpr auto bindRetryInterval = 5s;
+
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(10);
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
+    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(6);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(6);
+    EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(2);
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+
+    // First binds to DataLoader fails... because it's restart.
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderNotOkWithNoDelay));
+
+    // Request DL start.
+    mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {}, {}, {});
+
+    // Retry callback present.
+    ASSERT_EQ(storageId, mTimedQueue->mId);
+    ASSERT_EQ(mTimedQueue->mAfter, bindRetryInterval);
+    auto retryCallback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    // Expecting the same bindToDataLoaderNotOkWithNoDelay call.
+    mClock->advance(5s);
+
+    retryCallback();
+    // Retry callback present.
+    ASSERT_EQ(storageId, mTimedQueue->mId);
+    ASSERT_EQ(mTimedQueue->mAfter, bindRetryInterval);
+    retryCallback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    // Returning "binding" so that we can retry.
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderBindingWithNoDelay));
+
+    // Expecting bindToDataLoaderBindingWithNoDelay call.
+    mClock->advance(5s);
+
+    retryCallback();
+    // No retry callback.
+    ASSERT_EQ(mTimedQueue->mAfter, 0ms);
+    ASSERT_EQ(mTimedQueue->mWhat, nullptr);
+
+    // Should not change the bindToDataLoader call count
+    ASSERT_NE(nullptr, mLooper->mCallback);
+    ASSERT_NE(nullptr, mLooper->mCallbackData);
+    auto looperCb = mLooper->mCallback;
+    auto looperCbData = mLooper->mCallbackData;
+    looperCb(-1, -1, looperCbData);
+
+    // Expecting the same bindToDataLoaderBindingWithNoDelay call.
+    mClock->advance(5s);
+
+    // Use pending reads callback to trigger binding.
+    looperCb(-1, -1, looperCbData);
+
+    // No retry callback.
+    ASSERT_EQ(mTimedQueue->mAfter, 0ms);
+    ASSERT_EQ(mTimedQueue->mWhat, nullptr);
+
+    // Now we are out of 10m "retry" budget, let's finally bind.
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager, &MockDataLoaderManager::bindToDataLoaderOk));
+    mClock->advance(11min);
+
+    // Use pending reads callback to trigger binding.
+    looperCb(-1, -1, looperCbData);
+
+    // No retry callback.
+    ASSERT_EQ(mTimedQueue->mAfter, 0ms);
+    ASSERT_EQ(mTimedQueue->mWhat, nullptr);
+
+    // And test the rest of the backoff.
+    // Simulated crash/other connection breakage.
     ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
             .WillByDefault(Invoke(mDataLoaderManager,
                                   &MockDataLoaderManager::bindToDataLoaderOkWith10sDelay));

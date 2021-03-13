@@ -16,6 +16,8 @@
 
 package android.media;
 
+import static android.media.permission.PermissionUtil.myIdentity;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -25,7 +27,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
 import android.hardware.Camera;
+import android.media.permission.Identity;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -48,6 +52,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -127,9 +132,21 @@ public class MediaRecorder implements AudioRouting,
 
     /**
      * Default constructor.
+     *
+     * @deprecated Use {@link #MediaRecorder(Context)} instead
      */
+    @Deprecated
     public MediaRecorder() {
+        this(ActivityThread.currentApplication());
+    }
 
+    /**
+     * Default constructor.
+     *
+     * @param context Context the recorder belongs to
+     */
+    public MediaRecorder(@NonNull Context context) {
+        Objects.requireNonNull(context);
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
             mEventHandler = new EventHandler(this, looper);
@@ -140,12 +157,11 @@ public class MediaRecorder implements AudioRouting,
         }
 
         mChannelCount = 1;
-        String packageName = ActivityThread.currentPackageName();
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<MediaRecorder>(this), packageName,
-                ActivityThread.currentOpPackageName());
+        native_setup(new WeakReference<MediaRecorder>(this),
+                ActivityThread.currentPackageName(), myIdentity(context));
     }
 
     /**
@@ -1740,12 +1756,22 @@ public class MediaRecorder implements AudioRouting,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static native final void native_init();
 
-    @UnsupportedAppUsage
-    private native final void native_setup(Object mediarecorder_this,
-            String clientName, String opPackageName) throws IllegalStateException;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
+            publicAlternatives = "{@link MediaRecorder}")
+    private void native_setup(Object mediarecorderThis,
+            String clientName, String opPackageName) throws IllegalStateException {
+        Identity identity = myIdentity(null);
+        identity.packageName = opPackageName;
+
+        native_setup(mediarecorderThis, clientName, identity);
+    }
+
+    private native void native_setup(Object mediarecorderThis,
+            String clientName, Identity identity)
+            throws IllegalStateException;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private native final void native_finalize();
+    private native void native_finalize();
 
     @UnsupportedAppUsage
     private native void setParameter(String nameValuePair);

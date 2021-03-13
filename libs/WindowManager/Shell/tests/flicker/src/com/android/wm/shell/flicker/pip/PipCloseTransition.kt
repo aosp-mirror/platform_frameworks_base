@@ -24,14 +24,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.Test
 import org.junit.runners.Parameterized
 
@@ -52,22 +45,6 @@ abstract class PipCloseTransition(testSpec: FlickerTestParameter) : PipTransitio
 
     @Presubmit
     @Test
-    open fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    open fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    open fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    open fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
-
-    @Presubmit
-    @Test
     open fun pipWindowBecomesInvisible() {
         testSpec.assertWm {
             this.showsAppWindow(PIP_WINDOW_TITLE)
@@ -85,21 +62,6 @@ abstract class PipCloseTransition(testSpec: FlickerTestParameter) : PipTransitio
                 .isInvisible(PIP_WINDOW_TITLE)
         }
     }
-
-    @Presubmit
-    @Test
-    open fun statusBarLayerRotatesScales() =
-        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
-
-    @Presubmit
-    @Test
-    open fun noUncoveredRegions() =
-        testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
-
-    @Presubmit
-    @Test
-    open fun navBarLayerRotatesAndScales() =
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
 
     @FlakyTest(bugId = 151179149)
     @Test

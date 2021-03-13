@@ -30,6 +30,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -265,6 +266,13 @@ public final class IncrementalManager {
     }
 
     /**
+     * Checks if an fd corresponds to a file on a mounted Incremental File System.
+     */
+    public static boolean isIncrementalFileFd(@NonNull FileDescriptor fd) {
+        return nativeIsIncrementalFd(fd.getInt$());
+    }
+
+    /**
      * Returns raw signature for file if it's on Incremental File System.
      * Unsafe, use only if you are sure what you are doing.
      */
@@ -421,9 +429,22 @@ public final class IncrementalManager {
         storage.unregisterStorageHealthListener();
     }
 
+    /**
+     * Returns the metrics of an Incremental Storage.
+     */
+    public IncrementalMetrics getMetrics(@NonNull String codePath) {
+        final IncrementalStorage storage = openStorage(codePath);
+        if (storage == null) {
+            // storage does not exist, package not installed
+            return null;
+        }
+        return new IncrementalMetrics(storage.getMetrics());
+    }
+
     /* Native methods */
     private static native boolean nativeIsEnabled();
     private static native boolean nativeIsV2Available();
     private static native boolean nativeIsIncrementalPath(@NonNull String path);
+    private static native boolean nativeIsIncrementalFd(@NonNull int fd);
     private static native byte[] nativeUnsafeGetFileSignature(@NonNull String path);
 }

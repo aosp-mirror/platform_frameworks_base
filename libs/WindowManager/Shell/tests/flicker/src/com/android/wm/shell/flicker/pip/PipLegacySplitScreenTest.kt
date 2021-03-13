@@ -24,17 +24,11 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.helpers.ImeAppHelper
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.server.wm.flicker.repetitions
-import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.removeAllTasksButHome
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP
 import org.junit.FixMethodOrder
@@ -55,7 +49,6 @@ import org.junit.runners.Parameterized
 class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val imeApp = ImeAppHelper(instrumentation)
     private val testApp = FixedAppHelper(instrumentation)
-    private val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
@@ -105,11 +98,11 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
 
     @Postsubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     @Postsubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     @Postsubmit
     @Test
@@ -130,11 +123,11 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
 
     @Postsubmit
     @Test
-    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+    override fun navBarLayerIsAlwaysVisible() = super.navBarLayerIsAlwaysVisible()
 
     @Postsubmit
     @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+    override fun statusBarLayerIsAlwaysVisible() = super.statusBarLayerIsAlwaysVisible()
 
     companion object {
         const val TEST_REPETITIONS = 2

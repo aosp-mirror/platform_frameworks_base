@@ -18,6 +18,7 @@
 package android.telephony.data;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -29,6 +30,7 @@ import android.telephony.DataFailCause;
 import android.telephony.data.ApnSetting.ProtocolType;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -812,11 +814,19 @@ public final class DataCallResponse implements Parcelable {
 
         /**
          * Set pdu session id.
+         * <p/>
+         * The id must be between 1 and 15 when linked to a pdu session.  If no pdu session
+         * exists for the current data call, the id must be set to {@link PDU_SESSION_ID_NOT_SET}.
          *
          * @param pduSessionId Pdu Session Id of the data call.
          * @return The same instance of the builder.
          */
-        public @NonNull Builder setPduSessionId(int pduSessionId) {
+        public @NonNull Builder setPduSessionId(
+                @IntRange(from = PDU_SESSION_ID_NOT_SET, to = 15) int pduSessionId) {
+            Preconditions.checkArgument(pduSessionId >= PDU_SESSION_ID_NOT_SET,
+                    "pduSessionId must be greater than or equal to" + PDU_SESSION_ID_NOT_SET);
+            Preconditions.checkArgument(pduSessionId <= 15,
+                    "pduSessionId must be less than or equal to 15.");
             mPduSessionId = pduSessionId;
             return this;
         }

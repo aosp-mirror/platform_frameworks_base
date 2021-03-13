@@ -32,6 +32,7 @@ import android.net.ConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.os.BatteryManagerInternal;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.BatteryUsageStats;
@@ -183,6 +184,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     }
                 }
             };
+
+    private BatteryManagerInternal mBatteryManagerInternal;
 
     private void populatePowerEntityMaps() {
         PowerEntity[] entities = mPowerStatsInternal.getPowerEntityInfo();
@@ -370,6 +373,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 Slog.e(TAG, "Could not register PowerStatsInternal");
             }
         }
+        mBatteryManagerInternal = LocalServices.getService(BatteryManagerInternal.class);
 
         Watchdog.getInstance().addMonitor(this);
 
@@ -2714,5 +2718,45 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
             });
         }
+    }
+
+    /**
+     * Sets battery AC charger to enabled/disabled, and freezes the battery state.
+     */
+    @Override
+    public void setChargerAcOnline(boolean online, boolean forceUpdate) {
+        mBatteryManagerInternal.setChargerAcOnline(online, forceUpdate);
+    }
+
+    /**
+     * Sets battery level, and freezes the battery state.
+     */
+    @Override
+    public void setBatteryLevel(int level, boolean forceUpdate) {
+        mBatteryManagerInternal.setBatteryLevel(level, forceUpdate);
+    }
+
+    /**
+     * Unplugs battery, and freezes the battery state.
+     */
+    @Override
+    public void unplugBattery(boolean forceUpdate) {
+        mBatteryManagerInternal.unplugBattery(forceUpdate);
+    }
+
+    /**
+     * Unfreezes battery state, returning to current hardware values.
+     */
+    @Override
+    public void resetBattery(boolean forceUpdate) {
+        mBatteryManagerInternal.resetBattery(forceUpdate);
+    }
+
+    /**
+     * Suspend charging even if plugged in.
+     */
+    @Override
+    public void suspendBatteryInput() {
+        mBatteryManagerInternal.suspendBatteryInput();
     }
 }

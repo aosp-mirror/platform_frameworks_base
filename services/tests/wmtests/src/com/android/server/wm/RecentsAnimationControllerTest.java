@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -49,6 +52,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -511,6 +515,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         final WindowToken navToken = mDefaultDisplay.getDisplayPolicy().getNavigationBar().mToken;
         final SurfaceControl.Transaction transaction = navToken.getPendingTransaction();
 
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                mDefaultDisplay.mDisplayId, false);
         verify(transaction).reparent(navToken.getSurfaceControl(), activity.getSurfaceControl());
 
         final WindowContainer parent = navToken.getParent();
@@ -518,6 +524,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 mDefaultDisplay.getDisplayPolicy().getNavBarFadeAnimationController();
 
         mController.cleanupAnimation(REORDER_MOVE_TO_TOP);
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                mDefaultDisplay.mDisplayId, true);
         verify(transaction).reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
         verify(navBarFadeAnimationController).fadeWindowToken(true);
     }
@@ -532,6 +540,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         final WindowToken navToken = mDefaultDisplay.getDisplayPolicy().getNavigationBar().mToken;
         final SurfaceControl.Transaction transaction = navToken.getPendingTransaction();
 
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                mDefaultDisplay.mDisplayId, false);
         verify(transaction).reparent(navToken.getSurfaceControl(), activity.getSurfaceControl());
 
         final WindowContainer parent = navToken.getParent();
@@ -539,6 +549,51 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 mDefaultDisplay.getDisplayPolicy().getNavBarFadeAnimationController();
 
         mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                mDefaultDisplay.mDisplayId, true);
+        verify(transaction).reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
+        verify(navBarFadeAnimationController, never()).fadeWindowToken(anyBoolean());
+    }
+
+    @Test
+    public void testNotAttachNavigationBar_controlledByFixedRotationAnimation() {
+        setupForShouldAttachNavBarDuringTransition();
+        FixedRotationAnimationController mockController =
+                mock(FixedRotationAnimationController.class);
+        doReturn(mockController).when(mDefaultDisplay).getFixedRotationAnimationController();
+        final ActivityRecord homeActivity = createHomeActivity();
+        initializeRecentsAnimationController(mController, homeActivity);
+        assertFalse(mController.isNavigationBarAttachedToApp());
+    }
+
+    @Test
+    public void testAttachNavBarInSplitScreenMode() {
+        setupForShouldAttachNavBarDuringTransition();
+        final ActivityRecord primary = createActivityRecordWithParentTask(mDefaultDisplay,
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD);
+        final ActivityRecord secondary = createActivityRecordWithParentTask(mDefaultDisplay,
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD);
+        final ActivityRecord homeActivity = createHomeActivity();
+        homeActivity.setVisibility(true);
+        initializeRecentsAnimationController(mController, homeActivity);
+
+        WindowState navWindow = mController.getNavigationBarWindow();
+        final WindowToken navToken = navWindow.mToken;
+        final SurfaceControl.Transaction transaction = navToken.getPendingTransaction();
+
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                mDefaultDisplay.mDisplayId, false);
+        verify(navWindow).setSurfaceTranslationY(-secondary.getBounds().top);
+        verify(transaction).reparent(navToken.getSurfaceControl(), secondary.getSurfaceControl());
+        reset(navWindow);
+
+        mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+        final WindowContainer parent = navToken.getParent();
+        final NavBarFadeAnimationController navBarFadeAnimationController =
+                mDefaultDisplay.getDisplayPolicy().getNavBarFadeAnimationController();
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                mDefaultDisplay.mDisplayId, true);
+        verify(navWindow).setSurfaceTranslationY(0);
         verify(transaction).reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
         verify(navBarFadeAnimationController, never()).fadeWindowToken(anyBoolean());
     }
@@ -600,9 +655,10 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     private void setupForShouldAttachNavBarDuringTransition() {
         mController.mShouldAttachNavBarToAppDuringTransition = true;
-        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "NavigationBar");
+        final WindowState navBar = spy(createWindow(null, TYPE_NAVIGATION_BAR, "NavigationBar"));
         mDefaultDisplay.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
         mWm.setRecentsAnimationController(mController);
+        doReturn(navBar).when(mController).getNavigationBarWindow();
         final NavBarFadeAnimationController mockNavBarFadeAnimationController =
                 mock(NavBarFadeAnimationController.class);
         final DisplayPolicy displayPolicy = spy(mDefaultDisplay.getDisplayPolicy());

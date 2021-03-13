@@ -177,6 +177,7 @@ interface IDevicePolicyManager {
 
     String[] setPackagesSuspended(in ComponentName admin, in String callerPackage, in String[] packageNames, boolean suspended);
     boolean isPackageSuspended(in ComponentName admin, in String callerPackage, String packageName);
+    List<String> listPolicyExemptApps();
 
     boolean installCaCert(in ComponentName admin, String callerPackage, in byte[] certBuffer);
     void uninstallCaCerts(in ComponentName admin, String callerPackage, in String[] aliases);

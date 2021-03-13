@@ -33,6 +33,7 @@ import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
@@ -47,6 +48,7 @@ class DeviceControlsTile @Inject constructor(
     host: QSHost,
     @Background backgroundLooper: Looper,
     @Main mainHandler: Handler,
+    falsingManager: FalsingManager,
     metricsLogger: MetricsLogger,
     statusBarStateController: StatusBarStateController,
     activityStarter: ActivityStarter,
@@ -58,6 +60,7 @@ class DeviceControlsTile @Inject constructor(
         host,
         backgroundLooper,
         mainHandler,
+        falsingManager,
         metricsLogger,
         statusBarStateController,
         activityStarter,

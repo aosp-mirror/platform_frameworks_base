@@ -665,9 +665,8 @@ java_defaults {
     ],
     required: [
         "framework-platform-compat-config",
-        // TODO: remove gps_debug, cec_config.xml and protolog.conf.json when the build system propagates "required" properly.
+        // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
         "gps_debug.conf",
-        "cec_config.xml",
         "icu4j-platform-compat-config",
         "libcore-platform-compat-config",
         "protolog.conf.json.gz",

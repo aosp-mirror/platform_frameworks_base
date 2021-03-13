@@ -17,6 +17,7 @@
 package com.android.server.voiceinteraction;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,8 +26,10 @@ import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioAttributes;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SharedMemory;
 import android.service.voice.AlwaysOnHotwordDetector;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.IDspHotwordDetectionCallback;
@@ -74,7 +77,8 @@ final class HotwordDetectionConnection {
     boolean mBound;
 
     HotwordDetectionConnection(Object lock, Context context, ComponentName serviceName,
-            int userId, boolean bindInstantServiceAllowed) {
+            int userId, boolean bindInstantServiceAllowed, @Nullable Bundle options,
+            @Nullable SharedMemory sharedMemory) {
         mLock = lock;
         mContext = context;
         mDetectionComponentName = serviceName;
@@ -90,6 +94,14 @@ final class HotwordDetectionConnection {
                     boolean connected) {
                 synchronized (mLock) {
                     mBound = connected;
+                    if (connected) {
+                        try {
+                            service.setConfig(options, sharedMemory);
+                        } catch (RemoteException e) {
+                            // TODO: (b/181842909) Report an error to voice interactor
+                            Slog.w(TAG, "Failed to setConfig for HotwordDetectionService", e);
+                        }
+                    }
                 }
             }
 
@@ -115,6 +127,11 @@ final class HotwordDetectionConnection {
             mRemoteHotwordDetectionService.unbind();
             mBound = false;
         }
+    }
+
+    void setConfigLocked(Bundle options, SharedMemory sharedMemory) {
+        mRemoteHotwordDetectionService.run(
+                service -> service.setConfig(options, sharedMemory));
     }
 
     private void detectFromDspSource(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,

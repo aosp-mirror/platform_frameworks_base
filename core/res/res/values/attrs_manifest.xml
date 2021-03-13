@@ -829,7 +829,6 @@
             {@code FLAG_ACTIVITY_MULTIPLE_TASK} is set.-->
         <enum name="singleInstancePerTask" value="4" />
     </attr>
-
     <!-- Specify the orientation an activity should be run in.  If not
          specified, it will run in the current preferred orientation
          of the screen.
@@ -1602,6 +1601,12 @@
        <enum name="async" value="1" />
        <enum name="sync" value="2" />
     </attr>
+
+    <!-- Attribution tag to be used for permission sub-attribution if a
+      permission is checked in  {@link android.content.Context#sendBroadcast(Intent, String)}.
+      Multiple tags can be specified separated by '|'.
+    -->
+    <attr name="attributionTags" format="string" />
 
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
@@ -2825,6 +2830,10 @@
 
              <p> See {@link android.content.pm.ActivityInfo#FLAG_PREFER_MINIMAL_POST_PROCESSING} -->
         <attr name="preferMinimalPostProcessing" format="boolean"/>
+        <!-- Specify the attributionTags to be used if a permission is required due to
+            {@link android.content.Context#sendBroadcast(Intent, String)} being used.
+            Multiple tags can be specified separated by '|'. -->
+        <attr name="attributionTags"/>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

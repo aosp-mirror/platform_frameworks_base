@@ -74,6 +74,13 @@ struct Constants {
 
     // If DL was up and not crashing for 10mins, we consider it healthy and reset all delays.
     static constexpr auto healthyDataLoaderUptime = 10min;
+
+    // For healthy DLs, we'll retry every ~5secs for ~10min
+    static constexpr auto bindRetryInterval = 5s;
+    static constexpr auto bindGracePeriod = 10min;
+
+    static constexpr auto bindingTimeout = 1min;
+
     // 10s, 100s (~2min), 1000s (~15min), 10000s (~3hrs)
     static constexpr auto minBindDelay = 10s;
     static constexpr auto maxBindDelay = 10000s;
@@ -293,6 +300,7 @@ IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_v
         mTimedQueue(sm.getTimedQueue()),
         mProgressUpdateJobQueue(sm.getProgressUpdateJobQueue()),
         mFs(sm.getFs()),
+        mClock(sm.getClock()),
         mIncrementalDir(rootDir) {
     CHECK(mVold) << "Vold service is unavailable";
     CHECK(mDataLoaderManager) << "DataLoaderManagerService is unavailable";
@@ -302,6 +310,7 @@ IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_v
     CHECK(mTimedQueue) << "TimedQueue is unavailable";
     CHECK(mProgressUpdateJobQueue) << "mProgressUpdateJobQueue is unavailable";
     CHECK(mFs) << "Fs is unavailable";
+    CHECK(mClock) << "Clock is unavailable";
 
     mJobQueue.reserve(16);
     mJobProcessor = std::thread([this]() {
@@ -2241,17 +2250,44 @@ void IncrementalService::DataLoaderStub::setTargetStatusLocked(int status) {
                << status << " (current " << mCurrentStatus << ")";
 }
 
-Milliseconds IncrementalService::DataLoaderStub::updateBindDelay() {
+std::optional<Milliseconds> IncrementalService::DataLoaderStub::needToBind() {
     std::unique_lock lock(mMutex);
+
+    const auto now = mService.mClock->now();
+    const bool healthy = (mPreviousBindDelay == 0ms);
+
+    if (mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_BINDING &&
+        now - mCurrentStatusTs <= Constants::bindingTimeout) {
+        LOG(INFO) << "Binding still in progress. "
+                  << (healthy ? "The DL is healthy/freshly bound, ok to retry for a few times."
+                              : "Already unhealthy, don't do anything.");
+        // Binding still in progress.
+        if (!healthy) {
+            // Already unhealthy, don't do anything.
+            return {};
+        }
+        // The DL is healthy/freshly bound, ok to retry for a few times.
+        if (now - mPreviousBindTs <= Constants::bindGracePeriod) {
+            // Still within grace period.
+            if (now - mCurrentStatusTs >= Constants::bindRetryInterval) {
+                // Retry interval passed, retrying.
+                mCurrentStatusTs = now;
+                mPreviousBindDelay = 0ms;
+                return 0ms;
+            }
+            return {};
+        }
+        // fallthrough, mark as unhealthy, and retry with delay
+    }
+
     const auto previousBindTs = mPreviousBindTs;
-    const auto now = Clock::now();
     mPreviousBindTs = now;
 
     const auto nonCrashingInterval = std::max(castToMs(now - previousBindTs), 100ms);
     if (previousBindTs.time_since_epoch() == Clock::duration::zero() ||
         nonCrashingInterval > Constants::healthyDataLoaderUptime) {
         mPreviousBindDelay = 0ms;
-        return mPreviousBindDelay;
+        return 0ms;
     }
 
     constexpr auto minBindDelayMs = castToMs(Constants::minBindDelay);
@@ -2264,12 +2300,16 @@ Milliseconds IncrementalService::DataLoaderStub::updateBindDelay() {
     const auto bindDelayJitterRangeMs = bindDelayMs / Constants::bindDelayJitterDivider;
     const auto bindDelayJitterMs = rand() % (bindDelayJitterRangeMs * 2) - bindDelayJitterRangeMs;
     mPreviousBindDelay = std::chrono::milliseconds(bindDelayMs + bindDelayJitterMs);
-
     return mPreviousBindDelay;
 }
 
 bool IncrementalService::DataLoaderStub::bind() {
-    const auto bindDelay = updateBindDelay();
+    const auto maybeBindDelay = needToBind();
+    if (!maybeBindDelay) {
+        LOG(DEBUG) << "Skipping bind to " << mParams.packageName << " because of pending bind.";
+        return true;
+    }
+    const auto bindDelay = *maybeBindDelay;
     if (bindDelay > 1s) {
         LOG(INFO) << "Delaying bind to " << mParams.packageName << " by "
                   << bindDelay.count() / 1000 << "s";
@@ -2279,7 +2319,21 @@ bool IncrementalService::DataLoaderStub::bind() {
     auto status = mService.mDataLoaderManager->bindToDataLoader(id(), mParams, bindDelay.count(),
                                                                 this, &result);
     if (!status.isOk() || !result) {
-        LOG(ERROR) << "Failed to bind a data loader for mount " << id();
+        const bool healthy = (bindDelay == 0ms);
+        LOG(ERROR) << "Failed to bind a data loader for mount " << id()
+                   << (healthy ? ", retrying." : "");
+
+        // Internal error, retry for healthy/new DLs.
+        // Let needToBind migrate it to unhealthy after too many retries.
+        if (healthy) {
+            if (mService.addTimedJob(*mService.mTimedQueue, id(), Constants::bindRetryInterval,
+                                     [this]() { fsmStep(); })) {
+                // Mark as binding so that we know it's not the DL's fault.
+                setCurrentStatus(IDataLoaderStatusListener::DATA_LOADER_BINDING);
+                return true;
+            }
+        }
+
         return false;
     }
     return true;
@@ -2339,7 +2393,14 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
             // Do nothing, this is a reset state.
             break;
         case IDataLoaderStatusListener::DATA_LOADER_DESTROYED: {
-            return destroy();
+            switch (currentStatus) {
+                case IDataLoaderStatusListener::DATA_LOADER_BINDING:
+                    setCurrentStatus(IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
+                    return true;
+                default:
+                    return destroy();
+            }
+            break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_STARTED: {
             switch (currentStatus) {
@@ -2353,6 +2414,7 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
             switch (currentStatus) {
                 case IDataLoaderStatusListener::DATA_LOADER_DESTROYED:
                 case IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE:
+                case IDataLoaderStatusListener::DATA_LOADER_BINDING:
                     return bind();
                 case IDataLoaderStatusListener::DATA_LOADER_BOUND:
                     return create();
@@ -2372,7 +2434,8 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
                 fromServiceSpecificError(-EINVAL, "onStatusChange came to invalid DataLoaderStub");
     }
     if (id() != mountId) {
-        LOG(ERROR) << "Mount ID mismatch: expected " << id() << ", but got: " << mountId;
+        LOG(ERROR) << "onStatusChanged: mount ID mismatch: expected " << id()
+                   << ", but got: " << mountId;
         return binder::Status::fromServiceSpecificError(-EPERM, "Mount ID mismatch.");
     }
     if (newStatus == IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE) {
@@ -2396,10 +2459,12 @@ void IncrementalService::DataLoaderStub::setCurrentStatus(int newStatus) {
         }
 
         oldStatus = mCurrentStatus;
-        mCurrentStatus = newStatus;
         targetStatus = mTargetStatus;
-
         listener = mStatusListener;
+
+        // Change the status.
+        mCurrentStatus = newStatus;
+        mCurrentStatusTs = mService.mClock->now();
 
         if (mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE ||
             mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE) {
@@ -2428,7 +2493,8 @@ binder::Status IncrementalService::DataLoaderStub::reportStreamHealth(MountId mo
                                          "reportStreamHealth came to invalid DataLoaderStub");
     }
     if (id() != mountId) {
-        LOG(ERROR) << "Mount ID mismatch: expected " << id() << ", but got: " << mountId;
+        LOG(ERROR) << "reportStreamHealth: mount ID mismatch: expected " << id()
+                   << ", but got: " << mountId;
         return binder::Status::fromServiceSpecificError(-EPERM, "Mount ID mismatch.");
     }
     {
@@ -2694,6 +2760,8 @@ static std::string toHexString(const RawMetadata& metadata) {
 void IncrementalService::DataLoaderStub::onDump(int fd) {
     dprintf(fd, "    dataLoader: {\n");
     dprintf(fd, "      currentStatus: %d\n", mCurrentStatus);
+    dprintf(fd, "      currentStatusTs: %lldmcs\n",
+            (long long)(elapsedMcs(mCurrentStatusTs, Clock::now())));
     dprintf(fd, "      targetStatus: %d\n", mTargetStatus);
     dprintf(fd, "      targetStatusTs: %lldmcs\n",
             (long long)(elapsedMcs(mTargetStatusTs, Clock::now())));

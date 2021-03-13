@@ -27,6 +27,11 @@ cc_library_shared {
         "libaudioclient",
         "libaudioutils",
         "libaudiofoundation",
+        "media_permission-aidl-cpp",
+    ],
+
+    export_shared_lib_headers: [
+        "media_permission-aidl-cpp",
     ],
 
     version_script: "exports.lds",

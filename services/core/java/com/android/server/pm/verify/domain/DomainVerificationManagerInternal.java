@@ -80,14 +80,14 @@ public interface DomainVerificationManagerInternal {
      * been preserved for migration purposes, but is otherwise ignored. Corresponds to
      * {@link PackageManager#INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS}.
      */
-    int APPROVAL_LEVEL_LEGACY_ALWAYS = 1;
+    int APPROVAL_LEVEL_LEGACY_ALWAYS = 2;
 
     /**
      * The app has been chosen by the user through
      * {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set, boolean)},
      * indicating an explicit choice to use this app to open an unverified domain.
      */
-    int APPROVAL_LEVEL_SELECTION = 2;
+    int APPROVAL_LEVEL_SELECTION = 3;
 
     /**
      * The app is approved through the digital asset link statement being hosted at the domain
@@ -95,7 +95,7 @@ public interface DomainVerificationManagerInternal {
      * {@link DomainVerificationManager#setDomainVerificationStatus(UUID, Set, int)} by
      * the domain verification agent on device.
      */
-    int APPROVAL_LEVEL_VERIFIED = 3;
+    int APPROVAL_LEVEL_VERIFIED = 4;
 
     /**
      * The app has been installed as an instant app, which grants it total authority on the domains
@@ -105,7 +105,7 @@ public interface DomainVerificationManagerInternal {
      * The user is still able to disable instant app link handling through
      * {@link DomainVerificationManager#setDomainVerificationLinkHandlingAllowed(String, boolean)}.
      */
-    int APPROVAL_LEVEL_INSTANT_APP = 4;
+    int APPROVAL_LEVEL_INSTANT_APP = 5;
 
     /**
      * Defines the possible values for {@link #approvalLevelForDomain(PackageSetting, Intent, int)}

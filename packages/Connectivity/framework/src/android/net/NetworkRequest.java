@@ -114,6 +114,10 @@ public class NetworkRequest implements Parcelable {
      *       for the network (if any) that satisfies the default Internet
      *       request.
      *
+     *     - TRACK_BEST, which causes the framework to send callbacks about
+     *       the single, highest scoring current network (if any) that matches
+     *       the specified NetworkCapabilities.
+     *
      *     - BACKGROUND_REQUEST, like REQUEST but does not cause any networks
      *       to retain the NET_CAPABILITY_FOREGROUND capability. A network with
      *       no foreground requests is in the background. A network that has
@@ -136,6 +140,7 @@ public class NetworkRequest implements Parcelable {
         REQUEST,
         BACKGROUND_REQUEST,
         TRACK_SYSTEM_DEFAULT,
+        TRACK_BEST,
     };
 
     /**
@@ -455,6 +460,21 @@ public class NetworkRequest implements Parcelable {
                 if (!VCN_SUPPORTED_CAPABILITIES.contains(cap)) return;
             }
             nc.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
+        }
+
+        /**
+         * Sets the optional subscription ID set.
+         * <p>
+         * This specify the subscription IDs requirement.
+         * A network will satisfy this request only if it matches one of the subIds in this set.
+         * An empty set matches all networks, including those without a subId.
+         *
+         * @param subIds A {@code Set} that represents subscription IDs.
+         */
+        @NonNull
+        public Builder setSubIds(@NonNull Set<Integer> subIds) {
+            mNetworkCapabilities.setSubIds(subIds);
+            return this;
         }
     }
 

@@ -19,6 +19,7 @@ package com.android.server.apphibernation;
 import static org.junit.Assert.assertEquals;
 
 import android.os.FileUtils;
+import android.platform.test.annotations.Presubmit;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
@@ -48,6 +49,7 @@ import java.util.concurrent.TimeoutException;
 
 
 @SmallTest
+@Presubmit
 public class HibernationStateDiskStoreTest {
     private static final String STATES_FILE_NAME = "states";
     private final MockScheduledExecutorService mMockScheduledExecutorService =

@@ -267,7 +267,10 @@ private:
         BootClockTsUs getOldestTsFromLastPendingReads();
         Milliseconds elapsedMsSinceKernelTs(TimePoint now, BootClockTsUs kernelTsUs);
 
-        Milliseconds updateBindDelay();
+        // If the stub has to bind to the DL.
+        // Returns {} if bind operation is already in progress.
+        // Or bind delay in ms.
+        std::optional<Milliseconds> needToBind();
 
         void registerForPendingReads();
         void unregisterFromPendingReads();
@@ -283,6 +286,7 @@ private:
 
         std::condition_variable mStatusCondition;
         int mCurrentStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
+        TimePoint mCurrentStatusTs = {};
         int mTargetStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         TimePoint mTargetStatusTs = {};
 
@@ -443,6 +447,7 @@ private:
     const std::unique_ptr<TimedQueueWrapper> mTimedQueue;
     const std::unique_ptr<TimedQueueWrapper> mProgressUpdateJobQueue;
     const std::unique_ptr<FsWrapper> mFs;
+    const std::unique_ptr<ClockWrapper> mClock;
     const std::string mIncrementalDir;
 
     mutable std::mutex mLock;

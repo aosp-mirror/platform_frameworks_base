@@ -34,7 +34,8 @@ static struct fields_t {
     jclass      mSoundPoolClass;
 } fields;
 static inline SoundPool* MusterSoundPool(JNIEnv *env, jobject thiz) {
-    return (SoundPool*)env->GetLongField(thiz, fields.mNativeContext);
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
+    return reinterpret_cast<SoundPool*>(env->GetLongField(thiz, fields.mNativeContext));
 }
 static const char* const kAudioAttributesClassPathName = "android/media/AudioAttributes";
 struct audio_attributes_fields_t {

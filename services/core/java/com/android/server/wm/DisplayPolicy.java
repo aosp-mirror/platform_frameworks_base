@@ -1410,9 +1410,9 @@ public class DisplayPolicy {
             boolean localClient) {
         final InsetsState state =
                 mDisplayContent.getInsetsPolicy().getInsetsForWindowMetrics(attrs);
-        final boolean inSizeCompatMode = WindowState.inSizeCompatMode(attrs, windowToken);
-        outInsetsState.set(state, inSizeCompatMode || localClient);
-        if (inSizeCompatMode) {
+        final boolean hasCompatScale = WindowState.hasCompatScale(attrs, windowToken);
+        outInsetsState.set(state, hasCompatScale || localClient);
+        if (hasCompatScale) {
             final float compatScale = windowToken != null
                     ? windowToken.getSizeCompatScale()
                     : mDisplayContent.mCompatibleScreenScale;
