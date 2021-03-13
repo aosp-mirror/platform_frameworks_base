@@ -636,7 +636,9 @@ public final class DisplayInfo implements Parcelable {
     public void getMaxBoundsMetrics(DisplayMetrics outMetrics, CompatibilityInfo compatInfo,
             Configuration configuration) {
         Rect bounds = configuration.windowConfiguration.getMaxBounds();
-        getMetricsWithSize(outMetrics, compatInfo, configuration, bounds.width(), bounds.height());
+        // Pass in null configuration to ensure width and height are not overridden to app bounds.
+        getMetricsWithSize(outMetrics, compatInfo, /* configuration= */ null,
+                bounds.width(), bounds.height());
     }
 
     public int getNaturalWidth() {

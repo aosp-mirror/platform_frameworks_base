@@ -16,6 +16,8 @@
 
 package android.media.audiofx;
 
+import static android.media.permission.PermissionUtil.myIdentity;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -23,11 +25,11 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioSystem;
+import android.media.permission.Identity;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -515,10 +517,11 @@ public class AudioEffect {
         }
 
         // native initialization
+        // TODO b/182469354: Make consistent with AudioRecord
         int initResult = native_setup(new WeakReference<AudioEffect>(this),
                 type.toString(), uuid.toString(), priority, audioSession,
                 deviceType, deviceAddress,
-                id, desc, ActivityThread.currentOpPackageName(), probe);
+                id, desc, myIdentity(null), probe);
         if (initResult != SUCCESS && initResult != ALREADY_EXISTS) {
             Log.e(TAG, "Error code " + initResult
                     + " when initializing AudioEffect.");
@@ -1385,7 +1388,7 @@ public class AudioEffect {
     private native final int native_setup(Object audioeffect_this, String type,
             String uuid, int priority, int audioSession,
             int deviceType, String deviceAddress, int[] id, Object[] desc,
-            String opPackageName, boolean probe);
+            Identity identity, boolean probe);
 
     private native final void native_finalize();
 

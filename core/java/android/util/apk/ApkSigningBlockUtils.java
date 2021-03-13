@@ -200,10 +200,9 @@ public final class ApkSigningBlockUtils {
         // physical memory.
 
         DataSource beforeApkSigningBlock =
-                new MemoryMappedFileDataSource(apkFileDescriptor, 0,
-                        signatureInfo.apkSigningBlockOffset);
+                DataSource.create(apkFileDescriptor, 0, signatureInfo.apkSigningBlockOffset);
         DataSource centralDir =
-                new MemoryMappedFileDataSource(
+                DataSource.create(
                         apkFileDescriptor, signatureInfo.centralDirOffset,
                         signatureInfo.eocdOffset - signatureInfo.centralDirOffset);
 

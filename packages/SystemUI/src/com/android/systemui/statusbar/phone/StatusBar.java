@@ -95,6 +95,7 @@ import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -4071,7 +4072,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     private @Nullable Intent getEmergencyActionIntent() {
         Intent emergencyIntent = new Intent(EmergencyGesture.ACTION_LAUNCH_EMERGENCY);
         PackageManager pm = mContext.getPackageManager();
-        ResolveInfo resolveInfo = pm.resolveActivity(emergencyIntent, /*flags=*/0);
+        List<ResolveInfo> emergencyActivities = pm.queryIntentActivities(emergencyIntent,
+                PackageManager.MATCH_SYSTEM_ONLY);
+        ResolveInfo resolveInfo = getTopEmergencySosInfo(emergencyActivities);
         if (resolveInfo == null) {
             Log.wtf(TAG, "Couldn't find an app to process the emergency intent.");
             return null;
@@ -4080,6 +4083,34 @@ public class StatusBar extends SystemUI implements DemoMode,
                 resolveInfo.activityInfo.name));
         emergencyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return emergencyIntent;
+    }
+
+    /**
+     * Select and return the "best" ResolveInfo for Emergency SOS Activity.
+     */
+    private @Nullable ResolveInfo getTopEmergencySosInfo(List<ResolveInfo> emergencyActivities) {
+        // No matched activity.
+        if (emergencyActivities == null || emergencyActivities.isEmpty()) {
+            return null;
+        }
+
+        // Of multiple matched Activities, give preference to the pre-set package name.
+        String preferredAppPackageName =
+                mContext.getString(R.string.config_preferredEmergencySosPackage);
+
+        // If there is no preferred app, then return first match.
+        if (TextUtils.isEmpty(preferredAppPackageName)) {
+            return emergencyActivities.get(0);
+        }
+
+        for (ResolveInfo emergencyInfo: emergencyActivities) {
+            // If activity is from the preferred app, use it.
+            if (TextUtils.equals(emergencyInfo.activityInfo.packageName, preferredAppPackageName)) {
+                return emergencyInfo;
+            }
+        }
+        // No matching activity: return first match
+        return emergencyActivities.get(0);
     }
 
     boolean isCameraAllowedByAdmin() {

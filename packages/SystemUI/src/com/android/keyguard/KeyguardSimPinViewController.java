@@ -78,8 +78,8 @@ public class KeyguardSimPinViewController
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
-            TelephonyManager telephonyManager,
-            FalsingCollector falsingCollector, boolean isNewLayoutEnabled) {
+            TelephonyManager telephonyManager, FalsingCollector falsingCollector,
+            boolean isNewLayoutEnabled) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
                 falsingCollector);

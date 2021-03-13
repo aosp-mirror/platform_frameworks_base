@@ -277,6 +277,10 @@ public final class ImsCallProfile implements Parcelable {
      * server infrastructure to get the picture. It can be set via
      * {@link #setCallExtra(String, String)}.
      *
+     * Note that this URL is not intended to be parsed by the IMS stack -- it should be sent
+     * directly to the network for consumption by the called party or forwarded directly from the
+     * network to the platform for caching and download.
+     *
      * Reference: RCC.20 Section 2.4.3.2
      */
     public static final String EXTRA_PICTURE_URL = "android.telephony.ims.extra.PICTURE_URL";
@@ -729,6 +733,10 @@ public final class ImsCallProfile implements Parcelable {
 
     /**
      * Set the call extra value (Parcelable), given the call extra name.
+     *
+     * Note that the {@link Parcelable} provided must be a class defined in the Android API surface,
+     * as opposed to a class defined by your app.
+     *
      * @param name call extra name
      * @param parcelable call extra value
      */

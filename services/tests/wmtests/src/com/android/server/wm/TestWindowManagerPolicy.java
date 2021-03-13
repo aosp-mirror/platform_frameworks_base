@@ -119,7 +119,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             mRunnableWhenAddingSplashScreen.run();
             mRunnableWhenAddingSplashScreen = null;
         }
-        return () -> {
+        return (a) -> {
             synchronized (wm.mGlobalLock) {
                 activity.removeChild(window);
                 activity.mStartingWindow = null;

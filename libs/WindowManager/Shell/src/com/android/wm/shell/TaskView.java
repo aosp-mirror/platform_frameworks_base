@@ -83,6 +83,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private boolean mIsInitialized;
     private Listener mListener;
     private Executor mListenerExecutor;
+    private Rect mObscuredTouchRect;
 
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRootRect = new Rect();
@@ -158,6 +159,15 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         options.setLaunchCookie(launchCookie);
         options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         options.setRemoveWithTaskOrganizer(true);
+    }
+
+    /**
+     * Indicates a region of the view that is not touchable.
+     *
+     * @param obscuredRect the obscured region of the view.
+     */
+    public void setObscuredTouchRect(Rect obscuredRect) {
+        mObscuredTouchRect = obscuredRect;
     }
 
     /**
@@ -384,6 +394,10 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         mTmpRect.set(mTmpLocation[0], mTmpLocation[1],
                 mTmpLocation[0] + getWidth(), mTmpLocation[1] + getHeight());
         inoutInfo.touchableRegion.op(mTmpRect, Region.Op.DIFFERENCE);
+
+        if (mObscuredTouchRect != null) {
+            inoutInfo.touchableRegion.union(mObscuredTouchRect);
+        }
     }
 
     @Override

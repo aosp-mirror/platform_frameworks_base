@@ -188,4 +188,13 @@
 
     <!-- The height of the brand image on staring surface. -->
     <dimen name="starting_surface_brand_image_height">80dp</dimen>
+
+    <!-- The length of the shift of main window when exit starting window. -->
+    <dimen name="starting_surface_exit_animation_window_shift_length">20dp</dimen>
+
+    <!-- The distance of the shift icon when normal exit starting window. -->
+    <dimen name="starting_surface_normal_exit_icon_distance">120dp</dimen>
+
+    <!-- The distance of the shift icon when early exit starting window. -->
+    <dimen name="starting_surface_early_exit_icon_distance">32dp</dimen>
 </resources>

@@ -289,15 +289,19 @@ public class Task {
     /**
      * Returns the visible width to height ratio. Returns 0f if snapshot data is not available.
      */
-    public float getVisibleThumbnailRatio() {
+    public float getVisibleThumbnailRatio(boolean clipInsets) {
         if (lastSnapshotData.taskSize == null || lastSnapshotData.contentInsets == null) {
             return 0f;
         }
 
-        float availableWidth = lastSnapshotData.taskSize.x - (lastSnapshotData.contentInsets.left
-                + lastSnapshotData.contentInsets.right);
-        float availableHeight = lastSnapshotData.taskSize.y - (lastSnapshotData.contentInsets.top
-                + lastSnapshotData.contentInsets.bottom);
+        float availableWidth = lastSnapshotData.taskSize.x;
+        float availableHeight = lastSnapshotData.taskSize.y;
+        if (clipInsets) {
+            availableWidth -=
+                    (lastSnapshotData.contentInsets.left + lastSnapshotData.contentInsets.right);
+            availableHeight -=
+                    (lastSnapshotData.contentInsets.top + lastSnapshotData.contentInsets.bottom);
+        }
         return availableWidth / availableHeight;
     }
 

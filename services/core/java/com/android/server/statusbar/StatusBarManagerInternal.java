@@ -160,4 +160,10 @@ public interface StatusBarManagerInternal {
      * Handles a logging command from the WM shell command.
      */
     void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd);
+
+    /**
+     * @see com.android.internal.statusbar.IStatusBar#setNavigationBarLumaSamplingEnabled(int,
+     * boolean)
+     */
+    void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable);
 }

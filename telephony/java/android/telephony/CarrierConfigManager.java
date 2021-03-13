@@ -27,6 +27,7 @@ import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.net.ipsec.ike.SaProposal;
 import android.os.Build;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -4170,9 +4171,11 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "child_sa_rekey_soft_timer_sec_int";
 
         /**
-         * Supported DH groups for IKE negotiation. Possible values are {@link #DH_GROUP_NONE},
-         * {@link #DH_GROUP_1024_BIT_MODP}, {@link #DH_GROUP_1536_BIT_MODP}, {@link
-         * #DH_GROUP_2048_BIT_MODP}
+         * Supported DH groups for IKE negotiation. Possible values are:
+         * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_NONE},
+         * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_1024_BIT_MODP},
+         * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_1536_BIT_MODP},
+         * {@link android.net.ipsec.ike.SaProposal#DH_GROUP_2048_BIT_MODP}
          */
         public static final String KEY_DIFFIE_HELLMAN_GROUPS_INT_ARRAY =
                 KEY_PREFIX + "diffie_hellman_groups_int_array";
@@ -4208,23 +4211,29 @@ public class CarrierConfigManager {
 
         /**
          * List of supported key sizes for AES Cipher Block Chaining (CBC) encryption mode of child
-         * session. Possible values are {@link #KEY_LEN_UNUSED}, {@link #KEY_LEN_AES_128}, {@link
-         * #KEY_LEN_AES_192}, {@link #KEY_LEN_AES_256}
+         * session. Possible values are:
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_UNUSED},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_128},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_192},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_256}
          */
         public static final String KEY_CHILD_SESSION_AES_CBC_KEY_SIZE_INT_ARRAY =
                 KEY_PREFIX + "child_session_aes_cbc_key_size_int_array";
 
         /**
          * List of supported key sizes for AES Counter (CTR) encryption mode of child session.
-         * Possible values are {@link #KEY_LEN_UNUSED},
-         * {@link #KEY_LEN_AES_128}, {@link #KEY_LEN_AES_192}, {@link #KEY_LEN_AES_256}
+         * Possible values are:
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_UNUSED},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_128},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_192},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_256}
          */
         public static final String KEY_CHILD_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY =
                 KEY_PREFIX + "child_session_aes_ctr_key_size_int_array";
 
         /**
          * List of supported encryption algorithms for child session. Possible values are
-         * {@link #ENCRYPTION_ALGORITHM_AES_CBC}
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CBC}
          */
         public static final String KEY_SUPPORTED_CHILD_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY =
                 KEY_PREFIX + "supported_child_session_encryption_algorithms_int_array";
@@ -4245,8 +4254,11 @@ public class CarrierConfigManager {
 
         /**
          * List of supported key sizes for AES Cipher Block Chaining (CBC) encryption mode of IKE
-         * session. Possible values - {@link #KEY_LEN_UNUSED}, {@link #KEY_LEN_AES_128}, {@link
-         * #KEY_LEN_AES_192}, {@link #KEY_LEN_AES_256}
+         * session. Possible values:
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_UNUSED},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_128},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_192},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_256}
          */
         public static final String KEY_IKE_SESSION_AES_CBC_KEY_SIZE_INT_ARRAY =
                 KEY_PREFIX + "ike_session_encryption_aes_cbc_key_size_int_array";
@@ -4254,24 +4266,31 @@ public class CarrierConfigManager {
 
         /**
          * List of supported key sizes for AES Counter (CTR) encryption mode of IKE session.
-         * Possible values - {@link #KEY_LEN_UNUSED}, {@link #KEY_LEN_AES_128},
-         * {@link #KEY_LEN_AES_192}, {@link #KEY_LEN_AES_256}
+         * Possible values -
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_UNUSED},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_128},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_192},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_256}
          */
          public static final String KEY_IKE_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY =
                  KEY_PREFIX + "ike_session_encryption_aes_ctr_key_size_int_array";
 
         /**
          * List of supported encryption algorithms for IKE session. Possible values are
-         * {@link #ENCRYPTION_ALGORITHM_AES_CBC}, {@link #ENCRYPTION_ALGORITHM_AES_CTR}
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CBC},
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CTR}
          */
         public static final String KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY =
                 KEY_PREFIX + "supported_ike_session_encryption_algorithms_int_array";
 
         /**
-         * List of supported integrity algorithms for IKE session Possible values are {@link
-         * #INTEGRITY_ALGORITHM_NONE}, {@link #INTEGRITY_ALGORITHM_HMAC_SHA1_96}, {@link
-         * #INTEGRITY_ALGORITHM_AES_XCBC_96}, {@link #INTEGRITY_ALGORITHM_HMAC_SHA2_256_128}, {@link
-         * #INTEGRITY_ALGORITHM_HMAC_SHA2_384_192}, {@link #INTEGRITY_ALGORITHM_HMAC_SHA2_512_256}
+         * List of supported integrity algorithms for IKE session. Possible values are
+         * {@link android.net.ipsec.ike.SaProposal#INTEGRITY_ALGORITHM_NONE},
+         * {@link android.net.ipsec.ike.SaProposal#INTEGRITY_ALGORITHM_HMAC_SHA1_96},
+         * {@link android.net.ipsec.ike.SaProposal#INTEGRITY_ALGORITHM_AES_XCBC_96},
+         * {@link android.net.ipsec.ike.SaProposal#INTEGRITY_ALGORITHM_HMAC_SHA2_256_128},
+         * {@link android.net.ipsec.ike.SaProposal#INTEGRITY_ALGORITHM_HMAC_SHA2_384_192},
+         * {@link android.net.ipsec.ike.SaProposal#INTEGRITY_ALGORITHM_HMAC_SHA2_512_256}
          */
         public static final String KEY_SUPPORTED_INTEGRITY_ALGORITHMS_INT_ARRAY =
                 KEY_PREFIX + "supported_integrity_algorithms_int_array";
@@ -4291,9 +4310,11 @@ public class CarrierConfigManager {
 
         /**
          * List of supported pseudo random function algorithms for IKE session. Possible values are
-         * {@link #PSEUDORANDOM_FUNCTION_HMAC_SHA1}, {@link #PSEUDORANDOM_FUNCTION_AES128_XCBC},
-         * {@link #PSEUDORANDOM_FUNCTION_SHA2_256}, {@link #PSEUDORANDOM_FUNCTION_SHA2_384},
-         * {@link #PSEUDORANDOM_FUNCTION_SHA2_512}
+         * {@link android.net.ipsec.ike.SaProposal#PSEUDORANDOM_FUNCTION_HMAC_SHA1},
+         * {@link android.net.ipsec.ike.SaProposal#PSEUDORANDOM_FUNCTION_AES128_XCBC},
+         * {@link android.net.ipsec.ike.SaProposal#PSEUDORANDOM_FUNCTION_SHA2_256},
+         * {@link android.net.ipsec.ike.SaProposal#PSEUDORANDOM_FUNCTION_SHA2_384},
+         * {@link android.net.ipsec.ike.SaProposal#PSEUDORANDOM_FUNCTION_SHA2_512}
          */
         public static final String KEY_SUPPORTED_PRF_ALGORITHMS_INT_ARRAY =
                 KEY_PREFIX + "supported_prf_algorithms_int_array";
@@ -4366,182 +4387,6 @@ public class CarrierConfigManager {
         public static final int EPDG_ADDRESS_CELLULAR_LOC = 3;
 
         /** @hide */
-        @IntDef({KEY_LEN_UNUSED, KEY_LEN_AES_128, KEY_LEN_AES_192, KEY_LEN_AES_256})
-        public @interface EncrpytionKeyLengthType {}
-
-        public static final int KEY_LEN_UNUSED = 0;
-        /** AES Encryption/Ciphering Algorithm key length 128 bits. */
-        public static final int KEY_LEN_AES_128 = 128;
-        /** AES Encryption/Ciphering Algorithm key length 192 bits. */
-        public static final int KEY_LEN_AES_192 = 192;
-        /** AES Encryption/Ciphering Algorithm key length 256 bits. */
-        public static final int KEY_LEN_AES_256 = 256;
-
-        /** @hide */
-        @IntDef({
-            DH_GROUP_NONE,
-            DH_GROUP_1024_BIT_MODP,
-            DH_GROUP_1536_BIT_MODP,
-            DH_GROUP_2048_BIT_MODP,
-            DH_GROUP_3072_BIT_MODP,
-            DH_GROUP_4096_BIT_MODP
-        })
-        public @interface DhGroup {}
-
-        /** None Diffie-Hellman Group. */
-        public static final int DH_GROUP_NONE = 0;
-        /**
-         * 1024-bit MODP Diffie-Hellman Group.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int DH_GROUP_1024_BIT_MODP = 2;
-        /**
-         * 1536-bit MODP Diffie-Hellman Group.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int DH_GROUP_1536_BIT_MODP = 5;
-        /**
-         * 2048-bit MODP Diffie-Hellman Group.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int DH_GROUP_2048_BIT_MODP = 14;
-        /**
-         * 3072-bit MODP Diffie-Hellman Group.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int DH_GROUP_3072_BIT_MODP = 15;
-        /**
-         * 4096-bit MODP Diffie-Hellman Group.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int DH_GROUP_4096_BIT_MODP = 16;
-
-        /** @hide */
-        @IntDef({ENCRYPTION_ALGORITHM_AES_CBC, ENCRYPTION_ALGORITHM_AES_CTR})
-        public @interface EncryptionAlgorithm {}
-
-        /**
-         * AES-CBC Encryption/Ciphering Algorithm.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int ENCRYPTION_ALGORITHM_AES_CBC = 12;
-
-        /**
-         * AES-CTR Encryption/Ciphering Algorithm.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int ENCRYPTION_ALGORITHM_AES_CTR = 13;
-
-        /** @hide */
-        @IntDef({
-            INTEGRITY_ALGORITHM_NONE,
-            INTEGRITY_ALGORITHM_HMAC_SHA1_96,
-            INTEGRITY_ALGORITHM_AES_XCBC_96,
-            INTEGRITY_ALGORITHM_HMAC_SHA2_256_128,
-            INTEGRITY_ALGORITHM_HMAC_SHA2_384_192,
-            INTEGRITY_ALGORITHM_HMAC_SHA2_512_256
-        })
-        public @interface IntegrityAlgorithm {}
-
-        /** None Authentication/Integrity Algorithm. */
-        public static final int INTEGRITY_ALGORITHM_NONE = 0;
-        /**
-         * HMAC-SHA1 Authentication/Integrity Algorithm.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int INTEGRITY_ALGORITHM_HMAC_SHA1_96 = 2;
-        /**
-         * AES-XCBC-96 Authentication/Integrity Algorithm.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int INTEGRITY_ALGORITHM_AES_XCBC_96 = 5;
-        /**
-         * HMAC-SHA256 Authentication/Integrity Algorithm with 128-bit truncation.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_256_128 = 12;
-        /**
-         * HMAC-SHA384 Authentication/Integrity Algorithm with 192-bit truncation.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_384_192 = 13;
-        /**
-         * HMAC-SHA512 Authentication/Integrity Algorithm with 256-bit truncation.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_512_256 = 14;
-
-        /** @hide */
-        @IntDef({
-            PSEUDORANDOM_FUNCTION_HMAC_SHA1,
-            PSEUDORANDOM_FUNCTION_AES128_XCBC,
-            PSEUDORANDOM_FUNCTION_SHA2_256,
-            PSEUDORANDOM_FUNCTION_SHA2_384,
-            PSEUDORANDOM_FUNCTION_SHA2_512
-        })
-        public @interface PseudorandomFunction {}
-
-        /**
-         * HMAC-SHA1 Pseudorandom Function.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int PSEUDORANDOM_FUNCTION_HMAC_SHA1 = 2;
-        /**
-         * AES128-XCBC Pseudorandom Function.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int PSEUDORANDOM_FUNCTION_AES128_XCBC = 4;
-        /**
-         * HMAC-SHA2-256 Pseudorandom Function.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int PSEUDORANDOM_FUNCTION_SHA2_256 = 5;
-        /**
-         * HMAC-SHA2-384 Pseudorandom Function.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int PSEUDORANDOM_FUNCTION_SHA2_384 = 6;
-        /**
-         * HMAC-SHA2-384 Pseudorandom Function.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc7296#section-3.3">RFC 7296, Internet Key
-         *     Exchange Protocol Version 2 (IKEv2)</a>
-         */
-        public static final int PSEUDORANDOM_FUNCTION_SHA2_512 = 7;
-
-        /** @hide */
         @IntDef({ID_TYPE_FQDN, ID_TYPE_RFC822_ADDR, ID_TYPE_KEY_ID})
         public @interface IkeIdType {}
 
@@ -4582,31 +4427,33 @@ public class CarrierConfigManager {
             defaults.putIntArray(
                     KEY_DIFFIE_HELLMAN_GROUPS_INT_ARRAY,
                     new int[] {
-                        DH_GROUP_1024_BIT_MODP, DH_GROUP_1536_BIT_MODP, DH_GROUP_2048_BIT_MODP
+                        SaProposal.DH_GROUP_1024_BIT_MODP,
+                        SaProposal.DH_GROUP_1536_BIT_MODP,
+                        SaProposal.DH_GROUP_2048_BIT_MODP
                     });
             defaults.putIntArray(
                     KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY,
-                    new int[] {ENCRYPTION_ALGORITHM_AES_CBC});
+                    new int[] {SaProposal.ENCRYPTION_ALGORITHM_AES_CBC});
             defaults.putIntArray(
                     KEY_SUPPORTED_CHILD_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY,
-                    new int[] {ENCRYPTION_ALGORITHM_AES_CBC});
+                    new int[] {SaProposal.ENCRYPTION_ALGORITHM_AES_CBC});
             defaults.putIntArray(
                     KEY_SUPPORTED_INTEGRITY_ALGORITHMS_INT_ARRAY,
                     new int[] {
-                        INTEGRITY_ALGORITHM_AES_XCBC_96,
-                        INTEGRITY_ALGORITHM_HMAC_SHA1_96,
-                        INTEGRITY_ALGORITHM_HMAC_SHA2_256_128,
-                        INTEGRITY_ALGORITHM_HMAC_SHA2_384_192,
-                        INTEGRITY_ALGORITHM_HMAC_SHA2_512_256,
+                        SaProposal.INTEGRITY_ALGORITHM_AES_XCBC_96,
+                        SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA1_96,
+                        SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_256_128,
+                        SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_384_192,
+                        SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_512_256,
                     });
             defaults.putIntArray(
                     KEY_SUPPORTED_PRF_ALGORITHMS_INT_ARRAY,
                     new int[] {
-                        PSEUDORANDOM_FUNCTION_HMAC_SHA1,
-                        PSEUDORANDOM_FUNCTION_AES128_XCBC,
-                        PSEUDORANDOM_FUNCTION_SHA2_256,
-                        PSEUDORANDOM_FUNCTION_SHA2_384,
-                        PSEUDORANDOM_FUNCTION_SHA2_512
+                        SaProposal.PSEUDORANDOM_FUNCTION_HMAC_SHA1,
+                        SaProposal.PSEUDORANDOM_FUNCTION_AES128_XCBC,
+                        SaProposal.PSEUDORANDOM_FUNCTION_SHA2_256,
+                        SaProposal.PSEUDORANDOM_FUNCTION_SHA2_384,
+                        SaProposal.PSEUDORANDOM_FUNCTION_SHA2_512
                     });
 
             defaults.putInt(KEY_EPDG_AUTHENTICATION_METHOD_INT, AUTHENTICATION_METHOD_EAP_ONLY);
@@ -4616,16 +4463,28 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_NATT_KEEP_ALIVE_TIMER_SEC_INT, 20);
             defaults.putIntArray(
                     KEY_IKE_SESSION_AES_CBC_KEY_SIZE_INT_ARRAY,
-                    new int[] {KEY_LEN_AES_128, KEY_LEN_AES_192, KEY_LEN_AES_256});
+                    new int[] {
+                      SaProposal.KEY_LEN_AES_128,
+                      SaProposal.KEY_LEN_AES_192,
+                      SaProposal.KEY_LEN_AES_256});
             defaults.putIntArray(
                     KEY_CHILD_SESSION_AES_CBC_KEY_SIZE_INT_ARRAY,
-                    new int[] {KEY_LEN_AES_128, KEY_LEN_AES_192, KEY_LEN_AES_256});
+                    new int[] {
+                      SaProposal.KEY_LEN_AES_128,
+                      SaProposal.KEY_LEN_AES_192,
+                      SaProposal.KEY_LEN_AES_256});
             defaults.putIntArray(
                     KEY_IKE_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY,
-                    new int[] {KEY_LEN_AES_128, KEY_LEN_AES_192, KEY_LEN_AES_256});
+                    new int[] {
+                      SaProposal.KEY_LEN_AES_128,
+                      SaProposal.KEY_LEN_AES_192,
+                      SaProposal.KEY_LEN_AES_256});
             defaults.putIntArray(
                     KEY_CHILD_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY,
-                    new int[] {KEY_LEN_AES_128, KEY_LEN_AES_192, KEY_LEN_AES_256});
+                    new int[] {
+                      SaProposal.KEY_LEN_AES_128,
+                      SaProposal.KEY_LEN_AES_192,
+                      SaProposal.KEY_LEN_AES_256});
             defaults.putIntArray(
                     KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY,
                     new int[] {EPDG_ADDRESS_PLMN, EPDG_ADDRESS_STATIC});

@@ -220,7 +220,7 @@ public class ConnectivityManagerTest {
 
         // register callback
         when(mService.requestNetwork(any(), anyInt(), captor.capture(), anyInt(), any(), anyInt(),
-                any(), nullable(String.class))).thenReturn(request);
+                anyInt(), any(), nullable(String.class))).thenReturn(request);
         manager.requestNetwork(request, callback, handler);
 
         // callback triggers
@@ -248,7 +248,7 @@ public class ConnectivityManagerTest {
 
         // register callback
         when(mService.requestNetwork(any(), anyInt(), captor.capture(), anyInt(), any(), anyInt(),
-                any(), nullable(String.class))).thenReturn(req1);
+                anyInt(), any(), nullable(String.class))).thenReturn(req1);
         manager.requestNetwork(req1, callback, handler);
 
         // callback triggers
@@ -266,7 +266,7 @@ public class ConnectivityManagerTest {
 
         // callback can be registered again
         when(mService.requestNetwork(any(), anyInt(), captor.capture(), anyInt(), any(), anyInt(),
-                any(), nullable(String.class))).thenReturn(req2);
+                anyInt(), any(), nullable(String.class))).thenReturn(req2);
         manager.requestNetwork(req2, callback, handler);
 
         // callback triggers
@@ -289,8 +289,8 @@ public class ConnectivityManagerTest {
         info.targetSdkVersion = VERSION_CODES.N_MR1 + 1;
 
         when(mCtx.getApplicationInfo()).thenReturn(info);
-        when(mService.requestNetwork(any(), anyInt(), any(), anyInt(), any(), anyInt(), any(),
-                nullable(String.class))).thenReturn(request);
+        when(mService.requestNetwork(any(), anyInt(), any(), anyInt(), any(), anyInt(), anyInt(),
+                any(), nullable(String.class))).thenReturn(request);
 
         Handler handler = new Handler(Looper.getMainLooper());
         manager.requestNetwork(request, callback, handler);
@@ -358,34 +358,34 @@ public class ConnectivityManagerTest {
 
         manager.requestNetwork(request, callback);
         verify(mService).requestNetwork(eq(request.networkCapabilities),
-                eq(REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
+                eq(REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE), anyInt(),
                 eq(testPkgName), eq(testAttributionTag));
         reset(mService);
 
         // Verify that register network callback does not calls requestNetwork at all.
         manager.registerNetworkCallback(request, callback);
-        verify(mService, never()).requestNetwork(any(), anyInt(), any(), anyInt(), any(),
+        verify(mService, never()).requestNetwork(any(), anyInt(), any(), anyInt(), any(), anyInt(),
                 anyInt(), any(), any());
-        verify(mService).listenForNetwork(eq(request.networkCapabilities), any(), any(),
+        verify(mService).listenForNetwork(eq(request.networkCapabilities), any(), any(), anyInt(),
                 eq(testPkgName), eq(testAttributionTag));
         reset(mService);
 
         manager.registerDefaultNetworkCallback(callback);
         verify(mService).requestNetwork(eq(null),
-                eq(TRACK_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
-                eq(testPkgName), eq(testAttributionTag));
-        reset(mService);
-
-        manager.requestBackgroundNetwork(request, null, callback);
-        verify(mService).requestNetwork(eq(request.networkCapabilities),
-                eq(BACKGROUND_REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
+                eq(TRACK_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE), anyInt(),
                 eq(testPkgName), eq(testAttributionTag));
         reset(mService);
 
         Handler handler = new Handler(ConnectivityThread.getInstanceLooper());
+        manager.requestBackgroundNetwork(request, handler, callback);
+        verify(mService).requestNetwork(eq(request.networkCapabilities),
+                eq(BACKGROUND_REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE), anyInt(),
+                eq(testPkgName), eq(testAttributionTag));
+        reset(mService);
+
         manager.registerSystemDefaultNetworkCallback(callback, handler);
         verify(mService).requestNetwork(eq(null),
-                eq(TRACK_SYSTEM_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
+                eq(TRACK_SYSTEM_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE), anyInt(),
                 eq(testPkgName), eq(testAttributionTag));
         reset(mService);
     }

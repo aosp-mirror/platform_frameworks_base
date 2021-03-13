@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -131,6 +132,7 @@ public final class NetworkCapabilities implements Parcelable {
         mPrivateDnsBroken = false;
         mRequestorUid = Process.INVALID_UID;
         mRequestorPackageName = null;
+        mSubIds = new ArraySet<>();
     }
 
     /**
@@ -159,6 +161,7 @@ public final class NetworkCapabilities implements Parcelable {
         mPrivateDnsBroken = nc.mPrivateDnsBroken;
         mRequestorUid = nc.mRequestorUid;
         mRequestorPackageName = nc.mRequestorPackageName;
+        mSubIds = new ArraySet<>(nc.mSubIds);
     }
 
     /**
@@ -1048,6 +1051,16 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * Instances of NetworkCapabilities sent to apps without the appropriate permissions will have
      * this field cleared out.
+     *
+     * <p>
+     * This field will only be populated for VPN and wifi network suggestor apps (i.e using
+     * {@link WifiNetworkSuggestion}), and only for the network they own.
+     * In the case of wifi network suggestors apps, this field is also location sensitive, so the
+     * app needs to hold {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission. If the
+     * app targets SDK version greater than or equal to {@link Build.VERSION_CODES#S}, then they
+     * also need to use {@link NetworkCallback#FLAG_INCLUDE_LOCATION_INFO} to get the info in their
+     * callback. The app will be blamed for location access if this field is included.
+     * </p>
      */
     public int getOwnerUid() {
         return mOwnerUid;
@@ -1655,6 +1668,7 @@ public final class NetworkCapabilities implements Parcelable {
         combineSSIDs(nc);
         combineRequestor(nc);
         combineAdministratorUids(nc);
+        combineSubIds(nc);
     }
 
     /**
@@ -1674,8 +1688,9 @@ public final class NetworkCapabilities implements Parcelable {
                 && satisfiedBySpecifier(nc)
                 && (onlyImmutable || satisfiedBySignalStrength(nc))
                 && (onlyImmutable || satisfiedByUids(nc))
-                && (onlyImmutable || satisfiedBySSID(nc)))
-                && (onlyImmutable || satisfiedByRequestor(nc));
+                && (onlyImmutable || satisfiedBySSID(nc))
+                && (onlyImmutable || satisfiedByRequestor(nc))
+                && (onlyImmutable || satisfiedBySubIds(nc)));
     }
 
     /**
@@ -1771,7 +1786,8 @@ public final class NetworkCapabilities implements Parcelable {
                 && equalsOwnerUid(that)
                 && equalsPrivateDnsBroken(that)
                 && equalsRequestor(that)
-                && equalsAdministratorUids(that);
+                && equalsAdministratorUids(that)
+                && equalsSubIds(that);
     }
 
     @Override
@@ -1793,7 +1809,8 @@ public final class NetworkCapabilities implements Parcelable {
                 + Objects.hashCode(mPrivateDnsBroken) * 47
                 + Objects.hashCode(mRequestorUid) * 53
                 + Objects.hashCode(mRequestorPackageName) * 59
-                + Arrays.hashCode(mAdministratorUids) * 61;
+                + Arrays.hashCode(mAdministratorUids) * 61
+                + Objects.hashCode(mSubIds) * 67;
     }
 
     @Override
@@ -1827,6 +1844,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeInt(mOwnerUid);
         dest.writeInt(mRequestorUid);
         dest.writeString(mRequestorPackageName);
+        dest.writeIntArray(CollectionUtils.toIntArray(mSubIds));
     }
 
     public static final @android.annotation.NonNull Creator<NetworkCapabilities> CREATOR =
@@ -1850,6 +1868,11 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mOwnerUid = in.readInt();
                 netCap.mRequestorUid = in.readInt();
                 netCap.mRequestorPackageName = in.readString();
+                netCap.mSubIds = new ArraySet<>();
+                final int[] subIdInts = Objects.requireNonNull(in.createIntArray());
+                for (int i = 0; i < subIdInts.length; i++) {
+                    netCap.mSubIds.add(subIdInts[i]);
+                }
                 return netCap;
             }
             @Override
@@ -1933,9 +1956,12 @@ public final class NetworkCapabilities implements Parcelable {
             sb.append(" SSID: ").append(mSSID);
         }
 
-
         if (mPrivateDnsBroken) {
             sb.append(" PrivateDnsBroken");
+        }
+
+        if (!mSubIds.isEmpty()) {
+            sb.append(" SubscriptionIds: ").append(mSubIds);
         }
 
         sb.append("]");
@@ -2251,6 +2277,67 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
+     * Set of the subscription IDs that identifies the network or request, empty if none.
+     */
+    @NonNull
+    private ArraySet<Integer> mSubIds = new ArraySet<>();
+
+    /**
+     * Sets the subscription ID set that associated to this network or request.
+     *
+     * @hide
+     */
+    @NonNull
+    public NetworkCapabilities setSubIds(@NonNull Set<Integer> subIds) {
+        mSubIds = new ArraySet(Objects.requireNonNull(subIds));
+        return this;
+    }
+
+    /**
+     * Gets the subscription ID set that associated to this network or request.
+     * @return
+     */
+    @NonNull
+    public Set<Integer> getSubIds() {
+        return new ArraySet<>(mSubIds);
+    }
+
+    /**
+     * Tests if the subscription ID set of this network is the same as that of the passed one.
+     */
+    private boolean equalsSubIds(@NonNull NetworkCapabilities nc) {
+        return Objects.equals(mSubIds, nc.mSubIds);
+    }
+
+    /**
+     * Check if the subscription ID set requirements of this object are matched by the passed one.
+     * If specified in the request, the passed one need to have at least one subId and at least
+     * one of them needs to be in the request set.
+     */
+    private boolean satisfiedBySubIds(@NonNull NetworkCapabilities nc) {
+        if (mSubIds.isEmpty()) return true;
+        if (nc.mSubIds.isEmpty()) return false;
+        for (final Integer subId : nc.mSubIds) {
+            if (mSubIds.contains(subId)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Combine subscription ID set of the capabilities.
+     *
+     * <p>This is only legal if the subscription Ids are equal.
+     *
+     * <p>If both subscription IDs are not equal, they belong to different subscription
+     * (or no subscription). In this case, it would not make sense to add them together.
+     */
+    private void combineSubIds(@NonNull NetworkCapabilities nc) {
+        if (!Objects.equals(mSubIds, nc.mSubIds)) {
+            throw new IllegalStateException("Can't combine two subscription ID sets");
+        }
+    }
+
+    /**
      * Builder class for NetworkCapabilities.
      *
      * This class is mainly for for {@link NetworkAgent} instances to use. Many fields in
@@ -2552,6 +2639,18 @@ public final class NetworkCapabilities implements Parcelable {
         @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
         public Builder setRequestorPackageName(@Nullable final String packageName) {
             mCaps.setRequestorPackageName(packageName);
+            return this;
+        }
+
+        /**
+         * Set the subscription ID set.
+         *
+         * @param subIds a set that represent the subscription IDs. Empty if clean up.
+         * @return this builder.
+         */
+        @NonNull
+        public Builder setSubIds(@NonNull final Set<Integer> subIds) {
+            mCaps.setSubIds(subIds);
             return this;
         }
 

@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Annotation.NetworkType;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -164,7 +163,7 @@ public class NetworkInfo implements Parcelable {
      * @param typeName a human-readable string for the network type, or an empty string or null.
      * @param subtypeName a human-readable string for the subtype, or an empty string or null.
      */
-    public NetworkInfo(int type, @NetworkType int subtype,
+    public NetworkInfo(int type, int subtype,
             @Nullable String typeName, @Nullable String subtypeName) {
         if (!ConnectivityManager.isNetworkTypeValid(type)
                 && type != ConnectivityManager.TYPE_NONE) {

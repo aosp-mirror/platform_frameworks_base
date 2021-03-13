@@ -56,7 +56,7 @@ class PointerCountClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
         int interactionType = getInteractionType();
         int allowedPointerCount =
                 (interactionType == QUICK_SETTINGS || interactionType == NOTIFICATION_DRAG_DOWN)

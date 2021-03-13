@@ -90,4 +90,10 @@ public final class TimeZoneDetectorInternalImpl implements TimeZoneDetectorInter
         mHandler.post(
                 () -> mTimeZoneDetectorStrategy.suggestGeolocationTimeZone(timeZoneSuggestion));
     }
+
+    @Override
+    @NonNull
+    public MetricsTimeZoneDetectorState generateMetricsState() {
+        return mTimeZoneDetectorStrategy.generateMetricsState();
+    }
 }

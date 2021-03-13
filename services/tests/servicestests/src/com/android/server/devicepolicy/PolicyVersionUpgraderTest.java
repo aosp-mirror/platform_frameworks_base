@@ -65,9 +65,10 @@ public class PolicyVersionUpgraderTest {
         Map<Integer, ComponentName> mUserToComponent = new HashMap<>();
         Map<ComponentName, DeviceAdminInfo> mComponentToDeviceAdminInfo = new HashMap<>();
         File mDataDir;
+        int[] mUsers;
 
         @Override
-        public boolean isUserDeviceOwner(int userId, ComponentName who) {
+        public boolean isDeviceOwner(int userId, ComponentName who) {
             return userId == mDeviceOwnerUserId && mDeviceOwnerComponent.equals(who);
         }
 
@@ -105,6 +106,11 @@ public class PolicyVersionUpgraderTest {
         public Function<ComponentName, DeviceAdminInfo> getAdminInfoSupplier(int userId) {
             return componentName -> mComponentToDeviceAdminInfo.get(componentName);
         }
+
+        @Override
+        public int[] getUsersForUpgrade() {
+            return mUsers;
+        }
     }
 
     private final Context mRealTestContext = InstrumentationRegistry.getTargetContext();
@@ -126,16 +132,17 @@ public class PolicyVersionUpgraderTest {
         ActivityInfo activityInfo = createActivityInfo(mFakeAdmin);
         DeviceAdminInfo dai = createDeviceAdminInfo(activityInfo);
         mProvider.mComponentToDeviceAdminInfo.put(mFakeAdmin, dai);
+        mProvider.mUsers = new int[] {0};
     }
 
     @Test
     public void testSameVersionDoesNothing() throws IOException {
-        int[] users = new int[] {0};
         writeVersionToXml(DevicePolicyManagerService.DPMS_VERSION);
-        preparePoliciesFile(users[0]);
-        String oldContents = readPoliciesFile(0);
+        final int userId = mProvider.mUsers[0];
+        preparePoliciesFile(userId);
+        String oldContents = readPoliciesFile(userId);
 
-        mUpgrader.upgradePolicy(users, DevicePolicyManagerService.DPMS_VERSION);
+        mUpgrader.upgradePolicy(DevicePolicyManagerService.DPMS_VERSION);
 
         String newContents = readPoliciesFile(0);
         assertThat(newContents).isEqualTo(oldContents);
@@ -144,18 +151,18 @@ public class PolicyVersionUpgraderTest {
     @Test
     public void testUpgrade0To1RemovesPasswordMetrics() throws IOException, XmlPullParserException {
         final String activePasswordTag = "active-password";
-        int[] users = new int[] {0, 10};
+        mProvider.mUsers = new int[] {0, 10};
         writeVersionToXml(0);
-        for (int userId : users) {
+        for (int userId : mProvider.mUsers) {
             preparePoliciesFile(userId);
         }
         // Validate test set-up.
         assertThat(isTagPresent(readPoliciesFileToStream(0), activePasswordTag)).isTrue();
 
-        mUpgrader.upgradePolicy(users, 1);
+        mUpgrader.upgradePolicy(1);
 
         assertThat(readVersionFromXml()).isGreaterThan(1);
-        for (int user: users) {
+        for (int user: mProvider.mUsers) {
             assertThat(isTagPresent(readPoliciesFileToStream(user), activePasswordTag)).isFalse();
         }
     }
@@ -163,21 +170,22 @@ public class PolicyVersionUpgraderTest {
     @Test
     public void testUpgrade1To2MarksDoForPermissionControl()
             throws IOException, XmlPullParserException {
-        int[] users = new int[] {0, 10};
+        final int ownerUser = 10;
+        mProvider.mUsers = new int[] {0, ownerUser};
         writeVersionToXml(1);
-        for (int userId : users) {
+        for (int userId : mProvider.mUsers) {
             preparePoliciesFile(userId);
         }
-        mProvider.mDeviceOwnerUserId = 10;
+        mProvider.mDeviceOwnerUserId = ownerUser;
         mProvider.mDeviceOwnerComponent = mFakeAdmin;
-        mProvider.mUserToComponent.put(10, mFakeAdmin);
+        mProvider.mUserToComponent.put(ownerUser, mFakeAdmin);
 
-        mUpgrader.upgradePolicy(users, 2);
+        mUpgrader.upgradePolicy(2);
 
         assertThat(readVersionFromXml()).isEqualTo(2);
-        assertThat(getBooleanValueTag(readPoliciesFileToStream(users[0]),
+        assertThat(getBooleanValueTag(readPoliciesFileToStream(mProvider.mUsers[0]),
                 PERMISSIONS_TAG)).isFalse();
-        assertThat(getBooleanValueTag(readPoliciesFileToStream(users[1]),
+        assertThat(getBooleanValueTag(readPoliciesFileToStream(ownerUser),
                 PERMISSIONS_TAG)).isTrue();
     }
 

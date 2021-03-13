@@ -58,6 +58,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
@@ -103,6 +104,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private final StatusBarStateController mStatusBarStateController;
     protected final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
+    private final FalsingManager mFalsingManager;
     private final QSLogger mQSLogger;
     private volatile int mReadyState;
 
@@ -159,6 +161,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             QSHost host,
             Looper backgroundLooper,
             Handler mainHandler,
+            FalsingManager falsingManager,
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
@@ -171,6 +174,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
         mUiHandler = mainHandler;
         mHandler = new H(backgroundLooper);
+        mFalsingManager = falsingManager;
         mQSLogger = qsLogger;
         mMetricsLogger = metricsLogger;
         mStatusBarStateController = statusBarStateController;
@@ -608,7 +612,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                                 mContext, mEnforcedAdmin);
                         mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
                     } else {
-                        handleClick();
+                        if (!mFalsingManager.isFalseTap(true, 0.1)) {
+                            handleClick();
+                        }
                     }
                 } else if (msg.what == SECONDARY_CLICK) {
                     name = "handleSecondaryClick";

@@ -16,11 +16,11 @@
 
 package com.android.systemui.shared.system;
 
-import android.window.TaskSnapshot;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IRecentsAnimationController;
+import android.window.TaskSnapshot;
 
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
@@ -141,9 +141,9 @@ public class RecentsAnimationControllerCompat {
     /**
      * @see IRecentsAnimationController#detachNavigationBarFromApp
      */
-    public void detachNavigationBarFromApp() {
+    public void detachNavigationBarFromApp(boolean moveHomeToTop) {
         try {
-            mAnimationController.detachNavigationBarFromApp();
+            mAnimationController.detachNavigationBarFromApp(moveHomeToTop);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to detach the navigation bar from app", e);
         }

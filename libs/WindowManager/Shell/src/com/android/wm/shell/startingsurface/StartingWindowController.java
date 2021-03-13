@@ -28,14 +28,17 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.SurfaceControl;
 import android.window.StartingWindowInfo;
 import android.window.TaskOrganizer;
 import android.window.TaskSnapshot;
 
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.TransactionPool;
 
 import java.util.function.BiConsumer;
 
@@ -67,8 +70,16 @@ public class StartingWindowController {
     private final StartingSurfaceImpl mImpl = new StartingSurfaceImpl();
     private final ShellExecutor mSplashScreenExecutor;
 
+    // For Car Launcher
     public StartingWindowController(Context context, ShellExecutor splashScreenExecutor) {
-        mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, splashScreenExecutor);
+        mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, splashScreenExecutor,
+                new TransactionPool());
+        mSplashScreenExecutor = splashScreenExecutor;
+    }
+
+    public StartingWindowController(Context context, ShellExecutor splashScreenExecutor,
+            TransactionPool pool) {
+        mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, splashScreenExecutor, pool);
         mSplashScreenExecutor = splashScreenExecutor;
     }
 
@@ -112,7 +123,8 @@ public class StartingWindowController {
                         + " allowTaskSnapshot " + allowTaskSnapshot
                         + " activityCreated " + activityCreated);
             }
-            if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
+            if ((newTask || !processRunning || (taskSwitch && !activityCreated))
+                    && windowInfo.taskInfo.topActivityType != ACTIVITY_TYPE_HOME) {
                 return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
             if (taskSwitch && allowTaskSnapshot) {
@@ -198,8 +210,9 @@ public class StartingWindowController {
     /**
      * Called when the content of a task is ready to show, starting window can be removed.
      */
-    void removeStartingWindow(int taskId) {
-        mStartingSurfaceDrawer.removeStartingWindow(taskId);
+    void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
+            boolean playRevealAnimation) {
+        mStartingSurfaceDrawer.removeStartingWindow(taskId, leash, frame, playRevealAnimation);
     }
 
     private class StartingSurfaceImpl implements StartingSurface {
@@ -211,9 +224,11 @@ public class StartingWindowController {
         }
 
         @Override
-        public void removeStartingWindow(int taskId) {
+        public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
+                boolean playRevealAnimation) {
             mSplashScreenExecutor.execute(() ->
-                    StartingWindowController.this.removeStartingWindow(taskId));
+                    StartingWindowController.this.removeStartingWindow(taskId, leash, frame,
+                            playRevealAnimation));
         }
 
         @Override

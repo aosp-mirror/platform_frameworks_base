@@ -46,14 +46,14 @@ public class DoubleTapClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
         List<MotionEvent> secondTapEvents = getRecentMotionEvents();
         List<MotionEvent> firstTapEvents = getPriorMotionEvents();
 
         StringBuilder reason = new StringBuilder();
 
         if (firstTapEvents == null) {
-            return Result.falsed(1, "Only one gesture recorded");
+            return Result.falsed(0, "Only one gesture recorded");
         }
 
         return !isDoubleTap(firstTapEvents, secondTapEvents, reason)

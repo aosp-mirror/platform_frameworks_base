@@ -32,6 +32,7 @@ import android.testing.TestableLooper
 import android.view.IWindowManager
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -103,6 +104,7 @@ class CustomTileTest : SysuiTestCase() {
                 { tileHost },
                 testableLooper.looper,
                 Handler(testableLooper.looper),
+                FalsingManagerFake(),
                 metricsLogger,
                 statusBarStateController,
                 activityStarter,

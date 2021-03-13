@@ -575,8 +575,8 @@ public class NotificationPanelViewController extends PanelViewController {
             FeatureFlags featureFlags) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
-                latencyTracker, flingAnimationUtilsBuilder.get(), statusBarTouchableRegionManager,
-                ambientState);
+                statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
+                statusBarTouchableRegionManager, ambientState);
         mView = view;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
@@ -1347,7 +1347,6 @@ public class NotificationPanelViewController extends PanelViewController {
         setClosingWithAlphaFadeout(!expand && !isOnKeyguard() && getFadeoutAlpha() == 1.0f);
         super.flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
-
 
     private boolean onQsIntercept(MotionEvent event) {
         int pointerIndex = event.findPointerIndex(mTrackingPointer);

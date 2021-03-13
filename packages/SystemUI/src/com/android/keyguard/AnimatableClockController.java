@@ -45,6 +45,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private int mLockScreenColor;
 
     private boolean mIsDozing;
+    private float mDozeAmount;
     private Locale mLocale;
 
     private final NumberFormat mBurmeseNf = NumberFormat.getInstance(Locale.forLanguageTag("my"));
@@ -59,6 +60,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         super(view);
         mStatusBarStateController = statusBarStateController;
         mIsDozing = mStatusBarStateController.isDozing();
+        mDozeAmount = mStatusBarStateController.getDozeAmount();
         mBroadcastDispatcher = broadcastDispatcher;
 
         mBurmeseNumerals = mBurmeseNf.format(FORMAT_NUMBER);
@@ -82,6 +84,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
                 new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mIsDozing = mStatusBarStateController.isDozing();
+        mDozeAmount = mStatusBarStateController.getDozeAmount();
         refreshTime();
         initColors();
     }
@@ -136,9 +139,15 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
                 @Override
-                public void onDozingChanged(boolean isDozing) {
-                    mIsDozing = isDozing;
-                    mView.animateDoze(mIsDozing, true);
+                public void onDozeAmountChanged(float linear, float eased) {
+                    boolean noAnimation = (mDozeAmount == 0f && linear == 1f)
+                            || (mDozeAmount == 1f && linear == 0f);
+                    boolean isDozing = linear > mDozeAmount;
+                    mDozeAmount = linear;
+                    if (mIsDozing != isDozing) {
+                        mIsDozing = isDozing;
+                        mView.animateDoze(mIsDozing, !noAnimation);
+                    }
                 }
             };
 }

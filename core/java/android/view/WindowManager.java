@@ -873,6 +873,20 @@ public interface WindowManager extends ViewManager {
     default void removeCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
     }
 
+    /**
+     * Disables cross-window blurs device-wide. This includes window blur behind
+     * (see {@link LayoutParams#setBlurBehindRadius}) and window background blur
+     * (see {@link Window#setBackgroundBlurRadius}).
+     *
+     * @param disable specifies whether to disable the blur. Note that calling this
+     *                with 'disable=false' will not enable blurs if there is something
+     *                else disabling blurs.
+     * @hide
+     */
+    @TestApi
+    default void setForceCrossWindowBlurDisabled(boolean disable) {
+    }
+
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
         /**
          * X position for this window.  With the default gravity it is ignored.

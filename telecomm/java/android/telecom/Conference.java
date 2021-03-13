@@ -338,7 +338,7 @@ public abstract class Conference extends Conferenceable {
      *
      * @param videoState The video state in which to answer the connection.
      */
-    public void onAnswer(int videoState) {}
+    public void onAnswer(@VideoProfile.VideoState int videoState) {}
 
     /**
      * Notifies this Conference, which is in {@code STATE_RINGING}, of
