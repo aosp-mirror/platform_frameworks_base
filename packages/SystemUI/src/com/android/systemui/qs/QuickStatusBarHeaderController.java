@@ -97,7 +97,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
     private boolean mListening;
     private AlarmClockInfo mNextAlarm;
-    private boolean mAllIndicatorsEnabled;
     private boolean mMicCameraIndicatorsEnabled;
     private boolean mLocationIndicatorsEnabled;
     private boolean mPrivacyChipLogged;
@@ -148,14 +147,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         public void onPrivacyItemsChanged(@NonNull List<PrivacyItem> privacyItems) {
             mPrivacyChip.setPrivacyList(privacyItems);
             setChipVisibility(!privacyItems.isEmpty());
-        }
-
-        @Override
-        public void onFlagAllChanged(boolean flag) {
-            if (mAllIndicatorsEnabled != flag) {
-                mAllIndicatorsEnabled = flag;
-                update();
-            }
         }
 
         @Override
@@ -270,7 +261,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mRingerContainer.setOnClickListener(mOnClickListener);
         mPrivacyChip.setOnClickListener(mOnClickListener);
 
-        mAllIndicatorsEnabled = mPrivacyItemController.getAllIndicatorsAvailable();
         mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
         mLocationIndicatorsEnabled = mPrivacyItemController.getLocationAvailable();
 
@@ -321,7 +311,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             mNextAlarmController.addCallback(mNextAlarmChangeCallback);
             mLifecycle.setCurrentState(Lifecycle.State.RESUMED);
             // Get the most up to date info
-            mAllIndicatorsEnabled = mPrivacyItemController.getAllIndicatorsAvailable();
             mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
             mLocationIndicatorsEnabled = mPrivacyItemController.getLocationAvailable();
             mPrivacyItemController.addCallback(mPICCallback);
@@ -353,13 +342,13 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private List<String> getIgnoredIconSlots() {
         ArrayList<String> ignored = new ArrayList<>();
         if (getChipEnabled()) {
-            if (mAllIndicatorsEnabled || mMicCameraIndicatorsEnabled) {
+            if (mMicCameraIndicatorsEnabled) {
                 ignored.add(mView.getResources().getString(
                         com.android.internal.R.string.status_bar_camera));
                 ignored.add(mView.getResources().getString(
                         com.android.internal.R.string.status_bar_microphone));
             }
-            if (mAllIndicatorsEnabled || mLocationIndicatorsEnabled) {
+            if (mLocationIndicatorsEnabled) {
                 ignored.add(mView.getResources().getString(
                         com.android.internal.R.string.status_bar_location));
             }
@@ -368,7 +357,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     }
 
     private boolean getChipEnabled() {
-        return mMicCameraIndicatorsEnabled || mLocationIndicatorsEnabled || mAllIndicatorsEnabled;
+        return mMicCameraIndicatorsEnabled || mLocationIndicatorsEnabled;
     }
 
     private boolean isZenOverridingRinger() {

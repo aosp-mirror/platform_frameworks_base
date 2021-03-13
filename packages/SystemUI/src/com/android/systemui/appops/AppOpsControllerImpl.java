@@ -20,7 +20,6 @@ import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 import static android.media.AudioManager.ACTION_MICROPHONE_MUTE_CHANGED;
 
-import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -43,6 +42,7 @@ import androidx.annotation.WorkerThread;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
@@ -370,13 +370,9 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     }
 
     // TODO ntmyren: remove after teamfood is finished
-    private boolean shouldShowAppPredictor(String pkgName) {
-        if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY, "permissions_hub_2_enabled",
-                false)) {
-            return false;
-        }
-        return mPackageManager.checkPermission(Manifest.permission.MANAGE_APP_PREDICTIONS, pkgName)
-                == PackageManager.PERMISSION_GRANTED;
+    private boolean showSystemApps() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED, false);
     }
 
     /**
@@ -399,8 +395,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             return true;
         }
         // TODO ntmyren: Replace this with more robust check if this moves beyond teamfood
-        if ((appOpCode == AppOpsManager.OP_CAMERA && isLocationProvider(packageName))
-                || shouldShowAppPredictor(packageName)
+        if (((showSystemApps() && !packageName.equals("android"))
+                || appOpCode == AppOpsManager.OP_CAMERA && isLocationProvider(packageName))
                 || isSpeechRecognizerUsage(appOpCode, packageName)) {
             return true;
         }
