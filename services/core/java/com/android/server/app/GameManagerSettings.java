@@ -137,6 +137,11 @@ public class GameManagerSettings {
     boolean readPersistentDataLocked() {
         mGameModes.clear();
 
+        if (!mSettingsFile.exists()) {
+            Slog.v(GameManagerService.TAG, "Settings file doesn't exists, skip reading");
+            return false;
+        }
+
         try {
             final FileInputStream str = mSettingsFile.openRead();
 
