@@ -54,50 +54,6 @@ final class VibratorController {
         void onComplete(int vibratorId, long vibrationId);
     }
 
-    /**
-     * Initializes the native part of this controller, creating a global reference to given
-     * {@link OnVibrationCompleteListener} and returns a newly allocated native pointer. This
-     * wrapper is responsible for deleting this pointer by calling the method pointed
-     * by {@link #vibratorGetFinalizer()}.
-     *
-     * <p><b>Note:</b> Make sure the given implementation of {@link OnVibrationCompleteListener}
-     * do not hold any strong reference to the instance responsible for deleting the returned
-     * pointer, to avoid creating a cyclic GC root reference.
-     */
-    static native long vibratorInit(int vibratorId, OnVibrationCompleteListener listener);
-
-    /**
-     * Returns pointer to native function responsible for cleaning up the native pointer allocated
-     * and returned by {@link #vibratorInit(int, OnVibrationCompleteListener)}.
-     */
-    static native long vibratorGetFinalizer();
-
-    static native boolean vibratorIsAvailable(long nativePtr);
-
-    static native void vibratorOn(long nativePtr, long milliseconds, long vibrationId);
-
-    static native void vibratorOff(long nativePtr);
-
-    static native void vibratorSetAmplitude(long nativePtr, int amplitude);
-
-    static native int[] vibratorGetSupportedEffects(long nativePtr);
-
-    static native int[] vibratorGetSupportedPrimitives(long nativePtr);
-
-    static native long vibratorPerformEffect(
-            long nativePtr, long effect, long strength, long vibrationId);
-
-    static native long vibratorPerformComposedEffect(
-            long nativePtr, VibrationEffect.Composition.PrimitiveEffect[] effect, long vibrationId);
-
-    static native void vibratorSetExternalControl(long nativePtr, boolean enabled);
-
-    static native long vibratorGetCapabilities(long nativePtr);
-
-    static native void vibratorAlwaysOnEnable(long nativePtr, long id, long effect, long strength);
-
-    static native void vibratorAlwaysOnDisable(long nativePtr, long id);
-
     VibratorController(int vibratorId, OnVibrationCompleteListener listener) {
         this(vibratorId, listener, new NativeWrapper());
     }
@@ -109,7 +65,8 @@ final class VibratorController {
         mNativeWrapper.init(vibratorId, listener);
 
         mVibratorInfo = new VibratorInfo(vibratorId, nativeWrapper.getCapabilities(),
-                nativeWrapper.getSupportedEffects(), nativeWrapper.getSupportedPrimitives());
+                nativeWrapper.getSupportedEffects(), nativeWrapper.getSupportedPrimitives(),
+                nativeWrapper.getResonantFrequency(), nativeWrapper.getQFactor());
     }
 
     /** Register state listener for this vibrator. */
@@ -336,13 +293,47 @@ final class VibratorController {
     /** Wrapper around the static-native methods of {@link VibratorController} for tests. */
     @VisibleForTesting
     public static class NativeWrapper {
+        /**
+         * Initializes the native part of this controller, creating a global reference to given
+         * {@link OnVibrationCompleteListener} and returns a newly allocated native pointer. This
+         * wrapper is responsible for deleting this pointer by calling the method pointed
+         * by {@link #getNativeFinalizer()}.
+         *
+         * <p><b>Note:</b> Make sure the given implementation of {@link OnVibrationCompleteListener}
+         * do not hold any strong reference to the instance responsible for deleting the returned
+         * pointer, to avoid creating a cyclic GC root reference.
+         */
+        private static native long nativeInit(int vibratorId, OnVibrationCompleteListener listener);
+
+        /**
+         * Returns pointer to native function responsible for cleaning up the native pointer
+         * allocated and returned by {@link #nativeInit(int, OnVibrationCompleteListener)}.
+         */
+        private static native long getNativeFinalizer();
+        private static native boolean isAvailable(long nativePtr);
+        private static native void on(long nativePtr, long milliseconds, long vibrationId);
+        private static native void off(long nativePtr);
+        private static native void setAmplitude(long nativePtr, int amplitude);
+        private static native int[] getSupportedEffects(long nativePtr);
+        private static native int[] getSupportedPrimitives(long nativePtr);
+        private static native long performEffect(
+                long nativePtr, long effect, long strength, long vibrationId);
+        private static native long performComposedEffect(long nativePtr,
+                VibrationEffect.Composition.PrimitiveEffect[] effect, long vibrationId);
+        private static native void setExternalControl(long nativePtr, boolean enabled);
+        private static native long getCapabilities(long nativePtr);
+        private static native void alwaysOnEnable(long nativePtr, long id, long effect,
+                long strength);
+        private static native void alwaysOnDisable(long nativePtr, long id);
+        private static native float getResonantFrequency(long nativePtr);
+        private static native float getQFactor(long nativePtr);
 
         private long mNativePtr = 0;
 
         /** Initializes native controller and allocation registry to destroy native instances. */
         public void init(int vibratorId, OnVibrationCompleteListener listener) {
-            mNativePtr = VibratorController.vibratorInit(vibratorId, listener);
-            long finalizerPtr = VibratorController.vibratorGetFinalizer();
+            mNativePtr = nativeInit(vibratorId, listener);
+            long finalizerPtr = getNativeFinalizer();
 
             if (finalizerPtr != 0) {
                 NativeAllocationRegistry registry =
@@ -354,65 +345,73 @@ final class VibratorController {
 
         /** Check if the vibrator is currently available. */
         public boolean isAvailable() {
-            return VibratorController.vibratorIsAvailable(mNativePtr);
+            return isAvailable(mNativePtr);
         }
 
         /** Turns vibrator on for given time. */
         public void on(long milliseconds, long vibrationId) {
-            VibratorController.vibratorOn(mNativePtr, milliseconds, vibrationId);
+            on(mNativePtr, milliseconds, vibrationId);
         }
 
         /** Turns vibrator off. */
         public void off() {
-            VibratorController.vibratorOff(mNativePtr);
+            off(mNativePtr);
         }
 
         /** Sets the amplitude for the vibrator to run. */
         public void setAmplitude(int amplitude) {
-            VibratorController.vibratorSetAmplitude(mNativePtr, amplitude);
+            setAmplitude(mNativePtr, amplitude);
         }
 
         /** Returns all predefined effects supported by the device vibrator. */
         public int[] getSupportedEffects() {
-            return VibratorController.vibratorGetSupportedEffects(mNativePtr);
+            return getSupportedEffects(mNativePtr);
         }
 
         /** Returns all compose primitives supported by the device vibrator. */
         public int[] getSupportedPrimitives() {
-            return VibratorController.vibratorGetSupportedPrimitives(mNativePtr);
+            return getSupportedPrimitives(mNativePtr);
         }
 
         /** Turns vibrator on to perform one of the supported effects. */
         public long perform(long effect, long strength, long vibrationId) {
-            return VibratorController.vibratorPerformEffect(
-                    mNativePtr, effect, strength, vibrationId);
+            return performEffect(mNativePtr, effect, strength, vibrationId);
         }
 
         /** Turns vibrator on to perform one of the supported composed effects. */
         public long compose(
                 VibrationEffect.Composition.PrimitiveEffect[] effect, long vibrationId) {
-            return VibratorController.vibratorPerformComposedEffect(mNativePtr, effect,
-                    vibrationId);
+            return performComposedEffect(mNativePtr, effect, vibrationId);
         }
 
         /** Enabled the device vibrator to be controlled by another service. */
         public void setExternalControl(boolean enabled) {
-            VibratorController.vibratorSetExternalControl(mNativePtr, enabled);
+            setExternalControl(mNativePtr, enabled);
         }
 
         /** Returns all capabilities of the device vibrator. */
         public long getCapabilities() {
-            return VibratorController.vibratorGetCapabilities(mNativePtr);
+            return getCapabilities(mNativePtr);
         }
 
         /** Enable always-on vibration with given id and effect. */
         public void alwaysOnEnable(long id, long effect, long strength) {
-            VibratorController.vibratorAlwaysOnEnable(mNativePtr, id, effect, strength);
+            alwaysOnEnable(mNativePtr, id, effect, strength);
         }
 
         /** Disable always-on vibration for given id. */
         public void alwaysOnDisable(long id) {
-            VibratorController.vibratorAlwaysOnDisable(mNativePtr, id);
+            alwaysOnDisable(mNativePtr, id);
+        }
+
+        /** Gets the vibrator's resonant frequency (F0) */
+        public float getResonantFrequency() {
+            return getResonantFrequency(mNativePtr);
+        }
+
+        /** Gets the vibrator's Q factor */
+        public float getQFactor() {
+            return getQFactor(mNativePtr);
         }
     }
 }
