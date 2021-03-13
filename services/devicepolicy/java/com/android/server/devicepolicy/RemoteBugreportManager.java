@@ -25,6 +25,8 @@ import static android.app.admin.DevicePolicyManager.NOTIFICATION_BUGREPORT_ACCEP
 import static android.app.admin.DevicePolicyManager.NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED;
 import static android.app.admin.DevicePolicyManager.NOTIFICATION_BUGREPORT_STARTED;
 
+import static com.android.server.devicepolicy.DevicePolicyManagerService.LOG_TAG;
+
 import android.annotation.IntDef;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -58,7 +60,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Class managing bugreport collection upon device owner's request.
  */
 public class RemoteBugreportManager {
-    private static final String LOG_TAG = DevicePolicyManagerService.LOG_TAG;
 
     static final String BUGREPORT_MIMETYPE = "application/vnd.android.bugreport";
 
@@ -206,7 +207,7 @@ public class RemoteBugreportManager {
             return true;
         } catch (RemoteException re) {
             // should never happen
-            Slog.e(LOG_TAG, "Failed to make remote calls to start bugreportremote service", re);
+            Slog.e(LOG_TAG, re, "Failed to make remote calls to start bugreportremote service");
             return false;
         } finally {
             mInjector.binderRestoreCallingIdentity(callingIdentity);
@@ -220,7 +221,7 @@ public class RemoteBugreportManager {
             mContext.registerReceiver(mRemoteBugreportFinishedReceiver, filterFinished);
         } catch (IntentFilter.MalformedMimeTypeException e) {
             // should never happen, as setting a constant
-            Slog.w(LOG_TAG, "Failed to set type " + BUGREPORT_MIMETYPE, e);
+            Slog.w(LOG_TAG, e, "Failed to set type %s", BUGREPORT_MIMETYPE);
         }
         final IntentFilter filterConsent = new IntentFilter();
         filterConsent.addAction(ACTION_BUGREPORT_SHARING_DECLINED);

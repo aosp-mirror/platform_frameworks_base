@@ -46,18 +46,10 @@ public class DeviceAdminServiceController {
     final Object mLock = new Object();
     final Context mContext;
 
-    private final DevicePolicyManagerService mService;
     private final DevicePolicyManagerService.Injector mInjector;
     private final DevicePolicyConstants mConstants;
 
     private final Handler mHandler; // needed?
-
-    static void debug(String format, Object... args) {
-        if (!DEBUG) {
-            return;
-        }
-        Slog.d(TAG, String.format(format, args));
-    }
 
     private class DevicePolicyServiceConnection
             extends PersistentConnection<IDeviceAdminService> {
@@ -88,7 +80,6 @@ public class DeviceAdminServiceController {
 
     public DeviceAdminServiceController(DevicePolicyManagerService service,
             DevicePolicyConstants constants) {
-        mService = service;
         mInjector = service.mInjector;
         mContext = mInjector.mContext;
         mHandler = new Handler(BackgroundThread.get().getLooper());
@@ -122,8 +113,9 @@ public class DeviceAdminServiceController {
             synchronized (mLock) {
                 final ServiceInfo service = findService(packageName, userId);
                 if (service == null) {
-                    debug("Owner package %s on u%d has no service.",
-                            packageName, userId);
+                    if (DEBUG) {
+                        Slog.d(TAG, "Owner package %s on u%d has no service.", packageName, userId);
+                    }
                     disconnectServiceOnUserLocked(userId, actionForLog);
                     return;
                 }
@@ -134,14 +126,17 @@ public class DeviceAdminServiceController {
                     // Note even when we're already connected to the same service, the binding
                     // would have died at this point due to a package update.  So we disconnect
                     // anyway and re-connect.
-                    debug("Disconnecting from existing service connection.",
-                            packageName, userId);
+                    if (DEBUG) {
+                        Slog.d("Disconnecting from existing service connection.", packageName,
+                                userId);
+                    }
                     disconnectServiceOnUserLocked(userId, actionForLog);
                 }
 
-                debug("Owner package %s on u%d has service %s for %s",
-                        packageName, userId,
+                if (DEBUG) {
+                    Slog.d("Owner package %s on u%d has service %s for %s", packageName, userId,
                         service.getComponentName().flattenToShortString(), actionForLog);
+                }
 
                 final DevicePolicyServiceConnection conn =
                         new DevicePolicyServiceConnection(
@@ -172,8 +167,10 @@ public class DeviceAdminServiceController {
     private void disconnectServiceOnUserLocked(int userId, @NonNull String actionForLog) {
         final DevicePolicyServiceConnection conn = mConnections.get(userId);
         if (conn != null) {
-            debug("Stopping service for u%d if already running for %s.",
-                    userId, actionForLog);
+            if (DEBUG) {
+                Slog.d(TAG, "Stopping service for u%d if already running for %s.", userId,
+                        actionForLog);
+            }
             conn.unbind();
             mConnections.remove(userId);
         }

@@ -68,17 +68,16 @@ public final class FactoryResetter {
         IResultReceiver receiver = new IResultReceiver.Stub() {
             @Override
             public void send(int resultCode, Bundle resultData) throws RemoteException {
-                Slog.i(TAG, String.format("Factory reset confirmed by %s, proceeding",
-                        mSafetyChecker));
+                Slog.i(TAG, "Factory reset confirmed by %s, proceeding", mSafetyChecker);
                 try {
                     factoryResetInternalUnchecked();
                 } catch (IOException e) {
                     // Shouldn't happen
-                    Slog.wtf(TAG, "IOException calling underlying systems", e);
+                    Slog.wtf(TAG, e, "IOException calling underlying systems");
                 }
             }
         };
-        Slog.i(TAG, String.format("Delaying factory reset until %s confirms", mSafetyChecker));
+        Slog.i(TAG, "Delaying factory reset until %s confirms", mSafetyChecker);
         mSafetyChecker.onFactoryReset(receiver);
         return false;
     }
@@ -113,9 +112,9 @@ public final class FactoryResetter {
     }
 
     private void factoryResetInternalUnchecked() throws IOException {
-        Slog.i(TAG, String.format("factoryReset(): reason=%s, shutdown=%b, force=%b, wipeEuicc=%b, "
+        Slog.i(TAG, "factoryReset(): reason=%s, shutdown=%b, force=%b, wipeEuicc=%b, "
                 + "wipeAdoptableStorage=%b, wipeFRP=%b", mReason, mShutdown, mForce, mWipeEuicc,
-                mWipeAdoptableStorage, mWipeFactoryResetProtection));
+                mWipeAdoptableStorage, mWipeFactoryResetProtection);
 
         UserManager um = mContext.getSystemService(UserManager.class);
         if (!mForce && um.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)) {
