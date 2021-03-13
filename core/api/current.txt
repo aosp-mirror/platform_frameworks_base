@@ -51290,7 +51290,6 @@ package android.view.inputmethod {
     method public int describeContents();
     method public void dump(android.util.Printer, String);
     method public android.content.ComponentName getComponent();
-    method public int getConfigChanges();
     method public String getId();
     method public int getIsDefaultResourceId();
     method public String getPackageName();
