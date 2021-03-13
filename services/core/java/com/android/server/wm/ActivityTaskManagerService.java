@@ -557,7 +557,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     boolean mSupportsPictureInPicture;
     boolean mSupportsMultiDisplay;
     boolean mForceResizableActivities;
-    boolean mSupportsNonResizableMultiWindow;
+    volatile boolean mSupportsNonResizableMultiWindow;
 
     final List<ActivityTaskManagerInternal.ScreenObserver> mScreenObservers = new ArrayList<>();
 
@@ -3429,6 +3429,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean supportsLocalVoiceInteraction() {
         return LocalServices.getService(VoiceInteractionManagerInternal.class)
                 .supportsLocalVoiceInteraction();
+    }
+
+    @Override
+    public boolean supportsNonResizableMultiWindow() {
+        return mSupportsNonResizableMultiWindow;
     }
 
     @Override

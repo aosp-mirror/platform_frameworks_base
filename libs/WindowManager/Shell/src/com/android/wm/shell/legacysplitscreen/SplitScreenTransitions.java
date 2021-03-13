@@ -30,6 +30,7 @@ import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -91,9 +92,11 @@ public class SplitScreenTransitions implements Transitions.TransitionHandler {
                         // is nothing behind it.
                         ((type == TRANSIT_CLOSE || type == TRANSIT_TO_BACK)
                                 && triggerTask.parentTaskId == mListener.mPrimary.taskId)
-                        // if a non-resizable is launched, we also need to leave split-screen.
+                        // if a non-resizable is launched when it is not supported in multi window,
+                        // we also need to leave split-screen.
                         || ((type == TRANSIT_OPEN || type == TRANSIT_TO_FRONT)
-                                && !triggerTask.isResizeable);
+                                && !triggerTask.isResizeable
+                                && !ActivityTaskManager.supportsNonResizableMultiWindow());
                 // In both cases, dismiss the primary
                 if (shouldDismiss) {
                     WindowManagerProxy.buildDismissSplit(out, mListener,

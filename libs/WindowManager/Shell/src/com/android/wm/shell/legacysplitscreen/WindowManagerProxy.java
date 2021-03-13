@@ -46,6 +46,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 /**
  * Proxy to simplify calls into window manager/activity manager
@@ -208,11 +209,17 @@ class WindowManagerProxy {
             return false;
         }
         ActivityManager.RunningTaskInfo topHomeTask = null;
+        // One-time lazy wrapper to avoid duplicated IPC in loop. Not store as class variable
+        // because the value can be changed at runtime.
+        final BooleanSupplier supportsNonResizableMultiWindow =
+                createSupportsNonResizableMultiWindowSupplier();
         for (int i = rootTasks.size() - 1; i >= 0; --i) {
             final ActivityManager.RunningTaskInfo rootTask = rootTasks.get(i);
-            // Only move resizeable task to split secondary. However, we have an exception
-            // for non-resizable home because we will minimize to show it.
-            if (!rootTask.isResizeable && rootTask.topActivityType != ACTIVITY_TYPE_HOME) {
+            // Check whether to move resizeable task to split secondary.
+            // Also, we have an exception for non-resizable home because we will minimize to show
+            // it.
+            if (!rootTask.isResizeable && rootTask.topActivityType != ACTIVITY_TYPE_HOME
+                    && !supportsNonResizableMultiWindow.getAsBoolean()) {
                 continue;
             }
             // Only move fullscreen tasks to split secondary.
@@ -355,6 +362,21 @@ class WindowManagerProxy {
         }
         // Reset focusable to true
         outWct.setFocusable(tiles.mPrimary.token, true /* focusable */);
+    }
+
+    /** Creates a lazy wrapper to get whether it supports non-resizable in multi window. */
+    private static BooleanSupplier createSupportsNonResizableMultiWindowSupplier() {
+        return new BooleanSupplier() {
+            private Boolean mSupportsNonResizableMultiWindow;
+            @Override
+            public boolean getAsBoolean() {
+                if (mSupportsNonResizableMultiWindow == null) {
+                    mSupportsNonResizableMultiWindow =
+                            ActivityTaskManager.supportsNonResizableMultiWindow();
+                }
+                return mSupportsNonResizableMultiWindow;
+            }
+        };
     }
 
     /**
