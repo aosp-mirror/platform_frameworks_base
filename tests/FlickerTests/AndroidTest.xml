@@ -11,6 +11,8 @@
         <option name="force-skip-system-props" value="true" />
         <!-- set WM tracing verbose level to all -->
         <option name="run-command" value="cmd window tracing level all" />
+        <!-- set WM tracing to frame (avoid incomplete states) -->
+        <option name="run-command" value="cmd window tracing frame" />
         <!-- restart launcher to activate TAPL -->
         <option name="run-command" value="setprop ro.test_harness 1 ; am force-stop com.google.android.apps.nexuslauncher" />
     </target_preparer>

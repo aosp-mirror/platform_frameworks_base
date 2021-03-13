@@ -31,9 +31,9 @@ import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
-import android.os.SystemClock;
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -195,17 +195,6 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         }
     }
 
-    @VisibleForTesting final StatusBar.ExpansionChangedListener mStatusBarExpansionListener =
-            (expansion, expanded) -> mView.onExpansionChanged(expansion, expanded);
-
-    @VisibleForTesting final StatusBarStateController.StateListener mStatusBarStateListener =
-            new StatusBarStateController.StateListener() {
-                @Override
-                public void onStateChanged(int newState) {
-                    mView.onStateChanged(newState);
-                }
-            };
-
     private static float computePointerSpeed(@NonNull VelocityTracker tracker, int pointerId) {
         final float vx = tracker.getXVelocity(pointerId);
         final float vy = tracker.getYVelocity(pointerId);
@@ -360,10 +349,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
     @Override
     public void dozeTimeTick() {
-        if (mView == null) {
-            return;
+        if (mView != null) {
+            mView.dozeTimeTick();
         }
-        mView.dozeTimeTick();
     }
 
     /**
@@ -387,7 +375,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         }
     }
 
-    private WindowManager.LayoutParams computeLayoutParams(@Nullable UdfpsAnimationView animation) {
+    private WindowManager.LayoutParams computeLayoutParams(
+            @Nullable UdfpsAnimationViewController animation) {
         final int paddingX = animation != null ? animation.getPaddingX() : 0;
         final int paddingY = animation != null ? animation.getPaddingY() : 0;
 
@@ -438,20 +427,13 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mFgExecutor.execute(() -> {
             if (mView == null) {
                 try {
-                    Log.v(TAG, "showUdfpsOverlay | adding window");
-                    // TODO: Eventually we should refactor the code to inflate an
-                    //  operation-specific view here, instead of inflating a generic udfps_view
-                    //  and adding operation-specific animations to it.
+                    Log.v(TAG, "showUdfpsOverlay | adding window reason=" + reason);
                     mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
                     mView.setSensorProperties(mSensorProps);
                     mView.setHbmCallback(this);
-
-                    final UdfpsAnimationView animation = getUdfpsAnimationViewForReason(reason);
-                    mView.setAnimationView(animation);
-
-                    mStatusBar.addExpansionChangedListener(mStatusBarExpansionListener);
-                    mStatusBarStateController.addCallback(mStatusBarStateListener);
-                    mStatusBarStateListener.onStateChanged(mStatusBarStateController.getState());
+                    UdfpsAnimationViewController animation = inflateUdfpsAnimation(reason);
+                    animation.init();
+                    mView.setAnimationViewController(animation);
 
                     mWindowManager.addView(mView, computeLayoutParams(animation));
                     mView.setOnTouchListener(mOnTouchListener);
@@ -464,40 +446,46 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         });
     }
 
-    @NonNull
-    private UdfpsAnimationView getUdfpsAnimationViewForReason(int reason) {
-        Log.d(TAG, "getUdfpsAnimationForReason: " + reason);
-
-        final LayoutInflater inflater = LayoutInflater.from(mContext);
-
+    private UdfpsAnimationViewController inflateUdfpsAnimation(int reason) {
         switch (reason) {
             case IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR:
-            case IUdfpsOverlayController.REASON_ENROLL_ENROLLING: {
-                final UdfpsAnimationViewEnroll view = (UdfpsAnimationViewEnroll)
-                        inflater.inflate(R.layout.udfps_animation_view_enroll, null, false);
-                view.setEnrollHelper(mServerRequest.mEnrollHelper);
-                return view;
-            }
-
-            case IUdfpsOverlayController.REASON_AUTH_BP: {
-                final UdfpsAnimationViewBp view = (UdfpsAnimationViewBp)
-                        inflater.inflate(R.layout.udfps_animation_view_bp, null, false);
-                return view;
-            }
-
-            case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD: {
-                final UdfpsAnimationViewKeyguard view = (UdfpsAnimationViewKeyguard)
-                        inflater.inflate(R.layout.udfps_animation_view_keyguard, null, false);
-                view.setStatusBarStateController(mStatusBarStateController);
-                return view;
-            }
-
-            case IUdfpsOverlayController.REASON_AUTH_FPM_OTHER: {
-                final UdfpsAnimationViewFpmOther view = (UdfpsAnimationViewFpmOther)
-                        inflater.inflate(R.layout.udfps_animation_view_fpm_other, null, false);
-                return view;
-            }
-
+            case IUdfpsOverlayController.REASON_ENROLL_ENROLLING:
+                UdfpsEnrollView enrollView = (UdfpsEnrollView) mInflater.inflate(
+                        R.layout.udfps_enroll_view, null);
+                mView.addView(enrollView);
+                return new UdfpsEnrollViewController(
+                        enrollView,
+                        mServerRequest.mEnrollHelper,
+                        mStatusBarStateController,
+                        mStatusBar
+                );
+            case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD:
+                UdfpsKeyguardView keyguardView = (UdfpsKeyguardView)
+                        mInflater.inflate(R.layout.udfps_keyguard_view, null);
+                mView.addView(keyguardView);
+                return new UdfpsKeyguardViewController(
+                        keyguardView,
+                        mStatusBarStateController,
+                        mStatusBar
+                );
+            case IUdfpsOverlayController.REASON_AUTH_BP:
+                // note: empty controller, currently shows no visual affordance
+                UdfpsBpView bpView = (UdfpsBpView) mInflater.inflate(R.layout.udfps_bp_view, null);
+                mView.addView(bpView);
+                return new UdfpsBpViewController(
+                        bpView,
+                        mStatusBarStateController,
+                        mStatusBar
+                );
+            case IUdfpsOverlayController.REASON_AUTH_FPM_OTHER:
+                UdfpsFpmOtherView authOtherView = (UdfpsFpmOtherView)
+                        mInflater.inflate(R.layout.udfps_fpm_other_view, null);
+                mView.addView(authOtherView);
+                return new UdfpsFpmOtherViewController(
+                        authOtherView,
+                        mStatusBarStateController,
+                        mStatusBar
+                );
             default:
                 Log.d(TAG, "Animation for reason " + reason + " not supported yet");
                 return null;
@@ -510,11 +498,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 Log.v(TAG, "hideUdfpsOverlay | removing window");
                 // Reset the controller back to its starting state.
                 onFingerUp();
-
-                mStatusBar.removeExpansionChangedListener(mStatusBarExpansionListener);
-                mStatusBarStateController.removeCallback(mStatusBarStateListener);
-
                 mWindowManager.removeView(mView);
+                mView.setOnTouchListener(null);
+                mView.setAnimationViewController(null);
                 mView = null;
             } else {
                 Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");

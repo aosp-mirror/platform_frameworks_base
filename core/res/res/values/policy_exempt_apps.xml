@@ -14,9 +14,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.systemui.biometrics.UdfpsAnimationViewKeyguard
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/udfps_animation_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-</com.android.systemui.biometrics.UdfpsAnimationViewKeyguard>
+<resources>
+    <!--
+    A collection of apps that are critical for the device and hence will never be disabled by
+    device policies or APIs.
+    -->
+    <string-array translatable="false" name="policy_exempt_apps">
+    </string-array>
+</resources>

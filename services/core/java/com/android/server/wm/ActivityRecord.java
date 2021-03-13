@@ -137,6 +137,7 @@ import static com.android.server.wm.ActivityRecordProto.CLIENT_VISIBLE;
 import static com.android.server.wm.ActivityRecordProto.DEFER_HIDING_CLIENT;
 import static com.android.server.wm.ActivityRecordProto.FILLS_PARENT;
 import static com.android.server.wm.ActivityRecordProto.FRONT_OF_TASK;
+import static com.android.server.wm.ActivityRecordProto.IN_SIZE_COMPAT_MODE;
 import static com.android.server.wm.ActivityRecordProto.IS_ANIMATING;
 import static com.android.server.wm.ActivityRecordProto.IS_WAITING_FOR_TRANSITION_START;
 import static com.android.server.wm.ActivityRecordProto.LAST_ALL_DRAWN;
@@ -2114,7 +2115,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     }
                 }
                 if (abort) {
-                    surface.remove();
+                    surface.remove(false /* prepareAnimation */);
                 }
             } else {
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Surface returned was null: %s",
@@ -2128,7 +2129,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated,
             TaskSnapshot snapshot) {
-        if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
+        if ((newTask || !processRunning || (taskSwitch && !activityCreated))
+                && !isActivityTypeHome()) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
             if (isSnapshotCompatible(snapshot)) {
@@ -2179,7 +2181,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         + ActivityRecord.this + " state " + mTransferringSplashScreenState);
                 if (isTransferringSplashScreen()) {
                     mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
-                    // TODO show default exit splash screen animation
                     removeStartingWindow();
                 }
             }
@@ -2196,6 +2197,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     private boolean transferSplashScreenIfNeeded() {
+        if (!mWmService.mStartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
+            return false;
+        }
         if (!mHandleExitSplashScreen || mStartingSurface == null || mStartingWindow == null
                 || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH) {
             return false;
@@ -2265,10 +2269,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // no matter what, remove the starting window.
         mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
-        removeStartingWindow();
+        removeStartingWindowAnimation(false /* prepareAnimation */);
     }
 
     void removeStartingWindow() {
+        removeStartingWindowAnimation(true /* prepareAnimation */);
+    }
+
+    void removeStartingWindowAnimation(boolean prepareAnimation) {
         if (transferSplashScreenIfNeeded()) {
             return;
         }
@@ -2313,7 +2321,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mWmService.mAnimationHandler.post(() -> {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Removing startingView=%s", surface);
             try {
-                surface.remove();
+                surface.remove(prepareAnimation);
             } catch (Exception e) {
                 Slog.w(TAG_WM, "Exception when removing starting window", e);
             }
@@ -6190,7 +6198,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Remove orphaned starting window.
             if (DEBUG_VISIBILITY) Slog.w(TAG_VISIBILITY, "Found orphaned starting window " + this);
             mStartingWindowState = STARTING_WINDOW_REMOVED;
-            removeStartingWindow();
+            removeStartingWindowAnimation(false /* prepareAnimation */);
         }
         if (isState(INITIALIZING) && !shouldBeVisible(
                 true /* behindFullscreenActivity */, true /* ignoringKeyguard */)) {
@@ -8255,6 +8263,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             proto.write(PROC_ID, app.getPid());
         }
         proto.write(PIP_AUTO_ENTER_ENABLED, pictureInPictureArgs.isAutoEnterEnabled());
+        proto.write(IN_SIZE_COMPAT_MODE, inSizeCompatMode());
     }
 
     @Override

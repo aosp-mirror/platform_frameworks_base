@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.IDataLoaderStatusListener;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 
 import java.io.File;
@@ -599,6 +600,19 @@ public final class IncrementalStorage {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return;
+        }
+    }
+
+    /**
+     * Returns the metrics of the current storage.
+     * {@see IIncrementalService} for metrics keys.
+     */
+    public PersistableBundle getMetrics() {
+        try {
+            return mService.getMetrics(mId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return null;
         }
     }
 }

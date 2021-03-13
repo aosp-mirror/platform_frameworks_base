@@ -58,13 +58,13 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private static final int ICON_MASK_ID = com.android.internal.R.string.config_icon_mask;
     protected final Handler mHandler = new H();
     private final int[] mLocInScreen = new int[2];
-    private final FrameLayout mIconFrame;
+    protected final FrameLayout mIconFrame;
     protected QSIconView mIcon;
     protected RippleDrawable mRipple;
     protected Drawable mTileBackground;
     private String mAccessibilityClass;
     private boolean mTileState;
-    private boolean mCollapsedView;
+    protected boolean mCollapsedView;
     protected boolean mShowRippleEffect = true;
     private float mStrokeWidthActive;
     private float mStrokeWidthInactive;

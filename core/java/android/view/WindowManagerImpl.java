@@ -317,4 +317,13 @@ public final class WindowManagerImpl implements WindowManager {
     public void removeCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
         CrossWindowBlurListeners.getInstance().removeListener(listener);
     }
+
+    @Override
+    public void setForceCrossWindowBlurDisabled(boolean disable) {
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                .setForceCrossWindowBlurDisabled(disable);
+        } catch (RemoteException e) {
+        }
+    }
 }

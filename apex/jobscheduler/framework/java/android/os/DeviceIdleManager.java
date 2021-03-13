@@ -65,7 +65,7 @@ public class DeviceIdleManager {
      * @return package names the system has white-listed to opt out of power save restrictions,
      * except for device idle mode.
      *
-     * @hide Should be migrated to PowerWhitelistManager
+     * @hide Should be migrated to PowerExemptionManager
      */
     @TestApi
     public @NonNull String[] getSystemPowerWhitelistExceptIdle() {
@@ -80,7 +80,7 @@ public class DeviceIdleManager {
      * @return package names the system has white-listed to opt out of power save restrictions for
      * all modes.
      *
-     * @hide Should be migrated to PowerWhitelistManager
+     * @hide Should be migrated to PowerExemptionManager
      */
     @TestApi
     public @NonNull String[] getSystemPowerWhitelist() {

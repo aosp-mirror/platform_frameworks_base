@@ -42,10 +42,12 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
     @NonNull private final LocationTimeZoneProviderProxy mProxy;
 
     BinderLocationTimeZoneProvider(
+            @NonNull ProviderMetricsLogger providerMetricsLogger,
             @NonNull ThreadingDomain threadingDomain,
             @NonNull String providerName,
             @NonNull LocationTimeZoneProviderProxy proxy) {
-        super(threadingDomain, providerName, new ZoneInfoDbTimeZoneIdValidator());
+        super(providerMetricsLogger, threadingDomain, providerName,
+                new ZoneInfoDbTimeZoneIdValidator());
         mProxy = Objects.requireNonNull(proxy);
     }
 

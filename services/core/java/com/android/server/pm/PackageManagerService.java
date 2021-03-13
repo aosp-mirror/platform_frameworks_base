@@ -410,6 +410,7 @@ import com.android.server.utils.Watched;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 import com.android.server.utils.WatchedSparseBooleanArray;
+import com.android.server.utils.WatchedSparseIntArray;
 import com.android.server.utils.Watcher;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -892,7 +893,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // that created the isolated process.
     @Watched
     @GuardedBy("mLock")
-    final SparseIntArray mIsolatedOwners = new SparseIntArray();
+    final WatchedSparseIntArray mIsolatedOwners = new WatchedSparseIntArray();
 
     /**
      * Tracks new system packages [received in an OTA] that we expect to
@@ -1795,7 +1796,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public static final int SNAPPED = 2;
 
         public final Settings settings;
-        public final SparseIntArray isolatedOwners;
+        public final WatchedSparseIntArray isolatedOwners;
         public final WatchedArrayMap<String, AndroidPackage> packages;
         public final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> sharedLibs;
         public final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> staticLibs;
@@ -1814,7 +1815,7 @@ public class PackageManagerService extends IPackageManager.Stub
         Snapshot(int type) {
             if (type == Snapshot.SNAPPED) {
                 settings = mSettings.snapshot();
-                isolatedOwners = mIsolatedOwners.clone();
+                isolatedOwners = mIsolatedOwners.snapshot();
                 packages = mPackages.snapshot();
                 sharedLibs = mSharedLibraries.snapshot();
                 staticLibs = mStaticLibsByDeclaringPackage.snapshot();
@@ -2016,7 +2017,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Cached attributes.  The names in this class are the same as the
         // names in PackageManagerService; see that class for documentation.
         private final Settings mSettings;
-        private final SparseIntArray mIsolatedOwners;
+        private final WatchedSparseIntArray mIsolatedOwners;
         private final WatchedArrayMap<String, AndroidPackage> mPackages;
         private final WatchedArrayMap<ComponentName, ParsedInstrumentation>
                 mInstrumentation;
@@ -3551,7 +3552,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public String getInstantAppPackageName(int callingUid) {
             // If the caller is an isolated app use the owner's uid for the lookup.
             if (Process.isIsolated(callingUid)) {
-                callingUid = mIsolatedOwners.get(callingUid);
+                callingUid = getIsolatedOwner(callingUid);
             }
             final int appId = UserHandle.getAppId(callingUid);
             final Object obj = mSettings.getSettingLPr(appId);
@@ -3561,6 +3562,19 @@ public class PackageManagerService extends IPackageManager.Stub
                 return isInstantApp ? ps.pkg.getPackageName() : null;
             }
             return null;
+        }
+
+        /**
+         * Finds the owner for the provided isolated UID. Throws IllegalStateException if no such
+         * isolated UID is found.
+         */
+        private int getIsolatedOwner(int isolatedUid) {
+            final int ownerUid = mIsolatedOwners.get(isolatedUid, -1);
+            if (ownerUid == -1) {
+                throw new IllegalStateException(
+                        "No owner UID found for isolated UID " + isolatedUid);
+            }
+            return ownerUid;
         }
 
         public String resolveExternalPackageNameLPr(AndroidPackage pkg) {
@@ -3929,7 +3943,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean isInstantAppInternalBody(String packageName, @UserIdInt int userId,
                 int callingUid) {
             if (Process.isIsolated(callingUid)) {
-                callingUid = mIsolatedOwners.get(callingUid);
+                callingUid = getIsolatedOwner(callingUid);
             }
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
             final boolean returnAllowed =
@@ -4083,7 +4097,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 @Nullable ComponentName component, @ComponentType int componentType, int userId) {
             // if we're in an isolated process, get the real calling UID
             if (Process.isIsolated(callingUid)) {
-                callingUid = mIsolatedOwners.get(callingUid);
+                callingUid = getIsolatedOwner(callingUid);
             }
             final String instantAppPkgName = getInstantAppPackageName(callingUid);
             final boolean callerIsInstantApp = instantAppPkgName != null;
@@ -6164,6 +6178,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mAppsFilter.registerObserver(mWatcher);
         mInstantAppRegistry.registerObserver(mWatcher);
         mSettings.registerObserver(mWatcher);
+        mIsolatedOwners.registerObserver(mWatcher);
         // If neither "build" attribute is true then this may be a mockito test, and verification
         // can fail as a false positive.
         Watchable.verifyWatchedAttributes(this, mWatcher, !(mIsEngBuild || mIsUserDebugBuild));
@@ -27803,13 +27818,23 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private static String getDefaultTimeouts() {
-        return DeviceConfig.getString(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                PROPERTY_INCFS_DEFAULT_TIMEOUTS, "");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getString(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_INCFS_DEFAULT_TIMEOUTS, "");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private static String getKnownDigestersList() {
-        return DeviceConfig.getString(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                PROPERTY_KNOWN_DIGESTERS_LIST, "");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getString(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_KNOWN_DIGESTERS_LIST, "");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**

@@ -22,11 +22,11 @@ package android.media.permission;
  */
 parcelable Identity {
     /** Linux user ID. */
-    int uid;
+    int uid = -1;
     /** Linux process ID. */
-    int pid;
+    int pid = -1;
     /** Package name. If null, the first package owned by the given uid will be assumed. */
-    @nullable String packageName;
+    @nullable @utf8InCpp String packageName;
     /** Attribution tag. Mostly used for diagnostic purposes. */
-    @nullable String attributionTag;
+    @nullable @utf8InCpp String attributionTag;
 }

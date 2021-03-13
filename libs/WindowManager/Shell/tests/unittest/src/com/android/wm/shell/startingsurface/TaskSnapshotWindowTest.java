@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package unittest.src.com.android.wm.shell.startingsurface;
+package com.android.wm.shell.startingsurface;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -48,7 +48,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.TestShellExecutor;
-import com.android.wm.shell.startingsurface.TaskSnapshotWindow;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

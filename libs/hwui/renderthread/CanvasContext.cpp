@@ -576,6 +576,7 @@ void CanvasContext::draw() {
 
     if (requireSwap) {
         if (mExpectSurfaceStats) {
+            reportMetricsWithPresentTime();
             std::lock_guard lock(mLast4FrameInfosMutex);
             std::pair<FrameInfo*, int64_t>& next = mLast4FrameInfos.next();
             next.first = mCurrentFrameInfo;
@@ -655,8 +656,6 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* cont
             }
         }
     }
-
-    instance->reportMetricsWithPresentTime();
 
     if (frameInfo != nullptr) {
         if (gpuCompleteTime == -1) {

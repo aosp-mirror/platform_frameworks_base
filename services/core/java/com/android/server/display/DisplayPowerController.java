@@ -982,7 +982,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mWaitingForNegativeProximity = false;
             mIgnoreProximityUntilChanged = false;
         }
-        if (mScreenOffBecauseOfProximity) {
+
+        if (!mLogicalDisplay.isEnabled() || mScreenOffBecauseOfProximity) {
             state = Display.STATE_OFF;
         }
 

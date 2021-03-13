@@ -118,6 +118,11 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
     }
 
     @Override
+    public MetricsTimeZoneDetectorState generateMetricsState() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void addDumpable(Dumpable dumpable) {
         mDumpables.add(dumpable);
     }

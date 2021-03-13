@@ -21,10 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -93,7 +90,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider, mDockManager,
                 mMetricsLogger, mClassifiers, mSingleTapClassfier, mDoubleTapClassifier,
-                mHistoryTracker, mFakeExecutor, DOUBLE_TAP_TIMEOUT_MS, false);
+                mHistoryTracker, false);
 
 
         ArgumentCaptor<GestureCompleteListener> gestureCompleteListenerCaptor =
@@ -161,25 +158,27 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     public void testIsFalseTap_BasicCheck() {
         when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mFalsedResult);
 
-        assertThat(mBrightLineFalsingManager.isFalseTap(false)).isTrue();
+        assertThat(mBrightLineFalsingManager.isFalseTap(false, 0)).isTrue();
 
         when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mPassedResult);
 
-        assertThat(mBrightLineFalsingManager.isFalseTap(false)).isFalse();
+        assertThat(mBrightLineFalsingManager.isFalseTap(false, 0)).isFalse();
     }
 
     @Test
     public void testIsFalseTap_RobustCheck_NoFaceAuth() {
         when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mPassedResult);
+        when(mDoubleTapClassifier.classifyGesture()).thenReturn(mFalsedResult);
+        when(mHistoryTracker.falseBelief()).thenReturn(1.0);
         mFalsingDataProvider.setJustUnlockedWithFace(false);
-        assertThat(mBrightLineFalsingManager.isFalseTap(true)).isTrue();
+        assertThat(mBrightLineFalsingManager.isFalseTap(true, 0)).isTrue();
     }
 
     @Test
     public void testIsFalseTap_RobustCheck_FaceAuth() {
         when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mPassedResult);
         when(mFalsingDataProvider.isJustUnlockedWithFace()).thenReturn(true);
-        assertThat(mBrightLineFalsingManager.isFalseTap(true)).isFalse();
+        assertThat(mBrightLineFalsingManager.isFalseTap(true, 0)).isFalse();
     }
 
     @Test
@@ -203,43 +202,29 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     @Test
     public void testHistory_singleTap() {
         // When trying to classify single taps, we don't immediately add results to history.
-        mBrightLineFalsingManager.isFalseTap(false);
+        mBrightLineFalsingManager.isFalseTap(false, 0);
         mGestureCompleteListener.onGestureComplete(1000);
-
-        verify(mHistoryTracker, never()).addResults(any(), anyLong());
-
-        mFakeExecutor.advanceClockToNext();
-        mFakeExecutor.runAllReady();
-
         verify(mHistoryTracker).addResults(anyCollection(), eq(1000L));
     }
 
     @Test
     public void testHistory_multipleSingleTaps() {
         // When trying to classify single taps, we don't immediately add results to history.
-        mBrightLineFalsingManager.isFalseTap(false);
+        mBrightLineFalsingManager.isFalseTap(false, 0);
         mGestureCompleteListener.onGestureComplete(1000);
-        mBrightLineFalsingManager.isFalseTap(false);
+        mBrightLineFalsingManager.isFalseTap(false, 0);
         mGestureCompleteListener.onGestureComplete(2000);
-
-        verify(mHistoryTracker, never()).addResults(any(), anyLong());
-
-        mFakeExecutor.advanceClockToNext();
-        mFakeExecutor.runNextReady();
         verify(mHistoryTracker).addResults(anyCollection(), eq(1000L));
-        reset(mHistoryTracker);
-        mFakeExecutor.advanceClockToNext();
-        mFakeExecutor.runNextReady();
         verify(mHistoryTracker).addResults(anyCollection(), eq(2000L));
     }
 
     @Test
     public void testHistory_doubleTap() {
         // When trying to classify single taps, we don't immediately add results to history.
-        mBrightLineFalsingManager.isFalseTap(false);
+        mBrightLineFalsingManager.isFalseTap(false, 0);
         mGestureCompleteListener.onGestureComplete(1000);
         // Before checking for double tap, we may check for single-tap on the second gesture.
-        mBrightLineFalsingManager.isFalseTap(false);
+        mBrightLineFalsingManager.isFalseTap(false, 0);
         mBrightLineFalsingManager.isFalseDoubleTap();
         mGestureCompleteListener.onGestureComplete(2000);
 

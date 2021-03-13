@@ -112,7 +112,7 @@ class ProximityClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
         if (getInteractionType() == QUICK_SETTINGS) {
             return Result.passed(0);
         }

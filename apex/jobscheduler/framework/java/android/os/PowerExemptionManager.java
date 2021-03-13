@@ -170,7 +170,7 @@ public class PowerExemptionManager {
     /** @hide */
     public static final int REASON_EXEMPTED_PACKAGE = 64;
     /** @hide */
-    public static final int REASON_ALLOWLISTED_PACKAGE  = 65;
+    public static final int REASON_ALLOWLISTED_PACKAGE = 65;
     /** @hide */
     public static final int REASON_APPOP = 66;
 
@@ -193,6 +193,10 @@ public class PowerExemptionManager {
      * Set temp-allow-list for activity recognition.
      */
     public static final int REASON_ACTIVITY_RECOGNITION = 103;
+    /**
+     * Set temp-allow-list for transferring accounts between users.
+     */
+    public static final int REASON_ACCOUNT_TRANSFER = 104;
 
     /* Reason code range 200-299 are reserved for broadcast actions */
     /**
@@ -216,7 +220,7 @@ public class PowerExemptionManager {
      * Device idle system allow list, including EXCEPT-IDLE
      * @hide
      */
-    public static final int REASON_SYSTEM_ALLOW_LISTED  = 300;
+    public static final int REASON_SYSTEM_ALLOW_LISTED = 300;
     /** @hide */
     public static final int REASON_ALARM_MANAGER_ALARM_CLOCK = 301;
     /**
@@ -329,6 +333,7 @@ public class PowerExemptionManager {
             REASON_PUSH_MESSAGING,
             REASON_PUSH_MESSAGING_OVER_QUOTA,
             REASON_ACTIVITY_RECOGNITION,
+            REASON_ACCOUNT_TRANSFER,
             REASON_BOOT_COMPLETED,
             REASON_PRE_BOOT_COMPLETED,
             REASON_LOCKED_BOOT_COMPLETED,
@@ -579,6 +584,8 @@ public class PowerExemptionManager {
                 return "PUSH_MESSAGING_OVER_QUOTA";
             case REASON_ACTIVITY_RECOGNITION:
                 return "ACTIVITY_RECOGNITION";
+            case REASON_ACCOUNT_TRANSFER:
+                return "REASON_ACCOUNT_TRANSFER";
             case REASON_BOOT_COMPLETED:
                 return "BOOT_COMPLETED";
             case REASON_PRE_BOOT_COMPLETED:

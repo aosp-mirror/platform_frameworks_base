@@ -1397,4 +1397,12 @@ public class NavigationBarView extends FrameLayout implements
     private final Consumer<Rect> mPipListener = bounds -> post(() -> {
         mEdgeBackGestureHandler.setPipStashExclusionBounds(bounds);
     });
+
+    void setNavigationBarLumaSamplingEnabled(boolean enable) {
+        if (enable) {
+            mRegionSamplingHelper.start(mSamplingBounds);
+        } else {
+            mRegionSamplingHelper.stop();
+        }
+    }
 }
