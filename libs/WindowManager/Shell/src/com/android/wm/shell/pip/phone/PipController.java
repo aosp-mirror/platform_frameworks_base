@@ -21,8 +21,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
+import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PictureInPictureParams;
@@ -33,6 +35,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -44,6 +47,7 @@ import android.view.DisplayInfo;
 import android.view.WindowManagerGlobal;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -51,9 +55,13 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ExecutorUtils;
+import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.pip.IPip;
+import com.android.wm.shell.pip.IPipAnimationListener;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
@@ -71,7 +79,8 @@ import java.util.function.Consumer;
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
-public class PipController implements PipTransitionController.PipTransitionCallback {
+public class PipController implements PipTransitionController.PipTransitionCallback,
+        RemoteCallable<PipController> {
     private static final String TAG = "PipController";
 
     private Context mContext;
@@ -85,12 +94,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipBoundsState mPipBoundsState;
     private PipTouchHandler mTouchHandler;
     private PipTransitionController mPipTransitionController;
-    protected final PipImpl mImpl = new PipImpl();
+    protected final PipImpl mImpl;
 
     private final Rect mTmpInsetBounds = new Rect();
 
     private boolean mIsInFixedRotation;
-    private Consumer<Boolean> mPinnedStackAnimationRecentsCallback;
+    private IPipAnimationListener mPinnedStackAnimationRecentsCallback;
 
     protected PhonePipMenuController mMenuController;
     protected PipTaskOrganizer mPipTaskOrganizer;
@@ -264,6 +273,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         mContext = context;
+        mImpl = new PipImpl();
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         mDisplayController = displayController;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
@@ -364,6 +374,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                                 clearedTask /* skipAnimation */);
                     }
                 });
+    }
+
+    @Override
+    public Context getContext() {
+        return mContext;
+    }
+
+    @Override
+    public ShellExecutor getRemoteCallExecutor() {
+        return mMainExecutor;
     }
 
     private void onConfigurationChanged(Configuration newConfig) {
@@ -474,7 +494,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipTaskOrganizer.setOneShotAnimationType(animationType);
     }
 
-    private void setPinnedStackAnimationListener(Consumer<Boolean> callback) {
+    private void setPinnedStackAnimationListener(IPipAnimationListener callback) {
         mPinnedStackAnimationRecentsCallback = callback;
     }
 
@@ -512,7 +532,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         // Disable touches while the animation is running
         mTouchHandler.setTouchEnabled(false);
         if (mPinnedStackAnimationRecentsCallback != null) {
-            mPinnedStackAnimationRecentsCallback.accept(true);
+            try {
+                mPinnedStackAnimationRecentsCallback.onPipAnimationStarted();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to call onPinnedStackAnimationStarted()", e);
+            }
         }
     }
 
@@ -638,7 +662,21 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipInputConsumer.dump(pw, innerPrefix);
     }
 
+    /**
+     * The interface for calls from outside the Shell, within the host process.
+     */
     private class PipImpl implements Pip {
+        private IPipImpl mIPip;
+
+        @Override
+        public IPip createExternalInterface() {
+            if (mIPip != null) {
+                mIPip.invalidate();
+            }
+            mIPip = new IPipImpl(PipController.this);
+            return mIPip;
+        }
+
         @Override
         public void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {
             mMainExecutor.execute(() -> {
@@ -696,13 +734,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void setPinnedStackAnimationListener(Consumer<Boolean> callback) {
-            mMainExecutor.execute(() -> {
-                PipController.this.setPinnedStackAnimationListener(callback);
-            });
-        }
-
-        @Override
         public void setPinnedStackAnimationType(int animationType) {
             mMainExecutor.execute(() -> {
                 PipController.this.setPinnedStackAnimationType(animationType);
@@ -724,29 +755,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
-                PictureInPictureParams pictureInPictureParams, int launcherRotation,
-                int shelfHeight) {
-            Rect[] result = new Rect[1];
-            try {
-                mMainExecutor.executeBlocking(() -> {
-                    result[0] = PipController.this.startSwipePipToHome(componentName, activityInfo,
-                            pictureInPictureParams, launcherRotation, shelfHeight);
-                });
-            } catch (InterruptedException e) {
-                Slog.e(TAG, "Failed to start swipe pip to home");
-            }
-            return result[0];
-        }
-
-        @Override
-        public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
-            mMainExecutor.execute(() -> {
-                PipController.this.stopSwipePipToHome(componentName, destinationBounds);
-            });
-        }
-
-        @Override
         public void dump(PrintWriter pw) {
             try {
                 mMainExecutor.executeBlocking(() -> {
@@ -755,6 +763,91 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             } catch (InterruptedException e) {
                 Slog.e(TAG, "Failed to dump PipController in 2s");
             }
+        }
+    }
+
+    /**
+     * The interface for calls from outside the host process.
+     */
+    @BinderThread
+    private static class IPipImpl extends IPip.Stub {
+        private PipController mController;
+        private IPipAnimationListener mListener;
+        private final IBinder.DeathRecipient mListenerDeathRecipient =
+                new IBinder.DeathRecipient() {
+                    @Override
+                    @BinderThread
+                    public void binderDied() {
+                        final PipController controller = mController;
+                        controller.getRemoteCallExecutor().execute(() -> {
+                            mListener = null;
+                            controller.setPinnedStackAnimationListener(null);
+                        });
+                    }
+                };
+
+        IPipImpl(PipController controller) {
+            mController = controller;
+        }
+
+        /**
+         * Invalidates this instance, preventing future calls from updating the controller.
+         */
+        void invalidate() {
+            mController = null;
+        }
+
+        @Override
+        public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
+                PictureInPictureParams pictureInPictureParams, int launcherRotation,
+                int shelfHeight) {
+            Rect[] result = new Rect[1];
+            executeRemoteCallWithTaskPermission(mController, "startSwipePipToHome",
+                    (controller) -> {
+                        result[0] = controller.startSwipePipToHome(componentName, activityInfo,
+                                pictureInPictureParams, launcherRotation, shelfHeight);
+                    }, true /* blocking */);
+            return result[0];
+        }
+
+        @Override
+        public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
+            executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
+                    (controller) -> {
+                        controller.stopSwipePipToHome(componentName, destinationBounds);
+                    });
+        }
+
+        @Override
+        public void setShelfHeight(boolean visible, int height) {
+            executeRemoteCallWithTaskPermission(mController, "setShelfHeight",
+                    (controller) -> {
+                        controller.setShelfHeight(visible, height);
+                    });
+        }
+
+        @Override
+        public void setPinnedStackAnimationListener(IPipAnimationListener listener) {
+            executeRemoteCallWithTaskPermission(mController, "setPinnedStackAnimationListener",
+                    (controller) -> {
+                        if (mListener != null) {
+                            // Reset the old death recipient
+                            mListener.asBinder().unlinkToDeath(mListenerDeathRecipient,
+                                    0 /* flags */);
+                        }
+                        if (listener != null) {
+                            // Register the death recipient for the new listener to clear the listener
+                            try {
+                                listener.asBinder().linkToDeath(mListenerDeathRecipient,
+                                        0 /* flags */);
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "Failed to link to death");
+                                return;
+                            }
+                        }
+                        mListener = listener;
+                        controller.setPinnedStackAnimationListener(listener);
+                    });
         }
     }
 }
