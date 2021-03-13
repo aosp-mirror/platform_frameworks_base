@@ -9687,7 +9687,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Sets the roaming mode for CDMA phone to the given mode {@code mode}.
+     * Sets the roaming mode for CDMA phone to the given mode {@code mode}. If the phone is not
+     * CDMA capable, this method does nothing.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
@@ -9710,6 +9711,7 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setCdmaRoamingMode(@CdmaRoamingMode int mode) {
+        if (getPhoneType() != PHONE_TYPE_CDMA) return;
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -9790,7 +9792,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Sets the subscription mode for CDMA phone to the given mode {@code mode}.
+     * Sets the subscription mode for CDMA phone to the given mode {@code mode}. If the phone is not
+     * CDMA capable, this method does nothing.
      *
      * @param mode CDMA subscription mode.
      * @throws SecurityException if the caller does not have the permission.
@@ -9809,6 +9812,7 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setCdmaSubscriptionMode(@CdmaSubscription int mode) {
+        if (getPhoneType() != PHONE_TYPE_CDMA) return;
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
