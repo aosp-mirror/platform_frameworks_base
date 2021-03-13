@@ -91,16 +91,19 @@ class HostClipboardMonitor implements Runnable {
         return bits;
     }
 
-    private void openPipe() {
+    private boolean openPipe() {
         try {
-            mPipe = new RandomAccessFile(PIPE_DEVICE, "rw");
-            mPipe.write(createOpenHandshake());
-        } catch (IOException e) {
+            final RandomAccessFile pipe = new RandomAccessFile(PIPE_DEVICE, "rw");
             try {
-                if (mPipe != null) mPipe.close();
-            } catch (IOException ee) {}
-            mPipe = null;
+                pipe.write(createOpenHandshake());
+                mPipe = pipe;
+                return true;
+            } catch (IOException ignore) {
+                pipe.close();
+            }
+        } catch (IOException ignore) {
         }
+        return false;
     }
 
     public HostClipboardMonitor(HostClipboardCallback cb) {
@@ -114,8 +117,7 @@ class HostClipboardMonitor implements Runnable {
                 // There's no guarantee that QEMU pipes will be ready at the moment
                 // this method is invoked. We simply try to get the pipe open and
                 // retry on failure indefinitely.
-                while (mPipe == null) {
-                    openPipe();
+                while ((mPipe == null) && !openPipe()) {
                     Thread.sleep(100);
                 }
                 int size = mPipe.readInt();
