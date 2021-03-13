@@ -61,7 +61,7 @@ public class AppSearchSessionUnitTest {
     public void testPutDocument_throwsNullException() throws Exception {
         // Create a document
         AppSearchEmail inEmail =
-                new AppSearchEmail.Builder("uri1")
+                new AppSearchEmail.Builder("namespace", "uri1")
                         .setFrom("from@example.com")
                         .setTo("to1@example.com", "to2@example.com")
                         .setSubject("testPut example")
