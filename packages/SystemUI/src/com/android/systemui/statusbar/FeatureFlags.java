@@ -94,4 +94,8 @@ public class FeatureFlags {
     public boolean isAlarmTileAvailable() {
         return mFlagReader.isEnabled(R.bool.flag_alarm_tile);
     }
+
+    public boolean isChargingRippleEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_charging_ripple);
+    }
 }

@@ -48,4 +48,6 @@
     <bool name="flag_pm_lite">false</bool>
 
     <bool name="flag_alarm_tile">false</bool>
+
+    <bool name="flag_charging_ripple">false</bool>
 </resources>
