@@ -88,7 +88,7 @@ public class DevicePolicyConstants {
         } catch (IllegalArgumentException e) {
             // Failed to parse the settings string, log this and move on
             // with defaults.
-            Slog.e(TAG, "Bad device policy settings: " + settings);
+            Slog.e(TAG, "Bad device policy settings: %s", settings);
         }
 
         long dasDiedServiceReconnectBackoffSec = parser.getLong(
