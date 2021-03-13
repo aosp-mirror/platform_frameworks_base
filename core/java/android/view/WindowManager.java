@@ -81,6 +81,7 @@ import static android.view.WindowLayoutParamsProto.X;
 import static android.view.WindowLayoutParamsProto.Y;
 
 import android.Manifest.permission;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -121,6 +122,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -861,6 +863,33 @@ public interface WindowManager extends ViewManager {
      * @see Window#setBackgroundBlurRadius
      */
     default void addCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
+    }
+
+    /**
+     * Adds a listener, which will be called when cross-window blurs are enabled/disabled at
+     * runtime. This affects both window blur behind (see {@link LayoutParams#setBlurBehindRadius})
+     * and window background blur (see {@link Window#setBackgroundBlurRadius}).
+     *
+     * Cross-window blur might not be supported by some devices due to GPU limitations. It can also
+     * be disabled at runtime, e.g. during battery saving mode, when multimedia tunneling is used or
+     * when minimal post processing is requested. In such situations, no blur will be computed or
+     * drawn, so the blur target area will not be blurred. To handle this, the app might want to
+     * change its theme to one that does not use blurs.
+     *
+     * If the listener is added successfully, it will be called immediately with the current
+     * cross-window blur enabled state.
+     *
+     * @param executor {@link Executor} to handle the listener callback
+     * @param listener the listener to be added. It will be called back with a boolean parameter,
+     *                 which is true if cross-window blur is enabled and false if it is disabled
+     *
+     * @see #removeCrossWindowBlurEnabledListener
+     * @see #isCrossWindowBlurEnabled
+     * @see LayoutParams#setBlurBehindRadius
+     * @see Window#setBackgroundBlurRadius
+     */
+    default void addCrossWindowBlurEnabledListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> listener) {
     }
 
     /**
