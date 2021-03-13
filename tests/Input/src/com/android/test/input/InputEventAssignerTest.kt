@@ -43,7 +43,7 @@ fun createMotionEvent(action: Int, eventTime: Long, source: Int): MotionEvent {
             xPrecision, yPrecision, deviceId, edgeFlags, source, displayId)
 }
 
-fun createKeyEvent(action: Int, eventTime: Long): KeyEvent {
+private fun createKeyEvent(action: Int, eventTime: Long): KeyEvent {
     val code = KeyEvent.KEYCODE_A
     val repeat = 0
     return KeyEvent(eventTime, eventTime, action, code, repeat)
