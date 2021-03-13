@@ -50,9 +50,7 @@ import java.util.concurrent.Executor;
 
 public class VcnManagerTest {
     private static final ParcelUuid SUB_GROUP = new ParcelUuid(new UUID(0, 0));
-    private static final int[] UNDERLYING_NETWORK_CAPABILITIES = {
-        NetworkCapabilities.NET_CAPABILITY_IMS, NetworkCapabilities.NET_CAPABILITY_INTERNET
-    };
+    private static final String GATEWAY_CONNECTION_NAME = "gatewayConnectionName";
     private static final Executor INLINE_EXECUTOR = Runnable::run;
 
     private IVcnManagementService mMockVcnManagementService;
@@ -207,13 +205,13 @@ public class VcnManagerTest {
         verify(mMockStatusCallback).onStatusChanged(VCN_STATUS_CODE_ACTIVE);
 
         cbBinder.onGatewayConnectionError(
-                UNDERLYING_NETWORK_CAPABILITIES,
+                GATEWAY_CONNECTION_NAME,
                 VcnManager.VCN_ERROR_CODE_NETWORK_ERROR,
                 UnknownHostException.class.getName(),
                 "exception_message");
         verify(mMockStatusCallback)
                 .onGatewayConnectionError(
-                        eq(UNDERLYING_NETWORK_CAPABILITIES),
+                        any(int[].class),
                         eq(VcnManager.VCN_ERROR_CODE_NETWORK_ERROR),
                         any(UnknownHostException.class));
     }

@@ -148,6 +148,8 @@ public final class VcnGatewayConnectionConfig {
                 TimeUnit.MINUTES.toMillis(5),
                 TimeUnit.MINUTES.toMillis(15)
             };
+    private static final String GATEWAY_CONNECTION_NAME_KEY = "mGatewayConnectionName";
+    @NonNull private final String mGatewayConnectionName;
 
     private static final String CTRL_PLANE_CONFIG_KEY = "mCtrlPlaneConfig";
     @NonNull private VcnControlPlaneConfig mCtrlPlaneConfig;
@@ -166,11 +168,13 @@ public final class VcnGatewayConnectionConfig {
 
     /** Builds a VcnGatewayConnectionConfig with the specified parameters. */
     private VcnGatewayConnectionConfig(
+            @NonNull String gatewayConnectionName,
             @NonNull VcnControlPlaneConfig ctrlPlaneConfig,
             @NonNull Set<Integer> exposedCapabilities,
             @NonNull Set<Integer> underlyingCapabilities,
             @NonNull long[] retryIntervalsMs,
             @IntRange(from = MIN_MTU_V6) int maxMtu) {
+        mGatewayConnectionName = gatewayConnectionName;
         mCtrlPlaneConfig = ctrlPlaneConfig;
         mExposedCapabilities = new TreeSet(exposedCapabilities);
         mUnderlyingCapabilities = new TreeSet(underlyingCapabilities);
@@ -192,6 +196,7 @@ public final class VcnGatewayConnectionConfig {
         final PersistableBundle underlyingCapsBundle =
                 in.getPersistableBundle(UNDERLYING_CAPABILITIES_KEY);
 
+        mGatewayConnectionName = in.getString(GATEWAY_CONNECTION_NAME_KEY);
         mCtrlPlaneConfig = VcnControlPlaneConfig.fromPersistableBundle(ctrlPlaneConfigBundle);
         mExposedCapabilities = new TreeSet<>(PersistableBundleUtils.toList(
                 exposedCapsBundle, PersistableBundleUtils.INTEGER_DESERIALIZER));
@@ -204,6 +209,7 @@ public final class VcnGatewayConnectionConfig {
     }
 
     private void validate() {
+        Objects.requireNonNull(mGatewayConnectionName, "gatewayConnectionName was null");
         Objects.requireNonNull(mCtrlPlaneConfig, "control plane config was null");
 
         Preconditions.checkArgument(
@@ -239,6 +245,21 @@ public final class VcnGatewayConnectionConfig {
                     "Repeating retry interval was too short, must be a minimum of 15 minutes: "
                             + repeatingInterval);
         }
+    }
+
+    /**
+     * Returns the configured Gateway Connection name.
+     *
+     * <p>This name is used by the configuring apps to distinguish between
+     * VcnGatewayConnectionConfigs configured on a single {@link VcnConfig}. This will be used as
+     * the identifier in VcnStatusCallback invocations.
+     *
+     * @see VcnManager.VcnStatusCallback#onGatewayConnectionError
+     * @hide
+     */
+    @NonNull
+    public String getGatewayConnectionName() {
+        return mGatewayConnectionName;
     }
 
     /**
@@ -364,6 +385,7 @@ public final class VcnGatewayConnectionConfig {
                         new ArrayList<>(mUnderlyingCapabilities),
                         PersistableBundleUtils.INTEGER_SERIALIZER);
 
+        result.putString(GATEWAY_CONNECTION_NAME_KEY, mGatewayConnectionName);
         result.putPersistableBundle(CTRL_PLANE_CONFIG_KEY, ctrlPlaneConfigBundle);
         result.putPersistableBundle(EXPOSED_CAPABILITIES_KEY, exposedCapsBundle);
         result.putPersistableBundle(UNDERLYING_CAPABILITIES_KEY, underlyingCapsBundle);
@@ -376,6 +398,7 @@ public final class VcnGatewayConnectionConfig {
     @Override
     public int hashCode() {
         return Objects.hash(
+                mGatewayConnectionName,
                 mExposedCapabilities,
                 mUnderlyingCapabilities,
                 Arrays.hashCode(mRetryIntervalsMs),
@@ -389,7 +412,8 @@ public final class VcnGatewayConnectionConfig {
         }
 
         final VcnGatewayConnectionConfig rhs = (VcnGatewayConnectionConfig) other;
-        return mExposedCapabilities.equals(rhs.mExposedCapabilities)
+        return mGatewayConnectionName.equals(rhs.mGatewayConnectionName)
+                && mExposedCapabilities.equals(rhs.mExposedCapabilities)
                 && mUnderlyingCapabilities.equals(rhs.mUnderlyingCapabilities)
                 && Arrays.equals(mRetryIntervalsMs, rhs.mRetryIntervalsMs)
                 && mMaxMtu == rhs.mMaxMtu;
@@ -399,6 +423,7 @@ public final class VcnGatewayConnectionConfig {
      * This class is used to incrementally build {@link VcnGatewayConnectionConfig} objects.
      */
     public static final class Builder {
+        @NonNull private final String mGatewayConnectionName;
         @NonNull private final VcnControlPlaneConfig mCtrlPlaneConfig;
         @NonNull private final Set<Integer> mExposedCapabilities = new ArraySet();
         @NonNull private final Set<Integer> mUnderlyingCapabilities = new ArraySet();
@@ -416,8 +441,29 @@ public final class VcnGatewayConnectionConfig {
          * @see VcnControlPlaneConfig
          */
         public Builder(@NonNull VcnControlPlaneConfig ctrlPlaneConfig) {
+            this("" /* gatewayConnectionName */, ctrlPlaneConfig);
+        }
+
+        /**
+         * Construct a Builder object.
+         *
+         * @param gatewayConnectionName the String GatewayConnection name for this
+         *     VcnGatewayConnectionConfig. Each VcnGatewayConnectionConfig within a {@link
+         *     VcnConfig} must be given a unique name. This name is used by the caller to
+         *     distinguish between VcnGatewayConnectionConfigs configured on a single {@link
+         *     VcnConfig}. This will be used as the identifier in VcnStatusCallback invocations.
+         * @param ctrlPlaneConfig the control plane configuration
+         * @see VcnControlPlaneConfig
+         * @see VcnManager.VcnStatusCallback#onGatewayConnectionError
+         * @hide
+         */
+        public Builder(
+                @NonNull String gatewayConnectionName,
+                @NonNull VcnControlPlaneConfig ctrlPlaneConfig) {
+            Objects.requireNonNull(gatewayConnectionName, "gatewayConnectionName was null");
             Objects.requireNonNull(ctrlPlaneConfig, "ctrlPlaneConfig was null");
 
+            mGatewayConnectionName = gatewayConnectionName;
             mCtrlPlaneConfig = ctrlPlaneConfig;
         }
 
@@ -562,6 +608,7 @@ public final class VcnGatewayConnectionConfig {
         @NonNull
         public VcnGatewayConnectionConfig build() {
             return new VcnGatewayConnectionConfig(
+                    mGatewayConnectionName,
                     mCtrlPlaneConfig,
                     mExposedCapabilities,
                     mUnderlyingCapabilities,

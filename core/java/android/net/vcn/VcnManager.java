@@ -586,7 +586,7 @@ public class VcnManager {
         // TODO(b/180521637): use ServiceSpecificException for safer Exception 'parceling'
         @Override
         public void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage) {
@@ -597,7 +597,7 @@ public class VcnManager {
                             mExecutor.execute(
                                     () ->
                                             mCallback.onGatewayConnectionError(
-                                                    networkCapabilities, errorCode, cause)));
+                                                    new int[0], errorCode, cause)));
         }
 
         private static Throwable createThrowableByClassName(
