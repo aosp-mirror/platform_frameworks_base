@@ -21,28 +21,25 @@ import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.util.MathUtils;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 
 /**
  * UDFPS animations that should be shown when authenticating on keyguard.
  */
-public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiver,
-        StatusBarStateController.StateListener {
+public class UdfpsKeyguardDrawable extends UdfpsDrawable implements DozeReceiver {
 
     private static final String TAG = "UdfpsAnimationKeyguard";
+    private final int mLockScreenColor;
+    private final int mAmbientDisplayColor;
 
     @NonNull private final Context mContext;
-    @NonNull private final StatusBarStateController mStatusBarStateController;
     private final int mMaxBurnInOffsetX;
     private final int mMaxBurnInOffsetY;
 
@@ -51,18 +48,19 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
     private float mBurnInOffsetX;
     private float mBurnInOffsetY;
 
-    UdfpsAnimationKeyguard(@NonNull Context context,
-            @NonNull StatusBarStateController statusBarStateController) {
+    UdfpsKeyguardDrawable(@NonNull Context context) {
         super(context);
         mContext = context;
-        mStatusBarStateController = statusBarStateController;
 
+        // TODO: move burn-in to view
         mMaxBurnInOffsetX = context.getResources()
                 .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
         mMaxBurnInOffsetY = context.getResources()
                 .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
 
-        statusBarStateController.addCallback(this);
+        mLockScreenColor = Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor);
+        mAmbientDisplayColor = Color.WHITE;
+        updateAodPositionAndColor();
     }
 
     private void updateAodPositionAndColor() {
@@ -74,8 +72,10 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
                 getBurnInOffset(mMaxBurnInOffsetY * 2, false /* xAxis */)
                         - mMaxBurnInOffsetY,
                 mInterpolatedDarkAmount);
-        updateColor();
-        postInvalidateView();
+
+        mFingerprintDrawable.setTint(ColorUtils.blendARGB(mLockScreenColor,
+                mAmbientDisplayColor, mInterpolatedDarkAmount));
+        invalidateSelf();
     }
 
     @Override
@@ -84,44 +84,15 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
     }
 
     @Override
-    public void onDozeAmountChanged(float linear, float eased) {
-        mInterpolatedDarkAmount = eased;
-        updateAodPositionAndColor();
-    }
-
-    @Override
     public void draw(@NonNull Canvas canvas) {
         if (isIlluminationShowing()) {
             return;
         }
-
-        canvas.save();
-        canvas.translate(mBurnInOffsetX, mBurnInOffsetY);
         mFingerprintDrawable.draw(canvas);
-        canvas.restore();
     }
 
-    @Override
-    public void setColorFilter(@Nullable ColorFilter colorFilter) {
-
-    }
-
-    @Override
-    public int getOpacity() {
-        return 0;
-    }
-
-    @Override
-    protected void updateColor() {
-        final int lockScreenIconColor = Utils.getColorAttrDefaultColor(mContext,
-                R.attr.wallpaperTextColor);
-        final int ambientDisplayIconColor = Color.WHITE;
-        mFingerprintDrawable.setTint(ColorUtils.blendARGB(lockScreenIconColor,
-                ambientDisplayIconColor, mInterpolatedDarkAmount));
-    }
-
-    @Override
-    protected void onDestroy() {
-        mStatusBarStateController.removeCallback(this);
+    void onDozeAmountChanged(float linear, float eased) {
+        mInterpolatedDarkAmount = eased;
+        updateAodPositionAndColor();
     }
 }

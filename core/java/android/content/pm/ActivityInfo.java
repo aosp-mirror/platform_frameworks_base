@@ -1086,6 +1086,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     public WindowLayout windowLayout;
 
+    /**
+     * Attribution tags for finer grained calls if a {@android.content.Context#sendBroadcast(Intent,
+     * String)} is used with a permission.
+     * @hide
+     */
+    public String[] attributionTags;
+
     public ActivityInfo() {
     }
 
@@ -1114,6 +1121,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         maxAspectRatio = orig.maxAspectRatio;
         minAspectRatio = orig.minAspectRatio;
         supportsSizeChanges = orig.supportsSizeChanges;
+        attributionTags = orig.attributionTags;
     }
 
     /**
@@ -1361,6 +1369,15 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (supportsSizeChanges) {
             pw.println(prefix + "supportsSizeChanges=true");
         }
+        if (attributionTags != null && attributionTags.length > 0) {
+            StringBuilder tags = new StringBuilder();
+            tags.append(attributionTags[0]);
+            for (int i = 1; i < attributionTags.length; i++) {
+                tags.append(", ");
+                tags.append(attributionTags[i]);
+            }
+            pw.println(prefix + "attributionTags=[" + tags + "]");
+        }
         super.dumpBack(pw, prefix, dumpFlags);
     }
 
@@ -1406,6 +1423,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeFloat(maxAspectRatio);
         dest.writeFloat(minAspectRatio);
         dest.writeBoolean(supportsSizeChanges);
+        dest.writeString8Array(attributionTags);
     }
 
     /**
@@ -1525,6 +1543,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         maxAspectRatio = source.readFloat();
         minAspectRatio = source.readFloat();
         supportsSizeChanges = source.readBoolean();
+        attributionTags = source.createString8Array();
     }
 
     /**

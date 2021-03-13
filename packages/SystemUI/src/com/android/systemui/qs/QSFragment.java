@@ -430,6 +430,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mFooter.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
         mQSPanelController.setRevealExpansion(expansion);
         mQSPanelController.getTileLayout().setExpansion(expansion);
+        mQuickQSPanelController.getTileLayout().setExpansion(expansion);
         mQSPanelScrollView.setTranslationY(translationScaleY * heightDiff);
         if (fullyCollapsed) {
             mQSPanelScrollView.setScrollY(0);

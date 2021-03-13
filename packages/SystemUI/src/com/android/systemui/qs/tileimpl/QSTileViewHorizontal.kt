@@ -21,8 +21,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RoundRectShape
+import android.graphics.drawable.RippleDrawable
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.view.Gravity
 import android.widget.LinearLayout
@@ -32,25 +31,31 @@ import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState
 
-// Placeholder
-private const val CORNER_RADIUS = 40f
-private val RADII = (1..8).map { CORNER_RADIUS }.toFloatArray()
-
 open class QSTileViewHorizontal(
     context: Context,
-    icon: QSIconView
-) : QSTileView(context, icon, false) {
+    icon: QSIconView,
+    collapsed: Boolean
+) : QSTileView(context, icon, collapsed) {
 
-    protected var backgroundDrawable: ShapeDrawable? = null
+    protected var colorBackgroundDrawable: Drawable? = null
     private var paintColor = Color.WHITE
     private var paintAnimator: ValueAnimator? = null
+    private var labelAnimator: ValueAnimator? = null
 
     init {
         orientation = HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL or Gravity.START
         mDualTargetAllowed = false
+        val padding = context.resources.getDimensionPixelSize(R.dimen.qs_tile_side_label_padding)
+        setPadding(padding, paddingTop, padding, paddingBottom)
+
         mBg.setImageDrawable(null)
+        mIconFrame.removeAllViews()
+        removeView(mIconFrame)
+        val iconSize = context.resources.getDimensionPixelSize(R.dimen.qs_icon_size)
+        addView(mIcon, 0, LayoutParams(iconSize, iconSize))
+
         mColorLabelActive = ColorStateList.valueOf(getColorForState(getContext(), STATE_ACTIVE))
-        mMaxLabelLines = 3
     }
 
     override fun createLabel() {
@@ -61,64 +66,111 @@ open class QSTileViewHorizontal(
                 removeRule(RelativeLayout.ALIGN_PARENT_TOP)
             }
         }
+        mLabelContainer.setPadding(0, 0, 0, 0)
+        (mLabelContainer.layoutParams as MarginLayoutParams).apply {
+            marginStart = context.resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
+        }
         mLabel.gravity = Gravity.START
         mLabel.textDirection = TEXT_DIRECTION_LOCALE
         mSecondLine.gravity = Gravity.START
         mSecondLine.textDirection = TEXT_DIRECTION_LOCALE
-        val padding = context.resources.getDimensionPixelSize(R.dimen.qs_tile_side_label_padding)
-        mLabelContainer.setPaddingRelative(0, padding, padding, padding)
+
         (mLabelContainer.layoutParams as LayoutParams).gravity =
             Gravity.CENTER_VERTICAL or Gravity.START
+        if (mCollapsedView) {
+            mSecondLine.visibility = GONE
+        }
+    }
+
+    override fun shouldLabelBeSingleLine(): Boolean {
+        return true
     }
 
     override fun updateRippleSize() {
     }
 
     override fun newTileBackground(): Drawable? {
-        backgroundDrawable = ShapeDrawable(RoundRectShape(RADII, null, null))
-        return backgroundDrawable
+        val ripple = mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
+        colorBackgroundDrawable = ripple.findDrawableByLayerId(R.id.background)
+        return ripple
     }
 
     override fun setClickable(clickable: Boolean) {
         super.setClickable(clickable)
-        background = mTileBackground
+        background = if (clickable && mShowRippleEffect) {
+            mTileBackground
+        } else {
+            colorBackgroundDrawable
+        }
     }
 
     override fun handleStateChanged(state: QSTile.State) {
         super.handleStateChanged(state)
-        mSecondLine.setTextColor(mLabel.textColors)
         mLabelContainer.background = null
 
         val allowAnimations = animationsEnabled() && paintColor != Color.WHITE
         val newColor = getCircleColor(state.state)
         if (allowAnimations) {
-            animateToNewState(newColor)
+            animateBackground(newColor)
         } else {
             if (newColor != paintColor) {
-                clearAnimator()
-                backgroundDrawable?.setTintList(ColorStateList.valueOf(newColor))
+                clearBackgroundAnimator()
+                colorBackgroundDrawable?.setTintList(ColorStateList.valueOf(newColor))?.also {
+                    paintColor = newColor
+                }
                 paintColor = newColor
             }
         }
     }
 
-    private fun animateToNewState(newColor: Int) {
-        if (newColor != paintColor) {
-            clearAnimator()
-            paintAnimator = ValueAnimator.ofArgb(paintColor, newColor)
+    private fun animateBackground(newBackgroundColor: Int) {
+        if (newBackgroundColor != paintColor) {
+            clearBackgroundAnimator()
+            paintAnimator = ValueAnimator.ofArgb(paintColor, newBackgroundColor)
                 .setDuration(QSIconViewImpl.QS_ANIM_LENGTH).apply {
                     addUpdateListener { animation: ValueAnimator ->
                         val c = animation.animatedValue as Int
-                        backgroundDrawable?.setTintList(ColorStateList.valueOf(c))
-                        paintColor = c
+                        colorBackgroundDrawable?.setTintList(ColorStateList.valueOf(c))?.also {
+                            paintColor = c
+                        }
                     }
                     start()
                 }
         }
     }
 
-    private fun clearAnimator() {
+    override fun changeLabelColor(color: ColorStateList) {
+        val allowAnimations = animationsEnabled()
+        val currentColor = mLabel.textColors.defaultColor
+        if (currentColor != color.defaultColor) {
+            clearLabelAnimator()
+            if (allowAnimations) {
+                labelAnimator = ValueAnimator.ofArgb(currentColor, color.defaultColor)
+                    .setDuration(QSIconViewImpl.QS_ANIM_LENGTH).apply {
+                        addUpdateListener {
+                            setLabelsColor(ColorStateList.valueOf(it.animatedValue as Int))
+                        }
+                        start()
+                }
+            } else {
+                setLabelsColor(color)
+            }
+        }
+    }
+
+    private fun setLabelsColor(color: ColorStateList) {
+        mLabel.setTextColor(color)
+        if (!mCollapsedView) {
+            mSecondLine.setTextColor(color)
+        }
+    }
+
+    private fun clearBackgroundAnimator() {
         paintAnimator?.cancel()?.also { paintAnimator = null }
+    }
+
+    private fun clearLabelAnimator() {
+        labelAnimator?.cancel()?.also { labelAnimator = null }
     }
 
     override fun handleExpand(dualTarget: Boolean) {}

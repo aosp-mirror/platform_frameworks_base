@@ -158,6 +158,12 @@ public:
     virtual void listFilesRecursive(std::string_view directoryPath, FileCallback onFile) const = 0;
 };
 
+class ClockWrapper {
+public:
+    virtual ~ClockWrapper() = default;
+    virtual TimePoint now() const = 0;
+};
+
 class ServiceManagerWrapper {
 public:
     virtual ~ServiceManagerWrapper() = default;
@@ -170,6 +176,7 @@ public:
     virtual std::unique_ptr<TimedQueueWrapper> getTimedQueue() = 0;
     virtual std::unique_ptr<TimedQueueWrapper> getProgressUpdateJobQueue() = 0;
     virtual std::unique_ptr<FsWrapper> getFs() = 0;
+    virtual std::unique_ptr<ClockWrapper> getClock() = 0;
 };
 
 // --- Real stuff ---
@@ -187,6 +194,7 @@ public:
     std::unique_ptr<TimedQueueWrapper> getTimedQueue() final;
     std::unique_ptr<TimedQueueWrapper> getProgressUpdateJobQueue() final;
     std::unique_ptr<FsWrapper> getFs() final;
+    std::unique_ptr<ClockWrapper> getClock() final;
 
 private:
     template <class INTERFACE>

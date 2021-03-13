@@ -1018,7 +1018,7 @@ public class ImsMmTelManager implements RegistrationManager {
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PRECISE_PHONE_STATE})
-    public boolean isCrossSimCallingEnabledByUser() throws ImsException {
+    public boolean isCrossSimCallingEnabled() throws ImsException {
         ITelephony iTelephony = getITelephony();
         if (iTelephony == null) {
             throw new ImsException("Could not find Telephony Service.",
@@ -1058,7 +1058,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * the IMS service is not available.
      * @param isEnabled true if the user's setting for Voice over Cross SIM is enabled,
      *                 false otherwise
-     * @see #isCrossSimCallingEnabledByUser()
+     * @see #isCrossSimCallingEnabled()
      * @hide
      */
     @SystemApi

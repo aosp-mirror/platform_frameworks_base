@@ -68,8 +68,6 @@ class PrivacyItemController @Inject constructor(
             addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
         }
         const val TAG = "PrivacyItemController"
-        private const val ALL_INDICATORS =
-                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED
         private const val MIC_CAMERA = SystemUiDeviceConfigFlags.PROPERTY_MIC_CAMERA_ENABLED
         private const val LOCATION = SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_ENABLED
         private const val DEFAULT_ALL_INDICATORS = false
@@ -82,11 +80,6 @@ class PrivacyItemController @Inject constructor(
     internal var privacyList = emptyList<PrivacyItem>()
         @Synchronized get() = field.toList() // Returns a shallow copy of the list
         @Synchronized set
-
-    private fun isAllIndicatorsEnabled(): Boolean {
-        return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                ALL_INDICATORS, DEFAULT_ALL_INDICATORS)
-    }
 
     private fun isMicCameraEnabled(): Boolean {
         return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
@@ -120,34 +113,29 @@ class PrivacyItemController @Inject constructor(
         uiExecutor.execute(notifyChanges)
     }
 
-    var allIndicatorsAvailable = isAllIndicatorsEnabled()
-        private set
     var micCameraAvailable = isMicCameraEnabled()
         private set
     var locationAvailable = isLocationEnabled()
+
+    var allIndicatorsAvailable = micCameraAvailable && locationAvailable
 
     private val devicePropertiesChangedListener =
             object : DeviceConfig.OnPropertiesChangedListener {
         override fun onPropertiesChanged(properties: DeviceConfig.Properties) {
             if (DeviceConfig.NAMESPACE_PRIVACY.equals(properties.getNamespace()) &&
-                    (properties.keyset.contains(ALL_INDICATORS) ||
-                            properties.keyset.contains(MIC_CAMERA) ||
+                    (properties.keyset.contains(MIC_CAMERA) ||
                             properties.keyset.contains(LOCATION))) {
 
                 // Running on the ui executor so can iterate on callbacks
-                if (properties.keyset.contains(ALL_INDICATORS)) {
-                    allIndicatorsAvailable = properties.getBoolean(ALL_INDICATORS,
-                            DEFAULT_ALL_INDICATORS)
-                    callbacks.forEach { it.get()?.onFlagAllChanged(allIndicatorsAvailable) }
-                }
-
                 if (properties.keyset.contains(MIC_CAMERA)) {
                     micCameraAvailable = properties.getBoolean(MIC_CAMERA, DEFAULT_MIC_CAMERA)
+                    allIndicatorsAvailable = micCameraAvailable && locationAvailable
                     callbacks.forEach { it.get()?.onFlagMicCameraChanged(micCameraAvailable) }
                 }
 
                 if (properties.keyset.contains(LOCATION)) {
                     locationAvailable = properties.getBoolean(LOCATION, DEFAULT_LOCATION)
+                    allIndicatorsAvailable = micCameraAvailable && locationAvailable
                     callbacks.forEach { it.get()?.onFlagLocationChanged(locationAvailable) }
                 }
                 internalUiExecutor.updateListeningState()
@@ -163,8 +151,7 @@ class PrivacyItemController @Inject constructor(
             active: Boolean
         ) {
             // Check if we care about this code right now
-            if (!allIndicatorsAvailable &&
-                    (code in OPS_LOCATION && !locationAvailable)) {
+            if (code in OPS_LOCATION && !locationAvailable) {
                 return
             }
             val userId = UserHandle.getUserId(uid)
@@ -231,7 +218,7 @@ class PrivacyItemController @Inject constructor(
      */
     private fun setListeningState() {
         val listen = !callbacks.isEmpty() and
-                (allIndicatorsAvailable || micCameraAvailable || locationAvailable)
+                (micCameraAvailable || locationAvailable)
         if (listening == listen) return
         listening = listen
         if (listening) {
@@ -338,7 +325,7 @@ class PrivacyItemController @Inject constructor(
             AppOpsManager.OP_RECORD_AUDIO -> PrivacyType.TYPE_MICROPHONE
             else -> return null
         }
-        if (type == PrivacyType.TYPE_LOCATION && (!allIndicatorsAvailable && !locationAvailable)) {
+        if (type == PrivacyType.TYPE_LOCATION && !locationAvailable) {
             return null
         }
         val app = PrivacyApplication(appOpItem.packageName, appOpItem.uid)

@@ -26,14 +26,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,22 +61,6 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
 
     @Presubmit
     @Test
-    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
-
-    @Presubmit
-    @Test
     fun appReplacesPipWindow() {
         testSpec.assertWm {
             this.showsAppWindow(PIP_WINDOW_TITLE)
@@ -91,11 +68,6 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
                 .showsAppWindowOnTop(pipApp.launcherName)
         }
     }
-
-    @Presubmit
-    @Test
-    fun statusBarLayerRotatesScales() =
-        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
 
     @Presubmit
     @Test
@@ -107,15 +79,13 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
         }
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
-    fun noUncoveredRegions() =
-        testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
-
-    @Presubmit
-    @Test
-    fun navBarLayerRotatesAndScales() =
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
+    fun testAppCoversFullScreen() {
+        testSpec.assertLayersStart {
+            coversExactly(displayBounds, pipApp.defaultWindowName)
+        }
+    }
 
     @FlakyTest(bugId = 151179149)
     @Test

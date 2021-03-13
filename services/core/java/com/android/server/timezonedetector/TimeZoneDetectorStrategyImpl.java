@@ -195,6 +195,13 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     private ReferenceWithHistory<GeolocationTimeZoneSuggestion> mLatestGeoLocationSuggestion =
             new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
+    /**
+     * The latest manual suggestion received.
+     */
+    @GuardedBy("this")
+    private ReferenceWithHistory<ManualTimeZoneSuggestion> mLatestManualSuggestion =
+            new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
+
     @GuardedBy("this")
     private final List<Dumpable> mDumpables = new ArrayList<>();
 
@@ -286,6 +293,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
         if (currentUserConfig.getGeoDetectionEnabledBehavior()) {
             // Only store a geolocation suggestion if geolocation detection is currently enabled.
+            // See also clearGeolocationSuggestionIfNeeded().
             mLatestGeoLocationSuggestion.set(suggestion);
 
             // Now perform auto time zone detection. The new suggestion may be used to modify the
@@ -324,6 +332,12 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             return false;
         }
 
+        // Record the manual suggestion for debugging / metrics (but only if manual detection is
+        // currently enabled).
+        // Note: This is not used to set the device back to a previous manual suggestion if the user
+        // later disables automatic time zone detection.
+        mLatestManualSuggestion.set(suggestion);
+
         setDeviceTimeZoneIfRequired(timeZoneId, cause);
         return true;
     }
@@ -355,6 +369,28 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             String reason = "New telephony time zone suggested. suggestion=" + suggestion;
             doAutoTimeZoneDetection(currentUserConfig, reason);
         }
+    }
+
+    @Override
+    @NonNull
+    public synchronized MetricsTimeZoneDetectorState generateMetricsState() {
+        int currentUserId = mEnvironment.getCurrentUserId();
+        // Just capture one telephony suggestion: the one that would be used right now if telephony
+        // detection is in use.
+        QualifiedTelephonyTimeZoneSuggestion bestQualifiedTelephonySuggestion =
+                findBestTelephonySuggestion();
+        TelephonyTimeZoneSuggestion telephonySuggestion =
+                bestQualifiedTelephonySuggestion == null
+                        ? null : bestQualifiedTelephonySuggestion.suggestion;
+        // A new generator is created each time: we don't want / require consistency.
+        OrdinalGenerator<String> tzIdOrdinalGenerator = new OrdinalGenerator<>();
+        return MetricsTimeZoneDetectorState.create(
+                tzIdOrdinalGenerator,
+                getConfigurationInternal(currentUserId),
+                mEnvironment.getDeviceTimeZone(),
+                getLatestManualSuggestion(),
+                telephonySuggestion,
+                getLatestGeolocationSuggestion());
     }
 
     private static int scoreTelephonySuggestion(@NonNull TelephonyTimeZoneSuggestion suggestion) {
@@ -619,6 +655,11 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         mTimeZoneChangesLog.dump(ipw);
         ipw.decreaseIndent(); // level 2
 
+        ipw.println("Manual suggestion history:");
+        ipw.increaseIndent(); // level 2
+        mLatestManualSuggestion.dump(ipw);
+        ipw.decreaseIndent(); // level 2
+
         ipw.println("Geolocation suggestion history:");
         ipw.increaseIndent(); // level 2
         mLatestGeoLocationSuggestion.dump(ipw);
@@ -633,6 +674,14 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         for (Dumpable dumpable : mDumpables) {
             dumpable.dump(ipw, args);
         }
+    }
+
+    /**
+     * A method used to inspect strategy state during tests. Not intended for general use.
+     */
+    @VisibleForTesting
+    public synchronized ManualTimeZoneSuggestion getLatestManualSuggestion() {
+        return mLatestManualSuggestion.get();
     }
 
     /**

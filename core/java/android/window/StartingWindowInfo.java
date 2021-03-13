@@ -126,6 +126,12 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public int splashScreenThemeResId;
 
+    /**
+     * Is keyguard occluded on default display.
+     * @hide
+     */
+    public boolean isKeyguardOccluded = false;
+
     public StartingWindowInfo() {
 
     }
@@ -147,6 +153,7 @@ public final class StartingWindowInfo implements Parcelable {
         dest.writeTypedObject(topOpaqueWindowLayoutParams, flags);
         dest.writeTypedObject(mainWindowLayoutParams, flags);
         dest.writeInt(splashScreenThemeResId);
+        dest.writeBoolean(isKeyguardOccluded);
     }
 
     void readFromParcel(@NonNull Parcel source) {
@@ -157,6 +164,7 @@ public final class StartingWindowInfo implements Parcelable {
                 WindowManager.LayoutParams.CREATOR);
         mainWindowLayoutParams = source.readTypedObject(WindowManager.LayoutParams.CREATOR);
         splashScreenThemeResId = source.readInt();
+        isKeyguardOccluded = source.readBoolean();
     }
 
     @Override

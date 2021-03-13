@@ -60,7 +60,8 @@ public final class ContextHubManager {
     private static final String TAG = "ContextHubManager";
 
     /**
-     * An extra of type int describing the client's authorization state.
+     * An extra containing an int from {@link AuthorizationState} describing the client's
+     * authorization state.
      */
     public static final String EXTRA_CLIENT_AUTHORIZATION_STATE =
             "android.hardware.location.extra.CLIENT_AUTHORIZATION_STATE";
@@ -115,11 +116,9 @@ public final class ContextHubManager {
 
     /**
      * Indicates the {@link ContextHubClient} will soon lose its authorization to communicate with a
-     * nanoapp. The {@link ContextHubClient} must perform any cleanup with the nanoapp as soon as
-     * possible.
-     *
-     * Note that the time between this state event and {@link AUTHORIZATION_DENIED} must be enough
-     * for the {@link ContextHubClient} to send at least one message to the nanoapp.
+     * nanoapp. After receiving this state event, the {@link ContextHubClient} has one minute to
+     * perform any cleanup with the nanoapp such that the nanoapp is no longer performing work on
+     * behalf of the {@link ContextHubClient}.
      */
     public static final int AUTHORIZATION_DENIED_GRACE_PERIOD = 1;
 

@@ -359,18 +359,6 @@ public class BaseProtoLogImpl {
                 + "\nLogging definitions loaded: " + mViewerConfig.knownViewerStringsNumber();
     }
 
-    /**
-     * Writes the log buffer to a new file for the bugreport.
-     *
-     * This method is synchronized with {@code #startProtoLog(PrintWriter)} and
-     * {@link #stopProtoLog(PrintWriter, boolean)}.
-     */
-    public void writeProtoLogToFile() {
-        synchronized (mProtoLogEnabledLock) {
-            writeProtoLogToFileLocked();
-        }
-    }
-
     private void writeProtoLogToFileLocked() {
         try {
             long offset =

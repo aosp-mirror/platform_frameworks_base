@@ -16,10 +16,6 @@
 
 package com.android.systemui.biometrics;
 
-import static com.android.systemui.statusbar.StatusBarState.FULLSCREEN_USER_SWITCHER;
-import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
-import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -39,15 +35,12 @@ import android.widget.FrameLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * A view containing 1) A SurfaceView for HBM, and 2) A normal drawable view for all other
  * animations.
  */
-public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIlluminator,
-        StatusBarStateController.StateListener, StatusBar.ExpansionChangedListener {
+public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIlluminator {
     private static final String TAG = "UdfpsView";
 
     private static final int DEBUG_TEXT_SIZE_PX = 32;
@@ -56,7 +49,7 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     @NonNull private final Paint mDebugTextPaint;
 
     @NonNull private UdfpsSurfaceView mHbmSurfaceView;
-    @Nullable private UdfpsAnimationView mAnimationView;
+    @Nullable private UdfpsAnimationViewController mAnimationViewController;
 
     // Used to obtain the sensor location.
     @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
@@ -64,8 +57,6 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     private final float mSensorTouchAreaCoefficient;
     @Nullable private String mDebugMessage;
     private boolean mIlluminationRequested;
-    private int mStatusBarState;
-    private boolean mNotificationShadeExpanded;
 
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -108,15 +99,6 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
         mSensorProps = properties;
     }
 
-    void setAnimationView(@NonNull UdfpsAnimationView animation) {
-        mAnimationView = animation;
-        animation.setParent(this);
-
-        // TODO: Consider using a ViewStub placeholder to maintain positioning and inflating it
-        //  after the animation type has been decided.
-        addView(animation, 0);
-    }
-
     @Override
     public void setHbmCallback(@Nullable HbmCallback callback) {
         mHbmSurfaceView.setHbmCallback(callback);
@@ -124,45 +106,38 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
 
     @Override
     public void dozeTimeTick() {
-        if (mAnimationView == null) {
-            return;
-        }
-        mAnimationView.dozeTimeTick();
-    }
-
-    @Override
-    public void onStateChanged(int newState) {
-        mStatusBarState = newState;
-    }
-
-    @Override
-    public void onExpansionChanged(float expansion, boolean expanded) {
-        mNotificationShadeExpanded = expanded;
-
-        if (mAnimationView != null) {
-            mAnimationView.onExpansionChanged(expansion, expanded);
+        if (mAnimationViewController != null) {
+            mAnimationViewController.dozeTimeTick();
         }
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mSensorRect.set(0 + mAnimationView.getPaddingX(),
-                0 + mAnimationView.getPaddingY(),
-                2 * mSensorProps.sensorRadius + mAnimationView.getPaddingX(),
-                2 * mSensorProps.sensorRadius + mAnimationView.getPaddingY());
+        int paddingX = mAnimationViewController == null ? 0
+                : mAnimationViewController.getPaddingX();
+        int paddingY = mAnimationViewController == null ? 0
+                : mAnimationViewController.getPaddingY();
+        mSensorRect.set(
+                paddingX,
+                paddingY,
+                2 * mSensorProps.sensorRadius + paddingX,
+                2 * mSensorProps.sensorRadius + paddingY);
 
         mHbmSurfaceView.onSensorRectUpdated(new RectF(mSensorRect));
-        mAnimationView.onSensorRectUpdated(new RectF(mSensorRect));
+        if (mAnimationViewController != null) {
+            mAnimationViewController.onSensorRectUpdated(new RectF(mSensorRect));
+        }
+    }
+
+    void setAnimationViewController(UdfpsAnimationViewController animationViewController) {
+        mAnimationViewController = animationViewController;
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Log.v(TAG, "onAttachedToWindow");
-
-        // Retrieve the colors each time, since it depends on day/night mode
-        mAnimationView.updateColor();
     }
 
     @Override
@@ -188,7 +163,9 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
 
     boolean isWithinSensorArea(float x, float y) {
         // The X and Y coordinates of the sensor's center.
-        final PointF translation = mAnimationView.getTouchTranslation();
+        final PointF translation = mAnimationViewController == null
+                ? new PointF(0, 0)
+                : mAnimationViewController.getTouchTranslation();
         final float cx = mSensorRect.centerX() + translation.x;
         final float cy = mSensorRect.centerY() + translation.y;
         // Radii along the X and Y axes.
@@ -199,18 +176,7 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
                 && x < (cx + rx * mSensorTouchAreaCoefficient)
                 && y > (cy - ry * mSensorTouchAreaCoefficient)
                 && y < (cy + ry * mSensorTouchAreaCoefficient)
-                && !shouldPauseAuth();
-    }
-
-    /**
-     * States where UDFPS should temporarily not be authenticating. Instead of completely stopping
-     * authentication which would cause the UDFPS icons to abruptly disappear, do it here by not
-     * sending onFingerDown and smoothly animating away.
-     */
-    boolean shouldPauseAuth() {
-        return (mNotificationShadeExpanded && mStatusBarState != KEYGUARD)
-                || mStatusBarState == SHADE_LOCKED
-                || mStatusBarState == FULLSCREEN_USER_SWITCHER;
+                && !mAnimationViewController.shouldPauseAuth();
     }
 
     boolean isIlluminationRequested() {
@@ -223,7 +189,9 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     @Override
     public void startIllumination(@Nullable Runnable onIlluminatedRunnable) {
         mIlluminationRequested = true;
-        mAnimationView.onIlluminationStarting();
+        if (mAnimationViewController != null) {
+            mAnimationViewController.onIlluminationStarting();
+        }
         mHbmSurfaceView.setVisibility(View.VISIBLE);
         mHbmSurfaceView.startIllumination(onIlluminatedRunnable);
     }
@@ -231,7 +199,9 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     @Override
     public void stopIllumination() {
         mIlluminationRequested = false;
-        mAnimationView.onIlluminationStopped();
+        if (mAnimationViewController != null) {
+            mAnimationViewController.onIlluminationStopped();
+        }
         mHbmSurfaceView.setVisibility(View.INVISIBLE);
         mHbmSurfaceView.stopIllumination();
     }

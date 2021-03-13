@@ -682,7 +682,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     || oldState == Display.STATE_ON_SUSPEND) {
                                 setDisplayState(Display.STATE_ON);
                                 currentState = Display.STATE_ON;
-                            } else {
+
+                            // If UNKNOWN, we still want to set the initial display state,
+                            // otherwise, return early.
+                            } else if (oldState != Display.STATE_UNKNOWN) {
                                 return; // old state and new state is off
                             }
                         }

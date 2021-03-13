@@ -14,7 +14,7 @@ import com.android.systemui.qs.tileimpl.QSTileViewHorizontal
 class CustomizeTileViewHorizontal(
     context: Context,
     icon: QSIconView
-) : QSTileViewHorizontal(context, icon),
+) : QSTileViewHorizontal(context, icon, collapsed = false),
     TileAdapter.CustomizeView {
 
     private var showAppLabel = false
@@ -27,6 +27,7 @@ class CustomizeTileViewHorizontal(
 
     override fun handleStateChanged(state: QSTile.State) {
         super.handleStateChanged(state)
+        mShowRippleEffect = false
         mSecondLine.visibility = if (showAppLabel) View.VISIBLE else View.GONE
     }
 

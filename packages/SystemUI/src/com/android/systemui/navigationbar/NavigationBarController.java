@@ -216,6 +216,14 @@ public class NavigationBarController implements Callbacks,
         createNavigationBar(display, null /* savedState */, null /* result */);
     }
 
+    @Override
+    public void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
+        final NavigationBarView navigationBarView = getNavigationBarView(displayId);
+        if (navigationBarView != null) {
+            navigationBarView.setNavigationBarLumaSamplingEnabled(enable);
+        }
+    }
+
     /**
      * Recreates the navigation bar for the given display.
      */

@@ -121,4 +121,22 @@ public class AndroidKeyStoreMaintenance {
             return SYSTEM_ERROR;
         }
     }
+
+    /**
+     * Queries user state from Keystore 2.0.
+     *
+     * @param userId - Android user id of the user.
+     * @return UserState enum variant as integer if successful or an error
+     */
+    public static int getState(int userId) {
+        try {
+            return getService().getState(userId);
+        } catch (ServiceSpecificException e) {
+            Log.e(TAG, "getState failed", e);
+            return e.errorCode;
+        } catch (Exception e) {
+            Log.e(TAG, "Can not connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
+    }
 }

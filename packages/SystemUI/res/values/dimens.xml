@@ -171,7 +171,7 @@
     <dimen name="scroll_fast_threshold">1500dp</dimen>
 
     <!-- Height of a the shelf with the notification icons -->
-    <dimen name="notification_shelf_height">32dp</dimen>
+    <dimen name="notification_shelf_height">48dp</dimen>
 
     <!-- Minimum height of a notification to be interactable -->
     <dimen name="notification_min_interaction_height">40dp</dimen>
@@ -512,6 +512,7 @@
     <!-- The size of the gesture span needed to activate the "pull" notification expansion -->
     <dimen name="pull_span_min">25dp</dimen>
 
+    <dimen name="qs_corner_radius">14dp</dimen>
     <dimen name="qs_tile_height">96dp</dimen>
     <!--notification_side_paddings + notification_content_margin_start - (qs_quick_tile_size - qs_tile_background_size) / 2 -->
     <dimen name="qs_tile_layout_margin_side">18dp</dimen>
@@ -528,6 +529,8 @@
     <dimen name="qs_tile_margin_top">0dp</dimen>
     <dimen name="qs_tile_icon_background_stroke_width">-1dp</dimen>
     <dimen name="qs_tile_background_size">44dp</dimen>
+    <dimen name="qs_icon_size">20dp</dimen>
+    <dimen name="qs_label_container_margin">10dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>

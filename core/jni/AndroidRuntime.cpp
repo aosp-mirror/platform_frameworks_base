@@ -97,6 +97,7 @@ extern int register_android_media_AudioVolumeGroupChangeHandler(JNIEnv *env);
 extern int register_android_media_MicrophoneInfo(JNIEnv *env);
 extern int register_android_media_ToneGenerator(JNIEnv *env);
 extern int register_android_media_midi(JNIEnv *env);
+extern int register_android_media_permission_Identity(JNIEnv* env);
 
 namespace android {
 
@@ -636,6 +637,12 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char saveResolvedClassesDelayMsOptsBuf[
             sizeof("-Xps-save-resolved-classes-delay-ms:")-1 + PROPERTY_VALUE_MAX];
     char madviseRandomOptsBuf[sizeof("-XX:MadviseRandomAccess:")-1 + PROPERTY_VALUE_MAX];
+    char madviseWillNeedFileSizeVdex[
+            sizeof("-XMadviseWillNeedVdexFileSize:")-1 + PROPERTY_VALUE_MAX];
+    char madviseWillNeedFileSizeOdex[
+            sizeof("-XMadviseWillNeedOdexFileSize:")-1 + PROPERTY_VALUE_MAX];
+    char madviseWillNeedFileSizeArt[
+            sizeof("-XMadviseWillNeedArtFileSize:")-1 + PROPERTY_VALUE_MAX];
     char gctypeOptsBuf[sizeof("-Xgc:")-1 + PROPERTY_VALUE_MAX];
     char backgroundgcOptsBuf[sizeof("-XX:BackgroundGC=")-1 + PROPERTY_VALUE_MAX];
     char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
@@ -842,6 +849,22 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
      * Madvise related options.
      */
     parseRuntimeOption("dalvik.vm.madvise-random", madviseRandomOptsBuf, "-XX:MadviseRandomAccess:");
+
+    /*
+     * Use default platform configuration as limits for madvising,
+     * when no properties are specified.
+     */
+    parseRuntimeOption("dalvik.vm.madvise.vdexfile.size",
+                       madviseWillNeedFileSizeVdex,
+                       "-XMadviseWillNeedVdexFileSize:");
+
+    parseRuntimeOption("dalvik.vm.madvise.odexfile.size",
+                       madviseWillNeedFileSizeOdex,
+                       "-XMadviseWillNeedOdexFileSize:");
+
+    parseRuntimeOption("dalvik.vm.madvise.artfile.size",
+                       madviseWillNeedFileSizeArt,
+                       "-XMadviseWillNeedArtFileSize:");
 
     /*
      * Profile related options.
@@ -1564,6 +1587,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_media_RemoteDisplay),
         REG_JNI(register_android_media_ToneGenerator),
         REG_JNI(register_android_media_midi),
+        REG_JNI(register_android_media_permission_Identity),
 
         REG_JNI(register_android_opengl_classes),
         REG_JNI(register_android_server_NetworkManagementSocketTagger),

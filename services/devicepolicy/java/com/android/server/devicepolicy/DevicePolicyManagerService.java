@@ -1588,7 +1588,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             CryptoTestHelper.runAndLogSelfTest();
         }
 
-        public String[] getPersonalAppsForSuspension(int userId) {
+        public String[] getPersonalAppsForSuspension(@UserIdInt int userId) {
             return PersonalAppsSuspensionHelper.forUser(mContext, userId)
                     .getPersonalAppsForSuspension();
         }
@@ -2969,7 +2969,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private class DpmsUpgradeDataProvider implements PolicyUpgraderDataProvider {
         @Override
-        public boolean isUserDeviceOwner(int userId, ComponentName who) {
+        public boolean isDeviceOwner(int userId, ComponentName who) {
             return mOwners.isDeviceOwnerUserId(userId)
                     && mOwners.getDeviceOwnerComponent().equals(who);
         }
@@ -2999,14 +2999,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return component -> findAdmin(component, userId, /* throwForMissingPermission= */
                     false);
         }
+
+        @Override
+        public int[] getUsersForUpgrade() {
+            List<UserInfo> allUsers = mUserManager.getUsers();
+            return allUsers.stream().mapToInt(u -> u.id).toArray();
+        }
     }
 
     private void performPolicyVersionUpgrade() {
-        List<UserInfo> allUsers = mUserManager.getUsers();
         PolicyVersionUpgrader upgrader = new PolicyVersionUpgrader(
                 new DpmsUpgradeDataProvider());
 
-        upgrader.upgradePolicy(allUsers.stream().mapToInt(u -> u.id).toArray(), DPMS_VERSION);
+        upgrader.upgradePolicy(DPMS_VERSION);
     }
 
     private void revertTransferOwnershipIfNecessaryLocked() {
@@ -9333,6 +9338,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         dumpResources(pw, mContext, "vendor_cross_profile_apps", R.array.vendor_cross_profile_apps);
         dumpResources(pw, mContext, "config_packagesExemptFromSuspension",
                 R.array.config_packagesExemptFromSuspension);
+        dumpResources(pw, mContext, "policy_exempt_apps", R.array.policy_exempt_apps);
+        dumpResources(pw, mContext, "vendor_policy_exempt_apps", R.array.vendor_policy_exempt_apps);
         pw.decreaseIndent();
         pw.println();
     }
@@ -10613,6 +10620,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             return false;
         }
+    }
+
+    @Override
+    public List<String> listPolicyExemptApps() {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
+
+        // TODO(b/181238156): decide whether it should only list the apps set by the resources,
+        // or also the "critical" apps defined by PersonalAppsSuspensionHelper (like SMS app).
+        // If it's the latter, refactor PersonalAppsSuspensionHelper so it (or a superclass) takes
+        // the resources on constructor.
+        String[] core = mContext.getResources().getStringArray(R.array.policy_exempt_apps);
+        String[] vendor = mContext.getResources().getStringArray(R.array.vendor_policy_exempt_apps);
+
+        int size = core.length + vendor.length;
+        Set<String> apps = new ArraySet<>(size);
+        for (String app : core) {
+            apps.add(app);
+        }
+        for (String app : vendor) {
+            apps.add(app);
+        }
+
+        return new ArrayList<>(apps);
     }
 
     @Override

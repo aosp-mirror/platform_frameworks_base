@@ -33,6 +33,7 @@ import android.media.soundtrigger_middleware.PhraseSoundModel;
 import android.media.soundtrigger_middleware.RecognitionConfig;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
+import android.os.HwBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Log;
@@ -41,6 +42,8 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -230,13 +233,36 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
         public void onStart() {
             HalFactory[] factories = new HalFactory[]{() -> {
                 try {
-                    Log.d(TAG, "Connecting to default ISoundTriggerHw");
-                    return SoundTriggerHw2Compat.create(ISoundTriggerHw.getService(true),
-                            () -> {
-                                // This property needs to be defined in an init.rc script and
-                                // trigger a HAL reboot.
-                                SystemProperties.set("sys.audio.restart.hal", "1");
-                            }, mCaptureStateNotifier);
+                    if (SystemProperties.getBoolean("debug.soundtrigger_middleware.use_mock_hal",
+                            false)) {
+                        Log.d(TAG, "Connecting to mock ISoundTriggerHw");
+                        HwBinder.setTrebleTestingOverride(true);
+                        try {
+                            ISoundTriggerHw driver = ISoundTriggerHw.getService("mock", true);
+                            return SoundTriggerHw2Compat.create(driver,
+                                    () -> {
+                                        try {
+                                            driver.debug(null,
+                                                    new ArrayList<>(Arrays.asList(
+                                                            new String[]{"reboot"}
+                                                    )));
+                                        } catch (Exception e) {
+                                            Log.e(TAG, "Failed to reboot mock HAL", e);
+                                        }
+                                    }, mCaptureStateNotifier);
+                        } finally {
+                            HwBinder.setTrebleTestingOverride(false);
+                        }
+                    } else {
+                        Log.d(TAG, "Connecting to default ISoundTriggerHw");
+                        ISoundTriggerHw driver = ISoundTriggerHw.getService(true);
+                        return SoundTriggerHw2Compat.create(driver,
+                                () -> {
+                                    // This property needs to be defined in an init.rc script and
+                                    // trigger a HAL reboot.
+                                    SystemProperties.set("sys.audio.restart.hal", "1");
+                                }, mCaptureStateNotifier);
+                    }
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }

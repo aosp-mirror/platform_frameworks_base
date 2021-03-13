@@ -116,7 +116,10 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Скасаваць"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Абагуліць"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Запіс экрана скасаваны"</string>
-    <string name="screenrecord_save_message" msgid="490522052388998226">"Запіс экрана захаваны. Націсніце, каб прагледзець"</string>
+    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
+    <skip />
+    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
+    <skip />
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Памылка выдалення запісу экрана"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Не ўдалося атрымаць дазволы"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Памылка пачатку запісу экрана"</string>
@@ -471,7 +474,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Паказаць профіль"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Дадаць карыстальніка"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Новы карыстальнік"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"Завяршыць гасцявы сеанс"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Выдаліць госця?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Усе праграмы і даныя гэтага сеанса будуць выдалены."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Выдаліць"</string>

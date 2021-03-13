@@ -17,48 +17,33 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
+import android.util.AttributeSet;
+import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.systemui.R;
+
 /**
- * UDFPS animations that should be shown when authenticating via FingerprintManager, excluding
- * keyguard.
+ * View corresponding with udfps_fpm_other_view.xml
  */
-public class UdfpsAnimationFpmOther extends UdfpsAnimation {
+public class UdfpsFpmOtherView extends UdfpsAnimationView {
+    private final UdfpsFpDrawable mFingerprintDrawable;
+    private ImageView mFingerprintView;
 
-    UdfpsAnimationFpmOther(@NonNull Context context) {
-        super(context);
+    public UdfpsFpmOtherView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        mFingerprintDrawable = new UdfpsFpDrawable(context);
     }
 
     @Override
-    protected void updateColor() {
-
+    protected void onFinishInflate() {
+        mFingerprintView = findViewById(R.id.udfps_fpm_other_fp_view);
+        mFingerprintView.setImageDrawable(mFingerprintDrawable);
     }
 
     @Override
-    protected void onDestroy() {
-
-    }
-
-    @Override
-    public void draw(@NonNull Canvas canvas) {
-        if (isIlluminationShowing()) {
-            return;
-        }
-
-        mFingerprintDrawable.draw(canvas);
-    }
-
-    @Override
-    public void setColorFilter(@Nullable ColorFilter colorFilter) {
-
-    }
-
-    @Override
-    public int getOpacity() {
-        return 0;
+    UdfpsDrawable getDrawable() {
+        return mFingerprintDrawable;
     }
 }

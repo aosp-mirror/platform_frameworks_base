@@ -17,9 +17,12 @@
 package android.media.permission;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.content.PermissionChecker;
 import android.os.Binder;
+import android.os.Process;
 
 import java.util.Objects;
 
@@ -48,6 +51,25 @@ import java.util.Objects;
  * @hide
  */
 public class PermissionUtil {
+    /**
+     * Create an identity for the current process and the passed context.
+     *
+     * @param context The process the identity is for. If {@code null}, the process's default
+     *                identity is chosen.
+     * @return The identity for the current process and context
+     */
+    public static @NonNull Identity myIdentity(@Nullable Context context) {
+        Identity identity = new Identity();
+
+        identity.pid = Process.myPid();
+        identity.uid = Process.myUid();
+        identity.packageName = context != null ? context.getOpPackageName()
+                : ActivityThread.currentOpPackageName();
+        identity.attributionTag = context != null ? context.getAttributionTag() : null;
+
+        return identity;
+    }
+
     /**
      * Authenticate an originator, where the binder call is coming from a middleman.
      *

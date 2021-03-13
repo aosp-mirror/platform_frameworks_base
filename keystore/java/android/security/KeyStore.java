@@ -43,6 +43,7 @@ import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeystoreResponse;
 import android.security.keystore.UserNotAuthenticatedException;
+import android.security.maintenance.UserState;
 import android.system.keystore2.Domain;
 import android.util.Log;
 
@@ -196,6 +197,19 @@ public class KeyStore {
     public State state(int userId) {
         final int ret;
         try {
+            if (android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) {
+                int userState = AndroidKeyStoreMaintenance.getState(userId);
+                switch (userState) {
+                    case UserState.UNINITIALIZED:
+                        return KeyStore.State.UNINITIALIZED;
+                    case UserState.LSKF_UNLOCKED:
+                        return KeyStore.State.UNLOCKED;
+                    case UserState.LSKF_LOCKED:
+                        return KeyStore.State.LOCKED;
+                    default:
+                        throw new AssertionError(KeyStore.VALUE_CORRUPTED);
+                }
+            }
             ret = mBinder.getState(userId);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);

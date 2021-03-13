@@ -5838,7 +5838,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @ShellCommandResult
     private int handleShellCommandTraceInputMethod(@NonNull ShellCommand shellCommand) {
-        int result = ImeTracing.getInstance().onShellCommand(shellCommand);
+        final String cmd = shellCommand.getNextArgRequired();
+        final PrintWriter pw = shellCommand.getOutPrintWriter();
+        switch (cmd) {
+            case "start":
+                ImeTracing.getInstance().getInstance().startTrace(pw);
+                break;
+            case "stop":
+                ImeTracing.getInstance().stopTrace(pw);
+                break;
+            default:
+                pw.println("Unknown command: " + cmd);
+                pw.println("Input method trace options:");
+                pw.println("  start: Start tracing");
+                pw.println("  stop: Stop tracing");
+                return ShellCommandResult.FAILURE;
+        }
         boolean isImeTraceEnabled = ImeTracing.getInstance().isEnabled();
         ArrayMap<IBinder, ClientState> clients;
         synchronized (mMethodMap) {
@@ -5854,7 +5869,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
         }
-        return result;
+        return ShellCommandResult.SUCCESS;
     }
 
     /**

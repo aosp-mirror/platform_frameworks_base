@@ -3713,6 +3713,9 @@ public abstract class Context {
      * usage statistics.
      * <dt> {@link #HARDWARE_PROPERTIES_SERVICE} ("hardware_properties")
      * <dd> A {@link android.os.HardwarePropertiesManager} for accessing hardware properties.
+     * <dt> {@link #DOMAIN_VERIFICATION_SERVICE} ("domain_verification")
+     * <dd> A {@link android.content.pm.verify.domain.DomainVerificationManager} for accessing
+     * web domain approval state.
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -3794,6 +3797,8 @@ public abstract class Context {
      * @see android.app.usage.NetworkStatsManager
      * @see android.os.HardwarePropertiesManager
      * @see #HARDWARE_PROPERTIES_SERVICE
+     * @see #DOMAIN_VERIFICATION_SERVICE
+     * @see android.content.pm.verify.domain.DomainVerificationManager
      */
     public abstract @Nullable Object getSystemService(@ServiceName @NonNull String name);
 
@@ -3813,7 +3818,8 @@ public abstract class Context {
      * {@link android.view.inputmethod.InputMethodManager},
      * {@link android.app.UiModeManager}, {@link android.app.DownloadManager},
      * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler},
-     * {@link android.app.usage.NetworkStatsManager}.
+     * {@link android.app.usage.NetworkStatsManager},
+     * {@link android.content.pm.verify.domain.DomainVerificationManager}.
      * </p>
      *
      * <p>
@@ -4833,8 +4839,18 @@ public abstract class Context {
      * @hide
      */
     @TestApi
-    @SuppressLint("ServiceName")  // TODO: This should be renamed to POWER_WHITELIST_SERVICE
+    @Deprecated
+    @SuppressLint("ServiceName")
     public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
+
+    /**
+     * System service name for the PowerExemptionManager.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @TestApi
+    public static final String POWER_EXEMPTION_SERVICE = "power_exemption";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -5535,12 +5551,13 @@ public abstract class Context {
     public static final String GAME_SERVICE = "game";
 
     /**
-     * Use with {@link #getSystemService(String)} to access domain verification service.
+     * Use with {@link #getSystemService(String)} to access
+     * {@link android.content.pm.verify.domain.DomainVerificationManager} to retrieve approval and
+     * user state for declared web domains.
      *
      * @see #getSystemService(String)
-     * @hide
+     * @see android.content.pm.verify.domain.DomainVerificationManager
      */
-    @SystemApi
     public static final String DOMAIN_VERIFICATION_SERVICE = "domain_verification";
 
     /**

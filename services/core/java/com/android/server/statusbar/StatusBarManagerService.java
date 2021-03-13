@@ -588,6 +588,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 } catch (RemoteException ex) { }
             }
         }
+
+        @Override
+        public void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
+            if (mBar != null) {
+                try {
+                    mBar.setNavigationBarLumaSamplingEnabled(displayId, enable);
+                } catch (RemoteException ex) { }
+            }
+        }
     };
 
     private final GlobalActionsProvider mGlobalActionsProvider = new GlobalActionsProvider() {

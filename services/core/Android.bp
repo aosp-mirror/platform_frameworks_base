@@ -107,7 +107,6 @@ java_library_static {
         ":platform-compat-overrides",
         ":display-device-config",
         ":display-layout-config",
-        ":cec-config",
         ":device-state-config",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
@@ -128,7 +127,6 @@ java_library_static {
     ],
 
     required: [
-        "cec_config.xml",
         "gps_debug.conf",
         "protolog.conf.json.gz",
     ],
@@ -194,11 +192,6 @@ java_library_host {
 }
 
 prebuilt_etc {
-    name: "cec_config.xml",
-    src: "java/com/android/server/hdmi/cec_config.xml",
-}
-
-prebuilt_etc {
     name: "gps_debug.conf",
     src: "java/com/android/server/location/gnss/gps_debug.conf",
 }
@@ -232,6 +225,7 @@ filegroup {
         "java/com/android/server/TestNetworkService.java",
         "java/com/android/server/connectivity/AutodestructReference.java",
         "java/com/android/server/connectivity/ConnectivityConstants.java",
+        "java/com/android/server/connectivity/ConnectivityResources.java",
         "java/com/android/server/connectivity/DnsManager.java",
         "java/com/android/server/connectivity/KeepaliveTracker.java",
         "java/com/android/server/connectivity/LingerMonitor.java",

@@ -40,9 +40,8 @@ public class StartingSurfaceController {
     private static final String TAG = TAG_WITH_CLASS_NAME
             ? StartingSurfaceController.class.getSimpleName() : TAG_WM;
     /** Set to {@code true} to enable shell starting surface drawer. */
-    private static final boolean DEBUG_ENABLE_SHELL_DRAWER =
-            SystemProperties.getBoolean("persist.debug.shell_starting_surface", false);
-
+    static final boolean DEBUG_ENABLE_SHELL_DRAWER =
+            SystemProperties.getBoolean("persist.debug.shell_starting_surface", true);
     private final WindowManagerService mService;
 
     public StartingSurfaceController(WindowManagerService wm) {
@@ -139,8 +138,9 @@ public class StartingSurfaceController {
         }
 
         @Override
-        public void remove() {
-            mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask);
+        public void remove(boolean animate) {
+            mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask,
+                    animate);
         }
     }
 }

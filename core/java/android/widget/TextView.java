@@ -503,7 +503,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mImeIsConsumingInput;
 
     // Whether cursor is visible without regard to {@link mImeConsumesInput}.
-    // {code true} is the default value.
+    // {@code true} is the default value.
     private boolean mCursorVisibleFromAttr = true;
 
     static class Drawables {
@@ -9317,7 +9317,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         for (int i = 0; i < n; i++) {
-            max = Math.max(max, layout.getLineWidth(i));
+            max = Math.max(max, layout.getLineMax(i));
         }
 
         return (int) Math.ceil(max);
@@ -10569,6 +10569,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean isCursorVisible() {
         // true is the default value
         return mEditor == null ? true : mEditor.mCursorVisible;
+    }
+
+    /**
+     * @return whether cursor is visible without regard to {@code mImeIsConsumingInput}.
+     * {@code true} is the default value.
+     *
+     * @see #setCursorVisible(boolean)
+     * @hide
+     */
+    public boolean isCursorVisibleFromAttr() {
+        return mCursorVisibleFromAttr;
     }
 
     private boolean canMarquee() {

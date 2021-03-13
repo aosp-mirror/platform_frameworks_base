@@ -395,9 +395,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         `when`(permissionManager.indicatorAppOpUsageData).thenReturn(
                 listOf(usage_camera, usage_location, usage_microphone)
         )
-        `when`(privacyItemController.micCameraAvailable).thenReturn(false)
-        `when`(privacyItemController.locationAvailable).thenReturn(false)
-        `when`(privacyItemController.allIndicatorsAvailable).thenReturn(true)
+        `when`(privacyItemController.micCameraAvailable).thenReturn(true)
+        `when`(privacyItemController.locationAvailable).thenReturn(true)
 
         controller.showDialog(context)
         exhaustExecutors()
@@ -422,7 +421,6 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         )
         `when`(privacyItemController.micCameraAvailable).thenReturn(false)
         `when`(privacyItemController.locationAvailable).thenReturn(false)
-        `when`(privacyItemController.allIndicatorsAvailable).thenReturn(false)
 
         controller.showDialog(context)
         exhaustExecutors()
@@ -525,7 +523,6 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
         `when`(privacyItemController.locationAvailable).thenReturn(true)
         `when`(privacyItemController.micCameraAvailable).thenReturn(true)
-        `when`(privacyItemController.allIndicatorsAvailable).thenReturn(false)
 
         `when`(userTracker.userProfiles).thenReturn(listOf(
                 UserInfo(USER_ID, "", 0),

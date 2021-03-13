@@ -988,6 +988,7 @@ public class HdmiControlService extends SystemService {
         return mCecController.getVendorId();
     }
 
+    @Nullable
     @ServiceThreadOnly
     HdmiDeviceInfo getDeviceInfo(int logicalAddress) {
         assertRunOnServiceThread();

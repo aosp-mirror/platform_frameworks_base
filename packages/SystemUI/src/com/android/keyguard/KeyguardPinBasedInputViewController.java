@@ -25,7 +25,6 @@ import android.view.View.OnTouchListener;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 
@@ -50,19 +49,6 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
         return false;
     };
 
-    private final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
-        @Override
-        public boolean onInterceptTouchEvent(MotionEvent ev) {
-            mFalsingCollector.avoidGesture();
-            return false;
-        }
-
-        @Override
-        public boolean onTouchEvent(MotionEvent ev) {
-            return false;
-        }
-    };
-
     protected KeyguardPinBasedInputViewController(T view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             SecurityMode securityMode,
@@ -73,7 +59,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             LiftToActivateListener liftToActivateListener,
             FalsingCollector falsingCollector) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
-                messageAreaControllerFactory, latencyTracker);
+                messageAreaControllerFactory, latencyTracker, falsingCollector);
         mLiftToActivateListener = liftToActivateListener;
         mFalsingCollector = falsingCollector;
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
@@ -83,8 +69,14 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     protected void onViewAttached() {
         super.onViewAttached();
 
-        mView.addMotionEventListener(mGlobalTouchListener);
-
+        for (NumPadKey button: mView.getButtons()) {
+            button.setOnTouchListener((v, event) -> {
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    mFalsingCollector.avoidGesture();
+                }
+                return false;
+            });
+        }
         mPasswordEntry.setOnKeyListener(mOnKeyListener);
         mPasswordEntry.setUserActivityListener(this::onUserInput);
 
@@ -123,7 +115,10 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     @Override
     protected void onViewDetached() {
         super.onViewDetached();
-        mView.removeMotionEventListener(mGlobalTouchListener);
+
+        for (NumPadKey button: mView.getButtons()) {
+            button.setOnTouchListener(null);
+        }
     }
 
     @Override

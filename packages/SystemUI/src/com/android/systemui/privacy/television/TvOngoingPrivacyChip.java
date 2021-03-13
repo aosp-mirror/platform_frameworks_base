@@ -88,7 +88,6 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
     private boolean mViewAndWindowAdded;
     private ObjectAnimator mAnimator;
 
-    private boolean mAllIndicatorsFlagEnabled;
     private boolean mMicCameraIndicatorFlagEnabled;
     private boolean mLocationIndicatorEnabled;
     private List<PrivacyItem> mPrivacyItems;
@@ -111,12 +110,10 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
         mIconMarginStart = Math.round(res.getDimension(R.dimen.privacy_chip_icon_margin));
         mIconSize = res.getDimensionPixelSize(R.dimen.privacy_chip_icon_size);
 
-        mAllIndicatorsFlagEnabled = privacyItemController.getAllIndicatorsAvailable();
         mMicCameraIndicatorFlagEnabled = privacyItemController.getMicCameraAvailable();
         mLocationIndicatorEnabled = privacyItemController.getLocationAvailable();
 
         if (DEBUG) {
-            Log.d(TAG, "allIndicators: " + mAllIndicatorsFlagEnabled);
             Log.d(TAG, "micCameraIndicators: " + mMicCameraIndicatorFlagEnabled);
             Log.d(TAG, "locationIndicators: " + mLocationIndicatorEnabled);
         }
@@ -135,12 +132,6 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
     }
 
     @Override
-    public void onFlagAllChanged(boolean flag) {
-        if (DEBUG) Log.d(TAG, "all indicators enabled: " + flag);
-        mAllIndicatorsFlagEnabled = flag;
-    }
-
-    @Override
     public void onFlagMicCameraChanged(boolean flag) {
         if (DEBUG) Log.d(TAG, "mic/camera indicators enabled: " + flag);
         mMicCameraIndicatorFlagEnabled = flag;
@@ -155,8 +146,8 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
     private void updateUI() {
         if (DEBUG) Log.d(TAG, mPrivacyItems.size() + " privacy items");
 
-        if ((mMicCameraIndicatorFlagEnabled || mAllIndicatorsFlagEnabled
-                || mLocationIndicatorEnabled) && !mPrivacyItems.isEmpty()) {
+        if ((mMicCameraIndicatorFlagEnabled || mLocationIndicatorEnabled)
+                && !mPrivacyItems.isEmpty()) {
             if (mState == STATE_NOT_SHOWN || mState == STATE_DISAPPEARING) {
                 showIndicator();
             } else {

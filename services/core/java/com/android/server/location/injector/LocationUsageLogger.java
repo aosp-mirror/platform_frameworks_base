@@ -49,9 +49,9 @@ public class LocationUsageLogger {
      * Log a location API usage event.
      */
     public void logLocationApiUsage(int usageType, int apiInUse,
-            String packageName, String provider, LocationRequest locationRequest,
-            boolean hasListener, boolean hasIntent,
-            Geofence geofence, boolean foreground) {
+            String packageName, String attributionTag, String provider,
+            LocationRequest locationRequest, boolean hasListener,
+            boolean hasIntent, Geofence geofence, boolean foreground) {
         try {
             if (hitApiUsageLogCap()) {
                 return;
@@ -84,7 +84,8 @@ public class LocationUsageLogger {
                     isGeofenceNull
                         ? LocationStatsEnums.RADIUS_UNKNOWN
                         : bucketizeRadius(geofence.getRadius()),
-                    categorizeActivityImportance(foreground));
+                    categorizeActivityImportance(foreground),
+                    attributionTag);
         } catch (Exception e) {
             // Swallow exceptions to avoid crashing LMS.
             Log.w(TAG, "Failed to log API usage to statsd.", e);
@@ -114,7 +115,8 @@ public class LocationUsageLogger {
                             /* isListenerNull= */ true,
                             /* isIntentNull= */ true),
                     /* bucketizedRadius= */ 0,
-                    LocationStatsEnums.IMPORTANCE_UNKNOWN);
+                    LocationStatsEnums.IMPORTANCE_UNKNOWN,
+                    /* attribution_tag */ null);
         } catch (Exception e) {
             Log.w(TAG, "Failed to log API usage to statsd.", e);
         }

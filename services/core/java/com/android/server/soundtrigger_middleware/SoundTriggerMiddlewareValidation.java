@@ -112,8 +112,8 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     }
 
     private class ModuleState {
-        final @NonNull SoundTriggerModuleProperties properties;
-        Set<Session> sessions = new HashSet<>();
+        public @NonNull SoundTriggerModuleProperties properties;
+        public Set<Session> sessions = new HashSet<>();
 
         private ModuleState(@NonNull SoundTriggerModuleProperties properties) {
             this.properties = properties;
@@ -178,6 +178,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                             throw new RuntimeException(
                                     "listModules must always return the same result.");
                         }
+                        mModules.get(desc.handle).properties = desc.properties;
                     }
                 }
                 return result;

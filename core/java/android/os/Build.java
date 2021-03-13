@@ -27,6 +27,7 @@ import android.app.ActivityThread;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
 import android.text.TextUtils;
@@ -296,6 +297,19 @@ public class Build {
          */
         public static final String SECURITY_PATCH = SystemProperties.get(
                 "ro.build.version.security_patch", "");
+
+        /**
+         * The media performance class of the device or 0 if none.
+         * <p>
+         * If this value is not <code>0</code>, the device conforms to the media performance class
+         * definition of the SDK version of this value. This value never changes while a device is
+         * booted, but it may increase when the hardware manufacturer provides an OTA update.
+         * <p>
+         * Possible non-zero values are defined in {@link Build.VERSION_CODES} starting with
+         * {@link Build.VERSION_CODES#S}.
+         */
+        public static final int MEDIA_PERFORMANCE_CLASS =
+                DeviceProperties.media_performance_class().orElse(0);
 
         /**
          * The user-visible SDK version of the framework in its raw String

@@ -73,6 +73,11 @@ public class DisplayTests {
     private static Rect sAppBoundsPortrait = buildAppBounds(LOGICAL_WIDTH, LOGICAL_HEIGHT);
     private static Rect sAppBoundsLandscape = buildAppBounds(LOGICAL_HEIGHT, LOGICAL_WIDTH);
 
+    // Bounds of the device.
+    private static Rect sDeviceBoundsPortrait = new Rect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    private static Rect sDeviceBoundsLandscape = new Rect(0, 0, LOGICAL_HEIGHT, LOGICAL_WIDTH);
+
+
     private StaticMockitoSession mMockitoSession;
 
     private DisplayManagerGlobal mDisplayManagerGlobal;
@@ -278,29 +283,57 @@ public class DisplayTests {
     }
 
     @Test
-    public void testGetRealSize_resourcesPortraitSandboxed_matchesSandboxBounds() {
+    public void testGetRealSize_resourcesPortraitSandboxed_matchesAppSandboxBounds() {
         // GIVEN display is not rotated.
         setDisplayInfoPortrait(mDisplayInfo);
         // GIVEN app is letterboxed.
-        setMaxBoundsSandboxedToMatchAppBounds(mApplicationContext.getResources(),
-                sAppBoundsPortrait);
+        setMaxBoundsSandboxed(mApplicationContext.getResources(), sAppBoundsPortrait);
         final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
                 mApplicationContext.getResources());
         // THEN real size matches app bounds.
-        verifyRealSizeMatchesApp(display, sAppBoundsPortrait);
+        verifyRealSizeMatchesBounds(display, sAppBoundsPortrait);
     }
 
     @Test
-    public void testGetRealSize_resourcesLandscapeSandboxed_matchesSandboxBounds() {
+    public void testGetRealSize_resourcesPortraitSandboxed_matchesDisplayAreaSandboxBounds() {
+        // GIVEN display is not rotated.
+        setDisplayInfoPortrait(mDisplayInfo);
+        // GIVEN max bounds reflect DisplayArea size, which is the same size as the display.
+        setMaxBoundsSandboxed(mApplicationContext.getResources(), sDeviceBoundsPortrait);
+        // GIVEN app bounds do not stretch to include the full DisplayArea.
+        mApplicationContext.getResources().getConfiguration().windowConfiguration
+                .setAppBounds(buildAppBounds(LOGICAL_WIDTH, LOGICAL_HEIGHT - 10));
+        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
+                mApplicationContext.getResources());
+        // THEN real metrics matches max bounds for the DisplayArea.
+        verifyRealSizeMatchesBounds(display, sDeviceBoundsPortrait);
+    }
+
+    @Test
+    public void testGetRealSize_resourcesLandscapeSandboxed_matchesAppSandboxBounds() {
         // GIVEN display is rotated.
         setDisplayInfoLandscape(mDisplayInfo);
         // GIVEN app is letterboxed.
-        setMaxBoundsSandboxedToMatchAppBounds(mApplicationContext.getResources(),
-                sAppBoundsLandscape);
+        setMaxBoundsSandboxed(mApplicationContext.getResources(), sAppBoundsLandscape);
         final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
                 mApplicationContext.getResources());
         // THEN real size matches app bounds.
-        verifyRealSizeMatchesApp(display, sAppBoundsLandscape);
+        verifyRealSizeMatchesBounds(display, sAppBoundsLandscape);
+    }
+
+    @Test
+    public void testGetRealSize_resourcesLandscapeSandboxed_matchesDisplayAreaSandboxBounds() {
+        // GIVEN display is rotated.
+        setDisplayInfoLandscape(mDisplayInfo);
+        // GIVEN max bounds reflect DisplayArea size, which is the same size as the display.
+        setMaxBoundsSandboxed(mApplicationContext.getResources(), sDeviceBoundsLandscape);
+        // GIVEN app bounds do not stretch to include the full DisplayArea.
+        mApplicationContext.getResources().getConfiguration().windowConfiguration
+                .setAppBounds(buildAppBounds(LOGICAL_HEIGHT, LOGICAL_WIDTH - 10));
+        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
+                mApplicationContext.getResources());
+        // THEN real metrics matches max bounds for the DisplayArea.
+        verifyRealSizeMatchesBounds(display, sDeviceBoundsLandscape);
     }
 
     @Test
@@ -396,29 +429,57 @@ public class DisplayTests {
     }
 
     @Test
-    public void testGetRealMetrics_resourcesPortraitSandboxed_matchesSandboxBounds() {
+    public void testGetRealMetrics_resourcesPortraitSandboxed_matchesAppSandboxBounds() {
         // GIVEN display is not rotated.
         setDisplayInfoPortrait(mDisplayInfo);
         // GIVEN app is letterboxed.
-        setMaxBoundsSandboxedToMatchAppBounds(mApplicationContext.getResources(),
-                sAppBoundsPortrait);
+        setMaxBoundsSandboxed(mApplicationContext.getResources(), sAppBoundsPortrait);
         final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
                 mApplicationContext.getResources());
         // THEN real metrics matches app bounds.
-        verifyRealMetricsMatchesApp(display, sAppBoundsPortrait);
+        verifyRealMetricsMatchesBounds(display, sAppBoundsPortrait);
     }
 
     @Test
-    public void testGetRealMetrics_resourcesLandscapeSandboxed_matchesSandboxBounds() {
+    public void testGetRealMetrics_resourcesPortraitSandboxed_matchesDisplayAreaSandboxBounds() {
+        // GIVEN display is not rotated.
+        setDisplayInfoPortrait(mDisplayInfo);
+        // GIVEN max bounds reflect DisplayArea size, which is the same size as the display.
+        setMaxBoundsSandboxed(mApplicationContext.getResources(), sDeviceBoundsPortrait);
+        // GIVEN app bounds do not stretch to include the full DisplayArea.
+        mApplicationContext.getResources().getConfiguration().windowConfiguration
+                .setAppBounds(buildAppBounds(LOGICAL_WIDTH, LOGICAL_HEIGHT - 10));
+        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
+                mApplicationContext.getResources());
+        // THEN real metrics matches max bounds for the DisplayArea.
+        verifyRealMetricsMatchesBounds(display, sDeviceBoundsPortrait);
+    }
+
+    @Test
+    public void testGetRealMetrics_resourcesLandscapeSandboxed_matchesAppSandboxBounds() {
         // GIVEN display is rotated.
         setDisplayInfoLandscape(mDisplayInfo);
         // GIVEN app is letterboxed.
-        setMaxBoundsSandboxedToMatchAppBounds(mApplicationContext.getResources(),
-                sAppBoundsLandscape);
+        setMaxBoundsSandboxed(mApplicationContext.getResources(), sAppBoundsLandscape);
         final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
                 mApplicationContext.getResources());
         // THEN real metrics matches app bounds.
-        verifyRealMetricsMatchesApp(display, sAppBoundsLandscape);
+        verifyRealMetricsMatchesBounds(display, sAppBoundsLandscape);
+    }
+
+    @Test
+    public void testGetRealMetrics_resourcesLandscapeSandboxed_matchesDisplayAreaSandboxBounds() {
+        // GIVEN display is rotated.
+        setDisplayInfoLandscape(mDisplayInfo);
+        // GIVEN max bounds reflect DisplayArea size, which is the same size as the display.
+        setMaxBoundsSandboxed(mApplicationContext.getResources(), sDeviceBoundsLandscape);
+        // GIVEN app bounds do not stretch to include the full DisplayArea.
+        mApplicationContext.getResources().getConfiguration().windowConfiguration
+                .setAppBounds(buildAppBounds(LOGICAL_HEIGHT, LOGICAL_WIDTH - 10));
+        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
+                mApplicationContext.getResources());
+        // THEN real metrics matches max bounds for the DisplayArea.
+        verifyRealMetricsMatchesBounds(display, sDeviceBoundsLandscape);
     }
 
     // Given rotated display dimensions, calculate the letterboxed app bounds.
@@ -450,8 +511,8 @@ public class DisplayTests {
      * Set max bounds to be sandboxed to the app bounds, indicating the app is in
      * size compat mode or letterbox.
      */
-    private static void setMaxBoundsSandboxedToMatchAppBounds(Resources resources, Rect appBounds) {
-        resources.getConfiguration().windowConfiguration.setMaxBounds(appBounds);
+    private static void setMaxBoundsSandboxed(Resources resources, Rect bounds) {
+        resources.getConfiguration().windowConfiguration.setMaxBounds(bounds);
     }
 
     /**
@@ -492,17 +553,17 @@ public class DisplayTests {
         assertThat(metrics.heightPixels).isEqualTo(LOGICAL_HEIGHT);
     }
 
-    private static void verifyRealSizeMatchesApp(Display display, Rect appBounds) {
+    private static void verifyRealSizeMatchesBounds(Display display, Rect bounds) {
         Point size = new Point();
         display.getRealSize(size);
-        assertThat(size).isEqualTo(new Point(appBounds.width(), appBounds.height()));
+        assertThat(size).isEqualTo(new Point(bounds.width(), bounds.height()));
     }
 
-    private static void verifyRealMetricsMatchesApp(Display display, Rect appBounds) {
+    private static void verifyRealMetricsMatchesBounds(Display display, Rect bounds) {
         DisplayMetrics metrics = new DisplayMetrics();
         display.getRealMetrics(metrics);
-        assertThat(metrics.widthPixels).isEqualTo(appBounds.width());
-        assertThat(metrics.heightPixels).isEqualTo(appBounds.height());
+        assertThat(metrics.widthPixels).isEqualTo(bounds.width());
+        assertThat(metrics.heightPixels).isEqualTo(bounds.height());
     }
 
     private static FixedRotationAdjustments setOverrideFixedRotationAdjustments(

@@ -26,12 +26,18 @@ import android.app.AnrController;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.PackageManagerInternal;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
+import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.incremental.IIncrementalService;
+import android.os.incremental.IncrementalManager;
+import android.os.incremental.IncrementalMetrics;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
@@ -294,14 +300,31 @@ class ProcessErrorStateRecord {
         }
 
         // Check if package is still being loaded
-        boolean isPackageLoading = false;
+        boolean isIncremental = false;
+        float loadingProgress = 1;
+        long millisSinceOldestPendingRead = 0;
         final PackageManagerInternal packageManagerInternal = mService.getPackageManagerInternal();
         if (aInfo != null && aInfo.packageName != null) {
             IncrementalStatesInfo incrementalStatesInfo =
                     packageManagerInternal.getIncrementalStatesInfo(
                             aInfo.packageName, mApp.uid, mApp.userId);
             if (incrementalStatesInfo != null) {
-                isPackageLoading = incrementalStatesInfo.isLoading();
+                loadingProgress = incrementalStatesInfo.getProgress();
+            }
+            final String codePath = aInfo.getCodePath();
+            isIncremental = IncrementalManager.isIncrementalPath(codePath);
+            if (isIncremental) {
+                // Report in the main log that the incremental package is still loading
+                Slog.e(TAG, "App crashed on incremental package " + aInfo.packageName
+                        + " which is " + ((int) (loadingProgress * 100)) + "% loaded.");
+                final IBinder incrementalService = ServiceManager.getService(
+                        Context.INCREMENTAL_SERVICE);
+                if (incrementalService != null) {
+                    final IncrementalManager incrementalManager = new IncrementalManager(
+                            IIncrementalService.Stub.asInterface(incrementalService));
+                    IncrementalMetrics metrics = incrementalManager.getMetrics(codePath);
+                    millisSinceOldestPendingRead = metrics.getMillisSinceOldestPendingRead();
+                }
             }
         }
 
@@ -322,10 +345,8 @@ class ProcessErrorStateRecord {
             info.append("Parent: ").append(parentShortComponentName).append("\n");
         }
 
-        if (isPackageLoading) {
-            // Report in the main log that the package is still loading
-            final float loadingProgress = packageManagerInternal.getIncrementalStatesInfo(
-                    aInfo.packageName, mApp.uid, mApp.userId).getProgress();
+        if (isIncremental) {
+            // Report in the main log about the incremental package
             info.append("Package is ").append((int) (loadingProgress * 100)).append("% loaded.\n");
         }
 
@@ -412,7 +433,8 @@ class ProcessErrorStateRecord {
                         ? FrameworkStatsLog.ANROCCURRED__FOREGROUND_STATE__FOREGROUND
                         : FrameworkStatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND,
                 mApp.getProcessClassEnum(),
-                (mApp.info != null) ? mApp.info.packageName : "", isPackageLoading);
+                (mApp.info != null) ? mApp.info.packageName : "",
+                isIncremental, loadingProgress, millisSinceOldestPendingRead);
         final ProcessRecord parentPr = parentProcess != null
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", mApp, mApp.processName, activityShortComponentName,
