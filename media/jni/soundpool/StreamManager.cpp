@@ -330,7 +330,7 @@ ssize_t StreamManager::removeFromQueues_l(
 
     // streams on mProcessingStreams are undergoing processing by the StreamManager thread
     // and do not participate in normal stream migration.
-    return found;
+    return (ssize_t)found;
 }
 
 void StreamManager::addToRestartQueue_l(Stream *stream) {

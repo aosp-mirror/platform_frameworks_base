@@ -470,7 +470,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 mWm, mockRunner, null, displayId);
         spyOn(controller);
         controller.mShouldAttachNavBarToAppDuringTransition = true;
-        doReturn(mNavBarWindow.mToken).when(controller).getNavigationBarWindowToken();
+        doReturn(mNavBarWindow).when(controller).getNavigationBarWindow();
         mWm.setRecentsAnimationController(controller);
 
         // set ime visible

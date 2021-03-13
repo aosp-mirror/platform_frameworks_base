@@ -567,7 +567,7 @@ public class DisplayRotation {
         }
         mDisplayContent.forAllWindows(w -> {
             if (w.mSeamlesslyRotated) {
-                w.finishSeamlessRotation(false /* timeout */);
+                w.cancelSeamlessRotation();
                 w.mSeamlesslyRotated = false;
             }
         }, true /* traverseTopToBottom */);
@@ -667,24 +667,6 @@ public class DisplayRotation {
             mDisplayContent.finishFixedRotationAnimationIfPossible();
 
             updateRotationAndSendNewConfigIfChanged();
-        }
-    }
-
-    void onSeamlessRotationTimeout() {
-        final boolean[] isLayoutNeeded = { false };
-
-        mDisplayContent.forAllWindows(w -> {
-            if (!w.mSeamlesslyRotated) {
-                return;
-            }
-            isLayoutNeeded[0] = true;
-            w.setDisplayLayoutNeeded();
-            w.finishSeamlessRotation(true /* timeout */);
-            markForSeamlessRotation(w, false /* seamlesslyRotated */);
-        }, true /* traverseTopToBottom */);
-
-        if (isLayoutNeeded[0]) {
-            mService.mWindowPlacerLocked.performSurfacePlacement();
         }
     }
 

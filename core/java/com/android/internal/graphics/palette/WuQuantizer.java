@@ -78,7 +78,12 @@ public class WuQuantizer implements Quantizer {
         // All of the sample Wu implementations are reimplementations of a snippet of C code from
         // the early 90s. They all cap the maximum # of colors at 256, and it is impossible to tell
         // if this is a requirement, a consequence of QUANT_SIZE, or arbitrary.
-        this.mMaxColors = Math.min(MAX_COLORS, maxColorCount);
+        //
+        // Also, the number of maximum colors should be capped at the number of pixels - otherwise,
+        // If extraction is run on a set of pixels whose count is less than max colors,
+        // then colors.length < max colors, and accesses to colors[index] throw an
+        // ArrayOutOfBoundsException.
+        this.mMaxColors = Math.min(Math.min(MAX_COLORS, maxColorCount), colors.length);
         Box[] cube = new Box[mMaxColors];
         int red, green, blue;
 
@@ -119,17 +124,13 @@ public class WuQuantizer implements Quantizer {
             }
         }
 
-        // If extraction is run on a set of pixels whose count is less than the
-        // number of max colors, then colors.length < max colors, and accesses
-        // to colors[index] inside the for loop throw an ArrayOutOfBoundsException.
-        int numColorsToCreate = (int) Math.min(mMaxColors, colors.length);
-        for (k = 0; k < numColorsToCreate; ++k) {
+        for (k = 0; k < mMaxColors; ++k) {
             weight = getVolume(cube[k], mWt);
             if (weight > 0) {
                 red = (int) (getVolume(cube[k], mMr) / weight);
                 green = (int) (getVolume(cube[k], mMg) / weight);
                 blue = (int) (getVolume(cube[k], mMb) / weight);
-                colors[k] = ((red & 0x0ff) << 16) | ((green & 0x0ff) << 8) | (blue & 0x0ff);
+                colors[k] = (255 << 24) | (red << 16) | (green << 8) | blue;
             } else {
                 colors[k] = 0;
             }

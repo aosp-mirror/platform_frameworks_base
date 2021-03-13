@@ -314,8 +314,8 @@ public class TelecomManager {
     public static final String EXTRA_HAS_PICTURE = "android.telecom.extra.HAS_PICTURE";
 
     /**
-     * A URI representing the picture that was downloaded when a call is received or uploaded
-     * when a call is placed.
+     * A {@link Uri} representing the picture that was downloaded when a call is received or
+     * uploaded when a call is placed.
      *
      * This is a content URI within the call log provider which can be used to open a file
      * descriptor. This could be set a short time after a call is added to the Dialer app if the

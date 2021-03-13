@@ -45,13 +45,6 @@ xsd_config {
 }
 
 xsd_config {
-    name: "cec-config",
-    srcs: ["cec-config/cec-config.xsd"],
-    api_dir: "cec-config/schema",
-    package_name: "com.android.server.hdmi.cec.config",
-}
-
-xsd_config {
     name: "device-state-config",
     srcs: ["device-state-config/device-state-config.xsd"],
     api_dir: "device-state-config/schema",

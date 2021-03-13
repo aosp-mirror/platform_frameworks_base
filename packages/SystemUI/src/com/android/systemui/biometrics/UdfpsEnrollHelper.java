@@ -21,6 +21,9 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PointF;
 import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.os.Build;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.TypedValue;
 
 import java.util.ArrayList;
@@ -32,6 +35,10 @@ import java.util.List;
 public class UdfpsEnrollHelper {
     private static final String TAG = "UdfpsEnrollHelper";
 
+    private static final String SCALE_OVERRIDE =
+            "com.android.systemui.biometrics.UdfpsEnrollHelper.scale";
+    private static final float SCALE = 0.5f;
+
     // Enroll with two center touches before going to guided enrollment
     private static final int NUM_CENTER_TOUCHES = 2;
 
@@ -39,9 +46,10 @@ public class UdfpsEnrollHelper {
         void onEnrollmentProgress(int remaining, int totalSteps);
     }
 
+    @NonNull private final Context mContext;
     // IUdfpsOverlayController reason
     private final int mEnrollReason;
-    private final List<PointF> mGuidedEnrollmentPoints;
+    @NonNull private final List<PointF> mGuidedEnrollmentPoints;
 
     private int mTotalSteps = -1;
     private int mRemainingSteps = -1;
@@ -53,6 +61,7 @@ public class UdfpsEnrollHelper {
     @Nullable Listener mListener;
 
     public UdfpsEnrollHelper(@NonNull Context context, int reason) {
+        mContext = context;
         mEnrollReason = reason;
         mGuidedEnrollmentPoints = new ArrayList<>();
 
@@ -100,13 +109,13 @@ public class UdfpsEnrollHelper {
 
     }
 
-    void setListener(@NonNull Listener listener) {
+    void setListener(Listener listener) {
         mListener = listener;
 
         // Only notify during setListener if enrollment is already in progress, so the progress
         // bar can be updated. If enrollment has not started yet, the progress bar will be empty
         // anyway.
-        if (mTotalSteps != -1) {
+        if (mListener != null && mTotalSteps != -1) {
             mListener.onEnrollmentProgress(mRemainingSteps, mTotalSteps);
         }
     }
@@ -121,9 +130,15 @@ public class UdfpsEnrollHelper {
 
     @NonNull
     PointF getNextGuidedEnrollmentPoint() {
+        float scale = SCALE;
+        if (Build.IS_ENG || Build.IS_USERDEBUG) {
+            scale = Settings.Secure.getFloatForUser(mContext.getContentResolver(),
+                    SCALE_OVERRIDE, SCALE,
+                    UserHandle.USER_CURRENT);
+        }
         final int index = mLocationsEnrolled - NUM_CENTER_TOUCHES;
         final PointF originalPoint = mGuidedEnrollmentPoints
                 .get(index % mGuidedEnrollmentPoints.size());
-        return new PointF(originalPoint.x * 0.5f, originalPoint.y * 0.5f);
+        return new PointF(originalPoint.x * scale, originalPoint.y * scale);
     }
 }

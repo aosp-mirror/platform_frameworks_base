@@ -273,7 +273,6 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -366,9 +365,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
     static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
-
-    /** Amount of time (in milliseconds) to delay before declaring a seamless rotation timeout. */
-    static final int SEAMLESS_ROTATION_TIMEOUT_DURATION = 2000;
 
     /** Amount of time (in milliseconds) to delay before declaring a window replacement timeout. */
     static final int WINDOW_REPLACEMENT_TIMEOUT_DURATION = 2000;
@@ -529,14 +525,6 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
                 boolean asProto) {
-            // Bugreport dumps the trace 2x, 1x as proto and 1x as text. Save file to disk only 1x.
-            if (asProto && mWindowTracing.isEnabled()) {
-                mWindowTracing.stopTrace(null, false /* writeToFile */);
-                BackgroundThread.getHandler().post(() -> {
-                    mWindowTracing.writeTraceToFile();
-                    mWindowTracing.startTrace(null);
-                });
-            }
             doDump(fd, pw, new String[] {"-a"}, asProto);
         }
 
@@ -2245,16 +2233,9 @@ public class WindowManagerService extends IWindowManager.Stub
             win.setFrameNumber(frameNumber);
 
             final DisplayContent dc = win.getDisplayContent();
-            if (!dc.mWaitingForConfig) {
-                win.finishSeamlessRotation(false /* timeout */);
-            }
-
-            if (win.mPendingPositionChanged != null) {
-                win.mPendingPositionChanged.updateLeashPosition(frameNumber);
-                win.mPendingPositionChanged = null;
-            }
 
             if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
+                win.prepareDrawHandlers();
                 result |= RELAYOUT_RES_BLAST_SYNC;
             }
 
@@ -2999,8 +2980,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void screenTurningOff(ScreenOffListener listener) {
-        mTaskSnapshotController.screenTurningOff(listener);
+    public void screenTurningOff(int displayId, ScreenOffListener listener) {
+        mTaskSnapshotController.screenTurningOff(displayId, listener);
     }
 
     @Override
@@ -5095,7 +5076,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int UPDATE_ANIMATION_SCALE = 51;
         public static final int WINDOW_HIDE_TIMEOUT = 52;
-        public static final int SEAMLESS_ROTATION_TIMEOUT = 54;
         public static final int RESTORE_POINTER_ICON = 55;
         public static final int SET_HAS_OVERLAY_UI = 58;
         public static final int ANIMATION_FAILSAFE = 60;
@@ -5375,13 +5355,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 case RESTORE_POINTER_ICON: {
                     synchronized (mGlobalLock) {
                         restorePointerIconLocked((DisplayContent)msg.obj, msg.arg1, msg.arg2);
-                    }
-                    break;
-                }
-                case SEAMLESS_ROTATION_TIMEOUT: {
-                    final DisplayContent displayContent = (DisplayContent) msg.obj;
-                    synchronized (mGlobalLock) {
-                        displayContent.getDisplayRotation().onSeamlessRotationTimeout();
                     }
                     break;
                 }
@@ -5700,6 +5673,11 @@ public class WindowManagerService extends IWindowManager.Stub
     public void unregisterCrossWindowBlurEnabledListener(
                 ICrossWindowBlurEnabledListener listener) {
         mBlurController.unregisterCrossWindowBlurEnabledListener(listener);
+    }
+
+    @Override
+    public void setForceCrossWindowBlurDisabled(boolean disable) {
+        mBlurController.setForceCrossWindowBlurDisabled(disable);
     }
 
     // -------------------------------------------------------------

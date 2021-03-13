@@ -23,7 +23,6 @@ import android.inputmethodservice.AbstractInputMethodService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
-import android.os.ShellCommand;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
@@ -102,12 +101,6 @@ public abstract class ImeTracing {
      * @param proto dump to be added to the buffer
      */
     public abstract void addToBuffer(ProtoOutputStream proto, int source);
-
-    /**
-     * @param shell The shell command to process
-     * @return {@code 0} if the command was successfully processed, {@code -1} otherwise
-     */
-    public abstract int onShellCommand(ShellCommand shell);
 
     /**
      * Starts a proto dump of the client side information.

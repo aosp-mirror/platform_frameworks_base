@@ -1,4 +1,3 @@
-
 package {
     default_applicable_licenses: ["frameworks_base_core_jni_license"],
 }
@@ -218,6 +217,7 @@ cc_library_shared {
                 "fd_utils.cpp",
                 "android_hardware_input_InputWindowHandle.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
+                "permission_utils.cpp",
             ],
 
             static_libs: [
@@ -236,6 +236,7 @@ cc_library_shared {
                 "audioflinger-aidl-cpp",
                 "av-types-aidl-cpp",
                 "android.hardware.camera.device@3.2",
+                "media_permission-aidl-cpp",
                 "libandroidicu",
                 "libbpf_android",
                 "libnetdbpf",

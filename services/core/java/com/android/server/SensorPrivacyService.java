@@ -51,6 +51,7 @@ import android.graphics.drawable.Icon;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.SensorPrivacyManagerInternal;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -67,6 +68,7 @@ import android.service.SensorPrivacyServiceDumpProto;
 import android.service.SensorPrivacyUserProto;
 import android.text.Html;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -80,6 +82,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.XmlUtils;
@@ -137,6 +140,8 @@ public final class SensorPrivacyService extends SystemService {
     private final ActivityManager mActivityManager;
     private final ActivityTaskManager mActivityTaskManager;
 
+    private SensorPrivacyManagerInternalImpl mSensorPrivacyManagerInternal;
+
     public SensorPrivacyService(Context context) {
         super(context);
         mUserManagerInternal = getLocalService(UserManagerInternal.class);
@@ -148,6 +153,9 @@ public final class SensorPrivacyService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.SENSOR_PRIVACY_SERVICE, mSensorPrivacyServiceImpl);
+        mSensorPrivacyManagerInternal = new SensorPrivacyManagerInternalImpl();
+        publishLocalService(SensorPrivacyManagerInternal.class,
+                mSensorPrivacyManagerInternal);
     }
 
     class SensorPrivacyServiceImpl extends ISensorPrivacyManager.Stub implements
@@ -1108,6 +1116,7 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         public void handleSensorPrivacyChanged(int userId, int sensor, boolean enabled) {
+            mSensorPrivacyManagerInternal.dispatch(userId, sensor, enabled);
             SparseArray<RemoteCallbackList<ISensorPrivacyListener>> listenersForUser =
                     mIndividualSensorListeners.get(userId);
             if (listenersForUser == null) {
@@ -1168,4 +1177,87 @@ public final class SensorPrivacyService extends SystemService {
             c.accept(userIds[i]);
         }
     }
+
+    private class SensorPrivacyManagerInternalImpl extends SensorPrivacyManagerInternal {
+
+        private ArrayMap<Integer, ArrayMap<Integer, ArraySet<OnSensorPrivacyChangedListener>>>
+                mListeners = new ArrayMap<>();
+        private ArrayMap<Integer, ArraySet<OnUserSensorPrivacyChangedListener>> mAllUserListeners =
+                new ArrayMap<>();
+
+        private final Object mLock = new Object();
+
+        private void dispatch(int userId, int sensor, boolean enabled) {
+            synchronized (mLock) {
+                ArraySet<OnUserSensorPrivacyChangedListener> allUserSensorListeners =
+                        mAllUserListeners.get(sensor);
+                if (allUserSensorListeners != null) {
+                    for (int i = 0; i < allUserSensorListeners.size(); i++) {
+                        OnUserSensorPrivacyChangedListener listener =
+                                allUserSensorListeners.valueAt(i);
+                        BackgroundThread.getHandler().post(() ->
+                                listener.onSensorPrivacyChanged(userId, enabled));
+                    }
+                }
+
+                ArrayMap<Integer, ArraySet<OnSensorPrivacyChangedListener>> userSensorListeners =
+                        mListeners.get(userId);
+                if (userSensorListeners != null) {
+                    ArraySet<OnSensorPrivacyChangedListener> sensorListeners =
+                            userSensorListeners.get(sensor);
+                    if (sensorListeners != null) {
+                        for (int i = 0; i < sensorListeners.size(); i++) {
+                            OnSensorPrivacyChangedListener listener = sensorListeners.valueAt(i);
+                            BackgroundThread.getHandler().post(() ->
+                                    listener.onSensorPrivacyChanged(enabled));
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean isSensorPrivacyEnabled(int userId, int sensor) {
+            return SensorPrivacyService.this
+                    .mSensorPrivacyServiceImpl.isIndividualSensorPrivacyEnabled(userId, sensor);
+        }
+
+        @Override
+        public void addSensorPrivacyListener(int userId, int sensor,
+                OnSensorPrivacyChangedListener listener) {
+            synchronized (mLock) {
+                ArrayMap<Integer, ArraySet<OnSensorPrivacyChangedListener>> userSensorListeners =
+                        mListeners.get(userId);
+                if (userSensorListeners == null) {
+                    userSensorListeners = new ArrayMap<>();
+                    mListeners.put(userId, userSensorListeners);
+                }
+
+                ArraySet<OnSensorPrivacyChangedListener> sensorListeners =
+                        userSensorListeners.get(sensor);
+                if (sensorListeners == null) {
+                    sensorListeners = new ArraySet<>();
+                    userSensorListeners.put(sensor, sensorListeners);
+                }
+
+                sensorListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void addSensorPrivacyListenerForAllUsers(int sensor,
+                OnUserSensorPrivacyChangedListener listener) {
+            synchronized (mLock) {
+                ArraySet<OnUserSensorPrivacyChangedListener> sensorListeners =
+                        mAllUserListeners.get(sensor);
+                if (sensorListeners == null) {
+                    sensorListeners = new ArraySet<>();
+                    mAllUserListeners.put(sensor, sensorListeners);
+                }
+
+                sensorListeners.add(listener);
+            }
+        }
+    }
+
 }

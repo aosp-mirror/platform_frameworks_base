@@ -315,7 +315,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         int tileBg = getResources().getDimensionPixelSize(R.dimen.qs_tile_background_size);
         mFooterMarginStartHorizontal = getResources().getDimensionPixelSize(
                 R.dimen.qs_footer_horizontal_margin);
-        mVisualTilePadding = (int) ((tileSize - tileBg) / 2.0f);
+        mVisualTilePadding = mSideLabels ? 0 : (int) ((tileSize - tileBg) / 2.0f);
         updatePadding();
 
         updatePageIndicator();

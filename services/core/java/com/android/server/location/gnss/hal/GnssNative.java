@@ -27,6 +27,7 @@ import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
 import android.location.GnssStatus;
 import android.location.Location;
+import android.os.Binder;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -921,6 +922,7 @@ public class GnssNative {
 
     @NativeEntryPoint
     void reportGnssServiceDied() {
+        // Not necessary to clear (and restore) binder identity since it runs on another thread.
         Log.e(TAG, "gnss hal died - restarting shortly...");
 
         // move to another thread just in case there is some awkward gnss thread dependency with
@@ -940,96 +942,111 @@ public class GnssNative {
 
     @NativeEntryPoint
     void reportLocation(boolean hasLatLong, Location location) {
-        if (hasLatLong && !mHasFirstFix) {
-            mHasFirstFix = true;
+        Binder.withCleanCallingIdentity(() -> {
+            if (hasLatLong && !mHasFirstFix) {
+                mHasFirstFix = true;
 
-            // notify status listeners
-            int ttff = (int) (SystemClock.elapsedRealtime() - mStartRealtimeMs);
-            for (int i = 0; i < mStatusCallbacks.length; i++) {
-                mStatusCallbacks[i].onReportFirstFix(ttff);
+                // notify status listeners
+                int ttff = (int) (SystemClock.elapsedRealtime() - mStartRealtimeMs);
+                for (int i = 0; i < mStatusCallbacks.length; i++) {
+                    mStatusCallbacks[i].onReportFirstFix(ttff);
+                }
             }
-        }
 
-        if (location.hasSpeed()) {
-            boolean exceeded = location.getSpeed() > ITAR_SPEED_LIMIT_METERS_PER_SECOND;
-            if (!mItarSpeedLimitExceeded && exceeded) {
-                Log.w(TAG, "speed nearing ITAR threshold - blocking further GNSS output");
-            } else if (mItarSpeedLimitExceeded && !exceeded) {
-                Log.w(TAG, "speed leaving ITAR threshold - allowing further GNSS output");
+            if (location.hasSpeed()) {
+                boolean exceeded = location.getSpeed() > ITAR_SPEED_LIMIT_METERS_PER_SECOND;
+                if (!mItarSpeedLimitExceeded && exceeded) {
+                    Log.w(TAG, "speed nearing ITAR threshold - blocking further GNSS output");
+                } else if (mItarSpeedLimitExceeded && !exceeded) {
+                    Log.w(TAG, "speed leaving ITAR threshold - allowing further GNSS output");
+                }
+                mItarSpeedLimitExceeded = exceeded;
             }
-            mItarSpeedLimitExceeded = exceeded;
-        }
 
-        if (mItarSpeedLimitExceeded) {
-            return;
-        }
+            if (mItarSpeedLimitExceeded) {
+                return;
+            }
 
-        for (int i = 0; i < mLocationCallbacks.length; i++) {
-            mLocationCallbacks[i].onReportLocation(hasLatLong, location);
-        }
+            for (int i = 0; i < mLocationCallbacks.length; i++) {
+                mLocationCallbacks[i].onReportLocation(hasLatLong, location);
+            }
+        });
     }
 
     @NativeEntryPoint
     void reportStatus(@StatusCallbacks.GnssStatusValue int gnssStatus) {
-        for (int i = 0; i < mStatusCallbacks.length; i++) {
-            mStatusCallbacks[i].onReportStatus(gnssStatus);
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            for (int i = 0; i < mStatusCallbacks.length; i++) {
+                mStatusCallbacks[i].onReportStatus(gnssStatus);
+            }
+        });
     }
 
     @NativeEntryPoint
     void reportSvStatus(int svCount, int[] svidWithFlags, float[] cn0DbHzs,
             float[] elevations, float[] azimuths, float[] carrierFrequencies,
             float[] basebandCn0DbHzs) {
-        GnssStatus gnssStatus = GnssStatus.wrap(svCount, svidWithFlags, cn0DbHzs, elevations,
-                azimuths, carrierFrequencies, basebandCn0DbHzs);
-        for (int i = 0; i < mSvStatusCallbacks.length; i++) {
-            mSvStatusCallbacks[i].onReportSvStatus(gnssStatus);
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            GnssStatus gnssStatus = GnssStatus.wrap(svCount, svidWithFlags, cn0DbHzs, elevations,
+                    azimuths, carrierFrequencies, basebandCn0DbHzs);
+            for (int i = 0; i < mSvStatusCallbacks.length; i++) {
+                mSvStatusCallbacks[i].onReportSvStatus(gnssStatus);
+            }
+        });
     }
 
     @NativeEntryPoint
     void reportAGpsStatus(int agpsType, int agpsStatus, byte[] suplIpAddr) {
-        mAGpsCallbacks.onReportAGpsStatus(agpsType, agpsStatus, suplIpAddr);
+        Binder.withCleanCallingIdentity(
+                () -> mAGpsCallbacks.onReportAGpsStatus(agpsType, agpsStatus, suplIpAddr));
     }
 
     @NativeEntryPoint
     void reportNmea(long timestamp) {
-        if (mItarSpeedLimitExceeded) {
-            return;
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            if (mItarSpeedLimitExceeded) {
+                return;
+            }
 
-        for (int i = 0; i < mNmeaCallbacks.length; i++) {
-            mNmeaCallbacks[i].onReportNmea(timestamp);
-        }
+            for (int i = 0; i < mNmeaCallbacks.length; i++) {
+                mNmeaCallbacks[i].onReportNmea(timestamp);
+            }
+        });
     }
 
     @NativeEntryPoint
     void reportMeasurementData(GnssMeasurementsEvent event) {
-        if (mItarSpeedLimitExceeded) {
-            return;
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            if (mItarSpeedLimitExceeded) {
+                return;
+            }
 
-        for (int i = 0; i < mMeasurementCallbacks.length; i++) {
-            mMeasurementCallbacks[i].onReportMeasurements(event);
-        }
+            for (int i = 0; i < mMeasurementCallbacks.length; i++) {
+                mMeasurementCallbacks[i].onReportMeasurements(event);
+            }
+        });
     }
 
     @NativeEntryPoint
     void reportAntennaInfo(List<GnssAntennaInfo> antennaInfos) {
-        for (int i = 0; i < mAntennaInfoCallbacks.length; i++) {
-            mAntennaInfoCallbacks[i].onReportAntennaInfo(antennaInfos);
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            for (int i = 0; i < mAntennaInfoCallbacks.length; i++) {
+                mAntennaInfoCallbacks[i].onReportAntennaInfo(antennaInfos);
+            }
+        });
     }
 
     @NativeEntryPoint
     void reportNavigationMessage(GnssNavigationMessage event) {
-        if (mItarSpeedLimitExceeded) {
-            return;
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            if (mItarSpeedLimitExceeded) {
+                return;
+            }
 
-        for (int i = 0; i < mNavigationMessageCallbacks.length; i++) {
-            mNavigationMessageCallbacks[i].onReportNavigationMessage(event);
-        }
+            for (int i = 0; i < mNavigationMessageCallbacks.length; i++) {
+                mNavigationMessageCallbacks[i].onReportNavigationMessage(event);
+            }
+        });
     }
 
     @NativeEntryPoint
@@ -1061,15 +1078,17 @@ public class GnssNative {
 
     private void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
             GnssCapabilities newCapabilities) {
-        if (newCapabilities.equals(oldCapabilities)) {
-            return;
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            if (newCapabilities.equals(oldCapabilities)) {
+                return;
+            }
 
-        Log.i(TAG, "gnss capabilities changed to " + newCapabilities);
+            Log.i(TAG, "gnss capabilities changed to " + newCapabilities);
 
-        for (int i = 0; i < mBaseCallbacks.length; i++) {
-            mBaseCallbacks[i].onCapabilitiesChanged(oldCapabilities, newCapabilities);
-        }
+            for (int i = 0; i < mBaseCallbacks.length; i++) {
+                mBaseCallbacks[i].onCapabilitiesChanged(oldCapabilities, newCapabilities);
+            }
+        });
     }
 
     @NativeEntryPoint
@@ -1089,88 +1108,103 @@ public class GnssNative {
 
     @NativeEntryPoint
     void reportLocationBatch(Location[] locations) {
-        for (int i = 0; i < mLocationCallbacks.length; i++) {
-            mLocationCallbacks[i].onReportLocations(locations);
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            for (int i = 0; i < mLocationCallbacks.length; i++) {
+                mLocationCallbacks[i].onReportLocations(locations);
+            }
+        });
     }
 
     @NativeEntryPoint
     void psdsDownloadRequest(int psdsType) {
-        mPsdsCallbacks.onRequestPsdsDownload(psdsType);
+        Binder.withCleanCallingIdentity(() -> mPsdsCallbacks.onRequestPsdsDownload(psdsType));
     }
 
     @NativeEntryPoint
     void reportGeofenceTransition(int geofenceId, Location location, int transition,
             long transitionTimestamp) {
-        mGeofenceCallbacks.onReportGeofenceTransition(geofenceId, location, transition,
-                transitionTimestamp);
+        Binder.withCleanCallingIdentity(
+                () -> mGeofenceCallbacks.onReportGeofenceTransition(geofenceId, location,
+                        transition, transitionTimestamp));
     }
 
     @NativeEntryPoint
     void reportGeofenceStatus(int status, Location location) {
-        mGeofenceCallbacks.onReportGeofenceStatus(status, location);
+        Binder.withCleanCallingIdentity(
+                () -> mGeofenceCallbacks.onReportGeofenceStatus(status, location));
     }
 
     @NativeEntryPoint
     void reportGeofenceAddStatus(int geofenceId, @GeofenceCallbacks.GeofenceStatus int status) {
-        mGeofenceCallbacks.onReportGeofenceAddStatus(geofenceId, status);
+        Binder.withCleanCallingIdentity(
+                () -> mGeofenceCallbacks.onReportGeofenceAddStatus(geofenceId, status));
     }
 
     @NativeEntryPoint
     void reportGeofenceRemoveStatus(int geofenceId, @GeofenceCallbacks.GeofenceStatus int status) {
-        mGeofenceCallbacks.onReportGeofenceRemoveStatus(geofenceId, status);
+        Binder.withCleanCallingIdentity(
+                () -> mGeofenceCallbacks.onReportGeofenceRemoveStatus(geofenceId, status));
     }
 
     @NativeEntryPoint
     void reportGeofencePauseStatus(int geofenceId, @GeofenceCallbacks.GeofenceStatus int status) {
-        mGeofenceCallbacks.onReportGeofencePauseStatus(geofenceId, status);
+        Binder.withCleanCallingIdentity(
+                () -> mGeofenceCallbacks.onReportGeofencePauseStatus(geofenceId, status));
     }
 
     @NativeEntryPoint
     void reportGeofenceResumeStatus(int geofenceId, @GeofenceCallbacks.GeofenceStatus int status) {
-        mGeofenceCallbacks.onReportGeofenceResumeStatus(geofenceId, status);
+        Binder.withCleanCallingIdentity(
+                () -> mGeofenceCallbacks.onReportGeofenceResumeStatus(geofenceId, status));
     }
 
     @NativeEntryPoint
     void reportNiNotification(int notificationId, int niType, int notifyFlags,
             int timeout, int defaultResponse, String requestorId, String text,
             int requestorIdEncoding, int textEncoding) {
-        mNotificationCallbacks.onReportNiNotification(notificationId, niType, notifyFlags, timeout,
-                    defaultResponse, requestorId, text, requestorIdEncoding, textEncoding);
+        Binder.withCleanCallingIdentity(
+                () -> mNotificationCallbacks.onReportNiNotification(notificationId, niType,
+                        notifyFlags, timeout, defaultResponse, requestorId, text,
+                        requestorIdEncoding, textEncoding));
     }
 
     @NativeEntryPoint
     void requestSetID(int flags) {
-        mAGpsCallbacks.onRequestSetID(flags);
+        Binder.withCleanCallingIdentity(() -> mAGpsCallbacks.onRequestSetID(flags));
     }
 
     @NativeEntryPoint
     void requestLocation(boolean independentFromGnss, boolean isUserEmergency) {
-        mLocationRequestCallbacks.onRequestLocation(independentFromGnss, isUserEmergency);
+        Binder.withCleanCallingIdentity(
+                () -> mLocationRequestCallbacks.onRequestLocation(independentFromGnss,
+                        isUserEmergency));
     }
 
     @NativeEntryPoint
     void requestUtcTime() {
-        mTimeCallbacks.onRequestUtcTime();
+        Binder.withCleanCallingIdentity(() -> mTimeCallbacks.onRequestUtcTime());
     }
 
     @NativeEntryPoint
     void requestRefLocation() {
-        mLocationRequestCallbacks.onRequestRefLocation();
+        Binder.withCleanCallingIdentity(
+                () -> mLocationRequestCallbacks.onRequestRefLocation());
     }
 
     @NativeEntryPoint
     void reportNfwNotification(String proxyAppPackageName, byte protocolStack,
             String otherProtocolStackName, byte requestor, String requestorId,
             byte responseType, boolean inEmergencyMode, boolean isCachedLocation) {
-        mNotificationCallbacks.onReportNfwNotification(proxyAppPackageName, protocolStack,
-                    otherProtocolStackName, requestor, requestorId, responseType, inEmergencyMode,
-                    isCachedLocation);
+        Binder.withCleanCallingIdentity(
+                () -> mNotificationCallbacks.onReportNfwNotification(proxyAppPackageName,
+                        protocolStack, otherProtocolStackName, requestor, requestorId, responseType,
+                        inEmergencyMode, isCachedLocation));
     }
 
     @NativeEntryPoint
     boolean isInEmergencySession() {
-        return mEmergencyHelper.isInEmergency(mConfiguration.getEsExtensionSec());
+        return Binder.withCleanCallingIdentity(
+                () -> mEmergencyHelper.isInEmergency(mConfiguration.getEsExtensionSec()));
     }
 
     /**

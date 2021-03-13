@@ -27,16 +27,13 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -67,17 +64,7 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0,
-        testSpec.config.endRotation)
-
-    @Presubmit
-    @Test
     fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
-
-    @Presubmit
-    @Test
-    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales(
-        Surface.ROTATION_0, testSpec.config.endRotation)
 
     @Presubmit
     @Test

@@ -185,6 +185,12 @@ public class HdmiCecNetwork {
         mLocalDevices.clear();
     }
 
+    /**
+     * Get the device info of a local device or a device in the CEC network by a device id.
+     * @param id id of the device to get
+     * @return the device with the given id, or {@code null}
+     */
+    @Nullable
     public HdmiDeviceInfo getDeviceInfo(int id) {
         return mDeviceInfos.get(id);
     }
@@ -717,6 +723,7 @@ public class HdmiCecNetwork {
      * @return {@link HdmiDeviceInfo} matched with the given {@code logicalAddress}.
      * Returns null if no logical address matched
      */
+    @Nullable
     HdmiDeviceInfo getSafeCecDeviceInfo(int logicalAddress) {
         for (HdmiDeviceInfo info : mSafeAllDeviceInfos) {
             if (info.isCecDevice() && info.getLogicalAddress() == logicalAddress) {

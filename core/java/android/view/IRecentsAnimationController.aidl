@@ -142,7 +142,13 @@ interface IRecentsAnimationController {
      *
      * The system reparents the leash of navigation bar to the app when the recents animation starts
      * and Launcher should call this method to let system restore the navigation bar to its
-     * original position when the quick switch gesture is finished.
+     * original position when the quick switch gesture is finished and will run the fade-in
+     * animation If {@param moveHomeToTop} is {@code true}. Otherwise, restore the navigtation bar
+     * without animation.
+     *
+     * @param moveHomeToTop if {@code true}, the home activity should be moved to the top.
+     *                      Otherwise, the home activity is hidden and the user is returned to the
+     *                      app.
      */
-    void detachNavigationBarFromApp();
+    void detachNavigationBarFromApp(boolean moveHomeToTop);
 }

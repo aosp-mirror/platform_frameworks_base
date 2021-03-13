@@ -221,7 +221,8 @@ public abstract class WindowManagerInternal {
                 DragState state, Display display, InputManagerService service,
                 InputChannel source) {
             state.register(display);
-            return service.transferTouchFocus(source, state.getInputChannel());
+            return service.transferTouchFocus(source, state.getInputChannel(),
+                    true /* isDragDrop */);
         }
 
         /**

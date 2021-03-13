@@ -1783,8 +1783,9 @@ static void nativeSetSystemUiLightsOut(JNIEnv* /* env */, jclass /* clazz */, jl
     im->setSystemUiLightsOut(lightsOut);
 }
 
-static jboolean nativeTransferTouchFocus(JNIEnv* env,
-        jclass /* clazz */, jlong ptr, jobject fromChannelTokenObj, jobject toChannelTokenObj) {
+static jboolean nativeTransferTouchFocus(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                         jobject fromChannelTokenObj, jobject toChannelTokenObj,
+                                         jboolean isDragDrop) {
     if (fromChannelTokenObj == nullptr || toChannelTokenObj == nullptr) {
         return JNI_FALSE;
     }
@@ -1793,8 +1794,8 @@ static jboolean nativeTransferTouchFocus(JNIEnv* env,
     sp<IBinder> toChannelToken = ibinderForJavaObject(env, toChannelTokenObj);
 
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-    if (im->getInputManager()->getDispatcher()->transferTouchFocus(
-            fromChannelToken, toChannelToken)) {
+    if (im->getInputManager()->getDispatcher()->transferTouchFocus(fromChannelToken, toChannelToken,
+                                                                   isDragDrop)) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
@@ -2267,7 +2268,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeRequestPointerCapture},
         {"nativeSetInputDispatchMode", "(JZZ)V", (void*)nativeSetInputDispatchMode},
         {"nativeSetSystemUiLightsOut", "(JZ)V", (void*)nativeSetSystemUiLightsOut},
-        {"nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)Z",
+        {"nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;Z)Z",
          (void*)nativeTransferTouchFocus},
         {"nativeSetPointerSpeed", "(JI)V", (void*)nativeSetPointerSpeed},
         {"nativeSetShowTouches", "(JZ)V", (void*)nativeSetShowTouches},

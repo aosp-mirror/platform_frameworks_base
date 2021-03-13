@@ -210,6 +210,11 @@ public class ParsedActivityUtils {
                 pkg.setVisibleToInstantApps(true);
             }
 
+            String attributionTags = sa.getString(R.styleable.AndroidManifestActivity_attributionTags);
+            if (attributionTags != null) {
+                activity.attributionTags = attributionTags.split("\\|");
+            }
+
             return parseActivityOrAlias(activity, pkg, tag, parser, res, sa, receiver,
                     false /*isAlias*/, visibleToEphemeral, input,
                     R.styleable.AndroidManifestActivity_parentActivityName,

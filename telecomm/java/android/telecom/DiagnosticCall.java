@@ -26,15 +26,27 @@ import android.telephony.ims.ImsReasonInfo;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * A {@link DiagnosticCall} provides a way for a {@link CallDiagnosticService} to receive diagnostic
- * information about a mobile call on the device.  The {@link CallDiagnosticService} can generate
- * mid-call diagnostic messages using the {@link #displayDiagnosticMessage(int, CharSequence)} API
- * which provides the user with valuable information about conditions impacting their call and
- * corrective actions.  For example, if the {@link CallDiagnosticService} determines that conditions
- * on the call are degrading, it can inform the user that the call may soon drop and that they
- * can try using a different calling method (e.g. VOIP or WIFI).
+ * information about a mobile call on the device.  A {@link DiagnosticCall} is similar to a
+ * {@link Call}, however it does not expose call control capabilities and exposes extra diagnostic
+ * and messaging capabilities not present on a {@link Call}.  The {@link CallDiagnosticService}
+ * creates a {@link DiagnosticCall} for each {@link Call} on the device.  This means that for each
+ * in progress call on the device, the {@link CallDiagnosticService} will create an instance of
+ * {@link DiagnosticCall}.
+ * <p>
+ * The {@link CallDiagnosticService} can generate mid-call diagnostic messages using the
+ * {@link #displayDiagnosticMessage(int, CharSequence)} API which provides the user with valuable
+ * information about conditions impacting their call and corrective actions.  For example, if the
+ * {@link CallDiagnosticService} determines that conditions on the call are degrading, it can inform
+ * the user that the call may soon drop and that they can try using a different calling method
+ * (e.g. VOIP or WIFI).
+ * <h2>Threading Model</h2>
+ * All incoming IPC from Telecom in this class will use the same {@link Executor} as the
+ * {@link CallDiagnosticService}. See {@link CallDiagnosticService#setExecutor(Executor)} for more
+ * information.
  * @hide
  */
 @SystemApi
@@ -53,15 +65,19 @@ public abstract class DiagnosticCall {
     /**
      * Device to device message sent via {@link #sendDeviceToDeviceMessage(int, int)} (received via
      * {@link #onReceiveDeviceToDeviceMessage(int, int)}) which communicates the radio access type
-     * used for the current call.  Based loosely on the
-     * {@link android.telephony.TelephonyManager#getNetworkType(int)} for the call, provides a
-     * high level summary of the call radio access type.
+     * used for the current call.  The call network type communicated here is an intentional
+     * simplification of the {@link android.telephony.TelephonyManager#getNetworkType(int)} which
+     * removes some of the resolution inherent in those values; the
+     * {@link android.telephony.TelephonyManager#NETWORK_TYPE_LTE_CA} value, for example is
+     * collapsed into the {@link android.telephony.TelephonyManager#NETWORK_TYPE_LTE} value for
+     * efficiency of transport.  For a discussion on the necessity of this simplification, see
+     * {@link #sendDeviceToDeviceMessage(int, int)}.
      * <p>
-     * Valid values:
+     * Valid values are below:
      * <UL>
-     *     <LI>{@link #NETWORK_TYPE_LTE}</LI>
-     *     <LI>{@link #NETWORK_TYPE_IWLAN}</LI>
-     *     <LI>{@link #NETWORK_TYPE_NR}</LI>
+     *     <LI>{@link android.telephony.TelephonyManager#NETWORK_TYPE_LTE}</LI>
+     *     <LI>{@link android.telephony.TelephonyManager#NETWORK_TYPE_IWLAN}</LI>
+     *     <LI>{@link android.telephony.TelephonyManager#NETWORK_TYPE_NR}</LI>
      * </UL>
      */
     public static final int MESSAGE_CALL_NETWORK_TYPE = 1;
@@ -69,14 +85,21 @@ public abstract class DiagnosticCall {
     /**
      * Device to device message sent via {@link #sendDeviceToDeviceMessage(int, int)} (received via
      * {@link #onReceiveDeviceToDeviceMessage(int, int)}) which communicates the call audio codec
-     * used for the current call.  Based loosely on the {@link Connection#EXTRA_AUDIO_CODEC} for a
-     * call.
+     * used for the current call.
+     * <p>
+     * The audio codec communicated here is an intentional simplification of the
+     * {@link Connection#EXTRA_AUDIO_CODEC} for a call and focuses on communicating the most common
+     * variants of these audio codecs.  Other variants of these codecs are reported as the next
+     * closest variant.  For example, the {@link Connection#AUDIO_CODEC_EVS_FB} full band codec
+     * is reported via device to device communication as {@link Connection#AUDIO_CODEC_EVS_WB}.
+     * For a discussion on the necessity of this simplification, see
+     * {@link #sendDeviceToDeviceMessage(int, int)}.
      * <p>
      * Valid values:
      * <UL>
-     *     <LI>{@link #AUDIO_CODEC_EVS}</LI>
-     *     <LI>{@link #AUDIO_CODEC_AMR_WB}</LI>
-     *     <LI>{@link #AUDIO_CODEC_AMR_NB}</LI>
+     *     <LI>{@link Connection#AUDIO_CODEC_EVS_WB}</LI>
+     *     <LI>{@link Connection#AUDIO_CODEC_AMR_WB}</LI>
+     *     <LI>{@link Connection#AUDIO_CODEC_AMR}</LI>
      * </UL>
      */
     public static final int MESSAGE_CALL_AUDIO_CODEC = 2;
@@ -122,41 +145,6 @@ public abstract class DiagnosticCall {
     public @interface MessageType {}
 
     /**
-     * Used with {@link #MESSAGE_CALL_NETWORK_TYPE} to indicate an LTE network is being used for the
-     * call.
-     */
-    public static final int NETWORK_TYPE_LTE = 1;
-
-    /**
-     * Used with {@link #MESSAGE_CALL_NETWORK_TYPE} to indicate WIFI calling is in use for the call.
-     */
-    public static final int NETWORK_TYPE_IWLAN = 2;
-
-    /**
-     * Used with {@link #MESSAGE_CALL_NETWORK_TYPE} to indicate a 5G NR (new radio) network is in
-     * used for the call.
-     */
-    public static final int NETWORK_TYPE_NR = 3;
-
-    /**
-     * Used with {@link #MESSAGE_CALL_AUDIO_CODEC} to indicate call audio is using the
-     * Enhanced Voice Services (EVS) codec for the call.
-     */
-    public static final int AUDIO_CODEC_EVS = 1;
-
-    /**
-     * Used with {@link #MESSAGE_CALL_AUDIO_CODEC} to indicate call audio is using the AMR
-     * (adaptive multi-rate) WB (wide band) audio codec.
-     */
-    public static final int AUDIO_CODEC_AMR_WB = 2;
-
-    /**
-     * Used with {@link #MESSAGE_CALL_AUDIO_CODEC} to indicate call audio is using the AMR
-     * (adaptive multi-rate) NB (narrow band) audio codec.
-     */
-    public static final int AUDIO_CODEC_AMR_NB = 3;
-
-    /**
      * Used with {@link #MESSAGE_DEVICE_BATTERY_STATE} to indicate that the battery is low.
      */
     public static final int BATTERY_STATE_LOW = 1;
@@ -183,7 +171,6 @@ public abstract class DiagnosticCall {
 
     private Listener mListener;
     private String mCallId;
-    private Call.Details mCallDetails;
 
     /**
      * @hide
@@ -210,16 +197,10 @@ public abstract class DiagnosticCall {
     }
 
     /**
-     * Returns the latest {@link Call.Details} associated with this {@link DiagnosticCall} as
-     * reported by {@link #onCallDetailsChanged(Call.Details)}.
-     * @return The latest {@link Call.Details}.
-     */
-    public @NonNull Call.Details getCallDetails() {
-        return mCallDetails;
-    }
-
-    /**
      * Telecom calls this method when the details of a call changes.
+     * <p>
+     * Calls to this method will use the same {@link Executor} as the {@link CallDiagnosticService};
+     * see {@link CallDiagnosticService#getExecutor()} for more information.
      */
     public abstract void onCallDetailsChanged(@NonNull android.telecom.Call.Details details);
 
@@ -234,6 +215,9 @@ public abstract class DiagnosticCall {
      * devices communicating are using a different version of the protocol, messages the recipient
      * are not aware of are silently discarded.  This means an older client talking to a new client
      * will not receive newer messages and values sent by the new client.
+     * <p>
+     * Calls to this method will use the same {@link Executor} as the {@link CallDiagnosticService};
+     * see {@link CallDiagnosticService#getExecutor()} for more information.
      */
     public abstract void onReceiveDeviceToDeviceMessage(
             @MessageType int message,
@@ -253,39 +237,19 @@ public abstract class DiagnosticCall {
      * platform due to the extreme bandwidth constraints inherent with underlying device to device
      * communication transports used by the telephony framework.  Device to device communication is
      * either accomplished by adding RFC8285 compliant RTP header extensions to the audio packets
-     * for a call, or using the DTMF digits A-D as a communication pathway.  Signalling requirements
-     * for DTMF digits place a significant limitation on the amount of information which can be
-     * communicated during a call.
+     * for a call, or using the DTMF digits A-D as a communication pathway.  RTP header extension
+     * packets ride alongside a the audio for a call, and are thus limited to roughly a byte for
+     * a message.  Signalling requirements for DTMF digits place even more significant limitations
+     * on the amount of information which can be communicated during a call, offering only a few
+     * bits of potential information per message.  The messages and values are constrained in order
+     * to meet the limited bandwidth inherent with DTMF signalling.
      * <p>
-     * Allowed message types and values are:
+     * Allowed message types are:
      * <ul>
-     *     <li>{@link #MESSAGE_CALL_NETWORK_TYPE}
-     *         <ul>
-     *             <li>{@link #NETWORK_TYPE_LTE}</li>
-     *             <li>{@link #NETWORK_TYPE_IWLAN}</li>
-     *             <li>{@link #NETWORK_TYPE_NR}</li>
-     *         </ul>
-     *     </li>
-     *     <li>{@link #MESSAGE_CALL_AUDIO_CODEC}
-     *         <ul>
-     *             <li>{@link #AUDIO_CODEC_EVS}</li>
-     *             <li>{@link #AUDIO_CODEC_AMR_WB}</li>
-     *             <li>{@link #AUDIO_CODEC_AMR_NB}</li>
-     *         </ul>
-     *     </li>
-     *     <li>{@link #MESSAGE_DEVICE_BATTERY_STATE}
-     *         <ul>
-     *             <li>{@link #BATTERY_STATE_LOW}</li>
-     *             <li>{@link #BATTERY_STATE_GOOD}</li>
-     *             <li>{@link #BATTERY_STATE_CHARGING}</li>
-     *         </ul>
-     *     </li>
-     *     <li>{@link #MESSAGE_DEVICE_NETWORK_COVERAGE}
-     *         <ul>
-     *             <li>{@link #COVERAGE_POOR}</li>
-     *             <li>{@link #COVERAGE_GOOD}</li>
-     *         </ul>
-     *     </li>
+     *     <li>{@link #MESSAGE_CALL_NETWORK_TYPE}</LI>
+     *     <li>{@link #MESSAGE_CALL_AUDIO_CODEC}</LI>
+     *     <li>{@link #MESSAGE_DEVICE_BATTERY_STATE}</LI>
+     *     <li>{@link #MESSAGE_DEVICE_NETWORK_COVERAGE}</LI>
      * </ul>
      * @param message The message type to send.
      * @param value The message value corresponding to the type.
@@ -307,6 +271,9 @@ public abstract class DiagnosticCall {
      * @param preciseDisconnectCause the precise disconnect cause for the call.
      * @return the disconnect message to use in place of the default Telephony message, or
      * {@code null} if the default message will not be overridden.
+     * <p>
+     * Calls to this method will use the same {@link Executor} as the {@link CallDiagnosticService};
+     * see {@link CallDiagnosticService#getExecutor()} for more information.
      */
     // TODO: Wire in Telephony support for this.
     public abstract @Nullable CharSequence onCallDisconnected(
@@ -323,6 +290,9 @@ public abstract class DiagnosticCall {
      * @param disconnectReason The {@link ImsReasonInfo} associated with the call disconnection.
      * @return A user-readable call disconnect message to use in place of the platform-generated
      * disconnect message, or {@code null} if the disconnect message should not be overridden.
+     * <p>
+     * Calls to this method will use the same {@link Executor} as the {@link CallDiagnosticService};
+     * see {@link CallDiagnosticService#getExecutor()} for more information.
      */
     // TODO: Wire in Telephony support for this.
     public abstract @Nullable CharSequence onCallDisconnected(
@@ -332,6 +302,9 @@ public abstract class DiagnosticCall {
      * Telecom calls this method when a {@link CallQuality} report is received from the telephony
      * stack for a call.
      * @param callQuality The call quality report for this call.
+     * <p>
+     * Calls to this method will use the same {@link Executor} as the {@link CallDiagnosticService};
+     * see {@link CallDiagnosticService#getExecutor()} for more information.
      */
     public abstract void onCallQualityReceived(@NonNull CallQuality callQuality);
 
@@ -375,7 +348,6 @@ public abstract class DiagnosticCall {
      * @hide
      */
     public void handleCallUpdated(@NonNull Call.Details newDetails) {
-        mCallDetails = newDetails;
         onCallDetailsChanged(newDetails);
     }
 }

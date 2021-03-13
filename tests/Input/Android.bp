@@ -9,14 +9,17 @@ package {
 
 android_test {
     name: "InputTests",
-    srcs: ["src/**/*.kt"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
     platform_apis: true,
     certificate: "platform",
     static_libs: [
-            "androidx.test.ext.junit",
-            "androidx.test.rules",
-            "truth-prebuilt",
-            "ub-uiautomator",
-        ],
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+        "truth-prebuilt",
+        "ub-uiautomator",
+    ],
     test_suites: ["device-tests"],
 }

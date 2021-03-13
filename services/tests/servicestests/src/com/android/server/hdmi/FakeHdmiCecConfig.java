@@ -16,183 +16,206 @@
 
 package com.android.server.hdmi;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 import android.annotation.NonNull;
 import android.content.Context;
-import android.util.Slog;
+import android.content.ContextWrapper;
+import android.content.res.Resources;
 
-import com.android.server.hdmi.cec.config.CecSettings;
-import com.android.server.hdmi.cec.config.XmlParser;
-
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import javax.xml.datatype.DatatypeConfigurationException;
+import com.android.internal.R;
 
 /**
- * Fake class which loads default system configuration with user-configurable
+ * Fake class which stubs default system configuration with user-configurable
  * settings (useful for testing).
  */
 final class FakeHdmiCecConfig extends HdmiCecConfig {
     private static final String TAG = "FakeHdmiCecConfig";
 
-    private static final String SYSTEM_CONFIG_XML =
-            "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                    + "<cec-settings>"
-                    + "  <setting name=\"send_standby_on_sleep\""
-                    + "           value-type=\"string\""
-                    + "           user-configurable=\"true\">"
-                    + "    <allowed-values>"
-                    + "      <value string-value=\"to_tv\" />"
-                    + "      <value string-value=\"broadcast\" />"
-                    + "      <value string-value=\"none\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value string-value=\"to_tv\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"power_state_change_on_active_source_lost\""
-                    + "           value-type=\"string\""
-                    + "           user-configurable=\"true\">"
-                    + "    <allowed-values>"
-                    + "      <value string-value=\"none\" />"
-                    + "      <value string-value=\"standby_now\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value string-value=\"none\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"hdmi_cec_enabled\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"true\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"1\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"hdmi_cec_version\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"true\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0x05\" />"
-                    + "      <value int-value=\"0x06\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"0x05\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"system_audio_mode_muting\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"true\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"1\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"hdmi_cec_enabled\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"true\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"1\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"volume_control_enabled\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"true\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"1\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"tv_wake_on_one_touch_play\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"true\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"1\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"tv_send_standby_on_sleep\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"true\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"1\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"rc_profile_tv\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"false\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0x0\" />"
-                    + "      <value int-value=\"0x2\" />"
-                    + "      <value int-value=\"0x6\" />"
-                    + "      <value int-value=\"0xA\" />"
-                    + "      <value int-value=\"0xE\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"0x0\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"rc_profile_source_handles_root_menu\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"false\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"1\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"rc_profile_source_handles_setup_menu\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"false\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"1\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"rc_profile_source_handles_contents_menu\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"false\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"0\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"rc_profile_source_handles_top_menu\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"false\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"0\" />"
-                    + "  </setting>"
-                    + "  <setting name=\"rc_profile_source_handles_media_context_sensitive_menu\""
-                    + "           value-type=\"int\""
-                    + "           user-configurable=\"false\">"
-                    + "    <allowed-values>"
-                    + "      <value int-value=\"0\" />"
-                    + "      <value int-value=\"1\" />"
-                    + "    </allowed-values>"
-                    + "    <default-value int-value=\"0\" />"
-                    + "  </setting>"
-                    + "</cec-settings>";
-
-    FakeHdmiCecConfig(@NonNull Context context) {
-        super(context, new StorageAdapter(context), parseFromString(SYSTEM_CONFIG_XML), null);
+    public static Context buildContext(Context context) {
+        Context contextSpy = spy(new ContextWrapper(context));
+        doReturn(buildResources(context)).when(contextSpy).getResources();
+        return contextSpy;
     }
 
-    private static CecSettings parseFromString(@NonNull String configXml) {
-        CecSettings config = null;
-        try {
-            config = XmlParser.read(
-                    new ByteArrayInputStream(configXml.getBytes()));
-        } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
-            Slog.e(TAG, "Encountered an error while reading/parsing CEC config strings", e);
-        }
-        return config;
+    private static Resources buildResources(Context context) {
+        Resources resources = spy(context.getResources());
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecHdmiCecEnabled_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecHdmiCecControlEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecHdmiCecControlEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecHdmiCecControlDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecHdmiCecControlDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecHdmiCecVersion_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecHdmiCecVersion14b_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecHdmiCecVersion14b_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecHdmiCecVersion20_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecHdmiCecVersion20_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSendStandbyOnSleep_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerControlModeTv_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerControlModeTv_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerControlModeBroadcast_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecPowerControlModeBroadcast_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerControlModeNone_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecPowerControlModeNone_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerStateChangeOnActiveSourceLost_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerStateChangeOnActiveSourceLostNone_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerStateChangeOnActiveSourceLostNone_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerStateChangeOnActiveSourceLostStandbyNow_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioModeMuting_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioModeMutingEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioModeMutingEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioModeMutingDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioModeMutingDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecVolumeControlMode_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecVolumeControlModeEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecVolumeControlModeEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecVolumeControlModeDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecVolumeControlModeDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecTvWakeOnOneTouchPlay_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecTvWakeOnOneTouchPlayEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecTvWakeOnOneTouchPlayEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecTvWakeOnOneTouchPlayDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecTvWakeOnOneTouchPlayDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecTvSendStandbyOnSleep_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecTvSendStandbyOnSleepEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecTvSendStandbyOnSleepEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecTvSendStandbyOnSleepDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecTvSendStandbyOnSleepDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTv_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTvNone_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTvNone_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTvOne_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTvOne_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTvTwo_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTvTwo_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTvThree_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTvThree_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTvFour_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecRcProfileTvFour_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceRootMenu_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceRootMenuHandled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceRootMenuHandled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceRootMenuNotHandled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceRootMenuNotHandled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceSetupMenu_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceSetupMenuHandled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceSetupMenuHandled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceSetupMenuNotHandled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceSetupMenuNotHandled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceContentsMenu_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceContentsMenuHandled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceContentsMenuHandled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceContentsMenuNotHandled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceContentsMenuNotHandled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceTopMenu_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceTopMenuHandled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceTopMenuHandled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceTopMenuNotHandled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceTopMenuNotHandled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceMediaContextSensitiveMenu_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuHandled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuHandled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default);
+
+        return resources;
+    }
+
+    FakeHdmiCecConfig(@NonNull Context context) {
+        super(buildContext(context), new StorageAdapter(context));
     }
 }

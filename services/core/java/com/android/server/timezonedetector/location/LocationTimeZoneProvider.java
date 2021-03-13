@@ -98,6 +98,14 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     }
 
     /**
+     * Listener interface used to log provider events for metrics.
+     */
+    interface ProviderMetricsLogger {
+        /** Logs that a provider changed state. */
+        void onProviderStateChanged(@ProviderStateEnum int stateEnum);
+    }
+
+    /**
      * Information about the provider's current state.
      */
     static class ProviderState {
@@ -349,6 +357,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
         }
     }
 
+    @NonNull private final ProviderMetricsLogger mProviderMetricsLogger;
     @NonNull final ThreadingDomain mThreadingDomain;
     @NonNull final Object mSharedLock;
     @NonNull final String mProviderName;
@@ -380,10 +389,12 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     @NonNull private TimeZoneIdValidator mTimeZoneIdValidator;
 
     /** Creates the instance. */
-    LocationTimeZoneProvider(@NonNull ThreadingDomain threadingDomain,
+    LocationTimeZoneProvider(@NonNull ProviderMetricsLogger providerMetricsLogger,
+            @NonNull ThreadingDomain threadingDomain,
             @NonNull String providerName,
             @NonNull TimeZoneIdValidator timeZoneIdValidator) {
         mThreadingDomain = Objects.requireNonNull(threadingDomain);
+        mProviderMetricsLogger = Objects.requireNonNull(providerMetricsLogger);
         mInitializationTimeoutQueue = threadingDomain.createSingleRunnableQueue();
         mSharedLock = threadingDomain.getLockObject();
         mProviderName = Objects.requireNonNull(providerName);
@@ -485,6 +496,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             mCurrentState.set(newState);
             onSetCurrentState(newState);
             if (!Objects.equals(newState, oldState)) {
+                mProviderMetricsLogger.onProviderStateChanged(newState.stateEnum);
                 if (mStateChangeRecording) {
                     mRecordedStates.add(newState);
                 }

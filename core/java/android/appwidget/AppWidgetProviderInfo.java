@@ -121,7 +121,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      *
      * @see #widgetFeatures
      */
-    public static final int WIDGET_FEATURE_CONFIGURATION_OPTIONAL = 3;
+    public static final int WIDGET_FEATURE_CONFIGURATION_OPTIONAL = 4;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {

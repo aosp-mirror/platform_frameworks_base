@@ -138,9 +138,6 @@ public class DynamicSystemInstallationService extends Service
     private long mCurrentPartitionSize;
     private long mCurrentPartitionInstalledSize;
 
-    private boolean mJustCancelledByUser;
-    private boolean mKeepNotification;
-
     // This is for testing only now
     private boolean mEnableWhenCompleted;
 
@@ -173,11 +170,6 @@ public class DynamicSystemInstallationService extends Service
         HttpResponseCache cache = HttpResponseCache.getInstalled();
         if (cache != null) {
             cache.flush();
-        }
-
-        if (!mKeepNotification) {
-            // Cancel the persistent notification.
-            mNM.cancel(NOTIFICATION_ID);
         }
     }
 
@@ -231,9 +223,11 @@ public class DynamicSystemInstallationService extends Service
             return;
         }
 
+        boolean removeNotification = false;
         switch (result) {
             case RESULT_CANCELLED:
                 postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
+                removeNotification = true;
                 break;
 
             case RESULT_ERROR_IO:
@@ -251,7 +245,7 @@ public class DynamicSystemInstallationService extends Service
         }
 
         // if it's not successful, reset the task and stop self.
-        resetTaskAndStop();
+        resetTaskAndStop(removeNotification);
     }
 
     private void executeInstallCommand(Intent intent) {
@@ -302,12 +296,12 @@ public class DynamicSystemInstallationService extends Service
             return;
         }
 
-        stopForeground(true);
-        mJustCancelledByUser = true;
-
         if (mInstallTask.cancel(false)) {
-            // Will stopSelf() in onResult()
+            // onResult() would call resetTaskAndStop() upon task completion.
             Log.d(TAG, "Cancel request filed successfully");
+            // Dismiss the notification as soon as possible as DynamicSystemManager.remove() may
+            // block.
+            stopForeground(STOP_FOREGROUND_REMOVE);
         } else {
             Log.e(TAG, "Trying to cancel installation while it's already completed.");
         }
@@ -322,8 +316,7 @@ public class DynamicSystemInstallationService extends Service
         if (!isDynamicSystemInstalled() && (getStatus() != STATUS_READY)) {
             Log.e(TAG, "Trying to discard AOT while there is no complete installation");
             // Stop foreground state and dismiss stale notification.
-            stopForeground(STOP_FOREGROUND_REMOVE);
-            resetTaskAndStop();
+            resetTaskAndStop(true);
             return;
         }
 
@@ -331,8 +324,8 @@ public class DynamicSystemInstallationService extends Service
                 getString(R.string.toast_dynsystem_discarded),
                 Toast.LENGTH_LONG).show();
 
-        resetTaskAndStop();
         postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
+        resetTaskAndStop(true);
 
         mDynSystem.remove();
     }
@@ -412,12 +405,13 @@ public class DynamicSystemInstallationService extends Service
     }
 
     private void resetTaskAndStop() {
-        mInstallTask = null;
+        resetTaskAndStop(/* removeNotification= */ false);
+    }
 
-        new Handler().postDelayed(() -> {
-            stopForeground(STOP_FOREGROUND_DETACH);
-            stopSelf();
-        }, 50);
+    private void resetTaskAndStop(boolean removeNotification) {
+        mInstallTask = null;
+        stopForeground(removeNotification ? STOP_FOREGROUND_REMOVE : STOP_FOREGROUND_DETACH);
+        stopSelf();
     }
 
     private void prepareNotification() {
@@ -525,7 +519,7 @@ public class DynamicSystemInstallationService extends Service
     private void postStatus(int status, int cause, Throwable detail) {
         String statusString;
         String causeString;
-        mKeepNotification = false;
+        boolean notifyOnNotificationBar = true;
 
         switch (status) {
             case STATUS_NOT_STARTED:
@@ -551,18 +545,16 @@ public class DynamicSystemInstallationService extends Service
                 break;
             case CAUSE_INSTALL_CANCELLED:
                 causeString = "INSTALL_CANCELLED";
+                notifyOnNotificationBar = false;
                 break;
             case CAUSE_ERROR_IO:
                 causeString = "ERROR_IO";
-                mKeepNotification = true;
                 break;
             case CAUSE_ERROR_INVALID_URL:
                 causeString = "ERROR_INVALID_URL";
-                mKeepNotification = true;
                 break;
             case CAUSE_ERROR_EXCEPTION:
                 causeString = "ERROR_EXCEPTION";
-                mKeepNotification = true;
                 break;
             default:
                 causeString = "CAUSE_NOT_SPECIFIED";
@@ -570,16 +562,6 @@ public class DynamicSystemInstallationService extends Service
         }
 
         Log.d(TAG, "status=" + statusString + ", cause=" + causeString + ", detail=" + detail);
-
-        boolean notifyOnNotificationBar = true;
-
-        if (status == STATUS_NOT_STARTED
-                && cause == CAUSE_INSTALL_CANCELLED
-                && mJustCancelledByUser) {
-            // if task is cancelled by user, do not notify them
-            notifyOnNotificationBar = false;
-            mJustCancelledByUser = false;
-        }
 
         if (notifyOnNotificationBar) {
             mNM.notify(NOTIFICATION_ID, buildNotification(status, cause, detail));
