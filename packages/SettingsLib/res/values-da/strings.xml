@@ -424,7 +424,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopi (rød-grøn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopi (blå-gul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korriger farver"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Ved hjælp af farvekorrigering kan du justere, hvordan farver ser ud på din enhed"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="8625527799885140826">"Juster, hvordan farverne vises på skærmen. Dette kan være nyttigt, når du vil:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt; Se farver mere nøjagtigt&lt;/li&gt; &lt;li&gt; Fjerne farver, så du bedre kan fokusere&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Tilsidesat af <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ca. <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage"</string>
@@ -515,6 +515,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Indtil du deaktiverer"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Lige nu"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonens højttaler"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Denne telefon"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Der kunne ikke oprettes forbindelse. Sluk og tænd enheden"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhed med ledning"</string>
     <string name="help_label" msgid="3528360748637781274">"Hjælp og feedback"</string>
@@ -538,7 +539,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begrænset profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du tilføje en ny bruger?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enhed med andre ved at oprette ekstra brugere. Hver bruger har sit personlige område, som kan tilpasses med apps, baggrund osv. Brugerne kan også justere enhedsindstillinger, som for eksempel Wi-Fi, som påvirker alle.\n\nNår du tilføjer en ny bruger, skal vedkommende konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle andre brugere. Indstillinger og tjenester for hjælpefunktioner overføres muligvis ikke til den nye bruger."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit rum.\n\nEnhver bruger kan opdatere apps for alle andre brugere."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit rum.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brugeren nu?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for, at brugeren har mulighed for at tage enheden og konfigurere sit eget rum"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du oprette en profil nu?"</string>
@@ -554,7 +555,7 @@
     <string name="user_switch_to_user" msgid="6975428297154968543">"Skift til <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Opretter ny bruger…"</string>
     <string name="user_nickname" msgid="262624187455825083">"Kaldenavn"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Tilføj gæsten"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Tilføj gæst"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gæsten"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gæst"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Tag et billede"</string>
