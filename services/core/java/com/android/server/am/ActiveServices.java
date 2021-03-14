@@ -1841,7 +1841,7 @@ public final class ActiveServices {
                     ServiceState stracker = r.getTracker();
                     if (stracker != null) {
                         stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(),
-                                r.lastActivity);
+                                SystemClock.uptimeMillis());
                     }
                 }
                 if (alreadyStartedOp) {
@@ -1863,7 +1863,7 @@ public final class ActiveServices {
                 ServiceState stracker = r.getTracker();
                 if (stracker != null) {
                     stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(),
-                            r.lastActivity);
+                            SystemClock.uptimeMillis());
                 }
                 mAm.mAppOpsService.finishOperation(
                         AppOpsManager.getToken(mAm.mAppOpsService),
@@ -3765,6 +3765,7 @@ public final class ActiveServices {
             }
         }
 
+        final long now = SystemClock.uptimeMillis();
         // Check to see if the service had been started as foreground, but being
         // brought down before actually showing a notification.  That is not allowed.
         if (r.fgRequired) {
@@ -3774,8 +3775,7 @@ public final class ActiveServices {
             r.fgWaiting = false;
             ServiceState stracker = r.getTracker();
             if (stracker != null) {
-                stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(),
-                        r.lastActivity);
+                stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(), now);
             }
             mAm.mAppOpsService.finishOperation(AppOpsManager.getToken(mAm.mAppOpsService),
                     AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
@@ -3834,8 +3834,7 @@ public final class ActiveServices {
             decActiveForegroundAppLocked(smap, r);
             ServiceState stracker = r.getTracker();
             if (stracker != null) {
-                stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(),
-                        r.lastActivity);
+                stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(), now);
             }
             mAm.mAppOpsService.finishOperation(
                     AppOpsManager.getToken(mAm.mAppOpsService),
@@ -3902,7 +3901,6 @@ public final class ActiveServices {
         }
 
         int memFactor = mAm.mProcessStats.getMemFactorLocked();
-        long now = SystemClock.uptimeMillis();
         if (r.tracker != null) {
             r.tracker.setStarted(false, memFactor, now);
             r.tracker.setBound(false, memFactor, now);

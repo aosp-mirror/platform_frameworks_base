@@ -588,4 +588,7 @@
 
     <!-- Determines whether the shell features all run on another thread. -->
     <bool name="config_enableShellMainThread">false</bool>
+
+    <!-- Determines whether to allow the nav bar handle to be forced to be opaque. -->
+    <bool name="allow_force_nav_bar_handle_opaque">true</bool>
 </resources>

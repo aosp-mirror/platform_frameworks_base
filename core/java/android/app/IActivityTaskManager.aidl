@@ -289,6 +289,13 @@ interface IActivityTaskManager {
     void setSplitScreenResizing(boolean resizing);
     boolean supportsLocalVoiceInteraction();
 
+    /**
+     * Whether to allow non-resizable apps to be shown in multi-window. The app will be letterboxed
+     * if the request orientation is not met, and will be shown in size-compat mode if the container
+     * size has changed.
+     */
+    boolean supportsNonResizableMultiWindow();
+
     // Get device configuration
     ConfigurationInfo getDeviceConfigurationInfo();
 
