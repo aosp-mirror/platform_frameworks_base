@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.startingsurface;
+package com.android.wm.shell.transition;
+
+import android.window.IRemoteTransition;
+import android.window.TransitionFilter;
 
 /**
- * Interface to engage starting window feature.
+ * Interface that is exposed to remote callers to manipulate the transitions feature.
  */
-public interface StartingSurface {
+interface IShellTransitions {
 
     /**
-     * Returns a binder that can be passed to an external process to manipulate starting windows.
+     * Registers a remote transition handler.
      */
-    default IStartingWindow createExternalInterface() {
-        return null;
-    }
+    oneway void registerRemote(in TransitionFilter filter,
+            in IRemoteTransition remoteTransition) = 1;
+
+    /**
+     * Unregisters a remote transition handler.
+     */
+    oneway void unregisterRemote(in IRemoteTransition remoteTransition) = 2;
 }

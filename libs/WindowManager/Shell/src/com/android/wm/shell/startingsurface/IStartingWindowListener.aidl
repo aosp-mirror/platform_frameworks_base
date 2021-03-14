@@ -17,14 +17,14 @@
 package com.android.wm.shell.startingsurface;
 
 /**
- * Interface to engage starting window feature.
+ * Listener interface that Launcher attaches to SystemUI to get
+ * callbacks when need a new starting window.
  */
-public interface StartingSurface {
-
+interface IStartingWindowListener {
     /**
-     * Returns a binder that can be passed to an external process to manipulate starting windows.
+     * Notifies when Shell going to create a new starting window.
+     * @param taskId The task Id
+     * @param supportedType The starting window type
      */
-    default IStartingWindow createExternalInterface() {
-        return null;
-    }
+    oneway void onTaskLaunching(int taskId, int supportedType);
 }

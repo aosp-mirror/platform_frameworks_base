@@ -5419,6 +5419,8 @@
          intents}.
          <p>Protection level: normal -->
     <permission android:name="android.permission.USE_FULL_SCREEN_INTENT"
+                android:label="@string/permlab_fullScreenIntent"
+                android:description="@string/permdesc_fullScreenIntent"
                 android:protectionLevel="normal" />
 
     <!-- @SystemApi Allows requesting the framework broadcast the

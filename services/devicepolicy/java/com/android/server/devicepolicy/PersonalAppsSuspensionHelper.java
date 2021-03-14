@@ -18,6 +18,8 @@ package com.android.server.devicepolicy;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 
+import static com.android.server.devicepolicy.DevicePolicyManagerService.LOG_TAG;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -36,6 +38,7 @@ import android.provider.Telephony;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
+import android.util.Log;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
@@ -105,7 +108,9 @@ public final class PersonalAppsSuspensionHelper {
             result.remove(pkg);
         }
 
-        Slog.i(LOG_TAG, "Packages subject to suspension: " + String.join(",", result));
+        if (Log.isLoggable(LOG_TAG, Log.INFO)) {
+            Slog.i(LOG_TAG, "Packages subject to suspension: %s", String.join(",", result));
+        }
         return result.toArray(new String[0]);
     }
 
@@ -118,7 +123,7 @@ public final class PersonalAppsSuspensionHelper {
         for (final ResolveInfo resolveInfo : matchingActivities) {
             if (resolveInfo.activityInfo == null
                     || TextUtils.isEmpty(resolveInfo.activityInfo.packageName)) {
-                Slog.wtf(LOG_TAG, "Could not find package name for launcher app" + resolveInfo);
+                Slog.wtf(LOG_TAG, "Could not find package name for launcher app %s", resolveInfo);
                 continue;
             }
             final String packageName = resolveInfo.activityInfo.packageName;
@@ -129,7 +134,8 @@ public final class PersonalAppsSuspensionHelper {
                     result.add(packageName);
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(LOG_TAG, "Could not find application info for launcher app: " + packageName);
+                Slog.e(LOG_TAG, "Could not find application info for launcher app: %s",
+                        packageName);
             }
         }
         return result;
