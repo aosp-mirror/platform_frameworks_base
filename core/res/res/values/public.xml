@@ -3088,6 +3088,7 @@
     <public name="selectableAsDefault"/>
     <public name="isAccessibilityTool"/>
     <public name="attributionTags"/>
+    <public name="suppressesSpellChecker" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
