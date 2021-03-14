@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,6 +136,10 @@ public final class NavigationBarTransitions extends BarTransitions implements
         mBarBackground.setFrame(frame);
     }
 
+    void setBackgroundOverrideAlpha(float alpha) {
+        mBarBackground.setOverrideAlpha(alpha);
+    }
+
     @Override
     protected boolean isLightsOut(int mode) {
         return super.isLightsOut(mode) || (mAllowAutoDimWallpaperNotVisible && mAutoDim
@@ -229,5 +234,18 @@ public final class NavigationBarTransitions extends BarTransitions implements
      */
     public void removeDarkIntensityListener(DarkIntensityListener listener) {
         mDarkIntensityListeners.remove(listener);
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("NavigationBarTransitions:");
+        pw.println("  mMode: " + getMode());
+        pw.println("  mAlwaysOpaque: " + isAlwaysOpaque());
+        pw.println("  mAllowAutoDimWallpaperNotVisible: " + mAllowAutoDimWallpaperNotVisible);
+        pw.println("  mWallpaperVisible: " + mWallpaperVisible);
+        pw.println("  mLightsOut: " + mLightsOut);
+        pw.println("  mAutoDim: " + mAutoDim);
+        pw.println("  bg overrideAlpha: " + mBarBackground.getOverrideAlpha());
+        pw.println("  bg color: " + mBarBackground.getColor());
+        pw.println("  bg frame: " + mBarBackground.getFrame());
     }
 }
