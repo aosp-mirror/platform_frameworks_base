@@ -532,7 +532,7 @@ final class HistoricalRegistry {
                         System.currentTimeMillis()).increaseAccessDuration(op, uid, packageName,
                         attributionTag, uidState, flags, increment);
                 mDiscreteRegistry.recordDiscreteAccess(uid, packageName, op, attributionTag,
-                        flags, uidState, increment, eventStartTime);
+                        flags, uidState, eventStartTime, increment);
             }
         }
     }

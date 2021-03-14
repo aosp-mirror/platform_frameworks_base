@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -88,40 +89,40 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
         }
     }
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun imeAppWindowIsAlwaysVisible() = testSpec.imeAppWindowIsAlwaysVisible(testApp)
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation)
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
 
-    @Presubmit
+    @Postsubmit
     @Test
     fun imeAppLayerIsAlwaysVisible() = testSpec.imeAppLayerIsAlwaysVisible(testApp)
 

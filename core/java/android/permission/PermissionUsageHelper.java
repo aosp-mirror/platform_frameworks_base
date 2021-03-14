@@ -111,8 +111,7 @@ public class PermissionUsageHelper {
 
     private static boolean shouldShowLocationIndicator() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_LOCATION_INDICATORS_ENABLED, false)
-                || shouldShowPermissionsHub();
+                PROPERTY_LOCATION_INDICATORS_ENABLED, false);
     }
 
     private static long getRecentThreshold(Long now) {
@@ -326,10 +325,10 @@ public class PermissionUsageHelper {
                     }
 
                     if (packageName.equals(SYSTEM_PKG)
-                            || (!isUserSensitive(packageName, user, op)
+                            || (!shouldShowPermissionsHub()
+                            && !isUserSensitive(packageName, user, op)
                             && !isLocationProvider(packageName, user)
-                            && !isAppPredictor(packageName, user))
-                            && !isSpeechRecognizerUsage(op, packageName)) {
+                            && !isSpeechRecognizerUsage(op, packageName))) {
                         continue;
                     }
 
