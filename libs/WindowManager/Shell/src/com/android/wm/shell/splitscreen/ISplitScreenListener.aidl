@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.startingsurface;
+package com.android.wm.shell.splitscreen;
 
 /**
- * Interface to engage starting window feature.
+ * Listener interface that Launcher attaches to SystemUI to get split-screen callbacks.
  */
-public interface StartingSurface {
+oneway interface ISplitScreenListener {
 
     /**
-     * Returns a binder that can be passed to an external process to manipulate starting windows.
+     * Called when the stage position changes.
      */
-    default IStartingWindow createExternalInterface() {
-        return null;
-    }
+    void onStagePositionChanged(int stage, int position);
+
+    /**
+     * Called when a task changes stages.
+     */
+    void onTaskStageChanged(int taskId, int stage, boolean visible);
 }

@@ -179,11 +179,11 @@ class DevicePolicyData {
      */
     static boolean store(DevicePolicyData policyData, JournaledFile file, boolean isFdeDevice) {
         FileOutputStream stream = null;
+        File chooseForWrite = null;
         try {
-            File chooseForWrite = file.chooseForWrite();
+            chooseForWrite = file.chooseForWrite();
             if (VERBOSE_LOG) {
-                Slog.v(TAG, "Storing data for user " + policyData.mUserId + " on "
-                        + chooseForWrite);
+                Slog.v(TAG, "Storing data for user %d on %s ", policyData.mUserId, chooseForWrite);
             }
             stream = new FileOutputStream(chooseForWrite, false);
             TypedXmlSerializer out = Xml.resolveSerializer(stream);
@@ -195,7 +195,7 @@ class DevicePolicyData {
                         policyData.mRestrictionsProvider.flattenToString());
             }
             if (policyData.mUserSetupComplete) {
-                if (VERBOSE_LOG) Slog.v(TAG, "setting " + ATTR_SETUP_COMPLETE + " to true");
+                if (VERBOSE_LOG) Slog.v(TAG, "setting %s to true", ATTR_SETUP_COMPLETE);
                 out.attributeBoolean(null, ATTR_SETUP_COMPLETE, true);
             }
             if (policyData.mPaired) {
@@ -216,8 +216,8 @@ class DevicePolicyData {
 
             if (policyData.mFactoryResetFlags != 0) {
                 if (VERBOSE_LOG) {
-                    Slog.v(TAG, "Storing factory reset flags for user " + policyData.mUserId + ": "
-                            + factoryResetFlagsToString(policyData.mFactoryResetFlags));
+                    Slog.v(TAG, "Storing factory reset flags for user %d: %s", policyData.mUserId,
+                            factoryResetFlagsToString(policyData.mFactoryResetFlags));
                 }
                 out.attributeInt(null, ATTR_FACTORY_RESET_FLAGS, policyData.mFactoryResetFlags);
             }
@@ -382,7 +382,7 @@ class DevicePolicyData {
             file.commit();
             return true;
         } catch (XmlPullParserException | IOException e) {
-            Slog.w(TAG, "failed writing file", e);
+            Slog.w(TAG, e, "failed writing file %s", chooseForWrite);
             try {
                 if (stream != null) {
                     stream.close();
@@ -404,10 +404,8 @@ class DevicePolicyData {
             ComponentName ownerComponent) {
         FileInputStream stream = null;
         File file = journaledFile.chooseForRead();
-        if (VERBOSE_LOG) {
-            Slog.v(TAG, "Loading data for user " + policy.mUserId + " from " + file);
-        }
-
+        if (VERBOSE_LOG) Slog.v(TAG, "Loading data for user %d from %s", policy.mUserId, file);
+        boolean needsRewrite = false;
         try {
             stream = new FileInputStream(file);
             TypedXmlPullParser parser = Xml.resolvePullParser(stream);
@@ -454,8 +452,8 @@ class DevicePolicyData {
 
             policy.mFactoryResetFlags = parser.getAttributeInt(null, ATTR_FACTORY_RESET_FLAGS, 0);
             if (VERBOSE_LOG) {
-                Slog.v(TAG, "Restored factory reset flags for user " + policy.mUserId + ": "
-                        + factoryResetFlagsToString(policy.mFactoryResetFlags));
+                Slog.v(TAG, "Restored factory reset flags for user %d: %s", policy.mUserId,
+                        factoryResetFlagsToString(policy.mFactoryResetFlags));
             }
             policy.mFactoryResetReason = parser.getAttributeValue(null, ATTR_FACTORY_RESET_REASON);
 
@@ -488,7 +486,7 @@ class DevicePolicyData {
                             policy.mAdminMap.put(ap.info.getComponent(), ap);
                         }
                     } catch (RuntimeException e) {
-                        Slog.w(TAG, "Failed loading admin " + name, e);
+                        Slog.w(TAG, e, "Failed loading admin %s", name);
                     }
                 } else if ("delegation".equals(tag)) {
                     // Parse delegation info.
@@ -560,7 +558,7 @@ class DevicePolicyData {
                     policy.mAppsSuspended =
                             parser.getAttributeBoolean(null, ATTR_VALUE, false);
                 } else {
-                    Slog.w(TAG, "Unknown tag: " + tag);
+                    Slog.w(TAG, "Unknown tag: %s", tag);
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
@@ -568,7 +566,7 @@ class DevicePolicyData {
             // Don't be noisy, this is normal if we haven't defined any policies.
         } catch (NullPointerException | NumberFormatException | XmlPullParserException | IOException
                 | IndexOutOfBoundsException e) {
-            Slog.w(TAG, "failed parsing " + file, e);
+            Slog.w(TAG, e, "failed parsing %s", file);
         }
         try {
             if (stream != null) {
@@ -592,8 +590,8 @@ class DevicePolicyData {
                 }
             }
             if (!haveOwner) {
-                Slog.w(TAG, "Previous password owner " + mPasswordOwner
-                        + " no longer active; disabling");
+                Slog.w(TAG, "Previous password owner %s no longer active; disabling",
+                        mPasswordOwner);
                 mPasswordOwner = -1;
             }
         }

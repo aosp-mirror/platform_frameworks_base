@@ -148,7 +148,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun testIgnoredSlotsOnAttached_noIndicators() {
-        setPrivacyController(false, false, false)
+        setPrivacyController(micCamera = false, location = false)
 
         controller.init()
 
@@ -160,7 +160,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun testIgnoredSlotsOnAttached_onlyMicCamera() {
-        setPrivacyController(false, true, false)
+        setPrivacyController(micCamera = true, location = false)
 
         controller.init()
 
@@ -177,7 +177,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun testIgnoredSlotsOnAttached_onlyLocation() {
-        setPrivacyController(false, false, true)
+        setPrivacyController(micCamera = false, location = true)
 
         controller.init()
 
@@ -192,26 +192,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun testIgnoredSlotsOnAttached_locationMicCamera() {
-        setPrivacyController(false, true, true)
-
-        controller.init()
-
-        val captor = argumentCaptor<List<String>>()
-        verify(iconContainer).setIgnoredSlots(capture(captor))
-
-        val cameraString = mContext.resources.getString(
-                com.android.internal.R.string.status_bar_camera)
-        val micString = mContext.resources.getString(
-                com.android.internal.R.string.status_bar_microphone)
-        val locationString = mContext.resources.getString(
-                com.android.internal.R.string.status_bar_location)
-
-        assertThat(captor.value).containsExactly(cameraString, micString, locationString)
-    }
-
-    @Test
-    fun testIgnoredSlotsOnAttached_all() {
-        setPrivacyController(true, false, false)
+        setPrivacyController(micCamera = true, location = true)
 
         controller.init()
 
@@ -248,8 +229,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         `when`(view.findViewById<Clock>(R.id.clock)).thenReturn(clock)
     }
 
-    private fun setPrivacyController(all: Boolean, micCamera: Boolean, location: Boolean) {
-        `when`(privacyItemController.allIndicatorsAvailable).thenReturn(all)
+    private fun setPrivacyController(micCamera: Boolean, location: Boolean) {
         `when`(privacyItemController.micCameraAvailable).thenReturn(micCamera)
         `when`(privacyItemController.locationAvailable).thenReturn(location)
     }
