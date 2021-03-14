@@ -1158,6 +1158,8 @@ public class NavigationBarView extends FrameLayout implements
             int frameHeight = getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.navigation_bar_frame_height);
             mBarTransitions.setBackgroundFrame(new Rect(0, frameHeight - height, w, h));
+        } else {
+            mBarTransitions.setBackgroundFrame(null);
         }
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -1331,6 +1333,7 @@ public class NavigationBarView extends FrameLayout implements
         if (mNavigationInflaterView != null) {
             mNavigationInflaterView.dump(pw);
         }
+        mBarTransitions.dump(pw);
         mContextualButtonGroup.dump(pw);
         mRecentsOnboarding.dump(pw);
         mRegionSamplingHelper.dump(pw);
