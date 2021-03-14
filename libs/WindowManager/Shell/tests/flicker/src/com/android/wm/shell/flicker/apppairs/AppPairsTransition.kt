@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.apppairs
 
 import android.app.Instrumentation
+import android.content.Context
 import android.platform.test.annotations.Presubmit
 import android.system.helpers.ActivityHelper
 import android.util.Log
@@ -46,6 +47,7 @@ import java.io.IOException
 
 abstract class AppPairsTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    protected val context: Context = instrumentation.context
     protected val isRotated = testSpec.config.startRotation.isRotated()
     protected val activityHelper = ActivityHelper.getInstance()
     protected val appPairsHelper = AppPairsHelper(instrumentation,

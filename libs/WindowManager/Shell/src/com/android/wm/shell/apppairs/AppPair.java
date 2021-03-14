@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.window.WindowContainerToken;
@@ -88,7 +89,8 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
         ProtoLog.v(WM_SHELL_TASK_ORG, "pair task1=%d task2=%d in AppPair=%s",
                 task1.taskId, task2.taskId, this);
 
-        if (!task1.isResizeable || !task2.isResizeable) {
+        if ((!task1.isResizeable || !task2.isResizeable)
+                && !ActivityTaskManager.supportsNonResizableMultiWindow()) {
             ProtoLog.e(WM_SHELL_TASK_ORG,
                     "Can't pair unresizeable tasks task1.isResizeable=%b task1.isResizeable=%b",
                     task1.isResizeable, task2.isResizeable);

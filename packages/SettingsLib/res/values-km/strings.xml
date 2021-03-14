@@ -556,7 +556,7 @@
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"កំពុងបង្កើត​អ្នកប្រើប្រាស់ថ្មី…"</string>
     <string name="user_nickname" msgid="262624187455825083">"ឈ្មោះ​ហៅក្រៅ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"បញ្ចូល​ភ្ញៀវ"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"លុប​​​ភ្ញៀវ"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"ដកភ្ញៀវចេញ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ភ្ញៀវ"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ថតរូប"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ជ្រើសរើស​រូបភាព"</string>
