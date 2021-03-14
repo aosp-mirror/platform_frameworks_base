@@ -204,6 +204,8 @@ public final class InputBindResult implements Parcelable {
     @Nullable
     private final float[] mActivityViewToScreenMatrixValues;
 
+    public final boolean isInputMethodSuppressingSpellChecker;
+
     /**
      * @return {@link Matrix} that corresponds to {@link #mActivityViewToScreenMatrixValues}.
      *         {@code null} if {@link #mActivityViewToScreenMatrixValues} is {@code null}.
@@ -220,7 +222,8 @@ public final class InputBindResult implements Parcelable {
 
     public InputBindResult(@ResultCode int _result,
             IInputMethodSession _method, InputChannel _channel, String _id, int _sequence,
-            @Nullable Matrix activityViewToScreenMatrix) {
+            @Nullable Matrix activityViewToScreenMatrix,
+            boolean isInputMethodSuppressingSpellChecker) {
         result = _result;
         method = _method;
         channel = _channel;
@@ -232,6 +235,7 @@ public final class InputBindResult implements Parcelable {
             mActivityViewToScreenMatrixValues = new float[9];
             activityViewToScreenMatrix.getValues(mActivityViewToScreenMatrixValues);
         }
+        this.isInputMethodSuppressingSpellChecker = isInputMethodSuppressingSpellChecker;
     }
 
     InputBindResult(Parcel source) {
@@ -245,6 +249,7 @@ public final class InputBindResult implements Parcelable {
         id = source.readString();
         sequence = source.readInt();
         mActivityViewToScreenMatrixValues = source.createFloatArray();
+        isInputMethodSuppressingSpellChecker = source.readBoolean();
     }
 
     @Override
@@ -252,6 +257,7 @@ public final class InputBindResult implements Parcelable {
         return "InputBindResult{result=" + getResultString() + " method="+ method + " id=" + id
                 + " sequence=" + sequence
                 + " activityViewToScreenMatrix=" + getActivityViewToScreenMatrix()
+                + " isInputMethodSuppressingSpellChecker=" + isInputMethodSuppressingSpellChecker
                 + "}";
     }
 
@@ -274,6 +280,7 @@ public final class InputBindResult implements Parcelable {
         dest.writeString(id);
         dest.writeInt(sequence);
         dest.writeFloatArray(mActivityViewToScreenMatrixValues);
+        dest.writeBoolean(isInputMethodSuppressingSpellChecker);
     }
 
     /**
@@ -340,7 +347,7 @@ public final class InputBindResult implements Parcelable {
     }
 
     private static InputBindResult error(@ResultCode int result) {
-        return new InputBindResult(result, null, null, null, -1, null);
+        return new InputBindResult(result, null, null, null, -1, null, false);
     }
 
     /**

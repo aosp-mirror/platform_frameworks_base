@@ -2381,9 +2381,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             showCurrentInputLocked(mCurFocusedWindow, getAppShowFlags(), null,
                     SoftInputShowHideReason.ATTACH_NEW_INPUT);
         }
+        final InputMethodInfo curInputMethodInfo = mMethodMap.get(mCurId);
+        final boolean suppressesSpellChecker =
+                curInputMethodInfo != null && curInputMethodInfo.suppressesSpellChecker();
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
                 session.session, (session.channel != null ? session.channel.dup() : null),
-                mCurId, mCurSeq, mCurActivityViewToScreenMatrix);
+                mCurId, mCurSeq, mCurActivityViewToScreenMatrix, suppressesSpellChecker);
     }
 
     @Nullable
@@ -2425,7 +2428,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // party code.
             return new InputBindResult(
                     InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
-                    null, null, mCurMethodId, mCurSeq, null);
+                    null, null, mCurMethodId, mCurSeq, null, false);
         }
 
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
@@ -2501,7 +2504,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     requestClientSessionLocked(cs);
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
-                            null, null, mCurId, mCurSeq, null);
+                            null, null, mCurId, mCurSeq, null, false);
                 } else if (SystemClock.uptimeMillis()
                         < (mLastBindTime+TIME_TO_RECONNECT)) {
                     // In this case we have connected to the service, but
@@ -2513,7 +2516,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // to see if we can get back in touch with the service.
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                            null, null, mCurId, mCurSeq, null);
+                            null, null, mCurId, mCurSeq, null, false);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
                             mCurMethodId, SystemClock.uptimeMillis()-mLastBindTime, 0);
@@ -2553,7 +2556,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                    null, null, mCurId, mCurSeq, null);
+                    null, null, mCurId, mCurSeq, null, false);
         }
         mCurIntent = null;
         Slog.w(TAG, "Failure connecting to input method service: " + mCurIntent);
@@ -3509,7 +3512,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
-                    null, null, null, -1, null);
+                    null, null, null, -1, null, false);
         }
 
         mCurFocusedWindow = windowToken;
