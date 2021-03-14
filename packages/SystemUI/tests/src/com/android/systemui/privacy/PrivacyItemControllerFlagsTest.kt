@@ -37,7 +37,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -51,8 +50,6 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
         fun <T> eq(value: T): T = Mockito.eq(value) ?: value
         fun <T> any(): T = Mockito.any<T>()
 
-        private const val ALL_INDICATORS =
-                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED
         private const val MIC_CAMERA = SystemUiDeviceConfigFlags.PROPERTY_MIC_CAMERA_ENABLED
         private const val LOCATION = SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_ENABLED
     }
@@ -96,11 +93,6 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
-    fun testNotListeningAllByDefault() {
-        assertFalse(privacyItemController.allIndicatorsAvailable)
-    }
-
-    @Test
     fun testMicCameraListeningByDefault() {
         assertTrue(privacyItemController.micCameraAvailable)
     }
@@ -111,10 +103,8 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
         executor.runAllReady()
 
         verify(callback).onFlagMicCameraChanged(false)
-        verify(callback, never()).onFlagAllChanged(anyBoolean())
 
         assertFalse(privacyItemController.micCameraAvailable)
-        assertFalse(privacyItemController.allIndicatorsAvailable)
     }
 
     @Test
@@ -127,26 +117,15 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAllChanged() {
-        changeAll(true)
-        executor.runAllReady()
-
-        verify(callback).onFlagAllChanged(true)
-        verify(callback, never()).onFlagMicCameraChanged(anyBoolean())
-
-        assertTrue(privacyItemController.allIndicatorsAvailable)
-    }
-
-    @Test
     fun testBothChanged() {
         changeAll(true)
         changeMicCamera(false)
         executor.runAllReady()
 
-        verify(callback, atLeastOnce()).onFlagAllChanged(true)
+        verify(callback, atLeastOnce()).onFlagLocationChanged(true)
         verify(callback, atLeastOnce()).onFlagMicCameraChanged(false)
 
-        assertTrue(privacyItemController.allIndicatorsAvailable)
+        assertTrue(privacyItemController.locationAvailable)
         assertFalse(privacyItemController.micCameraAvailable)
     }
 
@@ -186,28 +165,6 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSomeListening_stillListening() {
-        // Mic and camera are true by default
-        changeAll(true)
-        executor.runAllReady()
-        changeAll(false)
-        executor.runAllReady()
-
-        verify(appOpsController, never()).removeCallback(any(), any())
-    }
-
-    @Test
-    fun testAllDeleted_micCameraFalse_stopListening() {
-        changeMicCamera(false)
-        changeAll(true)
-        executor.runAllReady()
-        changeAll(null)
-        executor.runAllReady()
-
-        verify(appOpsController).removeCallback(any(), any())
-    }
-
-    @Test
     fun testMicDeleted_stillListening() {
         changeMicCamera(true)
         executor.runAllReady()
@@ -219,7 +176,10 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
 
     private fun changeMicCamera(value: Boolean?) = changeProperty(MIC_CAMERA, value)
     private fun changeLocation(value: Boolean?) = changeProperty(LOCATION, value)
-    private fun changeAll(value: Boolean?) = changeProperty(ALL_INDICATORS, value)
+    private fun changeAll(value: Boolean?) {
+        changeMicCamera(value)
+        changeLocation(value)
+    }
 
     private fun changeProperty(name: String, value: Boolean?) {
         deviceConfigProxy.setProperty(
