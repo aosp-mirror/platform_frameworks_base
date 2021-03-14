@@ -1262,6 +1262,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     final PendingTempWhitelists mPendingTempWhitelist = new PendingTempWhitelists(this);
 
     /**
+     * List of uids that are allowed to have while-in-use permission when FGS is started from
+     * background.
+     */
+    private final FgsWhileInUseTempAllowList mFgsWhileInUseTempAllowList =
+            new FgsWhileInUseTempAllowList();
+
+    /**
      * Information about and control over application operations
      */
     final AppOpsService mAppOpsService;
@@ -19769,6 +19776,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean isPendingTopUid(int uid) {
             return mPendingStartActivityUids.isPendingTopUid(uid);
+        }
+
+        @Override
+        public void tempAllowWhileInUsePermissionInFgs(int uid, long duration) {
+            mFgsWhileInUseTempAllowList.add(uid, duration);
+        }
+
+        @Override
+        public boolean isTempAllowlistedForFgsWhileInUse(int uid) {
+            return mFgsWhileInUseTempAllowList.isAllowed(uid);
+        }
+
+        @Override
+        public boolean canAllowWhileInUsePermissionInFgs(int pid, int uid,
+                @NonNull String packageName) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.canAllowWhileInUsePermissionInFgsLocked(pid, uid, packageName);
+            }
         }
     }
 
