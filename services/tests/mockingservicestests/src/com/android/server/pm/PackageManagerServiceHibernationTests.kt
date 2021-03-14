@@ -17,8 +17,13 @@
 package com.android.server.pm
 
 import android.os.Build
+import android.provider.DeviceConfig
+import android.provider.DeviceConfig.NAMESPACE_APP_HIBERNATION
 import com.android.server.apphibernation.AppHibernationManagerInternal
+import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.testutils.whenever
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -33,7 +38,10 @@ class PackageManagerServiceHibernationTests {
 
     companion object {
         val TEST_PACKAGE_NAME = "test.package"
+        val TEST_PACKAGE_2_NAME = "test.package2"
         val TEST_USER_ID = 0
+
+        val KEY_APP_HIBERNATION_ENABLED = "app_hibernation_enabled"
     }
 
     @Rule
@@ -47,6 +55,8 @@ class PackageManagerServiceHibernationTests {
     @Throws(Exception::class)
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        wheneverStatic { DeviceConfig.getBoolean(
+            NAMESPACE_APP_HIBERNATION, KEY_APP_HIBERNATION_ENABLED, false) }.thenReturn(true)
         rule.system().stageNominalSystemState()
         whenever(rule.mocks().injector.getLocalService(AppHibernationManagerInternal::class.java))
             .thenReturn(appHibernationManager)
@@ -66,6 +76,28 @@ class PackageManagerServiceHibernationTests {
         pm.setPackageStoppedState(TEST_PACKAGE_NAME, false, TEST_USER_ID)
         verify(appHibernationManager).setHibernatingForUser(TEST_PACKAGE_NAME, TEST_USER_ID, false)
         verify(appHibernationManager).setHibernatingGlobally(TEST_PACKAGE_NAME, false)
+    }
+
+    @Test
+    fun testGetOptimizablePackages_ExcludesGloballyHibernatingPackages() {
+        rule.system().stageScanExistingPackage(
+            TEST_PACKAGE_NAME,
+            1L,
+            rule.system().dataAppDirectory,
+            withPackage = { it.apply { isHasCode = true } })
+        rule.system().stageScanExistingPackage(
+            TEST_PACKAGE_2_NAME,
+            1L,
+            rule.system().dataAppDirectory,
+            withPackage = { it.apply { isHasCode = true } })
+        val pm = createPackageManagerService()
+        rule.system().validateFinalState()
+        whenever(appHibernationManager.isHibernatingGlobally(TEST_PACKAGE_2_NAME)).thenReturn(true)
+
+        val optimizablePkgs = pm.optimizablePackages
+
+        assertTrue(optimizablePkgs.contains(TEST_PACKAGE_NAME))
+        assertFalse(optimizablePkgs.contains(TEST_PACKAGE_2_NAME))
     }
 
     private fun createPackageManagerService(): PackageManagerService {

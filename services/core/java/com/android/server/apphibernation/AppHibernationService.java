@@ -38,6 +38,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -91,8 +92,10 @@ public final class AppHibernationService extends SystemService {
     private final Object mLock = new Object();
     private final Context mContext;
     private final IPackageManager mIPackageManager;
+    private final PackageManagerInternal mPackageManagerInternal;
     private final IActivityManager mIActivityManager;
     private final UserManager mUserManager;
+
     @GuardedBy("mLock")
     private final SparseArray<Map<String, UserLevelState>> mUserStates = new SparseArray<>();
     private final SparseArray<HibernationStateDiskStore<UserLevelState>> mUserDiskStores =
@@ -123,6 +126,7 @@ public final class AppHibernationService extends SystemService {
         super(injector.getContext());
         mContext = injector.getContext();
         mIPackageManager = injector.getPackageManager();
+        mPackageManagerInternal = injector.getPackageManagerInternal();
         mIActivityManager = injector.getActivityManager();
         mUserManager = injector.getUserManager();
         mGlobalLevelHibernationDiskStore = injector.getGlobalLevelDiskStore();
@@ -210,8 +214,9 @@ public final class AppHibernationService extends SystemService {
         synchronized (mLock) {
             GlobalLevelState state = mGlobalHibernationStates.get(packageName);
             if (state == null) {
-                throw new IllegalArgumentException(
-                        String.format("Package %s is not installed", packageName));
+                // This API can be legitimately called before installation finishes as part of
+                // dex optimization, so we just return false here.
+                return false;
             }
             return state.hibernated;
         }
@@ -364,7 +369,7 @@ public final class AppHibernationService extends SystemService {
     @GuardedBy("mLock")
     private void hibernatePackageGlobally(@NonNull String packageName, GlobalLevelState state) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackageGlobally");
-        // TODO(175830194): Delete vdex/odex when DexManager API is built out
+        mPackageManagerInternal.deleteOatArtifactsOfPackage(packageName);
         state.hibernated = true;
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
@@ -707,6 +712,8 @@ public final class AppHibernationService extends SystemService {
 
         IPackageManager getPackageManager();
 
+        PackageManagerInternal getPackageManagerInternal();
+
         IActivityManager getActivityManager();
 
         UserManager getUserManager();
@@ -736,6 +743,11 @@ public final class AppHibernationService extends SystemService {
         @Override
         public IPackageManager getPackageManager() {
             return IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+        }
+
+        @Override
+        public PackageManagerInternal getPackageManagerInternal() {
+            return LocalServices.getService(PackageManagerInternal.class);
         }
 
         @Override
