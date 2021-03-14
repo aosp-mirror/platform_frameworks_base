@@ -286,11 +286,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
-        public void setBackButtonAlpha(float alpha, boolean animate) {
-            setNavBarButtonAlpha(alpha, animate);
-        }
-
-        @Override
         public void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {
             if (!verifyCaller("onAssistantProgress")) {
                 return;

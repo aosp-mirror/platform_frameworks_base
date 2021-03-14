@@ -394,6 +394,20 @@ public class ActivityTaskManager {
     }
 
     /**
+     * Whether to allow non-resizable apps to be shown in multi-window. The app will be letterboxed
+     * if the request orientation is not met, and will be shown in size-compat mode if the container
+     * size has changed.
+     * @hide
+     */
+    public static boolean supportsNonResizableMultiWindow() {
+        try {
+            return ActivityTaskManager.getService().supportsNonResizableMultiWindow();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @return whether the UI mode of the given config supports error dialogs (ANR, crash, etc).
      * @hide
      */
