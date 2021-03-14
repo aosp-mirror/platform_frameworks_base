@@ -31,6 +31,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -39,6 +41,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+
+import java.io.FileDescriptor;
 
 /**
  * Service to manage game related features.
@@ -70,6 +74,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
     GameManagerService(Context context, Looper looper) {
         mContext = context;
         mHandler = new SettingsHandler(looper);
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver result) {
+        new GameManagerShellCommand().exec(this, in, out, err, args, callback, result);
     }
 
     class SettingsHandler extends Handler {
