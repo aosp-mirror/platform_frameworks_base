@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.transition;
+package com.android.wm.shell.common;
 
-import android.annotation.NonNull;
-import android.window.IRemoteTransition;
-import android.window.TransitionFilter;
-
-import com.android.wm.shell.common.annotations.ExternalThread;
+import android.content.Context;
 
 /**
- * Interface to manage remote transitions.
+ * An interface for controllers that can receive remote calls.
  */
-@ExternalThread
-public interface RemoteTransitions {
+public interface RemoteCallable<T> {
     /**
-     * Registers a remote transition.
+     * Returns a context used for permission checking.
      */
-    void registerRemote(@NonNull TransitionFilter filter,
-            @NonNull IRemoteTransition remoteTransition);
+    Context getContext();
 
     /**
-     * Unregisters a remote transition.
+     * Returns the executor to post the handler callback to.
      */
-    void unregisterRemote(@NonNull IRemoteTransition remoteTransition);
+    ShellExecutor getRemoteCallExecutor();
 }

@@ -214,9 +214,7 @@ class PrivacyDialogController(
 
     private fun filterType(type: PrivacyType?): PrivacyType? {
         return type?.let {
-            if (privacyItemController.allIndicatorsAvailable) {
-                it
-            } else if ((it == PrivacyType.TYPE_CAMERA || it == PrivacyType.TYPE_MICROPHONE) &&
+            if ((it == PrivacyType.TYPE_CAMERA || it == PrivacyType.TYPE_MICROPHONE) &&
                     privacyItemController.micCameraAvailable) {
                 it
             } else if (it == PrivacyType.TYPE_LOCATION && privacyItemController.locationAvailable) {

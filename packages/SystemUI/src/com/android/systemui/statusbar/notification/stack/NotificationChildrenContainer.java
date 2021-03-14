@@ -337,6 +337,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         } else {
             header.reapply(getContext(), mNotificationHeader);
         }
+        mNotificationHeaderWrapper.setExpanded(mChildrenExpanded);
         mNotificationHeaderWrapper.onContentUpdated(mContainingNotification);
         if (mNotificationHeaderWrapper instanceof NotificationHeaderViewWrapper) {
             NotificationHeaderViewWrapper headerWrapper =
