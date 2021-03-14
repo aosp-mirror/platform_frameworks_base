@@ -258,6 +258,9 @@ LIBANDROID {
     ASurfaceTransaction_setHdrMetadata_cta861_3; # introduced=29
     ASurfaceTransaction_setHdrMetadata_smpte2086; # introduced=29
     ASurfaceTransaction_setOnComplete; # introduced=29
+    ASurfaceTransaction_setPosition; # introduced=31
+    ASurfaceTransaction_setSourceRect; # introduced=31
+    ASurfaceTransaction_setTransform; # introduced=31
     ASurfaceTransaction_setVisibility; # introduced=29
     ASurfaceTransaction_setZOrder; # introduced=29
     ASystemFontIterator_open; # introduced=29

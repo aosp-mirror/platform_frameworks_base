@@ -446,6 +446,44 @@ void ASurfaceTransaction_setGeometry(ASurfaceTransaction* aSurfaceTransaction,
     transaction->setTransformToDisplayInverse(surfaceControl, transformToInverseDisplay);
 }
 
+void ASurfaceTransaction_setSourceRect(ASurfaceTransaction* aSurfaceTransaction,
+                                       ASurfaceControl* aSurfaceControl, const ARect& source) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+    CHECK_VALID_RECT(source);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->setCrop(surfaceControl, static_cast<const Rect&>(source));
+}
+
+void ASurfaceTransaction_setPosition(ASurfaceTransaction* aSurfaceTransaction,
+                                     ASurfaceControl* aSurfaceControl, const ARect& destination) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+    CHECK_VALID_RECT(destination);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->setFrame(surfaceControl, static_cast<const Rect&>(destination));
+}
+
+void ASurfaceTransaction_setTransform(ASurfaceTransaction* aSurfaceTransaction,
+                                      ASurfaceControl* aSurfaceControl, int32_t transform) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->setTransform(surfaceControl, transform);
+    bool transformToInverseDisplay = (NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY & transform) ==
+            NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY;
+    transaction->setTransformToDisplayInverse(surfaceControl, transformToInverseDisplay);
+}
+
 void ASurfaceTransaction_setBufferTransparency(ASurfaceTransaction* aSurfaceTransaction,
                                                ASurfaceControl* aSurfaceControl,
                                                int8_t transparency) {
