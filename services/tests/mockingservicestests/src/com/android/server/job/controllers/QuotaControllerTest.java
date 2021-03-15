@@ -1880,6 +1880,144 @@ public class QuotaControllerTest {
     }
 
     @Test
+    public void testIsWithinEJQuotaLocked_NeverApp() {
+        JobStatus js = createExpeditedJobStatus("testIsWithinEJQuotaLocked_NeverApp", 1);
+        setStandbyBucket(NEVER_INDEX, js);
+        synchronized (mQuotaController.mLock) {
+            assertFalse(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+    }
+
+    @Test
+    public void testIsWithinEJQuotaLocked_Charging() {
+        setCharging();
+        JobStatus js = createExpeditedJobStatus("testIsWithinEJQuotaLocked_Charging", 1);
+        synchronized (mQuotaController.mLock) {
+            assertTrue(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+    }
+
+    @Test
+    public void testIsWithinEJQuotaLocked_UnderDuration() {
+        setDischarging();
+        JobStatus js = createExpeditedJobStatus("testIsWithinEJQuotaLocked_UnderDuration", 1);
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), true);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (5 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), true);
+        synchronized (mQuotaController.mLock) {
+            assertTrue(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+    }
+
+    @Test
+    public void testIsWithinEJQuotaLocked_OverDuration() {
+        setDischarging();
+        JobStatus js = createExpeditedJobStatus("testIsWithinEJQuotaLocked_OverDuration", 1);
+        setStandbyBucket(FREQUENT_INDEX, js);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_FREQUENT_MS, 10 * MINUTE_IN_MILLIS);
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), true);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (30 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), true);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (5 * MINUTE_IN_MILLIS), 4 * MINUTE_IN_MILLIS, 5), true);
+        synchronized (mQuotaController.mLock) {
+            assertFalse(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+    }
+
+    @Test
+    public void testIsWithinEJQuotaLocked_TimingSession() {
+        setDischarging();
+        setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_ACTIVE_MS, 20 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_WORKING_MS, 15 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_FREQUENT_MS, 13 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RARE_MS, 10 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RESTRICTED_MS, 8 * MINUTE_IN_MILLIS);
+
+        JobStatus js = createExpeditedJobStatus("testIsWithinEJQuotaLocked_TimingSession", 1);
+        for (int i = 0; i < 25; ++i) {
+            mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                    createTimingSession(now - ((60 - i) * MINUTE_IN_MILLIS), MINUTE_IN_MILLIS,
+                            2), true);
+
+            synchronized (mQuotaController.mLock) {
+                setStandbyBucket(ACTIVE_INDEX, js);
+                assertEquals("Active has incorrect quota status with " + (i + 1) + " sessions",
+                        i < 19, mQuotaController.isWithinEJQuotaLocked(js));
+
+                setStandbyBucket(WORKING_INDEX, js);
+                assertEquals("Working has incorrect quota status with " + (i + 1) + " sessions",
+                        i < 14, mQuotaController.isWithinEJQuotaLocked(js));
+
+                setStandbyBucket(FREQUENT_INDEX, js);
+                assertEquals("Frequent has incorrect quota status with " + (i + 1) + " sessions",
+                        i < 12, mQuotaController.isWithinEJQuotaLocked(js));
+
+                setStandbyBucket(RARE_INDEX, js);
+                assertEquals("Rare has incorrect quota status with " + (i + 1) + " sessions",
+                        i < 9, mQuotaController.isWithinEJQuotaLocked(js));
+
+                setStandbyBucket(RESTRICTED_INDEX, js);
+                assertEquals("Restricted has incorrect quota status with " + (i + 1) + " sessions",
+                        i < 7, mQuotaController.isWithinEJQuotaLocked(js));
+            }
+        }
+    }
+
+    /**
+     * Tests that Timers properly track sessions when an app is added and removed from the temp
+     * allowlist.
+     */
+    @Test
+    public void testIsWithinEJQuotaLocked_TempAllowlisting() {
+        setDischarging();
+        JobStatus js = createExpeditedJobStatus("testIsWithinEJQuotaLocked_TempAllowlisting", 1);
+        setStandbyBucket(FREQUENT_INDEX, js);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_FREQUENT_MS, 10 * MINUTE_IN_MILLIS);
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), true);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (30 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5), true);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (5 * MINUTE_IN_MILLIS), 4 * MINUTE_IN_MILLIS, 5), true);
+        synchronized (mQuotaController.mLock) {
+            assertFalse(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+
+        setProcessState(ActivityManager.PROCESS_STATE_RECEIVER);
+        final long gracePeriodMs = 15 * SECOND_IN_MILLIS;
+        setDeviceConfigLong(QcConstants.KEY_EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS, gracePeriodMs);
+        Handler handler = mQuotaController.getHandler();
+        spyOn(handler);
+
+        // Apps on the temp allowlist should be able to schedule & start EJs, even if they're out
+        // of quota (as long as they are in the temp allowlist grace period).
+        mTempAllowlistListener.onAppAdded(mSourceUid);
+        synchronized (mQuotaController.mLock) {
+            assertTrue(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        mTempAllowlistListener.onAppRemoved(mSourceUid);
+        advanceElapsedClock(10 * SECOND_IN_MILLIS);
+        // Still in grace period
+        synchronized (mQuotaController.mLock) {
+            assertTrue(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+        advanceElapsedClock(6 * SECOND_IN_MILLIS);
+        // Out of grace period.
+        synchronized (mQuotaController.mLock) {
+            assertFalse(mQuotaController.isWithinEJQuotaLocked(js));
+        }
+    }
+
+    @Test
     public void testMaybeScheduleCleanupAlarmLocked() {
         // No sessions saved yet.
         synchronized (mQuotaController.mLock) {
@@ -3877,6 +4015,55 @@ public class QuotaControllerTest {
                     i == NEVER_INDEX ? 0 : (limits[i] - 75 * SECOND_IN_MILLIS),
                     mQuotaController.getRemainingEJExecutionTimeLocked(
                             SOURCE_USER_ID, SOURCE_PACKAGE));
+        }
+    }
+
+    @Test
+    public void testGetRemainingEJExecutionTimeLocked_IncrementalTimingSessions() {
+        setDischarging();
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_ACTIVE_MS, 20 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_WORKING_MS, 15 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_FREQUENT_MS, 13 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RARE_MS, 10 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RESTRICTED_MS, 5 * MINUTE_IN_MILLIS);
+
+        for (int i = 1; i <= 25; ++i) {
+            mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                    createTimingSession(now - ((60 - i) * MINUTE_IN_MILLIS), MINUTE_IN_MILLIS,
+                            2), true);
+
+            synchronized (mQuotaController.mLock) {
+                setStandbyBucket(ACTIVE_INDEX);
+                assertEquals("Active has incorrect remaining EJ time with " + i + " sessions",
+                        (20 - i) * MINUTE_IN_MILLIS,
+                        mQuotaController.getRemainingEJExecutionTimeLocked(
+                                SOURCE_USER_ID, SOURCE_PACKAGE));
+
+                setStandbyBucket(WORKING_INDEX);
+                assertEquals("Working has incorrect remaining EJ time with " + i + " sessions",
+                        (15 - i) * MINUTE_IN_MILLIS,
+                        mQuotaController.getRemainingEJExecutionTimeLocked(
+                                SOURCE_USER_ID, SOURCE_PACKAGE));
+
+                setStandbyBucket(FREQUENT_INDEX);
+                assertEquals("Frequent has incorrect remaining EJ time with " + i + " sessions",
+                        (13 - i) * MINUTE_IN_MILLIS,
+                        mQuotaController.getRemainingEJExecutionTimeLocked(
+                                SOURCE_USER_ID, SOURCE_PACKAGE));
+
+                setStandbyBucket(RARE_INDEX);
+                assertEquals("Rare has incorrect remaining EJ time with " + i + " sessions",
+                        (10 - i) * MINUTE_IN_MILLIS,
+                        mQuotaController.getRemainingEJExecutionTimeLocked(
+                                SOURCE_USER_ID, SOURCE_PACKAGE));
+
+                setStandbyBucket(RESTRICTED_INDEX);
+                assertEquals("Restricted has incorrect remaining EJ time with " + i + " sessions",
+                        (5 - i) * MINUTE_IN_MILLIS,
+                        mQuotaController.getRemainingEJExecutionTimeLocked(
+                                SOURCE_USER_ID, SOURCE_PACKAGE));
+            }
         }
     }
 
