@@ -113,7 +113,7 @@ public final class IpPrefix implements Parcelable {
         // first statement in constructor". We could factor out setting the member variables to an
         // init() method, but if we did, then we'd have to make the members non-final, or "error:
         // cannot assign a value to final variable address". So we just duplicate the code here.
-        Pair<InetAddress, Integer> ipAndMask = NetworkUtils.parseIpAndMask(prefix);
+        Pair<InetAddress, Integer> ipAndMask = NetworkUtils.legacyParseIpAndMask(prefix);
         this.address = ipAndMask.first.getAddress();
         this.prefixLength = ipAndMask.second;
         checkAndMaskAddressAndPrefixLength();
