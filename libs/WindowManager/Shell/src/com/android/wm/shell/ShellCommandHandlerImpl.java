@@ -47,7 +47,21 @@ public final class ShellCommandHandlerImpl {
     private final ShellExecutor mMainExecutor;
     private final HandlerImpl mImpl = new HandlerImpl();
 
-    public ShellCommandHandlerImpl(
+    public static ShellCommandHandler create(
+            ShellTaskOrganizer shellTaskOrganizer,
+            Optional<LegacySplitScreenController> legacySplitScreenOptional,
+            Optional<SplitScreenController> splitScreenOptional,
+            Optional<Pip> pipOptional,
+            Optional<OneHandedController> oneHandedOptional,
+            Optional<HideDisplayCutoutController> hideDisplayCutout,
+            Optional<AppPairsController> appPairsOptional,
+            ShellExecutor mainExecutor) {
+        return new ShellCommandHandlerImpl(shellTaskOrganizer, legacySplitScreenOptional,
+                splitScreenOptional, pipOptional, oneHandedOptional, hideDisplayCutout,
+                appPairsOptional, mainExecutor).mImpl;
+    }
+
+    private ShellCommandHandlerImpl(
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
@@ -64,10 +78,6 @@ public final class ShellCommandHandlerImpl {
         mHideDisplayCutout = hideDisplayCutout;
         mAppPairsOptional = appPairsOptional;
         mMainExecutor = mainExecutor;
-    }
-
-    public ShellCommandHandler asShellCommandHandler() {
-        return mImpl;
     }
 
     /** Dumps WM Shell internal state. */
