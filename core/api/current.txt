@@ -3027,6 +3027,7 @@ package android.accessibilityservice {
     field public static final int GLOBAL_ACTION_ACCESSIBILITY_BUTTON_CHOOSER = 12; // 0xc
     field public static final int GLOBAL_ACTION_ACCESSIBILITY_SHORTCUT = 13; // 0xd
     field public static final int GLOBAL_ACTION_BACK = 1; // 0x1
+    field public static final int GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE = 15; // 0xf
     field public static final int GLOBAL_ACTION_HOME = 2; // 0x2
     field public static final int GLOBAL_ACTION_KEYCODE_HEADSETHOOK = 10; // 0xa
     field public static final int GLOBAL_ACTION_LOCK_SCREEN = 8; // 0x8
