@@ -100,18 +100,22 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
         // Wake-up on <Set Stream Path> was not mandatory before CEC 2.0.
         // The message is re-sent at the end of the action for devices that don't support 2.0.
         sendSetStreamPath();
-        int targetPowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
-        HdmiDeviceInfo targetDevice = localDevice().mService.getHdmiCecNetwork().getCecDeviceInfo(
-                getTargetAddress());
-        if (targetDevice != null) {
-            targetPowerStatus = targetDevice.getDevicePowerStatus();
-        }
 
-        if (!mIsCec20 || targetPowerStatus == HdmiControlManager.POWER_STATUS_UNKNOWN) {
+        if (!mIsCec20) {
             queryDevicePowerStatus();
-        } else if (targetPowerStatus == HdmiControlManager.POWER_STATUS_ON) {
-            finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-            return true;
+        } else {
+            int targetPowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
+            HdmiDeviceInfo targetDevice = localDevice().mService.getHdmiCecNetwork()
+                    .getCecDeviceInfo(getTargetAddress());
+            if (targetDevice != null) {
+                targetPowerStatus = targetDevice.getDevicePowerStatus();
+            }
+            if (targetPowerStatus == HdmiControlManager.POWER_STATUS_UNKNOWN) {
+                queryDevicePowerStatus();
+            } else if (targetPowerStatus == HdmiControlManager.POWER_STATUS_ON) {
+                finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+                return true;
+            }
         }
         mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
