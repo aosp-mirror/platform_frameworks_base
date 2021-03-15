@@ -6192,16 +6192,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_UNSTARTABLE_REASON = "android.intent.extra.UNSTARTABLE_REASON";
 
-    /**
-     * A boolean extra indicating whether an activity is bubbled. Set on the shortcut or
-     * pending intent provided for the bubble. If the extra is not present or false, then it is not
-     * bubbled.
-     *
-     * @see android.app.Notification.Builder#setBubbleMetadata(Notification.BubbleMetadata)
-     * @see android.app.Notification.BubbleMetadata.Builder#Builder(String)
-     */
-    public static final String EXTRA_IS_BUBBLED = "android.intent.extra.IS_BUBBLED";
-
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Intent flags (see mFlags variable).

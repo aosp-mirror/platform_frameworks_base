@@ -600,6 +600,9 @@ public final class ActivityThread extends ClientTransactionHandler
          */
         FixedRotationAdjustments mPendingFixedRotationAdjustments;
 
+        /** Whether this activiy was launched from a bubble. */
+        boolean mLaunchedFromBubble;
+
         @LifecycleState
         private int mLifecycleState = PRE_ON_CREATE;
 
@@ -619,7 +622,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
                 boolean isForward, ProfilerInfo profilerInfo, ClientTransactionHandler client,
                 IBinder assistToken, FixedRotationAdjustments fixedRotationAdjustments,
-                IBinder shareableActivityToken) {
+                IBinder shareableActivityToken, boolean launchedFromBubble) {
             this.token = token;
             this.assistToken = assistToken;
             this.shareableActivityToken = shareableActivityToken;
@@ -640,6 +643,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     compatInfo);
             mActivityOptions = activityOptions;
             mPendingFixedRotationAdjustments = fixedRotationAdjustments;
+            mLaunchedFromBubble = launchedFromBubble;
             init();
         }
 
@@ -3542,6 +3546,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     activity.mPendingOptions = r.mActivityOptions;
                     r.mActivityOptions = null;
                 }
+                activity.mLaunchedFromBubble = r.mLaunchedFromBubble;
                 activity.mCalled = false;
                 if (r.isPersistable()) {
                     mInstrumentation.callActivityOnCreate(activity, r.state, r.persistentState);

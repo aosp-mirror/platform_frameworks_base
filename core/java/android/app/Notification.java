@@ -10194,13 +10194,8 @@ public class Notification implements Parcelable
              * <p>The shortcut activity will be used when the bubble is expanded. This will display
              * the shortcut activity in a floating window over the existing foreground activity.</p>
              *
-             * <p>When the shortcut is displayed in a bubble, there will be an intent
-             * extra set on the activity, {@link Intent#EXTRA_IS_BUBBLED}
-             * with {@code true}. You may check this in the onCreate of your activity via:
-             *
-             * <pre class="prettyprint">
-             * boolean isBubbled = getIntent().getBooleanExtra(Intent.EXTRA_IS_BUBBLED, false);
-             * </pre>
+             * <p>When the activity is launched from a bubble,
+             * {@link Activity#isLaunchedFromBubble()} will return with {@code true}.
              * </p>
              *
              * <p>If the shortcut has not been published when the bubble notification is sent,
@@ -10231,13 +10226,8 @@ public class Notification implements Parcelable
              * app content in a floating window over the existing foreground activity. The intent
              * should point to a resizable activity. </p>
              *
-             * <p>When the activity is displayed in a bubble, there will be an intent
-             * extra set on the activity, {@link Intent#EXTRA_IS_BUBBLED}
-             * with {@code true}. You may check this in the onCreate of your activity via:
-             *
-             * <pre class="prettyprint">
-             * boolean isBubbled = getIntent().getBooleanExtra(Intent.EXTRA_IS_BUBBLED, false);
-             * </pre>
+             * <p>When the activity is launched from a bubble,
+             * {@link Activity#isLaunchedFromBubble()} will return with {@code true}.
              * </p>
              *
              * @throws NullPointerException if intent is null.

@@ -3958,6 +3958,7 @@ package android.app {
     method public boolean isImmersive();
     method public boolean isInMultiWindowMode();
     method public boolean isInPictureInPictureMode();
+    method public boolean isLaunchedFromBubble();
     method public boolean isLocalVoiceInteractionSupported();
     method public boolean isTaskRoot();
     method public boolean isVoiceInteraction();
@@ -11219,7 +11220,6 @@ package android.content {
     field public static final String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
     field public static final String EXTRA_INSTALLER_PACKAGE_NAME = "android.intent.extra.INSTALLER_PACKAGE_NAME";
     field public static final String EXTRA_INTENT = "android.intent.extra.INTENT";
-    field public static final String EXTRA_IS_BUBBLED = "android.intent.extra.IS_BUBBLED";
     field public static final String EXTRA_KEY_EVENT = "android.intent.extra.KEY_EVENT";
     field public static final String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
     field public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";

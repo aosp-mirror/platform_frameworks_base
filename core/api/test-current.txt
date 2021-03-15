@@ -137,6 +137,7 @@ package android.app {
     method public void setLaunchActivityType(int);
     method public void setLaunchTaskId(int);
     method public void setLaunchWindowingMode(int);
+    method public void setLaunchedFromBubble(boolean);
     method public void setTaskAlwaysOnTop(boolean);
     method public void setTaskOverlay(boolean, boolean);
   }

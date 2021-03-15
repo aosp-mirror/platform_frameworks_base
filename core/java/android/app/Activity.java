@@ -899,6 +899,9 @@ public class Activity extends ContextThemeWrapper
     /** The options for scene transition. */
     ActivityOptions mPendingOptions;
 
+    /** Whether this activity was launched from a bubble. **/
+    boolean mLaunchedFromBubble;
+
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
             mCursor = cursor;
@@ -6803,6 +6806,25 @@ public class Activity extends ContextThemeWrapper
      */
     public SharedPreferences getPreferences(@Context.PreferencesMode int mode) {
         return getSharedPreferences(getLocalClassName(), mode);
+    }
+
+    /**
+     * Indicates whether this activity is launched from a bubble. A bubble is a floating shortcut
+     * on the screen that expands to show an activity.
+     *
+     * If your activity can be used normally or as a bubble, you might use this method to check
+     * if the activity is bubbled to modify any behaviour that might be different between the
+     * normal activity and the bubbled activity. For example, if you normally cancel the
+     * notification associated with the activity when you open the activity, you might not want to
+     * do that when you're bubbled as that would remove the bubble.
+     *
+     * @return {@code true} if the activity is launched from a bubble.
+     *
+     * @see Notification.Builder#setBubbleMetadata(Notification.BubbleMetadata)
+     * @see Notification.BubbleMetadata.Builder#Builder(String)
+     */
+    public boolean isLaunchedFromBubble() {
+        return mLaunchedFromBubble;
     }
 
     private void ensureSearchManager() {

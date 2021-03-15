@@ -323,6 +323,9 @@ public class ActivityOptions {
     /** See {@link #setRemoveWithTaskOrganizer(boolean)}. */
     private static final String KEY_REMOVE_WITH_TASK_ORGANIZER =
             "android.activity.removeWithTaskOrganizer";
+    /** See {@link #setLaunchedFromBubble(boolean)}. */
+    private static final String KEY_LAUNCHED_FROM_BUBBLE =
+            "android.activity.launchTypeBubble";
 
     /**
      * @see #setLaunchCookie
@@ -410,6 +413,7 @@ public class ActivityOptions {
     private boolean mOverrideTaskTransition;
     private int mSplashScreenThemeResId;
     private boolean mRemoveWithTaskOrganizer;
+    private boolean mLaunchedFromBubble;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -1161,6 +1165,7 @@ public class ActivityOptions {
         mOverrideTaskTransition = opts.getBoolean(KEY_OVERRIDE_TASK_TRANSITION);
         mSplashScreenThemeResId = opts.getInt(KEY_SPLASH_SCREEN_THEME);
         mRemoveWithTaskOrganizer = opts.getBoolean(KEY_REMOVE_WITH_TASK_ORGANIZER);
+        mLaunchedFromBubble = opts.getBoolean(KEY_LAUNCHED_FROM_BUBBLE);
     }
 
     /**
@@ -1647,6 +1652,23 @@ public class ActivityOptions {
     }
 
     /**
+     * Sets whether this activity is launched from a bubble.
+     * @hide
+     */
+    @TestApi
+    public void setLaunchedFromBubble(boolean fromBubble) {
+        mLaunchedFromBubble = fromBubble;
+    }
+
+    /**
+     * @return whether the activity was launched from a bubble.
+     * @hide
+     */
+    public boolean getLaunchedFromBubble() {
+        return mLaunchedFromBubble;
+    }
+
+    /**
      * Update the current values in this ActivityOptions from those supplied
      * in <var>otherOptions</var>.  Any values
      * defined in <var>otherOptions</var> replace those in the base options.
@@ -1882,6 +1904,9 @@ public class ActivityOptions {
         }
         if (mRemoveWithTaskOrganizer) {
             b.putBoolean(KEY_REMOVE_WITH_TASK_ORGANIZER, mRemoveWithTaskOrganizer);
+        }
+        if (mLaunchedFromBubble) {
+            b.putBoolean(KEY_LAUNCHED_FROM_BUBBLE, mLaunchedFromBubble);
         }
         return b;
     }
