@@ -180,14 +180,15 @@ package android.app.appsearch {
     method public int getScore();
     method public long getTtlMillis();
     method @NonNull public String getUri();
-    field public static final String DEFAULT_NAMESPACE = "";
+    field @Deprecated public static final String DEFAULT_NAMESPACE = "";
   }
 
   public static class GenericDocument.Builder<BuilderType extends android.app.appsearch.GenericDocument.Builder> {
-    ctor public GenericDocument.Builder(@NonNull String, @NonNull String);
+    ctor @Deprecated public GenericDocument.Builder(@NonNull String, @NonNull String);
+    ctor public GenericDocument.Builder(@NonNull String, @NonNull String, @NonNull String);
     method @NonNull public android.app.appsearch.GenericDocument build();
     method @NonNull public BuilderType setCreationTimestampMillis(long);
-    method @NonNull public BuilderType setNamespace(@NonNull String);
+    method @Deprecated @NonNull public BuilderType setNamespace(@NonNull String);
     method @NonNull public BuilderType setPropertyBoolean(@NonNull String, @NonNull boolean...);
     method @NonNull public BuilderType setPropertyBytes(@NonNull String, @NonNull byte[]...);
     method @NonNull public BuilderType setPropertyDocument(@NonNull String, @NonNull android.app.appsearch.GenericDocument...);
@@ -206,12 +207,13 @@ package android.app.appsearch {
   }
 
   public static final class GetByUriRequest.Builder {
-    ctor public GetByUriRequest.Builder();
+    ctor @Deprecated public GetByUriRequest.Builder();
+    ctor public GetByUriRequest.Builder(@NonNull String);
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addProjection(@NonNull String, @NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUris(@NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUris(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.GetByUriRequest build();
-    method @NonNull public android.app.appsearch.GetByUriRequest.Builder setNamespace(@NonNull String);
+    method @Deprecated @NonNull public android.app.appsearch.GetByUriRequest.Builder setNamespace(@NonNull String);
   }
 
   public class GlobalSearchSession implements java.io.Closeable {
@@ -242,11 +244,12 @@ package android.app.appsearch {
   }
 
   public static final class RemoveByUriRequest.Builder {
-    ctor public RemoveByUriRequest.Builder();
+    ctor @Deprecated public RemoveByUriRequest.Builder();
+    ctor public RemoveByUriRequest.Builder(@NonNull String);
     method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUris(@NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUris(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.RemoveByUriRequest build();
-    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder setNamespace(@NonNull String);
+    method @Deprecated @NonNull public android.app.appsearch.RemoveByUriRequest.Builder setNamespace(@NonNull String);
   }
 
   public final class ReportUsageRequest {
@@ -256,9 +259,10 @@ package android.app.appsearch {
   }
 
   public static final class ReportUsageRequest.Builder {
-    ctor public ReportUsageRequest.Builder();
+    ctor @Deprecated public ReportUsageRequest.Builder();
+    ctor public ReportUsageRequest.Builder(@NonNull String);
     method @NonNull public android.app.appsearch.ReportUsageRequest build();
-    method @NonNull public android.app.appsearch.ReportUsageRequest.Builder setNamespace(@NonNull String);
+    method @Deprecated @NonNull public android.app.appsearch.ReportUsageRequest.Builder setNamespace(@NonNull String);
     method @NonNull public android.app.appsearch.ReportUsageRequest.Builder setUri(@NonNull String);
     method @NonNull public android.app.appsearch.ReportUsageRequest.Builder setUsageTimeMillis(long);
   }

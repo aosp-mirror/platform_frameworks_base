@@ -47,10 +47,7 @@ public class AppSearchTestUtils {
         AppSearchBatchResult<String, GenericDocument> result =
                 checkIsBatchResultSuccess(
                         session.getByUri(
-                                new GetByUriRequest.Builder()
-                                        .setNamespace(namespace)
-                                        .addUris(uris)
-                                        .build()));
+                                new GetByUriRequest.Builder(namespace).addUris(uris).build()));
         assertThat(result.getSuccesses()).hasSize(uris.length);
         assertThat(result.getFailures()).isEmpty();
         List<GenericDocument> list = new ArrayList<>(uris.length);
