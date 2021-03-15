@@ -48,7 +48,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.sizecompatui.SizeCompatUIController;
-import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.startingsurface.StartingSurface;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -133,7 +133,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     private final ArraySet<LocusIdListener> mLocusIdListeners = new ArraySet<>();
 
     private final Object mLock = new Object();
-    private StartingWindowController mStartingWindow;
+    private StartingSurface mStartingSurface;
 
     /**
      * In charge of showing size compat UI. Can be {@code null} if device doesn't support size
@@ -184,8 +184,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     /**
      * @hide
      */
-    public void initStartingWindow(StartingWindowController startingWindow) {
-        mStartingWindow = startingWindow;
+    public void initStartingSurface(StartingSurface startingSurface) {
+        mStartingSurface = startingSurface;
     }
 
     /**
@@ -302,23 +302,23 @@ public class ShellTaskOrganizer extends TaskOrganizer {
 
     @Override
     public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
-        if (mStartingWindow != null) {
-            mStartingWindow.addStartingWindow(info, appToken);
+        if (mStartingSurface != null) {
+            mStartingSurface.addStartingWindow(info, appToken);
         }
     }
 
     @Override
     public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
             boolean playRevealAnimation) {
-        if (mStartingWindow != null) {
-            mStartingWindow.removeStartingWindow(taskId, leash, frame, playRevealAnimation);
+        if (mStartingSurface != null) {
+            mStartingSurface.removeStartingWindow(taskId, leash, frame, playRevealAnimation);
         }
     }
 
     @Override
     public void copySplashScreenView(int taskId) {
-        if (mStartingWindow != null) {
-            mStartingWindow.copySplashScreenView(taskId);
+        if (mStartingSurface != null) {
+            mStartingSurface.copySplashScreenView(taskId);
         }
     }
 
