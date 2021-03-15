@@ -84,8 +84,6 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
-import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_UNKNOWN;
-import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH_ERROR_CODE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
@@ -8633,14 +8631,16 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowState win = windowForClientLocked(session, window, false);
             if (win == null) {
                 Slog.w(TAG, "Failed to generate DisplayHash. Invalid window");
-                sendDisplayHashError(callback, DISPLAY_HASH_ERROR_MISSING_WINDOW);
+                mDisplayHashController.sendDisplayHashError(callback,
+                        DISPLAY_HASH_ERROR_MISSING_WINDOW);
                 return;
             }
 
             DisplayContent displayContent = win.getDisplayContent();
             if (displayContent == null) {
                 Slog.w(TAG, "Failed to generate DisplayHash. Window is not on a display");
-                sendDisplayHashError(callback, DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN);
+                mDisplayHashController.sendDisplayHashError(callback,
+                        DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN);
                 return;
             }
 
@@ -8650,7 +8650,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (boundsInDisplay.isEmpty()) {
                 Slog.w(TAG, "Failed to generate DisplayHash. Bounds are not on screen");
-                sendDisplayHashError(callback, DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN);
+                mDisplayHashController.sendDisplayHashError(callback,
+                        DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN);
                 return;
             }
         }
@@ -8660,23 +8661,13 @@ public class WindowManagerService extends IWindowManager.Stub
         // be covering it with the same uid. We want to make sure we include content that's
         // covering to ensure we get as close as possible to what the user sees
         final int uid = session.mUid;
-        SurfaceControl.LayerCaptureArgs args =
+        SurfaceControl.LayerCaptureArgs.Builder args =
                 new SurfaceControl.LayerCaptureArgs.Builder(displaySurfaceControl)
                         .setUid(uid)
-                        .setSourceCrop(boundsInDisplay)
-                        .build();
+                        .setSourceCrop(boundsInDisplay);
 
-        SurfaceControl.ScreenshotHardwareBuffer screenshotHardwareBuffer =
-                SurfaceControl.captureLayers(args);
-        if (screenshotHardwareBuffer == null
-                || screenshotHardwareBuffer.getHardwareBuffer() == null) {
-            Slog.w(TAG, "Failed to generate DisplayHash. Couldn't capture content");
-            sendDisplayHashError(callback, DISPLAY_HASH_ERROR_UNKNOWN);
-            return;
-        }
-
-        mDisplayHashController.generateDisplayHash(screenshotHardwareBuffer.getHardwareBuffer(),
-                boundsInWindow, hashAlgorithm, callback);
+        mDisplayHashController.generateDisplayHash(args, boundsInWindow,
+                hashAlgorithm, callback);
     }
 
     boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {
@@ -8693,11 +8684,5 @@ public class WindowManagerService extends IWindowManager.Stub
                     false /* isLowResolution */);
             return snapshot != null && snapshot.hasImeSurface();
         }
-    }
-
-    private void sendDisplayHashError(RemoteCallback callback, int errorCode) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(EXTRA_DISPLAY_HASH_ERROR_CODE, errorCode);
-        callback.sendResult(bundle);
     }
 }

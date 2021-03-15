@@ -17,7 +17,9 @@
 package com.android.server.wm;
 
 import static android.service.displayhash.DisplayHasherService.EXTRA_VERIFIED_DISPLAY_HASH;
-import static android.service.displayhash.DisplayHasherService.SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS;
+import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_HASH_ALGORITHM;
+import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_UNKNOWN;
+import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH_ERROR_CODE;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -32,7 +34,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -45,16 +46,21 @@ import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.service.displayhash.DisplayHashParams;
 import android.service.displayhash.DisplayHasherService;
 import android.service.displayhash.IDisplayHasherService;
+import android.util.Size;
 import android.util.Slog;
 import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -78,12 +84,15 @@ public class DisplayHashController {
     private final Context mContext;
 
     /**
-     * Lock used for the cached {@link #mHashAlgorithms} array
+     * Lock used for the cached {@link #mDisplayHashAlgorithms} map
      */
-    private final Object mHashAlgorithmsLock = new Object();
+    private final Object mDisplayHashAlgorithmsLock = new Object();
 
-    @GuardedBy("mHashingAlgorithmsLock")
-    private String[] mHashAlgorithms;
+    /**
+     * The cached map of display hash algorithms to the {@link DisplayHashParams}
+     */
+    @GuardedBy("mDisplayHashAlgorithmsLock")
+    private Map<String, DisplayHashParams> mDisplayHashAlgorithms;
 
     private final Handler mHandler;
 
@@ -104,34 +113,8 @@ public class DisplayHashController {
     }
 
     String[] getSupportedHashAlgorithms() {
-        // We have a separate lock for the hashing algorithm array since it doesn't need to make
-        // the request through the service connection. Instead, we have a lock to ensure we can
-        // properly cache the hashing algorithms array so we don't need to call into the
-        // ExtServices process for each request.
-        synchronized (mHashAlgorithmsLock) {
-            // Already have cached values
-            if (mHashAlgorithms != null) {
-                return mHashAlgorithms;
-            }
-
-            final ServiceInfo serviceInfo = getServiceInfo();
-            if (serviceInfo == null) return null;
-
-            final PackageManager pm = mContext.getPackageManager();
-            final Resources res;
-            try {
-                res = pm.getResourcesForApplication(serviceInfo.applicationInfo);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG, "Error getting application resources for " + serviceInfo, e);
-                return null;
-            }
-
-            final int resourceId = serviceInfo.metaData.getInt(
-                    SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS);
-            mHashAlgorithms = res.getStringArray(resourceId);
-
-            return mHashAlgorithms;
-        }
+        Map<String, DisplayHashParams> displayHashAlgorithms = getDisplayHashAlgorithms();
+        return displayHashAlgorithms.keySet().toArray(new String[0]);
     }
 
     @Nullable
@@ -148,11 +131,74 @@ public class DisplayHashController {
         return results.getParcelable(EXTRA_VERIFIED_DISPLAY_HASH);
     }
 
-    void generateDisplayHash(HardwareBuffer buffer, Rect bounds,
+    private void generateDisplayHash(HardwareBuffer buffer, Rect bounds,
             String hashAlgorithm, RemoteCallback callback) {
         connectAndRun(
                 service -> service.generateDisplayHash(mSalt, buffer, bounds, hashAlgorithm,
                         callback));
+    }
+
+    void generateDisplayHash(SurfaceControl.LayerCaptureArgs.Builder args,
+            Rect boundsInWindow, String hashAlgorithm, RemoteCallback callback) {
+        final Map<String, DisplayHashParams> displayHashAlgorithmsMap = getDisplayHashAlgorithms();
+        DisplayHashParams displayHashParams = displayHashAlgorithmsMap.get(hashAlgorithm);
+        if (displayHashParams == null) {
+            Slog.w(TAG, "Failed to generateDisplayHash. Invalid hashAlgorithm");
+            sendDisplayHashError(callback, DISPLAY_HASH_ERROR_INVALID_HASH_ALGORITHM);
+            return;
+        }
+
+        Size size = displayHashParams.getBufferSize();
+        if (size != null && (size.getWidth() > 0 || size.getHeight() > 0)) {
+            args.setFrameScale((float) size.getWidth() / boundsInWindow.width(),
+                    (float) size.getHeight() / boundsInWindow.height());
+        }
+
+        args.setGrayscale(displayHashParams.isGrayscaleBuffer());
+
+        SurfaceControl.ScreenshotHardwareBuffer screenshotHardwareBuffer =
+                SurfaceControl.captureLayers(args.build());
+        if (screenshotHardwareBuffer == null
+                || screenshotHardwareBuffer.getHardwareBuffer() == null) {
+            Slog.w(TAG, "Failed to generate DisplayHash. Couldn't capture content");
+            sendDisplayHashError(callback, DISPLAY_HASH_ERROR_UNKNOWN);
+            return;
+        }
+
+        generateDisplayHash(screenshotHardwareBuffer.getHardwareBuffer(), boundsInWindow,
+                hashAlgorithm, callback);
+    }
+
+    private Map<String, DisplayHashParams> getDisplayHashAlgorithms() {
+        // We have a separate lock for the hashing params to ensure we can properly cache the
+        // hashing params so we don't need to call into the ExtServices process for each request.
+        synchronized (mDisplayHashAlgorithmsLock) {
+            if (mDisplayHashAlgorithms != null) {
+                return mDisplayHashAlgorithms;
+            }
+
+            final SyncCommand syncCommand = new SyncCommand();
+            Bundle results = syncCommand.run((service, remoteCallback) -> {
+                try {
+                    service.getDisplayHashAlgorithms(remoteCallback);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to invoke getDisplayHashAlgorithms command", e);
+                }
+            });
+
+            mDisplayHashAlgorithms = new HashMap<>(results.size());
+            for (String key : results.keySet()) {
+                mDisplayHashAlgorithms.put(key, results.getParcelable(key));
+            }
+
+            return mDisplayHashAlgorithms;
+        }
+    }
+
+    void sendDisplayHashError(RemoteCallback callback, int errorCode) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(EXTRA_DISPLAY_HASH_ERROR_CODE, errorCode);
+        callback.sendResult(bundle);
     }
 
     /**
