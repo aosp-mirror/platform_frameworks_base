@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.Preconditions;
 import com.android.net.module.util.InetAddressUtils;
 
 import java.net.InetAddress;
@@ -152,7 +153,7 @@ public final class StaticIpConfiguration implements Parcelable {
          * @return The {@link Builder} for chaining.
          */
         public @NonNull Builder setDnsServers(@NonNull Iterable<InetAddress> dnsServers) {
-            Objects.requireNonNull(dnsServers);
+            Preconditions.checkNotNull(dnsServers);
             mDnsServers = dnsServers;
             return this;
         }
