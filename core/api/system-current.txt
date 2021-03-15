@@ -5194,6 +5194,21 @@ package android.media {
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public static final int RADIO_TUNER = 1998; // 0x7ce
   }
 
+  public final class MediaRouter2 {
+    method @NonNull public java.util.List<android.media.MediaRoute2Info> getAllRoutes();
+    method @Nullable public String getClientPackageName();
+    method @Nullable public android.media.MediaRouter2.RoutingController getController(@NonNull String);
+    method @Nullable public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context, @NonNull String);
+    method public void setRouteVolume(@NonNull android.media.MediaRoute2Info, int);
+    method public void startScan();
+    method public void stopScan();
+    method public void transfer(@NonNull android.media.MediaRouter2.RoutingController, @NonNull android.media.MediaRoute2Info);
+  }
+
+  public abstract static class MediaRouter2.RouteCallback {
+    method public void onPreferredFeaturesChanged(@NonNull java.util.List<java.lang.String>);
+  }
+
   public class PlayerProxy {
     method public void pause();
     method public void setPan(float);
