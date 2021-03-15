@@ -4891,6 +4891,10 @@ public final class ActiveServices {
                 if (!pr.mAllowBackgroundActivityStartsTokens.isEmpty()) {
                     return true;
                 }
+                if (pr.getWindowProcessController()
+                        .areBackgroundActivityStartsAllowedByGracePeriodSafe()) {
+                    return true;
+                }
             }
         }
 
