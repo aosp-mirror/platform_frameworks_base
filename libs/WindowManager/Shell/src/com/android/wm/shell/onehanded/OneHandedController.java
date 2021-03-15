@@ -164,7 +164,7 @@ public class OneHandedController {
                 new OneHandedBackgroundPanelOrganizer(context, windowManager, displayController,
                         mainExecutor);
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
-                context, windowManager, displayController, animationController, tutorialHandler,
+                context, windowManager, animationController, tutorialHandler,
                 oneHandedBackgroundPanelOrganizer, mainExecutor);
         OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
