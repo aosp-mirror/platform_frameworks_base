@@ -1862,6 +1862,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Update application display metrics.
         final WmDisplayCutout wmDisplayCutout = calculateDisplayCutoutForRotation(rotation);
         final DisplayCutout displayCutout = wmDisplayCutout.getDisplayCutout();
+        final RoundedCorners roundedCorners = calculateRoundedCornersForRotation(rotation);
 
         final int appWidth = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
                 displayCutout);
@@ -1878,6 +1879,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
         }
         mDisplayInfo.displayCutout = displayCutout.isEmpty() ? null : displayCutout;
+        mDisplayInfo.roundedCorners = roundedCorners;
         mDisplayInfo.getAppMetrics(mDisplayMetrics);
         if (mDisplayScalingDisabled) {
             mDisplayInfo.flags |= Display.FLAG_SCALING_DISABLED;
