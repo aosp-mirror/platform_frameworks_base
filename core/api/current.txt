@@ -36864,11 +36864,12 @@ package android.security {
     method @NonNull public static android.content.Intent createInstallIntent();
     method @NonNull public static android.content.Intent createManageCredentialsIntent(@NonNull android.security.AppUriAuthenticationPolicy);
     method @Nullable @WorkerThread public static java.security.cert.X509Certificate[] getCertificateChain(@NonNull android.content.Context, @NonNull String) throws java.lang.InterruptedException, android.security.KeyChainException;
-    method @NonNull public static android.security.AppUriAuthenticationPolicy getCredentialManagementAppPolicy(@NonNull android.content.Context) throws java.lang.SecurityException;
+    method @NonNull @WorkerThread public static android.security.AppUriAuthenticationPolicy getCredentialManagementAppPolicy(@NonNull android.content.Context) throws java.lang.SecurityException;
     method @Nullable @WorkerThread public static java.security.PrivateKey getPrivateKey(@NonNull android.content.Context, @NonNull String) throws java.lang.InterruptedException, android.security.KeyChainException;
     method @Deprecated public static boolean isBoundKeyAlgorithm(@NonNull String);
-    method public static boolean isCredentialManagementApp(@NonNull android.content.Context);
+    method @WorkerThread public static boolean isCredentialManagementApp(@NonNull android.content.Context);
     method public static boolean isKeyAlgorithmSupported(@NonNull String);
+    method @RequiresPermission(value="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP", conditional=true) @WorkerThread public static boolean removeCredentialManagementApp(@NonNull android.content.Context);
     field public static final String ACTION_KEYCHAIN_CHANGED = "android.security.action.KEYCHAIN_CHANGED";
     field public static final String ACTION_KEY_ACCESS_CHANGED = "android.security.action.KEY_ACCESS_CHANGED";
     field @Deprecated public static final String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";

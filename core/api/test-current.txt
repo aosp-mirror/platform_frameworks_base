@@ -1950,8 +1950,7 @@ package android.provider {
 package android.security {
 
   public final class KeyChain {
-    method @RequiresPermission("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP") public static boolean removeCredentialManagementApp(@NonNull android.content.Context);
-    method @RequiresPermission("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP") public static boolean setCredentialManagementApp(@NonNull android.content.Context, @NonNull String, @NonNull android.security.AppUriAuthenticationPolicy);
+    method @RequiresPermission("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP") @WorkerThread public static boolean setCredentialManagementApp(@NonNull android.content.Context, @NonNull String, @NonNull android.security.AppUriAuthenticationPolicy);
   }
 
   public class KeyStoreException extends java.lang.Exception {
