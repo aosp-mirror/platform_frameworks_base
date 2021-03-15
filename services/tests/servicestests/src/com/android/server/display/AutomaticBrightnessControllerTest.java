@@ -65,6 +65,7 @@ public class AutomaticBrightnessControllerTest {
     @Mock HysteresisLevels mScreenBrightnessThresholds;
     @Mock Handler mNoOpHandler;
     @Mock DisplayDevice mDisplayDevice;
+    @Mock HighBrightnessModeController mHbmController;
 
     private static final int LIGHT_SENSOR_WARMUP_TIME = 0;
     @Before
@@ -90,7 +91,8 @@ public class AutomaticBrightnessControllerTest {
                 BRIGHTNESS_MAX_FLOAT, DOZE_SCALE_FACTOR, LIGHT_SENSOR_RATE,
                 INITIAL_LIGHT_SENSOR_RATE, BRIGHTENING_LIGHT_DEBOUNCE_CONFIG,
                 DARKENING_LIGHT_DEBOUNCE_CONFIG, RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
-                mAmbientBrightnessThresholds, mScreenBrightnessThresholds, mLogicalDisplay, mContext
+                mAmbientBrightnessThresholds, mScreenBrightnessThresholds, mLogicalDisplay,
+                mContext, mHbmController
         );
         controller.setLoggingEnabled(true);
 
