@@ -102,6 +102,10 @@ public class SeamlessRotator {
      * window in the new orientation.
      */
     void finish(Transaction t, WindowContainer win) {
+        if (win.mSurfaceControl == null || !win.mSurfaceControl.isValid()) {
+            return;
+        }
+
         mTransform.reset();
         t.setMatrix(win.mSurfaceControl, mTransform, mFloat9);
         t.setPosition(win.mSurfaceControl, win.mLastSurfacePosition.x, win.mLastSurfacePosition.y);
