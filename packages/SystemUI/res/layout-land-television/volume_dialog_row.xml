@@ -17,7 +17,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:tag="row"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/volume_dialog_row_height"
+    android:layout_height="@dimen/volume_dialog_panel_height"
     android:background="@android:color/transparent"
     android:clipChildren="false"
     android:clipToPadding="false"
@@ -54,18 +54,18 @@
         <FrameLayout
             android:id="@+id/volume_row_slider_frame"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/volume_dialog_row_height">
+            android:layout_height="@dimen/volume_dialog_panel_height">
             <SeekBar
                 android:id="@+id/volume_row_slider"
                 android:clickable="false"
-                android:layout_width="@dimen/volume_dialog_row_height"
+                android:layout_width="@dimen/volume_dialog_panel_height"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layoutDirection="ltr"
-                android:maxHeight="@dimen/tv_volume_seek_bar_width"
-                android:minHeight="@dimen/tv_volume_seek_bar_width"
+                android:maxHeight="@dimen/volume_dialog_slider_width"
+                android:minHeight="@dimen/volume_dialog_slider_width"
+                android:progressDrawable="@drawable/volume_row_seekbar"
                 android:thumb="@drawable/tv_volume_row_seek_thumb"
-                android:progressDrawable="@drawable/tv_volume_row_seek_bar"
                 android:splitTrack="false"
                 android:rotation="270" />
         </FrameLayout>

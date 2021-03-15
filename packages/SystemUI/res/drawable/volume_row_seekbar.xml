@@ -25,9 +25,9 @@
         <layer-list>
             <item android:id="@+id/volume_seekbar_background_solid">
                 <shape>
-                    <size android:height="@dimen/volume_dialog_panel_width" />
+                    <size android:height="@dimen/volume_dialog_slider_width" />
                     <solid android:color="?android:attr/colorBackgroundFloating" />
-                    <corners android:radius="@dimen/volume_dialog_panel_width_half" />
+                    <corners android:radius="@dimen/volume_dialog_slider_corner_radius" />
                 </shape>
             </item>
             <item
