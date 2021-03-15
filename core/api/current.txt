@@ -55030,6 +55030,7 @@ package android.widget {
     method public void setRelativeScrollPosition(@IdRes int, int);
     method @Deprecated public void setRemoteAdapter(int, @IdRes int, android.content.Intent);
     method public void setRemoteAdapter(@IdRes int, android.content.Intent);
+    method public void setRemoteAdapter(@IdRes int, @NonNull android.widget.RemoteViews.RemoteCollectionItems);
     method public void setScrollPosition(@IdRes int, int);
     method public void setShort(@IdRes int, String, short);
     method public void setString(@IdRes int, String, String);
@@ -55067,6 +55068,25 @@ package android.widget {
   public static class RemoteViews.ActionException extends java.lang.RuntimeException {
     ctor public RemoteViews.ActionException(Exception);
     ctor public RemoteViews.ActionException(String);
+  }
+
+  public static final class RemoteViews.RemoteCollectionItems implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getItemCount();
+    method public long getItemId(int);
+    method @NonNull public android.widget.RemoteViews getItemView(int);
+    method public int getViewTypeCount();
+    method public boolean hasStableIds();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.widget.RemoteViews.RemoteCollectionItems> CREATOR;
+  }
+
+  public static final class RemoteViews.RemoteCollectionItems.Builder {
+    ctor public RemoteViews.RemoteCollectionItems.Builder();
+    method @NonNull public android.widget.RemoteViews.RemoteCollectionItems.Builder addItem(long, @NonNull android.widget.RemoteViews);
+    method @NonNull public android.widget.RemoteViews.RemoteCollectionItems build();
+    method @NonNull public android.widget.RemoteViews.RemoteCollectionItems.Builder setHasStableIds(boolean);
+    method @NonNull public android.widget.RemoteViews.RemoteCollectionItems.Builder setViewTypeCount(int);
   }
 
   public static class RemoteViews.RemoteResponse {
