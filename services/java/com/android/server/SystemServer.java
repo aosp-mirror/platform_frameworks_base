@@ -116,6 +116,7 @@ import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.compat.PlatformCompatNative;
+import com.android.server.connectivity.PacProxyService;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.coverage.CoverageService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
@@ -1315,6 +1316,7 @@ public final class SystemServer implements Dumpable {
         ConsumerIrService consumerIr = null;
         MmsServiceBroker mmsService = null;
         HardwarePropertiesManagerService hardwarePropertiesService = null;
+        PacProxyService pacProxyService = null;
 
         boolean disableSystemTextClassifier = SystemProperties.getBoolean(
                 "config.disable_systemtextclassifier", false);
@@ -1873,6 +1875,15 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
                 t.traceEnd();
             }
+
+            t.traceBegin("StartPacProxyService");
+            try {
+                pacProxyService = new PacProxyService(context);
+                ServiceManager.addService(Context.PAC_PROXY_SERVICE, pacProxyService);
+            } catch (Throwable e) {
+                reportWtf("starting PacProxyService", e);
+            }
+            t.traceEnd();
 
             t.traceBegin("StartConnectivityService");
             // This has to be called after NetworkManagementService, NetworkStatsService
