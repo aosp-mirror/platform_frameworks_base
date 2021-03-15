@@ -386,7 +386,6 @@ public class BluetoothEventManager {
                 case BluetoothDevice.UNBOND_REASON_AUTH_TIMEOUT:
                 case BluetoothDevice.UNBOND_REASON_REPEATED_ATTEMPTS:
                 case BluetoothDevice.UNBOND_REASON_REMOTE_AUTH_CANCELED:
-                case BluetoothDevice.UNBOND_REASON_REMOVED:
                     errorMsg = R.string.bluetooth_pairing_error_message;
                     break;
                 default:
