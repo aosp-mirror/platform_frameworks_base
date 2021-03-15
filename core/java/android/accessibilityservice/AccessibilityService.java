@@ -555,6 +555,11 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS = 14;
 
+    /**
+     * Action to dismiss the notification shade
+     */
+    public static final int GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE = 15;
+
     private static final String LOG_TAG = "AccessibilityService";
 
     /**
