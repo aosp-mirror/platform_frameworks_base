@@ -54,7 +54,7 @@ java_library {
     name: "SystemUI-sensors",
     srcs: [
         "src/com/android/systemui/util/sensors/ThresholdSensor.java",
-    ]
+    ],
 }
 
 android_library {
@@ -99,7 +99,7 @@ android_library {
         "SystemUI-tags",
         "SystemUI-proto",
         "dagger2",
-        "jsr330"
+        "jsr330",
     ],
     manifest: "AndroidManifest.xml",
 
