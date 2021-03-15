@@ -31,6 +31,21 @@
 #include <vk/GrVkExtensions.h>
 #include <vulkan/vulkan.h>
 
+// VK_ANDROID_frame_boundary is a bespoke extension defined by AGI
+// (https://github.com/google/agi) to enable profiling of apps rendering via
+// HWUI. This extension is not defined in Khronos, hence the need to declare it
+// manually here. There's a superseding extension (VK_EXT_frame_boundary) being
+// discussed in Khronos, but in the meantime we use the bespoke
+// VK_ANDROID_frame_boundary. This is a device extension that is implemented by
+// AGI's Vulkan capture layer, such that it is only supported by devices when
+// AGI is doing a capture of the app.
+//
+// TODO(b/182165045): use the Khronos blessed VK_EXT_frame_boudary once it has
+// landed in the spec.
+typedef void(VKAPI_PTR* PFN_vkFrameBoundaryANDROID)(VkDevice device, VkSemaphore semaphore,
+                                                    VkImage image);
+#define VK_ANDROID_FRAME_BOUNDARY_EXTENSION_NAME "VK_ANDROID_frame_boundary"
+
 #include "Frame.h"
 #include "IRenderPipeline.h"
 #include "VulkanSurface.h"
@@ -160,6 +175,7 @@ private:
     VkPtr<PFN_vkDestroyFence> mDestroyFence;
     VkPtr<PFN_vkWaitForFences> mWaitForFences;
     VkPtr<PFN_vkResetFences> mResetFences;
+    VkPtr<PFN_vkFrameBoundaryANDROID> mFrameBoundaryANDROID;
 
     VkInstance mInstance = VK_NULL_HANDLE;
     VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
