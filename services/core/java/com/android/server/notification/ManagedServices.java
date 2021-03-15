@@ -317,9 +317,9 @@ abstract public class ManagedServices {
 
     private ManagedServiceInfo newServiceInfo(IInterface service,
             ComponentName component, int userId, boolean isSystem, ServiceConnection connection,
-            int targetSdkVersion) {
+            int targetSdkVersion, int uid) {
         return new ManagedServiceInfo(service, component, userId, isSystem, connection,
-                targetSdkVersion);
+                targetSdkVersion, uid);
     }
 
     public void onBootPhaseAppsCanStart() {}
@@ -974,10 +974,11 @@ abstract public class ManagedServices {
         unregisterServiceImpl(service, userid);
     }
 
-    public void registerSystemService(IInterface service, ComponentName component, int userid) {
+    public void registerSystemService(IInterface service, ComponentName component, int userid,
+            int uid) {
         checkNotNull(service);
         ManagedServiceInfo info = registerServiceImpl(
-                service, component, userid, Build.VERSION_CODES.CUR_DEVELOPMENT);
+                service, component, userid, Build.VERSION_CODES.CUR_DEVELOPMENT, uid);
         if (info != null) {
             onServiceAdded(info);
         }
@@ -1441,6 +1442,7 @@ abstract public class ManagedServices {
         }
         final int targetSdkVersion =
             appInfo != null ? appInfo.targetSdkVersion : Build.VERSION_CODES.BASE;
+        final int uid = appInfo != null ? appInfo.uid : -1;
 
         try {
             Slog.v(TAG, "binding: " + intent);
@@ -1457,7 +1459,7 @@ abstract public class ManagedServices {
                         try {
                             mService = asInterface(binder);
                             info = newServiceInfo(mService, name,
-                                userid, isSystem, this, targetSdkVersion);
+                                userid, isSystem, this, targetSdkVersion, uid);
                             binder.linkToDeath(info, 0);
                             added = mServices.add(info);
                         } catch (RemoteException e) {
@@ -1576,9 +1578,9 @@ abstract public class ManagedServices {
     }
 
     private ManagedServiceInfo registerServiceImpl(final IInterface service,
-            final ComponentName component, final int userid, int targetSdk) {
+            final ComponentName component, final int userid, int targetSdk, int uid) {
         ManagedServiceInfo info = newServiceInfo(service, component, userid,
-                true /*isSystem*/, null /*connection*/, targetSdk);
+                true /*isSystem*/, null /*connection*/, targetSdk, uid);
         return registerServiceImpl(info);
     }
 
@@ -1624,15 +1626,18 @@ abstract public class ManagedServices {
         public ServiceConnection connection;
         public int targetSdkVersion;
         public Pair<ComponentName, Integer> mKey;
+        public int uid;
 
         public ManagedServiceInfo(IInterface service, ComponentName component,
-                int userid, boolean isSystem, ServiceConnection connection, int targetSdkVersion) {
+                int userid, boolean isSystem, ServiceConnection connection, int targetSdkVersion,
+                int uid) {
             this.service = service;
             this.component = component;
             this.userid = userid;
             this.isSystem = isSystem;
             this.connection = connection;
             this.targetSdkVersion = targetSdkVersion;
+            this.uid = uid;
             mKey = Pair.create(component, userid);
         }
 
