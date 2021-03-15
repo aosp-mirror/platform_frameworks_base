@@ -1380,10 +1380,6 @@ package android.media {
     method public int getMaxMacroBlocks();
   }
 
-  public final class MediaDrm implements java.lang.AutoCloseable {
-    method @Nullable public android.media.metrics.PlaybackComponent getPlaybackComponent(@NonNull byte[]);
-  }
-
   public final class MediaRoute2Info implements android.os.Parcelable {
     method @NonNull public String getOriginalId();
   }

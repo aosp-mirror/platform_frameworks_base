@@ -21,7 +21,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
-import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -2937,9 +2936,7 @@ public final class MediaDrm implements AutoCloseable {
      * @return a {@link PlaybackComponent} associated with the session,
      * or {@code null} if the session is closed or does not exist.
      * @see PlaybackComponent
-     * @hide
      */
-    @TestApi
     @Nullable
     public PlaybackComponent getPlaybackComponent(@NonNull byte[] sessionId) {
         if (sessionId == null) {
