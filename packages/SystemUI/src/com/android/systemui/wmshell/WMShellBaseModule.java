@@ -480,7 +480,7 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static StartingWindowController provideStartingWindowController(Context context,
-            @ShellAnimationThread ShellExecutor executor, TransactionPool pool) {
+            @ShellSplashscreenThread ShellExecutor executor, TransactionPool pool) {
         return new StartingWindowController(context, executor, pool);
     }
 
