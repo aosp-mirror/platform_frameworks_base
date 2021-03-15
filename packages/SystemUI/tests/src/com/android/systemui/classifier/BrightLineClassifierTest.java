@@ -35,6 +35,7 @@ import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingDataProvider.GestureCompleteListener;
 import com.android.systemui.dock.DockManagerFake;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -71,7 +72,10 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     private FalsingClassifier mClassifierB;
     private final List<MotionEvent> mMotionEventList = new ArrayList<>();
     @Mock
-    private HistoryTracker mHistoryTracker;;
+    private HistoryTracker mHistoryTracker;
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
+
     private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     private final FalsingClassifier.Result mFalsedResult = FalsingClassifier.Result.falsed(1, "");
@@ -88,9 +92,10 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         mClassifiers.add(mClassifierA);
         mClassifiers.add(mClassifierB);
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider, mDockManager,
                 mMetricsLogger, mClassifiers, mSingleTapClassfier, mDoubleTapClassifier,
-                mHistoryTracker, false);
+                mHistoryTracker, mKeyguardStateController, false);
 
 
         ArgumentCaptor<GestureCompleteListener> gestureCompleteListenerCaptor =
@@ -120,7 +125,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIsFalseTouch_ClassffiersPass() {
+    public void testIsFalseTouch_ClassifiersPass() {
         assertThat(mBrightLineFalsingManager.isFalseTouch(0)).isFalse();
     }
 
@@ -232,5 +237,19 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         verify(mHistoryTracker).addResults(anyCollection(), eq(2000L));
 
         assertThat(mFakeExecutor.numPending()).isEqualTo(0);
+    }
+
+    @Test
+    public void testNoFalsingUnlocked() {
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+
+        when(mClassifierA.classifyGesture(anyDouble(), anyDouble())).thenReturn(mFalsedResult);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(0)).isFalse();
+
+        when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mFalsedResult);
+        assertThat(mBrightLineFalsingManager.isFalseTap(false, 0)).isFalse();
+
+        when(mDoubleTapClassifier.classifyGesture()).thenReturn(mFalsedResult);
+        assertThat(mBrightLineFalsingManager.isFalseDoubleTap()).isFalse();
     }
 }
