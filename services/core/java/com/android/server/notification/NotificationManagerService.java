@@ -60,7 +60,6 @@ import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.media.AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
@@ -85,6 +84,8 @@ import static android.service.notification.NotificationListenerService.REASON_AP
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
+import static android.service.notification.NotificationListenerService.REASON_CHANNEL_REMOVED;
+import static android.service.notification.NotificationListenerService.REASON_CLEAR_DATA;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 import static android.service.notification.NotificationListenerService.REASON_ERROR;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
@@ -454,6 +455,13 @@ public class NotificationManagerService extends SystemService {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
     private static final long NOTIFICATION_TRAMPOLINE_BLOCK = 167676448L;
+
+    /**
+     * Whether a notification listeners can understand new, more specific, cancellation reasons.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    private static final long NOTIFICATION_CANCELLATION_REASONS = 175319604L;
 
     /**
      * Rate limit showing toasts, on a per package basis.
@@ -3601,7 +3609,7 @@ public class NotificationManagerService extends SystemService {
             }
             enforceDeletingChannelHasNoFgService(pkg, callingUser, channelId);
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
-                    callingUser, REASON_CHANNEL_BANNED, null);
+                    callingUser, REASON_CHANNEL_REMOVED, null);
             mPreferencesHelper.deleteNotificationChannel(pkg, callingUid, channelId);
             mListeners.notifyNotificationChannelChanged(pkg,
                     UserHandle.getUserHandleForUid(callingUid),
@@ -3625,7 +3633,7 @@ public class NotificationManagerService extends SystemService {
                     final String channelId = nc.getId();
                     mAmi.stopForegroundServicesForChannel(pkg, appUserId, channelId);
                     cancelAllNotificationsInt(MY_UID, MY_PID, pkg, nc.getId(), 0, 0, true,
-                            appUserId, REASON_CHANNEL_BANNED, null);
+                            appUserId, REASON_CHANNEL_REMOVED, null);
                     mPreferencesHelper.deleteNotificationChannel(pkg, uid, channelId);
                     mListeners.notifyNotificationChannelChanged(pkg,
                             UserHandle.getUserHandleForUid(uid),
@@ -3674,7 +3682,7 @@ public class NotificationManagerService extends SystemService {
                     final NotificationChannel deletedChannel = deletedChannels.get(i);
                     cancelAllNotificationsInt(MY_UID, MY_PID, pkg, deletedChannel.getId(), 0, 0,
                             true,
-                            userId, REASON_CHANNEL_BANNED,
+                            userId, REASON_CHANNEL_REMOVED,
                             null);
                     mListeners.notifyNotificationChannelChanged(pkg,
                             UserHandle.getUserHandleForUid(callingUid),
@@ -3854,7 +3862,7 @@ public class NotificationManagerService extends SystemService {
             // Cancel posted notifications
             final int userId = UserHandle.getUserId(uid);
             cancelAllNotificationsInt(MY_UID, MY_PID, packageName, null, 0, 0, true,
-                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
+                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CLEAR_DATA, null);
 
             // Zen
             packagesChanged |=
@@ -4130,7 +4138,7 @@ public class NotificationManagerService extends SystemService {
         public void registerListener(final INotificationListener listener,
                 final ComponentName component, final int userid) {
             enforceSystemOrSystemUI("INotificationManager.registerListener");
-            mListeners.registerSystemService(listener, component, userid);
+            mListeners.registerSystemService(listener, component, userid, Binder.getCallingUid());
         }
 
         /**
@@ -6077,7 +6085,7 @@ public class NotificationManagerService extends SystemService {
                 mPreferencesHelper.deleteConversations(pkg, uid, shortcuts);
         for (String channelId : deletedChannelIds) {
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
-                    UserHandle.getUserId(uid), REASON_CHANNEL_BANNED,
+                    UserHandle.getUserId(uid), REASON_CHANNEL_REMOVED,
                     null);
         }
         handleSavePolicyFile();
@@ -10326,6 +10334,10 @@ public class NotificationManagerService extends SystemService {
             final INotificationListener listener = (INotificationListener) info.service;
             StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
+                if (!CompatChanges.isChangeEnabled(NOTIFICATION_CANCELLATION_REASONS, info.uid)
+                        && (reason == REASON_CHANNEL_REMOVED || reason == REASON_CLEAR_DATA)) {
+                    reason = REASON_CHANNEL_BANNED;
+                }
                 listener.onNotificationRemoved(sbnHolder, rankingUpdate, stats, reason);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "unable to notify listener (removed): " + info, ex);
