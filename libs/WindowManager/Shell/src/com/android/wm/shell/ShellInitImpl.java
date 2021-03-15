@@ -26,7 +26,7 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
-import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -47,20 +47,44 @@ public class ShellInitImpl {
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final ShellExecutor mMainExecutor;
     private final Transitions mTransitions;
-    private final StartingWindowController mStartingWindow;
+    private final Optional<StartingSurface> mStartingSurfaceOptional;
 
     private final InitImpl mImpl = new InitImpl();
 
-    public ShellInitImpl(DisplayImeController displayImeController,
+    public static ShellInit create(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
+            Optional<StartingSurface> startingSurfaceOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
-            StartingWindowController startingWindow,
+            ShellExecutor mainExecutor) {
+        return new ShellInitImpl(displayImeController,
+                dragAndDropController,
+                shellTaskOrganizer,
+                legacySplitScreenOptional,
+                splitScreenOptional,
+                appPairsOptional,
+                startingSurfaceOptional,
+                pipTouchHandlerOptional,
+                fullscreenTaskListener,
+                transitions,
+                mainExecutor).mImpl;
+    }
+
+    private ShellInitImpl(DisplayImeController displayImeController,
+            DragAndDropController dragAndDropController,
+            ShellTaskOrganizer shellTaskOrganizer,
+            Optional<LegacySplitScreenController> legacySplitScreenOptional,
+            Optional<SplitScreenController> splitScreenOptional,
+            Optional<AppPairsController> appPairsOptional,
+            Optional<StartingSurface> startingSurfaceOptional,
+            Optional<PipTouchHandler> pipTouchHandlerOptional,
+            FullscreenTaskListener fullscreenTaskListener,
+            Transitions transitions,
             ShellExecutor mainExecutor) {
         mDisplayImeController = displayImeController;
         mDragAndDropController = dragAndDropController;
@@ -72,21 +96,17 @@ public class ShellInitImpl {
         mPipTouchHandlerOptional = pipTouchHandlerOptional;
         mTransitions = transitions;
         mMainExecutor = mainExecutor;
-        mStartingWindow = startingWindow;
-    }
-
-    public ShellInit asShellInit() {
-        return mImpl;
+        mStartingSurfaceOptional = startingSurfaceOptional;
     }
 
     private void init() {
         // Start listening for display changes
         mDisplayImeController.startMonitorDisplays();
 
-        // Setup the shell organizer
         mShellTaskOrganizer.addListenerForType(
                 mFullscreenTaskListener, TASK_LISTENER_TYPE_FULLSCREEN);
-        mShellTaskOrganizer.initStartingWindow(mStartingWindow);
+        mStartingSurfaceOptional.ifPresent(mShellTaskOrganizer::initStartingSurface);
+        // Register the shell organizer
         mShellTaskOrganizer.registerOrganizer();
 
         mAppPairsOptional.ifPresent(AppPairsController::onOrganizerRegistered);
