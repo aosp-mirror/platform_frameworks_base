@@ -2234,6 +2234,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final DisplayContent dc = win.getDisplayContent();
 
+            if (win.mPendingPositionChanged != null) {
+                win.mPendingPositionChanged.updateLeashPosition(frameNumber);
+                win.mPendingPositionChanged = null;
+            }
+
             if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
                 win.prepareDrawHandlers();
                 result |= RELAYOUT_RES_BLAST_SYNC;
