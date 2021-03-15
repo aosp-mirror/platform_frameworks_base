@@ -87,10 +87,10 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper {
       * Translate the entire view, and optionally inform the wrapped view of the progress
       * so it can animate with the parent.
       */
-    public void animateForIme(int translationY, float interpolatedFraction) {
+    public void animateForIme(int translationY, float interpolatedFraction, boolean appearingAnim) {
         super.setTranslationY(translationY);
         KeyguardInputView v = getSecurityView();
-        if (v != null) v.animateForIme(interpolatedFraction);
+        if (v != null) v.animateForIme(interpolatedFraction, appearingAnim);
     }
 
     @Override
