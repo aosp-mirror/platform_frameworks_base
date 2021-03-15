@@ -1329,6 +1329,7 @@ package android.media {
   public class AudioManager {
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method public boolean hasRegisteredDynamicPolicy();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE}) public boolean isFullVolumeDevice();
   }
 
   public static final class AudioRecord.MetricsConstants {
