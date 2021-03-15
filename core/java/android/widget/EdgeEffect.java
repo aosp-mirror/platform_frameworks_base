@@ -130,7 +130,7 @@ public class EdgeEffect {
     public @interface EdgeEffectType {
     }
 
-    private static final float DEFAULT_MAX_STRETCH_INTENSITY = 1.5f;
+    private static final float DEFAULT_MAX_STRETCH_INTENSITY = 0.08f;
 
     @SuppressWarnings("UnusedDeclaration")
     private static final String TAG = "EdgeEffect";
@@ -177,6 +177,7 @@ public class EdgeEffect {
     private long mStartTime;
     private float mDuration;
     private float mStretchIntensity = DEFAULT_MAX_STRETCH_INTENSITY;
+    private float mStretchDistanceFraction = 0.1f;
     private float mStretchDistance = -1f;
 
     private final Interpolator mInterpolator = new DecelerateInterpolator();
@@ -467,7 +468,7 @@ public class EdgeEffect {
     public void onAbsorb(int velocity) {
         if (mEdgeEffectType == TYPE_STRETCH) {
             mState = STATE_RECEDE;
-            mVelocity = velocity / mHeight;
+            mVelocity = velocity;
             mDistance = 0;
             mStartTime = AnimationUtils.currentAnimationTimeMillis();
         } else {
@@ -655,7 +656,7 @@ public class EdgeEffect {
                     //  for now leverage placeholder logic if no stretch distance is provided to
                     //  consume the displacement ratio times the minimum of the width or height
                     mStretchDistance > 0 ? mStretchDistance :
-                            (mDisplacement * Math.min(mWidth, mHeight))
+                            (mStretchDistanceFraction * Math.min(mWidth, mHeight))
             );
         }
 
@@ -745,9 +746,9 @@ public class EdgeEffect {
         final double mDampedFreq = NATURAL_FREQUENCY * Math.sqrt(1 - DAMPING_RATIO * DAMPING_RATIO);
 
         // We're always underdamped, so we can use only those equations:
-        double cosCoeff = mDistance;
+        double cosCoeff = mDistance * mHeight;
         double sinCoeff = (1 / mDampedFreq) * (DAMPING_RATIO * NATURAL_FREQUENCY
-                * mDistance + mVelocity);
+                * mDistance * mHeight + mVelocity);
         double distance = Math.pow(Math.E, -DAMPING_RATIO * NATURAL_FREQUENCY * deltaT)
                 * (cosCoeff * Math.cos(mDampedFreq * deltaT)
                 + sinCoeff * Math.sin(mDampedFreq * deltaT));
@@ -755,7 +756,7 @@ public class EdgeEffect {
                 + Math.pow(Math.E, -DAMPING_RATIO * NATURAL_FREQUENCY * deltaT)
                 * (-mDampedFreq * cosCoeff * Math.sin(mDampedFreq * deltaT)
                 + mDampedFreq * sinCoeff * Math.cos(mDampedFreq * deltaT));
-        mDistance = (float) distance;
+        mDistance = (float) distance / mHeight;
         mVelocity = (float) velocity;
         mStartTime = time;
         if (isAtEquilibrium()) {
@@ -786,9 +787,8 @@ public class EdgeEffect {
      * considered at rest or false if it is still animating.
      */
     private boolean isAtEquilibrium() {
-        double velocity = mVelocity * mHeight; // in pixels/second
         double displacement = mDistance * mHeight; // in pixels
-        return Math.abs(velocity) < VELOCITY_THRESHOLD
+        return Math.abs(mVelocity) < VELOCITY_THRESHOLD
                 && Math.abs(displacement) < VALUE_THRESHOLD;
     }
 }
