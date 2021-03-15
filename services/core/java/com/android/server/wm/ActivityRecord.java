@@ -1519,7 +1519,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void setCornersRadius(WindowState mainWindow, int cornersRadius) {
         final SurfaceControl windowSurface = mainWindow.getClientViewRootSurface();
         if (windowSurface != null && windowSurface.isValid()) {
-            Transaction transaction = getPendingTransaction();
+            Transaction transaction = getSyncTransaction();
             transaction.setCornerRadius(windowSurface, cornersRadius);
         }
     }
@@ -1531,7 +1531,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         layoutLetterbox(winHint);
         if (mLetterbox != null && mLetterbox.needsApplySurfaceChanges()) {
-            mLetterbox.applySurfaceChanges(getPendingTransaction());
+            mLetterbox.applySurfaceChanges(getSyncTransaction());
         }
     }
 

@@ -3426,7 +3426,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Updates the layer assignment of windows on this display. */
     void assignWindowLayers(boolean setLayoutNeeded) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "assignWindowLayers");
-        assignChildLayers(getPendingTransaction());
+        assignChildLayers(getSyncTransaction());
         if (setLayoutNeeded) {
             setLayoutNeeded();
         }
