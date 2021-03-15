@@ -21,9 +21,10 @@ import android.annotation.SystemApi;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
 
 /**
  * Class that allows creation and management of per-app, test-only networks
@@ -49,7 +50,7 @@ public class TestNetworkManager {
 
     /** @hide */
     public TestNetworkManager(@NonNull ITestNetworkManager service) {
-        mService = Objects.requireNonNull(service, "missing ITestNetworkManager");
+        mService = Preconditions.checkNotNull(service, "missing ITestNetworkManager");
     }
 
     /**
@@ -92,7 +93,7 @@ public class TestNetworkManager {
      */
     public void setupTestNetwork(
             @NonNull LinkProperties lp, boolean isMetered, @NonNull IBinder binder) {
-        Objects.requireNonNull(lp, "Invalid LinkProperties");
+        Preconditions.checkNotNull(lp, "Invalid LinkProperties");
         setupTestNetwork(lp.getInterfaceName(), lp, isMetered, new int[0], binder);
     }
 
