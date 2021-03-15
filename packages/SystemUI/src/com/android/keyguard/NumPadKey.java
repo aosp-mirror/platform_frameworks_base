@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -30,6 +31,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.Utils;
@@ -48,6 +51,7 @@ public class NumPadKey extends ViewGroup {
     private int mTextViewResId;
     private PasswordTextView mTextView;
 
+    @Nullable
     private NumPadAnimator mAnimator;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
@@ -127,8 +131,13 @@ public class NumPadKey extends ViewGroup {
 
         setContentDescription(mDigitText.getText().toString());
 
-        mAnimator = new NumPadAnimator(context, (LayerDrawable) getBackground(),
-                R.style.NumPadKey);
+        Drawable background = getBackground();
+        if (background instanceof LayerDrawable) {
+            mAnimator = new NumPadAnimator(context, (LayerDrawable) background,
+                    R.style.NumPadKey);
+        } else {
+            mAnimator = null;
+        }
     }
 
     /**
@@ -136,10 +145,12 @@ public class NumPadKey extends ViewGroup {
      */
     public void disableNewLayout() {
         findViewById(R.id.klondike_text).setVisibility(View.VISIBLE);
-        mAnimator = null;
-        ContextThemeWrapper ctw = new ContextThemeWrapper(getContext(), R.style.NumPadKey);
-        setBackground(getContext().getResources().getDrawable(
-                R.drawable.ripple_drawable_pin, ctw.getTheme()));
+        if (mAnimator != null) {
+            mAnimator = null;
+            ContextThemeWrapper ctw = new ContextThemeWrapper(getContext(), R.style.NumPadKey);
+            setBackground(getContext().getResources().getDrawable(
+                    R.drawable.ripple_drawable_pin, ctw.getTheme()));
+        }
     }
 
     /**
