@@ -46,8 +46,14 @@ import java.util.Set;
 public class GenericDocument {
     private static final String TAG = "AppSearchGenericDocumen";
 
-    /** The default empty namespace. */
-    public static final String DEFAULT_NAMESPACE = "";
+    /**
+     * The default empty namespace.
+     *
+     * <p>TODO(b/181887768): This exists only for dogfooder transition and must be removed.
+     *
+     * @deprecated This exists only for dogfooder transition and must be removed.
+     */
+    @Deprecated public static final String DEFAULT_NAMESPACE = "";
 
     /** The maximum number of elements in a repeatable field. */
     private static final int MAX_REPEATED_PROPERTY_LENGTH = 100;
@@ -141,7 +147,7 @@ public class GenericDocument {
     /** Returns the namespace of the {@link GenericDocument}. */
     @NonNull
     public String getNamespace() {
-        return mBundle.getString(NAMESPACE_FIELD, DEFAULT_NAMESPACE);
+        return mBundle.getString(NAMESPACE_FIELD, /*defaultValue=*/ "");
     }
 
     /** Returns the {@link AppSearchSchema} type of the {@link GenericDocument}. */
@@ -579,6 +585,9 @@ public class GenericDocument {
          *
          * <p>Once {@link #build} is called, the instance can no longer be used.
          *
+         * <p>TODO(b/181887768): This method exists only for dogfooder transition and must be
+         * removed.
+         *
          * @param uri the URI to set for the {@link GenericDocument}.
          * @param schemaType the {@link AppSearchSchema} type of the {@link GenericDocument}. The
          *     provided {@code schemaType} must be defined using {@link AppSearchSession#setSchema}
@@ -586,7 +595,10 @@ public class GenericDocument {
          *     using {@link AppSearchSession#put}. Otherwise, the document will be rejected by
          *     {@link AppSearchSession#put} with result code {@link
          *     AppSearchResult#RESULT_NOT_FOUND}.
+         * @deprecated Please supply the namespace in {@link #Builder(String, String, String)}
+         *     instead. This method exists only for dogfooder transition and must be removed.
          */
+        @Deprecated
         @SuppressWarnings("unchecked")
         public Builder(@NonNull String uri, @NonNull String schemaType) {
             Preconditions.checkNotNull(uri);
@@ -604,6 +616,41 @@ public class GenericDocument {
         }
 
         /**
+         * Creates a new {@link GenericDocument.Builder}.
+         *
+         * <p>Once {@link #build} is called, the instance can no longer be used.
+         *
+         * <p>URIs are unique within a namespace.
+         *
+         * <p>The number of namespaces per app should be kept small for efficiency reasons.
+         *
+         * @param namespace the namespace to set for the {@link GenericDocument}.
+         * @param uri the URI to set for the {@link GenericDocument}.
+         * @param schemaType the {@link AppSearchSchema} type of the {@link GenericDocument}. The
+         *     provided {@code schemaType} must be defined using {@link AppSearchSession#setSchema}
+         *     prior to inserting a document of this {@code schemaType} into the AppSearch index
+         *     using {@link AppSearchSession#put}. Otherwise, the document will be rejected by
+         *     {@link AppSearchSession#put} with result code {@link
+         *     AppSearchResult#RESULT_NOT_FOUND}.
+         */
+        @SuppressWarnings("unchecked")
+        public Builder(@NonNull String namespace, @NonNull String uri, @NonNull String schemaType) {
+            Preconditions.checkNotNull(namespace);
+            Preconditions.checkNotNull(uri);
+            Preconditions.checkNotNull(schemaType);
+            mBuilderTypeInstance = (BuilderType) this;
+            mBundle.putString(GenericDocument.NAMESPACE_FIELD, namespace);
+            mBundle.putString(GenericDocument.URI_FIELD, uri);
+            mBundle.putString(GenericDocument.SCHEMA_TYPE_FIELD, schemaType);
+            // Set current timestamp for creation timestamp by default.
+            mBundle.putLong(
+                    GenericDocument.CREATION_TIMESTAMP_MILLIS_FIELD, System.currentTimeMillis());
+            mBundle.putLong(GenericDocument.TTL_MILLIS_FIELD, DEFAULT_TTL_MILLIS);
+            mBundle.putInt(GenericDocument.SCORE_FIELD, DEFAULT_SCORE);
+            mBundle.putBundle(PROPERTIES_FIELD, mProperties);
+        }
+
+        /**
          * Sets the app-defined namespace this document resides in. No special values are reserved
          * or understood by the infrastructure.
          *
@@ -611,8 +658,14 @@ public class GenericDocument {
          *
          * <p>The number of namespaces per app should be kept small for efficiency reasons.
          *
+         * <p>TODO(b/181887768): This method exists only for dogfooder transition and must be
+         * removed.
+         *
          * @throws IllegalStateException if the builder has already been used.
+         * @deprecated Please supply the namespace in {@link #Builder(String, String, String)}
+         *     instead. This method exists only for dogfooder transition and must be removed.
          */
+        @Deprecated
         @NonNull
         public BuilderType setNamespace(@NonNull String namespace) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");

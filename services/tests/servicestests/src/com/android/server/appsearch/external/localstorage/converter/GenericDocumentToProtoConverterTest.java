@@ -36,23 +36,23 @@ public class GenericDocumentToProtoConverterTest {
     private static final byte[] BYTE_ARRAY_2 = new byte[] {(byte) 4, (byte) 5, (byte) 6, (byte) 7};
     private static final GenericDocument DOCUMENT_PROPERTIES_1 =
             new GenericDocument.Builder<GenericDocument.Builder<?>>(
-                            "sDocumentProperties1", "sDocumentPropertiesSchemaType1")
+                            "namespace", "sDocumentProperties1", "sDocumentPropertiesSchemaType1")
                     .setCreationTimestampMillis(12345L)
                     .build();
     private static final GenericDocument DOCUMENT_PROPERTIES_2 =
             new GenericDocument.Builder<GenericDocument.Builder<?>>(
-                            "sDocumentProperties2", "sDocumentPropertiesSchemaType2")
+                            "namespace", "sDocumentProperties2", "sDocumentPropertiesSchemaType2")
                     .setCreationTimestampMillis(6789L)
                     .build();
 
     @Test
     public void testDocumentProtoConvert() {
         GenericDocument document =
-                new GenericDocument.Builder<GenericDocument.Builder<?>>("uri1", "schemaType1")
+                new GenericDocument.Builder<GenericDocument.Builder<?>>(
+                                "namespace", "uri1", "schemaType1")
                         .setCreationTimestampMillis(5L)
                         .setScore(1)
                         .setTtlMillis(1L)
-                        .setNamespace("namespace")
                         .setPropertyLong("longKey1", 1L)
                         .setPropertyDouble("doubleKey1", 1.0)
                         .setPropertyBoolean("booleanKey1", true)
