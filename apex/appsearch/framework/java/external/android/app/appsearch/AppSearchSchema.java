@@ -309,7 +309,11 @@ public final class AppSearchSchema {
             return mBundle.getString(NAME_FIELD, "");
         }
 
-        /** Returns the type of data the property contains (e.g. string, int, bytes, etc). */
+        /**
+         * Returns the type of data the property contains (e.g. string, int, bytes, etc).
+         *
+         * @hide
+         */
         public @DataType int getDataType() {
             return mBundle.getInt(DATA_TYPE_FIELD, -1);
         }
