@@ -49,6 +49,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -633,7 +634,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         @Override
         public void sendEpsQosSessionAvailable(final int qosCallbackId, final QosSession session,
                 final EpsBearerQosSessionAttributes attributes) {
-            mQosCallbackTracker.sendEventQosSessionAvailable(qosCallbackId, session, attributes);
+            mQosCallbackTracker.sendEventEpsQosSessionAvailable(qosCallbackId, session, attributes);
+        }
+
+        @Override
+        public void sendNrQosSessionAvailable(final int qosCallbackId, final QosSession session,
+                final NrQosSessionAttributes attributes) {
+            mQosCallbackTracker.sendEventNrQosSessionAvailable(qosCallbackId, session, attributes);
         }
 
         @Override
