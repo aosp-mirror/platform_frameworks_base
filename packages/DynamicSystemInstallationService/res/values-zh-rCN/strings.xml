@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"动态系统已准备就绪。重启您的设备即可开始使用动态系统。"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"正在安装"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"安装失败"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"图片验证失败。安装将中止。"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"映像验证失败。安装将中止。"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"目前正在运行动态系统。需重启才能使用原 Android 版本。"</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"取消"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"舍弃"</string>

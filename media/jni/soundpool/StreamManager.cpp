@@ -98,9 +98,11 @@ int32_t StreamMap::getNextIdForStream(Stream* stream) const {
 #pragma clang diagnostic ignored "-Wthread-safety-analysis"
 
 StreamManager::StreamManager(
-        int32_t streams, size_t threads, const audio_attributes_t* attributes)
+        int32_t streams, size_t threads, const audio_attributes_t* attributes,
+        std::string opPackageName)
     : StreamMap(streams)
     , mAttributes(*attributes)
+    , mOpPackageName(std::move(opPackageName))
 {
     ALOGV("%s(%d, %zu, ...)", __func__, streams, threads);
     forEach([this](Stream *stream) {

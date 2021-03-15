@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"ගතික පද්ධතිය සූදානම්ය. එය භාවිතා කිරීම ආරම්භ කිරීමට, ඔබගේ උපාංගය නැවත ආරම්භ කරන්න."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ස්ථාපනය කෙරෙමින් පවතී"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"ස්ථාපනය අසාර්ථක විය"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"රූප වලංගු කිරීම අසාර්ථක විය. ස්ථාපනය අවලංගු කරන්න"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"තැටි රූපය වලංගු කිරීම අසාර්ථක විය. ස්ථාපනය අවලංගු කරන්න"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"දැනට ගතික පද්ධතියක් ක්‍රියාත්මක කරයි. මුල් Android අනුවාදය භාවිතා කිරීමට නැවත ආරම්භ කරන්න."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"අවලංගු කරන්න"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"ඉවත ලන්න"</string>

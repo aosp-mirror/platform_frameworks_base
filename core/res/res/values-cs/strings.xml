@@ -1271,7 +1271,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Hlasitost oznámení"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Výchozí vyzvánění"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Výchozí (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Žádný"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Žádné"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Vyzvánění"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Zvuky budíku"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Zvuky upozornění"</string>

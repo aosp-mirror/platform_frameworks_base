@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Dinamični sustav je spreman. Da biste ga počeli upotrebljavati, ponovno pokrenite svoj uređaj."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Instalacija u tijeku"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Instaliranje nije uspjelo"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Provjera slike nije uspjela. Prekini instalaciju."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Provjera slike diska nije uspjela. Prekini instalaciju."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Trenutačno je pokrenut dinamični sustav. Ponovno pokrenite kako biste upotrebljavali izvornu verziju Androida."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Otkaži"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Odbaci"</string>

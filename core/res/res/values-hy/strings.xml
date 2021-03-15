@@ -1219,7 +1219,7 @@
     <string name="volume_music" msgid="7727274216734955095">"Մեդիա ձայնի բարձրություն"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Նվագարկում է Bluetooth-ի միջոցով"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Սահմանվել է անձայն զանգերանգ"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Մուտքային զանգի ձայնի ուժգնությունը"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Խոսակցություն"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth-ի ներզանգի բարձրություն"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Զարթուցիչի ձայնը"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Ծանուցումների ձայնի ուժգնությունը"</string>
@@ -1907,7 +1907,7 @@
     <string name="app_info" msgid="6113278084877079851">"Հավելվածի մասին"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Ցուցադրական օգտատերը գործարկվում է…"</string>
-    <string name="demo_restarting_message" msgid="1160053183701746766">"Սարաքը վերակայվում է…"</string>
+    <string name="demo_restarting_message" msgid="1160053183701746766">"Սարքը վերակայվում է…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"Անջատած <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="5731633152336490471">"Կոնֆերանս զանգ"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Հուշակ"</string>

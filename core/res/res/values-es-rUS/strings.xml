@@ -2044,7 +2044,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Selector del acceso directo de accesibilidad en pantalla"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Acceso directo de accesibilidad"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de subtítulos de <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Se colocó <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> en el depósito RESTRICTED"</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Se colocó <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> en el bucket RESTRICTED"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"envió una imagen"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversación"</string>

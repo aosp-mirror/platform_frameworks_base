@@ -3369,7 +3369,8 @@ class AlarmManagerService extends SystemService {
                     if (mMaxDelayTime < thisDelayTime) {
                         mMaxDelayTime = thisDelayTime;
                     }
-                    deliverAlarmsLocked(mPendingNonWakeupAlarms, nowELAPSED);
+                    final ArrayList<Alarm> triggerList = new ArrayList<>(mPendingNonWakeupAlarms);
+                    deliverAlarmsLocked(triggerList, nowELAPSED);
                     mPendingNonWakeupAlarms.clear();
                 }
                 if (mNonInteractiveStartTime > 0) {

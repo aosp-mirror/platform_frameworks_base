@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"ডায়নামিক সিস্টেম রেডি হয়ে গেছে। সেটি ব্যবহার করা শুরু করতে আপনার ডিভাইস রিস্টার্ট করুন।"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ইনস্টল করা হচ্ছে"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"ইনস্টল করা যায়নি"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ছবি যাচাই করা যায়নি। ইনস্টলেশন বন্ধ করুন।"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ইমেজ যাচাই করা যায়নি। ইনস্টলেশন বন্ধ করুন।"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"বর্তমানে ডায়নামিক সিস্টেম চালানো হচ্ছে। আসল Android ভার্সন ব্যবহার করার জন্য রিস্টার্ট করুন।"</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"বাতিল করুন"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"বাতিল করুন"</string>

@@ -85,7 +85,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"المكالمات الهاتفية"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"نقل الملف"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"جهاز الإرسال"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"الدخول إلى الإنترنت"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"استخدام الإنترنت"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"مشاركة جهة الاتصال"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"استخدام مع مشاركة جهة الاتصال"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"مشاركة اتصال الإنترنت"</string>
@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> إلى أن يتم شحن الجهاز بالكامل"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> إلى أن يتم شحن الجهاز بالكامل"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - التحسين لسلامة البطارية"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"غير معروف"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"جارٍ الشحن"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"جارٍ الشحن سريعًا"</string>
@@ -514,7 +515,7 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"مكبر صوت الهاتف"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"حدثت مشكلة أثناء الاتصال. يُرجى إيقاف الجهاز ثم إعادة تشغيله."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"جهاز سماعي سلكي"</string>
-    <string name="help_label" msgid="3528360748637781274">"المساعدة والتعليقات"</string>
+    <string name="help_label" msgid="3528360748637781274">"المساعدة والملاحظات والآراء"</string>
     <string name="storage_category" msgid="2287342585424631813">"مساحة التخزين"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"البيانات المشتركة"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"عرض البيانات المشتركة وتعديلها"</string>

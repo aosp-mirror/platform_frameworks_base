@@ -781,5 +781,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".media.dialog.MediaOutputDialogReceiver"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG" />
+                <action android:name="com.android.systemui.action.DISMISS_MEDIA_OUTPUT_DIALOG" />
+            </intent-filter>
+        </receiver>
+
     </application>
 </manifest>

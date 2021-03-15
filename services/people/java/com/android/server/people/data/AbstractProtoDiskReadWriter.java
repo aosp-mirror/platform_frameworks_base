@@ -185,22 +185,23 @@ abstract class AbstractProtoDiskReadWriter<T> {
      * is useful for when device is powering off.
      */
     @MainThread
-    synchronized void saveImmediately(@NonNull String fileName, @NonNull T data) {
-        mScheduledFileDataMap.put(fileName, data);
+    void saveImmediately(@NonNull String fileName, @NonNull T data) {
+        synchronized (this) {
+            mScheduledFileDataMap.put(fileName, data);
+        }
         triggerScheduledFlushEarly();
     }
 
     @MainThread
-    private synchronized void triggerScheduledFlushEarly() {
-        if (mScheduledFileDataMap.isEmpty() || mScheduledExecutorService.isShutdown()) {
-            return;
-        }
-        // Cancel existing future.
-        if (mScheduledFuture != null) {
-
-            // We shouldn't need to interrupt as this method and threaded task
-            // #flushScheduledData are both synchronized.
-            mScheduledFuture.cancel(true);
+    private void triggerScheduledFlushEarly() {
+        synchronized (this) {
+            if (mScheduledFileDataMap.isEmpty() || mScheduledExecutorService.isShutdown()) {
+                return;
+            }
+            // Cancel existing future.
+            if (mScheduledFuture != null) {
+                mScheduledFuture.cancel(true);
+            }
         }
 
         // Submit flush and blocks until it completes. Blocking will prevent the device from

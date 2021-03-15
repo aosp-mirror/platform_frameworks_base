@@ -765,7 +765,7 @@
       <item quantity="one">%d മിനിറ്റ്</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"ബാറ്ററി ഉപയോഗം"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി ലാഭിക്കൽ നടക്കില്ല"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"ചാർജ് ചെയ്യുമ്പോൾ ബാറ്ററി ലാഭിക്കൽ സാധ്യമല്ല"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"ബാറ്ററി ലാഭിക്കൽ"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ബട്ടൺ <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -951,7 +951,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"പൊതുവായ സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"സ്റ്റോറേജ്"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"സൂചനകൾ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ഇൻസ്റ്റന്റ് ആപ്പ്"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> റണ്‍ ചെയ്യുന്നു"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ഇൻസ്‌റ്റാൾ ചെയ്യാതെ ആപ്പ് തുറന്നു."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ഇൻസ്‌റ്റാൾ ചെയ്യാതെ ആപ്പ് തുറന്നു. കൂടുതലറിയാൻ ടാപ്പ് ചെയ്യുക."</string>
@@ -985,7 +985,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"ബാറ്ററി ചാർജ് തീരാൻ സാധ്യതയുണ്ടെങ്കിൽ ഓണാക്കുക"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"വേണ്ട"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"ബാറ്ററി ലാഭിക്കൽ ഷെഡ്യൂൾ ഓണാക്കുക"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ബാറ്ററി <xliff:g id="PERCENTAGE">%d</xliff:g>%% ൽ താഴെയാകുമ്പോൾ, ബാറ്ററി ലാഭിക്കൽ സ്വമേധയാ ഓണാകും."</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ബാറ്ററി <xliff:g id="PERCENTAGE">%d</xliff:g>%% ൽ താഴെയാകുമ്പോൾ, ബാറ്ററി ലാഭിക്കൽ സ്വയമേവ ഓണാകും."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ക്രമീകരണം"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"മനസ്സിലായി"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI ഹീപ്പ് ഡമ്പ് ചെയ്യുക"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"നിർദ്ദേശങ്ങൾ ലോഡ് ചെയ്യുന്നു"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"മീഡിയ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"നിലവിലെ സെഷൻ മറയ്‌ക്കുക."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"നിലവിലെ സെഷൻ മറയ്ക്കാനാകില്ല."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"പുനരാരംഭിക്കുക"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ക്രമീകരണം"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"പുതിയ നിയന്ത്രണങ്ങൾ കാണാൻ പവർ ബട്ടൺ പിടിക്കുക"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"നിയന്ത്രണങ്ങൾ എഡിറ്റ് ചെയ്യുക"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"ഔട്ട്പുട്ടുകൾ ചേർക്കുക"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"ഗ്രൂപ്പ്"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"ഒരു ഉപകരണം തിരഞ്ഞെടുത്തു"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> ഉപകരണങ്ങൾ തിരഞ്ഞെടുത്തു"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (വിച്ഛേദിച്ചു)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"കണക്റ്റ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"പുതിയ ഉപകരണവുമായി ജോടിയാക്കുക"</string>
 </resources>

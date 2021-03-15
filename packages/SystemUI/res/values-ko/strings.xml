@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"추천 제어 기능 로드 중"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"미디어"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"현재 세션을 숨깁니다."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"현재 세션은 숨길 수 없습니다."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"닫기"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"다시 시작"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"설정"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"새 컨트롤을 보려면 전원 버튼을 길게 누르세요."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"컨트롤 추가"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"컨트롤 수정"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"출력 추가"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"그룹"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"기기 1대 선택됨"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"기기 <xliff:g id="COUNT">%1$d</xliff:g>대 선택됨"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>(연결 끊김)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"연결할 수 없습니다. 다시 시도하세요."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"새 기기와 페어링"</string>
 </resources>

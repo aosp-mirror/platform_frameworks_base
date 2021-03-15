@@ -248,6 +248,7 @@ public class GraphicsEnvironment {
         }
         if (appInfo == null) {
             Log.w(TAG, "Debug layer app '" + packageName + "' not installed");
+            return "";
         }
 
         final String abi = chooseAbi(appInfo);

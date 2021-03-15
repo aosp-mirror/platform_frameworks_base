@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Dynamický systém je k dispozícii. Ak ho chcete začať používať, reštartujte zariadenie."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Prebieha inštalácia"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Nepodarilo sa nainštalovať"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Obrázok sa nepodarilo overiť. Prerušte inštaláciu."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Obraz disku sa nepodarilo overiť. Prerušte inštaláciu."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Momentálne je spustený dynamický systém. Ak chcete používať pôvodnú verziu Androidu, reštartujte."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Zrušiť"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Zahodiť"</string>

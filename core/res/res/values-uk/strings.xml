@@ -1130,7 +1130,7 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="8689459651807876423">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"Вибрати все"</string>
-    <string name="cut" msgid="2561199725874745819">"Виріз."</string>
+    <string name="cut" msgid="2561199725874745819">"Вирізати"</string>
     <string name="copy" msgid="5472512047143665218">"Копіювати"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Не вдалося скопіювати в буфер обміну"</string>
     <string name="paste" msgid="461843306215520225">"Вставити"</string>
@@ -1259,9 +1259,9 @@
     <string name="volume_music" msgid="7727274216734955095">"Гучність медіа"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Відтвор. через Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Установлено сигнал дзвінка без звуку"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Обсяг вхідних"</string>
-    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Обсяг вхідних Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Гучн. сповіщ."</string>
+    <string name="volume_call" msgid="7625321655265747433">"Гучність під час розмови"</string>
+    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Гучність у викликах Bluetooth"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Гучність будильника"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Гучність сповіщень"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Гучність"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Гучність Bluetooth"</string>
@@ -1856,7 +1856,7 @@
       <item quantity="other">Протягом %1$d хв (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">%1$d годину (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">%1$d година (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d години (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">%1$d годин (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">%1$d години (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

@@ -1120,8 +1120,8 @@
     <string name="loading" msgid="3138021523725055037">"Loading…"</string>
     <string name="capital_on" msgid="2770685323900821829">"ON"</string>
     <string name="capital_off" msgid="7443704171014626777">"OFF"</string>
-    <string name="checked" msgid="9179896827054513119">"ticked"</string>
-    <string name="not_checked" msgid="7972320087569023342">"not ticked"</string>
+    <string name="checked" msgid="9179896827054513119">"checked"</string>
+    <string name="not_checked" msgid="7972320087569023342">"not checked"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Complete action using"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Complete action using %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Complete action"</string>
@@ -2023,7 +2023,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> spreadsheet"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Presentation"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> presentation"</string>
-    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth will stay on during aeroplane mode"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth will stay on in Airplane mode"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Loading"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> files</item>

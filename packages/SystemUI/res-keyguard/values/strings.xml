@@ -79,6 +79,9 @@
          is not fully charged, and it's plugged into a slow charger, say that it's charging slowly.  -->
     <string name="keyguard_plugged_in_charging_slowly"><xliff:g id="percentage">%s</xliff:g> • Charging slowly</string>
 
+    <!-- When the lock screen is showing and the phone plugged in, and the defend mode is triggered, say that it's optimizing for battery health.  -->
+    <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Optimizing for battery health</string>
+
     <!-- When the lock screen is showing and the battery is low, warn user to plug
          in the phone soon. -->
     <string name="keyguard_low_battery">Connect your charger.</string>

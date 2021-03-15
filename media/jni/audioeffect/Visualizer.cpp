@@ -33,21 +33,9 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-Visualizer::Visualizer (const String16& opPackageName,
-         int32_t priority,
-         effect_callback_t cbf,
-         void* user,
-         audio_session_t sessionId)
-    :   AudioEffect(SL_IID_VISUALIZATION, opPackageName, NULL, priority, cbf, user, sessionId),
-        mCaptureRate(CAPTURE_RATE_DEF),
-        mCaptureSize(CAPTURE_SIZE_DEF),
-        mSampleRate(44100000),
-        mScalingMode(VISUALIZER_SCALING_MODE_NORMALIZED),
-        mMeasurementMode(MEASUREMENT_MODE_NONE),
-        mCaptureCallBack(NULL),
-        mCaptureCbkUser(NULL)
+Visualizer::Visualizer (const String16& opPackageName)
+        :   AudioEffect(opPackageName)
 {
-    initCaptureSize();
 }
 
 Visualizer::~Visualizer()
@@ -56,6 +44,23 @@ Visualizer::~Visualizer()
     setEnabled(false);
     setCaptureCallBack(NULL, NULL, 0, 0);
 }
+
+status_t Visualizer::set(int32_t priority,
+                         effect_callback_t cbf,
+                         void* user,
+                         audio_session_t sessionId,
+                         audio_io_handle_t io,
+                         const AudioDeviceTypeAddr& device,
+                         bool probe)
+{
+    status_t status = AudioEffect::set(
+            SL_IID_VISUALIZATION, nullptr, priority, cbf, user, sessionId, io, device, probe);
+    if (status == NO_ERROR || status == ALREADY_EXISTS) {
+        initCaptureSize();
+    }
+    return status;
+}
+
 
 void Visualizer::release()
 {

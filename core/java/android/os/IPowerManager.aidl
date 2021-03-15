@@ -94,6 +94,8 @@ interface IPowerManager
     boolean isAmbientDisplaySuppressedForToken(String token);
     // returns whether ambient display is suppressed by any app with any token.
     boolean isAmbientDisplaySuppressed();
+    // returns whether ambient display is suppressed by the given app with the given token.
+    boolean isAmbientDisplaySuppressedForTokenByApp(String token, int appUid);
 
     // Forces the system to suspend even if there are held wakelocks.
     boolean forceSuspend();

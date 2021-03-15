@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Échec de configuration de l\'adresse IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Non connecté en raison de la faible qualité du réseau"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Échec de la connexion Wi-Fi"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problème d\'authentification."</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problème d\'authentification"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Connexion impossible"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Impossible de se connecter au réseau \"<xliff:g id="AP_NAME">%1$s</xliff:g>\""</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Vérifiez le mot de passe et réessayez"</string>
@@ -251,7 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certification affichage sans fil"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Autoriser l\'enregistrement d\'infos Wi-Fi détaillées"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limiter la recherche Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Chgt aléatoire d\'adresse MAC en Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Changement aléatoire d\'adresse MAC en Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Données mobiles toujours actives"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accélération matérielle pour le partage de connexion"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afficher les appareils Bluetooth sans nom"</string>
@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> jusqu\'à ce que la batterie soit chargée"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la charge complète"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Optimisation pour préserver batterie"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Batterie en charge"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Charge rapide"</string>

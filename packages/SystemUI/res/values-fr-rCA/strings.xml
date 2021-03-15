@@ -459,7 +459,7 @@
     <string name="camera_hint" msgid="4519495795000658637">"Balayez à partir de l\'icône pour accéder à l\'appareil photo"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Aucune interruption : le son des lecteurs d\'écran sera également désactivé."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"Aucune interruption"</string>
-    <string name="interruption_level_priority" msgid="661294280016622209">"Priorités seulement"</string>
+    <string name="interruption_level_priority" msgid="661294280016622209">"Prioritaires seulement"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"Alarmes seulement"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Aucune\ninterruption"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Priorités\nuniquement"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Garde votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"S\'affiche en haut de la section des conversations sous forme de bulle flottante et affiche la photo du profil sur l\'écran de verrouillage"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Priorité"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne prend pas en charge les fonctionnalités de conversation"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bulles récentes et les bulles ignorées s\'afficheront ici"</string>
@@ -955,7 +955,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Application ouverte sans avoir été installée."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Application ouverte sans avoir été installée. Touchez ici pour en savoir plus."</string>
-    <string name="app_info" msgid="5153758994129963243">"Détails de l\'applic."</string>
+    <string name="app_info" msgid="5153758994129963243">"Détails de l\'appli"</string>
     <string name="go_to_web" msgid="636673528981366511">"Ouvrir le navigateur"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Données cellulaires"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> : <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Chargement des recommandations…"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Commandes multimédias"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Masquer la session en cours."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"La session actuelle ne peut pas être masquée."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Fermer"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reprendre"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Paramètres"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Maintenez enfoncé l\'interrupteur pour afficher les nouvelles commandes"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Ajouter des commandes"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Modifier des commandes"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Ajouter des sorties"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Groupe"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Un appareil sélectionné"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> appareil sélectionné"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (déconnecté)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Impossible de se connecter. Réessayez."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Associer un autre appareil"</string>
 </resources>

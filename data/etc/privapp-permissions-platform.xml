@@ -52,6 +52,7 @@ applications that come with the platform
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.RECEIVE_EMERGENCY_BROADCAST"/>
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
+        <permission name="android.permission.STATUS_BAR" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.cellbroadcastservice">
@@ -208,6 +209,7 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.providers.contacts">
         <permission name="android.permission.BIND_DIRECTORY_SEARCH"/>
+        <permission name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"/>
         <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>

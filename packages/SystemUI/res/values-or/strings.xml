@@ -951,7 +951,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"ସାଧାରଣ ମେସେଜ୍"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ଷ୍ଟୋରେଜ୍‌"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ହିଣ୍ଟ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ଇନଷ୍ଟାଣ୍ଟ ଆପ୍‌"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ସୁପାରିଶଗୁଡ଼ିକ ଲୋଡ୍ କରାଯାଉଛି"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ମିଡିଆ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"ବର୍ତ୍ତମାନର ସେସନ୍ ଲୁଚାନ୍ତୁ।"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"ବର୍ତ୍ତମାନର ସେସନକୁ ଲୁଚାଯାଇପାରିବ ନାହିଁ।"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ସେଟିଂସ୍"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"ନୂଆ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଦେଖିବା ପାଇଁ ପାୱାର ବଟନକୁ ଧରି ରଖନ୍ତୁ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ସମ୍ପାଦନ କରନ୍ତୁ"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"ଆଉଟପୁଟ୍ ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"ଗୋଷ୍ଠୀ"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1ଟି ଡିଭାଇସ୍ ଚୟନ କରାଯାଇଛି"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g>ଟି ଡିଭାଇସ୍ ଚୟନ କରାଯାଇଛି"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ବିଚ୍ଛିନ୍ନ କରାଯାଇଛି)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ସଂଯୋଗ କରାଯାଇପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ନୂଆ ଡିଭାଇସକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
 </resources>

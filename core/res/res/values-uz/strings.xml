@@ -584,7 +584,7 @@
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Telefonni chapga suring."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Telefonni oʻngga suring."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Qurilmaga tik qarang."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Telefoningizga yuzingizni tik tuting."</string>
+    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Telefonni yuzingizga tik qarating."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Ortiqcha harakatlanmoqda. Qimirlatmasdan ushlang."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Yuzingizni qaytadan qayd qildiring."</string>
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Yuz tanilmadi. Qaytadan urining."</string>
@@ -1219,7 +1219,7 @@
     <string name="volume_music" msgid="7727274216734955095">"Multimedia tovushi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth orqali ijro etilmoqda"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Ovozsiz rejim tanlandi"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Suhbat vaqtidagi tovush balandligi"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Suhbat tovushi"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Kiruvchi bluetooth tovushi"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Signal tovushi"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Eslatma tovushi"</string>
@@ -1231,7 +1231,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Eslatma tovushi"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Standart rington"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Standart (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Yo‘q"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Hech qanday"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Ringtonlar"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Signal ovozlari"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Bildirishnoma ovozlari"</string>
@@ -1765,7 +1765,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Yangi PIN kodni tasdiqlash"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Cheklovlarni o‘zgartirish uchun PIN-kod yaratish"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-kod mos kelmadi. Qayta urinib ko‘ring."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN kod kamida 4 ta raqamdan iborat bo‘lishi shart."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN kod juda qisqa, kamida 4 ta raqam kiriting."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring</item>
       <item quantity="one">1 soniyadan so‘ng qayta urinib ko‘ring</item>
@@ -1792,7 +1792,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administrator tomonidan yangilangan"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administrator tomonidan o‘chirilgan"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n• Tungi mavzuni yoqadi\n• Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi\n\n"<annotation id="url">"Batafsil"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n• Tungi mavzuni yoqadi\n• Fondagi harakatlar, vizual effektlar va “Ok Google” kabi boshqa funksiyalarni faolsizlantiradi\n\n"<annotation id="url">"Batafsil"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n• Tungi mavzuni yoqadi\n• Fondagi harakatlar, vizual effektlar va “Ok Google” kabi boshqa funksiyalarni faolsizlantiradi"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash yoqilsinmi?"</string>
@@ -1885,7 +1885,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Ilova ishlamayapti"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ishlamayapti. Uning ishlashini <xliff:g id="APP_NAME_1">%2$s</xliff:g> cheklamoqda."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Batafsil"</string>
-    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Ilovani ishga tushirish"</string>
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Ilovani pauzadan chiqarish"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ish profili yoqilsinmi?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Ishga oid ilovalar, bildirishnomalar, ma’lumotlar va boshqa ish profili imkoniyatlari yoqiladi"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Yoqish"</string>
@@ -1999,7 +1999,7 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ekranda boshqa ilovalar ustidan ochiladi"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Kun tartibi rejimi haqidagi bildirishnoma"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya quvvati odatdagidan ertaroq tugashi mumkin"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batareya quvvati uzoqroq ishlashi uchun Tejamkor rejim yoqildi"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash rejimi yoqildi"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Quvvat tejash"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Quvvat tejash rejimi faolsizlantirildi"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefon yetarli quvvatlandi. Funksiyalar endi cheklovlarsiz ishlaydi."</string>

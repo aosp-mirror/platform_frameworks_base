@@ -822,12 +822,12 @@
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"అన్‌లాక్ చేయడానికి పాస్‌వర్డ్‌ను టైప్ చేయండి"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"అన్‌లాక్ చేయడానికి పిన్‌ను టైప్ చేయండి"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"చెల్లని పిన్‌ కోడ్."</string>
-    <string name="keyguard_label_text" msgid="3841953694564168384">"అన్‌లాక్ చేయడానికి, మెను ఆపై 0ని నొక్కండి."</string>
+    <string name="keyguard_label_text" msgid="3841953694564168384">"అన్‌లాక్ చేయడానికి, మెనూ ఆపై 0ని నొక్కండి."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"అత్యవసర నంబర్"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"సేవ లేదు"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"స్క్రీన్ లాక్ చేయబడింది."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"అన్‌లాక్ చేయడానికి లేదా అత్యవసర కాల్ చేయడానికి మెను నొక్కండి."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"అన్‌లాక్ చేయడానికి మెను నొక్కండి."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"అన్‌లాక్ చేయడానికి లేదా అత్యవసర కాల్ చేయడానికి మెనూ నొక్కండి."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"అన్‌లాక్ చేయడానికి మెనూ నొక్కండి."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"అన్‌లాక్ చేయడానికి నమూనాను గీయండి"</string>
     <string name="lockscreen_emergency_call" msgid="7549683825868928636">"ఎమర్జెన్సీ కాల్"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"కాల్‌కు తిరిగి వెళ్లు"</string>
@@ -970,7 +970,7 @@
     <string name="text_copied" msgid="2531420577879738860">"వచనం క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది."</string>
     <string name="copied" msgid="4675902854553014676">"కాపీ చేయబడింది"</string>
     <string name="more_item_label" msgid="7419249600215749115">"ఎక్కువ"</string>
-    <string name="prepend_shortcut_label" msgid="1743716737502867951">"మెను+"</string>
+    <string name="prepend_shortcut_label" msgid="1743716737502867951">"మెనూ+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
     <string name="menu_ctrl_shortcut_label" msgid="131911133027196485">"Ctrl+"</string>
     <string name="menu_alt_shortcut_label" msgid="343761069945250991">"Alt+"</string>

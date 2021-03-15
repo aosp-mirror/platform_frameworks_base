@@ -857,12 +857,12 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Колдонуучунун нускамасын караңыз же Кардарларды тейлөө борборуна кайрылыңыз."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM-карта бөгөттөлгөн."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM-карта бөгөттөн чыгарылууда…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Кулпуну ачуу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Сырсөзүңүздү <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"PIN-кодуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Кулпуну ачуу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес тартсаңыз, планшетиңиздин кулпусун Google\'га кирип ачууга туура келет.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес тартсаңыз, планшетиңиздин кулпусун Google\'га кирип ачууга туура келет.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Графикалык ачкычыңызды <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес чийдиңиз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, Android TV түзмөгүңүздүн кулпусун Google аккаунтуңузга кирип ачышыңыз керек болот.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секунддан кийин кайталап көрүңүз."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Кулпуну ачуу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес тартсаңыз, телефонуңуздун кулпусун Google\'га кирип ачууга туура келет.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес тартсаңыз, телефонуңуздун кулпусун Google\'га кирип ачууга туура келет.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"Сиз планшетиңизди бөгөттөн чыгарууга <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> аракеттен кийин, планшет баштапкы абалына келтирилет жана бардык маалыматтар өчүрүлөт."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"Android TV түзмөгүңүздүн кулпусун <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес ачууга аракет жасадыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, Android TV түзмөгүңүз демейки жөндөөлөргө кайтарылып, бардык колдонуучу дайындары жоголот."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"Сиз телефонуңузду бөгөттөн чыгарууга <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> аракеттен кийин, телефон баштапкы абалына келтирилет жана бардык маалыматтар өчүрүлөт."</string>
@@ -1199,7 +1199,7 @@
     <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ичинен <xliff:g id="NUMBER_0">%1$d</xliff:g> колдонмо ыңгайлаштырылууда."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> даярдалууда."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Колдонмолорду иштетип баштоо"</string>
-    <string name="android_upgrading_complete" msgid="409800058018374746">"Жүктөө аякталууда."</string>
+    <string name="android_upgrading_complete" msgid="409800058018374746">"Жүктөлүүдө"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> иштеп жатат"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Оюнга кайтуу үчүн таптаңыз"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Оюн тандоо"</string>
@@ -1219,7 +1219,7 @@
     <string name="volume_music" msgid="7727274216734955095">"Мультимедианын катуулугу"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth аркылуу ойнотулууда"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Үнсүз рингтон орнотулду"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Чалуудагы үн көлөмү"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Сүйлөшүүнүн катуулугу"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth чалуудагы үн көлөмү"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Ойготкучтун катуулугу"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Эскертме үн көлөмү"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Администраторуңуз жаңыртып койгон"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Администраторуңуз жок кылып салган"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ЖАРАЙТ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батареянын мөөнөтүн узартуу үчүн, Батареяны үнөмдөгүч режими төмөнкүлөрдү аткарат:\n\n• Караңгы теманы күйгүзөт\n• Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт\n\n"<annotation id="url">"Кеңири маалымат"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Батареянын мөөнөтүн узартуу үчүн, Батареяны үнөмдөгүч режими:\n\n• Караңгы теманы күйгүзөт\n• Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батареяны көбүрөөк убакытка жеткирүү үчүн Батареяны үнөмдөгүч режиминде:\n\n• Караңгы тема күйгүзүлөт\n• Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт\n\n"<annotation id="url">"Кеңири маалымат"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Батареяны көбүрөөк убакытка жеткирүү үчүн Батареяны үнөмдөгүч режими:\n\n• Караңгы тема күйгүзүлөт\n• Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Трафикти үнөмдөө режиминде айрым колдонмолор дайын-даректерди фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайын-даректерди жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикти үнөмдөө режимин иштетесизби?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Күйгүзүү"</string>
@@ -2001,8 +2001,8 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея кубаттоого чейин отуруп калышы мүмкүн"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батареянын отуруп калбашы үчүн Батареяны үнөмдөгүч режими иштетилди"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Батареяны үнөмдөгүч"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батареяны үнөмдөгүч режими өчүрүлдү"</string>
-    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефон жеткиликтүү кубатталды. Функцияны колдоно берсеңиз болот."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батареяны үнөмдөө режими өчүк"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефондун кубаты жетиштүү. Функциялар мындан ары чектелбейт."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Планшет жеткиликтүү кубатталды. Функцияны колдоно берсеңиз болот."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Түзмөк жеткиликтүү кубатталды. Функцияны колдоно берсеңиз болот."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Папка"</string>

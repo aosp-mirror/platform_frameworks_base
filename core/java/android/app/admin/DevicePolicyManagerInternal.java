@@ -222,4 +222,16 @@ public abstract class DevicePolicyManagerInternal {
      * Returns the profile owner component for the given user, or {@code null} if there is not one.
      */
     public abstract ComponentName getProfileOwnerAsUser(int userHandle);
+
+    /**
+     * Returns whether this class supports being deferred the responsibility for resetting the given
+     * op.
+     */
+    public abstract boolean supportsResetOp(int op);
+
+    /**
+     * Resets the given op across the profile group of the given user for the given package. Assumes
+     * {@link #supportsResetOp(int)} is true.
+     */
+    public abstract void resetOp(int op, String packageName, @UserIdInt int userId);
 }

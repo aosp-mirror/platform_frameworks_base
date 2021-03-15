@@ -84,6 +84,14 @@
     <dimen name="car_button_radius">@dimen/car_radius_1</dimen>
     <dimen name="car_pill_button_size">56dp</dimen>
     <dimen name="car_touch_target_size">76dp</dimen>
+    <dimen name="car_touch_target_size_minus_one">75dp</dimen>
+
+    <!-- Switch. -->
+    <!-- Thumb size + 2*thumb margin size must equal car_touch_target_size -->
+    <!-- 2 * Thumb size + 2*track margin size must equal car_touch_target_size -->
+    <dimen name="car_switch_thumb_size">24dp</dimen>
+    <dimen name="car_switch_thumb_margin_size">26dp</dimen>
+    <dimen name="car_switch_track_margin_size">14dp</dimen>
 
     <!-- Seekbar -->
     <dimen name="car_seekbar_height">6dp</dimen>

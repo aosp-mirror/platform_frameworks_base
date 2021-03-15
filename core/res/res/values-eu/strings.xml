@@ -492,7 +492,7 @@
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"Sarearen konexioaren egoera aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"aldatu telefono bidezko konektagarritasuna"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Partekatutako Interneterako konexioaren egoera aldatzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_accessWifiState" msgid="5552488500317911052">"ikusi wifi bidezko konexioak"</string>
+    <string name="permlab_accessWifiState" msgid="5552488500317911052">"ikusi wifi-konexioak"</string>
     <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi sareei buruzko informazioa ikusteko baimena ematen die aplikazioei, adibidez, Wi-Fi konexioa aktibatuta dagoen eta konektatutako Wi-Fi gailuen izenak zein diren."</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"konektatu wifira edo deskonektatu bertatik"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fi sarbide-puntuetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei, baita Wi-Fi sareen gailu-konfigurazioari aldaketak egitekoa ere."</string>

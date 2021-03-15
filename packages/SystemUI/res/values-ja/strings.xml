@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"候補を読み込んでいます"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"メディア"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"現在のセッションを非表示にします。"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"現在のセッションは非表示にできません。"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"閉じる"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"再開"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"電源ボタンを長押しすると、新しいコントロールが表示されます"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"コントロールを追加"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"コントロールを編集"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"出力の追加"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"グループ"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"選択したデバイス: 1 台"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"選択したデバイス: <xliff:g id="COUNT">%1$d</xliff:g> 台"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>（未接続）"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"接続できませんでした。もう一度お試しください。"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"新しいデバイスとのペア設定"</string>
 </resources>

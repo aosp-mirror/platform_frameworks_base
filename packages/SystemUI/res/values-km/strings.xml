@@ -28,15 +28,15 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"នៅ​សល់ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"នៅសល់ <xliff:g id="PERCENTAGE">%1$s</xliff:g> អាច​ប្រើ​បាន​ប្រហែល <xliff:g id="TIME">%2$s</xliff:g> ទៀត​ផ្អែកលើ​ការប្រើប្រាស់​របស់អ្នក"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"នៅសល់ <xliff:g id="PERCENTAGE">%1$s</xliff:g> អាច​ប្រើ​បាន​ប្រហែល <xliff:g id="TIME">%2$s</xliff:g> ទៀត"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"នៅ​សល់ <xliff:g id="PERCENTAGE">%s</xliff:g> ។ កម្មវិធី​សន្សំ​ថ្ម​បានបើក។"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"នៅ​សល់ <xliff:g id="PERCENTAGE">%s</xliff:g>។ មុខងារ​សន្សំ​ថ្មត្រូវបានបើក។"</string>
     <string name="invalid_charger" msgid="4370074072117767416">"មិន​អាច​សាក​តាម USB បានទេ។ សូម​ប្រើ​ឆ្នាំង​សាក​ដែល​ភ្ជាប់​មក​ជាមួយ​ឧបករណ៍​របស់អ្នក។"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"មិន​អាច​សាក​តាម USB បានទេ"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"សូមប្រើ​ឆ្នាំង​សាក​ដែល​ភ្ជាប់​មក​ជាមួយ​ឧបករណ៍​របស់អ្នក"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"ការកំណត់"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"បើក​កម្មវិធី​សន្សំ​ថ្ម?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"អំពី​កម្មវិធីសន្សំថ្ម"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"បើក​មុខងារ​សន្សំ​ថ្ម?"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"អំពី​មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"បើក"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"បើក​កម្មវិធី​សន្សំ​ថ្ម​"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"បើក​មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ការ​កំណត់"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"វ៉ាយហ្វាយ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"បង្វិល​អេក្រង់​ស្វ័យ​ប្រវត្តិ"</string>
@@ -497,9 +497,9 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"យកអ្នកប្រើចេញ?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"កម្មវិធី និងទិន្នន័យទាំងអស់របស់អ្នកប្រើនេះនឹងត្រូវបានលុប។"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"យកចេញ"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"កម្មវិធីសន្សំថ្មបានបើក"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"មុខងារ​សន្សំ​ថ្មបានបើក"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"ការ​បន្ថយ​ការ​ប្រតិបត្តិ និង​ទិន្នន័យ​ផ្ទៃ​ខាងក្រោយ"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"បិទ​កម្មវិធី​សន្សំ​ថ្ម"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"បិទ​មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> នឹងមានសិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"សេវាកម្មដែល​ផ្ដល់​មុខងារ​នេះ​នឹងមាន​សិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែល​អាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬ​ដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ចាប់ផ្ដើម​ថត ឬបញ្ជូន​មែនទេ?"</string>
@@ -765,7 +765,7 @@
       <item quantity="one">%d នាទី</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"ការប្រើប្រាស់ថ្ម"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"កម្មវិធីសន្សំថ្មមិនអាចប្រើបានអំឡុងពេលសាកថ្មទេ"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"មិនអាចប្រើមុខងារ​សន្សំ​ថ្មបានទេក្នុងអំឡុងពេលសាកថ្ម"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"កាត់បន្ថយប្រតិបត្តិការ និងទិន្នន័យផ្ទៃខាងក្រោយ"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ប៊ូតុង <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -981,11 +981,11 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"អនុញ្ញាត​ឱ្យ <xliff:g id="APP">%1$s</xliff:g> បង្ហាញ​ស្ថិតិ​ប្រើប្រាស់​ពី​កម្មវិធី​នានា"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"អនុញ្ញាត"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"បដិសេធ"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"ចុច​ដើម្បី​កំណត់​កាលវិភាគ​កម្មវិធី​សន្សំ​ថ្ម"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"ចុច​ដើម្បី​កំណត់​កាលវិភាគ​មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"បើក​នៅពេល​ថ្ម​ទំនងជា​អស់"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"ទេ អរគុណ"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"កាលវិភាគ​កម្មវិធី​សន្សំ​ថ្ម​បាន​បើក​ហើយ"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"កម្មវិធី​សន្សំ​ថ្ម​នឹង​បើក​ដោយ​ស្វ័យ​ប្រវត្តិ​ នៅពេល​ថ្ម​នៅ​សល់​តិច​ជាង <xliff:g id="PERCENTAGE">%d</xliff:g>%% ។"</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"កាលវិភាគ​មុខងារ​សន្សំ​ថ្មបាន​បើក​ហើយ"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"មុខងារ​សន្សំ​ថ្មនឹង​បើក​ដោយ​ស្វ័យ​ប្រវត្តិ​ នៅពេល​ថ្ម​នៅ​សល់​តិច​ជាង <xliff:g id="PERCENTAGE">%d</xliff:g>%%។"</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ការកំណត់"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"យល់ហើយ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"ចម្លង SysUI Heap"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"កំពុងផ្ទុក​ការណែនាំ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"មេឌៀ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"លាក់វគ្គ​បច្ចុប្បន្ន។"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"មិនអាចលាក់​វគ្គបច្ចុប្បន្នបានទេ។"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ច្រាន​ចោល"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"បន្ត"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ការកំណត់"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"សង្កត់​ប៊ូតុង​ថាមពល ដើម្បី​មើលឃើញ​ការគ្រប់គ្រង​ថ្មីៗ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"បញ្ចូល​ផ្ទាំងគ្រប់គ្រង"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"កែ​ផ្ទាំងគ្រប់គ្រង"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"បញ្ចូល​ឧបករណ៍​មេឌៀ"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"ក្រុម"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"បានជ្រើសរើស​ឧបករណ៍ 1"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"បានជ្រើសរើស​ឧបករណ៍ <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (បាន​ផ្ដាច់)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"មិន​អាច​ភ្ជាប់​បាន​ទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ផ្គូផ្គង​ឧបករណ៍ថ្មី"</string>
 </resources>

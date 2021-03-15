@@ -364,6 +364,18 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x0001000;
 
+    /**
+     * This flag requests that when when {@link #FLAG_REQUEST_MULTI_FINGER_GESTURES} is enabled,
+     * two-finger passthrough gestures are re-enabled. Two-finger swipe gestures are not detected,
+     * but instead passed through as one-finger gestures. In addition, three-finger swipes from the
+     * bottom of the screen are not detected, and instead are passed through unchanged. If {@link
+     * #FLAG_REQUEST_MULTI_FINGER_GESTURES} is disabled this flag has no effect.
+     *
+     * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
+     * @hide
+     */
+    public static final int FLAG_REQUEST_2_FINGER_PASSTHROUGH = 0x0002000;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -1261,6 +1273,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_SERVICE_HANDLES_DOUBLE_TAP";
             case FLAG_REQUEST_MULTI_FINGER_GESTURES:
                 return "FLAG_REQUEST_MULTI_FINGER_GESTURES";
+            case FLAG_REQUEST_2_FINGER_PASSTHROUGH:
+                return "FLAG_REQUEST_2_FINGER_PASSTHROUGH";
             case FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY:
                 return "FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
             case FLAG_REPORT_VIEW_IDS:

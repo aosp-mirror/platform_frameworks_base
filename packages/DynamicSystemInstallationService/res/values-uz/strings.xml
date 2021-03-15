@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Dinamik tizim tayyor. Foydalanishni boshlash uchun qurilmani qayta ishga tushiring."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Oʻrnatilmoqda"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Oʻrnatilmadi"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Rasm tekshiruvi amalga oshmadi Oʻrnatishni bekor qilish."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Disk tasviri tekshiruvi amalga oshmadi. Oʻrnatishni bekor qiling."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Hozirda dinamik tizim ishga tushirilgan. Asl Android versiyasidan foydlanish uchun qayta ishga tushiring."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Bekor qilish"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Bekor qilish"</string>

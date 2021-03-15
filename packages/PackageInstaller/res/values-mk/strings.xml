@@ -33,9 +33,9 @@
     <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"Оваа апликација не е компатибилна со вашиот телевизор."</string>
     <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"Апликација што не е инсталирана како апликација не е компатибилна со вашиот телефон."</string>
     <string name="install_failed_invalid_apk" msgid="8581007676422623930">"Апликација што не е инсталирана како пакет се чини дека е неважечка."</string>
-    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира на вашиот таблет."</string>
-    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира на вашиот телевизор."</string>
-    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира на вашиот телефон."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"<xliff:g id="APP_NAME">%1$s</xliff:g> не може да се инсталира на вашиот таблет."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> не може да се инсталира на вашиот телевизор."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"<xliff:g id="APP_NAME">%1$s</xliff:g> не може да се инсталира на вашиот телефон."</string>
     <string name="launch" msgid="3952550563999890101">"Отвори"</string>
     <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"Вашиот администратор не дозволува инсталација на апликации добиени од непознати извори"</string>
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Корисников не може да инсталира непознати апликации"</string>
@@ -43,13 +43,13 @@
     <string name="ok" msgid="7871959885003339302">"Во ред"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Управување со апликациите"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Нема простор"</string>
-    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира. Ослободете простор и обидете се повторно."</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> не може да се инсталира. Ослободете простор и обидете се повторно."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Апликацијата не е најдена"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Апликацијата не е пронајдена во списокот инсталирани апликации."</string>
     <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Не е дозволено"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"Тековниот корисник нема дозвола да ја изведе деинсталацијава."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Грешка"</string>
-    <string name="generic_error_dlg_text" msgid="5287861443265795232">"Не можеше да се деинсталира апликацијата."</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"Не може да се деинсталира апликацијата."</string>
     <string name="uninstall_application_title" msgid="4045420072401428123">"Деинсталирај ја апликацијата"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Деинсталирајте ажурирање"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> е дел од следната апликација:"</string>

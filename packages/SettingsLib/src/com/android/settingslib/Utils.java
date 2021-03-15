@@ -13,7 +13,11 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
@@ -28,6 +32,10 @@ import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
+
+import androidx.annotation.NonNull;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
@@ -303,6 +311,36 @@ public class Utils {
     }
 
     /**
+    * Create a color matrix suitable for a ColorMatrixColorFilter that modifies only the color but
+    * preserves the alpha for a given drawable
+    * @param color
+    * @return a color matrix that uses the source alpha and given color
+    */
+    public static ColorMatrix getAlphaInvariantColorMatrixForColor(@ColorInt int color) {
+        int r = Color.red(color);
+        int g = Color.green(color);
+        int b = Color.blue(color);
+
+        ColorMatrix cm = new ColorMatrix(new float[] {
+                0, 0, 0, 0, r,
+                0, 0, 0, 0, g,
+                0, 0, 0, 0, b,
+                0, 0, 0, 1, 0 });
+
+        return cm;
+    }
+
+    /**
+     * Create a ColorMatrixColorFilter to tint a drawable but retain its alpha characteristics
+     *
+     * @return a ColorMatrixColorFilter which changes the color of the output but is invariant on
+     * the source alpha
+     */
+    public static ColorFilter getAlphaInvariantColorFilterForColor(@ColorInt int color) {
+        return new ColorMatrixColorFilter(getAlphaInvariantColorMatrixForColor(color));
+    }
+
+    /**
      * Determine whether a package is a "system package", in which case certain things (like
      * disabling notifications or disabling the package altogether) should be disallowed.
      */
@@ -503,5 +541,26 @@ public class Utils {
                 || (networkRegWlan.getRegistrationState()
                 == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING);
         return !isInIwlan;
+    }
+
+    /**
+     * Returns a bitmap with rounded corner.
+     *
+     * @param context application context.
+     * @param source bitmap to apply round corner.
+     * @param cornerRadius corner radius value.
+     */
+    public static Bitmap convertCornerRadiusBitmap(@NonNull Context context,
+            @NonNull Bitmap source, @NonNull float cornerRadius) {
+        final Bitmap roundedBitmap = Bitmap.createBitmap(source.getWidth(), source.getHeight(),
+                Bitmap.Config.ARGB_8888);
+        final RoundedBitmapDrawable drawable =
+                RoundedBitmapDrawableFactory.create(context.getResources(), source);
+        drawable.setAntiAlias(true);
+        drawable.setCornerRadius(cornerRadius);
+        final Canvas canvas = new Canvas(roundedBitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return roundedBitmap;
     }
 }
