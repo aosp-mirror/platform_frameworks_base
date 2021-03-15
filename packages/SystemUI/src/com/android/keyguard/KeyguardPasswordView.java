@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static android.view.WindowInsets.Type.ime;
+
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
@@ -23,15 +25,25 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.WindowInsetsAnimationControlListener;
+import android.view.WindowInsetsAnimationController;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.TextViewInputDisabler;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 /**
  * Displays an alphanumeric (latin-1) key entry for the user to enter
@@ -40,6 +52,8 @@ import com.android.systemui.R;
 public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
     private final int mDisappearYTranslation;
+
+    private static final long IME_DISAPPEAR_DURATION_MS = 125;
 
     // A delay constant to be used in a workaround for the situation where InputMethodManagerService
     // is not switched to the new user yet.
@@ -150,9 +164,63 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
     }
 
     @Override
-    public void animateForIme(float interpolatedFraction) {
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        getWindowInsetsController().controlWindowInsetsAnimation(ime(),
+                100,
+                Interpolators.LINEAR, null, new WindowInsetsAnimationControlListener() {
+
+                    @Override
+                    public void onReady(@NonNull WindowInsetsAnimationController controller,
+                            int types) {
+                        ValueAnimator anim = ValueAnimator.ofFloat(1f, 0f);
+                        anim.addUpdateListener(animation -> {
+                            if (controller.isCancelled()) {
+                                return;
+                            }
+                            Insets shownInsets = controller.getShownStateInsets();
+                            Insets insets = Insets.add(shownInsets, Insets.of(0, 0, 0,
+                                    (int) (-shownInsets.bottom / 4
+                                            * anim.getAnimatedFraction())));
+                            controller.setInsetsAndAlpha(insets,
+                                    (float) animation.getAnimatedValue(),
+                                    anim.getAnimatedFraction());
+                        });
+                        anim.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                controller.finish(false);
+                                runOnFinishImeAnimationRunnable();
+                                finishRunnable.run();
+                            }
+                        });
+                        anim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+                        anim.start();
+                    }
+
+                    @Override
+                    public void onFinished(
+                            @NonNull WindowInsetsAnimationController controller) {
+                    }
+
+                    @Override
+                    public void onCancelled(
+                            @Nullable WindowInsetsAnimationController controller) {
+                    }
+                });
+        return true;
+    }
+
+
+    @Override
+    public void animateForIme(float interpolatedFraction, boolean appearingAnim) {
         animate().cancel();
-        setAlpha(Math.max(interpolatedFraction, getAlpha()));
+        setAlpha(appearingAnim
+                ? Math.max(interpolatedFraction, getAlpha())
+                : 1 - interpolatedFraction);
     }
 
     @Override
