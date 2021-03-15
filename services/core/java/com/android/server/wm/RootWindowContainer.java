@@ -273,7 +273,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
     private int mTmpTaskLayerRank;
-    private final LockedScheduler mRankTaskLayersScheduler;
+    private final RankTaskLayersRunnable mRankTaskLayersRunnable = new RankTaskLayersRunnable();
 
     private boolean mTmpBoolean;
     private RemoteException mTmpRemoteException;
@@ -451,12 +451,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTaskSupervisor = mService.mTaskSupervisor;
         mTaskSupervisor.mRootWindowContainer = this;
         mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl("Display-off");
-        mRankTaskLayersScheduler = new LockedScheduler(mService) {
-            @Override
-            public void execute() {
-                rankTaskLayersIfNeeded();
-            }
-        };
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
@@ -2660,16 +2654,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void invalidateTaskLayers() {
-        mTaskLayersChanged = true;
-        mRankTaskLayersScheduler.scheduleIfNeeded();
+        if (!mTaskLayersChanged) {
+            mTaskLayersChanged = true;
+            mService.mH.post(mRankTaskLayersRunnable);
+        }
     }
 
     /** Generate oom-score-adjustment rank for all tasks in the system based on z-order. */
-    void rankTaskLayersIfNeeded() {
-        if (!mTaskLayersChanged) {
-            return;
+    void rankTaskLayers() {
+        if (mTaskLayersChanged) {
+            mTaskLayersChanged = false;
+            mService.mH.removeCallbacks(mRankTaskLayersRunnable);
         }
-        mTaskLayersChanged = false;
         mTmpTaskLayerRank = 0;
         // Only rank for leaf tasks because the score of activity is based on immediate parent.
         forAllLeafTasks(task -> {
@@ -3668,32 +3664,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    /**
-     * Helper class to schedule the runnable if it hasn't scheduled on display thread inside window
-     * manager lock.
-     */
-    abstract static class LockedScheduler implements Runnable {
-        private final ActivityTaskManagerService mService;
-        private boolean mScheduled;
-
-        LockedScheduler(ActivityTaskManagerService service) {
-            mService = service;
-        }
-
+    private class RankTaskLayersRunnable implements Runnable {
         @Override
         public void run() {
             synchronized (mService.mGlobalLock) {
-                mScheduled = false;
-                execute();
-            }
-        }
-
-        abstract void execute();
-
-        void scheduleIfNeeded() {
-            if (!mScheduled) {
-                mService.mH.post(this);
-                mScheduled = true;
+                if (mTaskLayersChanged) {
+                    mTaskLayersChanged = false;
+                    rankTaskLayers();
+                }
             }
         }
     }
