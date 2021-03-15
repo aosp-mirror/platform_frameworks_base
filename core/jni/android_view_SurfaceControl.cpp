@@ -500,12 +500,12 @@ static void nativeSetAnimationTransaction(JNIEnv* env, jclass clazz, jlong trans
 
 static void nativeSetEarlyWakeupStart(JNIEnv* env, jclass clazz, jlong transactionObj) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->setExplicitEarlyWakeupStart();
+    transaction->setEarlyWakeupStart();
 }
 
 static void nativeSetEarlyWakeupEnd(JNIEnv* env, jclass clazz, jlong transactionObj) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->setExplicitEarlyWakeupEnd();
+    transaction->setEarlyWakeupEnd();
 }
 
 static void nativeSetLayer(JNIEnv* env, jclass clazz, jlong transactionObj,
