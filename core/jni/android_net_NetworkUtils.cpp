@@ -52,27 +52,6 @@ constexpr int MAXPACKETSIZE = 8 * 1024;
 // FrameworkListener limits the size of commands to 4096 bytes.
 constexpr int MAXCMDSIZE = 4096;
 
-static void throwErrnoException(JNIEnv* env, const char* functionName, int error) {
-    ScopedLocalRef<jstring> detailMessage(env, env->NewStringUTF(functionName));
-    if (detailMessage.get() == NULL) {
-        // Not really much we can do here. We're probably dead in the water,
-        // but let's try to stumble on...
-        env->ExceptionClear();
-    }
-    static jclass errnoExceptionClass =
-            MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/system/ErrnoException"));
-
-    static jmethodID errnoExceptionCtor =
-            GetMethodIDOrDie(env, errnoExceptionClass,
-            "<init>", "(Ljava/lang/String;I)V");
-
-    jobject exception = env->NewObject(errnoExceptionClass,
-                                       errnoExceptionCtor,
-                                       detailMessage.get(),
-                                       error);
-    env->Throw(reinterpret_cast<jthrowable>(exception));
-}
-
 static void android_net_utils_attachDropAllBPFFilter(JNIEnv *env, jobject clazz, jobject javaFd)
 {
     struct sock_filter filter_code[] = {
@@ -150,7 +129,7 @@ static jobject android_net_utils_resNetworkQuery(JNIEnv *env, jobject thiz, jint
     int fd = resNetworkQuery(netId, queryname.data(), ns_class, ns_type, flags);
 
     if (fd < 0) {
-        throwErrnoException(env, "resNetworkQuery", -fd);
+        jniThrowErrnoException(env, "resNetworkQuery", -fd);
         return nullptr;
     }
 
@@ -165,7 +144,7 @@ static jobject android_net_utils_resNetworkSend(JNIEnv *env, jobject thiz, jint 
     int fd = resNetworkSend(netId, data, msgLen, flags);
 
     if (fd < 0) {
-        throwErrnoException(env, "resNetworkSend", -fd);
+        jniThrowErrnoException(env, "resNetworkSend", -fd);
         return nullptr;
     }
 
@@ -180,13 +159,13 @@ static jobject android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, job
     int res = resNetworkResult(fd, &rcode, buf.data(), MAXPACKETSIZE);
     jniSetFileDescriptorOfFD(env, javaFd, -1);
     if (res < 0) {
-        throwErrnoException(env, "resNetworkResult", -res);
+        jniThrowErrnoException(env, "resNetworkResult", -res);
         return nullptr;
     }
 
     jbyteArray answer = env->NewByteArray(res);
     if (answer == nullptr) {
-        throwErrnoException(env, "resNetworkResult", ENOMEM);
+        jniThrowErrnoException(env, "resNetworkResult", ENOMEM);
         return nullptr;
     } else {
         env->SetByteArrayRegion(answer, 0, res,
@@ -208,7 +187,7 @@ static void android_net_utils_resNetworkCancel(JNIEnv *env, jobject thiz, jobjec
 static jobject android_net_utils_getDnsNetwork(JNIEnv *env, jobject thiz) {
     unsigned dnsNetId = 0;
     if (int res = getNetworkForDns(&dnsNetId) < 0) {
-        throwErrnoException(env, "getDnsNetId", -res);
+        jniThrowErrnoException(env, "getDnsNetId", -res);
         return nullptr;
     }
     bool privateDnsBypass = dnsNetId & NETID_USE_LOCAL_NAMESERVERS;
@@ -233,8 +212,8 @@ static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, j
     // Obtain the parameters of the TCP repair window.
     int rc = getsockopt(fd, IPPROTO_TCP, TCP_REPAIR_WINDOW, &trw, &size);
     if (rc == -1) {
-      throwErrnoException(env, "getsockopt : TCP_REPAIR_WINDOW", errno);
-      return NULL;
+        jniThrowErrnoException(env, "getsockopt : TCP_REPAIR_WINDOW", errno);
+        return NULL;
     }
 
     struct tcp_info tcpinfo = {};
@@ -244,8 +223,8 @@ static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, j
     // should be applied to the window size.
     rc = getsockopt(fd, IPPROTO_TCP, TCP_INFO, &tcpinfo, &tcpinfo_size);
     if (rc == -1) {
-      throwErrnoException(env, "getsockopt : TCP_INFO", errno);
-      return NULL;
+        jniThrowErrnoException(env, "getsockopt : TCP_INFO", errno);
+        return NULL;
     }
 
     jclass class_TcpRepairWindow = env->FindClass("android/net/TcpRepairWindow");
