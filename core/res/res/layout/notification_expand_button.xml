@@ -39,7 +39,7 @@
             android:layout_height="@dimen/notification_expand_button_pill_height"
             android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Info"
             android:gravity="center_vertical"
-            android:paddingLeft="8dp"
+            android:paddingStart="8dp"
             />
 
         <ImageView
