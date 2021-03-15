@@ -509,13 +509,7 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static ShellInit provideShellInit(ShellInitImpl impl) {
-        return impl.asShellInit();
-    }
-
-    @WMSingleton
-    @Provides
-    static ShellInitImpl provideShellInitImpl(DisplayImeController displayImeController,
+    static ShellInit provideShellInit(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
@@ -526,7 +520,7 @@ public abstract class WMShellBaseModule {
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellInitImpl(displayImeController,
+        return ShellInitImpl.create(displayImeController,
                 dragAndDropController,
                 shellTaskOrganizer,
                 legacySplitScreenOptional,
@@ -545,13 +539,7 @@ public abstract class WMShellBaseModule {
      */
     @WMSingleton
     @Provides
-    static Optional<ShellCommandHandler> provideShellCommandHandler(ShellCommandHandlerImpl impl) {
-        return Optional.of(impl.asShellCommandHandler());
-    }
-
-    @WMSingleton
-    @Provides
-    static ShellCommandHandlerImpl provideShellCommandHandlerImpl(
+    static Optional<ShellCommandHandler> provideShellCommandHandler(
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
@@ -560,8 +548,8 @@ public abstract class WMShellBaseModule {
             Optional<HideDisplayCutoutController> hideDisplayCutout,
             Optional<AppPairsController> appPairsOptional,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellCommandHandlerImpl(shellTaskOrganizer,
+        return Optional.of(ShellCommandHandlerImpl.create(shellTaskOrganizer,
                 legacySplitScreenOptional, splitScreenOptional, pipOptional, oneHandedOptional,
-                hideDisplayCutout, appPairsOptional, mainExecutor);
+                hideDisplayCutout, appPairsOptional, mainExecutor));
     }
 }

@@ -41,8 +41,6 @@ public class QuickStepContract {
     public static final String KEY_EXTRA_INPUT_MONITOR = "extra_input_monitor";
     public static final String KEY_EXTRA_WINDOW_CORNER_RADIUS = "extra_window_corner_radius";
     public static final String KEY_EXTRA_SUPPORTS_WINDOW_CORNERS = "extra_supports_window_corners";
-    // See IPip.aidl
-    public static final String KEY_EXTRA_SHELL_PIP = "extra_shell_pip";
 
     public static final String NAV_BAR_MODE_2BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
