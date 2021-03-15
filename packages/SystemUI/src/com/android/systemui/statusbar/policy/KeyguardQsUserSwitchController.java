@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardConstants;
@@ -141,6 +142,16 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
 
             // Tapping anywhere in the view will open QS user panel
             openQsUserPanel();
+        });
+
+        mView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_CLICK,
+                        mContext.getString(
+                                R.string.accessibility_quick_settings_choose_user_action)));
+            }
         });
 
         updateView(true /* forceUpdate */);
