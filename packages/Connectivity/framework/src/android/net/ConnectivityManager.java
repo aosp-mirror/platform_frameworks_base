@@ -5114,9 +5114,9 @@ public class ConnectivityManager {
     }
 
     // The first network ID of IPSec tunnel interface.
-    private static final int TUN_INTF_NETID_START = 0xFC00;
+    private static final int TUN_INTF_NETID_START = 0xFC00; // 0xFC00 = 64512
     // The network ID range of IPSec tunnel interface.
-    private static final int TUN_INTF_NETID_RANGE = 0x0400;
+    private static final int TUN_INTF_NETID_RANGE = 0x0400; // 0x0400 = 1024
 
     /**
      * Get the network ID range reserved for IPSec tunnel interfaces.
