@@ -31,23 +31,26 @@ public class SensorPropertiesInternal implements Parcelable {
     public final int sensorId;
     @SensorProperties.Strength public final int sensorStrength;
     public final int maxEnrollmentsPerUser;
+    public final boolean resetLockoutRequiresHardwareAuthToken;
 
     public static SensorPropertiesInternal from(@NonNull SensorPropertiesInternal prop) {
         return new SensorPropertiesInternal(prop.sensorId, prop.sensorStrength,
-                prop.maxEnrollmentsPerUser);
+                prop.maxEnrollmentsPerUser, prop.resetLockoutRequiresHardwareAuthToken);
     }
 
     protected SensorPropertiesInternal(int sensorId, @SensorProperties.Strength int sensorStrength,
-            int maxEnrollmentsPerUser) {
+            int maxEnrollmentsPerUser, boolean resetLockoutRequiresHardwareAuthToken) {
         this.sensorId = sensorId;
         this.sensorStrength = sensorStrength;
         this.maxEnrollmentsPerUser = maxEnrollmentsPerUser;
+        this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
     }
 
     protected SensorPropertiesInternal(Parcel in) {
         sensorId = in.readInt();
         sensorStrength = in.readInt();
         maxEnrollmentsPerUser = in.readInt();
+        resetLockoutRequiresHardwareAuthToken = in.readBoolean();
     }
 
     public static final Creator<SensorPropertiesInternal> CREATOR =
@@ -73,6 +76,7 @@ public class SensorPropertiesInternal implements Parcelable {
         dest.writeInt(sensorId);
         dest.writeInt(sensorStrength);
         dest.writeInt(maxEnrollmentsPerUser);
+        dest.writeBoolean(resetLockoutRequiresHardwareAuthToken);
     }
 
     @Override
