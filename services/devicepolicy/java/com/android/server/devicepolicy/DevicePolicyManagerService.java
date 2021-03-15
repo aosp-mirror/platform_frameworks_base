@@ -14668,24 +14668,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void sendNetworkLoggingNotificationLocked() {
         ensureLocked();
-        final ActiveAdmin activeAdmin = getNetworkLoggingControllingAdminLocked();
-        if (activeAdmin == null || !activeAdmin.isNetworkLoggingEnabled) {
+        // Send a network logging notification if the admin is a device owner, not profile owner.
+        final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+        if (deviceOwner == null || !deviceOwner.isNetworkLoggingEnabled) {
             return;
         }
-        if (activeAdmin.numNetworkLoggingNotifications
+        if (deviceOwner.numNetworkLoggingNotifications
                 >= ActiveAdmin.DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN) {
             return;
         }
         final long now = System.currentTimeMillis();
-        if (now - activeAdmin.lastNetworkLoggingNotificationTimeMs < MS_PER_DAY) {
+        if (now - deviceOwner.lastNetworkLoggingNotificationTimeMs < MS_PER_DAY) {
             return;
         }
-        activeAdmin.numNetworkLoggingNotifications++;
-        if (activeAdmin.numNetworkLoggingNotifications
+        deviceOwner.numNetworkLoggingNotifications++;
+        if (deviceOwner.numNetworkLoggingNotifications
                 >= ActiveAdmin.DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN) {
-            activeAdmin.lastNetworkLoggingNotificationTimeMs = 0;
+            deviceOwner.lastNetworkLoggingNotificationTimeMs = 0;
         } else {
-            activeAdmin.lastNetworkLoggingNotificationTimeMs = now;
+            deviceOwner.lastNetworkLoggingNotificationTimeMs = now;
         }
         final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
         final Intent intent = new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
@@ -14705,7 +14706,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .bigText(mContext.getString(R.string.network_logging_notification_text)))
                 .build();
         mInjector.getNotificationManager().notify(SystemMessage.NOTE_NETWORK_LOGGING, notification);
-        saveSettingsLocked(activeAdmin.getUserHandle().getIdentifier());
+        saveSettingsLocked(deviceOwner.getUserHandle().getIdentifier());
     }
 
     /**
