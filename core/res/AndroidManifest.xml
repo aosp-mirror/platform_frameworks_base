@@ -2775,11 +2775,11 @@
          The app can check whether it has this authorization by calling
          {@link android.provider.Settings#canDrawOverlays
          Settings.canDrawOverlays()}.
-         <p>Protection level: signature|appop|installer|appPredictor|pre23|development -->
+         <p>Protection level: signature|setup|appop|installer|appPredictor|pre23|development -->
     <permission android:name="android.permission.SYSTEM_ALERT_WINDOW"
         android:label="@string/permlab_systemAlertWindow"
         android:description="@string/permdesc_systemAlertWindow"
-        android:protectionLevel="signature|appop|installer|appPredictor|pre23|development" />
+        android:protectionLevel="signature|setup|appop|installer|appPredictor|pre23|development" />
 
     <!-- @SystemApi @hide Allows an application to create windows using the type
          {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY},
