@@ -867,13 +867,13 @@ public class DomainVerificationService extends SystemService
         boolean sendBroadcast = true;
 
         DomainVerificationPkgState pkgState;
-        pkgState = mSettings.getPendingState(pkgName);
+        pkgState = mSettings.removePendingState(pkgName);
         if (pkgState != null) {
             // Don't send when attaching from pending read, which is usually boot scan. Re-send on
             // boot is handled in a separate method once all packages are added.
             sendBroadcast = false;
         } else {
-            pkgState = mSettings.getRestoredState(pkgName);
+            pkgState = mSettings.removeRestoredState(pkgName);
         }
 
         AndroidPackage pkg = newPkgSetting.getPkg();
