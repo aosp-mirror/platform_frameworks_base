@@ -19,9 +19,6 @@ package com.android.keyguard;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -87,13 +84,6 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         mKeyguardSecurityContainer.mSecurityViewFlipper = mSecurityViewFlipper;
         mKeyguardSecurityContainer.addView(mSecurityViewFlipper, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-    }
-
-    @Test
-    public void startDisappearAnimation_animatesKeyboard() {
-        mKeyguardSecurityContainer.startDisappearAnimation(SecurityMode.Password);
-        verify(mWindowInsetsController).controlWindowInsetsAnimation(eq(ime()), anyLong(), any(),
-                any(), any());
     }
 
     @Test
