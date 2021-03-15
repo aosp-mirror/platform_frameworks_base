@@ -81,9 +81,18 @@ genrule {
     out: ["services.core.protolog.json"],
 }
 
+genrule {
+    name: "statslog-art-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module art" +
+         " --javaPackage com.android.internal.art --javaClass ArtStatsLog --worksource",
+    out: ["com/android/internal/art/ArtStatsLog.java"],
+}
+
 java_library_static {
     name: "services.core.unboosted",
     srcs: [
+        ":statslog-art-java-gen",
         ":services.core.protologsrc",
         ":dumpstate_aidl",
         ":framework_native_aidl",
