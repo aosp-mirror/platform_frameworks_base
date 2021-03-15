@@ -104,7 +104,9 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.RESET_APP_ERRORS) public void resetAppErrors();
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
+    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean stopUser(int, boolean);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.DUMP) public void waitForBroadcastIdle();
     field public static final long DROP_CLOSE_SYSTEM_DIALOGS = 174664120L; // 0xa6929b8L
     field public static final long LOCK_DOWN_CLOSE_SYSTEM_DIALOGS = 174664365L; // 0xa692aadL
     field public static final int PROCESS_CAPABILITY_ALL = 15; // 0xf
@@ -707,6 +709,10 @@ package android.content {
 
   public class ContextWrapper extends android.content.Context {
     method public int getDisplayId();
+  }
+
+  public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final String ACTION_USER_STOPPED = "android.intent.action.USER_STOPPED";
   }
 
   public class SyncAdapterType implements android.os.Parcelable {
