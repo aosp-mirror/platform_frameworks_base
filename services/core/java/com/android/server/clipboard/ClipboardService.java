@@ -922,6 +922,10 @@ public class ClipboardService extends SystemService {
         if (!mShowAccessNotifications) {
             return;
         }
+        if (Settings.Secure.getInt(getContext().getContentResolver(),
+                Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS, 1) == 0) {
+            return;
+        }
         // Don't notify if the app accessing the clipboard is the same as the current owner.
         if (UserHandle.isSameApp(uid, clipboard.primaryClipUid)) {
             return;
