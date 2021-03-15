@@ -21,7 +21,9 @@ import android.annotation.SystemApi;
 import android.annotation.SystemApi.Client;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
+import android.os.Build;
 
+import com.android.modules.annotation.MinSdk;
 import com.android.modules.utils.build.SdkLevel;
 
 /**
@@ -29,6 +31,7 @@ import com.android.modules.utils.build.SdkLevel;
  *
  * @hide
  */
+@MinSdk(Build.VERSION_CODES.S)
 @SystemApi(client = Client.MODULE_LIBRARIES)
 public class MediaFrameworkInitializer {
     private MediaFrameworkInitializer() {
