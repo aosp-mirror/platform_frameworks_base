@@ -43,8 +43,11 @@ interface IRecentsAnimationController {
      * accordingly. This should be called before `finish`
      * @param taskId for which the leash should be updated
      * @param destinationBounds bounds of the final PiP window
+     * @param windowCrop bounds to crop as part of final transform.
+     * @param float9 An array of 9 floats to be used as matrix transform.
      */
-     void setFinishTaskBounds(int taskId, in Rect destinationBounds);
+     void setFinishTaskBounds(int taskId, in Rect destinationBounds, in Rect windowCrop,
+             in float[] float9);
 
     /**
      * Notifies to the system that the animation into Recents should end, and all leashes associated
