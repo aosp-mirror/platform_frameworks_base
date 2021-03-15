@@ -31,6 +31,7 @@ import android.app.KeyguardManager;
 import android.app.UriGrantsManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -176,8 +177,6 @@ public class ClipboardService extends SystemService {
         SystemProperties.getBoolean("ro.kernel.qemu", false);
 
     // DeviceConfig properties
-    private static final String PROPERTY_SHOW_ACCESS_NOTIFICATIONS = "show_access_notifications";
-    private static final boolean DEFAULT_SHOW_ACCESS_NOTIFICATIONS = true;
     private static final String PROPERTY_MAX_CLASSIFICATION_LENGTH = "max_classification_length";
     private static final int DEFAULT_MAX_CLASSIFICATION_LENGTH = 400;
 
@@ -199,7 +198,8 @@ public class ClipboardService extends SystemService {
     private final SparseArray<PerUserClipboard> mClipboards = new SparseArray<>();
 
     @GuardedBy("mLock")
-    private boolean mShowAccessNotifications = DEFAULT_SHOW_ACCESS_NOTIFICATIONS;
+    private boolean mShowAccessNotifications =
+            ClipboardManager.DEVICE_CONFIG_DEFAULT_SHOW_ACCESS_NOTIFICATIONS;
 
     @GuardedBy("mLock")
     private int mMaxClassificationLength = DEFAULT_MAX_CLASSIFICATION_LENGTH;
@@ -269,8 +269,10 @@ public class ClipboardService extends SystemService {
 
     private void updateConfig() {
         synchronized (mLock) {
-            mShowAccessNotifications = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
-                    PROPERTY_SHOW_ACCESS_NOTIFICATIONS, DEFAULT_SHOW_ACCESS_NOTIFICATIONS);
+            mShowAccessNotifications = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_CLIPBOARD,
+                    ClipboardManager.DEVICE_CONFIG_SHOW_ACCESS_NOTIFICATIONS,
+                    ClipboardManager.DEVICE_CONFIG_DEFAULT_SHOW_ACCESS_NOTIFICATIONS);
             mMaxClassificationLength = DeviceConfig.getInt(DeviceConfig.NAMESPACE_CLIPBOARD,
                     PROPERTY_MAX_CLASSIFICATION_LENGTH, DEFAULT_MAX_CLASSIFICATION_LENGTH);
         }
@@ -1008,11 +1010,9 @@ public class ClipboardService extends SystemService {
         if (clipboard.primaryClip == null) {
             return;
         }
-        if (!mShowAccessNotifications) {
-            return;
-        }
         if (Settings.Secure.getInt(getContext().getContentResolver(),
-                Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS, 1) == 0) {
+                Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS,
+                (mShowAccessNotifications ? 1 : 0)) == 0) {
             return;
         }
         // Don't notify if the app accessing the clipboard is the same as the current owner.
