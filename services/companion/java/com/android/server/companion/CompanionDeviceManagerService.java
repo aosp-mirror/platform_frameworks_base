@@ -963,7 +963,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private Set<Association> getAllAssociations(int userId, @Nullable String packageFilter) {
         return CollectionUtils.filter(
                 getAllAssociations(userId),
-                a -> Objects.equals(packageFilter, a.getPackageName()));
+                // Null filter == get all associations
+                a -> packageFilter == null || Objects.equals(packageFilter, a.getPackageName()));
     }
 
     private Set<Association> getAllAssociations() {
@@ -983,8 +984,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             int userId, @Nullable String packageFilter, @Nullable String addressFilter) {
         return CollectionUtils.filter(
                 getAllAssociations(userId),
-                a -> Objects.equals(packageFilter, a.getPackageName())
-                        && Objects.equals(addressFilter, a.getDeviceMacAddress()));
+                // Null filter == get all associations
+                a -> (packageFilter == null || Objects.equals(packageFilter, a.getPackageName()))
+                        && (addressFilter == null
+                                || Objects.equals(addressFilter, a.getDeviceMacAddress())));
     }
 
     private Set<Association> readAllAssociations(int userId) {
