@@ -473,8 +473,15 @@ public class DomainVerificationService extends SystemService
                     throw DomainVerificationUtils.throwPackageUnavailable(packageName);
                 }
 
-                pkgState.getOrCreateUserState(userId)
-                        .setLinkHandlingAllowed(allowed);
+                if (userId == UserHandle.USER_ALL) {
+                    for (int aUserId : mConnection.getAllUserIds()) {
+                        pkgState.getOrCreateUserState(aUserId)
+                                .setLinkHandlingAllowed(allowed);
+                    }
+                } else {
+                    pkgState.getOrCreateUserState(userId)
+                            .setLinkHandlingAllowed(allowed);
+                }
             }
         }
 
