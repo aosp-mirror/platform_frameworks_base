@@ -478,7 +478,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Қонақты жою керек пе?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Осы сеанстағы барлық қолданбалар мен деректер жойылады."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Алып тастау"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Қош келдіңіз, қонақ"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Қош келдіңіз, қонақ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Сеансты жалғастыру керек пе?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Қайта бастау"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Иә, жалғастыру"</string>
