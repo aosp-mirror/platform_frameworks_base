@@ -18,7 +18,6 @@ package com.android.wm.shell.splitscreen;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_UNDEFINED;
@@ -35,24 +34,19 @@ import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 
-import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayImeController;
-import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
-import com.android.wm.shell.splitscreen.ISplitScreenListener;
 
 import java.io.PrintWriter;
 
@@ -61,8 +55,7 @@ import java.io.PrintWriter;
  * {@link SplitScreen}.
  * @see StageCoordinator
  */
-public class SplitScreenController implements DragAndDropPolicy.Starter,
-        RemoteCallable<SplitScreenController> {
+public class SplitScreenController implements DragAndDropPolicy.Starter {
     private static final String TAG = SplitScreenController.class.getSimpleName();
 
     private final ShellTaskOrganizer mTaskOrganizer;
@@ -89,16 +82,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public SplitScreen asSplitScreen() {
         return mImpl;
-    }
-
-    @Override
-    public Context getContext() {
-        return mContext;
-    }
-
-    @Override
-    public ShellExecutor getRemoteCallExecutor() {
-        return mMainExecutor;
     }
 
     public void onOrganizerRegistered() {
@@ -189,13 +172,13 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    public void startIntent(PendingIntent intent, Intent fillInIntent,
-            @SplitScreen.StageType int stage, @SplitScreen.StagePosition int position,
-            @Nullable Bundle options) {
+    public void startIntent(PendingIntent intent, Context context,
+            Intent fillInIntent, @SplitScreen.StageType int stage,
+            @SplitScreen.StagePosition int position, @Nullable Bundle options) {
         options = resolveStartStage(stage, position, options);
 
         try {
-            intent.send(mContext, 0, fillInIntent, null, null, null, options);
+            intent.send(context, 0, fillInIntent, null, null, null, options);
         } catch (PendingIntent.CanceledException e) {
             Slog.e(TAG, "Failed to launch activity", e);
         }
@@ -259,170 +242,121 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
-    /**
-     * The interface for calls from outside the Shell, within the host process.
-     */
-    @ExternalThread
     private class SplitScreenImpl implements SplitScreen {
-        private ISplitScreenImpl mISplitScreen;
-
         @Override
-        public ISplitScreen createExternalInterface() {
-            if (mISplitScreen != null) {
-                mISplitScreen.invalidate();
-            }
-            mISplitScreen = new ISplitScreenImpl(SplitScreenController.this);
-            return mISplitScreen;
-        }
-    }
-
-    /**
-     * The interface for calls from outside the host process.
-     */
-    @BinderThread
-    private static class ISplitScreenImpl extends ISplitScreen.Stub {
-        private SplitScreenController mController;
-        private ISplitScreenListener mListener;
-        private final SplitScreen.SplitScreenListener mSplitScreenListener =
-                new SplitScreen.SplitScreenListener() {
-                    @Override
-                    public void onStagePositionChanged(int stage, int position) {
-                        try {
-                            if (mListener != null) {
-                                mListener.onStagePositionChanged(stage, position);
-                            }
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "onStagePositionChanged", e);
-                        }
-                    }
-
-                    @Override
-                    public void onTaskStageChanged(int taskId, int stage, boolean visible) {
-                        try {
-                            if (mListener != null) {
-                                mListener.onTaskStageChanged(taskId, stage, visible);
-                            }
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "onTaskStageChanged", e);
-                        }
-                    }
-                };
-        private final IBinder.DeathRecipient mListenerDeathRecipient =
-                new IBinder.DeathRecipient() {
-                    @Override
-                    @BinderThread
-                    public void binderDied() {
-                        final SplitScreenController controller = mController;
-                        controller.getRemoteCallExecutor().execute(() -> {
-                            mListener = null;
-                            controller.unregisterSplitScreenListener(mSplitScreenListener);
-                        });
-                    }
-                };
-
-        public ISplitScreenImpl(SplitScreenController controller) {
-            mController = controller;
-        }
-
-        /**
-         * Invalidates this instance, preventing future calls from updating the controller.
-         */
-        void invalidate() {
-            mController = null;
+        public boolean isSplitScreenVisible() {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return SplitScreenController.this.isSplitScreenVisible();
+            }, Boolean.class);
         }
 
         @Override
-        public void registerSplitScreenListener(ISplitScreenListener listener) {
-            executeRemoteCallWithTaskPermission(mController, "registerSplitScreenListener",
-                    (controller) -> {
-                        if (mListener != null) {
-                            mListener.asBinder().unlinkToDeath(mListenerDeathRecipient,
-                                    0 /* flags */);
-                        }
-                        if (listener != null) {
-                            try {
-                                listener.asBinder().linkToDeath(mListenerDeathRecipient,
-                                        0 /* flags */);
-                            } catch (RemoteException e) {
-                                Slog.e(TAG, "Failed to link to death");
-                                return;
-                            }
-                        }
-                        mListener = listener;
-                        controller.registerSplitScreenListener(mSplitScreenListener);
-                    });
+        public boolean moveToSideStage(int taskId, int sideStagePosition) {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return SplitScreenController.this.moveToSideStage(taskId, sideStagePosition);
+            }, Boolean.class);
         }
 
         @Override
-        public void unregisterSplitScreenListener(ISplitScreenListener listener) {
-            executeRemoteCallWithTaskPermission(mController, "unregisterSplitScreenListener",
-                    (controller) -> {
-                        if (mListener != null) {
-                            mListener.asBinder().unlinkToDeath(mListenerDeathRecipient,
-                                    0 /* flags */);
-                        }
-                        mListener = null;
-                        controller.unregisterSplitScreenListener(mSplitScreenListener);
-                    });
+        public boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
+                int sideStagePosition) {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return SplitScreenController.this.moveToSideStage(task, sideStagePosition);
+            }, Boolean.class);
         }
 
         @Override
-        public void exitSplitScreen() {
-            executeRemoteCallWithTaskPermission(mController, "exitSplitScreen",
-                    (controller) -> {
-                        controller.exitSplitScreen();
-                    });
+        public boolean removeFromSideStage(int taskId) {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return SplitScreenController.this.removeFromSideStage(taskId);
+            }, Boolean.class);
         }
 
         @Override
-        public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
-            executeRemoteCallWithTaskPermission(mController, "exitSplitScreenOnHide",
-                    (controller) -> {
-                        controller.exitSplitScreenOnHide(exitSplitScreenOnHide);
-                    });
+        public void setSideStagePosition(int sideStagePosition) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.setSideStagePosition(sideStagePosition);
+            });
         }
 
         @Override
         public void setSideStageVisibility(boolean visible) {
-            executeRemoteCallWithTaskPermission(mController, "setSideStageVisibility",
-                    (controller) -> {
-                        controller.setSideStageVisibility(visible);
-                    });
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.setSideStageVisibility(visible);
+            });
         }
 
         @Override
-        public void removeFromSideStage(int taskId) {
-            executeRemoteCallWithTaskPermission(mController, "removeFromSideStage",
-                    (controller) -> {
-                        controller.removeFromSideStage(taskId);
-                    });
+        public void enterSplitScreen(int taskId, boolean leftOrTop) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.enterSplitScreen(taskId, leftOrTop);
+            });
+        }
+
+        @Override
+        public void exitSplitScreen() {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.exitSplitScreen();
+            });
+        }
+
+        @Override
+        public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.exitSplitScreenOnHide(exitSplitScreenOnHide);
+            });
+        }
+
+        @Override
+        public void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    SplitScreenController.this.getStageBounds(outTopOrLeftBounds,
+                            outBottomOrRightBounds);
+                });
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Failed to get stage bounds in 2s");
+            }
+        }
+
+        @Override
+        public void registerSplitScreenListener(SplitScreenListener listener) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.registerSplitScreenListener(listener);
+            });
+        }
+
+        @Override
+        public void unregisterSplitScreenListener(SplitScreenListener listener) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.unregisterSplitScreenListener(listener);
+            });
         }
 
         @Override
         public void startTask(int taskId, int stage, int position, @Nullable Bundle options) {
-            executeRemoteCallWithTaskPermission(mController, "startTask",
-                    (controller) -> {
-                        controller.startTask(taskId, stage, position, options);
-                    });
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.startTask(taskId, stage, position, options);
+            });
         }
 
         @Override
         public void startShortcut(String packageName, String shortcutId, int stage, int position,
                 @Nullable Bundle options, UserHandle user) {
-            executeRemoteCallWithTaskPermission(mController, "startShortcut",
-                    (controller) -> {
-                        controller.startShortcut(packageName, shortcutId, stage, position,
-                                options, user);
-                    });
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.startShortcut(packageName, shortcutId, stage, position,
+                        options, user);
+            });
         }
 
         @Override
-        public void startIntent(PendingIntent intent, Intent fillInIntent, int stage, int position,
-                @Nullable Bundle options) {
-            executeRemoteCallWithTaskPermission(mController, "startIntent",
-                    (controller) -> {
-                        controller.startIntent(intent, fillInIntent, stage, position, options);
-                    });
+        public void startIntent(PendingIntent intent, Context context, Intent fillInIntent,
+                int stage, int position, @Nullable Bundle options) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.startIntent(intent, context, fillInIntent, stage,
+                        position, options);
+            });
         }
     }
+
 }

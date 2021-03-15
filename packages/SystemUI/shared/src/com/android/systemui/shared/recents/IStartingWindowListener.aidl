@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.startingsurface;
-
-import com.android.wm.shell.startingsurface.IStartingWindowListener;
+package com.android.systemui.shared.recents;
 
 /**
- * Interface that is exposed to remote callers to manipulate starting windows.
+ * Listener interface that Launcher attaches to SystemUI to get
+ * callbacks when need a new starting window.
  */
-interface IStartingWindow {
+interface IStartingWindowListener {
     /**
-     * Sets listener to get task launching callbacks.
+     * Notifies when Shell going to create a new starting window.
+     * @param taskId The task Id
+     * @param supportedType The starting window type
      */
-    oneway void setStartingWindowListener(IStartingWindowListener listener) = 43;
+    oneway void onTaskLaunching(int taskId, int supportedType);
 }

@@ -38,14 +38,6 @@ filegroup {
     path: "src",
 }
 
-filegroup {
-    name: "wm_shell-aidls",
-    srcs: [
-        "src/**/*.aidl",
-    ],
-    path: "src",
-}
-
 // TODO(b/168581922) protologtool do not support kotlin(*.kt)
 filegroup {
     name: "wm_shell-sources-kt",
@@ -106,7 +98,7 @@ android_library {
         ":wm_shell_protolog_src",
         // TODO(b/168581922) protologtool do not support kotlin(*.kt)
         ":wm_shell-sources-kt",
-        ":wm_shell-aidls",
+        "src/**/I*.aidl",
     ],
     resource_dirs: [
         "res",

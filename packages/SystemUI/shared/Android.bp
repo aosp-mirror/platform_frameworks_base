@@ -41,7 +41,6 @@ android_library {
     srcs: [
         "src/**/*.java",
         "src/**/I*.aidl",
-        ":wm_shell-aidls",
     ],
 
     static_libs: [
