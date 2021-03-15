@@ -481,7 +481,7 @@
     <string name="user_new_user_name" msgid="2019166282704195789">"משתמש חדש"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"להסיר אורח?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בפעילות זו באתר יימחקו."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"הסר"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"הסרה"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"שמחים לראותך שוב!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"האם ברצונך להמשיך בפעילות באתר?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ברצוני להתחיל מחדש"</string>
@@ -503,7 +503,7 @@
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"האם להסיר את המשתמש?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"כל האפליקציות והנתונים של המשתמש הזה יימחקו."</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"הסר"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"הסרה"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"תכונת החיסכון בסוללה פועלת"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"מפחית את הביצועים ונתונים ברקע"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"כיבוי תכונת החיסכון בסוללה"</string>
