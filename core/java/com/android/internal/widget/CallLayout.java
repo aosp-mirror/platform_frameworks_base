@@ -100,7 +100,6 @@ public class CallLayout extends FrameLayout {
         }
         // TODO(b/179178086): crop/clip the icon to a circle?
         mConversationIconView.setImageIcon(icon);
-        mConversationText.setText(callerName);
     }
 
     @RemotableViewMethod
