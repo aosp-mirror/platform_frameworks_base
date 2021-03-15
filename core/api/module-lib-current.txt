@@ -58,6 +58,16 @@ package android.net {
     method @Nullable public byte[] getWatchlistConfigHash();
   }
 
+  public class PacProxyManager {
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void addPacProxyInstalledListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.PacProxyManager.PacProxyInstalledListener);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void removePacProxyInstalledListener(@NonNull android.net.PacProxyManager.PacProxyInstalledListener);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void setCurrentProxyScriptUrl(@Nullable android.net.ProxyInfo);
+  }
+
+  public static interface PacProxyManager.PacProxyInstalledListener {
+    method public void onPacProxyInstalled(@Nullable android.net.Network, @NonNull android.net.ProxyInfo);
+  }
+
   public final class Proxy {
     method public static void setHttpProxyConfiguration(@Nullable android.net.ProxyInfo);
   }
