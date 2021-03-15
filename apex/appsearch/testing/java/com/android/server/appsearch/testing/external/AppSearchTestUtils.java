@@ -80,7 +80,7 @@ public class AppSearchTestUtils {
         List<GenericDocument> documents = new ArrayList<>();
         while (results.size() > 0) {
             for (SearchResult result : results) {
-                documents.add(result.getDocument());
+                documents.add(result.getGenericDocument());
             }
             results = searchResults.getNextPage().get();
         }
