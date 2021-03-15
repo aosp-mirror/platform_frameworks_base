@@ -49,6 +49,7 @@ import android.widget.TextView
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import kotlin.reflect.KClass
@@ -63,7 +64,9 @@ class ControlViewHolder(
     val controlsController: ControlsController,
     val uiExecutor: DelayableExecutor,
     val bgExecutor: DelayableExecutor,
-    val controlActionCoordinator: ControlActionCoordinator
+    val controlActionCoordinator: ControlActionCoordinator,
+    val controlsMetricsLogger: ControlsMetricsLogger,
+    val uid: Int
 ) {
 
     companion object {
@@ -141,7 +144,7 @@ class ControlViewHolder(
         status.setSelected(true)
     }
 
-    fun bindData(cws: ControlWithState) {
+    fun bindData(cws: ControlWithState, isLocked: Boolean) {
         // If an interaction is in progress, the update may visually interfere with the action the
         // action the user wants to make. Don't apply the update, and instead assume a new update
         // will coming from when the user interaction is complete.
@@ -171,10 +174,16 @@ class ControlViewHolder(
             controlActionCoordinator.runPendingAction(cws.ci.controlId)
         }
 
+        val wasLoading = isLoading
         isLoading = false
         behavior = bindBehavior(behavior,
             findBehaviorClass(controlStatus, controlTemplate, deviceType))
         updateContentDescription()
+
+        // Only log one event per control, at the moment we have determined that the control
+        // switched from the loading to done state
+        val doneLoading = wasLoading && !isLoading
+        if (doneLoading) controlsMetricsLogger.refreshEnd(this, isLocked)
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
