@@ -489,7 +489,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Huidige gebruiker uitloggen"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"GEBRUIKER UITLOGGEN"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Nieuwe gebruiker toevoegen?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Wanneer u een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Als je een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Gebruikerslimiet bereikt"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Je kunt maximaal <xliff:g id="COUNT">%d</xliff:g> gebruikers toevoegen.</item>
@@ -679,7 +679,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Bluetooth inschakelen?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Als je je toetsenbord wilt verbinden met je tablet, moet je eerst Bluetooth inschakelen."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Inschakelen"</string>
-    <string name="show_silently" msgid="5629369640872236299">"Meldingen zonder geluid weergeven"</string>
+    <string name="show_silently" msgid="5629369640872236299">"Meldingen zonder geluid tonen"</string>
     <string name="block" msgid="188483833983476566">"Alle meldingen blokkeren"</string>
     <string name="do_not_silence" msgid="4982217934250511227">"Niet zonder geluid weergeven"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"Niet zonder geluid weergeven of blokkeren"</string>
@@ -715,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan overgaan of trillen op basis van de telefooninstellingen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan overgaan of trillen op basis van de telefooninstellingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels weergegeven."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Trekt de aandacht met een zwevende snelkoppeling naar deze content."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gespreksgedeelte weergegeven, verschijnt als zwevende bubbel, geeft profielfoto weer op vergrendelscherm"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Verschijnt als zwevende bubbel bovenaan het gespreksgedeelte en toont profielfoto op vergrendelscherm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellingen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ondersteunt geen gespreksfuncties"</string>
