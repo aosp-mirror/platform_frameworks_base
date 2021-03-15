@@ -632,7 +632,7 @@ public class AppSearchImplTest {
         // No query filters specified. package2 should only get its own documents back.
         searchResultPage = mAppSearchImpl.query("package2", "database2", "", searchSpec);
         assertThat(searchResultPage.getResults()).hasSize(1);
-        assertThat(searchResultPage.getResults().get(0).getDocument()).isEqualTo(document);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document);
     }
 
     /**
@@ -692,7 +692,7 @@ public class AppSearchImplTest {
                         .build();
         searchResultPage = mAppSearchImpl.query("package2", "database2", "", searchSpec);
         assertThat(searchResultPage.getResults()).hasSize(1);
-        assertThat(searchResultPage.getResults().get(0).getDocument()).isEqualTo(document);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document);
     }
 
     @Test
@@ -1073,7 +1073,7 @@ public class AppSearchImplTest {
         for (SearchResult result : searchResultPage.getResults()) {
             assertThat(result.getPackageName()).isEqualTo("com.package.foo");
             assertThat(result.getDatabaseName()).isEqualTo("databaseName");
-            assertThat(result.getDocument())
+            assertThat(result.getGenericDocument())
                     .isEqualTo(
                             GenericDocumentToProtoConverter.toGenericDocument(
                                     strippedDocumentProto.build()));
