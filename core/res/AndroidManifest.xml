@@ -4799,7 +4799,7 @@
          TODO(159952358): STOPSHIP: This must be updated to the new "internal" protectionLevel
     -->
     <permission android:name="android.permission.DOMAIN_VERIFICATION_AGENT"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="internal|privileged" />
 
     <!-- @SystemApi @hide Must be required by the domain verification agent's intent
          BroadcastReceiver, to ensure that only the system can interact with it.
