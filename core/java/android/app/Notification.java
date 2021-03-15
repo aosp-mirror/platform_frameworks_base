@@ -5311,7 +5311,7 @@ public class Notification implements Parcelable
             contentView.setInt(R.id.expand_button, "setDefaultTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
             // Use different highlighted colors except when low-priority mode prevents that
-            if (!p.forceDefaultColor) {
+            if (!p.mReduceHighlights) {
                 textColor = getBackgroundColor(p);
                 pillColor = getAccentColor(p);
             }
@@ -5952,7 +5952,7 @@ public class Notification implements Parcelable
                     .viewType(StandardTemplateParams.VIEW_TYPE_PUBLIC)
                     .fillTextsFrom(this);
             if (isLowPriority) {
-                params.forceDefaultColor();
+                params.reduceHighlights();
             }
             view = makeNotificationHeader(params);
             view.setBoolean(R.id.notification_header, "setExpandOnlyOnButton", true);
@@ -5975,7 +5975,7 @@ public class Notification implements Parcelable
         public RemoteViews makeLowPriorityContentView(boolean useRegularSubtext) {
             StandardTemplateParams p = mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_MINIMIZED)
-                    .forceDefaultColor()
+                    .reduceHighlights()
                     .fillTextsFrom(this);
             if (!useRegularSubtext || TextUtils.isEmpty(mParams.summaryText)) {
                 p.summaryText(createSummaryText());
@@ -6315,7 +6315,9 @@ public class Notification implements Parcelable
          * @param p the template params to inflate this with
          */
         private @ColorInt int getRawColor(StandardTemplateParams p) {
-            if (p.forceDefaultColor) {
+            // When notifications are theme-tinted, the raw color is only used for the icon, so go
+            // ahead and keep that color instead of changing the color for minimized notifs.
+            if (p.mReduceHighlights && !mTintWithThemeAccent) {
                 return COLOR_DEFAULT;
             }
             return mN.color;
@@ -12182,7 +12184,7 @@ public class Notification implements Parcelable
         int maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
         boolean hideLargeIcon;
         boolean allowColorization  = true;
-        boolean forceDefaultColor = false;
+        boolean mReduceHighlights = false;
 
         final StandardTemplateParams reset() {
             mViewType = VIEW_TYPE_UNSPECIFIED;
@@ -12203,7 +12205,7 @@ public class Notification implements Parcelable
             headerTextSecondary = null;
             maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
             allowColorization = true;
-            forceDefaultColor = false;
+            mReduceHighlights = false;
             return this;
         }
 
@@ -12301,8 +12303,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        final StandardTemplateParams forceDefaultColor() {
-            this.forceDefaultColor = true;
+        final StandardTemplateParams reduceHighlights() {
+            this.mReduceHighlights = true;
             return this;
         }
 
