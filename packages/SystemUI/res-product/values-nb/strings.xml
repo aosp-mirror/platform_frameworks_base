@@ -40,7 +40,4 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Du har gjort feil i forsøket på å låse opp telefonen <xliff:g id="NUMBER">%d</xliff:g> ganger. Jobbprofilen blir fjernet, og alle profildataene blir slettet."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Du har tegnet opplåsingsmønsteret feil <xliff:g id="NUMBER_0">%1$d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%2$d</xliff:g> nye mislykkede forsøk blir du bedt om å låse opp nettbrettet via en e-postkonto.\n\n Prøv på nytt om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Du har tegnet opplåsingsmønsteret feil <xliff:g id="NUMBER_0">%1$d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%2$d</xliff:g> nye mislykkede forsøk blir du bedt om å låse opp telefonen via en e-postkonto.\n\n Prøv på nytt om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
-    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Lås opp telefonen din for å få flere alternativer"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Lås opp nettbrettet ditt for å få flere alternativer"</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Lås opp enheten din for å få flere alternativer"</string>
 </resources>

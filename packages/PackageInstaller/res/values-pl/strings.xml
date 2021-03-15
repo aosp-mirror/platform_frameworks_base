@@ -57,7 +57,7 @@
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Chcesz odinstalować tę aplikację dla "<b>"wszystkich"</b>" użytkowników? Ta aplikacja i jej dane zostaną usunięte dla "<b>"wszystkich"</b>" użytkowników na urządzeniu."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Chcesz odinstalować tę aplikację dla użytkownika <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Przywrócić fabryczną wersję tej aplikacji? Wszystkie dane zostaną usunięte."</string>
-    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Przywrócić fabryczną wersję tej aplikacji? Wszystkie dane zostaną usunięte. Dotyczy to wszystkich użytkowników tego urządzenia, również tych korzystających z profilu służbowego."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Przywrócić fabryczną wersję tej aplikacji? Wszystkie dane zostaną usunięte. Dotyczy to wszystkich użytkowników tego urządzenia, również tych korzystających z profilu do pracy."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Zachowaj <xliff:g id="SIZE">%1$s</xliff:g> danych aplikacji."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Aktywne odinstalowania"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Nieudane odinstalowania"</string>

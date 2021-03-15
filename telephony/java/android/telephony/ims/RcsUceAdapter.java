@@ -36,6 +36,8 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -430,7 +432,8 @@ public class RcsUceAdapter {
 
         /**
          * The pending request has completed successfully due to all requested contacts information
-         * being delivered.
+         * being delivered. The callback {@link #onCapabilitiesReceived(List)}
+         * for each contacts is required to be called before {@link #onComplete} is called.
          */
         void onComplete();
 
@@ -467,7 +470,7 @@ public class RcsUceAdapter {
      * poll on the network unless there are contacts being queried with stale information.
      * <p>
      * Be sure to check the availability of this feature using
-     * {@link ImsRcsManager#isAvailable(int)} and ensuring
+     * {@link ImsRcsManager#isAvailable(int, int)} and ensuring
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} or
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} is enabled or else
      * this operation will fail with {@link #ERROR_NOT_AVAILABLE} or {@link #ERROR_NOT_ENABLED}.
@@ -484,8 +487,9 @@ public class RcsUceAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void requestCapabilities(@NonNull List<Uri> contactNumbers,
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE,
+            Manifest.permission.READ_CONTACTS})
+    public void requestCapabilities(@NonNull Collection<Uri> contactNumbers,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull CapabilitiesCallback c) throws ImsException {
         if (c == null) {
@@ -537,7 +541,7 @@ public class RcsUceAdapter {
 
         try {
             imsRcsController.requestCapabilities(mSubId, mContext.getOpPackageName(),
-                    mContext.getAttributionTag(), contactNumbers, internalCallback);
+                    mContext.getAttributionTag(), new ArrayList(contactNumbers), internalCallback);
         } catch (ServiceSpecificException e) {
             throw new ImsException(e.toString(), e.errorCode);
         } catch (RemoteException e) {
@@ -557,7 +561,7 @@ public class RcsUceAdapter {
      *
      * <p>
      * Be sure to check the availability of this feature using
-     * {@link ImsRcsManager#isAvailable(int)} and ensuring
+     * {@link ImsRcsManager#isAvailable(int, int)} and ensuring
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} or
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} is
      * enabled or else this operation will fail with
@@ -568,10 +572,15 @@ public class RcsUceAdapter {
      * {@link CapabilitiesCallback} is called.
      * @param c A one-time callback for when the request for capabilities completes or there is
      * an error processing the request.
+     * @throws ImsException if the subscription associated with this instance of
+     * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
+     * available. This can happen if the ImsService has crashed, for example, or if the subscription
+     * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE,
+            Manifest.permission.READ_CONTACTS})
     public void requestAvailability(@NonNull Uri contactNumber,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull CapabilitiesCallback c) throws ImsException {

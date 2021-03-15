@@ -37,6 +37,7 @@ import com.android.internal.telephony.util.RemoteCallbackListExt;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -368,7 +369,13 @@ public class ImsConfigImplBase {
     }
 
     private void onNotifyRcsAutoConfigurationReceived(byte[] config, boolean isCompressed) {
-        mRcsConfigData = isCompressed ? RcsConfig.decompressGzip(config) : config;
+        // cache uncompressed config
+        config = isCompressed ? RcsConfig.decompressGzip(config) : config;
+        if (Arrays.equals(mRcsConfigData, config)) {
+            return;
+        }
+        mRcsConfigData = config;
+
         // can be null in testing
         if (mRcsCallbacks != null) {
             mRcsCallbacks.broadcastAction(c -> {
@@ -535,10 +542,33 @@ public class ImsConfigImplBase {
         }
         mRcsCallbacks.broadcastAction(c -> {
             try {
-                //TODO compressed by default?
                 c.onAutoConfigurationErrorReceived(errorCode, errorString);
             } catch (RemoteException e) {
                 Log.w(TAG, "dead binder in notifyAutoConfigurationErrorReceived, skipping.");
+            }
+        });
+    }
+
+    /**
+     * Notifies application that pre-provisioning config is received.
+     *
+     * <p>Some carriers using ACS (auto configuration server) may send a carrier-specific
+     * pre-provisioning configuration XML if the user has not been provisioned for RCS
+     * services yet. When such provisioning XML is received, ACS client must call this
+     * method to notify the application with the XML.
+     *
+     * @param configXml the pre-provisioning config in carrier specified format.
+     */
+    public final void notifyPreProvisioningReceived(@NonNull byte[] configXml) {
+        // can be null in testing
+        if (mRcsCallbacks == null) {
+            return;
+        }
+        mRcsCallbacks.broadcastAction(c -> {
+            try {
+                c.onPreProvisioningReceived(configXml);
+            } catch (RemoteException e) {
+                Log.w(TAG, "dead binder in notifyPreProvisioningReceived, skipping.");
             }
         });
     }

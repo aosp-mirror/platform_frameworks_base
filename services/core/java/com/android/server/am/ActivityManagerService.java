@@ -13386,6 +13386,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     endTime = SystemClock.currentThreadTimeMillis();
                     hasSwapPss = mi.hasSwappedOutPss;
+                    memtrackGraphics = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GRAPHICS);
+                    memtrackGl = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GL);
                 } else {
                     reportType = ProcessStats.ADD_PSS_EXTERNAL;
                     startTime = SystemClock.currentThreadTimeMillis();
@@ -13539,6 +13541,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if (!Debug.getMemoryInfo(st.pid, mi)) {
                                 continue;
                             }
+                            memtrackGraphics = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GRAPHICS);
+                            memtrackGl = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GL);
                         } else {
                             long pss = Debug.getPss(st.pid, tmpLong, memtrackTmp);
                             if (pss == 0) {
@@ -13768,9 +13772,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print(" unmapped + ");
                         pw.print(stringifyKBSize(ionPool));
                         pw.println(" pools)");
+                kernelUsed += ionUnmapped;
                 // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
-                // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
-                kernelUsed += ionHeap;
+                // set on ION VMAs, however it might be included by the memtrack HAL.
+                // Replace memtrack HAL reported Graphics category with mapped dmabufs
+                totalPss -= totalMemtrackGraphics;
+                totalPss += dmabufMapped;
             } else {
                 final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
                 if (totalExportedDmabuf >= 0) {
@@ -14439,6 +14446,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             });
         }
         final int statsCount = stats.size();
+        long totalMemtrackGraphics = 0;
+        long totalMemtrackGl = 0;
         for (int i = 0; i < statsCount; i++) {
             ProcessCpuTracker.Stats st = stats.get(i);
             long pss = Debug.getPss(st.pid, swaptrackTmp, memtrackTmp);
@@ -14449,6 +14458,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mi.pss = pss;
                     mi.swapPss = swaptrackTmp[1];
                     mi.memtrack = memtrackTmp[0];
+                    totalMemtrackGraphics += memtrackTmp[1];
+                    totalMemtrackGl += memtrackTmp[2];
                     memInfos.add(mi);
                 }
             }
@@ -14457,20 +14468,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         long totalPss = 0;
         long totalSwapPss = 0;
         long totalMemtrack = 0;
-        long totalMemtrackGraphics = 0;
-        long totalMemtrackGl = 0;
         for (int i=0, N=memInfos.size(); i<N; i++) {
             ProcessMemInfo mi = memInfos.get(i);
             if (mi.pss == 0) {
                 mi.pss = Debug.getPss(mi.pid, swaptrackTmp, memtrackTmp);
                 mi.swapPss = swaptrackTmp[1];
                 mi.memtrack = memtrackTmp[0];
+                totalMemtrackGraphics += memtrackTmp[1];
+                totalMemtrackGl += memtrackTmp[2];
             }
             totalPss += mi.pss;
             totalSwapPss += mi.swapPss;
             totalMemtrack += mi.memtrack;
-            totalMemtrackGraphics += memtrackTmp[1];
-            totalMemtrackGl += memtrackTmp[2];
         }
         Collections.sort(memInfos, new Comparator<ProcessMemInfo>() {
             @Override public int compare(ProcessMemInfo lhs, ProcessMemInfo rhs) {
@@ -14628,17 +14637,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         long kernelUsed = memInfo.getKernelUsedSizeKb();
         final long ionHeap = Debug.getIonHeapsSizeKb();
         final long ionPool = Debug.getIonPoolsSizeKb();
+        final long dmabufMapped = Debug.getDmabufMappedSizeKb();
         if (ionHeap >= 0 && ionPool >= 0) {
+            final long ionUnmapped = ionHeap - dmabufMapped;
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
             memInfoBuilder.append("\n");
+            kernelUsed += ionUnmapped;
             // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
-            // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
-            kernelUsed += ionHeap;
+            // set on ION VMAs, however it might be included by the memtrack HAL.
+            // Replace memtrack HAL reported Graphics category with mapped dmabufs
+            totalPss -= totalMemtrackGraphics;
+            totalPss += dmabufMapped;
         } else {
             final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
             if (totalExportedDmabuf >= 0) {
-                final long dmabufMapped = Debug.getDmabufMappedSizeKb();
                 final long dmabufUnmapped = totalExportedDmabuf - dmabufMapped;
                 memInfoBuilder.append("DMA-BUF: ");
                 memInfoBuilder.append(stringifyKBSize(totalExportedDmabuf));
@@ -19828,7 +19841,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int getStorageMountMode(int pid, int uid) {
             if (uid == SHELL_UID || uid == ROOT_UID) {
-                return Zygote.MOUNT_EXTERNAL_FULL;
+                return Zygote.MOUNT_EXTERNAL_DEFAULT;
             }
             synchronized (mPidsSelfLocked) {
                 final ProcessRecord pr = mPidsSelfLocked.get(pid);
@@ -20358,10 +20371,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int checkOperation(int code, int uid, String packageName, boolean raw,
                 QuadFunction<Integer, Integer, String, Boolean, Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, Process.SHELL_UID,
-                            "com.android.shell", raw);
+                    return superImpl.apply(code, shellUid, "com.android.shell", raw);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -20373,10 +20387,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int checkAudioOperation(int code, int usage, int uid, String packageName,
                 QuadFunction<Integer, Integer, Integer, String, Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, usage, Process.SHELL_UID,
-                            "com.android.shell");
+                    return superImpl.apply(code, usage, shellUid, "com.android.shell");
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -20391,9 +20406,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
                         Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, Process.SHELL_UID, "com.android.shell", featureId,
+                    return superImpl.apply(code, shellUid, "com.android.shell", featureId,
                             shouldCollectAsyncNotedOp, message, shouldCollectMessage);
                 } finally {
                     Binder.restoreCallingIdentity(identity);

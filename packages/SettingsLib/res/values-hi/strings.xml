@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉन्‍फ़िगरेशन की विफलता"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"खराब नेटवर्क होने के कारण कनेक्ट नहीं हुआ"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"वाईफ़ाई कनेक्‍शन विफलता"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"पुष्टि नहीं हो सकी"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"प्रमाणीकरण समस्या"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"कनेक्ट नहीं हो पा रहा है"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' से कनेक्ट नहीं हो पा रहा है"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"पासवर्ड जाँचें और दोबारा कोशिश करें"</string>
@@ -85,7 +85,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"फ़ोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फ़ाइल स्थानांतरण"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"इनपुट डिवाइस"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इंटरनेट ऐक्सेस"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इंटरनेट पहुंच"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"संपर्क शेयर करना"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"संपर्क साझाकरण के लिए उपयोग करें"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"इंटरनेट कनेक्शन साझाकरण"</string>
@@ -161,7 +161,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"कृत्रिम बोली के लहजे को प्रभावित करता है"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"भाषा"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्‍टम की भाषा का इस्तेमाल करें"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्‍टम भाषा का उपयोग करें"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"भाषा नहीं चुनी गई है"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"बोले गए लेख के लिए भाषा-विशिष्ट ध्‍वनि सेट करता है"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"एक उदाहरण सुनें"</string>
@@ -206,34 +206,60 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB डीबग करना"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"डीबग मोड जब USB कनेक्‍ट किया गया हो"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB डीबग करने की मंज़ूरी रद्द करें"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"वॉयरलेस डीबगिंग"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"डिवाइस के वाई-फ़ाई से कनेक्ट हाेने पर, डीबग मोड चालू करें"</string>
-    <string name="adb_wireless_error" msgid="721958772149779856">"गड़बड़ी"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"वॉयरलेस डीबगिंग"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"उपलब्ध डिवाइस देखने और इस्तेमाल करने के लिए, वॉयरलेस डीबगिंग की सुविधा चालू करें"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"क्यूआर कोड की मदद से डिवाइस जोड़ें"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"क्यूआर कोड स्कैनर का इस्तेमाल करके, नए डिवाइस जोड़ें"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"जोड़ने का कोड इस्तेमाल करके, डिवाइस जोड़ें"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"छह अंकों का कोड इस्तेमाल करके, नए डिवाइस जोड़ें"</string>
-    <string name="adb_paired_devices_title" msgid="5268997341526217362">"जोड़े गए डिवाइस"</string>
-    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"फ़िलहाल, कनेक्ट किया गया"</string>
-    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"डिवाइस की जानकारी"</string>
-    <string name="adb_device_forget" msgid="193072400783068417">"जानकारी हटाएं"</string>
-    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"डिवाइस फ़िंगरप्रिंट: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
-    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"कनेक्ट नहीं किया जा सका"</string>
-    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"पक्का करें कि <xliff:g id="DEVICE_NAME">%1$s</xliff:g> सही नेटवर्क से कनेक्ट किया गया है"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"डिवाइस से जोड़ें"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"वाई-फ़ाई से जोड़ने का कोड"</string>
-    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"दूसरे डिवाइस से जोड़ा नहीं जा सका"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"पक्का करें कि आपका डिवाइस और दूसरा डिवाइस, दाेनाें एक ही नेटवर्क से जुड़े हैं."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"क्यूआर कोड स्कैन करके, वाई-फ़ाई से डिवाइस को जोड़ें"</string>
-    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"डिवाइस जोड़ा जा रहा है…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"डिवाइस को जोड़ा नहीं जा सका. शायद, क्यूआर कोड ठीक नहीं था या फिर आपका डिवाइस और दूसरा डिवाइस, दाेनाें एक ही नेटवर्क से नहीं जुड़े हैं."</string>
-    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"आईपी पता और पोर्ट"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"क्यूआर कोड स्कैन करें"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"क्यूआर कोड स्कैन करके, वाई-फ़ाई नेटवर्क से डिवाइस जोड़ें"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"कृपया किसी वाई-फ़ाई नेटवर्क से कनेक्ट करें"</string>
-    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
+    <!-- no translation found for enable_adb_wireless (6973226350963971018) -->
+    <skip />
+    <!-- no translation found for enable_adb_wireless_summary (7344391423657093011) -->
+    <skip />
+    <!-- no translation found for adb_wireless_error (721958772149779856) -->
+    <skip />
+    <!-- no translation found for adb_wireless_settings (2295017847215680229) -->
+    <skip />
+    <!-- no translation found for adb_wireless_list_empty_off (1713707973837255490) -->
+    <skip />
+    <!-- no translation found for adb_pair_method_qrcode_title (6982904096137468634) -->
+    <skip />
+    <!-- no translation found for adb_pair_method_qrcode_summary (3729901496856458634) -->
+    <skip />
+    <!-- no translation found for adb_pair_method_code_title (1122590300445142904) -->
+    <skip />
+    <!-- no translation found for adb_pair_method_code_summary (6370414511333685185) -->
+    <skip />
+    <!-- no translation found for adb_paired_devices_title (5268997341526217362) -->
+    <skip />
+    <!-- no translation found for adb_wireless_device_connected_summary (3039660790249148713) -->
+    <skip />
+    <!-- no translation found for adb_wireless_device_details_title (7129369670526565786) -->
+    <skip />
+    <!-- no translation found for adb_device_forget (193072400783068417) -->
+    <skip />
+    <!-- no translation found for adb_device_fingerprint_title_format (291504822917843701) -->
+    <skip />
+    <!-- no translation found for adb_wireless_connection_failed_title (664211177427438438) -->
+    <skip />
+    <!-- no translation found for adb_wireless_connection_failed_message (9213896700171602073) -->
+    <skip />
+    <!-- no translation found for adb_pairing_device_dialog_title (7141739231018530210) -->
+    <skip />
+    <!-- no translation found for adb_pairing_device_dialog_pairing_code_label (3639239786669722731) -->
+    <skip />
+    <!-- no translation found for adb_pairing_device_dialog_failed_title (3426758947882091735) -->
+    <skip />
+    <!-- no translation found for adb_pairing_device_dialog_failed_msg (6611097519661997148) -->
+    <skip />
+    <!-- no translation found for adb_wireless_qrcode_summary (8051414549011801917) -->
+    <skip />
+    <!-- no translation found for adb_wireless_verifying_qrcode_text (6123192424916029207) -->
+    <skip />
+    <!-- no translation found for adb_qrcode_pairing_device_failed_msg (6936292092592914132) -->
+    <skip />
+    <!-- no translation found for adb_wireless_ip_addr_preference_title (8335132107715311730) -->
+    <skip />
+    <!-- no translation found for adb_wireless_qrcode_pairing_title (1906409667944674707) -->
+    <skip />
+    <!-- no translation found for adb_wireless_qrcode_pairing_description (8578868049289910131) -->
+    <skip />
+    <!-- no translation found for keywords_adb_wireless (6507505581882171240) -->
+    <skip />
     <string name="bugreport_in_power" msgid="8664089072534638709">"गड़बड़ी की रिपोर्ट का शॉर्टकट"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"गड़बड़ी की रिपोर्ट लेने के लिए पावर मेन्यू में कोई बटन दिखाएं"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"स्क्रीन को चालू रखें"</string>
@@ -251,7 +277,6 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"वायरलेस डिसप्ले सर्टिफ़िकेशन"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"वाई-फ़ाई वर्बोस लॉगिंग चालू करें"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"वाई-फ़ाई के लिए स्कैन की संख्या कम करें"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"बेहतर वाई-फ़ाई नेटवर्क से जुड़ने पर मैक पता बदलने की सुविधा"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा हमेशा चालू"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"हार्डवेयर से तेज़ी लाने के लिए टेदर करें"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"बिना नाम वाले ब्लूटूथ डिवाइस दिखाएं"</string>
@@ -276,14 +301,13 @@
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"निजी डीएनएस"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"निजी डीएनएस मोड चुनें"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"बंद"</string>
-    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"अपने-आप"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"अपने आप"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"निजी डीएनएस सेवा देने वाले का होस्टनाम"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"डीएनएस सेवा देने वाले का होस्टनाम डालें"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"कनेक्‍ट नहीं हो सका"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"वायरलेस डिसप्ले सर्टिफ़िकेशन के विकल्प दिखाएं"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"वाई-फ़ाई लॉगिंग का स्तर बढ़ाएं, वाई-फ़ाई पिकर में प्रति SSID RSSI दिखाएं"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"बैटरी की खपत कम और नेटवर्क की परफ़ॉर्मेंस बेहतर होती है"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"जब यह मोड चालू होता है, तब नेटवर्क से कनेक्ट होने पर हर बार इस डिवाइस का मैक पता बदल सकता है. ऐसा तब होता है, जब डिवाइस किसी ऐसे नेटवर्क से जुड़ता है जिस पर मैक पते को बिना किसी तय नियम के बदलने की सुविधा चालू होती है."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"डेटा इस्तेमाल करने की सीमा तय की गई है"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"डेटा इस्तेमाल करने की सीमा तय नहीं की गई है"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लॉगर बफ़र आकार"</string>
@@ -301,8 +325,10 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"हार्डवेयर से तेज़ी लाने के लिए टेदर करने की सुविधा मौजूद होने पर उसका इस्तेमाल करें"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB डीबग करने की अनुमति दें?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB डीबग करने का मकसद केवल डेवेलप करना है. इसका इस्तेमाल आपके कंप्‍यूटर और आपके डिवाइस के बीच डेटा को कॉपी करने, बिना सूचना के आपके डिवाइस पर ऐप इंस्‍टॉल करने और लॉग डेटा पढ़ने के लिए करें."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"वॉयरलेस डीबगिंग की अनुमति देना चाहते हैं?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"वॉयरलेस डीबगिंग का मकसद सिर्फ़ डेवलपमेंट करना है. इसका इस्तेमाल, आपके कंप्यूटर और डिवाइस के बीच डेटा कॉपी करने, बिना सूचना के आपके डिवाइस पर ऐप्लिकेशन इंस्टॉल करने, और लॉग डेटा पढ़ने के लिए करें."</string>
+    <!-- no translation found for adbwifi_warning_title (727104571653031865) -->
+    <skip />
+    <!-- no translation found for adbwifi_warning_message (8005936574322702388) -->
+    <skip />
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"उन सभी कंप्यूटरों से USB डीबग करने की पहुंचर रद्द करें, जिन्हें आपने पहले इसकी मंज़ूरी दी थी?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"विकास सेटिंग की अनुमति दें?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ये सेटिंग केवल विकास संबंधी उपयोग के प्रयोजन से हैं. वे आपके डिवाइस और उस पर स्‍थित ऐप्लिकेशन  को खराब कर सकती हैं या उनके दुर्व्यवहार का कारण हो सकती हैं."</string>
@@ -311,7 +337,6 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"बिना नाम वाले ब्लूटूथ डिवाइस (केवल MAC पते वाले) दिखाए जाएंगे"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"दूर के डिवाइस पर आवाज़ बहुत बढ़ जाने या उससे नियंत्रण हटने जैसी समस्याएं होने पर, यह ब्लूटूथ के ज़रिए आवाज़ के नियंत्रण की सुविधा रोक देता है."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लूटूथ सेटिंग में Gabeldorsche सुविधा को चालू करता है."</string>
-    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"कनेक्टिविटी बेहतर बनाने की सुविधा को चालू करें"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानीय टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"लोकल शेल तक पहुंचने की सुविधा देने वाले टर्मिनल ऐप को चालू करें"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"एचडीसीपी जाँच"</string>
@@ -358,8 +383,6 @@
     <string name="track_frame_time" msgid="522674651937771106">"प्रोफ़ाइल HWUI रेंडरिंग"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"जीपीयू डीबग लेयर चालू करें"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डीबग ऐप के लिए जीपीयू डीबग लेयर लोड करने दें"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"वर्बोस वेंडर लॉगिंग चालू करें"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"गड़बड़ियों की रिपोर्ट में खास डिवाइस से जुड़े वेंडर लॉग शामिल करें. इन लॉग में निजी जानकारी, बैटरी का ज़्यादा इस्तेमाल, और/या डिवाइस की मेमोरी ज़्यादा इस्तेमाल करने की जानकारी हो सकती है."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"विंडो एनिमेशन स्‍केल"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ट्रांज़िशन एनिमेशन स्‍केल"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"एनिमेटर अवधि स्केल"</string>
@@ -417,8 +440,9 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"लाल-हरे रंग की पहचान न कर पाना (लाल-हरा)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"लाल रंग पहचान न पाना (लाल-हरा)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"नीला रंग पहचान न पाना (नीला-पीला)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग में सुधार करने की सुविधा"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"रंग में सुधार करने की सुविधा, आपके डिवाइस पर दिखने वाले रंगों में बदलाव करने में मदद करती है"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग सुधार"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> के द्वारा ओवरराइड किया गया"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"बैटरी करीब <xliff:g id="TIME_REMAINING">%1$s</xliff:g> में खत्म हो जाएगी"</string>
@@ -430,26 +454,34 @@
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"आपके इस्तेमाल के हिसाब से बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"आपके इस्तेमाल के हिसाब से बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> चलेगी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> चलेगी"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> तक"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"बैटरी <xliff:g id="TIME">%1$s</xliff:g> तक खत्म हो जाएगी"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम बैटरी बची है"</string>
-    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम बैटरी बची है (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> से ज़्यादा चलने लायक बैटरी बची है (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> से ज़्यादा चलने लायक बैटरी बची है"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"फ़ोन जल्द ही बंद हो सकता है"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"टैबलेट जल्द ही बंद हो सकता है"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"डिवाइस जल्द ही बंद हो सकता है"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"फ़ोन जल्द ही बंद हो सकता है (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"टैबलेट जल्द ही बंद हो सकता है (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"डिवाइस जल्द ही बंद हो सकता है (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"बैटरी लाइफ़ <xliff:g id="TIME">%1$s</xliff:g> तक के लिए बढाएं"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम समय बचा है"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम बैटरी बची है (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> से ज़्यादा चलने लायक बैटरी बची है (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> से ज़्यादा चलने लायक बैटरी बची है"</string>
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (137330009791560774) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (145489081521468132) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1070562682853942350) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (4429259621177089719) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7703677921000858479) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (4374784375644214578) -->
+    <skip />
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"चार्ज पूरा होने में <xliff:g id="TIME">%1$s</xliff:g> बचा है"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> में पूरा चार्ज हो जाएगा"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हो रही है"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"तेज़ चार्ज हो रही है"</string>
-    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"धीरे चार्ज हो रही है"</string>
+    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
+    <skip />
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज नहीं हो रही है"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लग इन है, अभी चार्ज नहीं हो सकती"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"पूरी"</string>
@@ -457,7 +489,7 @@
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति नहीं है"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने का ऐक्सेस"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात ऐप्लिकेशन इंस्टॉल करने का ऐक्सेस"</string>
     <string name="home" msgid="973834627243661438">"सेटिंग का होम पेज"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -484,10 +516,10 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS रजिस्ट्रेशन की स्थिति"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"रजिस्टर है"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"रजिस्टर नहीं है"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"मौजूद नहीं है"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"अनुपलब्ध"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"एमएसी पता रैंडम पर सेट है"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="one">%1$d डिवाइस जुड़ा है</item>
+      <item quantity="one">%1$d डिवाइस जुड़े हैं</item>
       <item quantity="other">%1$d डिवाइस जुड़े हैं</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ज़्यादा समय."</string>
@@ -507,50 +539,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"हर बार पूछें"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"जब तक आप इसे बंद नहीं करते"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"अभी-अभी"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"फ़ोन का स्पीकर"</string>
+    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"यह डिवाइस"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"कनेक्ट करने में समस्या हो रही है. डिवाइस को बंद करके चालू करें"</string>
-    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"वायर वाला ऑडियो डिवाइस"</string>
-    <string name="help_label" msgid="3528360748637781274">"सहायता और सुझाव"</string>
-    <string name="storage_category" msgid="2287342585424631813">"डिवाइस की मेमोरी"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"शेयर किया गया डेटा"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"शेयर किए गए डेटा को देखें और उसमें बदलाव करें"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"इस उपयोगकर्ता के साथ किसी तरह का डेटा शेयर नहीं किया गया है."</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"शेयर किए गए डेटा को लाने में कोई गड़बड़ी हुई है. फिर से कोशिश करें."</string>
-    <string name="blob_id_text" msgid="8680078988996308061">"शेयर किए गए डेटा का आईडी: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"डेटा का ऐक्सेस <xliff:g id="DATE">%s</xliff:g> को खत्म हो जाएगा"</string>
-    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"शेयर किए गए डेटा को मिटाने में कोई गड़बड़ी हुई."</string>
-    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"शेयर किए गए इस डेटा के लिए कोई लीज़ नहीं ली गई है. क्या आप इसे मिटाना चाहते हैं?"</string>
-    <string name="accessor_info_title" msgid="8289823651512477787">"ऐप्लिकेशन का शेयर किया गया डेटा"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"ऐप्लिकेशन से कोई जानकारी नहीं मिली."</string>
-    <string name="accessor_expires_text" msgid="4625619273236786252">"लीज़ <xliff:g id="DATE">%s</xliff:g> को खत्म होगी"</string>
-    <string name="delete_blob_text" msgid="2819192607255625697">"शेयर किया गया डेटा मिटाएं"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"क्या आप वाकई शेयर किया गया यह डेटा मिटाना चाहते हैं?"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"उपयोगकर्ताओं के उनके स्वयं के ऐप्लिकेशन  और सामग्री होती है"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"आप अपने खाते से ऐप और सामग्री की पहुंच को रोक सकते हैं"</string>
-    <string name="user_add_user_item_title" msgid="2394272381086965029">"उपयोगकर्ता"</string>
-    <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबंधित प्रोफ़ाइल"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"नया उपयोगकर्ता जोड़ें?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"आप और ज़्यादा उपयोगकर्ता बनाकर इस डिवाइस को दूसरे लोगों के साथ शेयर कर सकते हैं. हर उपयोगकर्ता के पास अपनी जगह होती है, जिसमें वह मनपसंद तरीके से ऐप्लिकेशन, वॉलपेपर और दूसरी चीज़ों में बदलाव कर सकते हैं. उपयोगकर्ता वाई-फ़ाई जैसी डिवाइस सेटिंग में भी बदलाव कर सकते हैं, जिसका असर हर किसी पर पड़ेगा.\n\nजब आप कोई नया उपयोगकर्ता जोड़ते हैं तो उन्हें अपनी जगह सेट करनी होगी.\n\nकोई भी उपयोगकर्ता दूसरे सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है. ऐसा भी हो सकता है कि सुलभता सेटिंग और सेवाएं नए उपयोगकर्ता को ट्रांसफ़र न हो पाएं."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"जब आप कोई नया उपयोगकर्ता जोड़ते हैं तो उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप अपडेट कर सकता है."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"उपयोगकर्ता को अभी सेट करें?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"पक्का करें कि व्यक्ति डिवाइस का इस्तेमाल करने और अपनी जगह सेट करने के लिए मौजूद है"</string>
-    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"प्रोफ़ाइल अभी सेट करें?"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"अभी सेट करें"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"रद्द करें"</string>
-    <string name="user_add_user_type_title" msgid="551279664052914497">"जोड़ें"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"नया उपयोगकर्ता"</string>
-    <string name="user_new_profile_name" msgid="2405500423304678841">"नई प्रोफ़ाइल"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"उपयोगकर्ता की जानकारी"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफ़ाइल की जानकारी"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"इससे पहले कि आप कोई प्रतिबंधित प्रोफ़ाइल बनाएं, आपको अपने ऐप्लिकेशन  और व्यक्तिगत डेटा की सुरक्षा करने के लिए एक स्क्रीन लॉक सेट करना होगा."</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"लॉक सेट करें"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> पर जाएं"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"मेहमान जोड़ें"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"मेहमान हटाएं"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"मेहमान"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"डिवाइस की डिफ़ॉल्ट सेटिंग"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"बंद है"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"चालू है"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"बदली गई सेटिंग को लागू करने के लिए, डिवाइस को रीस्टार्ट करना होगा. अपने डिवाइस को रीस्टार्ट करें या रद्द करें."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"वायर वाला हेडफ़ोन"</string>
 </resources>

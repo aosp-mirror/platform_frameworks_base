@@ -18,6 +18,7 @@ package com.android.systemui;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
@@ -39,6 +40,7 @@ import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvide
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.phone.BackGestureTfClassifierProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -181,5 +183,14 @@ public class SystemUIFactory {
         public Context provideContext() {
             return mContext;
         }
+    }
+
+    /**
+     * Creates an instance of BackGestureTfClassifierProvider.
+     * This method is overridden in vendor specific implementation of Sys UI.
+     */
+    public BackGestureTfClassifierProvider createBackGestureTfClassifierProvider(
+            AssetManager am, String modelName) {
+        return new BackGestureTfClassifierProvider();
     }
 }

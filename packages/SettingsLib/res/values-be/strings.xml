@@ -42,10 +42,10 @@
     <string name="connected_via_app" msgid="3532267661404276584">"Падключана праз праграму \"<xliff:g id="NAME">%1$s</xliff:g>\""</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"Даступна праз %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Націсніце, каб зарэгістравацца"</string>
-    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Няма падключэння да інтэрнэту"</string>
+    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Не падключана да інтэрнэту"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Не ўдалося атрымаць доступ да прыватнага DNS-сервера"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"Абмежаваныя магчымасці падключэння"</string>
-    <string name="wifi_status_no_internet" msgid="3799933875988829048">"Няма падключэння да інтэрнэту"</string>
+    <string name="wifi_status_no_internet" msgid="3799933875988829048">"Не падключана да інтэрнэту"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Трэба выканаць уваход"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Пункт доступу часова заняты"</string>
     <string name="connected_via_carrier" msgid="1968057009076191514">"Падключана праз %1$s"</string>
@@ -81,7 +81,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Узровень зараду: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Л: акумулятар: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, П: акумулятар: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Уключана"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аўдыя медыяфайлаў"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аўдыё медыяпрылады"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Тэлефонныя выклікі"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Перадача файлаў"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Прылада ўводу"</string>
@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Выкарыстоўваць для перадачы файлаў"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Выкарыстоўваць для ўводу"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Выкарыстоўваць для слыхавых апаратаў"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Спалучыць"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Падлучыць"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"СПАЛУЧЫЦЬ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Скасаваць"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Спалучэнне дае доступ да вашых кантактаў і гісторыі выклікаў пры падключэнні."</string>
@@ -140,8 +140,8 @@
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Адкрытая сетка"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Бяспечная сетка"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"АС Android"</string>
-    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Выдаленыя праграмы"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Выдаленыя праграмы і карыстальнiкi"</string>
+    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Выдаленыя прыкладанні"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Выдаленыя прыкладанні і карыстальнiкi"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Абнаўленні сістэмы"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB-мадэм"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Партатыўны хот-спот"</string>
@@ -153,10 +153,10 @@
     <string name="unknown" msgid="3544487229740637809">"Невядома"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Карыстальнiк: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Усталяваны некаторыя стандартныя налады"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Стандартныя налады не зададзены"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Параметры па змаўчанні не ўсталяваныя"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Налады Text-to-speech"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Сінтэз маўлення"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Хуткасць маўлення"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Хуткасць гаворкі"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Хуткасць, з якой кажуць тэкст"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Тон"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Уплывае на тон сінтэзаванага маўлення"</string>
@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Выбраць профіль"</string>
     <string name="category_personal" msgid="6236798763159385225">"Асабісты"</string>
-    <string name="category_work" msgid="4014193632325996115">"Працоўны"</string>
+    <string name="category_work" msgid="4014193632325996115">"Рабочы"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Параметры распрацоўшчыка"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Уключыць параметры распрацоўшчыка"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Налада параметраў для распрацоўкі прыкладанняў"</string>
@@ -206,19 +206,19 @@
     <string name="enable_adb" msgid="8072776357237289039">"Адладка USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Рэжым адладкі, калі USB падключаны"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Адклікаць дазвол USB-адладкі"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Адладка па Wi-Fi"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Бесправадная адладка"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Рэжым адладкі з падключанай сеткай Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Памылка"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"Адладка па Wi-Fi"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Каб праглядаць і выкарыстоўваць даступныя прылады, уключыце адладку па Wi-Fi"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Бесправадная адладка"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Каб праглядаць і выкарыстоўваць даступныя прылады, уключыце бесправадную адладку"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Спалучыць прыладу з дапамогай QR-кода"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Спалучаць новыя прылады з дапамогай сканера QR-кодаў"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Спалучаць новыя прылады з дапамогай сканера QR-кода"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Спалучыць прыладу з дапамогай кода спалучэння"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Спалучаць новыя прылады з дапамогай шасцізначнага кода"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Спалучаныя прылады"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Цяпер падключана"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Падрабязныя звесткі пра прыладу"</string>
-    <string name="adb_device_forget" msgid="193072400783068417">"Забыць"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Ігнараваць"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Лічбавы адбітак прылады: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Не ўдалося падключыцца"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Пераканайцеся, што прылада \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" падключана да правільнай сеткі"</string>
@@ -231,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Не ўдалося спалучыць прыладу. QR-код няправільны, ці прылада падключана не да той самай сеткі."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-адрас і порт"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Сканіраваць QR-код"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Спалучэнне прылады праз Wi‑Fi шляхам сканіравання QR-кода"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Падключыцеся да сеткі Wi-Fi"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Спалучыць прыладу праз Wi‑Fi шляхам сканіравання QR-кода"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, адладка, распрацоўшчык"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Ярлык для справаздачы пра памылкі"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Паказаць кнопку для прыняцця справаздачы пра памылку ў меню сілкавання"</string>
@@ -251,7 +250,6 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сертыфікацыя бесправаднога экрана"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Уключыць падрабязны журнал Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Рэгуляванне пошуку сетак Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Палепшаная Wi‑Fi рандамізацыя MAC-адраса"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мабільная перадача даных заўсёды актыўная"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Апаратнае паскарэнне ў рэжыме мадэма"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Паказваць прылады Bluetooth без назваў"</string>
@@ -283,7 +281,6 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Паказаць опцыі сертыфікацыі бесправаднога экрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Пры выбары сеткі Wi-Fi указваць у журнале RSSI для кожнага SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Зніжае расход зараду акумулятара і павышае прадукцыйнасць мабільных сетак"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Калі ўключаны гэты рэжым, MAC-адрас гэтай прылады можа змяняцца падчас кожнага падключэння да сеткі з актыўнай рандамізацыяй MAC-адрасоў."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Сетка з улікам трафіка"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сетка без уліку трафіка"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Памеры буфера журнала"</string>
@@ -301,8 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Выкарыстоўваць апаратнае паскарэнне ў рэжыме мадэма пры наяўнасці"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Дазволіць адладку USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Адладка USB прызначана толькі для мэтаў распрацоўкі. Яна можа выкарыстоўвацца, каб капіяваць дадзеныя паміж кампутарам і прыладай, усталёўваць прыкладанні на прыладзе без папярэдняга апавяшчэння і чытаць дадзеныя дзённiка."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Дазволіць адладку па Wi-Fi?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Адладка па Wi-Fi прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп\'ютарам і прыладай, усталёўваць праграмы на прыладзе без апавяшчэння і чытаць даныя журнала."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Дазволіць бесправадную адладку?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Бесправадная адладка прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп\'ютарам і прыладай, усталёўваць праграмы на прыладзе без апавяшчэння і чытаць даныя журнала."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Адклікаць доступ да адладкі USB з усіх камп\'ютараў, на якiх вы уваходзiлi ў сiстэму?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Дазволiць налады распрацоўшчыка?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Гэтыя налады прызначаны толькi для распрацоўшыкаў. Яны могуць выклікаць збоi прылад i ўсталяваных на iх прыкладанняў, а таксама перашкаджаць iх працы."</string>
@@ -311,7 +308,6 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Прылады Bluetooth будуць паказаны без назваў (толькі MAC-адрасы)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Адключыць функцыю абсалютнага гуку Bluetooth у выпадку праблем з гукам на аддаленых прыладах, напрыклад, пры непрымальна высокай гучнасці або адсутнасці кіравання."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Уключае стос функцый Bluetooth Gabeldorsche."</string>
-    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Уключае функцыю \"Палепшанае падключэнне\"."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Лакальны тэрмінал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Уключэнне прыкладання тэрмінала, якое прапануе доступ да лакальнай абалонкі"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Праверка HDCP"</string>
@@ -358,8 +354,6 @@
     <string name="track_frame_time" msgid="522674651937771106">"Профіль візуалізацыі HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Уключыць слаі адладкі GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Загружаць слаі адладкі GPU для праграм адладкі"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Уключыць падрабязны журнал пастаўшчыка"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Дадаваць у справаздачы пра памылкі дадатковыя журналы пастаўшчыка для пэўнай прылады (могуць утрымлівацца прыватныя даныя, можа павышацца выкарыстанне акумулятара і/ці памяці)."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Маштаб анімацыі акна"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Маштаб перадачы анімацыі"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Працягласць анімацыі"</string>
@@ -418,7 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Пратанамалія (чырвоны-зялёны)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Трытанамалія (сіні-жоўты)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Карэкцыя колеру"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Карэкцыя колеру дазволіць вам наладзіць адлюстраванне колераў на экране прылады"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Карэкцыя колеру дазваляе людзям з парушэннямі колеравага зроку лепш распазнаваць выявы на экране"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Перавызначаны <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Зараду хопіць прыблізна на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -432,11 +426,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Зараду (<xliff:g id="LEVEL">%2$s</xliff:g>) хопіць прыблізна да <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Зараду хопіць прыблізна да <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Да <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Акумулятар разрадзіцца ў <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Засталося менш за <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Засталося менш за <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Засталося больш за <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Засталося больш за <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Падоўжыце тэрмін службы акумулятара пасля <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Засталося менш за <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Узровень зараду батарэі: <xliff:g id="LEVEL">%2$s</xliff:g> (хопіць менш чым на <xliff:g id="THRESHOLD">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Узровень зараду батарэі: <xliff:g id="LEVEL">%2$s</xliff:g> (хопіць больш чым на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Хопіць больш чым на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Тэлефон у хуткім часе выключыцца"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Планшэт у хуткім часе выключыцца"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Прылада ў хуткім часе выключыцца"</string>
@@ -509,50 +503,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Заўсёды пытацца"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Пакуль не выключыце"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Толькі што"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Дынамік тэлефона"</string>
+    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Гэта прылада"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Праблема з падключэннем. Выключыце і зноў уключыце прыладу"</string>
-    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Правадная аўдыяпрылада"</string>
-    <string name="help_label" msgid="3528360748637781274">"Даведка і водгукі"</string>
-    <string name="storage_category" msgid="2287342585424631813">"Сховішча"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"Абагуленыя даныя"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Прагляд і змяненне абагуленых даных"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Для гэтага карыстальніка няма абагуленых даных."</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Падчас атрымання абагуленых даных узнікла памылка. Паўтарыце спробу."</string>
-    <string name="blob_id_text" msgid="8680078988996308061">"Ідэнтыфікатар абагуленых даных: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"Тэрмін дзеяння заканчваецца <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Падчас выдалення абагуленых даных узнікла памылка."</string>
-    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Для гэтых абагуленых даных няма дазволаў. Выдаліць іх?"</string>
-    <string name="accessor_info_title" msgid="8289823651512477787">"Праграмы, якія абагульваюць даныя"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"У праграмы адсутнічае апісанне."</string>
-    <string name="accessor_expires_text" msgid="4625619273236786252">"Тэрмін дзеяння арэнды завяршаецца <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="delete_blob_text" msgid="2819192607255625697">"Выдаліць абагуленыя даныя"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Сапраўды выдаліць гэтыя абагуленыя даныя?"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Карыстальнікі маюць свае ўласныя прыкладанні і змесцiва"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Вы можаце абмяжоўваць доступ да прыкладанняў і змесціва са свайго ўліковага запісу"</string>
-    <string name="user_add_user_item_title" msgid="2394272381086965029">"Карыстальнік"</string>
-    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Абмежаваны профiль"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"Дадаць новага карыстальніка?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Вы можаце адкрыць доступ да гэтай прылады іншым людзям шляхам стварэння дадатковых карыстальнікаў. Кожны карыстальнік мае свой уласны раздзел, на якім ён можа наладзіць свае праграмы, шпалеры і іншае. Карыстальнікі таксама могуць наладжваць параметры прылады, напрыклад Wi-Fi, якія ўплываюць на ўсіх.\n\nКалі вы дадаяце новага карыстальніка, ён павінен наладзіць свой раздзел.\n\nЛюбы карыстальнік можа абнаўляць праграмы для ўсіх астатніх карыстальнікаў. Спецыяльныя магчымасці наладжваюцца асабіста кожным карыстальнікам."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Пасля стварэння профіля яго трэба наладзіць.\n\nЛюбы карыстальнік прылады можа абнаўляць праграмы ўсіх іншых карыстальнікаў."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Наладзіць профіль?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Пераканайцеся, што чалавек мае магчымасць узяць прыладу і наладзіць свой раздзел"</string>
-    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Наладзiць профiль?"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Наладзіць"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Не зараз"</string>
-    <string name="user_add_user_type_title" msgid="551279664052914497">"Дадаць"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"Новы карыстальнік"</string>
-    <string name="user_new_profile_name" msgid="2405500423304678841">"Новы профiль"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Звесткі карыстальніка"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"Звесткi профiлю"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"Перш чым вы зможаце стварыць профіль з абмежаваннямi, вам трэба наладзіць блакiроўку экрана для абароны сваiх дадаткаў і асабістай інфармацыі."</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"Усталёўка блакiроўкi"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Пераключыцца на карыстальніка <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Дадаць госця"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Выдаліць госця"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Госць"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Стандартная прылада"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Выключана"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Уключана"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Перазагрузіце прыладу, каб прымяніць гэта змяненне. Перазагрузіце ці скасуйце."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Правадныя навушнікі"</string>
 </resources>

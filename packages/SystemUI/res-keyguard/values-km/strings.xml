@@ -100,7 +100,7 @@
     <string name="kg_pin_accepted" msgid="1625501841604389716">"កូដត្រូវ​បានទទួល​យក!"</string>
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"គ្មាន​សេវា​ទេ។"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ប្ដូរ​វិធី​បញ្ចូល"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"​ពេល​ជិះ​យន្តហោះ"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"មុខងារ​ពេល​ជិះ​យន្តហោះ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"តម្រូវឲ្យប្រើលំនាំ បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"តម្រូវឲ្យបញ្ចូលកូដ PIN បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់ បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>

@@ -19,6 +19,8 @@ package com.android.server.connectivity;
 import static android.net.ConnectivityManager.PRIVATE_DNS_DEFAULT_MODE_FALLBACK;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
+import static android.net.resolv.aidl.IDnsResolverUnsolicitedEventListener.VALIDATION_RESULT_FAILURE;
+import static android.net.resolv.aidl.IDnsResolverUnsolicitedEventListener.VALIDATION_RESULT_SUCCESS;
 import static android.provider.Settings.Global.DNS_RESOLVER_MAX_SAMPLES;
 import static android.provider.Settings.Global.DNS_RESOLVER_MIN_SAMPLES;
 import static android.provider.Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS;
@@ -147,17 +149,18 @@ public class DnsManager {
     }
 
     public static class PrivateDnsValidationUpdate {
-        final public int netId;
-        final public InetAddress ipAddress;
-        final public String hostname;
-        final public boolean validated;
+        public final int netId;
+        public final InetAddress ipAddress;
+        public final String hostname;
+        // Refer to IDnsResolverUnsolicitedEventListener.VALIDATION_RESULT_*.
+        public final int validationResult;
 
         public PrivateDnsValidationUpdate(int netId, InetAddress ipAddress,
-                String hostname, boolean validated) {
+                String hostname, int validationResult) {
             this.netId = netId;
             this.ipAddress = ipAddress;
             this.hostname = hostname;
-            this.validated = validated;
+            this.validationResult = validationResult;
         }
     }
 
@@ -216,10 +219,13 @@ public class DnsManager {
             if (!mValidationMap.containsKey(p)) {
                 return;
             }
-            if (update.validated) {
+            if (update.validationResult == VALIDATION_RESULT_SUCCESS) {
                 mValidationMap.put(p, ValidationStatus.SUCCEEDED);
-            } else {
+            } else if (update.validationResult == VALIDATION_RESULT_FAILURE) {
                 mValidationMap.put(p, ValidationStatus.FAILED);
+            } else {
+                Log.e(TAG, "Unknown private dns validation operation="
+                        + update.validationResult);
             }
         }
 

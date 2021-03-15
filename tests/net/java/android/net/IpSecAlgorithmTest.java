@@ -129,6 +129,7 @@ public class IpSecAlgorithmTest {
             checkCryptKeyLenValidation(IpSecAlgorithm.CRYPT_AES_CTR, len);
         }
         checkAuthKeyAndTruncLenValidation(IpSecAlgorithm.AUTH_AES_XCBC, 128, 96);
+        checkAuthKeyAndTruncLenValidation(IpSecAlgorithm.AUTH_AES_CMAC, 128, 96);
         checkAuthKeyAndTruncLenValidation(IpSecAlgorithm.AUTH_CRYPT_CHACHA20_POLY1305, 288, 128);
     }
 

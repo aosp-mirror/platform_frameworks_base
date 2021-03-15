@@ -16,34 +16,23 @@
 
 package android.uwb;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.SystemClock;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executor;
 
 public class UwbTestUtils {
     private UwbTestUtils() {}
 
-    public static boolean isUwbSupported(Context context) {
-        PackageManager packageManager = context.getPackageManager();
-        return packageManager.hasSystemFeature(PackageManager.FEATURE_UWB);
-    }
-
     public static AngleMeasurement getAngleMeasurement() {
-        return new AngleMeasurement.Builder()
-                .setRadians(getDoubleInRange(-Math.PI, Math.PI))
-                .setErrorRadians(getDoubleInRange(0, Math.PI))
-                .setConfidenceLevel(getDoubleInRange(0, 1))
-                .build();
+        return new AngleMeasurement(
+                getDoubleInRange(-Math.PI, Math.PI),
+                getDoubleInRange(0, Math.PI),
+                getDoubleInRange(0, 1));
     }
 
     public static AngleOfArrivalMeasurement getAngleOfArrivalMeasurement() {
-        return new AngleOfArrivalMeasurement.Builder()
+        return new AngleOfArrivalMeasurement.Builder(getAngleMeasurement())
                 .setAltitude(getAngleMeasurement())
-                .setAzimuth(getAngleMeasurement())
                 .build();
     }
 
@@ -67,14 +56,6 @@ public class UwbTestUtils {
                 .setRemoteDeviceAddress(address != null ? address : getUwbAddress(false))
                 .setStatus(RangingMeasurement.RANGING_STATUS_SUCCESS)
                 .build();
-    }
-
-    public static List<RangingMeasurement> getRangingMeasurements(int num) {
-        List<RangingMeasurement> result = new ArrayList<>();
-        for (int i = 0; i < num; i++) {
-            result.add(getRangingMeasurement());
-        }
-        return result;
     }
 
     public static RangingReport getRangingReports(int numMeasurements) {

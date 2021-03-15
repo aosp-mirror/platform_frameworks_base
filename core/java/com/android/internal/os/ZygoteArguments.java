@@ -230,7 +230,7 @@ class ZygoteArguments {
      * A list that stores all allowlisted app data info: volume uuid and inode.
      * Null if it does need to do app data isolation.
      */
-    String[] mWhitelistedDataInfoList;
+    String[] mAllowlistedDataInfoList;
 
     /**
      * @see Zygote#BIND_MOUNT_APP_STORAGE_DIRS
@@ -395,16 +395,8 @@ class ZygoteArguments {
                 mNiceName = getAssignmentValue(arg);
             } else if (arg.equals("--mount-external-default")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_DEFAULT;
-            } else if (arg.equals("--mount-external-read")) {
-                mMountExternal = Zygote.MOUNT_EXTERNAL_READ;
-            } else if (arg.equals("--mount-external-write")) {
-                mMountExternal = Zygote.MOUNT_EXTERNAL_WRITE;
-            } else if (arg.equals("--mount-external-full")) {
-                mMountExternal = Zygote.MOUNT_EXTERNAL_FULL;
-            }  else if (arg.equals("--mount-external-installer")) {
+            } else if (arg.equals("--mount-external-installer")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_INSTALLER;
-            }  else if (arg.equals("--mount-external-legacy")) {
-                mMountExternal = Zygote.MOUNT_EXTERNAL_LEGACY;
             } else if (arg.equals("--mount-external-pass-through")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_PASS_THROUGH;
             } else if (arg.equals("--mount-external-android-writable")) {
@@ -483,8 +475,8 @@ class ZygoteArguments {
                 }
             } else if (arg.startsWith(Zygote.PKG_DATA_INFO_MAP)) {
                 mPkgDataInfoList = getAssignmentList(arg);
-            } else if (arg.startsWith(Zygote.WHITELISTED_DATA_INFO_MAP)) {
-                mWhitelistedDataInfoList = getAssignmentList(arg);
+            } else if (arg.startsWith(Zygote.ALLOWLISTED_DATA_INFO_MAP)) {
+                mAllowlistedDataInfoList = getAssignmentList(arg);
             } else if (arg.equals(Zygote.BIND_MOUNT_APP_STORAGE_DIRS)) {
                 mBindMountAppStorageDirs = true;
             } else if (arg.equals(Zygote.BIND_MOUNT_APP_DATA_DIRS)) {

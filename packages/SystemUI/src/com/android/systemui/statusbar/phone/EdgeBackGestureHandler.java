@@ -56,6 +56,7 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.model.SysUiState;
@@ -74,8 +75,10 @@ import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -117,7 +120,32 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         public void onTaskStackChanged() {
             mGestureBlockingActivityRunning = isGestureBlockingActivityRunning();
         }
+        @Override
+        public void onTaskCreated(int taskId, ComponentName componentName) {
+            if (componentName != null) {
+                mPackageName = componentName.getPackageName();
+            } else {
+                mPackageName = "_UNKNOWN";
+            }
+        }
     };
+
+    private DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
+            new DeviceConfig.OnPropertiesChangedListener() {
+                @Override
+                public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                    if (DeviceConfig.NAMESPACE_SYSTEMUI.equals(properties.getNamespace())
+                            && (properties.getKeyset().contains(
+                                    SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_THRESHOLD)
+                            || properties.getKeyset().contains(
+                                    SystemUiDeviceConfigFlags.USE_BACK_GESTURE_ML_MODEL)
+                            || properties.getKeyset().contains(
+                                    SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_NAME))) {
+                        updateMLModelState();
+                    }
+                }
+            };
+
 
     private final Context mContext;
     private final OverviewProxyService mOverviewProxyService;
@@ -172,6 +200,19 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     private int mLeftInset;
     private int mRightInset;
     private int mSysUiFlags;
+
+    // For Tf-Lite model.
+    private BackGestureTfClassifierProvider mBackGestureTfClassifierProvider;
+    private Map<String, Integer> mVocab;
+    private boolean mUseMLModel;
+    // minimum width below which we do not run the model
+    private int mMLEnableWidth;
+    private float mMLModelThreshold;
+    private String mPackageName;
+    private float mMLResults;
+
+    private static final int MAX_LOGGED_PREDICTIONS = 10;
+    private ArrayDeque<String> mPredictionLog = new ArrayDeque<>();
 
     private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
@@ -230,7 +271,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 Log.e(TAG, "Failed to add gesture blocking activities", e);
             }
         }
-
         mLongPressTimeout = Math.min(MAX_LONG_PRESS_TIMEOUT,
                 ViewConfiguration.getLongPressTimeout());
 
@@ -257,6 +297,11 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 defaultGestureHeight);
         mBottomGestureHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, gestureHeight,
                 dm);
+
+        // Set the minimum bounds to activate ML to 12dp or the minimum of configured values
+        mMLEnableWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12.0f, dm);
+        if (mMLEnableWidth > mEdgeWidthRight) mMLEnableWidth = mEdgeWidthRight;
+        if (mMLEnableWidth > mEdgeWidthLeft) mMLEnableWidth = mEdgeWidthLeft;
 
         // Reduce the default touch slop to ensure that we can intercept the gesture
         // before the app starts to react to it.
@@ -344,6 +389,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             mContext.getSystemService(DisplayManager.class).unregisterDisplayListener(this);
             mPluginManager.removePluginListener(this);
             ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
+            DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
 
             try {
                 WindowManagerGlobal.getWindowManagerService()
@@ -359,6 +405,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             mContext.getSystemService(DisplayManager.class).registerDisplayListener(this,
                     mContext.getMainThreadHandler());
             ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
+            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+                    runnable -> (mContext.getMainThreadHandler()).post(runnable),
+                    mOnPropertiesChangedListener);
 
             try {
                 WindowManagerGlobal.getWindowManagerService()
@@ -379,6 +428,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             mPluginManager.addPluginListener(
                     this, NavigationEdgeBackPlugin.class, /*allowMultiple=*/ false);
         }
+        // Update the ML model resources.
+        updateMLModelState();
     }
 
     @Override
@@ -431,12 +482,71 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         }
     }
 
+    private void updateMLModelState() {
+        boolean newState = mIsEnabled && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.USE_BACK_GESTURE_ML_MODEL, false);
+
+        if (newState == mUseMLModel) {
+            return;
+        }
+
+        if (newState) {
+            String mlModelName = DeviceConfig.getString(DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_NAME, "backgesture");
+            mBackGestureTfClassifierProvider = SystemUIFactory.getInstance()
+                    .createBackGestureTfClassifierProvider(mContext.getAssets(), mlModelName);
+            mMLModelThreshold = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_THRESHOLD, 0.9f);
+            if (mBackGestureTfClassifierProvider.isActive()) {
+                mVocab = mBackGestureTfClassifierProvider.loadVocab(mContext.getAssets());
+                mUseMLModel = true;
+                return;
+            }
+        }
+
+        mUseMLModel = false;
+        if (mBackGestureTfClassifierProvider != null) {
+            mBackGestureTfClassifierProvider.release();
+            mBackGestureTfClassifierProvider = null;
+        }
+    }
+
+    private int getBackGesturePredictionsCategory(int x, int y, int app) {
+        if (app == -1) {
+            return -1;
+        }
+
+        int distanceFromEdge;
+        int location;
+        if (x <= mDisplaySize.x / 2.0) {
+            location = 1;  // left
+            distanceFromEdge = x;
+        } else {
+            location = 2;  // right
+            distanceFromEdge = mDisplaySize.x - x;
+        }
+
+        Object[] featuresVector = {
+            new long[]{(long) mDisplaySize.x},
+            new long[]{(long) distanceFromEdge},
+            new long[]{(long) location},
+            new long[]{(long) app},
+            new long[]{(long) y},
+        };
+
+        mMLResults = mBackGestureTfClassifierProvider.predict(featuresVector);
+        if (mMLResults == -1) {
+            return -1;
+        }
+
+        return mMLResults >= mMLModelThreshold ? 1 : 0;
+    }
+
     private boolean isWithinTouchRegion(int x, int y) {
         // Disallow if we are in the bottom gesture area
         if (y >= (mDisplaySize.y - mBottomGestureHeight)) {
             return false;
         }
-
         // If the point is way too far (twice the margin), it is
         // not interesting to us for logging purposes, nor we
         // should process it.  Simply return false and keep
@@ -446,11 +556,33 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             return false;
         }
 
-        // Denotes whether we should proceed with the gesture.
-        // Even if it is false, we may want to log it assuming
-        // it is not invalid due to exclusion.
-        boolean withinRange = x <= mEdgeWidthLeft + mLeftInset
-                || x >= (mDisplaySize.x - mEdgeWidthRight - mRightInset);
+        int app = -1;
+        if (mVocab != null) {
+            app = mVocab.getOrDefault(mPackageName, -1);
+        }
+        // Check if we are within the tightest bounds beyond which
+        // we would not need to run the ML model.
+        boolean withinRange = x <= mMLEnableWidth + mLeftInset
+                || x >= (mDisplaySize.x - mMLEnableWidth - mRightInset);
+        if (!withinRange) {
+            int results = -1;
+            if (mUseMLModel && (results = getBackGesturePredictionsCategory(x, y, app)) != -1) {
+                withinRange = results == 1;
+            } else {
+                // Denotes whether we should proceed with the gesture.
+                // Even if it is false, we may want to log it assuming
+                // it is not invalid due to exclusion.
+                withinRange = x <= mEdgeWidthLeft + mLeftInset
+                        || x >= (mDisplaySize.x - mEdgeWidthRight - mRightInset);
+            }
+        }
+
+        // For debugging purposes
+        if (mPredictionLog.size() >= MAX_LOGGED_PREDICTIONS) {
+            mPredictionLog.removeFirst();
+        }
+        mPredictionLog.addLast(String.format("[%d,%d,%d,%f,%d]",
+                x, y, app, mMLResults, withinRange ? 1 : 0));
 
         // Always allow if the user is in a transient sticky immersive state
         if (mIsNavBarShownTransiently) {
@@ -493,6 +625,11 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             return;
         }
         mLogGesture = false;
+        String logPackageName = "";
+        // Due to privacy, only top 100 most used apps by all users can be logged.
+        if (mUseMLModel && mVocab.containsKey(mPackageName) && mVocab.get(mPackageName) < 100) {
+            logPackageName = mPackageName;
+        }
         SysUiStatsLog.write(SysUiStatsLog.BACK_GESTURE_REPORTED_REPORTED, backType,
                 (int) mDownPoint.y, mIsOnLeftEdge
                         ? SysUiStatsLog.BACK_GESTURE__X_LOCATION__LEFT
@@ -500,7 +637,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 (int) mDownPoint.x, (int) mDownPoint.y,
                 (int) mEndPoint.x, (int) mEndPoint.y,
                 mEdgeWidthLeft + mLeftInset,
-                mDisplaySize.x - (mEdgeWidthRight + mRightInset));
+                mDisplaySize.x - (mEdgeWidthRight + mRightInset),
+                mUseMLModel ? mMLResults : -2, logPackageName);
     }
 
     private void onMotionEvent(MotionEvent ev) {
@@ -509,6 +647,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             mIsOnLeftEdge = ev.getX() <= mEdgeWidthLeft + mLeftInset;
+            mMLResults = 0;
             mLogGesture = false;
             mInRejectedExclusion = false;
             mAllowGesture = !mDisabledForQuickstep && mIsBackGestureAllowed
@@ -642,12 +781,19 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         pw.println("  mIsAttached=" + mIsAttached);
         pw.println("  mEdgeWidthLeft=" + mEdgeWidthLeft);
         pw.println("  mEdgeWidthRight=" + mEdgeWidthRight);
+        pw.println("  mIsNavBarShownTransiently=" + mIsNavBarShownTransiently);
+        pw.println("  mPredictionLog=" + String.join(";", mPredictionLog));
     }
 
     private boolean isGestureBlockingActivityRunning() {
         ActivityManager.RunningTaskInfo runningTask =
                 ActivityManagerWrapper.getInstance().getRunningTask();
         ComponentName topActivity = runningTask == null ? null : runningTask.topActivity;
+        if (topActivity != null) {
+            mPackageName = topActivity.getPackageName();
+        } else {
+            mPackageName = "_UNKNOWN";
+        }
         return topActivity != null && mGestureBlockingActivities.contains(topActivity);
     }
 

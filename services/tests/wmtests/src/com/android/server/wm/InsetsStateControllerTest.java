@@ -30,6 +30,9 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -327,6 +330,26 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNotNull(getController().getControlsForDispatch(app));
         statusBar.cancelAnimation();
         assertNull(getController().getControlsForDispatch(app));
+    }
+
+    @Test
+    public void testTransientVisibilityOfFixedRotationState() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final InsetsSourceProvider provider = getController().getSourceProvider(ITYPE_STATUS_BAR);
+        provider.setWindow(statusBar, null, null);
+
+        final InsetsState rotatedState = new InsetsState(app.getInsetsState(),
+                true /* copySources */);
+        spyOn(app.mToken);
+        doReturn(rotatedState).when(app.mToken).getFixedRotationTransformInsetsState();
+        assertTrue(rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+
+        provider.getSource().setVisible(false);
+        mDisplayContent.getInsetsPolicy().showTransient(new int[] { ITYPE_STATUS_BAR });
+
+        assertTrue(mDisplayContent.getInsetsPolicy().isTransient(ITYPE_STATUS_BAR));
+        assertFalse(app.getInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());
     }
 
     private InsetsStateController getController() {

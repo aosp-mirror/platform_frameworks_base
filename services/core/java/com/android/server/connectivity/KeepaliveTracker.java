@@ -57,8 +57,8 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.R;
-import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.net.module.util.HexDump;
 import com.android.net.module.util.IpUtils;
 
 import java.io.FileDescriptor;

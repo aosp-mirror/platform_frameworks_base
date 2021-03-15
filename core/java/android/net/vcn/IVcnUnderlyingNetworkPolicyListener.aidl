@@ -17,6 +17,6 @@
 package android.net.vcn;
 
 /** @hide */
-interface IVcnUnderlyingNetworkPolicyListener {
+oneway interface IVcnUnderlyingNetworkPolicyListener {
     void onPolicyChanged();
 }

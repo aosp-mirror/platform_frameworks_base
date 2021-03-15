@@ -24,8 +24,8 @@ import android.os.RemoteException;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRule.IgnoreAfter;
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
 
 import org.junit.Rule;
@@ -55,7 +55,7 @@ public class CaptivePortalTest {
             mCode = request;
         }
 
-        @Override
+        // This is only @Override on R-
         public void logEvent(int eventId, String packageName) throws RemoteException {
             mCode = eventId;
             mPackageName = packageName;
@@ -98,12 +98,24 @@ public class CaptivePortalTest {
         assertEquals(result.mCode, CaptivePortal.APP_REQUEST_REEVALUATION_REQUIRED);
     }
 
+    @IgnoreUpTo(Build.VERSION_CODES.R)
     @Test
     public void testLogEvent() {
+        /**
+        * From S testLogEvent is expected to do nothing but shouldn't crash (the API
+        * logEvent has been deprecated).
+        */
         final MyCaptivePortalImpl result = runCaptivePortalTest(c -> c.logEvent(
-                MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_ACTIVITY,
+                0,
                 TEST_PACKAGE_NAME));
-        assertEquals(result.mCode, MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_ACTIVITY);
+    }
+
+    @IgnoreAfter(Build.VERSION_CODES.R)
+    @Test
+    public void testLogEvent_UntilR() {
+        final MyCaptivePortalImpl result = runCaptivePortalTest(c -> c.logEvent(
+                42, TEST_PACKAGE_NAME));
+        assertEquals(result.mCode, 42);
         assertEquals(result.mPackageName, TEST_PACKAGE_NAME);
     }
 }

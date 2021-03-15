@@ -63,12 +63,6 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"ඉඩ දෙන්න"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB නිදොස්කරණය වෙත අවසර නැහැ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"දැනට මෙම උපාංගයට පුරා ඇති පරිශීලකයාට USB නිදොස්කරණය ක්‍රියාත්මක කළ නොහැක. මෙම විශේෂාංගය භාවිතා කිරීම සඳහා, මූලික පරිශීලකයා වෙත මාරු වෙන්න."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"මෙම ජාලයේ නොරැහැන් නිදොස්කරණය ඉඩ දෙන්නද?"</string>
-    <string name="wifi_debugging_message" msgid="5461204211731802995">"ජාල නම (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi ලිපිනය (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"මෙම ජාලයේ සැමවිට ඉඩ දෙන්න"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"ඉඩ දෙන්න"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"නොරැහැන් නිදොස්කරණය ඉඩ දී නැත"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"මෙම උපාංගයට දැනට පුරා ඇති පරිශීලකට නොරැහැන් නිදොස්කරණය ක්‍රියාත්මක කළ නොහැකිය. මෙම විශේෂාංගය භාවිතට, මූලික පරිශීලක වෙත මාරු වෙන්න."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB තොට අබලයි"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"ඔබේ උපාංගය ද්‍රවවලින් හෝ කුණුවලින් ආරක්‍ෂා කිරීමට, USB තොට අබල කර තිබෙන අතර, එය කිසිම අමතරාංගයක් අනාවරණ නොකරයි.\n\nනැවතත් USB තොට භාවිත කිරීම හරි නම් ඔබව දැනුම් දෙනු ලැබේ."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ආරෝපක සහ උපකාරක අංග අනාවරණ කිරීමට USB තොට සබල කර ඇත"</string>
@@ -86,10 +80,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"තිර රුව නැවත ගැනීමට උත්සාහ කරන්න"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"සීමිත ගබඩා ඉඩ නිසා තිර රුව සුරැකිය නොහැකිය"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"තිර රූ ගැනීමට යෙදුම හෝ ඔබගේ සංවිධානය ඉඩ නොදේ"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"තිර රුව ඉවත ලන්න"</string>
-    <string name="screenshot_preview_description" msgid="7606510140714080474">"තිර රූ පෙර දසුන"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"තිර රෙකෝඩරය"</string>
-    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"තිර පටිගත කිරීම සකසමින්"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"තිර පටිගත කිරීමේ සැසියක් සඳහා කෙරෙන දැනුම් දීම"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"පටිගත කිරීම ආරම්භ කරන්නද?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"පටිගත කරන අතරතුර, Android පද්ධතියට ඔබේ තිරයේ පෙනෙන හෝ ඔබේ උපාංගයේ වාදනය කරන ඕනෑම සංවේදී තොරතුරක් ග්‍රහණය කර ගැනීමට හැකිය. මෙයට මුරපද, ගෙවීම් තොරතුරු, ඡායාරූප, පණිවිඩ සහ ඕඩියෝ ඇතුළත් වේ."</string>
@@ -108,8 +99,10 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"නැවත අරඹන්න"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"අවලංගු කරන්න"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"බෙදා ගන්න"</string>
+    <string name="screenrecord_delete_label" msgid="1376347010553987058">"මකන්න"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"තිර පටිගත කිරීම අවලංගු කරන ලදී"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"තිර පටිගත කිරීම සුරකින ලදී, බැලීමට තට්ටු කරන්න"</string>
+    <string name="screenrecord_delete_description" msgid="1604522770162810570">"තිර පටිගත කිරීම මකන ලදී"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"තිර පටිගත කිරීම මැකීමේ දෝෂයකි"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"අවසර ලබා ගැනීමට අසමත් විය"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"තිර පටිගත කිරීම ආරම්භ කිරීමේ දෝෂයකි"</string>
@@ -153,21 +146,6 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"වැරදි රටාවකි"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"වැරදි මුරපදයකි"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"වැරදි උත්සාහයන් ගණන වැඩියි. තත්පර \n තත්පර <xliff:g id="NUMBER">%d</xliff:g>කින් නැවත උත්සාහ කරන්න."</string>
-    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"නැවත උත්සාහ කරන්න. <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>කින් <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> උත්සාහය."</string>
-    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"ඔබේ දත්ත මකනු ඇත"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"ඔබ ඊළඟ උත්සාහයේදී වැරදි රටාවක් ඇතුළු කළහොත්, මෙම උපාංගයෙහි දත්ත මකනු ඇත."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"ඔබ ඊළඟ උත්සාහයේදී වැරදි PIN එකක් ඇතුළු කළහොත්, මෙම උපාංගයෙහි දත්ත මකනු ඇත."</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"ඔබ ඊළඟ උත්සාහයේදී වැරදි මුරපදයක් ඇතුළු කළහොත්, මෙම උපාංගයෙහි දත්ත මකනු ඇත."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"ඔබ ඊළඟ උත්සාහයේදී වැරදි රටාවක් ඇතුළු කළහොත්, මෙම පරිශීලක මකනු ඇත."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"ඔබ ඊළඟ උත්සාහයේදී වැරදි PIN එකක් ඇතුළු කළහොත්, මෙම පරිශීලක මකනු ඇත."</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"ඔබ ඊළඟ උත්සාහයේදී වැරදි මුරපදයක් ඇතුළු කළහොත්, මෙම පරිශීලක මකනු ඇත."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"ඔබ ඊළඟ උත්සාහයේදී වැරදි රටාවක් ඇතුළු කළහොත්, ඔබේ කාර්යාල පැතිකඩ සහ එහි දත්ත මකනු ඇත."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"ඔබ ඊළඟ උත්සාහයේදී වැරදි PIN එකක් ඇතුළු කළහොත්, ඔබේ කාර්යාල පැතිකඩ සහ එහි දත්ත මකනු ඇත."</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"ඔබ ඊළඟ උත්සාහයේදී වැරදි මුරපදයක් ඇතුළු කළහොත්, ඔබේ කාර්යාල පැතිකඩ සහ එහි දත්ත මකනු ඇත."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"වැරදි උත්සාහයන් ඉතා වැඩි ගණනකි. මෙම උපාංගයෙහි දත්ත මකනු ඇත."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"වැරදි උත්සාහයන් ඉතා වැඩි ගණනකි. මෙම පරිශීලකයා මකනු ඇත."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"වැරදි උත්සාහයන් ඉතා වැඩි ගණනකි. මෙම කාර්යාල පැතිකඩ සහ එහි දත්ත මකනු ඇත."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ඉවත ලන්න"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ඇඟිලි සලකුණු සංවේදකය ස්පර්ශ කරන්න"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ඇඟිලි සලකුණු නිරූපකය"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"ඔබව සොයමින්…"</string>
@@ -254,7 +232,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"දැනුම්දීම නිෂ්ප්‍රභා කරඇත."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"බුබුල ඉවත දමා ඇත."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"දැනුම්දීම් ආවරණය."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ක්ෂණික සැකසීම්."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"අගුළු තිරය."</string>
@@ -430,7 +407,6 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"තිර පටිගත කිරීම"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ආරම්භ කරන්න"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"නතර කරන්න"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"උපාංගය"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"යෙදුම් මාරු කිරීමට ස්වයිප් කරන්න"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ඉක්මනින් යෙදුම් මාරු කිරීමට දකුණට අදින්න"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"දළ විශ්ලේෂණය ටොගල කරන්න"</string>
@@ -452,8 +428,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"විවෘත කිරීමට නැවත තට්ටු කරන්න"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"විවෘත කිරීමට ස්වයිප් කරන්න"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"නැවත උත්සාහ කිරීමට ඉහළට ස්වයිප් කරන්න"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"මෙම උපාංගය ඔබේ සංවිධානයට අයිතිය"</string>
-    <string name="do_disclosure_with_name" msgid="2091641464065004091">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> සංවිධානයට අයිතිය"</string>
+    <string name="do_disclosure_generic" msgid="2388094207542706440">"මෙම උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබේ"</string>
+    <string name="do_disclosure_with_name" msgid="9113122674419739611">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> මගින් කළමනාකරණය කෙරේ"</string>
     <string name="phone_hint" msgid="6682125338461375925">"දුරකථනය සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
     <string name="voice_hint" msgid="7476017460191291417">"හඬ සහාය සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
     <string name="camera_hint" msgid="4519495795000658637">"කැමරාව සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
@@ -474,6 +450,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"පැතිකඩ පෙන්වන්න"</string>
     <string name="user_add_user" msgid="4336657383006913022">"පරිශීලකයෙක් එක් කරන්න"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"නව පරිශීලකයා"</string>
+    <string name="guest_nickname" msgid="1863770639799615889">"අමුත්තා"</string>
+    <string name="guest_new_guest" msgid="962155336259570156">"අමුත්තා එක් කරන්න"</string>
+    <string name="guest_exit_guest" msgid="4030840507598850886">"අමුත්තා ඉවත් කරන්න"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"අමුත්තාන් ඉවත් කරන්නද?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"මෙම සැසියේ සියළුම යෙදුම් සහ දත්ත මකාවී."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ඉවත් කරන්න"</string>
@@ -508,9 +487,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"සියල්ල හිස් කරන්න"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"කළමනාකරණය කරන්න"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ඉතිහාසය"</string>
-    <string name="notification_section_header_incoming" msgid="850925217908095197">"නව"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"නිහඬ"</string>
-    <string name="notification_section_header_alerting" msgid="5581175033680477651">"දැනුම් දීම්"</string>
+    <string name="notification_section_header_gentle" msgid="3044910806569985386">"නිහඬ දැනුම්දීම්"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"සංවාද"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"සියලු නිහඬ දැනුම්දීම් හිස් කරන්න"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"බාධා නොකරන්න මගින් විරාම කරන ලද දැනුම්දීම්"</string>
@@ -519,21 +496,21 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"ඇතැම් විට පැතිකඩ නිරීක්ෂණය කරන ලදි"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ඔබේ සංවිධානයට මෙම උපාංගය අයිති අතර ජාල තදබදය නිරීක්ෂණය කළ හැකිය"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> සංවිධානයට මෙම උපාංගය අයිති අතර ජාල තදබදය නිරීක්ෂණය කළ හැකිය"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"මෙම උපාංගය ඔබේ සංවිධානයට අයිති අතර <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ කර ඇත"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> සංවිධානයට අයිති අතර <xliff:g id="VPN_APP">%2$s</xliff:g> වෙත සම්බන්ධ කර ඇත"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"මෙම උපාංගය ඔබේ සංවිධානයට අයිතිය"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> සංවිධානයට අයිතිය"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"මෙම උපාංගය ඔබේ සංවිධානයට අයිති අතර VPNs වෙත සම්බන්ධ කර ඇත"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> සංවිධානයට අයිති අතර VPNs වෙත සම්බන්ධ කර ඇත"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"ඔබගේ සංවිධානය මෙම උපාංගය කළමනාකරණය කරන අතර එය ජාල තදබදය නිරීක්ෂණය කළ හැක"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> මෙම උපාංගය කළමනාකරණය කරන අතර එය ජාල තදබදය නිරීක්ෂණය කළ හැක"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබෙන අතර එය <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධිතයි"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> මගින් කළමනාකරණය කෙරෙන අතර <xliff:g id="VPN_APP">%2$s</xliff:g> වෙත සම්බන්ධිතයි"</string>
+    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබේ"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> මගින් කළමනාකරණය කෙරේ"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබෙන අතර එය VPN වෙත සම්බන්ධිතයි"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> මගින් කළමනාකරණය කෙරෙන අතර VPN වෙත සම්බන්ධිතයි"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ඔබගේ කාර්යාල පැතිකඩ තුළ ඔබේ සංවිධානය ජාල තදබදය නිරීක්ෂණය කිරීමට හැක"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ඔබේ කාර්යාල පැතිකඩ තුළ ජාල තදබදය නිරීක්ෂණය කළ හැක"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"මෙම උපාංගය VPNs වෙත සම්බන්ධ කර ඇත"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"ඔබේ කාර්යාල පැතිකඩ <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ කර ඇත"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"ඔබේ පෞද්ගලික පැතිකඩ <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ කර ඇත"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"මෙම උපාංගය <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ කර ඇත"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"උපාංගය VPN වෙත සම්බන්ධිතයි"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"කාර්යාල පැතිකඩ <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ වුණි"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"පුද්ගලික පැතිකඩ <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ වුණි"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"උපාංගය <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ වුණි"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"උපාංග කළමනාකරණය"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"පැතිකඩ නිරීක්ෂණය කිරීම"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"ජාල නිරීක්ෂණය"</string>
@@ -543,8 +520,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN අබල කරන්න."</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN විසන්ධි කරන්න"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ප්‍රතිපත්ති පෙන්වන්න"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> සංවිධානයට අයිතිය.\n\nඔබේ IT පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංගයේ ස්ථාන තොරතුරු නිරීක්ෂණය කර කළමනාකරණය කිරීමට හැකිය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබේ IT අමතන්න."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"මෙම උපාංගය ඔබේ සංවිධානයට අයිතිය.\n\nඔබේ IT පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංගයේ ස්ථාන තොරතුරු නිරීක්ෂණය කර කළමනාකරණය කිරීමට හැකිය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබේ IT අමතන්න."</string>
+    <string name="monitoring_description_named_management" msgid="7424612629468754552">"ඔබගේ උපාංගය ඔබගේ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> විසින් කළමනාකරණය කරනු ලැබේ. \n\nඔබේ පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංග ස්ථාන තොරතුරු නිරීක්ෂණය සහ කළමනාකරණය කිරීමට හැකිය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබගේ පරිපාලක අමතන්න."</string>
+    <string name="monitoring_description_management" msgid="8081910434889677718">"ඔබගේ උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබේ.\n\nඔබේ පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංග ස්ථාන තොරතුරු නිරීක්ෂණය සහ කළමනාකරණය කිරීමට හැකිය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබගේ පරිපාලක අමතන්න."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ඔබගේ සංවිධානය ඔබගේ උපාංගය තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ඔබගේ සංවිධානය ඔබගේ කාර්යාල පැතිකඩ තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"මෙම උපාංගය තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
@@ -574,7 +551,6 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"ඔබේ කාර්යාල පැතිකඩ කළමනාකරණය කරන්නේ <xliff:g id="ORGANIZATION">%1$s</xliff:g> විසිනි. ඊ-තැපැල්, යෙදුම් සහ වෙබ් අඩවි ඇතුළු ඔබේ කාර්යාල ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, වෙත පැතිකඩ සම්බන්ධ වී ඇත.\n\nඔබ ඔබේ පෞද්ගලික ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> වෙතද සම්බන්ධ වී ඇත."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent මඟින් අඟුලු දමා තබා ගන්න"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"ඔබ අතින් අගුළු අරින තුරු උපකරණය අගුළු වැටි තිබේ"</string>
-    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"දැනුම්දීම් ඉක්මනින් ලබාගන්න"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"ඔබ අඟුළු හැරීමට කලින් ඒවා බලන්න"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"එපා ස්තූතියි"</string>
@@ -590,21 +566,19 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"සබල කරන්න"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"අබල කරන්න"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ප්‍රතිදාන උපාංගය මාරු කරන්න"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"යෙදුම අමුණා ඇත"</string>
+    <string name="screen_pinning_title" msgid="7357611095909618178">"තීරය අමුණන ලදි"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර ආපසු අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට ඉහළට ස්වයිප් කර අල්ලා සිටින්න."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"පෞද්ගලික දත්ත ප්‍රවේශ විය හැකිය (සම්බන්ධතා සහ ඉ-තැපැල් අන්තර්ගත යනාදි)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ඇමිණූ යෙදුම වෙනත් යෙදුම් විවෘත කළ හැකිය."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"මෙම යෙදුම ගැලවීමට, දළ විශ්ලේෂණය බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"මෙම යෙදුම ගැලවීමට, මුල් පිටුව බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"මෙම යෙදුම ගැලවීමට, ඉහළට ස්වයිප් කර අල්ලාගෙන සිටින්න"</string>
+    <string name="screen_pinning_toast" msgid="2083944237147005811">"මෙම තිර ඇමුණුම ගැලවීමට, දළ විශ්ලේෂණය බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"මෙම තිරය ඇමුණුම ගැලවීමට, මුල් පිටුව බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"මෙම තිරය ගැලවීමට, ඉහළට ස්වයිප් කර අල්ලාගෙන සිටින්න"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"හරි, තේරුණා"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"එපා ස්තූතියි"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"යෙදුම අමුණන ලදී"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"යෙදුම ගලවන ලදී"</string>
+    <string name="screen_pinning_start" msgid="5695091877402422575">"තිරය අමුණා ඇත"</string>
+    <string name="screen_pinning_exit" msgid="5114993350662745840">"තිරයේ ගලවා ඇත"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> සඟවන්නද?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"ඊළඟ අවස්ථාවේ සැකසීම් තුළ ඔබ එය සක්‍රිය කළ විට එය නැවත දිසිවේ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"සඟවන්න"</string>
@@ -707,19 +681,15 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"දැනුම්දීම් අක්‍රිය කරන්න"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"මෙම යෙදුම වෙතින් දැනුම්දීම් පෙන්වමින් තබන්නද?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"නිහඬ"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"පෙරනිමි"</string>
+    <string name="notification_alert_title" msgid="7629202599338071971">"ඇඟවීම"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"බුබුළු"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"හඬක් හෝ කම්පනයක් නැත"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"හඬක් හෝ කම්පනයක් නැති අතර සංවාද කොටසේ පහළම දිස් වේ"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"දුරකථන සැකසීම් මත පදනම්ව නාද කිරීමට හෝ කම්පනය කිරීමට හැකිය"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"දුරකථන සැකසීම් මත පදනම්ව නාද කිරීමට හෝ කම්පනය කිරීමට හැකිය. <xliff:g id="APP_NAME">%1$s</xliff:g> වෙතින් සංවාද පෙරනිමියෙන් බුබුළු දමයි"</string>
+    <string name="notification_channel_summary_low" msgid="7300447764759926720">"ඔබට ශබ්දය හෝ කම්පනය නොමැතිව අවධානය යොමු කිරීමට උදවු කරයි."</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"ශබ්දය හෝ කම්පනය සමඟ ඔබේ අවධානය ලබා ගනී."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"පාවෙන කෙටිමගක් සමග ඔබේ අවධානය මෙම අන්තර්ගතය වෙත තබා ගන්න."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"සංවාද කොටසේ ඉහළම පෙන්වයි, බුබුළක් ලෙස දිස් වේ, අගුලු තිරයේ පැතිකඩ පින්තූරය සංදර්ශනය වේ"</string>
-    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"සැකසීම්"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"ප්‍රමුඛතාව"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> සංවාද විශේෂාංගවලට සහාය නොදක්වයි"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"මෑත බුබුලු නැත"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"මෑත බුබුලු සහ ඉවත ලූ බුබුලු මෙහි දිස් වනු ඇත"</string>
+    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
+    <skip />
+    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"මෙම දැනුම්දීම් වෙනස් කළ නොහැක."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"මෙම දැනුම්දීම් සමූහය මෙහි වින්‍යාස කළ නොහැක"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ප්‍රොක්සි කළ දැනුම්දීම"</string>
@@ -882,13 +852,12 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"ඉහළම 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"ඉහළම 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"පහළ පූර්ණ තිරය"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ටයිල් ඉවත් කරන්න"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"අගට ටයිල් එක් කරන්න"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ටයිල් ගෙන යන්න"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ටයිල් එක් කරන්න"</string>
-    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> වෙත ගෙන යන්න"</string>
-    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ස්ථානයට එක් කරන්න"</string>
-    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ස්ථානය <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"ස්ථානය <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. වෙනස් කිරීමට දෙවරක් තට්ටු කරන්න."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. එක් කිරීමට දෙවරක් තට්ටු කරන්න."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ගෙන යන්න"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ඉවත් කරන්න"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> තත්ත්වයට <xliff:g id="POSITION">%2$d</xliff:g> එක් කරන්න"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> තත්ත්වයට <xliff:g id="POSITION">%2$d</xliff:g> ගෙන යන්න"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ඉක්මන් සැකසුම් සංස්කාරකය."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> දැනුම්දීම: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"යෙදුම බෙදුම්-තිරය සමග ක්‍රියා නොකළ හැකිය."</string>
@@ -919,15 +888,12 @@
     <string name="pip_pause" msgid="1139598607050555845">"විරාම කරන්න"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"ඊළඟ එකට පනින්න"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"පෙර එකට පනින්න"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ප්‍රතිප්‍රමාණ කරන්න"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"දුරකථනය රත් වීම නිසා ක්‍රියාවිරහිත කරන ලදී"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"ඔබගේ දුරකථනය දැන් සාමාන්‍ය ලෙස ධාවනය වේ.\nතව තතු සඳහා තට්ටු කරන්න"</string>
+    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ඔබගේ දුරකථනය දැන් සාමාන්‍ය ලෙස ධාවනය වේ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ඔබේ දුරකථනය ඉතාම උණුසුම්ය, එම නිසා එය සිසිල් වීමට ක්‍රියාවිරහිත කරන ලදී. ධැන් ඔබේ දුරකථනය සාමාන්‍ය පරිදි ධාවනය වේ.\n\nඔබ පහත දේවල් සිදු කළහොත් ඔබේ දුරකථනය ඉතාම උණුසුම් විය හැකිය:\n	• සම්පත්-දැඩි සත්කාරක යෙදුම් භාවිතය (ක්‍රීඩා, වීඩියෝ, හෝ සංචලන යෙදුම් යනාදී)\n	• විශාල ගොනු බාගැනීම හෝ උඩුගත කිරීම\n	• ඔබේ දුරකථනය අධික උෂ්ණත්වයේදී භාවිත කිරීම"</string>
-    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"රැකවරණ පියවර බලන්න"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"දුරකථනය උණුසුම් වෙමින්"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"දුරකථනය සිසිල් වන අතරතුර සමහර විශේෂාංග සීමිත විය හැකිය.\nතව තතු සඳහා තට්ටු කරන්න"</string>
+    <string name="high_temp_notif_message" msgid="163928048626045592">"දුරකථනය සිසිල් වන අතරතුර සමහර විශේෂාංග සීමිත විය හැකිය"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ඔබගේ දුරකථනය ස්වයංක්‍රියව සිසිල් වීමට උත්සාහ කරනු ඇත. ඔබට තවම ඔබේ දුරකථනය භාවිත කළ හැකිය, නමුත් එය සෙමින් ධාවනය විය හැකිය.\n\nඔබේ දුරකථනය සිසිල් වූ පසු, එය සාමාන්‍ය ලෙස ධාවනය වනු ඇත."</string>
-    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"රැකවරණ පියවර බලන්න"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"චාජරය පේනුවෙන් ඉවත් කරන්න"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"මෙම උපාංගය ආරෝපණ කිරීමේ ගැටලුවක් තිබේ බල ඇඩැප්ටරය ගලවා කේබලය උණුසුම් විය හැකි බැවින් පරෙස්සම් වන්න."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"රැකවරණ පියවර බලන්න"</string>
@@ -989,21 +955,17 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"සැකසීම්"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"තේරුණා"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> ඔබේ <xliff:g id="TYPES_LIST">%2$s</xliff:g> භාවිත කරමින් සිටී."</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"යෙදුම් ඔබේ <xliff:g id="TYPES_LIST">%s</xliff:g> භාවිත කරමින් සිටී."</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" සහ "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"කැමරාව"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"ස්ථානය"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"මයික්‍රෝෆෝනය"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"සංවේදක ක්‍රියාවිරහිතයි"</string>
     <string name="device_services" msgid="1549944177856658705">"උපාංග සේවා"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"මාතෘකාවක් නැත"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"මෙම යෙදුම යළි ඇරඹීමට සහ පූර්ණ තිරයට යාමට තට්ටු කරන්න"</string>
+    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> විවෘත කරන්න"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> බුබුළු සඳහා සැකසීම්"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"පිටාර යාම"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"අට්ටිය වෙත ආපසු එක් කරන්න"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> වෙතින් බුබුළුවලට ඉඩ දෙන්නේද?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"කළමනා කරන්න"</string>
+    <string name="no_bubbles" msgid="1187859094003006292">"ප්‍රතික්‍ෂේප කරන්න"</string>
+    <string name="yes_bubbles" msgid="3014008797151197346">"ඉඩ දෙන්න"</string>
+    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"පසුව මගෙන් අසන්න"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> වෙතින් <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> වෙතින් <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> සහ තවත් <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> ක්"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ගෙන යන්න"</string>
@@ -1011,82 +973,26 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ඉහළ දකුණට ගෙන යන්න"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"පහළ වමට ගෙන යන්න"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"පහළ දකුණට ගෙන යන්න"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"බුබුලු ඉවත ලන්න"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"සංවාදය බුබුලු නොදමන්න"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"බුබුලු භාවිතයෙන් කතාබහ කරන්න"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"නව සංවාද පාවෙන අයිකන හෝ බුබුලු ලෙස දිස් වේ. බුබුල විවෘත කිරීමට තට්ටු කරන්න. එය ගෙන යාමට අදින්න."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ඕනෑම වේලාවක බුබුලු පාලනය කරන්න"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"මෙම යෙදුමෙන් බුබුලු ක්‍රියාවිරහිත කිරීමට කළමනාකරණය කරන්න තට්ටු කරන්න"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"තේරුණා"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> සැකසීම්"</string>
+    <string name="bubble_dismiss_text" msgid="7071770411580452911">"ඉවතලන්න"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"පද්ධති සංචලනය යාවත්කාලීන කළා. වෙනස්කම් සිදු කිරීමට, සැකසීම් වෙත යන්න."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"පද්ධති සංචලනය යාවත්කාලීන කිරීමට සැකසීම් වෙත යන්න"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"පොරොත්තු"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"සංවාදය ප්‍රමුඛතාව වෙත සකසන ලදී"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ප්‍රමුඛතා සංවාද:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"සංවාද කොටසේ ඉහළ දී පෙන්වන්න"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"පැතිකඩ පින්තූරය අගුලු තිරය මත පෙන්වන්න"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"යෙදුම්වල ඉහළම පාවෙන බුබුලක් ලෙස දිස් වේ"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"බාධා නොකරන්න හට බාධා කරන්න"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"තේරුණා"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"සැකසීම්"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"විශාලන උඩැතිරි කවුළුව"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"විශාලන කවුළුව"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"විශාලනය කිරීමේ කවුළු පාලන"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"උපාංග පාලන"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"ඔබේ සම්බන්ධිත උපාංග සඳහා පාලන එක් කරන්න"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"උපාංග පාලන පිහිටුවන්න"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ඔබේ පාලන වෙත ප්‍රවේශ වීමට බල බොත්තම අල්ලාගෙන සිටින්න"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"පාලන එක් කිරීමට යෙදුම තෝරා ගන්න"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="one">පාලන <xliff:g id="NUMBER_1">%s</xliff:g>ක් එක් කරන ලදී.</item>
-      <item quantity="other">පාලන <xliff:g id="NUMBER_1">%s</xliff:g>ක් එක් කරන ලදී.</item>
+    <string name="quick_controls_title" msgid="525285759614231333">"ඉක්මන් පාලන"</string>
+    <string name="controls_providers_title" msgid="8844124515157926071">"පාලන එක් කරන්න"</string>
+    <string name="controls_providers_subtitle" msgid="8187768950110836569">"පාලන එක් කිරීමට යෙදුමක් තෝරා ගන්න"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
+      <item quantity="one">දැනට ප්‍රියතම <xliff:g id="NUMBER_1">%s</xliff:g>.</item>
+      <item quantity="other">දැනට ප්‍රියතම <xliff:g id="NUMBER_1">%s</xliff:g>.</item>
     </plurals>
-    <string name="controls_removed" msgid="3731789252222856959">"ඉවත් කළා"</string>
-    <string name="accessibility_control_favorite" msgid="8694362691985545985">"ප්‍රියතම කළා"</string>
-    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ප්‍රියතම කළා, තත්ත්ව <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ප්‍රියතම වෙතින් ඉවත් කළා"</string>
-    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"ප්‍රියතම කරන්න"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ප්‍රියතම වෙතින් ඉවත් කරන්න"</string>
-    <string name="accessibility_control_move" msgid="8980344493796647792">"ස්ථාන <xliff:g id="NUMBER">%d</xliff:g> වෙත ගෙන යන්න"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"පාලන"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"බල මෙනුවෙන් ප්‍රවේශ වීමට පාලන තෝරා ගන්න"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"පාලන නැවත පිළියෙළ කිරීමට අල්ලාගෙන සිට අදින්න"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"සියලු පාලන ඉවත් කර ඇත"</string>
-    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"වෙනස් කිරීම් නොසුරැකිණි"</string>
-    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"වෙනත් යෙදුම් බලන්න"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"පාලන පූරණය කළ නොහැකි විය. යෙදුම් සැකසීම් වෙනස් වී නැති බව සහතික කර ගැනීමට <xliff:g id="APP">%s</xliff:g> යෙදුම පරීක්ෂා කරන්න."</string>
-    <string name="controls_favorite_load_none" msgid="7687593026725357775">"ගැළපෙන පාලන ලබා ගත නොහැකිය"</string>
-    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"වෙනත්"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"උපාංග පාලන වෙත එක් කරන්න"</string>
-    <string name="controls_dialog_ok" msgid="2770230012857881822">"එක් කරන්න"</string>
-    <string name="controls_dialog_message" msgid="342066938390663844">"යෝජනා කළේ <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="controls_dialog_confirmation" msgid="586517302736263447">"පාලන යාවත්කාලීනයි"</string>
-    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN හි අකුරු හෝ සංකේත අඩංගු වේ"</string>
-    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> සත්‍යාපනය කරන්න"</string>
-    <string name="controls_pin_wrong" msgid="6162694056042164211">"වැරදි PIN එකකි"</string>
-    <string name="controls_pin_verifying" msgid="3755045989392131746">"සත්‍යාපනය කරමින්…"</string>
-    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN ඇතුළු කරන්න"</string>
-    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"තවත් PIN එකක් උත්සාහ කරන්න"</string>
-    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"තහවුරු කරමින්…"</string>
-    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> සඳහා වෙනස තහවුරු කරන්න"</string>
-    <string name="controls_structure_tooltip" msgid="4355922222944447867">"තව බැලීමට ස්වයිප් කරන්න"</string>
-    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"නිර්දේශ පූරණය කරමින්"</string>
-    <string name="controls_media_title" msgid="1746947284862928133">"මාධ්‍ය"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"වත්මන් සැසිය සඟවන්න."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ඉවත ලන්න"</string>
-    <string name="controls_media_resume" msgid="1933520684481586053">"නැවත පටන් ගන්න"</string>
-    <string name="controls_media_settings_button" msgid="5815790345117172504">"සැකසීම්"</string>
-    <string name="controls_error_timeout" msgid="794197289772728958">"අක්‍රියයි, යෙදුම පරීක්ෂා කරන්න"</string>
-    <string name="controls_error_retryable" msgid="864025882878378470">"දෝෂයකි, නැවත උත්සාහ කරමින්…"</string>
-    <string name="controls_error_removed" msgid="6675638069846014366">"හමු නොවිණි"</string>
-    <string name="controls_error_removed_title" msgid="1207794911208047818">"පාලනය ලබා ගත නොහැකිය"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> වෙත ප්‍රවේශ විය නොහැකි විය. පාලනය තිබෙන බව සහ යෙදුම් සැකසීම් වෙනස් වී ඇති බව සහතික කර ගැනීමට <xliff:g id="APPLICATION">%2$s</xliff:g> යෙදුම පරීක්ෂා කරන්න."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"යෙදුම විවෘත කරන්න"</string>
-    <string name="controls_error_generic" msgid="352500456918362905">"තත්ත්වය පූරණය කළ නොහැකිය"</string>
-    <string name="controls_error_failed" msgid="960228639198558525">"දෝෂයකි, නැවත උත්සාහ කරන්න"</string>
-    <string name="controls_in_progress" msgid="4421080500238215939">"ප්‍රගතියේ පවතී"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"නව පාලන බැලීමට බල බොත්තම අල්ලාගෙන සිටින්න"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"පාලන එක් කරන්න"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"පාලන සංස්කරණය කරන්න"</string>
+    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"ඉක්මන් ප්‍රවේශය සඳහා පාලන තෝරා ගන්න"</string>
+    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
+    <skip />
+    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <skip />
 </resources>

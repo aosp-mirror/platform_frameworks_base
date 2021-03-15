@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -32,11 +33,17 @@ import android.os.RemoteException;
 import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.ImsSsData;
+import android.telephony.ims.SipDelegateManager;
+import android.telephony.ims.feature.MmTelFeature;
+import android.telephony.ims.feature.RcsFeature;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -102,6 +109,32 @@ public class CarrierConfigManager {
      * {@link #KEY_CARRIER_USSD_METHOD_INT}
      */
     public static final int USSD_OVER_IMS_ONLY       = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "CARRIER_NR_AVAILABILITY_" }, value = {
+            CARRIER_NR_AVAILABILITY_NONE,
+            CARRIER_NR_AVAILABILITY_NSA,
+            CARRIER_NR_AVAILABILITY_SA,
+    })
+    public @interface DeviceNrCapability {}
+
+    /**
+     * Indicates CARRIER_NR_AVAILABILITY_NONE determine that the carrier does not enable 5G NR.
+     */
+    public static final int CARRIER_NR_AVAILABILITY_NONE = 0;
+
+    /**
+     * Indicates CARRIER_NR_AVAILABILITY_NSA determine that the carrier enable the non-standalone
+     * (NSA) mode of 5G NR.
+     */
+    public static final int CARRIER_NR_AVAILABILITY_NSA = 1 << 0;
+
+    /**
+     * Indicates CARRIER_NR_AVAILABILITY_SA determine that the carrier enable the standalone (SA)
+     * mode of 5G NR.
+     */
+    public static final int CARRIER_NR_AVAILABILITY_SA = 1 << 1;
 
     private final Context mContext;
 
@@ -1774,10 +1807,23 @@ public class CarrierConfigManager {
             "show_precise_failed_cause_bool";
 
     /**
-     * Boolean to decide whether NR is enabled.
-     * @hide
+     * Bit-field integer to determine whether the carrier enable the non-standalone (NSA) mode of
+     * 5G NR, standalone (SA) mode of 5G NR
+     *
+     * <UL>
+     *  <LI>CARRIER_NR_AVAILABILITY_NONE: non-NR = 0 </LI>
+     *  <LI>CARRIER_NR_AVAILABILITY_NSA: NSA = 1 << 0</LI>
+     *  <LI>CARRIER_NR_AVAILABILITY_SA: SA = 1 << 1</LI>
+     * </UL>
+     * <p> The value of this key must be bitwise OR of
+     * {@link #CARRIER_NR_AVAILABILITY_NONE}, {@link #CARRIER_NR_AVAILABILITY_NSA},
+     * {@link #CARRIER_NR_AVAILABILITY_SA}.
+     *
+     * <p> For example, if both NSA and SA are used, the value of key is 3 (1 << 0 | 1 << 1).
+     * If the carrier doesn't support 5G NR, the value of key is 0 (non-NR).
+     * If the key is invalid or not configured, a default value 3 (NSA|SA = 3) will apply.
      */
-    public static final String KEY_NR_ENABLED_BOOL = "nr_enabled_bool";
+    public static final String KEY_CARRIER_NR_AVAILABILITY_INT = "carrier_nr_availability_int";
 
     /**
      * Boolean to decide whether LTE is enabled.
@@ -1881,9 +1927,8 @@ public class CarrierConfigManager {
      *     "APN_1, ERROR_CODE_1 : CARRIER_ACTION_IDX_1, CARRIER_ACTION_IDX_2...",
      *     "APN_1, ERROR_CODE_2 : CARRIER_ACTION_IDX_1 "
      * }
-     * Where {@code APN_1} is a string defined in
-     * com.android.internal.telephony.PhoneConstants
-     * Example: "default"
+     * Where {@code APN_1} is an integer defined in {@link android.telephony.data.ApnSetting}
+     * (e.g. {@link android.telephony.data.ApnSetting#TYPE_DEFAULT}
      *
      * {@code ERROR_CODE_1} is an integer defined in android.telephony.DataFailCause
      * Example:
@@ -3900,6 +3945,43 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "enable_presence_publish_bool";
 
         /**
+         * Each string in this array contains a mapping between the service-id and version portion
+         * of the service-description element and the associated IMS feature tag(s) that are
+         * associated with each element (see RCC.07 Table 7).
+         * <p>
+         * Each string contains 3 parts, which define the mapping between service-description and
+         * feature tag(s) that must be present in the IMS REGISTER for the RCS service to be
+         * published as part of the RCS PUBLISH procedure:
+         * [service-id]|[version]|[desc]|[feature_tag];[feature_tag];...
+         * <ul>
+         *   <li>[service-id]: the service-id element associated with the RCS capability.</li>
+         *   <li>[version]: The version element associated with that service-id</li>
+         *   <li>[desc]: The optional desecription element associated with that service-id</li>
+         *   <li>[feature_tag];[feature_tag]: The list of all feature tags associated with this
+         *       capability that MUST ALL be present in the IMS registration for this this
+         *       capability to be published to the network.</li>
+         * </ul>
+         * <p>
+         * Features managed by the framework will be considered capable when the ImsService reports
+         * that those services are capable via the
+         * {@link MmTelFeature#notifyCapabilitiesStatusChanged(MmTelFeature.MmTelCapabilities)} or
+         * {@link RcsFeature#notifyCapabilitiesStatusChanged(RcsFeature.RcsImsCapabilities)} APIs.
+         * For RCS services not managed by the framework, the capability of these services are
+         * determined by looking at the feature tags associated with the IMS registration using the
+         * {@link ImsRegistrationAttributes} API and mapping them to the service-description map.
+         * <p>
+         * The framework contains a default value of this key, which is based off of RCC.07
+         * specification. Capabilities based of carrier extensions may be added to this list on a
+         * carrier-by-carrier basis as required in order to support additional services in the
+         * PUBLISH. If this list contains a service-id and version that overlaps with the default,
+         * it will override the framework default.
+         * @hide
+         */
+        @SystemApi
+        public static final String KEY_PUBLISH_SERVICE_DESC_FEATURE_TAG_MAP_OVERRIDE_STRING_ARRAY =
+                KEY_PREFIX + "publish_service_desc_feature_tag_map_override_string_array";
+
+        /**
          * Flag indicating whether or not this carrier supports the exchange of phone numbers with
          * the carrier's RCS presence server in order to retrieve the RCS capabilities of requested
          * contacts used in the RCS User Capability Exchange (UCE) procedure. See RCC.71, section 3
@@ -3958,6 +4040,8 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT, 4000);
             defaults.putBoolean(KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_PUBLISH_BOOL, false);
+            defaults.putStringArray(KEY_PUBLISH_SERVICE_DESC_FEATURE_TAG_MAP_OVERRIDE_STRING_ARRAY,
+                    new String[] {});
             defaults.putBoolean(KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, true);
@@ -4547,7 +4631,8 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
-        sDefaults.putBoolean(KEY_NR_ENABLED_BOOL, true);
+        sDefaults.putInt(KEY_CARRIER_NR_AVAILABILITY_INT,
+                CARRIER_NR_AVAILABILITY_NSA | CARRIER_NR_AVAILABILITY_SA);
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
@@ -4711,7 +4796,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
         sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
-                "default:0", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
+                "default:0", "enterprise:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
                 "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
         });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);

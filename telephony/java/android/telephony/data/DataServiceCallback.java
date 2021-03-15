@@ -191,6 +191,8 @@ public class DataServiceCallback {
      * Called to indicate result for the request {@link DataService#startHandover}.
      *
      * @param result The result code. Must be one of the {@link ResultCode}
+     *
+     * @hide
      */
     public void onHandoverStarted(@ResultCode int result) {
         if (mCallback != null) {
@@ -209,6 +211,8 @@ public class DataServiceCallback {
      * Called to indicate result for the request {@link DataService#cancelHandover}.
      *
      * @param result The result code. Must be one of the {@link ResultCode}
+     *
+     * @hide
      */
     public void onHandoverCancelled(@ResultCode int result) {
         if (mCallback != null) {
@@ -250,15 +254,15 @@ public class DataServiceCallback {
     }
 
     /**
-     * The APN is throttled for the duration specified in
-     * {@link DataCallResponse#getRetryDurationMillis}.  Calling this method unthrottles that
-     * APN.
+     * Unthrottles the APN on the current transport.  There is no matching "APN throttle" method.
+     * Instead, the APN is throttled for the time specified in
+     * {@link DataCallResponse#getRetryDurationMillis}.
      * <p/>
      * see: {@link DataCallResponse#getRetryDurationMillis}
      *
      * @param apn Access Point Name defined by the carrier.
      */
-    public void onApnUnthrottled(@NonNull String apn) {
+    public void onApnUnthrottled(final @NonNull String apn) {
         if (mCallback != null) {
             try {
                 if (DBG) Rlog.d(TAG, "onApnUnthrottled");

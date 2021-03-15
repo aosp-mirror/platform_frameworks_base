@@ -19,7 +19,7 @@
     <string name="app_name" msgid="7488448184431507488">"ପ୍ୟାକେଜ୍‌ ଇନଷ୍ଟଲର୍‍"</string>
     <string name="install" msgid="711829760615509273">"ଇନଷ୍ଟଲ୍‍ କରନ୍ତୁ"</string>
     <string name="done" msgid="6632441120016885253">"ହୋଇଗଲା"</string>
-    <string name="cancel" msgid="1018267193425558088">"ବାତିଲ୍ କରନ୍ତୁ"</string>
+    <string name="cancel" msgid="1018267193425558088">"କ୍ୟାନ୍ସଲ୍ କରନ୍ତୁ"</string>
     <string name="installing" msgid="4921993079741206516">"ଇନଷ୍ଟଲ୍‌ କରାଯାଉଛି…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ଇନଷ୍ଟଲ୍‌ କରାଯାଉଛି…"</string>
     <string name="install_done" msgid="5987363587661783896">"ଆପ୍‍ ଇନଷ୍ଟଲ୍‌ ହୋଇଗଲା।"</string>
@@ -87,7 +87,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ଅଜଣା ଆପ୍‌ ଦ୍ୱାରା ଆପଣଙ୍କ ଟାବଲେଟ୍‍ ଏବଂ ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ନଷ୍ଟ କରାଯାଇପାରିବାର ସମ୍ଭାବନା ବହୁତ ଅଧିକ। ଏହି ଆପ୍‌କୁ ଇନଷ୍ଟଲ୍‌ କରିବାର ଅର୍ଥ ହେଉଛି ଆପଣଙ୍କ ଟାବ୍‌ଲେଟ୍‌ରେ ଘଟିବା କୌଣସି ପ୍ରକାର କ୍ଷତି କିମ୍ବା ସେଗୁଡ଼ିକର ବ୍ୟବହାରରୁ ହେବା କୌଣସି ପ୍ରକାର ଡାଟାର ହାନୀ ପାଇଁ ଆପଣ ଦାୟୀ ରହିବାକୁ ରାଜି ହୁଅନ୍ତି।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ଅଜଣା ଆପ୍‌ ଦ୍ୱାରା ଆପଣଙ୍କ ଟିଭି ଏବଂ ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ନଷ୍ଟ କରାଯାଇପାରିବାର ସମ୍ଭାବନା ବହୁତ ଅଧିକ। ଏହି ଆପ୍‌କୁ ଇନଷ୍ଟଲ୍‌ କରିବାର ଅର୍ଥ ହେଉଛି ଆପଣଙ୍କ ଟିଭିରେ ଘଟିବା କୌଣସି ପ୍ରକାର କ୍ଷତି କିମ୍ବା ସେଗୁଡ଼ିକର ବ୍ୟବହାରରୁ ହେବା କୌଣସି ପ୍ରକାର ଡାଟାର ହାନୀ ପାଇଁ ଆପଣ ଦାୟୀ ରହିବାକୁ ରାଜି ହୁଅନ୍ତି।"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ଜାରି ରଖନ୍ତୁ"</string>
-    <string name="external_sources_settings" msgid="4046964413071713807">"ସେଟିଂସ୍"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"ସେଟିଙ୍ଗ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ୱିଅର୍‍ ଆପ୍‍ ଇନଷ୍ଟଲ୍‌/ଅନଇନଷ୍ଟଲ୍‍ କରାଯାଉଛି"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ଆପ୍ ଇନ୍‌ଷ୍ଟଲ୍‌ କରାଯାଇଥିବା ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"ସଫଳତାପୂର୍ବକ ଇନ୍‌ଷ୍ଟଲ୍‌ କରାଗଲା"</string>
