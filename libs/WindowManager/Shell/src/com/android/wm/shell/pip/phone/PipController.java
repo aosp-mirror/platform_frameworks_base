@@ -494,15 +494,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipTaskOrganizer.stopSwipePipToHome(componentName, destinationBounds);
     }
 
-    /**
-     * Set a listener to watch out for PiP bounds. This is mostly used by SystemUI's
-     * Back-gesture handler, to avoid conflicting with PiP when it's stashed.
-     */
-    private void setPipExclusionBoundsChangeListener(
-            Consumer<Rect> pipExclusionBoundsChangeListener) {
-        mTouchHandler.setPipExclusionBoundsChangeListener(pipExclusionBoundsChangeListener);
-    }
-
     @Override
     public void onPipTransitionStarted(int direction, Rect pipBounds) {
         if (isOutPipDirection(direction)) {
@@ -712,7 +703,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         @Override
         public void setPipExclusionBoundsChangeListener(Consumer<Rect> listener) {
             mMainExecutor.execute(() -> {
-                PipController.this.setPipExclusionBoundsChangeListener(listener);
+                mPipBoundsState.setPipExclusionBoundsChangeCallback(listener);
             });
         }
 
