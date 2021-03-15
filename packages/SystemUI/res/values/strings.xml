@@ -2297,6 +2297,9 @@
     <!-- accessibility label for button to select user [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_user">Signed in as <xliff:g name="user" example="John">%s</xliff:g></string>
 
+    <!-- Accessibility description (not shown on the screen) of action to open user switcher when the multi-user icon is clicked. It will read as "Double-tap to choose user" in screen readers [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_choose_user_action">choose user</string>
+
     <!-- Content description for no internet connection [CHAR LIMIT=NONE] -->
     <string name="data_connection_no_internet">No internet</string>
 
