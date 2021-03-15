@@ -8817,6 +8817,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return null;
             }
             final ComponentName supervisorComponent = ComponentName.unflattenFromString(supervisor);
+            if (supervisorComponent == null) {
+                return null;
+            }
             if (supervisorComponent.equals(doComponent) || supervisorComponent.equals(
                     poComponent)) {
                 return supervisorComponent;
