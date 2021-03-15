@@ -9910,6 +9910,7 @@ package android.content {
     method public String getHtmlText();
     method public android.content.Intent getIntent();
     method public CharSequence getText();
+    method @Nullable public android.view.textclassifier.TextLinks getTextLinks();
     method public android.net.Uri getUri();
   }
 
@@ -9919,6 +9920,8 @@ package android.content {
     method public static boolean compareMimeTypes(String, String);
     method public int describeContents();
     method public String[] filterMimeTypes(String);
+    method public int getClassificationStatus();
+    method @FloatRange(from=0.0, to=1.0) public float getConfidenceScore(@NonNull String);
     method public android.os.PersistableBundle getExtras();
     method public CharSequence getLabel();
     method public String getMimeType(int);
@@ -9928,6 +9931,9 @@ package android.content {
     method public boolean isStyledText();
     method public void setExtras(android.os.PersistableBundle);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CLASSIFICATION_COMPLETE = 3; // 0x3
+    field public static final int CLASSIFICATION_NOT_COMPLETE = 1; // 0x1
+    field public static final int CLASSIFICATION_NOT_PERFORMED = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.content.ClipDescription> CREATOR;
     field public static final String MIMETYPE_TEXT_HTML = "text/html";
     field public static final String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
@@ -51916,6 +51922,7 @@ package android.view.textclassifier {
     field public static final String TYPE_PHONE = "phone";
     field public static final String TYPE_UNKNOWN = "";
     field public static final String TYPE_URL = "url";
+    field public static final String WIDGET_TYPE_CLIPBOARD = "clipboard";
     field public static final String WIDGET_TYPE_CUSTOM_EDITTEXT = "customedit";
     field public static final String WIDGET_TYPE_CUSTOM_TEXTVIEW = "customview";
     field public static final String WIDGET_TYPE_CUSTOM_UNSELECTABLE_TEXTVIEW = "nosel-customview";
