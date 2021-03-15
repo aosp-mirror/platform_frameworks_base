@@ -113,6 +113,15 @@ public class IpPrefixTest {
             p = new IpPrefix("f00:::/32");
             fail("Expected IllegalArgumentException: invalid IPv6 address");
         } catch (IllegalArgumentException expected) { }
+
+        p = new IpPrefix("/64");
+        assertEquals("::/64", p.toString());
+
+        p = new IpPrefix("/128");
+        assertEquals("::1/128", p.toString());
+
+        p = new IpPrefix("[2001:db8::123]/64");
+        assertEquals("2001:db8::/64", p.toString());
     }
 
     @Test
