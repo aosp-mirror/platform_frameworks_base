@@ -2473,7 +2473,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * explicitly set {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}, its value defaults to 1.0.</p>
      * <p>One limitation of controlling zoom using zoomRatio is that the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}
      * must only be used for letterboxing or pillarboxing of the sensor active array, and no
-     * FREEFORM cropping can be used with {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} other than 1.0.</p>
+     * FREEFORM cropping can be used with {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} other than 1.0. If
+     * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} is not 1.0, and {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} is set to be
+     * windowboxing, the camera framework will override the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to be
+     * the active array.</p>
      * <p><b>Range of valid values:</b><br>
      * {@link CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE android.control.zoomRatioRange}</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>

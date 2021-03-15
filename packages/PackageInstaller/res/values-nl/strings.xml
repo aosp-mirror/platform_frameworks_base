@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Pakket-installatie"</string>
     <string name="install" msgid="711829760615509273">"Installeren"</string>
-    <string name="done" msgid="6632441120016885253">"Klaar"</string>
+    <string name="done" msgid="6632441120016885253">"Gereed"</string>
     <string name="cancel" msgid="1018267193425558088">"Annuleren"</string>
     <string name="installing" msgid="4921993079741206516">"Installeren…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> installeren…"</string>

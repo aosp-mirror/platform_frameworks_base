@@ -20,6 +20,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
@@ -59,6 +60,7 @@ import android.net.ipsec.ike.exceptions.AuthenticationFailedException;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
+import android.net.vcn.VcnControlPlaneIkeConfig;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
@@ -168,6 +170,8 @@ public class VcnGatewayConnection extends StateMachine {
     private static final String DISCONNECT_REASON_INTERNAL_ERROR = "Uncaught exception: ";
     private static final String DISCONNECT_REASON_UNDERLYING_NETWORK_LOST =
             "Underlying Network lost";
+    private static final String DISCONNECT_REASON_NETWORK_AGENT_UNWANTED =
+            "NetworkAgent was unwanted";
     private static final String DISCONNECT_REASON_TEARDOWN = "teardown() called on VcnTunnel";
     private static final int TOKEN_ALL = Integer.MIN_VALUE;
 
@@ -379,13 +383,16 @@ public class VcnGatewayConnection extends StateMachine {
         /** The reason why the disconnect was requested. */
         @NonNull public final String reason;
 
-        EventDisconnectRequestedInfo(@NonNull String reason) {
+        public final boolean shouldQuit;
+
+        EventDisconnectRequestedInfo(@NonNull String reason, boolean shouldQuit) {
             this.reason = Objects.requireNonNull(reason);
+            this.shouldQuit = shouldQuit;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(reason);
+            return Objects.hash(reason, shouldQuit);
         }
 
         @Override
@@ -395,7 +402,7 @@ public class VcnGatewayConnection extends StateMachine {
             }
 
             final EventDisconnectRequestedInfo rhs = (EventDisconnectRequestedInfo) other;
-            return reason.equals(rhs.reason);
+            return reason.equals(rhs.reason) && shouldQuit == rhs.shouldQuit;
         }
     }
 
@@ -488,8 +495,14 @@ public class VcnGatewayConnection extends StateMachine {
      */
     @NonNull private final VcnWakeLock mWakeLock;
 
-    /** Running state of this VcnGatewayConnection. */
-    private boolean mIsRunning = true;
+    /**
+     * Whether the VcnGatewayConnection is in the process of irreversibly quitting.
+     *
+     * <p>This variable is false for the lifecycle of the VcnGatewayConnection, until a command to
+     * teardown has been received. This may be flipped due to events such as the Network becoming
+     * unwanted, the owning VCN entering safe mode, or an irrecoverable internal failure.
+     */
+    private boolean mIsQuitting = false;
 
     /**
      * The token used by the primary/current/active session.
@@ -622,10 +635,8 @@ public class VcnGatewayConnection extends StateMachine {
      * <p>Once torn down, this VcnTunnel CANNOT be started again.
      */
     public void teardownAsynchronously() {
-        sendMessageAndAcquireWakeLock(
-                EVENT_DISCONNECT_REQUESTED,
-                TOKEN_ALL,
-                new EventDisconnectRequestedInfo(DISCONNECT_REASON_TEARDOWN));
+        sendDisconnectRequestedAndAcquireWakelock(
+                DISCONNECT_REASON_TEARDOWN, true /* shouldQuit */);
 
         // TODO: Notify VcnInstance (via callbacks) of permanent teardown of this tunnel, since this
         // is also called asynchronously when a NetworkAgent becomes unwanted
@@ -646,6 +657,8 @@ public class VcnGatewayConnection extends StateMachine {
         cancelSafeModeAlarm();
 
         mUnderlyingNetworkTracker.teardown();
+
+        mGatewayStatusCallback.onQuit();
     }
 
     /**
@@ -693,7 +706,7 @@ public class VcnGatewayConnection extends StateMachine {
     private void acquireWakeLock() {
         mVcnContext.ensureRunningOnLooperThread();
 
-        if (mIsRunning) {
+        if (!mIsQuitting) {
             mWakeLock.acquire();
         }
     }
@@ -892,7 +905,7 @@ public class VcnGatewayConnection extends StateMachine {
                         TOKEN_ALL,
                         0 /* arg2 */,
                         new EventDisconnectRequestedInfo(
-                                DISCONNECT_REASON_UNDERLYING_NETWORK_LOST));
+                                DISCONNECT_REASON_UNDERLYING_NETWORK_LOST, false /* shouldQuit */));
         mDisconnectRequestAlarm =
                 createScheduledAlarm(
                         DISCONNECT_REQUEST_ALARM,
@@ -909,7 +922,8 @@ public class VcnGatewayConnection extends StateMachine {
         // Cancel any existing disconnect due to previous loss of underlying network
         removeEqualMessages(
                 EVENT_DISCONNECT_REQUESTED,
-                new EventDisconnectRequestedInfo(DISCONNECT_REASON_UNDERLYING_NETWORK_LOST));
+                new EventDisconnectRequestedInfo(
+                        DISCONNECT_REASON_UNDERLYING_NETWORK_LOST, false /* shouldQuit */));
     }
 
     private void setRetryTimeoutAlarm(long delay) {
@@ -967,7 +981,7 @@ public class VcnGatewayConnection extends StateMachine {
         // IkeSessionCallback.onClosedExceptionally(), which calls sessionClosed()
         if (exception != null) {
             mGatewayStatusCallback.onGatewayConnectionError(
-                    mConnectionConfig.getRequiredUnderlyingCapabilities(),
+                    mConnectionConfig.getExposedCapabilities(),
                     VCN_ERROR_CODE_INTERNAL_ERROR,
                     RuntimeException.class.getName(),
                     "Received "
@@ -1004,7 +1018,7 @@ public class VcnGatewayConnection extends StateMachine {
         }
 
         mGatewayStatusCallback.onGatewayConnectionError(
-                mConnectionConfig.getRequiredUnderlyingCapabilities(),
+                mConnectionConfig.getExposedCapabilities(),
                 errorCode,
                 exceptionClass,
                 exceptionMessage);
@@ -1041,11 +1055,8 @@ public class VcnGatewayConnection extends StateMachine {
                 enterState();
             } catch (Exception e) {
                 Slog.wtf(TAG, "Uncaught exception", e);
-                sendMessageAndAcquireWakeLock(
-                        EVENT_DISCONNECT_REQUESTED,
-                        TOKEN_ALL,
-                        new EventDisconnectRequestedInfo(
-                                DISCONNECT_REASON_INTERNAL_ERROR + e.toString()));
+                sendDisconnectRequestedAndAcquireWakelock(
+                        DISCONNECT_REASON_INTERNAL_ERROR + e.toString(), true /* shouldQuit */);
             }
         }
 
@@ -1083,11 +1094,8 @@ public class VcnGatewayConnection extends StateMachine {
                 processStateMsg(msg);
             } catch (Exception e) {
                 Slog.wtf(TAG, "Uncaught exception", e);
-                sendMessageAndAcquireWakeLock(
-                        EVENT_DISCONNECT_REQUESTED,
-                        TOKEN_ALL,
-                        new EventDisconnectRequestedInfo(
-                                DISCONNECT_REASON_INTERNAL_ERROR + e.toString()));
+                sendDisconnectRequestedAndAcquireWakelock(
+                        DISCONNECT_REASON_INTERNAL_ERROR + e.toString(), true /* shouldQuit */);
             }
 
             // Attempt to release the WakeLock - only possible if the Handler queue is empty
@@ -1104,11 +1112,8 @@ public class VcnGatewayConnection extends StateMachine {
                 exitState();
             } catch (Exception e) {
                 Slog.wtf(TAG, "Uncaught exception", e);
-                sendMessageAndAcquireWakeLock(
-                        EVENT_DISCONNECT_REQUESTED,
-                        TOKEN_ALL,
-                        new EventDisconnectRequestedInfo(
-                                DISCONNECT_REASON_INTERNAL_ERROR + e.toString()));
+                sendDisconnectRequestedAndAcquireWakelock(
+                        DISCONNECT_REASON_INTERNAL_ERROR + e.toString(), true /* shouldQuit */);
             }
         }
 
@@ -1141,11 +1146,11 @@ public class VcnGatewayConnection extends StateMachine {
             }
         }
 
-        protected void handleDisconnectRequested(String msg) {
+        protected void handleDisconnectRequested(EventDisconnectRequestedInfo info) {
             // TODO(b/180526152): notify VcnStatusCallback for Network loss
 
-            Slog.v(TAG, "Tearing down. Cause: " + msg);
-            mIsRunning = false;
+            Slog.v(TAG, "Tearing down. Cause: " + info.reason);
+            mIsQuitting = info.shouldQuit;
 
             teardownNetwork();
 
@@ -1177,7 +1182,7 @@ public class VcnGatewayConnection extends StateMachine {
     private class DisconnectedState extends BaseState {
         @Override
         protected void enterState() {
-            if (!mIsRunning) {
+            if (mIsQuitting) {
                 quitNow(); // Ignore all queued events; cleanup is complete.
             }
 
@@ -1200,9 +1205,11 @@ public class VcnGatewayConnection extends StateMachine {
                     }
                     break;
                 case EVENT_DISCONNECT_REQUESTED:
-                    mIsRunning = false;
+                    if (((EventDisconnectRequestedInfo) msg.obj).shouldQuit) {
+                        mIsQuitting = true;
 
-                    quitNow();
+                        quitNow();
+                    }
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1284,10 +1291,11 @@ public class VcnGatewayConnection extends StateMachine {
 
                     break;
                 case EVENT_DISCONNECT_REQUESTED:
+                    EventDisconnectRequestedInfo info = ((EventDisconnectRequestedInfo) msg.obj);
+                    mIsQuitting = info.shouldQuit;
                     teardownNetwork();
 
-                    String reason = ((EventDisconnectRequestedInfo) msg.obj).reason;
-                    if (reason.equals(DISCONNECT_REASON_UNDERLYING_NETWORK_LOST)) {
+                    if (info.reason.equals(DISCONNECT_REASON_UNDERLYING_NETWORK_LOST)) {
                         // TODO(b/180526152): notify VcnStatusCallback for Network loss
 
                         // Will trigger EVENT_SESSION_CLOSED immediately.
@@ -1300,7 +1308,7 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_SESSION_CLOSED:
                     mIkeSession = null;
 
-                    if (mIsRunning && mUnderlying != null) {
+                    if (!mIsQuitting && mUnderlying != null) {
                         transitionTo(mSkipRetryTimeout ? mConnectingState : mRetryTimeoutState);
                     } else {
                         teardownNetwork();
@@ -1342,7 +1350,7 @@ public class VcnGatewayConnection extends StateMachine {
                 mIkeSession = null;
             }
 
-            mIkeSession = buildIkeSession();
+            mIkeSession = buildIkeSession(mUnderlying.network);
         }
 
         @Override
@@ -1391,7 +1399,7 @@ public class VcnGatewayConnection extends StateMachine {
                     transitionTo(mConnectedState);
                     break;
                 case EVENT_DISCONNECT_REQUESTED:
-                    handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
+                    handleDisconnectRequested((EventDisconnectRequestedInfo) msg.obj);
                     break;
                 case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
                     mGatewayStatusCallback.onEnteredSafeMode();
@@ -1438,6 +1446,7 @@ public class VcnGatewayConnection extends StateMachine {
                             mVcnContext.getVcnNetworkProvider()) {
                         @Override
                         public void unwanted() {
+                            Slog.d(TAG, "NetworkAgent was unwanted");
                             teardownAsynchronously();
                         }
 
@@ -1471,7 +1480,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull IpSecTransform transform,
                 int direction) {
             try {
-                // TODO(b/180163196): Set underlying network of tunnel interface
+                tunnelIface.setUnderlyingNetwork(underlyingNetwork);
 
                 // Transforms do not need to be persisted; the IkeSession will keep them alive
                 mIpSecManager.applyTunnelModeTransform(tunnelIface, direction, transform);
@@ -1577,7 +1586,7 @@ public class VcnGatewayConnection extends StateMachine {
                     setupInterfaceAndNetworkAgent(mCurrentToken, mTunnelIface, mChildConfig);
                     break;
                 case EVENT_DISCONNECT_REQUESTED:
-                    handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
+                    handleDisconnectRequested((EventDisconnectRequestedInfo) msg.obj);
                     break;
                 case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
                     mGatewayStatusCallback.onEnteredSafeMode();
@@ -1682,7 +1691,7 @@ public class VcnGatewayConnection extends StateMachine {
                     transitionTo(mConnectingState);
                     break;
                 case EVENT_DISCONNECT_REQUESTED:
-                    handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
+                    handleDisconnectRequested((EventDisconnectRequestedInfo) msg.obj);
                     break;
                 case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
                     mGatewayStatusCallback.onEnteredSafeMode();
@@ -1719,6 +1728,7 @@ public class VcnGatewayConnection extends StateMachine {
         final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
 
         builder.addTransportType(TRANSPORT_CELLULAR);
+        builder.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
         builder.addCapability(NET_CAPABILITY_NOT_CONGESTED);
         builder.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
 
@@ -1905,13 +1915,13 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    boolean isRunning() {
-        return mIsRunning;
+    boolean isQuitting() {
+        return mIsQuitting;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    void setIsRunning(boolean isRunning) {
-        mIsRunning = isRunning;
+    void setIsQuitting(boolean isQuitting) {
+        mIsQuitting = isQuitting;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -1924,23 +1934,37 @@ public class VcnGatewayConnection extends StateMachine {
         mIkeSession = session;
     }
 
-    private IkeSessionParams buildIkeParams() {
-        // TODO: Implement this once IkeSessionParams is persisted
-        return null;
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    void sendDisconnectRequestedAndAcquireWakelock(String reason, boolean shouldQuit) {
+        sendMessageAndAcquireWakeLock(
+                EVENT_DISCONNECT_REQUESTED,
+                TOKEN_ALL,
+                new EventDisconnectRequestedInfo(reason, shouldQuit));
+    }
+
+    private IkeSessionParams buildIkeParams(@NonNull Network network) {
+        final VcnControlPlaneIkeConfig controlPlaneConfig =
+                (VcnControlPlaneIkeConfig) mConnectionConfig.getControlPlaneConfig();
+        final IkeSessionParams.Builder builder =
+                new IkeSessionParams.Builder(controlPlaneConfig.getIkeSessionParams());
+        builder.setConfiguredNetwork(network);
+
+        return builder.build();
     }
 
     private ChildSessionParams buildChildParams() {
-        // TODO: Implement this once IkeSessionParams is persisted
-        return null;
+        final VcnControlPlaneIkeConfig controlPlaneConfig =
+                (VcnControlPlaneIkeConfig) mConnectionConfig.getControlPlaneConfig();
+        return controlPlaneConfig.getChildSessionParams();
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    VcnIkeSession buildIkeSession() {
+    VcnIkeSession buildIkeSession(@NonNull Network network) {
         final int token = ++mCurrentToken;
 
         return mDeps.newIkeSession(
                 mVcnContext,
-                buildIkeParams(),
+                buildIkeParams(network),
                 buildChildParams(),
                 new IkeSessionCallbackImpl(token),
                 new VcnChildSessionCallback(token));

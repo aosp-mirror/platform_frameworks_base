@@ -16,14 +16,17 @@
 
 package android.net;
 
+import static android.app.ActivityManager.procStateToString;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
+import android.app.ActivityManager.ProcessCapability;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -617,8 +620,18 @@ public class NetworkPolicyManager {
      * to access network when the device is idle or in battery saver mode. Otherwise, false.
      * @hide
      */
-    public static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(int procState) {
-        return procState <= FOREGROUND_THRESHOLD_STATE;
+    public static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(@Nullable UidState uidState) {
+        if (uidState == null) {
+            return false;
+        }
+        return isProcStateAllowedWhileIdleOrPowerSaveMode(uidState.procState, uidState.capability);
+    }
+
+    /** @hide */
+    public static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(
+            int procState, @ProcessCapability int capability) {
+        return procState <= FOREGROUND_THRESHOLD_STATE
+                || (capability & ActivityManager.PROCESS_CAPABILITY_NETWORK) != 0;
     }
 
     /**
@@ -626,8 +639,41 @@ public class NetworkPolicyManager {
      * to access network when the device is in data saver mode. Otherwise, false.
      * @hide
      */
+    public static boolean isProcStateAllowedWhileOnRestrictBackground(@Nullable UidState uidState) {
+        if (uidState == null) {
+            return false;
+        }
+        return isProcStateAllowedWhileOnRestrictBackground(uidState.procState);
+    }
+
+    /** @hide */
     public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState) {
+        // Data saver and bg policy restrictions will only take procstate into account.
         return procState <= FOREGROUND_THRESHOLD_STATE;
+    }
+
+    /** @hide */
+    public static final class UidState {
+        public int uid;
+        public int procState;
+        public int capability;
+
+        public UidState(int uid, int procState, int capability) {
+            this.uid = uid;
+            this.procState = procState;
+            this.capability = capability;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("{procState=");
+            sb.append(procStateToString(procState));
+            sb.append(",cap=");
+            ActivityManager.printCapabilitiesSummary(sb, capability);
+            sb.append("}");
+            return sb.toString();
+        }
     }
 
     /** @hide */

@@ -333,7 +333,6 @@ filegroup {
     srcs: [
         // Java/AIDL sources under frameworks/base
         ":framework-blobstore-sources",
-        ":framework-connectivity-sources", // framework-connectivity is not yet a module
         ":framework-core-sources",
         ":framework-drm-sources",
         ":framework-graphics-sources",
@@ -395,6 +394,7 @@ filegroup {
 filegroup {
     name: "framework-updatable-sources",
     srcs: [
+        ":framework-connectivity-sources",
         ":framework-mediaprovider-sources",
         ":framework-permission-sources",
         ":framework-sdkextensions-sources",
@@ -525,7 +525,8 @@ java_library {
         "android.hardware.vibrator-V1.3-java",
         "android.security.apc-java",
         "android.security.authorization-java",
-        "android.security.usermanager-java",
+        "android.security.maintenance-java",
+        "android.security.vpnprofilestore-java",
         "android.system.keystore2-V1-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
@@ -580,6 +581,7 @@ java_library {
     defaults: ["framework-aidl-export-defaults"],
     srcs: [
         ":framework-non-updatable-sources",
+        ":framework-connectivity-sources",
         "core/java/**/*.logtags",
     ],
     // See comment on framework-atb-backward-compatibility module below
@@ -628,6 +630,8 @@ java_library {
     apex_available: ["//apex_available:platform"],
     visibility: [
         "//frameworks/base",
+        // TODO: remove when framework-connectivity can build against API
+        "//frameworks/base/packages/Connectivity/framework",
         // TODO(b/147128803) remove the below lines
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
@@ -830,17 +834,20 @@ filegroup {
     ],
 }
 
-// keep these files in sync with the package/Tethering/jarjar-rules.txt for the tethering module.
+// keep these files in sync with the package/Tethering/jarjar-rules.txt and
+// package/Connectivity/jarjar-rules.txt for the tethering module and connectivity module.
 filegroup {
-    name: "framework-tethering-shared-srcs",
+    name: "framework-connectivity-shared-srcs",
     srcs: [
         "core/java/android/util/LocalLog.java",
+        // This should be android.util.IndentingPrintWriter, but it's not available in all branches.
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/MessageUtils.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
+        "core/java/com/android/internal/util/WakeupMessage.java",
     ],
 }
 
@@ -1126,6 +1133,21 @@ aidl_interface {
     },
 }
 
+// Build Rust bindings for PermissionController. Needed by keystore2.
+aidl_interface {
+    name: "android.os.permissions_aidl",
+    unstable: true,
+    local_include_dir: "core/java",
+    srcs: [
+        "core/java/android/os/IPermissionController.aidl",
+    ],
+    backend: {
+        rust: {
+            enabled: true,
+        },
+    },
+}
+
 // TODO(b/77285514): remove this once the last few hidl interfaces have been
 // updated to use hwbinder.stubs.
 java_library {
@@ -1281,6 +1303,7 @@ java_library {
     ],
     libs: [
         "framework-annotations-lib",
+        "framework-connectivity",
         "unsupportedappusage",
     ],
     visibility: [

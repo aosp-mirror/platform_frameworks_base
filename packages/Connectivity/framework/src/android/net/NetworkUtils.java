@@ -27,8 +27,10 @@ import com.android.net.module.util.Inet4AddressUtils;
 import java.io.FileDescriptor;
 import java.math.BigInteger;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.TreeSet;
 
@@ -85,22 +87,6 @@ public class NetworkUtils {
      * @return 0 on success or negative errno on failure.
      */
     public static native int bindSocketToNetwork(FileDescriptor fd, int netId);
-
-    /**
-     * Protect {@code fd} from VPN connections.  After protecting, data sent through
-     * this socket will go directly to the underlying network, so its traffic will not be
-     * forwarded through the VPN.
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553,
-            publicAlternatives = "Use {@link android.net.VpnService#protect} instead.")
-    public static native boolean protectFromVpn(FileDescriptor fd);
-
-    /**
-     * Protect {@code socketfd} from VPN connections.  After protecting, data sent through
-     * this socket will go directly to the underlying network, so its traffic will not be
-     * forwarded through the VPN.
-     */
-    public native static boolean protectFromVpn(int socketfd);
 
     /**
      * Determine if {@code uid} can access network designated by {@code netId}.
@@ -228,7 +214,7 @@ public class NetworkUtils {
     @Deprecated
     public static InetAddress numericToInetAddress(String addrString)
             throws IllegalArgumentException {
-        return InetAddress.parseNumericAddress(addrString);
+        return InetAddresses.parseNumericAddress(addrString);
     }
 
     /**
@@ -250,11 +236,52 @@ public class NetworkUtils {
         try {
             String[] pieces = ipAndMaskString.split("/", 2);
             prefixLength = Integer.parseInt(pieces[1]);
-            address = InetAddress.parseNumericAddress(pieces[0]);
+            address = InetAddresses.parseNumericAddress(pieces[0]);
         } catch (NullPointerException e) {            // Null string.
         } catch (ArrayIndexOutOfBoundsException e) {  // No prefix length.
         } catch (NumberFormatException e) {           // Non-numeric prefix.
         } catch (IllegalArgumentException e) {        // Invalid IP address.
+        }
+
+        if (address == null || prefixLength == -1) {
+            throw new IllegalArgumentException("Invalid IP address and mask " + ipAndMaskString);
+        }
+
+        return new Pair<InetAddress, Integer>(address, prefixLength);
+    }
+
+    /**
+     * Utility method to parse strings such as "192.0.2.5/24" or "2001:db8::cafe:d00d/64".
+     * @hide
+     *
+     * @deprecated This method is used only for IpPrefix and LinkAddress. Since Android S, use
+     *             {@link #parseIpAndMask(String)}, if possible.
+     */
+    @Deprecated
+    public static Pair<InetAddress, Integer> legacyParseIpAndMask(String ipAndMaskString) {
+        InetAddress address = null;
+        int prefixLength = -1;
+        try {
+            String[] pieces = ipAndMaskString.split("/", 2);
+            prefixLength = Integer.parseInt(pieces[1]);
+            if (pieces[0] == null || pieces[0].isEmpty()) {
+                final byte[] bytes = new byte[16];
+                bytes[15] = 1;
+                return new Pair<InetAddress, Integer>(Inet6Address.getByAddress(
+                        "ip6-localhost"/* host */, bytes, 0 /* scope_id */), prefixLength);
+            }
+
+            if (pieces[0].startsWith("[")
+                    && pieces[0].endsWith("]")
+                    && pieces[0].indexOf(':') != -1) {
+                pieces[0] = pieces[0].substring(1, pieces[0].length() - 1);
+            }
+            address = InetAddresses.parseNumericAddress(pieces[0]);
+        } catch (NullPointerException e) {            // Null string.
+        } catch (ArrayIndexOutOfBoundsException e) {  // No prefix length.
+        } catch (NumberFormatException e) {           // Non-numeric prefix.
+        } catch (IllegalArgumentException e) {        // Invalid IP address.
+        } catch (UnknownHostException e) {            // IP address length is illegal
         }
 
         if (address == null || prefixLength == -1) {

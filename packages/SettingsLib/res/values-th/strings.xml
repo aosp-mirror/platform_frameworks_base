@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"ไม่สามารถสแกนหาเครือข่าย"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"ไม่มี"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"บันทึกแล้ว"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"ยกเลิกการเชื่อมต่อแล้ว"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"เลิกเชื่อมต่อแล้ว"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"ปิดอยู่"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"การกำหนดค่า IP ล้มเหลว"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"ไม่ได้เชื่อมต่อเนื่องจากเครือข่ายคุณภาพต่ำ"</string>
@@ -35,7 +35,7 @@
     <string name="wifi_not_in_range" msgid="1541760821805777772">"ไม่อยู่ในพื้นที่ให้บริการ"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"จะไม่เชื่อมต่อโดยอัตโนมัติ"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"เข้าถึงอินเทอร์เน็ตไม่ได้"</string>
-    <string name="saved_network" msgid="7143698034077223645">"บันทึกโดย<xliff:g id="NAME">%1$s</xliff:g> แล้ว"</string>
+    <string name="saved_network" msgid="7143698034077223645">"บันทึกโดย <xliff:g id="NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"เชื่อมต่ออัตโนมัติผ่าน %1$s แล้ว"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"เชื่อมต่ออัตโนมัติผ่านผู้ให้บริการการจัดอันดับเครือข่าย"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"เชื่อมต่อผ่าน %1$s แล้ว"</string>
@@ -93,8 +93,8 @@
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"การเข้าถึงซิม"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"เสียง HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"เสียง HD"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"เครื่องช่วยฟัง"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"เชื่อมต่อกับเครื่องช่วยฟังแล้ว"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"เครื่องช่วยการได้ยิน"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"เชื่อมต่อกับเครื่องช่วยการได้ยินแล้ว"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"เชื่อมต่อกับระบบเสียงของสื่อแล้ว"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"เชื่อมต่อกับระบบเสียงของโทรศัพท์แล้ว"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"เชื่อมต่อกับเซิร์ฟเวอร์สำหรับโอนไฟล์แล้ว"</string>
@@ -111,7 +111,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"ใช้สำหรับระบบเสียงของโทรศัพท์"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ใช้สำหรับการโอนไฟล์"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ใช้สำหรับการป้อนข้อมูล"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"ใช้สำหรับเครื่องช่วยฟัง"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"ใช้สำหรับเครื่องช่วยการได้ยิน"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"จับคู่อุปกรณ์"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"จับคู่อุปกรณ์"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ยกเลิก"</string>
@@ -127,8 +127,8 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"หูฟัง"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"อุปกรณ์อินพุต"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"บลูทูธ"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"กำลังจับคู่กับเครื่องช่วยฟังข้างซ้าย…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"กำลังจับคู่กับเครื่องช่วยฟังข้างขวา…"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"กำลังจับคู่กับเครื่องช่วยการได้ยินข้างซ้าย…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"กำลังจับคู่กับเครื่องช่วยการได้ยินข้างขวา…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"ข้างซ้าย - แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"ข้างขวา - แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi ปิดอยู่"</string>
@@ -143,19 +143,19 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"แอปพลิเคชันที่นำออก"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"แอปพลิเคชันและผู้ใช้ที่นำออก"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"การอัปเดตระบบ"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"เชื่อมต่อเน็ตผ่าน USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"ปล่อยสัญญาณผ่าน USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"ฮอตสปอตแบบพกพาได้"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ปล่อยสัญญาณบลูทูธ"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"การปล่อยสัญญาณ"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"การปล่อยสัญญาณและฮอตสปอต"</string>
     <string name="managed_user_title" msgid="449081789742645723">"แอปการทำงานทั้งหมด"</string>
-    <string name="user_guest" msgid="6939192779649870792">"ผู้ใช้ชั่วคราว"</string>
+    <string name="user_guest" msgid="6939192779649870792">"ผู้เข้าร่วม"</string>
     <string name="unknown" msgid="3544487229740637809">"ไม่ทราบ"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ผู้ใช้: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"ตั้งค่าเริ่มต้นไว้บางส่วน"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"ไม่ได้ตั้งค่าเริ่มต้น"</string>
     <string name="tts_settings" msgid="8130616705989351312">"การตั้งค่าการอ่านออกเสียงข้อความ"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"เอาต์พุตการอ่านออกเสียงข้อความ"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"เอาต์พุตการอ่านออกเสียง"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"ความเร็วของคำพูด"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ความเร็วในการพูดข้อความ"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"ความสูง-ต่ำของเสียง"</string>
@@ -196,7 +196,7 @@
     <string name="choose_profile" msgid="343803890897657450">"เลือกโปรไฟล์"</string>
     <string name="category_personal" msgid="6236798763159385225">"ส่วนตัว"</string>
     <string name="category_work" msgid="4014193632325996115">"ที่ทำงาน"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"สำหรับนักพัฒนาซอฟต์แวร์"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"เปิดใช้ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ตั้งค่าตัวเลือกสำหรับการพัฒนาแอปพลิเคชัน"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์ไม่สามารถใช้ได้สำหรับผู้ใช้นี้"</string>
@@ -205,14 +205,14 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"การตั้งค่าจุดเข้าใช้งานไม่สามารถใช้ได้สำหรับผู้ใช้รายนี้"</string>
     <string name="enable_adb" msgid="8072776357237289039">"การแก้ไขข้อบกพร่อง USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"โหมดแก้ไขข้อบกพร่องเมื่อเชื่อมต่อ USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"เพิกถอนการให้สิทธิ์การแก้ไขข้อบกพร่อง USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"ยกเลิกการให้สิทธิ์การแก้ปัญหา USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"การแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"โหมดแก้ไขข้อบกพร่องเมื่อเชื่อมต่อ Wi-Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ข้อผิดพลาด"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"การแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"หากต้องการดูและใช้อุปกรณ์ที่มีอยู่ ให้เปิดการแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"จับคู่อุปกรณ์ด้วยคิวอาร์โค้ด"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"จับคู่อุปกรณ์เครื่องใหม่โดยใช้เครื่องมือสแกนคิวอาร์โค้ด"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"จับคู่อุปกรณ์เครื่องใหม่โดยใช้เครื่องมือสแกนคิวอาร์โค้ด"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"จับคู่อุปกรณ์ด้วยรหัสการจับคู่"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"จับคู่อุปกรณ์เครื่องใหม่โดยใช้รหัสตัวเลข 6 หลัก"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"อุปกรณ์ที่จับคู่"</string>
@@ -231,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"จับคู่อุปกรณ์ไม่สำเร็จ คิวอาร์โค้ดไม่ถูกต้อง หรืออุปกรณ์ไม่ได้เชื่อมต่อกับเครือข่ายเดียวกัน"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"ที่อยู่ IP และพอร์ต"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"สแกนคิวอาร์โค้ด"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"จับคู่อุปกรณ์ผ่าน Wi‑Fi ด้วยการสแกนคิวอาร์โค้ด"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"โปรดเชื่อมต่อกับเครือข่าย Wi-Fi"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"จับคู่อุปกรณ์ผ่าน Wi‑Fi ด้วยการสแกนคิวอาร์โค้ด"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, แก้ไขข้อบกพร่อง, พัฒนา"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ทางลัดรายงานข้อบกพร่อง"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"แสดงปุ่มในเมนูเปิด/ปิดสำหรับการใช้รายงานข้อบกพร่อง"</string>
@@ -251,7 +250,6 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"การรับรองการแสดงผลแบบไร้สาย"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"เปิดใช้การบันทึกรายละเอียด Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"การควบคุมการสแกนหา Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"การสุ่ม MAC เพื่อเพิ่มความปลอดภัย Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"เปิดใช้เน็ตมือถือเสมอ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"การเร่งฮาร์ดแวร์การเชื่อมต่ออินเทอร์เน็ตผ่านมือถือ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"แสดงอุปกรณ์บลูทูธที่ไม่มีชื่อ"</string>
@@ -283,8 +281,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ลดการเปลืองแบตเตอรี่และเพิ่มประสิทธิภาพเครือข่าย"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"เมื่อเปิดใช้โหมดนี้ ที่อยู่ MAC ของอุปกรณ์นี้อาจเปลี่ยนทุกครั้งที่เชื่อมต่อกับเครือข่ายที่มีการเปิดใช้การสุ่ม MAC"</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"แบบจำกัดปริมาณอินเทอร์เน็ต"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ไม่มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ขนาดบัฟเฟอร์ของตัวบันทึก"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"เลือกขนาด Logger ต่อบัฟเฟอร์ไฟล์บันทึก"</string>
@@ -311,7 +308,6 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"ระบบจะแสดงอุปกรณ์บลูทูธที่ไม่มีชื่อ (มีเฉพาะที่อยู่ MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ปิดใช้ฟีเจอร์การควบคุมระดับเสียงของอุปกรณ์อื่นผ่านบลูทูธในกรณีที่มีปัญหาเกี่ยวกับระดับเสียงของอุปกรณ์ระยะไกล เช่น ระดับเสียงที่ดังเกินไปหรือระดับเสียงที่ไม่มีการควบคุม"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"เปิดใช้สแต็กฟีเจอร์ Bluetooth Gabeldorsche"</string>
-    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"เปิดใช้ฟีเจอร์การเชื่อมต่อที่ปรับปรุงแล้ว"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"เทอร์มินัลในตัวเครื่อง"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"การตรวจสอบ HDCP"</string>
@@ -358,8 +354,6 @@
     <string name="track_frame_time" msgid="522674651937771106">"การแสดงผล HWUI ตามโปรไฟล์"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"เปิดใช้เลเยอร์การแก้ไขข้อบกพร่อง GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"อนุญาตให้โหลดเลเยอร์การแก้ไขข้อบกพร่อง GPU สำหรับแอปแก้ไขข้อบกพร่อง"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"เปิดการบันทึกเวนเดอร์แบบละเอียด"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"รวมบันทึกเวนเดอร์เพิ่มเติมเฉพาะอุปกรณ์ไว้ในรายงานข้อบกพร่อง ซึ่งอาจมีข้อมูลส่วนตัว ใช้แบตเตอรี่มากขึ้น และ/หรือใช้พื้นที่เก็บข้อมูลมากขึ้น"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"อัตราการเคลื่อนไหวของหน้าต่าง"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"อัตราการเคลื่อนไหวของการเปลี่ยนภาพ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"อัตราความเร็วตามตัวสร้างภาพเคลื่อนไหว"</string>
@@ -418,7 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ตาบอดจางสีแดง (สีแดง/เขียว)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ตาบอดจางสีน้ำเงิน (สีน้ำเงิน/เหลือง)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"การแก้สี"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"การแก้สีช่วยให้คุณปรับการแสดงสีในอุปกรณ์ได้"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"การแก้ไขสีช่วยให้ผู้ที่มีอาการตาบอดสีเห็นสีต่างๆ ได้ตรงตามจริงยิ่งขึ้น"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"แทนที่โดย <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"เหลืออีกประมาณ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -432,11 +426,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"น่าจะใช้งานได้ถึงเวลาประมาณ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"น่าจะใช้งานได้ถึงเวลาประมาณ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"จนถึง <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"แบตเตอรี่อาจหมดภายใน <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"เหลือน้อยกว่า <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"เหลือน้อยกว่า <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"เหลืออีกกว่า <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"เหลืออีกกว่า <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"ยืดอายุการใช้งานแบตเตอรี่หลังเวลา <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"เหลืออีกไม่ถึง <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"เหลือเวลาอีกไม่ถึง <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"เหลือเวลามากกว่า <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"เหลือเวลามากกว่า <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"โทรศัพท์อาจปิดเครื่องในไม่ช้า"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"แท็บเล็ตอาจปิดเครื่องในไม่ช้า"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"อุปกรณ์อาจปิดเครื่องในไม่ช้า"</string>
@@ -444,11 +438,11 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"แท็บเล็ตอาจปิดเครื่องในไม่ช้า (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"อุปกรณ์อาจปิดเครื่องในไม่ช้า (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"เหลือ <xliff:g id="TIME">%1$s</xliff:g> จนกว่าจะชาร์จเต็ม"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"เหลือ <xliff:g id="TIME">%1$s</xliff:g> จนกว่าจะชาร์จ"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> จนกว่าจะชาร์จ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ไม่ทราบ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"กำลังชาร์จ"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"กำลังชาร์จอย่างเร็ว"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"กำลังชาร์จเร็ว"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"กำลังชาร์จอย่างช้าๆ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ไม่ได้ชาร์จ"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"เสียบอยู่ ไม่สามารถชาร์จได้ในขณะนี้"</string>
@@ -484,7 +478,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"สถานะการลงทะเบียน IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ลงทะเบียนแล้ว"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ไม่ได้ลงทะเบียน"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"ไม่มี"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"ไม่ว่าง"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC เป็นแบบสุ่ม"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="other">มีอุปกรณ์ที่เชื่อมต่อ %1$d เครื่อง</item>
@@ -507,50 +501,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ถามทุกครั้ง"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"จนกว่าคุณจะปิด"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"เมื่อสักครู่"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ลำโพงโทรศัพท์"</string>
+    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"อุปกรณ์นี้"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"เกิดปัญหาในการเชื่อมต่อ ปิดอุปกรณ์แล้วเปิดใหม่อีกครั้ง"</string>
-    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"อุปกรณ์เสียงแบบมีสาย"</string>
-    <string name="help_label" msgid="3528360748637781274">"ความช่วยเหลือและความคิดเห็น"</string>
-    <string name="storage_category" msgid="2287342585424631813">"พื้นที่เก็บข้อมูล"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"ข้อมูลที่แชร์"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"ดูและแก้ไขข้อมูลที่แชร์"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ไม่มีข้อมูลที่แชร์สำหรับผู้ใช้รายนี้"</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"เกิดข้อผิดพลาดขณะดึงข้อมูลที่แชร์ ลองใหม่"</string>
-    <string name="blob_id_text" msgid="8680078988996308061">"รหัสข้อมูลที่แชร์: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"จะหมดอายุในวันที่ <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"เกิดข้อผิดพลาดขณะลบข้อมูลที่แชร์"</string>
-    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"ไม่มีสัญญาเช่าที่ได้มาสำหรับข้อมูลที่แชร์นี้ คุณต้องการลบข้อมูลนี้ไหม"</string>
-    <string name="accessor_info_title" msgid="8289823651512477787">"แอปที่แชร์ข้อมูล"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"แอปไม่ได้ให้คำอธิบายไว้"</string>
-    <string name="accessor_expires_text" msgid="4625619273236786252">"เวลาได้รับสิทธิ์จะสิ้นสุดในวันที่ <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="delete_blob_text" msgid="2819192607255625697">"ลบข้อมูลที่แชร์"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"คุณแน่ใจไหมว่าต้องการลบข้อมูลที่แชร์นี้"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"ผู้ใช้มีแอปและเนื้อหาของตัวเอง"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"คุณสามารถจำกัดการเข้าถึงแอปและเนื้อหาจากบัญชีของคุณได้"</string>
-    <string name="user_add_user_item_title" msgid="2394272381086965029">"ผู้ใช้"</string>
-    <string name="user_add_profile_item_title" msgid="3111051717414643029">"โปรไฟล์ที่ถูกจำกัด"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"ต้องการเพิ่มผู้ใช้ใหม่ใช่ไหม"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"คุณมีสิทธิ์แชร์อุปกรณ์นี้กับผู้อื่นได้โดยการเพิ่มผู้ใช้ ซึ่งแต่ละคนจะมีพื้นที่ของตนเองและปรับใช้กับแอป วอลเปเปอร์ และรายการอื่นๆ ได้ อีกทั้งยังปรับการตั้งค่าอุปกรณ์ได้ด้วย เช่น Wi‑Fi ซึ่งจะมีผลกับทุกคน\n\nเมื่อคุณเพิ่มผู้ใช้ใหม่ ผู้ใช้ดังกล่าวจะต้องตั้งค่าพื้นที่ของตน\n\nผู้ใช้ทุกคนมีสิทธิ์อัปเดตแอปให้กับผู้ใช้รายอื่น การตั้งค่าและบริการสำหรับการช่วยเหลือพิเศษอาจโอนไปยังผู้ใช้ใหม่ไม่ได้"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"เมื่อคุณเพิ่มผู้ใช้ใหม่ ผู้ใช้ดังกล่าวจะต้องตั้งค่าพื้นที่ของตนเอง\n\nผู้ใช้ทุกคนสามารถอัปเดตแอปสำหรับผู้ใช้รายอื่นได้"</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ตั้งค่าผู้ใช้เลยไหม"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"ตรวจสอบว่าบุคคลดังกล่าวสามารถนำอุปกรณ์ไปตั้งค่าพื้นที่ของตนได้"</string>
-    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"หากต้องการตั้งค่าโปรไฟล์ทันที"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ตั้งค่าทันที"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ข้ามไปก่อน"</string>
-    <string name="user_add_user_type_title" msgid="551279664052914497">"เพิ่ม"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"ผู้ใช้ใหม่"</string>
-    <string name="user_new_profile_name" msgid="2405500423304678841">"โปรไฟล์ใหม่"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"ข้อมูลผู้ใช้"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"ข้อมูลโปรไฟล์"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"ก่อนที่คุณจะสามารถสร้างโปรไฟล์ที่ถูกจำกัดได้ คุณจะต้องตั้งค่าล็อกหน้าจอเพื่อปกป้องแอปและข้อมูลส่วนตัวของคุณ"</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"ตั้งค่าล็อก"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"เปลี่ยนเป็น <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้เข้าร่วม"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้เข้าร่วมออก"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"ผู้ใช้ชั่วคราว"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ค่าเริ่มต้นของอุปกรณ์"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ปิดใช้"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"เปิดใช้"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"คุณต้องรีบูตอุปกรณ์เพื่อให้การเปลี่ยนแปลงนี้มีผล รีบูตเลยหรือยกเลิก"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"หูฟังแบบมีสาย"</string>
 </resources>

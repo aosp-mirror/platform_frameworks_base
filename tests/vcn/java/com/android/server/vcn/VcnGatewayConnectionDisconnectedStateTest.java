@@ -21,9 +21,12 @@ import static android.net.IpSecManager.IpSecTunnelInterface;
 import static com.android.server.vcn.VcnGatewayConnection.DUMMY_ADDR;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.net.IpSecManager;
@@ -54,7 +57,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
     }
 
     @Test
-    public void testEnterWhileNotRunningTriggersQuit() throws Exception {
+    public void testEnterWhileQuittingTriggersQuit() throws Exception {
         final VcnGatewayConnection vgc =
                 new VcnGatewayConnection(
                         mVcnContext,
@@ -64,7 +67,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
                         mGatewayStatusCallback,
                         mDeps);
 
-        vgc.setIsRunning(false);
+        vgc.setIsQuitting(true);
         vgc.transitionTo(vgc.mDisconnectedState);
         mTestLooper.dispatchAll();
 
@@ -101,5 +104,18 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
         assertNull(mGatewayConnection.getCurrentState());
         verify(mIpSecSvc).deleteTunnelInterface(eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), any());
         verifySafeModeTimeoutAlarmAndGetCallback(true /* expectCanceled */);
+        assertTrue(mGatewayConnection.isQuitting());
+        verify(mGatewayStatusCallback).onQuit();
+    }
+
+    @Test
+    public void testNonTeardownDisconnectRequest() throws Exception {
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
+        assertFalse(mGatewayConnection.isQuitting());
+        verify(mGatewayStatusCallback, never()).onQuit();
+        // No safe mode timer changes expected.
     }
 }

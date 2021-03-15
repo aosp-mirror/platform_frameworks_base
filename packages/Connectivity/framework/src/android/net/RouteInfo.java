@@ -26,6 +26,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.net.module.util.NetUtils;
+import com.android.net.module.util.NetworkStackConstants;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -181,9 +182,9 @@ public final class RouteInfo implements Parcelable {
         if (destination == null) {
             if (gateway != null) {
                 if (gateway instanceof Inet4Address) {
-                    destination = new IpPrefix(Inet4Address.ANY, 0);
+                    destination = new IpPrefix(NetworkStackConstants.IPV4_ADDR_ANY, 0);
                 } else {
-                    destination = new IpPrefix(Inet6Address.ANY, 0);
+                    destination = new IpPrefix(NetworkStackConstants.IPV6_ADDR_ANY, 0);
                 }
             } else {
                 // no destination, no gateway. invalid.
@@ -196,9 +197,9 @@ public final class RouteInfo implements Parcelable {
         // ConnectivityService) to stop doing things like r.getGateway().equals(), ... .
         if (gateway == null) {
             if (destination.getAddress() instanceof Inet4Address) {
-                gateway = Inet4Address.ANY;
+                gateway = NetworkStackConstants.IPV4_ADDR_ANY;
             } else {
-                gateway = Inet6Address.ANY;
+                gateway = NetworkStackConstants.IPV6_ADDR_ANY;
             }
         }
         mHasGateway = (!gateway.isAnyLocalAddress());

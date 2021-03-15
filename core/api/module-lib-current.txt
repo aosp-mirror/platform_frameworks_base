@@ -6,69 +6,70 @@ package android.app {
     method public void setMaxManifestReceiverApiLevel(int);
   }
 
+  public final class PendingIntent implements android.os.Parcelable {
+    method @RequiresPermission("android.permission.GET_INTENT_SENDER_INTENT") public boolean intentFilterEquals(@Nullable android.app.PendingIntent);
+  }
+
+}
+
+package android.app.usage {
+
+  public class NetworkStatsManager {
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void notifyNetworkStatus(@NonNull java.util.List<android.net.Network>, @NonNull java.util.List<android.net.NetworkStateSnapshot>, @Nullable String, @NonNull java.util.List<android.net.UnderlyingNetworkInfo>);
+  }
+
+}
+
+package android.content {
+
+  public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final String ACTION_CLEAR_DNS_CACHE = "android.intent.action.CLEAR_DNS_CACHE";
+  }
+
 }
 
 package android.net {
 
-  public final class ConnectivityFrameworkInitializer {
-    method public static void registerServiceWrappers();
-  }
-
-  public class ConnectivityManager {
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerSystemDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
-    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void requestBackgroundNetwork(@NonNull android.net.NetworkRequest, @Nullable android.os.Handler, @NonNull android.net.ConnectivityManager.NetworkCallback);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
+  public final class EthernetNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    ctor public EthernetNetworkSpecifier(@NonNull String);
+    method public int describeContents();
+    method @Nullable public String getInterfaceName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkSpecifier> CREATOR;
   }
 
   public static final class IpSecManager.UdpEncapsulationSocket implements java.lang.AutoCloseable {
     method public int getResourceId();
   }
 
-  public final class NetworkAgentConfig implements android.os.Parcelable {
-    method @Nullable public String getSubscriberId();
-  }
-
-  public static final class NetworkAgentConfig.Builder {
-    method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
-  }
-
-  public final class NetworkCapabilities implements android.os.Parcelable {
-    field public static final int TRANSPORT_TEST = 7; // 0x7
+  public final class NetworkStateSnapshot implements android.os.Parcelable {
+    ctor public NetworkStateSnapshot(@NonNull android.net.Network, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, @Nullable String, int);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStateSnapshot> CREATOR;
+    field public final int legacyType;
+    field @NonNull public final android.net.LinkProperties linkProperties;
+    field @NonNull public final android.net.Network network;
+    field @NonNull public final android.net.NetworkCapabilities networkCapabilities;
+    field @Nullable public final String subscriberId;
   }
 
   public class NetworkWatchlistManager {
     method @Nullable public byte[] getWatchlistConfigHash();
   }
 
+  public class PacProxyManager {
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void addPacProxyInstalledListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.PacProxyManager.PacProxyInstalledListener);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void removePacProxyInstalledListener(@NonNull android.net.PacProxyManager.PacProxyInstalledListener);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void setCurrentProxyScriptUrl(@Nullable android.net.ProxyInfo);
+  }
+
+  public static interface PacProxyManager.PacProxyInstalledListener {
+    method public void onPacProxyInstalled(@Nullable android.net.Network, @NonNull android.net.ProxyInfo);
+  }
+
   public final class Proxy {
     method public static void setHttpProxyConfiguration(@Nullable android.net.ProxyInfo);
-  }
-
-  public final class TcpRepairWindow {
-    ctor public TcpRepairWindow(int, int, int, int, int, int);
-    field public final int maxWindow;
-    field public final int rcvWnd;
-    field public final int rcvWndScale;
-    field public final int rcvWup;
-    field public final int sndWl1;
-    field public final int sndWnd;
-  }
-
-  public final class TestNetworkInterface implements android.os.Parcelable {
-    ctor public TestNetworkInterface(@NonNull android.os.ParcelFileDescriptor, @NonNull String);
-    method public int describeContents();
-    method @NonNull public android.os.ParcelFileDescriptor getFileDescriptor();
-    method @NonNull public String getInterfaceName();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.TestNetworkInterface> CREATOR;
-  }
-
-  public class TestNetworkManager {
-    method @NonNull public android.net.TestNetworkInterface createTapInterface();
-    method @NonNull public android.net.TestNetworkInterface createTunInterface(@NonNull java.util.Collection<android.net.LinkAddress>);
-    method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
-    method public void teardownTestNetwork(@NonNull android.net.Network);
-    field public static final String TEST_TAP_PREFIX = "testtap";
   }
 
   public final class UnderlyingNetworkInfo implements android.os.Parcelable {
@@ -81,17 +82,20 @@ package android.net {
     field @NonNull public final java.util.List<java.lang.String> underlyingIfaces;
   }
 
-  public final class VpnTransportInfo implements android.os.Parcelable android.net.TransportInfo {
-    ctor public VpnTransportInfo(int);
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnTransportInfo> CREATOR;
-    field public final int type;
+  public class VpnManager {
+    field @Deprecated public static final int TYPE_VPN_LEGACY = 3; // 0x3
+    field public static final int TYPE_VPN_NONE = -1; // 0xffffffff
+    field public static final int TYPE_VPN_PLATFORM = 2; // 0x2
+    field public static final int TYPE_VPN_SERVICE = 1; // 0x1
   }
 
 }
 
 package android.os {
+
+  public final class BatteryStatsManager {
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void reportNetworkInterfaceForTransports(@NonNull String, @NonNull int[]) throws java.lang.RuntimeException;
+  }
 
   public class Binder implements android.os.IBinder {
     method public final void markVintfStability();

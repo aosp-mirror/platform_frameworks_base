@@ -522,7 +522,7 @@ public class Log {
             return "";
         }
         return Arrays.stream(packageName.split("\\."))
-                .map(s -> s.substring(0,1))
+                .map(s -> s.length() == 0 ? "" : s.substring(0, 1))
                 .collect(Collectors.joining(""));
     }
 }

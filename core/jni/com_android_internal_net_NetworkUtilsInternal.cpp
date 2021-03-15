@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <android/file_descriptor_jni.h>
+
 #include "NetdClient.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
@@ -24,9 +26,20 @@ static void android_net_utils_setAllowNetworkingForProcess(JNIEnv *env, jobject 
     setAllowNetworkingForProcess(hasConnectivity == JNI_TRUE);
 }
 
+static jboolean android_net_utils_protectFromVpn(JNIEnv *env, jobject thiz, jint socket) {
+    return (jboolean)!protectFromVpn(socket);
+}
+
+static jboolean android_net_utils_protectFromVpnWithFd(JNIEnv *env, jobject thiz, jobject javaFd) {
+    return android_net_utils_protectFromVpn(env, thiz, AFileDescriptor_getFD(env, javaFd));
+}
+
 static const JNINativeMethod gNetworkUtilMethods[] = {
         {"setAllowNetworkingForProcess", "(Z)V",
          (void *)android_net_utils_setAllowNetworkingForProcess},
+        {"protectFromVpn", "(I)Z", (void *)android_net_utils_protectFromVpn},
+        {"protectFromVpn", "(Ljava/io/FileDescriptor;)Z",
+         (void *)android_net_utils_protectFromVpnWithFd},
 };
 
 int register_com_android_internal_net_NetworkUtilsInternal(JNIEnv *env) {

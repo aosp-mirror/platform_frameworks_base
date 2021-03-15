@@ -20,11 +20,8 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.DisplayStatusCallback;
 import android.hardware.hdmi.IHdmiControlCallback;
-import android.os.RemoteException;
 import android.util.Slog;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Feature action that queries the power status of other device. This action is initiated via
@@ -40,7 +37,6 @@ final class DevicePowerStatusAction extends HdmiCecFeatureAction {
     private static final int STATE_WAITING_FOR_REPORT_POWER_STATUS = 1;
 
     private final int mTargetAddress;
-    private final List<IHdmiControlCallback> mCallbacks = new ArrayList<>();
 
     static DevicePowerStatusAction create(HdmiCecLocalDevice source,
             int targetAddress, IHdmiControlCallback callback) {
@@ -53,9 +49,8 @@ final class DevicePowerStatusAction extends HdmiCecFeatureAction {
 
     private DevicePowerStatusAction(HdmiCecLocalDevice localDevice,
             int targetAddress, IHdmiControlCallback callback) {
-        super(localDevice);
+        super(localDevice, callback);
         mTargetAddress = targetAddress;
-        addCallback(callback);
     }
 
     @Override
@@ -79,8 +74,7 @@ final class DevicePowerStatusAction extends HdmiCecFeatureAction {
         }
         if (cmd.getOpcode() == Constants.MESSAGE_REPORT_POWER_STATUS) {
             int status = cmd.getParams()[0];
-            invokeCallback(status);
-            finish();
+            finishWithCallback(status);
             return true;
         }
         return false;
@@ -93,22 +87,7 @@ final class DevicePowerStatusAction extends HdmiCecFeatureAction {
         }
         if (state == STATE_WAITING_FOR_REPORT_POWER_STATUS) {
             // Got no response from TV. Report status 'unknown'.
-            invokeCallback(HdmiControlManager.POWER_STATUS_UNKNOWN);
-            finish();
-        }
-    }
-
-    public void addCallback(IHdmiControlCallback callback) {
-        mCallbacks.add(callback);
-    }
-
-    private void invokeCallback(int result) {
-        try {
-            for (IHdmiControlCallback callback : mCallbacks) {
-                callback.onComplete(result);
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Callback failed:" + e);
+            finishWithCallback(HdmiControlManager.POWER_STATUS_UNKNOWN);
         }
     }
 }

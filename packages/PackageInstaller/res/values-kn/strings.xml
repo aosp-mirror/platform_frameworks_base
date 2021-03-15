@@ -69,7 +69,7 @@
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವಿಕೆ ಯಶಸ್ವಿಯಾಗಿಲ್ಲ."</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ಸಕ್ರಿಯ ಸಾಧನ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ ಸಕ್ರಿಯ ಸಾಧನ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ಕೆಲವು ಬಳಕೆದಾರರು ಅಥವಾ ಪ್ರೊಫೈಲ್‌ಗಳಿಗೆ ಈ ಆ್ಯಪ್‌ ಅಗತ್ಯ ಮತ್ತು ಇತರರ ಸಾಧನದಿಂದ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ಕೆಲವು ಬಳಕೆದಾರರು ಅಥವಾ ಪ್ರೊಫೈಲ್‌ಗಳಿಗೆ ಈ ಆಪ್‌ ಅಗತ್ಯ ಮತ್ತು ಇತರರ ಸಾಧನದಿಂದ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"ಈ ಆ್ಯಪ್‌ಗೆ ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌‌ನ ಅಗತ್ಯವಿದೆ ಮತ್ತು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"ಈ ಆ್ಯಪ್‌ ನಿಮ್ಮ ಸಾಧನ ನಿರ್ವಾಹಕರಿಗೆ ಅಗತ್ಯವಿದೆ ಮತ್ತು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="manage_device_administrators" msgid="3092696419363842816">"ಸಾಧನದ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>

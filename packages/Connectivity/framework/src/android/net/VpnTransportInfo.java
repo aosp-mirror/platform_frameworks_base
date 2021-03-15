@@ -42,9 +42,9 @@ public final class VpnTransportInfo implements TransportInfo, Parcelable {
             MessageUtils.findMessageNames(new Class[]{VpnManager.class}, new String[]{"TYPE_VPN_"});
 
     /** Type of this VPN. */
-    @VpnManager.VpnType public final int type;
+    public final int type;
 
-    public VpnTransportInfo(@VpnManager.VpnType int type) {
+    public VpnTransportInfo(int type) {
         this.type = type;
     }
 

@@ -19,9 +19,13 @@ package com.android.server.vcn;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+
+import android.net.ipsec.ike.IkeSessionParams;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -29,6 +33,7 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 /** Tests for VcnGatewayConnection.ConnectingState */
 @RunWith(AndroidJUnit4.class)
@@ -49,7 +54,12 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
 
     @Test
     public void testEnterStateCreatesNewIkeSession() throws Exception {
-        verify(mDeps).newIkeSession(any(), any(), any(), any(), any());
+        final ArgumentCaptor<IkeSessionParams> paramsCaptor =
+                ArgumentCaptor.forClass(IkeSessionParams.class);
+        verify(mDeps).newIkeSession(any(), paramsCaptor.capture(), any(), any(), any());
+        assertEquals(
+                TEST_UNDERLYING_NETWORK_RECORD_1.network,
+                paramsCaptor.getValue().getConfiguredNetwork());
     }
 
     @Test
@@ -110,5 +120,23 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
     @Test
     public void testSafeModeTimeoutNotifiesCallback() {
         verifySafeModeTimeoutNotifiesCallback(mGatewayConnection.mConnectingState);
+    }
+
+    @Test
+    public void testTeardown() throws Exception {
+        mGatewayConnection.teardownAsynchronously();
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        assertTrue(mGatewayConnection.isQuitting());
+    }
+
+    @Test
+    public void testNonTeardownDisconnectRequest() throws Exception {
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        assertFalse(mGatewayConnection.isQuitting());
     }
 }

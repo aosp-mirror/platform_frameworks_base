@@ -22,6 +22,7 @@ import static com.android.internal.compat.OverrideAllowedState.DISABLED_NON_TARG
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_NOT_DEBUGGABLE;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_TARGET_SDK_TOO_HIGH;
 import static com.android.internal.compat.OverrideAllowedState.LOGGING_ONLY_CHANGE;
+import static com.android.internal.compat.OverrideAllowedState.PLATFORM_TOO_OLD;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -52,6 +53,7 @@ public class OverrideValidatorImplTest {
     private static final int TARGET_SDK = 10;
     private static final int TARGET_SDK_BEFORE = 9;
     private static final int TARGET_SDK_AFTER = 11;
+    private static final int PLATFORM_SDK_VERSION = 30;
 
     @Mock
     private PackageManager mPackageManager;
@@ -61,6 +63,7 @@ public class OverrideValidatorImplTest {
     private AndroidBuildClassifier debuggableBuild() {
         AndroidBuildClassifier buildClassifier = mock(AndroidBuildClassifier.class);
         when(buildClassifier.isDebuggableBuild()).thenReturn(true);
+        when(buildClassifier.platformTargetSdk()).thenReturn(PLATFORM_SDK_VERSION);
         return buildClassifier;
     }
 
@@ -68,6 +71,7 @@ public class OverrideValidatorImplTest {
         AndroidBuildClassifier buildClassifier = mock(AndroidBuildClassifier.class);
         when(buildClassifier.isDebuggableBuild()).thenReturn(false);
         when(buildClassifier.isFinalBuild()).thenReturn(false);
+        when(buildClassifier.platformTargetSdk()).thenReturn(PLATFORM_SDK_VERSION);
         return buildClassifier;
     }
 
@@ -75,6 +79,7 @@ public class OverrideValidatorImplTest {
         AndroidBuildClassifier buildClassifier = mock(AndroidBuildClassifier.class);
         when(buildClassifier.isDebuggableBuild()).thenReturn(false);
         when(buildClassifier.isFinalBuild()).thenReturn(true);
+        when(buildClassifier.platformTargetSdk()).thenReturn(PLATFORM_SDK_VERSION);
         return buildClassifier;
     }
 
@@ -330,6 +335,26 @@ public class OverrideValidatorImplTest {
         assertThat(stateTargetSdkLessChange).isEqualTo(
                 new OverrideAllowedState(DISABLED_TARGET_SDK_TOO_HIGH, TARGET_SDK,
                                          TARGET_SDK_BEFORE));
+    }
+
+    @Test
+    public void getOverrideAllowedState_targetSdkChangeGreaterThanOsVersion_rejectOverride()
+            throws Exception {
+        final AndroidBuildClassifier buildClassifier = finalBuild();
+        CompatConfig config = CompatConfigBuilder.create(finalBuild(), mContext)
+                        .addEnabledSinceApexChangeWithId(PLATFORM_SDK_VERSION + 1, 1).build();
+        IOverrideValidator overrideValidator = config.getOverrideValidator();
+        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
+                .thenReturn(ApplicationInfoBuilder.create()
+                        .withPackageName(PACKAGE_NAME)
+                        .debuggable()
+                        .build());
+
+        OverrideAllowedState stateTargetSdkLessChange =
+                overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
+        assertThat(stateTargetSdkLessChange).isEqualTo(
+                new OverrideAllowedState(PLATFORM_TOO_OLD, -1,
+                                         PLATFORM_SDK_VERSION));
     }
 
     @Test

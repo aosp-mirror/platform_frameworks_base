@@ -148,6 +148,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     private boolean mRequestMultiFingerGestures;
 
+    private boolean mRequestTwoFingerPassthrough;
+
     boolean mRequestFilterKeyEvents;
 
     boolean mRetrieveInteractiveWindows;
@@ -323,8 +325,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 & AccessibilityServiceInfo.FLAG_SERVICE_HANDLES_DOUBLE_TAP) != 0;
         mRequestMultiFingerGestures = (info.flags
                 & AccessibilityServiceInfo.FLAG_REQUEST_MULTI_FINGER_GESTURES) != 0;
-        mRequestFilterKeyEvents = (info.flags
-                & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) != 0;
+        mRequestTwoFingerPassthrough =
+                (info.flags & AccessibilityServiceInfo.FLAG_REQUEST_2_FINGER_PASSTHROUGH) != 0;
+        mRequestFilterKeyEvents =
+                (info.flags & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) != 0;
         mRetrieveInteractiveWindows = (info.flags
                 & AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS) != 0;
         mCaptureFingerprintGestures = (info.flags
@@ -1771,6 +1775,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     public boolean isMultiFingerGesturesEnabled() {
         return mRequestMultiFingerGestures;
+    }
+
+    public boolean isTwoFingerPassthroughEnabled() {
+        return mRequestTwoFingerPassthrough;
     }
 
     @Override

@@ -71,4 +71,5 @@ oneway interface IPhoneStateListener {
     void onBarringInfoChanged(in BarringInfo barringInfo);
     void onPhysicalChannelConfigChanged(in List<PhysicalChannelConfig> configs);
     void onDataEnabledChanged(boolean enabled, int reason);
+    void onAllowedNetworkTypesChanged(in Map allowedNetworkTypeList);
 }

@@ -19,8 +19,6 @@ package android.net;
 import android.net.INetworkPolicyListener;
 import android.net.Network;
 import android.net.NetworkPolicy;
-import android.net.NetworkQuotaInfo;
-import android.net.NetworkState;
 import android.net.NetworkTemplate;
 import android.telephony.SubscriptionPlan;
 
@@ -69,9 +67,6 @@ interface INetworkPolicyManager {
     void setWifiMeteredOverride(String networkId, int meteredOverride);
 
     int getMultipathPreference(in Network network);
-
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
 
     SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage);
     void setSubscriptionPlans(int subId, in SubscriptionPlan[] plans, String callingPackage);

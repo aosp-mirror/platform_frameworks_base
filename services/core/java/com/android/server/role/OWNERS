@@ -1,5 +1,1 @@
-svetoslavganov@google.com
-zhanghai@google.com
-evanseverson@google.com
-eugenesusla@google.com
-ntmyren@google.com
+include platform/frameworks/base:/core/java/android/permission/OWNERS

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item
+    android:height="@dimen/car_touch_target_size_minus_one"
+    android:width="@dimen/car_touch_target_size_minus_one"
+    android:gravity="center">
+    <selector>
+      <item android:state_focused="true" android:state_pressed="true">
+        <shape android:shape="oval">
+          <solid android:color="#8A94CBFF"/>
+          <stroke android:width="4dp"
+              android:color="#94CBFF"/>
+        </shape>
+      </item>
+      <item android:state_focused="true">
+        <shape android:shape="oval">
+          <solid android:color="#3D94CBFF"/>
+          <stroke android:width="8dp"
+              android:color="#94CBFF"/>
+        </shape>
+      </item>
+    </selector>
+  </item>
+  <item android:gravity="center_vertical|fill_horizontal"
+      android:left="@dimen/car_switch_track_margin_size"
+      android:right="@dimen/car_switch_track_margin_size">
+    <shape
+        android:shape="rectangle"
+        android:tint="@color/switch_track_material">
+      <corners android:radius="7dp" />
+      <solid android:color="@color/white_disabled_material" />
+      <size android:height="14dp" />
+      <padding
+          android:right="@dimen/car_switch_track_margin_size"
+          android:left="@dimen/car_switch_track_margin_size"/>
+    </shape>
+  </item>
+</layer-list>

@@ -32,14 +32,14 @@
     <string name="invalid_charger" msgid="4370074072117767416">"USB ଦ୍ଵାରା ଚାର୍ଜ କରିହେବନାହିଁ। ଆପଣଙ୍କ ଡିଭାଇସ୍ ପାଇଁ ଥିବା ଚାର୍ଜର୍‌କୁ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB ଦ୍ଵାରା ଚାର୍ଜ କରିହେବନାହିଁ"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"ଆପଣଙ୍କ ଡିଭାଇସ୍ ପାଇଁ ଥିବା ଚାର୍ଜର୍‌କୁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <string name="battery_low_why" msgid="2056750982959359863">"ସେଟିଂସ୍"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଚାଲୁ କରିବେ?"</string>
+    <string name="battery_low_why" msgid="2056750982959359863">"ସେଟିଙ୍ଗ"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍ କରିବେ?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"ବ୍ୟାଟେରୀ ସେଭର୍ ବିଷୟରେ"</string>
-    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ଚାଲୁ‌ କରନ୍ତୁ"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଚାଲୁ କରନ୍ତୁ"</string>
-    <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ସେଟିଂସ୍"</string>
+    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ଅନ୍‌ କରନ୍ତୁ"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍ କରନ୍ତୁ"</string>
+    <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ସେଟିଙ୍ଗ"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"ୱାଇ-ଫାଇ"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ଅଟୋ-ରୋଟେଟ୍‌ ସ୍କ୍ରିନ୍"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ଅଟୋ-ରୋଟେଟ୍‌ ସ୍କ୍ରୀନ୍‍"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"ମ୍ୟୁଟ୍"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"ସ୍ୱତଃ"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"ବିଜ୍ଞପ୍ତି"</string>
@@ -63,12 +63,6 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USBରେ ଡିବଗ୍‍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"ସମ୍ପ୍ରତି ସାଇନ୍‍-ଇନ୍‍ କରିଥିବା ୟୁଜର୍‍ ଜଣକ ଏହି ଡିଭାଇସରେ USB ଡିବଗିଙ୍ଗ ଅନ୍‍ କରିପାରିବେ ନାହିଁ। ଏହି ବୈଶିଷ୍ଟ୍ୟ ବ୍ୟବହାର କରିବାକୁ, ପ୍ରାଥମିକ ୟୁଜର୍‍ରେ ସାଇନ୍‍-ଇନ୍‍ କରନ୍ତୁ।"</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"ଏହି ନେଟୱାର୍କରେ ୱାୟାରଲେସ୍ ଡିବଗିଂ ପାଇଁ ଅନୁମତି ଦେବେ?"</string>
-    <string name="wifi_debugging_message" msgid="5461204211731802995">"ନେଟୱାର୍କ ନାମ (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nୱାଇଫାଇ ଠିକଣା (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"ସର୍ବଦା ଏହି ନେଟୱାର୍କରେ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
-    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"ୱାୟାରଲେସ୍ ଡିବଗିଂ ପାଇଁ ଅନୁମତି ନାହିଁ"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"ଉପଯୋଗକର୍ତ୍ତା ବର୍ତ୍ତମାନ ସାଇନ୍-ଇନ୍ କରିଥିବା ଏହି ଡିଭାଇସରେ ୱାୟାରଲେସ୍ ଡିବଗିଂ ଚାଲୁ କରିପାରିବେ ନାହିଁ। ଏହି ଫିଚର୍ ବ୍ୟବହାର କରିବା ପାଇଁ ପ୍ରାଥମିକ ଉପଯୋଗକର୍ତ୍ତାରେ ସ୍ୱିଚ୍ କରନ୍ତୁ।"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB ପୋର୍ଟକୁ ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"ଆପଣଙ୍କ ଡିଭାଇସ୍‌କୁ ତରଳ ପଦାର୍ଥ ଏବଂ ଧୂଳିରୁ ସୁରକ୍ଷିତ ରଖିବା ପାଇଁ, USB ପୋର୍ଟକୁ ଅକ୍ଷମ କରାଯାଇଛି ଏବଂ ଏହା କୌଣସି ଉପକରଣ ଚିହ୍ନଟ କରିବ ନାହିଁ। \n\n ଯେତେବେଳେ USB ପୋର୍ଟ ପୁଣିି ବ୍ୟବହାର କରିବାକୁ ସୁରକ୍ଷିତ ହେବ, ସେତେବେଳେ ଆପଣଙ୍କୁ ସୂଚିତ କରାଯିବ।"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ଚାର୍ଜର୍‍ ଏବଂ ଆକ୍ସେସରିଗୁଡ଼ିକୁ ଚିହ୍ନଟ କରିବାକୁ USB ପୋର୍ଟ ସକ୍ଷମ କରାଯାଇଛି"</string>
@@ -86,13 +80,10 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ପୁଣିଥରେ ସ୍କ୍ରୀନ୍‌ଶଟ୍ ନେବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"ସୀମିତ ଷ୍ଟୋରେଜ୍‍ ସ୍ପେସ୍‍ ହେତୁ ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ ହୋଇପାରିବ ନାହିଁ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ଆପ୍‍ କିମ୍ବା ସଂସ୍ଥା ଦ୍ୱାରା ସ୍କ୍ରୀନଶଟ୍‍ ନେବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ସ୍କ୍ରିନସଟ୍ ଖାରଜ କରନ୍ତୁ"</string>
-    <string name="screenshot_preview_description" msgid="7606510140714080474">"ସ୍କ୍ରିନସଟର ପ୍ରିଭ୍ୟୁ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ସ୍କ୍ରିନ୍ ରେକର୍ଡର୍"</string>
-    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ସ୍କ୍ରିନ ରେକର୍ଡିଂର ପ୍ରକ୍ରିୟାକରଣ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ଏକ ସ୍କ୍ରି‍ନ୍‍ ରେକର୍ଡ୍‍ ସେସନ୍‍ ପାଇଁ ଚାଲୁଥିବା ବିଜ୍ଞପ୍ତି"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ରେକର୍ଡିଂ ଆରମ୍ଭ କରିବେ?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ରେକର୍ଡିଂ ସମୟରେ, Android ସିଷ୍ଟମ୍ ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା ବା ଆପଣଙ୍କ ଡିଭାଇସରେ ଚାଲୁଥିବା ଯେ କୌଣସି ସମ୍ବେଦନଶୀଳ ସୂଚନାକୁ କ୍ୟାପଚର୍ କରିପାରିବ। ଏଥିରେ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ସୂଚନା, ଫଟୋ, ମେସେଜ ଏବଂ ଅଡିଓ ଅନ୍ତର୍ଭୁକ୍ତ।"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"ରେକର୍ଡିଂ ସମୟରେ, Android ସିଷ୍ଟମ୍ ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା ବା ଆପଣଙ୍କ ଡିଭାଇସରେ ଚାଲୁଥିବା ଯେ କୌଣସି ସମ୍ବେଦନଶୀଳ ସୂଚନାକୁ କ୍ୟାପଚର୍ କରିପାରିବ। ଏହା ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ସୂଚନା, ଫଟୋ, ମେସେଜଗୁଡ଼ିକ ଏବଂ ଅଡିଓ ଅନ୍ତର୍ଭୁକ୍ତ କରେ।"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ଡିଭାଇସ୍ ଅଡିଓ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ଆପଣଙ୍କ ଡିଭାଇସରୁ ସାଉଣ୍ଡ, ଯେପରିକି ସଙ୍ଗୀତ, କଲ୍ ଏବଂ ରିଂଟୋନଗୁଡ଼ିକ"</string>
@@ -108,8 +99,10 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ବାତିଲ୍‌ କରନ୍ତୁ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ସେୟାର୍‍ କରନ୍ତୁ"</string>
+    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ଡିଲିଟ୍ କରନ୍ତୁ"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ବାତିଲ୍‌ କରିଦିଆଯାଇଛି"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ସେଭ୍‍ ହୋଇଛି, ଦେଖିବାକୁ ଟାପ୍‍ କରନ୍ତୁ"</string>
+    <string name="screenrecord_delete_description" msgid="1604522770162810570">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ଡିଲିଟ୍‍ କରିଦିଆଯାଇଛି"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ଡିଲିଟ୍‍ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ଅନୁମତି ପାଇବାରେ ଅସଫଳ ହେଲା।"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ସ୍କ୍ରିନ୍ ରେକର୍ଡିଂ ଆରମ୍ଭ କରିବାରେ ତ୍ରୁଟି"</string>
@@ -123,7 +116,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"ସ୍କ୍ରୀନ୍‌କୁ ଘୁରାନ୍ତୁ"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ଓଭରଭିଉ"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"କ୍ୟାମେରା"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ଫୋନ୍‍"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ଭଏସ୍‌ ସହାୟକ"</string>
@@ -153,21 +146,6 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ଭୁଲ ପାଟର୍ନ"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"ଭୁଲ ପାସ୍‌ୱାର୍ଡ"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"ଅନେକ ଥର ଭୁଲ ଚେଷ୍ଟା। \n <xliff:g id="NUMBER">%d</xliff:g>ସେକେଣ୍ଡରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ। <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>ଟିରୁ <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>ଟି ପ୍ରଚେଷ୍ଟା।"</string>
-    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"ଆପଣଙ୍କ ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାଟର୍ନ ପ୍ରବେଶ କଲେ, ଏହି ଡିଭାଇସର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ PIN ଲେଖିଲେ, ଏହି ଡିଭାଇସର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାସୱାର୍ଡ ଲେଖିଲେ, ଏହି ଡିଭାଇସର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାଟର୍ନ ପ୍ରବେଶ କଲେ, ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ PIN ଲେଖିଲେ, ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାସୱାର୍ଡ ଲେଖିଲେ, ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାଟର୍ନ ପ୍ରବେଶ କଲେ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଏବଂ ଏହାର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ PIN ଲେଖିଲେ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଏବଂ ଏହାର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାସୱାର୍ଡ ଲେଖିଲେ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଓ ଏହାର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ଡିଭାଇସର ଡାଟା ଡିଲିଟ୍ ହୋଇଯିବ।"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ଉପଯୋଗକର୍ତ୍ତା ଡିଲିଟ୍ ହୋଇଯିବ।"</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଏବଂ ଏହାର ଡାଟା ଡିଲିଟ୍ ହୋଇଯିବ।"</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ଟିପଚିହ୍ନ ସେନସର୍‌କୁ ଛୁଅଁନ୍ତୁ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ଟିପଚିହ୍ନ ଆଇକନ୍"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"ଆପଣଙ୍କୁ ଚିହ୍ନଟ କରୁଛି…"</string>
@@ -208,8 +186,8 @@
     <string name="accessibility_two_bars" msgid="1335676987274417121">"ଦୁଇଟି ବାର୍‍ ଅଛି।"</string>
     <string name="accessibility_three_bars" msgid="819417766606501295">"ତିନୋଟି ବାର୍‍ ଅଛି।"</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"ସିଗ୍ନାଲ୍ ଫୁଲ୍ ଅଛି।"</string>
-    <string name="accessibility_desc_on" msgid="2899626845061427845">"ଚାଲୁ।"</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"ବନ୍ଦ।"</string>
+    <string name="accessibility_desc_on" msgid="2899626845061427845">"ଅନ୍।"</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"ଅଫ୍।"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"ସଂଯୁକ୍ତ।"</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"ସଂଯୋଗ କରୁଛି।"</string>
     <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
@@ -230,17 +208,17 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"ମୋବାଇଲ୍‌ ଡାଟା ଅନ୍‍"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"ମୋବାଇଲ୍‌ ଡାଟା ବନ୍ଦ ଅଛି"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"ବ୍ୟବହୃତ ଡାଟା ପାଇଁ ସେଟ୍ ହୋଇନାହିଁ"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"ବନ୍ଦ"</string>
-    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"ବ୍ଲୁଟୁଥ ଟିଥରିଂ।"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"ଅଫ୍ ଅଛି"</string>
+    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"ବ୍ଲୁଟୂଥ୍‍ ଟିଥରିଙ୍ଗ।"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍‌।"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ଅନ୍‍।"</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"କୌଣସି SIM କାର୍ଡ ନାହିଁ।"</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"କେରିଅର୍‍ ନେଟ୍‌ୱର୍କ ବଦଳୁଛି"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"ବ୍ୟାଟେରୀ ବିବରଣୀ ଖୋଲନ୍ତୁ"</string>
-    <string name="accessibility_battery_level" msgid="5143715405241138822">"ବ୍ୟାଟେରୀ <xliff:g id="NUMBER">%d</xliff:g> ଶତକଡ଼ା।"</string>
+    <string name="accessibility_battery_level" msgid="5143715405241138822">"ବ୍ୟାଟେରୀ <xliff:g id="NUMBER">%d</xliff:g> ଶତକଡ଼ା ଅଛି।"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ବ୍ୟାଟେରୀ <xliff:g id="PERCENTAGE">%1$s</xliff:g> ଶତକଡା, ଆପଣଙ୍କର ବ୍ୟବହାରକୁ ଆଧାର କରି ପାଖାପାଖି <xliff:g id="TIME">%2$s</xliff:g> ବାକି ଅଛି"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ବ୍ୟାଟେରୀ ଚାର୍ଜ ହେଉଛି, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ଶତକଡ଼ା।"</string>
-    <string name="accessibility_settings_button" msgid="2197034218538913880">"ସିଷ୍ଟମ୍‍ ସେଟିଂସ୍।"</string>
+    <string name="accessibility_settings_button" msgid="2197034218538913880">"ସିଷ୍ଟମ୍‍ ସେଟିଙ୍ଗ।"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"ବିଜ୍ଞପ୍ତି"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"ସମସ୍ତ ବିଜ୍ଞପ୍ତି ଦେଖନ୍ତୁ"</string>
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"ବିଜ୍ଞପ୍ତି ଖାଲି କରନ୍ତୁ।"</string>
@@ -254,11 +232,10 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"ବିଜ୍ଞପ୍ତି ଖାରଜ କରାଗଲା।"</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"ବବଲ୍ ଖାରଜ କରାଯାଇଛି।"</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"ବିଜ୍ଞପ୍ତି ଶେଡ୍‍।"</string>
-    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ଦ୍ରୁତ ସେଟିଂସ୍।"</string>
+    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ଦ୍ରୁତ ସେଟିଙ୍ଗ।"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ଲକ୍‌ ସ୍କ୍ରୀନ୍‌।"</string>
-    <string name="accessibility_desc_settings" msgid="6728577365389151969">"ସେଟିଂସ୍"</string>
+    <string name="accessibility_desc_settings" msgid="6728577365389151969">"ସେଟିଙ୍ଗ"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"ସଂକ୍ଷିପ୍ତ ବିବରଣୀ"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ୱର୍କ ଲକ୍‍ ସ୍କ୍ରୀନ୍‍"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ବନ୍ଦ କରନ୍ତୁ"</string>
@@ -271,12 +248,12 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"ଏୟାର୍‌ପ୍ଲେନ୍‌ ମୋଡ୍‌ ଅନ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"ଏୟାର୍‌ପ୍ଲେନ୍‌ ମୋଡ୍‌କୁ ବନ୍ଦ କରାଯାଇଛି।"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"ଏୟାର୍‌ପ୍ଲେନ୍‌ ମୋଡ୍‌କୁ ଚାଲୁ କରାଯାଇଛି।"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବତା"</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ସମ୍ପୂର୍ଣ୍ଣ ନିରବ"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"କେବଳ ଆଲାର୍ମ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ।"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\"କୁ ବନ୍ଦ କରାଯାଇଛି।"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଚାଲୁ ଅଛି।"</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ବ୍ଲୁଟୁଥ।"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ବ୍ଲୁଟୂଥ୍‍‌।"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="3795983516942423240">"ବ୍ଲୁଟୂଥ୍‌ ଅଫ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ବ୍ଲୁଟୂଥ୍‍‍ ଅନ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="7362294657419149294">"ବ୍ଲୁଟୂଥ୍‍‌ ସଂଯୋଗ ହେଉଛି।"</string>
@@ -328,8 +305,8 @@
       <item quantity="one">ଭିତରେ ଆଉ <xliff:g id="NUMBER_0">%s</xliff:g>ଟି ଅଧିକ ବିଜ୍ଞପ୍ତି ରହିଛି।</item>
     </plurals>
     <string name="notification_summary_message_format" msgid="5158219088501909966">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"ବିଜ୍ଞପ୍ତି ସେଟିଂସ୍"</string>
-    <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"<xliff:g id="APP_NAME">%s</xliff:g> ସେଟିଂସ୍"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"ବିଜ୍ଞପ୍ତି ସେଟିଙ୍ଗ"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"<xliff:g id="APP_NAME">%s</xliff:g> ସେଟିଙ୍ଗ"</string>
     <string name="accessibility_rotation_lock_off" msgid="3880436123632448930">"ସ୍କ୍ରୀନ୍‍ ସ୍ୱଚାଳିତ ଭାବେ ବୁଲିବ।"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"ଲ୍ୟାଣ୍ଡସ୍କେପ୍‌ ଅବସ୍ଥାରେ ସ୍କ୍ରୀନ୍‍କୁ ଲକ୍‌ କରାଯାଇଛି।"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"ପୋର୍ଟ୍ରେଟ୍‍ ଅବସ୍ଥାରେ ସ୍କ୍ରୀନ୍‍କୁ ଲକ୍‌ କରାଯାଇଛି।"</string>
@@ -337,14 +314,14 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"ବର୍ତ୍ତମାନ ସ୍କ୍ରୀନ୍‌ଟି ଲ୍ୟାଣ୍ଡସ୍କେପ୍ ଦିଗରେ ଲକ୍ ଅଛି।"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"ବର୍ତ୍ତମାନ ସ୍କ୍ରୀନ୍‌ଟି ପୋର୍ଟେଟ୍ ଦିଗରେ ଲକ୍‌ ଅଛି।"</string>
     <string name="dessert_case" msgid="9104973640704357717">"ଡେଜର୍ଟ କେସ୍‌"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"ସ୍କ୍ରିନ୍‌ ସେଭର୍‌"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"ସ୍କ୍ରୀନ୍‌ ସେଭର୍‌"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ଇଥରନେଟ୍‌"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆଇକନ୍‌କୁ ସ୍ପର୍ଶ କରି ଧରିରଖନ୍ତୁ"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"କେବଳ ପ୍ରାଥମିକତା"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"କେବଳ ଆଲାର୍ମ"</string>
-    <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବତା"</string>
-    <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ବ୍ଲୁଟୁଥ"</string>
+    <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବ"</string>
+    <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ବ୍ଲୁଟୂଥ୍‍‌"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"ବ୍ଲୁଟୂଥ୍‍‌ (<xliff:g id="NUMBER">%d</xliff:g>ଟି ଡିଭାଇସ୍‌)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଫ୍"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ପେୟାର୍‍ ହୋଇଥିବା କୌଣସି ଡିଭାଇସ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -355,8 +332,8 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"ଶ୍ରବଣ ଯନ୍ତ୍ର"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ଅନ୍ ହେଉଛି…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"ଉଜ୍ଜ୍ୱଳତା"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ଅଟୋ-ରୋଟେଟ୍"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ଅଟୋ-ରୋଟେଟ୍ ସ୍କ୍ରିନ୍"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ସ୍ୱତଃ-ଘୂର୍ଣ୍ଣନ"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ସ୍କ୍ରୀନ୍‍କୁ ଅଟୋ-ରୋଟେଟ୍‌ କରନ୍ତୁ"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> ମୋଡ୍‍"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"ଘୂର୍ଣ୍ଣନ ଲକ୍‍ ହୋଇଛି"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"ପୋର୍ଟ୍ରେଟ୍"</string>
@@ -367,11 +344,11 @@
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ମିଡିଆ ଡିଭାଇସ୍‌"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"କେବଳ ଜରୁରୀକାଳୀନ କଲ୍‌"</string>
-    <string name="quick_settings_settings_label" msgid="2214639529565474534">"ସେଟିଂସ୍"</string>
+    <string name="quick_settings_settings_label" msgid="2214639529565474534">"ସେଟିଙ୍ଗ"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"ସମୟ"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"ମୁଁ"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ୟୁଜର୍‌"</string>
-    <string name="quick_settings_user_new_user" msgid="3347905871336069666">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା"</string>
+    <string name="quick_settings_user_new_user" msgid="3347905871336069666">"ନୂଆ ୟୁଜର୍‌"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"ୱାଇ-ଫାଇ"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"ସଂଯୁକ୍ତ ହୋଇନାହିଁ"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"ନେଟ୍‌ୱର୍କ ନାହିଁ"</string>
@@ -389,12 +366,12 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"ସ୍ୱଚାଳିତ"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ରଙ୍ଗ ଇନଭାର୍ଟ୍ କରନ୍ତୁ"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"ରଙ୍ଗ ସଂଶୋଧନ ମୋଡ୍‍"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"ଅଧିକ ସେଟିଂସ୍"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"ଅଧିକ ସେଟିଙ୍ଗ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ହୋଇଗଲା"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"ସଂଯୁକ୍ତ"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"କନେକ୍ଟ ରହିଛି, ବ୍ୟାଟେରୀ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"ସଂଯୋଗ କରୁଛି..."</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"ଟିଥରିଂ"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"ଟିଥରିଙ୍ଗ"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"ହଟସ୍ପଟ୍‌"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"ଅନ୍ ହେଉଛି…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"ଡାଟା ସେଭର୍‌ ଅନ୍‌ ଅଛି"</string>
@@ -430,7 +407,6 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ସ୍କ୍ରିନ୍ ରେକର୍ଡ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="media_seamless_remote_device" msgid="177033467332920464">"ଡିଭାଇସ୍"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ଆପ୍‌କୁ ବଦଳ କରିବା ପାଇଁ ସ୍ଵାଇପ୍ କରନ୍ତୁ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ଆପ୍‌ଗୁଡ଼ିକ ମଧ୍ୟରେ ଶୀଘ୍ର ବଦଳ କରିବା ପାଇଁ ଡାହାଣକୁ ଡ୍ରାଗ୍ କରନ୍ତୁ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ସଂକ୍ଷିପ୍ତ ବିବରଣୀକୁ ଟୋଗଲ୍ କରନ୍ତୁ"</string>
@@ -439,7 +415,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବାକୁ ଆଉ <xliff:g id="CHARGING_TIME">%s</xliff:g> ଅଛି"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ଚାର୍ଜ ହେଉନାହିଁ"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"ନେଟ୍‍ୱର୍କ\nମନିଟର୍‍ କରାଯାଇପାରେ"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"ସର୍ଚ୍ଚ"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ପାଇଁ ଉପରକୁ ସ୍ଲାଇଡ୍‍ କରନ୍ତୁ।"</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ପାଇଁ ବାମକୁ ସ୍ଲାଇଡ୍ କରନ୍ତୁ"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ଆଲାର୍ମ, ରିମାଇଣ୍ଡର୍‌, ଇଭେଣ୍ଟ ଏବଂ ଆପଣ ନିର୍ଦ୍ଦିଷ୍ଟ କରିଥିବା କଲର୍‌ଙ୍କ ବ୍ୟତୀତ ଆପଣଙ୍କ ଧ୍ୟାନ ଅନ୍ୟ କୌଣସି ଧ୍ୱନୀ ଏବଂ ଭାଇବ୍ରେଶନ୍‌ରେ ଆକର୍ଷଣ କରାଯିବନାହିଁ। ମ୍ୟୁଜିକ୍‍, ଭିଡିଓ ଏବଂ ଗେମ୍‌ ସମେତ ନିଜେ ଚଲାଇବାକୁ ବାଛିଥିବା ଅନ୍ୟ ସବୁକିଛି ଆପଣ ଶୁଣିପାରିବେ।"</string>
@@ -452,13 +428,13 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ଖୋଲିବା ପାଇଁ ପୁଣି ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ଖୋଲିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ପୁଣି ଚେଷ୍ଟା କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ"</string>
-    <string name="do_disclosure_with_name" msgid="2091641464065004091">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>ର ଅଟେ"</string>
+    <string name="do_disclosure_generic" msgid="2388094207542706440">"ଏହି ଡିଭାଇସ୍‌ ଆପଣଙ୍କ ସଂସ୍ଥା ଦ୍ୱାରା ପରିଚାଳିତ।"</string>
+    <string name="do_disclosure_with_name" msgid="9113122674419739611">"ଏହି ଡିଭାଇସ୍‌ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ଦ୍ୱାରା ପରିଚାଳିତ ହେଉଛି"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ଫୋନ୍‍ ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="voice_hint" msgid="7476017460191291417">"ଭଏସ୍‍ ସହାୟକ ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="camera_hint" msgid="4519495795000658637">"କ୍ୟାମେରା ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବ। ଏହାଦ୍ୱାରା ସ୍କ୍ରୀନ୍‍ ରିଡର୍‍ ମଧ୍ୟ ନୀରବ ହୋଇଯିବ।"</string>
-    <string name="interruption_level_none" msgid="219484038314193379">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବତା"</string>
+    <string name="interruption_level_none" msgid="219484038314193379">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବ"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"କେବଳ ପ୍ରାଥମିକତା"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"କେବଳ ଆଲାର୍ମ"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"ସମ୍ପୂର୍ଣ୍ଣ\nନୀରବ"</string>
@@ -472,8 +448,11 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"ୟୁଜର୍‍ ବଦଳାନ୍ତୁ, ବର୍ତ୍ତମାନର ୟୁଜର୍‍ ହେଉଛନ୍ତି <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"ବର୍ତ୍ତମାନର ୟୁଜର୍‍ ହେଉଛନ୍ତି <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"ପ୍ରୋଫାଇଲ୍ ଦେଖାନ୍ତୁ"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"ୟୁଜର୍‍ଙ୍କୁ ଯୋଡ଼ନ୍ତୁ"</string>
+    <string name="user_new_user_name" msgid="2019166282704195789">"ନୂତନ ୟୁଜର୍‍"</string>
+    <string name="guest_nickname" msgid="1863770639799615889">"ଅତିଥି"</string>
+    <string name="guest_new_guest" msgid="962155336259570156">"ଅତିଥି ଯୋଡ଼ନ୍ତୁ"</string>
+    <string name="guest_exit_guest" msgid="4030840507598850886">"ଅତିଥିଙ୍କୁ କାଢ଼ନ୍ତୁ"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ଅତିଥିଙ୍କୁ କାଢ଼ିଦେବେ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ଏହି ଅବଧିର ସମସ୍ତ ଆପ୍‌ ଓ ଡାଟା ଡିଲିଟ୍‌ ହୋଇଯିବ।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"କାଢ଼ିଦିଅନ୍ତୁ"</string>
@@ -487,7 +466,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"ୟୁଜରଙ୍କୁ ଲଗଆଉଟ୍‍ କରନ୍ତୁ"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ବର୍ତ୍ତମାନର ୟୁଜରଙ୍କୁ ଲଗଆଉଟ୍‍ କରନ୍ତୁ"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ୟୁଜରଙ୍କୁ ଲଗଆଉଟ୍‍ କରନ୍ତୁ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"ନୂତନ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରିବେ?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"ନୂତନ ୟୁଜର୍‍ ଯୋଡ଼ିବେ?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"ଜଣେ ନୂଆ ୟୁଜର୍‍ଙ୍କୁ ଯୋଡ଼ିବାବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ସ୍ଥାନ ସେଟ୍‍ କରିବାକୁ ପଡ଼ିବ। \n \n ଅନ୍ୟ ସମସ୍ତ ୟୁଜର୍‍ଙ୍କ ପାଇଁ ଯେକୌଣସି ୟୁଜର୍‍ ଆପ୍‌ଗୁଡ଼ିକୁ ଅପଡେଟ୍‌ କରିପାରିବେ।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"ଉପଯୋଗକର୍ତ୍ତା ସୀମାରେ ପହଞ୍ଚିଛି"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -497,20 +476,18 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"ୟୁଜରଙ୍କୁ ବାହାର କରିବେ?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"ଏହି ୟୁଜରଙ୍କ ସମସ୍ତ ଆପ୍‍ ଓ ଡାଟା ଡିଲିଟ୍‍ ହେବ।"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"ବାହାର କରନ୍ତୁ"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଚାଲୁ‌ ଅଛି"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍‌ ଅଛି"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"କାର୍ଯ୍ୟ ସମ୍ପାଦନ ଓ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଡାଟା କମ୍ କରନ୍ତୁ"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅଫ୍‍ କରନ୍ତୁ"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ରେ ସମସ୍ତ ସୂଚନାକୁ ଆକ୍ସେସ୍ ରହିବ ଯାହା ଆପଣଙ୍କର ସ୍କ୍ରିନ୍‌ରେ ଦେଖାଯିବ ବା ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ବେଳେ ଆପଣଙ୍କର ଡିଭାଇସ୍ ଠାରୁ ଚାଲିବ। ପାସ୍‌ୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ଫଟୋ, ମେସେଜ୍ ଏବଂ ଆପଣ ଚଲାଉଥିବା ଅଡିଓ ପରି ସୂଚନା ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ବେଳେ ଆପଣଙ୍କର ଡିଭାଇସରେ ଦେଖାଯାଉଥିବା ବା ଆପଣଙ୍କ ଡିଭାଇସରୁ ପ୍ଲେ କରାଯାଉଥିବା ସବୁ ସୂଚନାକୁ ଏହି ପ୍ରକାର୍ଯ୍ୟ ପ୍ରଦାନ କରୁଥିବା ସେବାର ଆକସେସ୍ ରହିବ। ପାସ୍‌ୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ଫଟୋ, ମେସେଜ୍ ଏବଂ ଆପଣ ଚଲାଉଥିବା ଅଡିଓ ପରି ସୂଚନା ଏଥିରେ ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ଏହି ପ୍ରକାର୍ଯ୍ୟ ପ୍ରଦାନ କରୁଥିବା ସେବା ସମସ୍ତ ସୂଚନାକୁ ଆକ୍ସେସ୍ ରହିବ ଯାହା ସ୍କ୍ରିନ୍‌ରେ ଦେଖାଯିବ ବା ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ବେଳେ ଆପଣଙ୍କର ଡିଭାଇସ୍ ଠାରୁ ଚାଲିବ। ପାସ୍‌ୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ଫଟୋ, ମେସେଜ୍ ଏବଂ ଆପଣ ଚଲାଉଥିବା ଅଡିଓ ପରି ସୂଚନା ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ଆରମ୍ଭ କରିବେ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ସହ ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ଆରମ୍ଭ କରିବେ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ସମସ୍ତ ଖାଲି କରନ୍ତୁ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ଇତିହାସ"</string>
-    <string name="notification_section_header_incoming" msgid="850925217908095197">"ନୂଆ"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"ନୀରବ"</string>
-    <string name="notification_section_header_alerting" msgid="5581175033680477651">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>
+    <string name="notification_section_header_gentle" msgid="3044910806569985386">"ନୀରବ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ସମସ୍ତ ନୀରବ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଖାଲି କରନ୍ତୁ"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ବିକଳ୍ପ ଦ୍ୱାରା ବିଜ୍ଞପ୍ତି ପଜ୍‍ ହୋଇଛି"</string>
@@ -519,21 +496,21 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"ପ୍ରୋଫାଇଲ୍ ନିରୀକ୍ଷଣ କରାଯାଇପାରେ।"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"ନେଟ୍‌ୱର୍କ ନୀରିକ୍ଷଣ କରାଯାଇପାରେ"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"ନେଟ୍‌ୱର୍କକୁ ନିରୀକ୍ଷଣ କରାଯାଇପାରେ"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ଏହି ଡିଭାଇସର ମାଲିକାନା ଆପଣଙ୍କ ସଂସ୍ଥା ପାଖରେ ଅଛି ଏବଂ ଏହା ନେଟୱାର୍କ ଟ୍ରାଫିକର ନିରୀକ୍ଷଣ କରିପାରେ"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ ଏବଂ ଏହା ନେଟୱାର୍କ ଟ୍ରାଫିକକୁ ନିରୀକ୍ଷଣ କରିପାରେ"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ ଏବଂ ଏହା <xliff:g id="VPN_APP">%1$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ ଏବଂ ଏହା <xliff:g id="VPN_APP">%2$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ ଏବଂ ଏହା VPNଗୁଡ଼ିକ ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ ଏବଂ ଏହା VPNଗୁଡ଼ିକ ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"ଆପଣଙ୍କ ସଂସ୍ଥା ଏହି ଡିଭାଇସକୁ ପରିଚାଳନା କରନ୍ତି ଏବଂ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରିପାରନ୍ତି"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ଏହି ଡିଭାଇସକୁ ପରିଚାଳନା କରନ୍ତି ଏବଂ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରନ୍ତି"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"ଡିଭାଇସ୍‌ ଆପଣଙ୍କ ସଂସ୍ଥା ଦ୍ୱାରା ପରିଚାଳିତ ଏବଂ <xliff:g id="VPN_APP">%1$s</xliff:g>ରେ ସଂଯୁକ୍ତ"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"ଡିଭାଇସ୍‌ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ଦ୍ୱାରା ପରିଚାଳିତ ଏବଂ <xliff:g id="VPN_APP">%2$s</xliff:g>ରେ ସଂଯୁକ୍ତ"</string>
+    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"ଡିଭାଇସ୍‌ ଆପଣଙ୍କ ସଂସ୍ଥା ଦ୍ୱାରା ପରିଚାଳିତ"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"ଡିଭାଇସ୍‍ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ଦ୍ୱାରା ପରିଚାଳିତ ହେଉଛି"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"ଡିଭାଇସ୍‌ ଆପଣଙ୍କ ସଂସ୍ଥା ଦ୍ୱାରା ପରିଚାଳିତ ଏବଂ VPNଗୁଡ଼ିକରେ ସଂଯୁକ୍ତ"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"ଡିଭାଇସ୍‌ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ଦ୍ୱାରା ପରିଚାଳିତ ଏବଂ VPNଗୁଡ଼ିକରେ ସଂଯୁକ୍ତ"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲରେ ଆପଣଙ୍କ ସଂସ୍ଥା ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରିପାରନ୍ତି"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲରେ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରିପାରନ୍ତି"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ନେଟୱର୍କ ନୀରିକ୍ଷଣ କରାଯାଇପାରେ"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ଏହି ଡିଭାଇସଟି VPNଗୁଡ଼ିକ ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ <xliff:g id="VPN_APP">%1$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲ୍ <xliff:g id="VPN_APP">%1$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ଏହି ଡିଭାଇସଟି <xliff:g id="VPN_APP">%1$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"ଡିଭାଇସ୍‍ VPNଗୁଡ଼ିକରେ ସଂଯୁକ୍ତ"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ <xliff:g id="VPN_APP">%1$s</xliff:g>ରେ ସଂଯୁକ୍ତ"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲ୍‍ <xliff:g id="VPN_APP">%1$s</xliff:g>ରେ ସଂଯୁକ୍ତ"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"ଡିଭାଇସ୍‍ <xliff:g id="VPN_APP">%1$s</xliff:g>ରେ ସଂଯୁକ୍ତ"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ଡିଭାଇସ୍‌ ପରିଚାଳନା"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"ପ୍ରୋଫାଇଲ୍ ନୀରିକ୍ଷଣ"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"ନେଟ୍‌ୱର୍କ ନୀରିକ୍ଷଣ"</string>
@@ -543,8 +520,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN ବିଛିନ୍ନ କରନ୍ତୁ"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ପଲିସୀ ଦେଖନ୍ତୁ"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ।\n\nଆପଣଙ୍କ IT ଆଡମିନ୍ ସେଟିଂସ୍, କର୍ପୋରେଟ୍ ଆକ୍ସେସ୍, ଆପ୍ସ, ଆପଣଙ୍କ ଡିଭାଇସ୍ ସହ ସମ୍ବନ୍ଧିତ ଡାଟା ଏବଂ ଆପଣଙ୍କ ଡିଭାଇସର ଲୋକେସନ୍ ସୂଚନାକୁ ନିରୀକ୍ଷଣ ଏବଂ ପରିଚାଳନା କରିପାରିବେ।\n\nଅଧିକ ସୂଚନା ପାଇଁ, ଆପଣଙ୍କ IT ଆଡମିନଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ।\n\nଆପଣଙ୍କ IT ଆଡମିନ୍ ସେଟିଂସ୍, କର୍ପୋରେଟ୍ ଆକ୍ସେସ୍, ଆପ୍ସ, ଆପଣଙ୍କ ଡିଭାଇସ୍ ସହ ସମ୍ବନ୍ଧିତ ଡାଟା ଏବଂ ଆପଣଙ୍କ ଡିଭାଇସର ଲୋକେସନ୍ ସୂଚନାକୁ ନିରୀକ୍ଷଣ ଏବଂ ପରିଚାଳନା କରିପାରିବେ।\n\nଅଧିକ ସୂଚନା ପାଇଁ, ଆପଣଙ୍କ IT ଆଡମିନଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <string name="monitoring_description_named_management" msgid="7424612629468754552">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ଦ୍ୱାରା ପରିଚାଳନା କରାଯାଉଛି।.\n\nଆପଣଙ୍କ ଆଡମିନ୍‍ ସେଟିଙ୍ଗ, କର୍ପୋରେଟ୍‍ ଆକ୍ସେସ୍‍, ଆପ୍‍, ଆପଣଙ୍କ ଡିଭାଇସ୍‍ ସମ୍ବନ୍ଧୀୟ ଡାଟା ଏବଂ ଆପଣଙ୍କ ଡିଭାଇସର ଲୋକେସନ୍‍ ନିରୀକ୍ଷଣ ଓ ପରିଚାଳନା କରିପାରନ୍ତି।\n\nଅଧିକ ସୂଚନା ପାଇଁ, ନିଜ ଆଡମିନଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <string name="monitoring_description_management" msgid="8081910434889677718">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ ଆପଣଙ୍କ ସଂସ୍ଥା ଦ୍ୱାରା ପରିଚାଳନା କରାଯାଉଛି।\n\nଆପଣଙ୍କ ଆଡମିନ୍‍ ସେଟିଙ୍ଗ, କର୍ପୋରେଟ୍‍ ଆକ୍ସେସ୍‍, ଆପ୍‍, ଆପଣଙ୍କ ଡିଭାଇସ୍‍ ସମ୍ବନ୍ଧୀୟ ଡାଟା ଏବଂ ଆପଣଙ୍କ ଡିଭାଇସର ଲୋକେସନ୍‍ ନିରୀକ୍ଷଣ ଓ ପରିଚାଳନା କରିପାରନ୍ତି।\n\nଅଧିକ ସୂଚନା ପାଇଁ, ନିଜ ଆଡମିନଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ଏହି ଡିଭାଇସରେ ଆପଣଙ୍କ ସଂସ୍ଥା ଏକ ସର୍ଟିଫିକେଟ୍‍ ଅଥରିଟି ଇନଷ୍ଟଲ୍‍ କରିଛନ୍ତି। ଆପଣଙ୍କ ସୁରକ୍ଷିତ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କିମ୍ବା ସଂଶୋଧନ କରାଯାଇ ପାରେ।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲରେ ଆପଣଙ୍କ ସଂସ୍ଥା ଏକ ସର୍ଟିଫିକେଟ୍‍ ଅଥରିଟି ଇନଷ୍ଟଲ୍‍ କରିଛନ୍ତି। ଆପଣଙ୍କ ସୁରକ୍ଷିତ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କିମ୍ବା ସଂଶୋଧନ କରାଯାଇ ପାରେ।"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ଏହି ଡିଭାଇସରେ ଏକ ସର୍ଟିଫିକେଟ୍‍ ଅଥରିଟି ଇନଷ୍ଟଲ୍‍ କରାଯାଇଛି। ଆପଣଙ୍କ ସୁରକ୍ଷିତ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କିମ୍ବା ସଂଶୋଧନ କରାଯାଇ ପାରେ।"</string>
@@ -560,7 +537,7 @@
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"ଆପଣ <xliff:g id="VPN_APP">%1$s</xliff:g>ରେ ସଂଯୁକ୍ତ ଅଛନ୍ତି, ଯାହା ଇମେଲ୍‍, ଆପ୍‌ ଓ ୱେବସାଇଟ୍‍ ସମେତ ଆପଣଙ୍କ ନେଟ୍‌ୱର୍କର ଗତିବିଧିକୁ ନିରୀକ୍ଷଣ କରିପାରେ।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN ସେଟିଂସ୍ ଖୋଲନ୍ତୁ"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN ସେଟିଙ୍ଗ ଖୋଲନ୍ତୁ"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"ମୁକ୍ତ ବିଶ୍ୱସ୍ତ କ୍ରୀଡେନଶିଆଲ୍‍"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"ଆପଣଙ୍କ ଆଡମିନ୍‍ ନେଟ୍‌ୱର୍କ ଲଗଇନ୍‍ କରିବା ଅନ୍‍ କରିଛନ୍ତି, ଯାହା ଆପଣଙ୍କ ଡିଭାଇସରେ ଟ୍ରାଫିକ୍‍ ନିରୀକ୍ଷଣ କରେ।\n\nଅଧିକ ସୂଚନା ପାଇଁ, ନିଜ ଆଡମିନଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
@@ -574,14 +551,13 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ଦ୍ୱାରା ପରିଚାଳନା କରାଯାଉଛି। ପ୍ରୋଫାଇଲଟି <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି, ଯାହା ଇମେଲ୍‍, ଆପ୍‌ ଓ ୱେବସାଇଟ୍‍ ସମେତ ଆପଣଙ୍କ ନେଟୱର୍କ ଗତିବିଧିକୁ ନିରୀକ୍ଷଣ କରିପାରେ।\n\nଆପଣ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>ରେ ମଧ୍ୟ ସଂଯୁକ୍ତ, ଯାହା ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ନେଟୱର୍କ ଗତିବିଧିକୁ ନିରୀକ୍ଷଣ କରିପାରେ।"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ଦ୍ୱାରା ଅନ୍‌ଲକ୍ ରହିଛି"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"ଯେତେବେଳ ପର୍ଯ୍ୟନ୍ତ ଆପଣ ମାନୁଆଲୀ ଅନଲକ୍‌ କରିନାହାନ୍ତି, ସେତେବେଳ ପର୍ଯ୍ୟନ୍ତ ଡିଭାଇସ୍‌ ଲକ୍‌ ରହିବ"</string>
-    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"ବିଜ୍ଞପ୍ତିକୁ ଶୀଘ୍ର ପ୍ରାପ୍ତ କରନ୍ତୁ"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"ଅନଲକ୍‌ କରିବା ପୁର୍ବରୁ ସେମାନଙ୍କୁ ଦେଖନ୍ତୁ"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"ନାହିଁ, ଥାଉ"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="5901885672973736563">"ବର୍ତ୍ତମାନ ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="accessibility_volume_settings" msgid="1458961116951564784">"ସାଉଣ୍ଡ ସେଟିଂସ୍"</string>
+    <string name="volume_zen_end_now" msgid="5901885672973736563">"ବର୍ତ୍ତମାନ ଅଫ୍‍ କରନ୍ତୁ"</string>
+    <string name="accessibility_volume_settings" msgid="1458961116951564784">"ସାଉଣ୍ଡ ସେଟିଙ୍ଗ"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"ବଢ଼ାନ୍ତୁ"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ସ୍ବଚାଳିତ କ୍ୟାପ୍ସନ୍ ମିଡିଆ"</string>
@@ -590,21 +566,19 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ଆଉଟପୁଟ୍ ଡିଭାଇସ୍‌କୁ ଯାଆନ୍ତୁ"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"ଆପକୁ ପିନ୍ କରାଯାଇଛି"</string>
+    <string name="screen_pinning_title" msgid="7357611095909618178">"ସ୍କ୍ରିନକୁ ପିନ୍‌ କରାଯାଇଛି"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରି ଧରିରଖନ୍ତୁ ଓ ଦେଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପାଇଁ ହୋମ୍ ଓ ବ୍ୟାକ୍ ବଟନ୍‌କୁ ଧରିରଖନ୍ତୁ।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ଆପଣ ଅନ୍‌ପିନ୍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଯାଉଥିବ। ଅନ୍‌ପିନ୍ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରି ଧରି ରଖନ୍ତୁ।"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ଆପଣ ଅନ୍‌ପିନ୍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଯାଉଥିବ। ଅନ୍‌ପିନ୍ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରନ୍ତୁ ଏବଂ ଓଭରଭ୍ୟୁକୁ ଧରିରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପର୍ଯ୍ୟନ୍ତ ହୋମ୍‌କୁ ଦାବିଧରନ୍ତୁ।"</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ଆକ୍ସେସ୍ କରାଯାଇପାରେ (ଯେପରିକି ଯୋଗାଯୋଗଗୁଡ଼ିକ ଏବଂ ଇମେଲ୍ ବିଷୟବସ୍ତୁ)।"</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ପିନ୍ କରାଯାଇଥିବା ଆପଟି ଅନ୍ୟ ଆପଗୁଡ଼ିକୁ ଖୋଲିପାରେ।"</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"ଏହି ଆପକୁ ଅନପିନ୍ କରିବା ପାଇଁ, \"ବ୍ୟାକ୍\" ଏବଂ \"ଓଭରଭିଉ\" ବଟନକୁ ସ୍ପର୍ଶ କରି ଧରି ରଖନ୍ତୁ"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ଏହି ଆପକୁ ଅନପିନ୍ କରିବାକୁ, \"ବ୍ୟାକ୍\" ଏବଂ \"ହୋମ୍\" ବଟନକୁ ସ୍ପର୍ଶ କରି ଧରି ରଖନ୍ତୁ"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ଏହି ଆପକୁ ଅନପିନ୍ କରିବାକୁ, ଉପରକୁ ସ୍ୱାଇପ୍ କରି ଧରି ରଖନ୍ତୁ"</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"ବୁଝିଗଲି"</string>
+    <string name="screen_pinning_toast" msgid="2083944237147005811">"ଏହି ସ୍କ୍ରୀନ୍‍‍କୁ ଅନପିନ୍‍ କରିବା ପାଇଁ, ବ୍ୟାକ୍ ଏବଂ ଓଭରଭ୍ୟୁ ବଟନ୍‍‌କୁ ଦାବିଧରନ୍ତୁ"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"ଏହି ସ୍କ୍ରୀନ୍‍‍କୁ ଅନପିନ୍‍ କରିବା ପାଇଁ, ବ୍ୟାକ୍ ଏବଂ ହୋମ୍ ବଟନ୍‍‌କୁ ଦାବିଧରନ୍ତୁ"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"ଏହି ସ୍କ୍ରୀନ୍‌କୁ ଅନପିନ୍ କରିବା ପାଇଁ, ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ ଏବଂ ଧରି ରଖନ୍ତୁ"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"ବୁଝିଲି"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ନାହିଁ, ଥାଉ"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"ଆପ୍ ପିନ୍ କରାଯାଇଛି"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"ଆପ୍ ଅନପିନ୍ କରାଯାଇଛି"</string>
+    <string name="screen_pinning_start" msgid="5695091877402422575">"ସ୍କ୍ରୀନ୍‌କୁ ପିନ୍‌ କରାଗଲା"</string>
+    <string name="screen_pinning_exit" msgid="5114993350662745840">"ସ୍କ୍ରୀନ୍‌ ଅନପିନ୍ ହୋଇଗଲା"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ଲୁଚାନ୍ତୁ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"ଆଗକୁ ଆପଣ ଯେତେବେଳେ ଏହି ସେଟିଙ୍ଗକୁ ଚାଲୁ କରିବେ, ଏହା ପୁଣି ଦେଖାଦେବ।"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"ଲୁଚାନ୍ତୁ"</string>
@@ -614,7 +588,7 @@
     <string name="stream_music" msgid="2188224742361847580">"ମିଡିଆ"</string>
     <string name="stream_alarm" msgid="16058075093011694">"ଆଲାର୍ମ"</string>
     <string name="stream_notification" msgid="7930294049046243939">"ବିଜ୍ଞପ୍ତି"</string>
-    <string name="stream_bluetooth_sco" msgid="6234562365528664331">"ବ୍ଲୁଟୁଥ୍‍‌"</string>
+    <string name="stream_bluetooth_sco" msgid="6234562365528664331">"ବ୍ଲୁଟୂଥ୍‍‌"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"ଡୁଆଲ୍‍ ମଲ୍ଟି ଟୋନ୍‍ ଫ୍ରିକ୍ୱେନ୍ସୀ"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="ring_toggle_title" msgid="5973120187287633224">"କଲ୍‌"</string>
@@ -628,7 +602,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। ମ୍ୟୁଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ। ଆକ୍ସେସିବିଲିଟୀ ସର୍ଭିସ୍‌ ମ୍ୟୁଟ୍‍ କରାଯାଇପାରେ।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s। ଭାଇବ୍ରେଟରେ ସେଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s। ମ୍ୟୁଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ମ୍ୟୁଟ୍"</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ମ୍ୟୁଟ୍ କରନ୍ତୁ"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ଅନ୍‍-ମ୍ୟୁଟ୍ କରନ୍ତୁ"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ଭାଇବ୍ରେଟ୍"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ଭଲ୍ୟୁମ୍ ନିୟନ୍ତ୍ରଣ"</string>
@@ -637,7 +611,7 @@
     <string name="output_calls_title" msgid="7085583034267889109">"ଫୋନ୍‍ କଲ୍‍ ଆଉଟପୁଟ୍‍"</string>
     <string name="output_none_found" msgid="5488087293120982770">"କୌଣସି ଡିଭାଇସ୍ ମିଳିଲା ନାହିଁ"</string>
     <string name="output_none_found_service_off" msgid="935667567681386368">"କୌଣସି ଡିଭାଇସ୍ ମିଳିଲା ନାହିଁ। <xliff:g id="SERVICE">%1$s</xliff:g> ଅନ୍‍ କରି ଦେଖନ୍ତୁ"</string>
-    <string name="output_service_bt" msgid="4315362133973911687">"ବ୍ଲୁଟୁଥ"</string>
+    <string name="output_service_bt" msgid="4315362133973911687">"ବ୍ଲୁଟୂଥ୍‍‌"</string>
     <string name="output_service_wifi" msgid="9003667810868222134">"ୱାଇ-ଫାଇ"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"ବ୍ଲୁଟୂଥ୍‍‌ ଓ ୱାଇ-ଫାଇ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ସିଷ୍ଟମ୍ UI ଟ୍ୟୁନର୍‍"</string>
@@ -677,14 +651,14 @@
     <string name="experimental" msgid="3549865454812314826">"ପରୀକ୍ଷାମୂଳକ"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"ବ୍ଲୁଟୂଥ୍‍‍ ଅନ୍‍ କରିବେ?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"ଆପଣଙ୍କ ଟାବଲେଟ୍‌ରେ କୀ’ବୋର୍ଡ ସଂଯୋଗ କରିବା ପାଇଁ ଆପଣଙ୍କୁ ପ୍ରଥମେ ବ୍ଲୁଟୂଥ୍‍‍ ଅନ୍‍ କରିବାକୁ ହେବ।"</string>
-    <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ଅନ୍ କରନ୍ତୁ"</string>
     <string name="show_silently" msgid="5629369640872236299">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ନିରବରେ ଦେଖାନ୍ତୁ"</string>
     <string name="block" msgid="188483833983476566">"ସମସ୍ତ ବିଜ୍ଞପ୍ତି ବ୍ଲକ୍‌ କରନ୍ତୁ"</string>
     <string name="do_not_silence" msgid="4982217934250511227">"ନିରବ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"ନିରବ କିମ୍ବା ବ୍ଲକ୍‌ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ପାୱାର୍‍ ବିଜ୍ଞପ୍ତି କଣ୍ଟ୍ରୋଲ୍‌"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ଚାଲୁ"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ବନ୍ଦ"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ଅନ୍"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ଅଫ୍"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ପାୱାର୍‍ ବିଜ୍ଞପ୍ତି କଣ୍ଟ୍ରୋଲ୍‌ରେ, ଆପଣ ଏକ ଆପ୍‍ ବିଜ୍ଞପ୍ତି ପାଇଁ 0 ରୁ 5 ଗୁରୁତ୍ୱ ସ୍ତର ସେଟ୍‍ କରିହେବେ। \n\n"<b>"ସ୍ତର 5"</b>" \n- ବିଜ୍ଞପ୍ତି ତାଲିକାର ଶୀର୍ଷରେ ଦେଖାନ୍ତୁ \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ \n- ସର୍ବଦା ପିକ୍‍ କରନ୍ତୁ \n\n"<b>"ସ୍ତର 4"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- ସର୍ବଦା ପିକ୍‍ କରନ୍ତୁ \n\n"<b>"ସ୍ତର 3"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n\n"<b>"ସ୍ତର 2"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n- କଦାପି ସାଉଣ୍ଡ ଓ ଭାଇବ୍ରେଟ୍‍ କରନ୍ତୁ ନାହିଁ \n\n"<b>"ସ୍ତର 1"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n- କଦାପି ସାଉଣ୍ଡ ଓ ଭାଇବ୍ରେଟ୍‍ କରନ୍ତୁ ନାହିଁ \n- ଲକ୍‍ ସ୍କ୍ରୀନ୍‍ ଓ ଷ୍ଟାଟସ୍‍ ବାର୍‌ରୁ ଲୁଚାନ୍ତୁ \n- ବିଜ୍ଞପ୍ତି ତାଲିକାର ନିମ୍ନରେ ଦେଖାନ୍ତୁ \n\n"<b>"ସ୍ତର 0"</b>" \n- ଆପରୁ ସମସ୍ତ ବିଜ୍ଞପ୍ତି ବ୍ଲକ୍‌ କରନ୍ତୁ"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଆପଣ ଆଉ ଦେଖିବାକୁ ପାଇବେନାହିଁ।"</string>
@@ -702,24 +676,20 @@
     <string name="inline_minimize_button" msgid="1474436209299333445">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"ନୀରବ"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"ନୀରବ ରହନ୍ତୁ"</string>
-    <string name="inline_silent_button_alert" msgid="5705343216858250354">"ଆଲର୍ଟିଂ"</string>
+    <string name="inline_silent_button_alert" msgid="5705343216858250354">"ଆଲର୍ଟ କରିବା"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"ଆଲର୍ଟ କରିବା ଜାରି ରଖନ୍ତୁ"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ବିଜ୍ଞପ୍ତି ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"ଏହି ଆପ୍‌ରୁ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଦେଖାଇବା ଜାରି ରଖିବେ?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"ନୀରବ"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"ଡିଫଲ୍ଟ"</string>
+    <string name="notification_alert_title" msgid="7629202599338071971">"ଆଲର୍ଟ କରିବା"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"ବବଲ୍"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"କୌଣସି ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ନାହିଁ"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"କୌଣସି ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ନାହିଁ ଏବଂ ବାର୍ତ୍ତାଳାପ ବିଭାଗର ନିମ୍ନରେ ଦେଖାଯାଏ"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ। <xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଡିଫଲ୍ଟ ଭାବରେ ବବଲ୍ ହୁଏ।"</string>
+    <string name="notification_channel_summary_low" msgid="7300447764759926720">"ବିନା ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍‌ରେ ଆପଣଙ୍କୁ ଫୋକସ୍ କରିବାରେ ସାହାଯ୍ୟ କରେ।"</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ମାଧ୍ୟମରେ ଆପଣଙ୍କର ଧ୍ୟାନ ଆକର୍ଷିତ କରିଥାଏ।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ଏହି ବିଷୟବସ୍ତୁ ପାଇଁ ଏକ ଭାସମାନ ସର୍ଟକଟ୍ ସହ ଆପଣଙ୍କର ଧ୍ୟାନ ଦିଅନ୍ତୁ।"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ବାର୍ତ୍ତାଳାପ ବିଭାଗର ଶୀର୍ଷରେ ଦେଖାଏ, ଫ୍ଲୋଟିଂ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ, ଲକ୍ ସ୍କ୍ରିନରେ ପ୍ରୋଫାଇଲ୍ ଛବି ଡିସପ୍ଲେ କରେ"</string>
-    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ସେଟିଂସ୍"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବାର୍ତ୍ତାଳାପ ଫିଚରଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ ନାହିଁ"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ବର୍ତ୍ତମାନ କୌଣସି ବବଲ୍ ନାହିଁ"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ବର୍ତ୍ତମାନର ଏବଂ ଖାରଜ କରାଯାଇଥିବା ବବଲଗୁଡ଼ିକ ଏଠାରେ ଦେଖାଯିବ"</string>
+    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
+    <skip />
+    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ଏଠାରେ ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଗ୍ରୁପ୍ କନଫ୍ୟୁଗର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ବିଜ୍ଞପ୍ତି ପ୍ରକ୍ସୀ ହୋଇଛି"</string>
@@ -732,12 +702,12 @@
     <string name="appops_camera_overlay" msgid="6466845606058816484">"ଏହି ଆପ୍, ଆପଣଙ୍କର ସ୍କ୍ରୀନ୍ ଉପରେ ଥିବା ଅନ୍ୟ ଆପ୍ ଉପରେ ପ୍ରଦର୍ଶିତ ହେଉଛି ଏବଂ କ୍ୟାମେରା ବ୍ୟବହାର କରୁଛି।"</string>
     <string name="appops_mic_overlay" msgid="4609326508944233061">"ଏହି ଆପ୍, ଆପଣଙ୍କର ସ୍କ୍ରୀନ୍ ଉପରେ ଥିବା ଅନ୍ୟ ଆପ୍ ଉପରେ ପ୍ରଦର୍ଶିତ ହେଉଛି ଏବଂ ମାଇକ୍ରୋଫୋନ୍ ବ୍ୟବହାର କରୁଛି।"</string>
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"ଏହି ଆପ୍, ଆପଣଙ୍କର ସ୍କ୍ରୀନ୍ ଉପରେ ଥିବା ଅନ୍ୟ ଆପ୍ ଉପରେ ପ୍ରଦର୍ଶିତ ହେଉଛି ଏବଂ ମାଇକ୍ରୋଫୋନ୍ ଓ କ୍ୟାମେରା ବ୍ୟବହାର କରୁଛି।"</string>
-    <string name="notification_appops_settings" msgid="5208974858340445174">"ସେଟିଂସ୍"</string>
+    <string name="notification_appops_settings" msgid="5208974858340445174">"ସେଟିଙ୍ଗ"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ଠିକ୍ ଅଛି"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> ପାଇଁ ବିଜ୍ଞପ୍ତି ନିୟନ୍ତ୍ରଣ ଖୋଲା ଯାଇଛି"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ପାଇଁ ବିଜ୍ଞପ୍ତି ନିୟନ୍ତ୍ରଣ ବନ୍ଦ ହୋଇଛି"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"ଏହି ଚ୍ୟାନେଲରୁ ବିଜ୍ଞପ୍ତିକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"ଅଧିକ ସେଟିଂସ୍"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"ଅଧିକ ସେଟିଙ୍ଗ"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"କଷ୍ଟମାଇଜ୍‌ କରନ୍ତୁ"</string>
     <string name="notification_done" msgid="6215117625922713976">"ହୋଇଗଲା"</string>
     <string name="inline_undo" msgid="9026953267645116526">"ପୂର୍ବସ୍ଥାନକୁ ଫେରାଇଆଣନ୍ତୁ"</string>
@@ -745,7 +715,7 @@
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ବାର୍ତ୍ତାଳାପ"</string>
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"କୌଣସି ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ବାର୍ତ୍ତାଳାପ ନାହିଁ"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"ନିରବ କରାଯାଇଛି"</string>
-    <string name="notification_conversation_unmute" msgid="2692255619510896710">"ଆଲର୍ଟିଂ"</string>
+    <string name="notification_conversation_unmute" msgid="2692255619510896710">"ଆଲର୍ଟ କରୁଛି"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"ବବଲ୍ ଦେଖାନ୍ତୁ"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"ବବଲଗୁଡ଼ିକ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"ମୂଳ ସ୍କ୍ରିନରେ ଯୋଗ କରନ୍ତୁ"</string>
@@ -817,7 +787,7 @@
     <string name="battery" msgid="769686279459897127">"ବ୍ୟାଟେରୀ"</string>
     <string name="clock" msgid="8978017607326790204">"ଘଣ୍ଟା"</string>
     <string name="headset" msgid="4485892374984466437">"ହେଡସେଟ୍‍"</string>
-    <string name="accessibility_long_click_tile" msgid="210472753156768705">"ସେଟିଂସ୍ ଖୋଲନ୍ତୁ"</string>
+    <string name="accessibility_long_click_tile" msgid="210472753156768705">"ସେଟିଙ୍ଗ ଖୋଲନ୍ତୁ"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"ହେଡଫୋନ୍‍ ସଂଯୁକ୍ତ"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"ହେଡସେଟ୍‍ ସଂଯୁକ୍ତ"</string>
     <string name="data_saver" msgid="3484013368530820763">"ଡାଟା ସେଭର୍‍"</string>
@@ -835,7 +805,7 @@
     <item msgid="2681220472659720036">"କ୍ଲିପ୍‌ବୋର୍ଡ"</item>
     <item msgid="4795049793625565683">"କୀ\'କୋଡ୍‍"</item>
     <item msgid="80697951177515644">"ଘୁରାଇବା ସୁନିଶ୍ଚିତ କରନ୍ତୁ, କୀ’ବୋର୍ଡର ଭାଷା ପରିବର୍ତ୍ତନ ସୁବିଧା"</item>
-    <item msgid="7626977989589303588">"କିଛି ନାହିଁ"</item>
+    <item msgid="7626977989589303588">"କିଛିନୁହେଁ"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="9156773083127904112">"ସାମାନ୍ୟ"</item>
@@ -853,7 +823,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"ଡାହାଣ କୀ\'କୋଡ୍‍"</string>
     <string name="left_icon" msgid="5036278531966897006">"ବାମ ଆଇକନ୍‍"</string>
     <string name="right_icon" msgid="1103955040645237425">"ଡାହାଣ ଆଇକନ୍"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"ଟାଇଲ୍ ଯୋଗ କରିବା ପାଇଁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"ଟାଇଲ୍ ଯୋଡ଼ିବା ପାଇଁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ଟାଇଲ୍‍ ପୁଣି ସଜାଇବାକୁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ବାହାର କରିବାକୁ ଏଠାକୁ ଡ୍ରାଗ୍‍ କରନ୍ତୁ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"ଆପଣଙ୍କର ଅତିକମ୍‌ରେ <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>ଟି ଟାଇଲ୍ ଆବଶ୍ୟକ"</string>
@@ -882,22 +852,21 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"ଉପର ଆଡ଼କୁ 50% କରନ୍ତୁ"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"ଉପର ଆଡ଼କୁ 30% କରନ୍ତୁ"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"ତଳ ଅଂଶର ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ଟାଇଲ୍ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ଶେଷରେ ଟାଇଲ୍ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ଟାଇଲ୍ ମୁଭ୍ କରନ୍ତୁ"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ଟାଇଲ୍ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g>କୁ ମୁଭ୍ କରନ୍ତୁ"</string>
-    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ଅବସ୍ଥିତିରେ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ଅବସ୍ଥିତି <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"ଅବସ୍ଥାନ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। ଏଡିଟ୍ କରିବାକୁ ଡବଲ୍‍-ଟାପ୍‍ କରନ୍ତୁ।"</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। ଯୋଡ଼ିବା ପାଇଁ ଡବଲ୍‍-ଟାପ୍‍ କରନ୍ତୁ।"</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ନିଅନ୍ତୁ"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ବାହାର କରିଦିଅନ୍ତୁ"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="POSITION">%2$d</xliff:g> ଅବସ୍ଥାନକୁ <xliff:g id="TILE_NAME">%1$s</xliff:g> ଯୋଡନ୍ତୁ"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="POSITION">%2$d</xliff:g> ଅବସ୍ଥାନକୁ <xliff:g id="TILE_NAME">%1$s</xliff:g> ଘୁଞ୍ଚାନ୍ତୁ"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ଦ୍ରୁତ ସେଟିଙ୍ଗ ଏଡିଟର୍।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ବିଜ୍ଞପ୍ତି: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"ସ୍ପ୍ଲିଟ୍‍-ସ୍କ୍ରୀନରେ ଆପ୍‍ କାମ କରିନପାରେ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"ଆପ୍‍ ସ୍ପ୍ଲିଟ୍‍-ସ୍କ୍ରୀନକୁ ସପୋର୍ଟ କରେ ନାହିଁ।"</string>
     <string name="forced_resizable_secondary_display" msgid="522558907654394940">"ସେକେଣ୍ଡାରୀ ଡିସପ୍ଲେରେ ଆପ୍‍ କାମ ନକରିପାରେ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"ସେକେଣ୍ଡାରୀ ଡିସପ୍ଲେରେ ଆପ୍‍ ଲଞ୍ଚ ସପୋର୍ଟ କରେ ନାହିଁ।"</string>
-    <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ସେଟିଂସ୍ ଖୋଲନ୍ତୁ।"</string>
+    <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ସେଟିଙ୍ଗ ଖୋଲନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"ଦ୍ରୁତ ସେଟିଙ୍ଗ ଖୋଲନ୍ତୁ।"</string>
-    <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ଦ୍ରୁତ ସେଟିଂସ୍ ବନ୍ଦ କରନ୍ତୁ।"</string>
+    <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ଦ୍ରୁତ ସେଟିଙ୍ଗ ବନ୍ଦ କରନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"ଆଲାର୍ମ ସେଟ୍‍।"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> ଭାବରେ ସାଇନ୍‌ ଇନ୍‌ କରିଛନ୍ତି"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"କୌଣସି ଇଣ୍ଟରନେଟ୍‌ କନେକ୍ସନ୍ ନାହିଁ"</string>
@@ -910,7 +879,7 @@
     <string name="pip_phone_expand" msgid="1424988917240616212">"ବଢ଼ାନ୍ତୁ"</string>
     <string name="pip_phone_minimize" msgid="9057117033655996059">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="pip_phone_close" msgid="8801864042095341824">"ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"ସେଟିଂସ୍"</string>
+    <string name="pip_phone_settings" msgid="5687538631925004341">"ସେଟିଙ୍ଗ"</string>
     <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"ଖାରଜ କରିବାକୁ ତଳକୁ ଟାଣନ୍ତୁ"</string>
     <string name="pip_menu_title" msgid="6365909306215631910">"ମେନୁ"</string>
     <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> \"ଛବି-ଭିତରେ-ଛବି\"ରେ ଅଛି"</string>
@@ -919,15 +888,12 @@
     <string name="pip_pause" msgid="1139598607050555845">"ପଜ୍‍ କରନ୍ତୁ"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"ପରବର୍ତ୍ତୀକୁ ଯାଆନ୍ତୁ"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"ପୂର୍ବବର୍ତ୍ତୀକୁ ଛାଡ଼ନ୍ତୁ"</string>
-    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ରିସାଇଜ୍ କରନ୍ତୁ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ଗରମ ହେତୁ ଫୋନ୍‍ ଅଫ୍‍ କରିଦିଆଗଲା"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"ଆପଣଙ୍କ ଫୋନ୍ ବର୍ତ୍ତମାନ ସାମାନ୍ୟ ରୂପେ ଚାଲୁଛି।\nଅଧିକ ସୂଚନା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ଆପଣଙ୍କ ଫୋନ୍‍ ବର୍ତ୍ତମାନ ସାମାନ୍ୟ ଅବସ୍ଥାରେ ଚାଲୁଛି"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ଆପଣଙ୍କ ଫୋନ୍‍ ବହୁତ ଗରମ ଥିଲା, ତେଣୁ ଏହାକୁ ଥଣ୍ଡା କରାଯିବାକୁ ଅଫ୍‍ କରିଦିଆଗଲା। ଆପଣଙ୍କ ଫୋନ୍‍ ବର୍ତ୍ତମାନ ସାମାନ୍ୟ ଅବସ୍ଥାରେ ଚାଲୁଛି।\n\nଆପଣଙ୍କ ଫୋନ୍‍ ଅଧିକ ଗରମ ହୋଇଯାଇପାରେ ଯଦି ଆପଣ:\n	• ରିସୋର୍ସ-ଇଣ୍ଟେନସିଭ୍‍ ଆପ୍‍ (ଯେପରିକି ଗେମିଙ୍ଗ, ଭିଡିଓ, କିମ୍ବା ନେଭିଗେସନ୍‍ ଆପ୍‍) ବ୍ୟବହାର କରନ୍ତି\n	• ବଡ ଫାଇଲ୍‍ ଡାଉନଲୋଡ୍ କିମ୍ବା ଅପଲୋଡ୍‍ କରନ୍ତି\n	• ଅଧିକ ତାପମାତ୍ରାରେ ଆପଣଙ୍କ ଫୋନ୍‍ ବ୍ୟବହାର କରନ୍ତି"</string>
-    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ଯତ୍ନ ନେବା ପାଇଁ ଷ୍ଟେପଗୁଡ଼ିକ ଦେଖନ୍ତୁ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ଫୋନ୍‍ ଗରମ ହୋଇଯାଉଛି"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"ଫୋନ୍ ଥଣ୍ଡା ହେବା ସମୟରେ କିଛି ଫିଚର୍ ଠିକ ଭାବେ କାମ କରିନଥାଏ।\nଅଧିକ ସୂଚନା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="high_temp_notif_message" msgid="163928048626045592">"ଫୋନ୍‍ ଥଣ୍ଡା ହେବା ସମୟରେ କିଛି ଫିଚର୍ ସୀମିତ ଭାବେ କାମ କରିଥାଏ"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ଆପଣଙ୍କ ଫୋନ୍‍ ସ୍ୱଚାଳିତ ଭାବେ ଥଣ୍ଡା ହେବାକୁ ଚେଷ୍ଟା କରିବ। ଆପଣ ତଥାପି ନିଜ ଫୋନ୍‍ ବ୍ୟବହାର କରିପାରିବେ, କିନ୍ତୁ ଏହା ଧୀରେ ଚାଲିପାରେ।\n\nଆପଣଙ୍କ ଫୋନ୍‍ ଥଣ୍ଡା ହୋଇଯିବାପରେ, ଏହା ସାମାନ୍ୟ ଭାବେ ଚାଲିବ।"</string>
-    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ଯତ୍ନ ନେବା ପାଇଁ ଷ୍ଟେପଗୁଡ଼ିକ ଦେଖନ୍ତୁ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ଚାର୍ଜର୍‍ ଅନ୍‍ପ୍ଲଗ୍‌ କରନ୍ତୁ"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ଏହି ଡିଭାଇସ୍ ଚାର୍ଜ କରିବାରେ ଗୋଟିଏ ସମସ୍ୟା ଅଛି। ଯେହେତୁ କେବଳ ଗରମ ହୋଇଯାଇପାରେ, ତେଣୁ ପାୱାର୍ ଆଡପ୍ଟର୍ ଅନ୍‌ପ୍ଲଗ୍‌ କରନ୍ତୁ ଏବଂ ଯତ୍ନ ନିଅନ୍ତୁ।"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"ସେବା ସମ୍ବନ୍ଧିତ ଷ୍ଟେପ୍‌ଗୁଡ଼ିକ ଦେଖନ୍ତୁ"</string>
@@ -935,9 +901,9 @@
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"ଡାହାଣ ଶର୍ଟକଟ୍‍"</string>
     <string name="lockscreen_unlock_left" msgid="1417801334370269374">"ବାମ ଶର୍ଟକଟ୍‍ ମଧ୍ୟ ଅନଲକ୍‍ କରେ"</string>
     <string name="lockscreen_unlock_right" msgid="4658008735541075346">"ଡାହାଣ ଶର୍ଟକଟ୍‍ ମଧ୍ୟ ଅନଲକ୍‍ କରେ"</string>
-    <string name="lockscreen_none" msgid="4710862479308909198">"କିଛି ନାହିଁ"</string>
+    <string name="lockscreen_none" msgid="4710862479308909198">"କିଛିନୁହେଁ"</string>
     <string name="tuner_launch_app" msgid="3906265365971743305">"<xliff:g id="APP">%1$s</xliff:g> ଲଞ୍ଚ କରନ୍ତୁ"</string>
-    <string name="tuner_other_apps" msgid="7767462881742291204">"ଅନ୍ୟ ଆପ୍ସ‍"</string>
+    <string name="tuner_other_apps" msgid="7767462881742291204">"ଅନ୍ୟାନ୍ୟ ଆପ୍‍"</string>
     <string name="tuner_circle" msgid="5270591778160525693">"ବୃତ୍ତ"</string>
     <string name="tuner_plus" msgid="4130366441154416484">"ଯୁକ୍ତ"</string>
     <string name="tuner_minus" msgid="5258518368944598545">"ବିଯୁକ୍ତ"</string>
@@ -951,7 +917,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"ସାଧାରଣ ମେସେଜ୍"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ଷ୍ଟୋରେଜ୍‌"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ହିଣ୍ଟ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"ଇନଷ୍ଟାଣ୍ଟ ଆପ୍‌"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
@@ -967,12 +933,12 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ଏକ ଆପ୍‍ (<xliff:g id="ID_1">%s</xliff:g>) ଦ୍ୱାରା \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅନ୍‌ କରାଗଲା।"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ଏକ ସ୍ୱଚାଳିତ ନିୟମ କିମ୍ବା ଆପ୍‍ ଦ୍ୱାରା \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅନ୍‍ କରାଗଲା।"</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
-    <string name="qs_dnd_keep" msgid="3829697305432866434">"Keep"</string>
+    <string name="qs_dnd_keep" msgid="3829697305432866434">"ଧରି ରଖନ୍ତୁ"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"ବଦଳାନ୍ତୁ"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"ବ୍ୟାକଗ୍ରାଉଣ୍ଡରେ ଆପ୍‍ ଚାଲୁଛି"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ବ୍ୟାଟେରୀ ଏବଂ ଡାଟା ବ୍ୟବହାର ଉପରେ ବିବରଣୀ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"ମୋବାଇଲ୍‌ ଡାଟା ବନ୍ଦ କରିବେ?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"ଡାଟା କିମ୍ବା ଇଣ୍ଟରନେଟ୍‌କୁ <xliff:g id="CARRIER">%s</xliff:g> ଦ୍ଵାରା ଆପଣଙ୍କର  ଆକ୍ସେସ୍ ରହିବ ନାହିଁ। ଇଣ୍ଟରନେଟ୍‌ କେବଳ ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ ଉପଲବ୍ଧ ହେବ।"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> ଦ୍ଵାରା ଆପଣଙ୍କର ଡାଟା କିମ୍ବା ଇଣ୍ଟରନେଟ୍‌କୁ ଆକ୍ସେସ୍ ନାହିଁ। ଇଣ୍ଟରନେଟ୍‌ କେବଳ ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ ଉପଲବ୍ଧ ହେବ।"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ଆପଣଙ୍କ କେରିଅର୍"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"ଗୋଟିଏ ଆପ୍‍ ଏକ ଅନୁମତି ଅନୁରୋଧକୁ ଦେଖିବାରେ ବାଧା ଦେଉଥିବାରୁ, ସେଟିଙ୍ଗ ଆପଣଙ୍କ ଉତ୍ତରକୁ ଯାଞ୍ଚ କରିପାରିବ ନାହିଁ।"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_2">%2$s</xliff:g> ସ୍ଲାଇସ୍‌କୁ ଦେଖାଇବା ପାଇଁ <xliff:g id="APP_0">%1$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
@@ -980,30 +946,26 @@
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- ଏହା <xliff:g id="APP">%1$s</xliff:g> ଭିତରେ କାମ କରିପାରିବ"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"ଯେକୌଣସି ଆପ୍‌ରେ ସ୍ଲାଇସ୍‌କୁ ଦେଖାଇବା ପାଇଁ <xliff:g id="APP">%1$s</xliff:g>କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
-    <string name="slice_permission_deny" msgid="6870256451658176895">"ଅଗ୍ରାହ୍ୟ କରନ୍ତୁ"</string>
+    <string name="slice_permission_deny" msgid="6870256451658176895">"ଅସ୍ଵୀକାର କରନ୍ତୁ"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍‌ ହେବାର ସମୟ ସେଟ୍‌ କରିବାକୁ ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"ବ୍ୟାଟେରୀ ସରିବାକୁ ଥିବା ସମୟରେ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"ନାହିଁ, ଥାଉ"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"ଆଗରୁ ସେଟ୍‌ କରିଥିବା ସମୟ ଅନୁସାରେ ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍‌ ହୋଇଛି"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ଚାର୍ଜ <xliff:g id="PERCENTAGE">%d</xliff:g>%%ରୁ କମ୍‌ ହେଲେ ବ୍ୟାଟେରୀ ସେଭର୍‌ ଆପେ ଅନ୍‌ ହୋଇଯିବ।"</string>
-    <string name="open_saver_setting_action" msgid="2111461909782935190">"ସେଟିଂସ୍"</string>
-    <string name="auto_saver_okay_action" msgid="7815925750741935386">"ବୁଝିଗଲି"</string>
+    <string name="open_saver_setting_action" msgid="2111461909782935190">"ସେଟିଙ୍ଗ"</string>
+    <string name="auto_saver_okay_action" msgid="7815925750741935386">"ବୁଝିଲି"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI ହିପ୍ ଡମ୍ପ୍ କରନ୍ତୁ"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> ଆପଣଙ୍କ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ବ୍ୟବହାର କରୁଛନ୍ତି।"</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ଆପ୍ଲିକେସନ୍‍ଗୁଡିକ ଆପଣଙ୍କ <xliff:g id="TYPES_LIST">%s</xliff:g> ବ୍ୟବହାର କରୁଛନ୍ତି।"</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" ଏବଂ "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"କ୍ୟାମେରା"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"ଲୋକେସନ୍‍"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"ମାଇକ୍ରୋଫୋନ୍"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"ସେନ୍ସର୍‍ଗୁଡ଼ିକ ବନ୍ଦ ଅଛି"</string>
     <string name="device_services" msgid="1549944177856658705">"ଡିଭାଇସ୍‍ ସେବାଗୁଡିକ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"କୌଣସି ଶୀର୍ଷକ ନାହିଁ"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ଏହି ଆପ୍‌କୁ ରିଷ୍ଟାର୍ଟ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ ଏବଂ ଫୁଲ୍‌ସ୍କ୍ରିନ୍‌କୁ ଯାଆନ୍ତୁ।"</string>
+    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଖୋଲନ୍ତୁ"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବବଲ୍‌ଗୁଡ଼ିକ ପାଇଁ ସେଟିଂସ୍"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"ଓଭରଫ୍ଲୋ"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"ଷ୍ଟାକରେ ପୁଣି ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବବ୍‌ଲ୍‌ଗୁଡ଼ିକୁ ଅନୁମତି ଦିଅନ୍ତୁ?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"ପରିଚାଳନା କରନ୍ତୁ"</string>
+    <string name="no_bubbles" msgid="1187859094003006292">"ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ"</string>
+    <string name="yes_bubbles" msgid="3014008797151197346">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
+    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"ମୋତେ ପରେ ପଚାରନ୍ତୁ"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g>ରୁ <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> ଏବଂ ଅଧିକ <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>ଟିରୁ <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ନିଅନ୍ତୁ"</string>
@@ -1011,82 +973,26 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ଉପର-ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ତଳ ବାମକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ତଳ ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"ବବଲ୍ ଖାରଜ କରନ୍ତୁ"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ବାର୍ତ୍ତାଳାପକୁ ବବଲ୍ କରନ୍ତୁ ନାହିଁ"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"ବବଲଗୁଡ଼ିକୁ ବ୍ୟବହାର କରି ଚାଟ୍ କରନ୍ତୁ"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"ନୂଆ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଫ୍ଲୋଟିଂ ଆଇକନ୍ କିମ୍ବା ବବଲ୍ ଭାବେ ଦେଖାଯିବ। ବବଲ୍ ଖୋଲିବାକୁ ଟାପ୍ କରନ୍ତୁ। ଏହାକୁ ମୁଭ୍ କରିବାକୁ ଟାଣନ୍ତୁ।"</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ଯେ କୌଣସି ସମୟରେ ବବଲଗୁଡ଼ିକ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ଏହି ଆପର ବବଲଗୁଡ଼ିକ ବନ୍ଦ କରିବା ପାଇଁ \'ପରିଚାଳନା କରନ୍ତୁ\' ବଟନରେ ଟାପ୍ କରନ୍ତୁ"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ବୁଝିଗଲି"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ସେଟିଂସ୍"</string>
+    <string name="bubble_dismiss_text" msgid="7071770411580452911">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ ହୋଇଛି। ପରିବର୍ତ୍ତନ କରିବା ପାଇଁ, ସେଟିଂସ୍‌କୁ ଯାଆନ୍ତୁ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ କରିବା ପାଇଁ ସେଟିଂସ୍‍କୁ ଯାଆନ୍ତୁ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ଷ୍ଟାଣ୍ଡବାଏ"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"ବାର୍ତ୍ତାଳାପ ପ୍ରାଥମିକତାରେ ସେଟ୍ କରାଯାଇଛି"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ପ୍ରାଥମିକତା ଦିଆଯାଇଥିବା ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଏଠାରେ ଦେଖାଯିବ:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"ବାର୍ତ୍ତାଳାପ ବିଭାଗର ଶୀର୍ଷରେ ଦେଖାନ୍ତୁ"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ଲକ୍ ସ୍କ୍ରିନରେ ପ୍ରୋଫାଇଲ୍ ଛବି ଦେଖାନ୍ତୁ"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ଆପଗୁଡ଼ିକ ଉପରେ ଫ୍ଲୋଟିଂ ବବଲ୍ ପରି ଦେଖାଯିବ"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\' ମୋଡରେ ବାଧା"</string>
-    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ବୁଝିଗଲି"</string>
-    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ସେଟିଂସ୍"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ଓଭର୍‌ଲେ ୱିଣ୍ଡୋ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"ଆପଣଙ୍କ ସଂଯୁକ୍ତ ଡିଭାଇସଗୁଡ଼ିକ ପାଇଁ ନିୟନ୍ତ୍ରଣ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
-    <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ଆପଣଙ୍କ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ କରିବାକୁ ପାୱାର ବଟନକୁ ଧରି ରଖନ୍ତୁ"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଯୋଗ କରିବାକୁ ଆପ୍ ବାଛନ୍ତୁ"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g>ଟି ନିୟନ୍ତ୍ରଣ ଯୋଗ କରାଯାଇଛି।</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g>ଟି ନିୟନ୍ତ୍ରଣ ଯୋଗ କରାଯାଇଛି।</item>
+    <string name="quick_controls_title" msgid="525285759614231333">"ଦ୍ରୁତ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
+    <string name="controls_providers_title" msgid="8844124515157926071">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="controls_providers_subtitle" msgid="8187768950110836569">"କେଉଁ ଆପରୁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଯୋଗ କରିବେ ତାହା ଚୟନ କରନ୍ତୁ"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g>ଟି ବର୍ତ୍ତମାନର ପସନ୍ଦ।</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g>ଟି ବର୍ତ୍ତମାନର ପସନ୍ଦ।</item>
     </plurals>
-    <string name="controls_removed" msgid="3731789252222856959">"କାଢ଼ି ଦିଆଯାଇଛି"</string>
-    <string name="accessibility_control_favorite" msgid="8694362691985545985">"ପସନ୍ଦ କରାଯାଇଛି"</string>
-    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ପସନ୍ଦ କରାଯାଇଛି, ସ୍ଥିତି <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ନାପସନ୍ଦ କରାଯାଇଛି"</string>
-    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"ପସନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ନାପସନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> ସ୍ଥିତିକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ପାୱାର ମେନୁରୁ ଆକ୍ସେସ୍ କରିବାକୁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ବାଛନ୍ତୁ"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ପୁଣି ସଜାଇବାକୁ ସେଗୁଡ଼ିକୁ ଧରି ଟାଣନ୍ତୁ"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"ସମସ୍ତ ନିୟନ୍ତ୍ରଣ କାଢ଼ି ଦିଆଯାଇଛି"</string>
-    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ପରିବର୍ତ୍ତନଗୁଡ଼ିକ ସେଭ୍ କରାଯାଇନାହିଁ"</string>
-    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"ଅନ୍ୟ ଆପ୍ ଦେଖନ୍ତୁ"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଲୋଡ୍ କରାଯାଇପାରିଲା ନାହିଁ। ଆପ୍ ସେଟିଂସ୍ ପରିବର୍ତ୍ତନ ହୋଇନାହିଁ ବୋଲି ନିଶ୍ଚିତ କରିବାକୁ <xliff:g id="APP">%s</xliff:g> ଆପ୍ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
-    <string name="controls_favorite_load_none" msgid="7687593026725357775">"ସୁସଙ୍ଗତ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ଅନ୍ୟ"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକରେ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="controls_dialog_ok" msgid="2770230012857881822">"ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ଦ୍ଵାରା ପ୍ରସ୍ତାବିତ"</string>
-    <string name="controls_dialog_confirmation" msgid="586517302736263447">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଅପଡେଟ୍ କରାଯାଇଛି"</string>
-    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PINରେ ଅକ୍ଷର କିମ୍ୱା ପ୍ରତୀକଗୁଡ଼ିକ ଥାଏ"</string>
-    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ଯାଞ୍ଚ କରନ୍ତୁ"</string>
-    <string name="controls_pin_wrong" msgid="6162694056042164211">"ଭୁଲ PIN"</string>
-    <string name="controls_pin_verifying" msgid="3755045989392131746">"ଯାଞ୍ଚ କରାଯାଉଛି…"</string>
-    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN ଲେଖନ୍ତୁ"</string>
-    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"ଅନ୍ୟ ଏକ PIN ଚେଷ୍ଟା କରି ଦେଖନ୍ତୁ"</string>
-    <string name="controls_confirmation_confirming" msgid="2596071302617310665">"ସୁନିଶ୍ଚିତ କରାଯାଉଛି…"</string>
-    <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> ପାଇଁ ପରିବର୍ତ୍ତନ ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
-    <string name="controls_structure_tooltip" msgid="4355922222944447867">"ଅଧିକ ଦେଖିବାକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
-    <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ସୁପାରିଶଗୁଡ଼ିକ ଲୋଡ୍ କରାଯାଉଛି"</string>
-    <string name="controls_media_title" msgid="1746947284862928133">"ମିଡିଆ"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"ବର୍ତ୍ତମାନର ସେସନ୍ ଲୁଚାନ୍ତୁ।"</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ଖାରଜ କରନ୍ତୁ"</string>
-    <string name="controls_media_resume" msgid="1933520684481586053">"ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ"</string>
-    <string name="controls_media_settings_button" msgid="5815790345117172504">"ସେଟିଂସ୍"</string>
-    <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
-    <string name="controls_error_retryable" msgid="864025882878378470">"ତ୍ରୁଟି, ପୁଣି ଚେଷ୍ଟା କରୁଛି…"</string>
-    <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳିଲା ନାହିଁ"</string>
-    <string name="controls_error_removed_title" msgid="1207794911208047818">"ନିୟନ୍ତ୍ରଣ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>କୁ ଆକ୍ସେସ୍ କରିହେଲା ନାହିଁ। ନିୟନ୍ତ୍ରଣ ଏବେ ବି ଉପଲବ୍ଧ ଅଛି ଏବଂ ଆପ୍ ସେଟିଂସ୍ ବଦଳାଯାଇ ନାହିଁ ବୋଲି ସୁନିଶ୍ଚିତ କରିବାକୁ <xliff:g id="APPLICATION">%2$s</xliff:g> ଆପକୁ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
-    <string name="controls_open_app" msgid="483650971094300141">"ଆପ୍ ଖୋଲନ୍ତୁ"</string>
-    <string name="controls_error_generic" msgid="352500456918362905">"ସ୍ଥିତି ଲୋଡ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <string name="controls_error_failed" msgid="960228639198558525">"ତ୍ରୁଟି ହୋଇଛି, ପୁଣି ଚେଷ୍ଟା କର"</string>
-    <string name="controls_in_progress" msgid="4421080500238215939">"ପ୍ରଗତିରେ ଅଛି"</string>
-    <string name="controls_added_tooltip" msgid="4842812921719153085">"ନୂଆ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଦେଖିବା ପାଇଁ ପାୱାର ବଟନକୁ ଧରି ରଖନ୍ତୁ"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ସମ୍ପାଦନ କରନ୍ତୁ"</string>
+    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"ଶୀଘ୍ର ଆକ୍ସେସ୍ ପାଇଁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଚୟନ କରନ୍ତୁ"</string>
+    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
+    <skip />
+    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <skip />
 </resources>

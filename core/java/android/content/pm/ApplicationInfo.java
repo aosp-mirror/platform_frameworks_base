@@ -38,6 +38,8 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Parcelling;
+import com.android.internal.util.Parcelling.BuiltIn.ForBoolean;
 import com.android.server.SystemConfig;
 
 import java.lang.annotation.Retention;
@@ -56,6 +58,8 @@ import java.util.UUID;
  * &lt;application&gt; tag.
  */
 public class ApplicationInfo extends PackageItemInfo implements Parcelable {
+    private static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
+
     /**
      * Default task affinity of all activities in this application. See 
      * {@link ActivityInfo#taskAffinity} for more information.  This comes 
@@ -1336,6 +1340,51 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     private @GwpAsanMode int gwpAsanMode;
 
     /**
+     * Default (unspecified) setting of Memtag.
+     */
+    public static final int MEMTAG_DEFAULT = -1;
+
+    /**
+     * Do not enable Memtag in this application or process.
+     */
+    public static final int MEMTAG_OFF = 0;
+
+    /**
+     * Enable Memtag in Async mode in this application or process.
+     */
+    public static final int MEMTAG_ASYNC = 1;
+
+    /**
+     * Enable Memtag in Sync mode in this application or process.
+     */
+    public static final int MEMTAG_SYNC = 2;
+
+    /**
+     * These constants need to match the values of memtagMode in application manifest.
+     * @hide
+     */
+    @IntDef(prefix = {"MEMTAG_"}, value = {
+            MEMTAG_DEFAULT,
+            MEMTAG_OFF,
+            MEMTAG_ASYNC,
+            MEMTAG_SYNC,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MemtagMode {}
+
+    /**
+     * Indicates if the application has requested Memtag to be enabled, disabled, or left
+     * unspecified. Processes can override this setting.
+     */
+    private @MemtagMode int memtagMode;
+
+    /**
+     * Enable automatic zero-initialization of native heap memory allocations.
+     */
+    @Nullable
+    private Boolean nativeHeapZeroInit;
+
+    /**
      * Represents the default policy. The actual policy used will depend on other properties of
      * the application, e.g. the target SDK version.
      * @hide
@@ -1479,6 +1528,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             if (gwpAsanMode != GWP_ASAN_DEFAULT) {
                 pw.println(prefix + "gwpAsanMode=" + gwpAsanMode);
             }
+            if (memtagMode != MEMTAG_DEFAULT) {
+                pw.println(prefix + "memtagMode=" + memtagMode);
+            }
+            if (nativeHeapZeroInit != null) {
+                pw.println(prefix + "nativeHeapZeroInit=" + nativeHeapZeroInit);
+            }
         }
         super.dumpBack(pw, prefix);
     }
@@ -1579,6 +1634,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
             if (gwpAsanMode != GWP_ASAN_DEFAULT) {
                 proto.write(ApplicationInfoProto.Detail.ENABLE_GWP_ASAN, gwpAsanMode);
+            }
+            if (memtagMode != MEMTAG_DEFAULT) {
+                proto.write(ApplicationInfoProto.Detail.ENABLE_MEMTAG, memtagMode);
+            }
+            if (nativeHeapZeroInit != null) {
+                proto.write(ApplicationInfoProto.Detail.NATIVE_HEAP_ZERO_INIT, nativeHeapZeroInit);
             }
             proto.end(detailToken);
         }
@@ -1690,6 +1751,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         hiddenUntilInstalled = orig.hiddenUntilInstalled;
         zygotePreloadName = orig.zygotePreloadName;
         gwpAsanMode = orig.gwpAsanMode;
+        memtagMode = orig.memtagMode;
+        nativeHeapZeroInit = orig.nativeHeapZeroInit;
     }
 
     public String toString() {
@@ -1774,6 +1837,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(hiddenUntilInstalled ? 1 : 0);
         dest.writeString8(zygotePreloadName);
         dest.writeInt(gwpAsanMode);
+        dest.writeInt(memtagMode);
+        sForBoolean.parcel(nativeHeapZeroInit, dest, parcelableFlags);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1855,6 +1920,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         hiddenUntilInstalled = source.readInt() != 0;
         zygotePreloadName = source.readString8();
         gwpAsanMode = source.readInt();
+        memtagMode = source.readInt();
+        nativeHeapZeroInit = sForBoolean.unparcel(source);
     }
 
     /**
@@ -2237,6 +2304,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** {@hide} */ public void setBaseResourcePath(String baseResourcePath) { publicSourceDir = baseResourcePath; }
     /** {@hide} */ public void setSplitResourcePaths(String[] splitResourcePaths) { splitPublicSourceDirs = splitResourcePaths; }
     /** {@hide} */ public void setGwpAsanMode(@GwpAsanMode int value) { gwpAsanMode = value; }
+    /** {@hide} */ public void setMemtagMode(@MemtagMode int value) { memtagMode = value; }
+    /** {@hide} */ public void setNativeHeapZeroInit(@Nullable Boolean value) { nativeHeapZeroInit = value; }
 
     /** {@hide} */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -2250,4 +2319,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** {@hide} */ public String[] getSplitResourcePaths() { return splitPublicSourceDirs; }
     @GwpAsanMode
     public int getGwpAsanMode() { return gwpAsanMode; }
+    @MemtagMode
+    public int getMemtagMode() { return memtagMode; }
+    @Nullable
+    public Boolean isNativeHeapZeroInit() { return nativeHeapZeroInit; }
 }

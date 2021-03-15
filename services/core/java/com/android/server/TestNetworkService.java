@@ -32,16 +32,14 @@ import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkProvider;
-import android.net.NetworkStack;
 import android.net.RouteInfo;
-import android.net.StringNetworkSpecifier;
 import android.net.TestNetworkInterface;
+import android.net.TestNetworkSpecifier;
 import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -51,6 +49,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.NetworkStackConstants;
+import com.android.net.module.util.PermissionUtils;
 
 import java.io.UncheckedIOException;
 import java.net.Inet4Address;
@@ -69,7 +68,6 @@ class TestNetworkService extends ITestNetworkManager.Stub {
     @NonNull private static final AtomicInteger sTestTunIndex = new AtomicInteger();
 
     @NonNull private final Context mContext;
-    @NonNull private final INetworkManagementService mNMS;
     @NonNull private final INetd mNetd;
 
     @NonNull private final HandlerThread mHandlerThread;
@@ -82,19 +80,22 @@ class TestNetworkService extends ITestNetworkManager.Stub {
     private static native int jniCreateTunTap(boolean isTun, @NonNull String iface);
 
     @VisibleForTesting
-    protected TestNetworkService(
-            @NonNull Context context, @NonNull INetworkManagementService netManager) {
+    protected TestNetworkService(@NonNull Context context) {
         mHandlerThread = new HandlerThread("TestNetworkServiceThread");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
 
         mContext = Objects.requireNonNull(context, "missing Context");
-        mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
         mNetd = Objects.requireNonNull(NetdService.getInstance(), "could not get netd instance");
         mCm = mContext.getSystemService(ConnectivityManager.class);
         mNetworkProvider = new NetworkProvider(mContext, mHandler.getLooper(),
                 TEST_NETWORK_PROVIDER_NAME);
-        mCm.registerNetworkProvider(mNetworkProvider);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mCm.registerNetworkProvider(mNetworkProvider);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -246,7 +247,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED);
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
-        nc.setNetworkSpecifier(new StringNetworkSpecifier(iface));
+        nc.setNetworkSpecifier(new TestNetworkSpecifier(iface));
         nc.setAdministratorUids(administratorUids);
         if (!isMetered) {
             nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
@@ -324,7 +325,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         try {
             final long token = Binder.clearCallingIdentity();
             try {
-                NetworkStack.checkNetworkStackPermission(mContext);
+                PermissionUtils.enforceNetworkStackPermission(mContext);
                 NetdUtils.setInterfaceUp(mNetd, iface);
             } finally {
                 Binder.restoreCallingIdentity(token);

@@ -138,6 +138,24 @@ import java.util.List;
  *     }
  * }
  * }
+ *
+ * </pre>
+ * <p id="companionInCallService">
+ * <h3>Access to InCallService for Wearable Devices</h3>
+ * <ol>
+ * If your app is a third-party companion app and wants to access InCallService APIs, what your
+ * app could do are:
+ * <p>
+ *   <ol>
+ *     <li> Declare MANAGE_ONGOING_CALLS permission in your manifest
+ *     <li> Associate with a physical wearable device via the
+ *          {@link android.companion.CompanionDeviceManager} API as a companion app. See:
+ *          https://developer.android.com/guide/topics/connectivity/companion-device-pairing
+ *     <li> Implement this InCallService with BIND_INCALL_SERVICE permission
+ *   </ol>
+ * </ol>
+ * <p>
+ *
  * </pre>
  * <p id="incomingCallNotification">
  * <h3>Showing the Incoming Call Notification</h3>

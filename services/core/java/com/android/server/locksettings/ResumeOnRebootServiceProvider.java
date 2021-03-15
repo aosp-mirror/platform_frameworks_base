@@ -136,7 +136,7 @@ public class ResumeOnRebootServiceProvider {
         }
 
         /** Bind to the service */
-        public void bindToService(long timeOut) throws TimeoutException {
+        public void bindToService(long timeOut) throws RemoteException, TimeoutException {
             if (mBinder == null || !mBinder.asBinder().isBinderAlive()) {
                 CountDownLatch connectionLatch = new CountDownLatch(1);
                 Intent intent = new Intent();
@@ -210,27 +210,25 @@ public class ResumeOnRebootServiceProvider {
 
         private void throwTypedException(
                 ParcelableException exception)
-                throws IOException {
-            if (exception.getCause() instanceof IOException) {
+                throws IOException, RemoteException {
+            if (exception != null && exception.getCause() instanceof IOException) {
                 exception.maybeRethrow(IOException.class);
-            } else if (exception.getCause() instanceof IllegalStateException) {
-                exception.maybeRethrow(IllegalStateException.class);
             } else {
-                // This should not happen. Wrap the cause in IllegalStateException so that it
-                // doesn't disrupt the exception handling
-                throw new IllegalStateException(exception.getCause());
+                // Wrap the exception and throw it as a RemoteException.
+                throw new RemoteException(TAG + " wrap/unwrap failed", exception,
+                        true /* enableSuppression */, true /* writableStackTrace */);
             }
         }
 
         private void waitForLatch(CountDownLatch latch, String reason, long timeOut)
-                throws TimeoutException {
+                throws RemoteException, TimeoutException {
             try {
                 if (!latch.await(timeOut, TimeUnit.SECONDS)) {
                     throw new TimeoutException("Latch wait for " + reason + " elapsed");
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new IllegalStateException("Latch wait for " + reason + " interrupted");
+                throw new RemoteException("Latch wait for " + reason + " interrupted");
             }
         }
     }

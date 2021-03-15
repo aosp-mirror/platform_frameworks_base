@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP тохируулга амжилтгүй"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Сүлжээний чанар муу байгаа тул холбогдож чадсангүй"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi холболт амжилтгүй"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Баталгаажуулалтын асуудал"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Гэрчлэлийн асуудал"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Холбогдож чадсангүй"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'-д холбогдож чадсангүй"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Нууц үгийг шалгаад дахин оролдоно уу"</string>
@@ -70,7 +70,7 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Хослуулж байна…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Холбогдсон (утас байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Холбогдсон (медиа байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Холбогдсон (мессежийн хандалт байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Холбогдсон (зурвасын хандалт байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Холбогдсон (утас эсвэл медиа байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Холбогдсон, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Холбогдсон (утас байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -206,13 +206,13 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB дебаг"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB холбодсон үеийн согог засах горим"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB дебагын зөвшөөрлийг хураах"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Wireless debugging"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Утасгүй алдаа засах"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi холбогдсон үед дебаг хийх горим"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Алдаа"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"Wireless debugging"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Боломжтой төхөөрөмжүүдийг харах болох ашиглахын тулд wireless debugging-г асаана уу"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR кодоор төхөөрөмжийг хослуул"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR кодын сканнер ашиглан шинэ төхөөрөмжүүдийг хослуулна уу"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Утасгүй алдаа засах"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Боломжтой төхөөрөмжүүдийг харах болох ашиглахын тулд утасгүй алдаа засахыг асаана уу"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Хурдан хариу үйлдлийн кодоор төхөөрөмжийг хослуул"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Хурдан хариу үйлдлийн кодын сканнерыг ашиглан шинэ төхөөрөмжүүдийг хослуулна уу"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Хослуулах кодоор төхөөрөмжийг хослуулна уу"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Зургаан оронтой кодыг ашиглан шинэ төхөөрөмжүүдийг хослуулна уу"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Хослуулсан төхөөрөмжүүд"</string>
@@ -226,13 +226,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi хослуулах код"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Хослуулалт амжилтгүй боллоо"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Төхөөрөмжийг ижил сүлжээнд холбосон эсэхийг шалгана уу."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Хурдан хариу үйлдлийн кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Төхөөрөмжийг хослуулж байна…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Төхөөрөмжийг хослуулж чадсангүй. QR код буруу эсвэл төхөөрөмжийг ижил сүлжээнд холбоогүй байна."</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Төхөөрөмжийг хослуулж чадсангүй. Хурдан хариу үйлдлийн код буруу эсвэл төхөөрөмжийг ижил сүлжээнд холбоогүй байна."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP хаяг ба порт"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR кодыг скан хийх"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi сүлжээнд холбогдоно уу"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Хурдан хариу үйлдлийн кодыг скан хийх"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Хурдан хариу үйлдлийн кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, дебаг хийх, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Алдаа мэдээлэх товчлол"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Цэсэнд алдааны мэдэгдэл авахад зориулсан товчийг харуулах"</string>
@@ -251,7 +250,6 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Утасгүй дэлгэцийн сертификат"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi дэлгэрэнгүй лог-г идэвхжүүлэх"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi скан бууруулалт"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"MAC-г санамсаргүй байдлаар Wi‑Fi‑н сайжруулалттай эмхлэх"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобайл дата байнга идэвхтэй"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Модем болгох техник хангамжийн хурдасгуур"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Нэргүй Bluetooth төхөөрөмжийг харуулах"</string>
@@ -283,11 +281,10 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Утасгүй дэлгэцийн сертификатын сонголтыг харуулах"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi лог-н түвшинг нэмэгдүүлэх, Wi‑Fi Сонгогч дээрх SSID-д ногдох RSSI-г харуулах"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батарей зарцуулалтыг бууруулж, сүлжээний гүйцэтгэлийг сайжруулдаг"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Энэ горимыг идэхвжүүлсэн үед энэ төхөөрөмжийг MAC-н санамсаргүй байдлаар эмхлэх явцыг идэвхжүүлсэн сүлжээнд холбогдох бүрд үүний MAC хаягийг өөрчилж болзошгүй."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Хязгаартай"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Хязгааргүй"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Логгерын буферын хэмжээ"</string>
-    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Лог буфер бүрд ногдох логгерын хэмжээг сонгоно уу"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Лог буфер бүрт ногдох логгерын хэмжээг сонгоно уу"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Нэвтрэгчийн тогтмол санг устгах уу?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Бид байнгын логоор хянаагүй үед таны төхөөрөмжтэй холбоотой нэвтрэгч өгөгдлийг устгах шаардлагатай."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Төхөөрөмжид тогтмол нэвтрэгчийн өгөгдлийн сан"</string>
@@ -301,8 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Модем болгох техник хангамжийн хурдасгуурыг боломжтой тохиолдолд ашиглах"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB дебаг хийхийг зөвшөөрөх үү?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB дебаг нь зөвхөн хөгжүүлэлтийн зорилготой. Үүнийг өөрийн компьютер болон төхөөрөмжийн хооронд өгөгдөл хуулах, өөрийн төхөөрөмж дээр мэдэгдэлгүйгээр аппликейшн суулгах, лог датаг унших зэрэгт ашиглаж болно."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Wireless debugging-г зөвшөөрөх үү?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Wireless debugging нь зөвхөн хөгжүүлэлтийн зориулалттай. Үүнийг компьютер болон төхөөрөмж хооронд өгөгдөл хуулах, төхөөрөмждөө мэдэгдэлгүйгээр аппууд суулгах болон лог өгөгдлийг унших зэрэгт ашиглана уу."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Утасгүй алдаа засахыг зөвшөөрөх үү?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Утасгүй алдаа засах нь зөвхөн хөгжүүлэлтийн зориулалттай. Үүнийг компьютер болон төхөөрөмж хооронд өгөгдөл хуулах, төхөөрөмждөө мэдэгдэлгүйгээр аппууд суулгах болон лог өгөгдлийг унших зэрэгт ашиглана уу."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Таны өмнө нь зөвшөөрөл өгсөн бүх компьютерээс USB дебаг хандалтыг нь хураах уу?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Хөгжлийн тохиргоог зөвшөөрөх үү?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Эдгээр тохиргоо нь зөвхөн хөгжүүлэлтэд ашиглах зорилготой. Эдгээр нь таны төхөөрөмж буюу түүн дээрх аппликейшнүүдийг эвдрэх, буруу ажиллах шалтгаан нь болж болно."</string>
@@ -311,7 +308,6 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Нэргүй Bluetooth төхөөрөмжийг (зөвхөн MAC хаяг) харуулна"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Хэт чанга дуугаралт эсвэл муу тохиргоо зэрэг алсын зайн төхөөрөмжийн дуугаралттай холбоотой асуудлын үед Bluetooth-ийн үнэмлэхүй дууны түвшинг идэвхгүй болго."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche онцлогийн өрөлтийг идэвхжүүлдэг."</string>
-    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Сайжруулсан холболтын онцлогийг идэвхжүүлдэг."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локал терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Локал суурьт хандалт хийх боломж олгодог терминалын апп-г идэвхжүүлэх"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP шалгах"</string>
@@ -358,8 +354,6 @@
     <string name="track_frame_time" msgid="522674651937771106">"Профайл HWUI-н буулгалт"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU дебаг хийх давхаргыг идэвхжүүлэх"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дебаг хийх аппад GPU дебаг хийх давхарга ачааллахыг зөвшөөрөх"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Нийлүүлэгчийн дэлгэрэнгүй логийг идэвхжүүлэх"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Төхөөрөмжийн тодорхойосон нийлүүлэгчийн нэвтрэх үеийн алдааны нэмэлт мэдээг оруулах бөгөөд энэ нь хувийн мэдээлэл агуулж, батарейг илүү ашиглах болон/эсвэл хадгалах сан илүү ашиглаж болзошгүй."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Цонхны дүрс амилуулалтын далайц"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Шилжилтийн дүрс амилуулалтын далайц"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Дүрс амилуулалт үргэлжлэх далайц"</string>
@@ -418,7 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномаль (улаан-ногоон)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомаль (цэнхэр-шар)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Өнгө тохируулах"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Өнгө тохируулга нь танд төхөөрөмж дээрээ өнгө хэрхэн харагдахыг тохируулах боломжийг олгодог"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Өнгөний залруулга нь өнгө ялгадаггүй хүмүүст өнгийг илүү оновчтой харахад тусалдаг"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Давхарласан <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ойролцоогоор <xliff:g id="TIME_REMAINING">%1$s</xliff:g> үлдсэн"</string>
@@ -432,11 +426,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> хүртэл барих ёстой (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> хүртэл барих ёстой"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> хүртэл"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Батарейн цэнэг <xliff:g id="TIME">%1$s</xliff:g> гээд дуусаж болзошгүй"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага үлдсэн"</string>
-    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их үлдсэн"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"<xliff:g id="TIME">%1$s</xliff:g>-с хойш батарейн ажиллах хугацааг сунгах"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага хугацаа үлдсэн"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага хугацаа үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их хугацаа үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их хугацаа үлдсэн"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Утас удахгүй унтарч болзошгүй"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Таблет удахгүй унтарч болзошгүй"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Төхөөрөмж удахгүй унтарч болзошгүй"</string>
@@ -507,50 +501,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Тухай бүрд асуух"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Таныг унтраах хүртэл"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Дөнгөж сая"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Утасны чанга яригч"</string>
+    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Энэ төхөөрөмж"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Холбогдоход асуудал гарлаа. Төхөөрөмжийг унтраагаад дахин асаана уу"</string>
-    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Утастай аудио төхөөрөмж"</string>
-    <string name="help_label" msgid="3528360748637781274">"Тусламж, санал хүсэлт"</string>
-    <string name="storage_category" msgid="2287342585424631813">"Хадгалах сан"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"Хуваалцсан өгөгдөл"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Хуваалцсан өгөгдлийг харах, өөрчлөх"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Энэ хэрэглэгчид зориулж хуваалцсан өгөгдөл байхгүй байна."</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Хуваалцсан өгөгдлийг дуудахад алдаа гарлаа. Дахин оролдоно уу."</string>
-    <string name="blob_id_text" msgid="8680078988996308061">"Хуваалцсан өгөгдлийн ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"Хугацаа нь <xliff:g id="DATE">%s</xliff:g>-д дуусна"</string>
-    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Хуваалцсан өгөгдлийг устгахад алдаа гарлаа."</string>
-    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Хуваалцсан энэ өгөгдлийн хувьд шаардагдах түрээс байхгүй. Та үүнийг устгамаар байна уу?"</string>
-    <string name="accessor_info_title" msgid="8289823651512477787">"Аппуудын хуваалцсан өгөгдөл"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"Аппаас ямар ч тайлбар өгөөгүй."</string>
-    <string name="accessor_expires_text" msgid="4625619273236786252">"Түрээсийн хугацаа <xliff:g id="DATE">%s</xliff:g>-д дуусна"</string>
-    <string name="delete_blob_text" msgid="2819192607255625697">"Хуваалцсан өгөгдлийг устгах уу?"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Та хуваалцсан энэ өгөгдлийг устгахдаа итгэлтэй байна уу?"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Хэрэглэгчид өөрийн апп-ууд болон контенттэй"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Та өөрийн бүртгэлийн апп-ууд болон контентэд хандалт хийхийг хязгаарлаж болно"</string>
-    <string name="user_add_user_item_title" msgid="2394272381086965029">"Хэрэглэгч"</string>
-    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Хязгаарлагдсан профайл"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"Шинэ хэрэглэгч нэмэх үү?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Та нэмэлт хэрэглэгч үүсгэх замаар бусад хүмүүстэй энэ төхөөрөмжийг хуваалцаж болно. Хэрэглэгч тус бүр апп, дэлгэцийн зураг болон бусад зүйлээ өөрчлөх боломжтой хувийн орон зайтай байдаг. Түүнчлэн хэрэглэгч нь бүх хэрэглэгчид нөлөөлөх боломжтой Wi-Fi зэрэг төхөөрөмжийн тохиргоог өөрчлөх боломжтой.\n\nХэрэв та шинэ хэрэглэгч нэмэх бол тухайн хүн хувийн орон зайгаа бүрдүүлэх ёстой.\n\nХэрэглэгч бүр бусад бүх хэрэглэгчийн өмнөөс апп шинэчилж болно. Хүртээмжийн тохиргоо болон үйлчилгээг шинэ хэрэглэгчид шилжүүлэх боломжгүй байж болзошгүй."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Хэрэглэгчийг одоо тохируулах уу?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Хэрэглэгч төхөөрөмжийг авч өөрийн профайлыг тохируулах боломжтой эсэхийг шалгана уу"</string>
-    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайлыг одоо тохируулах уу?"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Одоо тохируулах"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Одоо биш"</string>
-    <string name="user_add_user_type_title" msgid="551279664052914497">"Нэмэх"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"Шинэ хэрэглэгч"</string>
-    <string name="user_new_profile_name" msgid="2405500423304678841">"Шинэ профайл"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Хэрэглэгчийн мэдээлэл"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"Профайлын мэдээлэл"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"Та хязгаарлагдсан профайл үүсгэхийн өмнө өөрийн апп-ууд болон хувийн өгөгдлийг хамгаалахын тулд дэлгэцийн түгжээг тохируулах шаардлагатай."</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"Түгжээг тохируулах"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> руу сэлгэх"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Зочин нэмэх"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Зочин хасах"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Зочин"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Төхөөрөмжийн өгөгдмөл"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Идэвхгүй болгосон"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Идэвхжүүлсэн"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Энэ өөрчлөлтийг хэрэгжүүлэхийн тулд таны төхөөрөмжийг дахин асаах ёстой. Одоо дахин асаах эсвэл цуцлана уу."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Утастай чихэвч"</string>
 </resources>

@@ -104,7 +104,7 @@
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"फ़ाइल पर नहीं लिखा जा सका"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"क्षमा करें, उससे बात नहीं बनी. फिर से प्रयास करें."</string>
-    <string name="print_error_retry" msgid="1426421728784259538">"फिर से कोशिश करें"</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"फिर से प्रयास करें"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"यह प्रिंटर इस समय उपलब्ध नहीं है."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"झलक नहीं दिखाई जा सकती"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"झलक तैयार हो रही है..."</string>

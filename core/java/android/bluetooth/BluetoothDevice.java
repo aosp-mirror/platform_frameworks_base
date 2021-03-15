@@ -354,6 +354,35 @@ public final class BluetoothDevice implements Parcelable {
     public static final String ACTION_SDP_RECORD =
             "android.bluetooth.device.action.SDP_RECORD";
 
+    /** @hide */
+    @IntDef(prefix = "METADATA_", value = {
+            METADATA_MANUFACTURER_NAME,
+            METADATA_MODEL_NAME,
+            METADATA_SOFTWARE_VERSION,
+            METADATA_HARDWARE_VERSION,
+            METADATA_COMPANION_APP,
+            METADATA_MAIN_ICON,
+            METADATA_IS_UNTETHERED_HEADSET,
+            METADATA_UNTETHERED_LEFT_ICON,
+            METADATA_UNTETHERED_RIGHT_ICON,
+            METADATA_UNTETHERED_CASE_ICON,
+            METADATA_UNTETHERED_LEFT_BATTERY,
+            METADATA_UNTETHERED_RIGHT_BATTERY,
+            METADATA_UNTETHERED_CASE_BATTERY,
+            METADATA_UNTETHERED_LEFT_CHARGING,
+            METADATA_UNTETHERED_RIGHT_CHARGING,
+            METADATA_UNTETHERED_CASE_CHARGING,
+            METADATA_ENHANCED_SETTINGS_UI_URI,
+            METADATA_DEVICE_TYPE,
+            METADATA_MAIN_BATTERY,
+            METADATA_MAIN_CHARGING,
+            METADATA_MAIN_LOW_BATTERY_THRESHOLD,
+            METADATA_UNTETHERED_LEFT_LOW_BATTERY_THRESHOLD,
+            METADATA_UNTETHERED_RIGHT_LOW_BATTERY_THRESHOLD,
+            METADATA_UNTETHERED_CASE_LOW_BATTERY_THRESHOLD})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MetadataKey{}
+
     /**
      * Maximum length of a metadata entry, this is to avoid exploding Bluetooth
      * disk usage
@@ -501,6 +530,89 @@ public final class BluetoothDevice implements Parcelable {
      */
     @SystemApi
     public static final int METADATA_ENHANCED_SETTINGS_UI_URI = 16;
+
+    /**
+     * Type of the Bluetooth device, must be within the list of
+     * BluetoothDevice.DEVICE_TYPE_*
+     * Data type should be {@String} as {@link Byte} array.
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_DEVICE_TYPE = 17;
+
+    /**
+     * Battery level of the Bluetooth device, use when the Bluetooth device
+     * does not support HFP battery indicator.
+     * Data type should be {@String} as {@link Byte} array.
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_MAIN_BATTERY = 18;
+
+    /**
+     * Whether the device is charging.
+     * Data type should be {@String} as {@link Byte} array.
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_MAIN_CHARGING = 19;
+
+    /**
+     * The battery threshold of the Bluetooth device to show low battery icon.
+     * Data type should be {@String} as {@link Byte} array.
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_MAIN_LOW_BATTERY_THRESHOLD = 20;
+
+    /**
+     * The battery threshold of the left headset to show low battery icon.
+     * Data type should be {@String} as {@link Byte} array.
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTETHERED_LEFT_LOW_BATTERY_THRESHOLD = 21;
+
+    /**
+     * The battery threshold of the right headset to show low battery icon.
+     * Data type should be {@String} as {@link Byte} array.
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTETHERED_RIGHT_LOW_BATTERY_THRESHOLD = 22;
+
+    /**
+     * The battery threshold of the case to show low battery icon.
+     * Data type should be {@String} as {@link Byte} array.
+     * @hide
+     */
+    @SystemApi
+    public static final int METADATA_UNTETHERED_CASE_LOW_BATTERY_THRESHOLD = 23;
+
+    /**
+     * Device type which is used in METADATA_DEVICE_TYPE
+     * Indicates this Bluetooth device is a standard Bluetooth accessory or
+     * not listed in METADATA_DEVICE_TYPE_*.
+     * @hide
+     */
+    @SystemApi
+    public static final String DEVICE_TYPE_DEFAULT = "Default";
+
+    /**
+     * Device type which is used in METADATA_DEVICE_TYPE
+     * Indicates this Bluetooth device is a watch.
+     * @hide
+     */
+    @SystemApi
+    public static final String DEVICE_TYPE_WATCH = "Watch";
+
+    /**
+     * Device type which is used in METADATA_DEVICE_TYPE
+     * Indicates this Bluetooth device is an untethered headset.
+     * @hide
+     */
+    @SystemApi
+    public static final String DEVICE_TYPE_UNTETHERED_HEADSET = "Untethered Headset";
 
     /**
      * Broadcast Action: This intent is used to broadcast the {@link UUID}
@@ -2258,7 +2370,7 @@ public final class BluetoothDevice implements Parcelable {
     */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean setMetadata(int key, @NonNull byte[] value) {
+    public boolean setMetadata(@MetadataKey int key, @NonNull byte[] value) {
         final IBluetooth service = sService;
         if (service == null) {
             Log.e(TAG, "Bluetooth is not enabled. Cannot set metadata");
@@ -2286,7 +2398,7 @@ public final class BluetoothDevice implements Parcelable {
     @SystemApi
     @Nullable
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public byte[] getMetadata(int key) {
+    public byte[] getMetadata(@MetadataKey int key) {
         final IBluetooth service = sService;
         if (service == null) {
             Log.e(TAG, "Bluetooth is not enabled. Cannot get metadata");
@@ -2298,5 +2410,15 @@ public final class BluetoothDevice implements Parcelable {
             Log.e(TAG, "getMetadata fail", e);
             return null;
         }
+    }
+
+    /**
+     * Get the maxinum metadata key ID.
+     *
+     * @return the last supported metadata key
+     * @hide
+     */
+    public static @MetadataKey int getMaxMetadataKey() {
+        return METADATA_UNTETHERED_CASE_LOW_BATTERY_THRESHOLD;
     }
 }

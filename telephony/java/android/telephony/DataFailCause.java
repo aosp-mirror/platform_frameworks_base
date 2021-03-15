@@ -917,6 +917,10 @@ public final class DataFailCause {
     public static final int HANDOFF_PREFERENCE_CHANGED = 0x8CB;
     /** Data call fail due to the slice not being allowed for the data call. */
     public static final int SLICE_REJECTED = 0x8CC;
+    /** No matching rule available for the request, and match-all rule is not allowed for it. */
+    public static final int MATCH_ALL_RULE_NOT_ALLOWED = 0x8CD;
+    /** If connection failed for all matching URSP rules. */
+    public static final int ALL_MATCHING_RULES_FAILED = 0x8CE;
 
     //IKE error notifications message as specified in 3GPP TS 24.302 (Section 8.1.2.2).
 

@@ -63,10 +63,10 @@ class NetworkStateSnapshotTest {
 
     @Test
     fun testParcelUnparcel() {
-        val emptySnapshot = NetworkStateSnapshot(LinkProperties(), NetworkCapabilities(),
-                Network(TEST_NETID), null, TYPE_NONE)
+        val emptySnapshot = NetworkStateSnapshot(Network(TEST_NETID), NetworkCapabilities(),
+                LinkProperties(), null, TYPE_NONE)
         val snapshot = NetworkStateSnapshot(
-                TEST_LINK_PROPERTIES, TEST_CAPABILITIES, Network(TEST_NETID), TEST_IMSI, TYPE_WIFI)
+                Network(TEST_NETID), TEST_CAPABILITIES, TEST_LINK_PROPERTIES, TEST_IMSI, TYPE_WIFI)
         assertParcelSane(emptySnapshot, 5)
         assertParcelSane(snapshot, 5)
     }

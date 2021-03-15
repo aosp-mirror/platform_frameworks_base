@@ -2,5 +2,7 @@ per-file FeatureFlagUtils.java = sbasi@google.com
 per-file FeatureFlagUtils.java = tmfang@google.com
 per-file FeatureFlagUtils.java = asapperstein@google.com
 
-per-file TypedValue.java = file:/core/java/android/content/res/OWNERS
 per-file AttributeSet.java = file:/core/java/android/content/res/OWNERS
+per-file TypedValue.java = file:/core/java/android/content/res/OWNERS
+
+per-file PackageUtils.java = file:/core/java/android/content/pm/OWNERS

@@ -35,7 +35,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkMonitorManager;
 import android.net.NetworkRequest;
-import android.net.NetworkState;
+import android.net.NetworkStateSnapshot;
 import android.net.QosCallbackException;
 import android.net.QosFilter;
 import android.net.QosFilterParcelable;
@@ -43,7 +43,6 @@ import android.net.QosSession;
 import android.net.TcpKeepalivePacketData;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.data.EpsBearerQosSessionAttributes;
@@ -341,8 +340,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public NetworkAgentInfo(INetworkAgent na, Network net, NetworkInfo info,
             @NonNull LinkProperties lp, @NonNull NetworkCapabilities nc, int score, Context context,
             Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
-            IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber,
-            int creatorUid, QosCallbackTracker qosCallbackTracker) {
+            IDnsResolver dnsResolver, int factorySerialNumber, int creatorUid,
+            QosCallbackTracker qosCallbackTracker, ConnectivityService.Dependencies deps) {
         Objects.requireNonNull(net);
         Objects.requireNonNull(info);
         Objects.requireNonNull(lp);
@@ -356,7 +355,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         linkProperties = lp;
         networkCapabilities = nc;
         mScore = score;
-        clatd = new Nat464Xlat(this, netd, dnsResolver, nms);
+        clatd = new Nat464Xlat(this, netd, dnsResolver, deps);
         mConnService = connService;
         mContext = context;
         mHandler = handler;
@@ -891,15 +890,18 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         mScore = score;
     }
 
-    public NetworkState getNetworkState() {
+    /**
+     * Return a {@link NetworkStateSnapshot} for this network.
+     */
+    @NonNull
+    public NetworkStateSnapshot getNetworkStateSnapshot() {
         synchronized (this) {
             // Network objects are outwardly immutable so there is no point in duplicating.
             // Duplicating also precludes sharing socket factories and connection pools.
             final String subscriberId = (networkAgentConfig != null)
                     ? networkAgentConfig.subscriberId : null;
-            return new NetworkState(new NetworkInfo(networkInfo),
-                    new LinkProperties(linkProperties),
-                    new NetworkCapabilities(networkCapabilities), network, subscriberId);
+            return new NetworkStateSnapshot(network, new NetworkCapabilities(networkCapabilities),
+                    new LinkProperties(linkProperties), subscriberId, networkInfo.getType());
         }
     }
 

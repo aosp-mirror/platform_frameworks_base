@@ -31,8 +31,6 @@ import android.telephony.ims.stub.SipDelegate;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.internal.telephony.SipMessageParsingUtils;
-
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -188,7 +186,7 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
     }
 
     private void notifyLocalMessageFailedToBeReceived(SipMessage m, int reason) {
-        String transactionId = SipMessageParsingUtils.getTransactionId(m.getHeaderSection());
+        String transactionId = m.getViaBranchParameter();
         if (TextUtils.isEmpty(transactionId)) {
             Log.w(LOG_TAG, "failure to parse SipMessage.");
             throw new IllegalArgumentException("Malformed SipMessage, can not determine "

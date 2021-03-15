@@ -1516,7 +1516,9 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
             res = JNI_TRUE;
         } else {
             jniThrowException(env, "java/util/NoSuchElementException",
-                              "Death link does not exist");
+                              base::StringPrintf("Death link does not exist (%s)",
+                                                 statusToString(err).c_str())
+                                      .c_str());
         }
     }
 
