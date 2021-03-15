@@ -962,7 +962,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             int delay = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
-                    ANR_DELAY_MILLIS_DEVICE_CONFIG_KEY, 0);
+                    ANR_DELAY_MILLIS_DEVICE_CONFIG_KEY, 5000);
             Slog.v(TAG, "getAnrDelayMillis for " + packageName + ". " + delay + "ms");
             return delay;
         }
