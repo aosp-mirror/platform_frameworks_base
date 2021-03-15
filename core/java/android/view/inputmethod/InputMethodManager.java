@@ -444,6 +444,13 @@ public final class InputMethodManager {
      */
     private Matrix mActivityViewToScreenMatrix = null;
 
+    /**
+     * As reported by {@link InputBindResult}. This value is determined by
+     * {@link com.android.internal.R.styleable#InputMethod_suppressesSpellChecking}.
+     */
+    @GuardedBy("mH")
+    private boolean mIsInputMethodSuppressingSpellChecker = false;
+
     // -----------------------------------------------------------
 
     /**
@@ -858,6 +865,8 @@ public final class InputMethodManager {
                         mCurId = res.id;
                         mBindSequence = res.sequence;
                         mActivityViewToScreenMatrix = res.getActivityViewToScreenMatrix();
+                        mIsInputMethodSuppressingSpellChecker =
+                                res.isInputMethodSuppressingSpellChecker;
                     }
                     startInputInner(StartInputReason.BOUND_TO_IMMS, null, 0, 0, 0);
                     return;
@@ -1470,6 +1479,15 @@ public final class InputMethodManager {
     }
 
     /**
+     * Return {@code true} if the input method is suppressing system spell checker.
+     */
+    public boolean isInputMethodSuppressingSpellChecker() {
+        synchronized (mH) {
+            return mIsInputMethodSuppressingSpellChecker;
+        }
+    }
+
+    /**
      * Reset all of the state associated with being bound to an input method.
      */
     void clearBindingLocked() {
@@ -1513,6 +1531,7 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     void finishInputLocked() {
         mActivityViewToScreenMatrix = null;
+        mIsInputMethodSuppressingSpellChecker = false;
         setNextServedViewLocked(null);
         if (getServedViewLocked() != null) {
             if (DEBUG) {
@@ -2037,6 +2056,7 @@ public final class InputMethodManager {
                     return false;
                 }
                 mActivityViewToScreenMatrix = res.getActivityViewToScreenMatrix();
+                mIsInputMethodSuppressingSpellChecker = res.isInputMethodSuppressingSpellChecker;
                 if (res.id != null) {
                     setInputChannelLocked(res.channel);
                     mBindSequence = res.sequence;

@@ -30,6 +30,7 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
 
 import com.android.internal.textservice.ISpellCheckerSessionListener;
@@ -88,10 +89,15 @@ public final class TextServicesManager {
     @UserIdInt
     private final int mUserId;
 
-    private TextServicesManager(@UserIdInt int userId) throws ServiceNotFoundException {
+    @Nullable
+    private final InputMethodManager mInputMethodManager;
+
+    private TextServicesManager(@UserIdInt int userId,
+            @Nullable InputMethodManager inputMethodManager) throws ServiceNotFoundException {
         mService = ITextServicesManager.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TEXT_SERVICES_MANAGER_SERVICE));
         mUserId = userId;
+        mInputMethodManager = inputMethodManager;
     }
 
     /**
@@ -105,7 +111,8 @@ public final class TextServicesManager {
     @NonNull
     public static TextServicesManager createInstance(@NonNull Context context)
             throws ServiceNotFoundException {
-        return new TextServicesManager(context.getUserId());
+        return new TextServicesManager(context.getUserId(), context.getSystemService(
+                InputMethodManager.class));
     }
 
     /**
@@ -118,13 +125,19 @@ public final class TextServicesManager {
         synchronized (TextServicesManager.class) {
             if (sInstance == null) {
                 try {
-                    sInstance = new TextServicesManager(UserHandle.myUserId());
+                    sInstance = new TextServicesManager(UserHandle.myUserId(), null);
                 } catch (ServiceNotFoundException e) {
                     throw new IllegalStateException(e);
                 }
             }
             return sInstance;
         }
+    }
+
+    /** @hide */
+    @Nullable
+    public InputMethodManager getInputMethodManager() {
+        return mInputMethodManager;
     }
 
     /**

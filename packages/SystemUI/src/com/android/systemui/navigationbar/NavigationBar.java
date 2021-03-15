@@ -216,6 +216,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private Locale mLocale;
     private int mLayoutDirection;
 
+    private boolean mAllowForceNavBarHandleOpaque;
     private boolean mForceNavBarHandleOpaque;
     private Optional<Long> mHomeButtonLongPressDurationMs;
     private boolean mIsCurrentUserSetup;
@@ -340,13 +341,23 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 // If the current user is not yet setup, then don't update any button alphas
                 return;
             }
+            if (QuickStepContract.isLegacyMode(mNavBarMode)) {
+                // Don't allow the bar buttons to be affected by the alpha
+                return;
+            }
+
             ButtonDispatcher buttonDispatcher = null;
             boolean forceVisible = false;
-            if (QuickStepContract.isSwipeUpMode(mNavBarMode)) {
-                buttonDispatcher = mNavigationBarView.getBackButton();
-            } else if (QuickStepContract.isGesturalMode(mNavBarMode)) {
-                forceVisible = mForceNavBarHandleOpaque;
+            if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+                // Disallow home handle animations when in gestural
+                animate = false;
+                forceVisible = mAllowForceNavBarHandleOpaque && mForceNavBarHandleOpaque;
                 buttonDispatcher = mNavigationBarView.getHomeHandle();
+                if (getBarTransitions() != null) {
+                    getBarTransitions().setBackgroundOverrideAlpha(alpha);
+                }
+            } else if (QuickStepContract.isSwipeUpMode(mNavBarMode)) {
+                buttonDispatcher = mNavigationBarView.getBackButton();
             }
             if (buttonDispatcher != null) {
                 buttonDispatcher.setVisibility(
@@ -533,6 +544,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         // Respect the latest disabled-flags.
         mCommandQueue.recomputeDisableFlags(mDisplayId, false);
 
+        mAllowForceNavBarHandleOpaque = mContext.getResources().getBoolean(
+                R.bool.allow_force_nav_bar_handle_opaque);
         mForceNavBarHandleOpaque = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 NAV_BAR_HANDLE_FORCE_OPAQUE,
@@ -1530,6 +1543,12 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
+        if (!QuickStepContract.isGesturalMode(mode)) {
+            // Reset the override alpha
+            if (getBarTransitions() != null) {
+                getBarTransitions().setBackgroundOverrideAlpha(1f);
+            }
+        }
         updateScreenPinningGestures();
 
         if (!canShowSecondaryHandle()) {
