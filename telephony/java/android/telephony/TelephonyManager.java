@@ -14111,6 +14111,10 @@ public class TelephonyManager {
     /**
      * Enable/Disable E-UTRA-NR Dual Connectivity.
      *
+     * This api is supported only if
+     * {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
+     * ({@link TelephonyManager#CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE})
+     * returns true.
      * @param nrDualConnectivityState expected NR dual connectivity state
      * This can be passed following states
      * <ol>
@@ -14125,6 +14129,9 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE)
     public @EnableNrDualConnectivityResult int setNrDualConnectivityState(
             @NrDualConnectivityState int nrDualConnectivityState) {
         try {
@@ -14144,15 +14151,21 @@ public class TelephonyManager {
 
     /**
      * Is E-UTRA-NR Dual Connectivity enabled.
+     * This api is supported only if
+     * {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
+     * ({@link TelephonyManager#CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE})
+     * returns true.
      * @return true if dual connectivity is enabled else false. Enabled state does not mean dual
      * connectivity is active. It means the device is allowed to connect to both primary and
      * secondary cell.
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE)
     public boolean isNrDualConnectivityEnabled() {
         try {
             ITelephony telephony = getITelephony();
@@ -14404,11 +14417,23 @@ public class TelephonyManager {
     public static final String CAPABILITY_ALLOWED_NETWORK_TYPES_USED =
             "CAPABILITY_ALLOWED_NETWORK_TYPES_USED";
 
+    /**
+     * Indicates whether {@link #setNrDualConnectivityState()} and
+     * {@link #isNrDualConnectivityEnabled()} ()} are available.  See comments
+     * on respective methods for more information.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE =
+            "CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = "CAPABILITY_", value = {
             CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE,
             CAPABILITY_ALLOWED_NETWORK_TYPES_USED,
+            CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE
     })
     public @interface RadioInterfaceCapability {}
 
