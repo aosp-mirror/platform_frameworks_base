@@ -25,6 +25,7 @@ import android.os.RemoteException;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.RampSegment;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -65,9 +66,12 @@ final class VibratorController {
         mNativeWrapper = nativeWrapper;
         mNativeWrapper.init(vibratorId, listener);
 
+        // TODO(b/167947076): load supported ones from HAL once API introduced
+        VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
+                Float.NaN, nativeWrapper.getResonantFrequency(), Float.NaN, Float.NaN, null);
         mVibratorInfo = new VibratorInfo(vibratorId, nativeWrapper.getCapabilities(),
                 nativeWrapper.getSupportedEffects(), nativeWrapper.getSupportedPrimitives(),
-                nativeWrapper.getResonantFrequency(), nativeWrapper.getQFactor());
+                nativeWrapper.getQFactor(), frequencyMapping);
     }
 
     /** Register state listener for this vibrator. */
@@ -231,6 +235,19 @@ final class VibratorController {
             }
             return duration;
         }
+    }
+
+    /**
+     * Plays a composition of pwle primitives, using {@code vibrationId} or completion callback
+     * to {@link OnVibrationCompleteListener}.
+     *
+     * <p>This will affect the state of {@link #isVibrating()}.
+     *
+     * @return The duration of the effect playing, or 0 if unsupported.
+     */
+    public long on(RampSegment[] primitives, long vibrationId) {
+        // TODO(b/167947076): forward to the HAL once APIs are introduced
+        return 0;
     }
 
     /** Turns off the vibrator.This will affect the state of {@link #isVibrating()}. */
