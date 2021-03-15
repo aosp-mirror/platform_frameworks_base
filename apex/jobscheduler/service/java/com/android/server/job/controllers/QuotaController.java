@@ -813,12 +813,21 @@ public final class QuotaController extends StateController {
         //   1. it's already running (already executing expedited jobs should be allowed to finish)
         //   2. the app is currently in the foreground
         //   3. the app overall is within its quota
+        //   4. It's on the temp allowlist (or within the grace period)
         if (isTopStartedJobLocked(jobStatus) || isUidInForeground(jobStatus.getSourceUid())) {
             return true;
         }
+        final long tempAllowlistGracePeriodEndElapsed =
+                mTempAllowlistGraceCache.get(jobStatus.getSourceUid());
+        final boolean hasTempAllowlistExemption = mTempAllowlistCache.get(jobStatus.getSourceUid())
+                || sElapsedRealtimeClock.millis() < tempAllowlistGracePeriodEndElapsed;
+        if (hasTempAllowlistExemption) {
+            return true;
+        }
+
         Timer ejTimer = mEJPkgTimers.get(jobStatus.getSourceUserId(),
                 jobStatus.getSourcePackageName());
-        // Any already executing expedited jbos should be allowed to finish.
+        // Any already executing expedited jobs should be allowed to finish.
         if (ejTimer != null && ejTimer.isRunning(jobStatus)) {
             return true;
         }
