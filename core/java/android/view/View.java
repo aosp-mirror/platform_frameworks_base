@@ -151,6 +151,8 @@ import android.view.inputmethod.InputConnection;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.inspector.InspectableProperty.FlagEntry;
+import android.view.translation.TranslationSpec.DataFormat;
+import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 import android.widget.Checkable;
@@ -5252,6 +5254,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     @Nullable
     private String[] mOnReceiveContentMimeTypes;
+
+    @Nullable
+    private ViewTranslationCallback mViewTranslationCallback;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -30717,71 +30722,62 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    //TODO(b/1960696): update javadoc when dispatchRequestTranslation is ready.
     /**
-     * Returns a {@link ViewTranslationRequest} to the {@link onStartUiTranslation} which represents
-     * the content to be translated.
+     * Returns a {@link ViewTranslationRequest} which represents the content to be translated.
      *
-     * <p>The default implementation does nothing and return null.</p>
+     * <p>The default implementation does nothing and returns null.</p>
      *
-     * @hide
-     *
-     * @return the {@link ViewTranslationRequest} which contains the information to be translated.
+     * @param supportedFormats the supported translation formats. For now, the only possible value
+     * is the {@link android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
+     * @return the {@link ViewTranslationRequest} which contains the information to be translated or
+     * {@code null} if this View doesn't support translation.
+     * The {@link AutofillId} must be set on the returned value.
      */
     @Nullable
-    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public ViewTranslationRequest onCreateTranslationRequest() {
+    public ViewTranslationRequest createTranslationRequest(
+            @NonNull @DataFormat int[] supportedFormats) {
         return null;
     }
 
     /**
-     * Called when the user wants to show the original text instead of the translated text.
+     * Returns a {@link ViewTranslationCallback} that is used to display/hide the translated
+     * information. If the View supports displaying translated content, it should implement
+     * {@link ViewTranslationCallback}.
      *
-     * @hide
+     * <p>The default implementation returns null if developers don't set the customized
+     * {@link ViewTranslationCallback} by {@link #setViewTranslationCallback} </p>
      *
-     * <p> The default implementation does nothing.
+     * @return a {@link ViewTranslationCallback} that is used to control how to display the
+     * translated information or {@code null} if this View doesn't support translation.
      */
-    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public void onPauseUiTranslation() {
-        // no-op
+    @Nullable
+    public ViewTranslationCallback getViewTranslationCallback() {
+        return mViewTranslationCallback;
     }
 
     /**
-     * User can switch back to show the original text, this method called when the user wants to
-     * re-show the translated text again.
+     * Sets a {@link ViewTranslationCallback} that is used to display/hide the translated
+     * information. Developers can provide the customized implementation for show/hide translated
+     * information.
      *
-     * @hide
-     *
-     * <p> The default implementation does nothing.</p>
+     * @param callback a {@link ViewTranslationCallback} that is used to control how to display the
+     * translated information
      */
-    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public void onRestoreUiTranslation() {
-        // no-op
+    public void setViewTranslationCallback(@NonNull ViewTranslationCallback callback) {
+        mViewTranslationCallback = callback;
     }
 
     /**
-     * Called when the user finish the Ui translation and no longer to show the translated text.
-     *
-     * @hide
-     *
-     * <p> The default implementation does nothing.</p>
-     */
-    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public void onFinishUiTranslation() {
-        // no-op
-    }
-
-    /**
-     * Called when the request from {@link onStartUiTranslation} is completed by the translation
-     * service so that the translation result can be shown.
-     *
-     * @hide
+     * Called when the content from {@link #createTranslationRequest} had been translated by the
+     * TranslationService.
      *
      * <p> The default implementation does nothing.</p>
      *
-     * @param response the translated information which can be shown in the view.
+     * @param response a {@link ViewTranslationResponse} that contains the translated information
+     * which can be shown in the view.
      */
-    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public void onTranslationComplete(@NonNull ViewTranslationResponse response) {
+    public void onTranslationResponse(@NonNull ViewTranslationResponse response) {
         // no-op
     }
 

@@ -195,7 +195,9 @@ import android.view.textclassifier.TextLinks;
 import android.view.textservice.SpellCheckerSubtype;
 import android.view.textservice.TextServicesManager;
 import android.view.translation.TranslationRequestValue;
+import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationController;
+import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 import android.widget.RemoteViews.RemoteView;
@@ -203,6 +205,7 @@ import android.widget.RemoteViews.RemoteView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastMath;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.EditableInputConnection;
@@ -737,7 +740,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private MovementMethod mMovement;
 
     private TransformationMethod mTransformation;
-    private TranslationTransformationMethod mTranslationTransformation;
+    private TextViewTranslationCallback mDefaultTranslationCallback;
     @UnsupportedAppUsage
     private boolean mAllowTransformationLengthChange;
     @UnsupportedAppUsage
@@ -13857,136 +13860,104 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Provides a {@link ViewTranslationRequest} that represents the content to be translated via
-     * translation service.
+     * Returns a {@link ViewTranslationRequest} which represents the content to be translated.
      *
-     * <p>NOTE: When overriding the method, it should not translate the password. We also suggest
-     * that not translating the text is selectable or editable. We use the transformation method to
-     * implement showing the translated text. The TextView does not support the transformation
-     * method text length change. If the text is selectable or editable, it will crash while
-     * selecting the text. To support it, it needs broader changes to text APIs, we only allow to
-     * translate non selectable and editable text now.
+     * <p>NOTE: When overriding the method, it should not translate the password. If the subclass
+     * uses {@link TransformationMethod} to display the translated result, it's also not recommend
+     * to translate text is selectable or editable.
      *
-     * @hide
+     * @param supportedFormats the supported translation format. The value could be {@link
+     *                         android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
+     * @return the {@link ViewTranslationRequest} which contains the information to be translated.
      */
     @Nullable
     @Override
-    public ViewTranslationRequest onCreateTranslationRequest() {
-        if (mText == null || mText.length() == 0) {
+    public ViewTranslationRequest createTranslationRequest(@NonNull int[] supportedFormats) {
+        if (supportedFormats == null || supportedFormats.length == 0) {
             // TODO(b/182433547): remove before S release
             if (UiTranslationController.DEBUG) {
-                Log.w(LOG_TAG, "Cannot create translation request for the empty text.");
+                Log.w(LOG_TAG, "Do not provide the support translation formats.");
             }
             return null;
         }
-        // Not translate password, editable text and not important for translation
-        // TODO(b/177214256): support selectable text translation. It needs to broader changes to
-        //  text selection apis, not support in S.
-        boolean isPassword = isAnyPasswordInputType() || hasPasswordTransformationMethod();
-        if (isTextEditable() || isPassword || isTextSelectable()) {
-            // TODO(b/182433547): remove before S release
-            if (UiTranslationController.DEBUG) {
-                Log.w(LOG_TAG, "Cannot create translation request. editable = " + isTextEditable()
-                        + ", isPassword = " + isPassword + ", selectable = " + isTextSelectable());
+        ViewTranslationRequest.Builder requestBuilder =
+                new ViewTranslationRequest.Builder(getAutofillId());
+        // Support Text translation
+        if (ArrayUtils.contains(supportedFormats, TranslationSpec.DATA_FORMAT_TEXT)) {
+            if (mText == null || mText.length() == 0) {
+                // TODO(b/182433547): remove before S release
+                if (UiTranslationController.DEBUG) {
+                    Log.w(LOG_TAG, "Cannot create translation request for the empty text.");
+                }
+                return null;
             }
-            return null;
+            boolean isPassword = isAnyPasswordInputType() || hasPasswordTransformationMethod();
+            // TODO(b/177214256): support selectable text translation.
+            //  We use the TransformationMethod to implement showing the translated text. The
+            //  TextView does not support the text length change for TransformationMethod. If the
+            //  text is selectable or editable, it will crash while selecting the text. To support
+            //  it, it needs broader changes to text APIs, we only allow to translate non selectable
+            //  and editable text in S.
+            if (isTextEditable() || isPassword || isTextSelectable()) {
+                // TODO(b/182433547): remove before S release
+                if (UiTranslationController.DEBUG) {
+                    Log.w(LOG_TAG, "Cannot create translation request. editable = "
+                            + isTextEditable() + ", isPassword = " + isPassword + ", selectable = "
+                            + isTextSelectable());
+                }
+                return null;
+            }
+            // TODO(b/176488462): apply the view's important for translation
+            requestBuilder.setValue(ViewTranslationRequest.ID_TEXT,
+                    TranslationRequestValue.forText(mText));
         }
-        // TODO(b/176488462): apply the view's important for translation property
-        // TODO(b/174283799): remove the spans from the mText and save the spans information
-        // TODO: use fixed ids for request texts.
-        ViewTranslationRequest request =
-                new ViewTranslationRequest.Builder(getAutofillId())
-                        .setValue(ViewTranslationRequest.ID_TEXT,
-                                TranslationRequestValue.forText(mText))
-                        .build();
-        return request;
+        return requestBuilder.build();
     }
 
     /**
-     * Provides the implementation that pauses the ongoing Ui translation, it will show the original
-     * text instead of the translated text and restore the original transformation method.
+     * Returns a {@link ViewTranslationCallback} that is used to display the translated information.
+     * The default implementation will use a {@link TransformationMethod} that allow to replace the
+     * current {@link TransformationMethod} to transform the original text to the translated text
+     * display.
      *
-     * <p>NOTE: If this method is overridden, other translation related methods such as
-     * {@link onRestoreUiTranslation}, {@link onFinishUiTranslation}, {@link onTranslationComplete}
-     * should also be overridden.
-     *
-     * @hide
+     * @return a {@link ViewTranslationCallback} that is used to control how to display the
+     * translated information or {@code null} if this View doesn't support translation.
      */
+    @Nullable
     @Override
-    public void onPauseUiTranslation() {
-        // Restore to original text content.
-        if (mTranslationTransformation != null) {
-            setTransformationMethod(mTranslationTransformation.getOriginalTransformationMethod());
-        } else {
-            // TODO(b/182433547): remove before S release
-            Log.w(LOG_TAG, "onPauseUiTranslation(): no translated text.");
+    public ViewTranslationCallback getViewTranslationCallback() {
+        return getDefaultViewTranslationCallback();
+    }
+
+    private ViewTranslationCallback getDefaultViewTranslationCallback() {
+        if (mDefaultTranslationCallback == null) {
+            mDefaultTranslationCallback = new TextViewTranslationCallback();
         }
+        return mDefaultTranslationCallback;
     }
 
     /**
-     * Provides the implementation that restoes the paused Ui translation, it will show the
-     * translated text again if the text had been translated. This method will replace the current
-     * tansformation method with {@link TranslationTransformationMethod}.
      *
-     * <p>NOTE: If this method is overridden, other translation related methods such as
-     * {@link onPauseUiTranslation}, {@link onFinishUiTranslation}, {@link onTranslationComplete}
-     * should also be overridden.
+     * Called when the content from {@link #createTranslationRequest} had been translated by the
+     * TranslationService. The default implementation will replace the current
+     * {@link TransformationMethod} to transform the original text to the translated text display.
      *
-     * @hide
+     * @param response a {@link ViewTranslationResponse} that contains the translated information
+     * which can be shown in the view.
      */
     @Override
-    public void onRestoreUiTranslation() {
-        if (mTranslationTransformation != null) {
-            setTransformationMethod(mTranslationTransformation);
-        } else {
-            // TODO(b/182433547): remove before S release
-            Log.w(LOG_TAG, "onRestoreUiTranslation(): no translated text.");
-        }
-    }
-
-    /**
-     * Provides the implementation that finishes the current Ui translation and it's no longer to
-     * show the translated text. This method restores the original transformation method and resets
-     * the saved {@link TranslationTransformationMethod}.
-     *
-     * <p>NOTE: If this method is overridden, other translation related methods such as
-     * {@link onPauseUiTranslation}, {@link onRestoreUiTranslation}, {@link onTranslationComplete}
-     * should also be overridden.
-     *
-     * @hide
-     */
-    @Override
-    public void onFinishUiTranslation() {
-        // Restore to original text content and clear TranslationTransformation
-        if (mTranslationTransformation != null) {
-            setTransformationMethod(mTranslationTransformation.getOriginalTransformationMethod());
-            mTranslationTransformation = null;
-        } else {
-            // TODO(b/182433547): remove before S release
-            Log.w(LOG_TAG, "onFinishUiTranslation(): no translated text.");
-        }
-    }
-
-    /**
-     * Default {@link TextView} implementation after the translation request is done by the
-     * translation service, it's ok to show the translated text. This method will save the original
-     * transformation method and replace the current transformation method with
-     * {@link TranslationTransformationMethod}.
-     *
-     * <p>NOTE: If this method is overridden, other translation related methods such as
-     * {@link onPauseUiTranslation}, {@link onRestoreUiTranslation}, {@link onFinishUiTranslation}
-     * should also be overridden.
-     *
-     * @hide
-     */
-    @Override
-    public void onTranslationComplete(@NonNull ViewTranslationResponse response) {
-        // Show the translated text.
-        TransformationMethod originalTranslationMethod = mTranslationTransformation != null
-                ? mTranslationTransformation.getOriginalTransformationMethod() : mTransformation;
-        mTranslationTransformation =
+    public void onTranslationResponse(@NonNull ViewTranslationResponse response) {
+        // TODO(b/183467275): Use the overridden ViewTranslationCallback instead of our default
+        //  implementation if the view has overridden getViewTranslationCallback.
+        TextViewTranslationCallback callback =
+                (TextViewTranslationCallback) getDefaultViewTranslationCallback();
+        TranslationTransformationMethod oldTranslationMethod =
+                callback.getTranslationTransformation();
+        TransformationMethod originalTranslationMethod = oldTranslationMethod != null
+                ? oldTranslationMethod.getOriginalTransformationMethod() : mTransformation;
+        TranslationTransformationMethod newTranslationMethod =
                 new TranslationTransformationMethod(response, originalTranslationMethod);
         // TODO(b/178353965): well-handle setTransformationMethod.
-        setTransformationMethod(mTranslationTransformation);
+        callback.setTranslationTransformation(newTranslationMethod);
     }
 }
