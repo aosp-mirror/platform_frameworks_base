@@ -19,6 +19,7 @@ package com.android.systemui.controls.ui
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -63,6 +64,8 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
     private lateinit var taskViewFactory: Optional<TaskViewFactory>
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private lateinit var cvh: ControlViewHolder
+    @Mock
+    private lateinit var metricsLogger: ControlsMetricsLogger
 
     companion object {
         fun <T> any(): T = Mockito.any<T>()
@@ -86,7 +89,8 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
             globalActionsComponent,
             taskViewFactory,
             getFakeBroadcastDispatcher(),
-            lazyUiController
+            lazyUiController,
+            metricsLogger
         ))
 
         `when`(cvh.cws.ci.controlId).thenReturn(ID)
