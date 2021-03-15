@@ -221,10 +221,6 @@ public final class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(mH.obtainMessage(DO_GET_SURROUNDING_TEXT, flags, 0 /* unused */, args));
     }
 
-    public void setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
-         // no-op
-    }
-
     public void getCursorCapsMode(int reqModes, IIntResultCallback callback) {
         dispatchMessage(
                 mH.obtainMessage(DO_GET_CURSOR_CAPS_MODE, reqModes, 0 /* unused */, callback));
