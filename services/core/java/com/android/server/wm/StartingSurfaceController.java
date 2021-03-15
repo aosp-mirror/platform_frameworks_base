@@ -52,8 +52,8 @@ public class StartingSurfaceController {
             int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
             int icon, int logo, int windowFlags, Configuration overrideConfig, int displayId) {
         if (!DEBUG_ENABLE_SHELL_DRAWER) {
-            return mService.mPolicy.addSplashScreen(activity.token, packageName, theme,
-                    compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
+            return mService.mPolicy.addSplashScreen(activity.token, activity.mUserId, packageName,
+                    theme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                     overrideConfig, displayId);
         }
 

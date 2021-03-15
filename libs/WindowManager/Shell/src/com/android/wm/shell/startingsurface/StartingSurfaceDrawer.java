@@ -36,6 +36,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -149,11 +150,12 @@ public class StartingSurfaceDrawer {
         context = displayContext;
         if (theme != context.getThemeResId() || labelRes != 0) {
             try {
-                context = context.createPackageContext(
-                        activityInfo.packageName, CONTEXT_RESTRICTED);
+                context = context.createPackageContextAsUser(activityInfo.packageName,
+                        CONTEXT_RESTRICTED, UserHandle.of(taskInfo.userId));
                 context.setTheme(theme);
             } catch (PackageManager.NameNotFoundException e) {
-                // Ignore
+                Slog.w(TAG, "Failed creating package context with package name "
+                        + activityInfo.packageName + " for user " + taskInfo.userId, e);
             }
         }
 
