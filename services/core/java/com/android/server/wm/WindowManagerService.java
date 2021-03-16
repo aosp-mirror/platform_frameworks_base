@@ -1600,11 +1600,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     ProtoLog.w(WM_ERROR, "Attempted to add window with exiting application token "
                             + ".%s Aborting.", token);
                     return WindowManagerGlobal.ADD_APP_EXITING;
-                } else if (type == TYPE_APPLICATION_STARTING && activity.mStartingWindow != null) {
-                    ProtoLog.w(WM_ERROR,
-                            "Attempted to add starting window to token with already existing"
-                                    + " starting window");
-                    return WindowManagerGlobal.ADD_DUPLICATE_ADD;
+                } else if (type == TYPE_APPLICATION_STARTING) {
+                    if (activity.mStartingWindow != null) {
+                        ProtoLog.w(WM_ERROR, "Attempted to add starting window to "
+                                + "token with already existing starting window");
+                        return WindowManagerGlobal.ADD_DUPLICATE_ADD;
+                    }
+                    if (activity.mStartingData == null) {
+                        ProtoLog.w(WM_ERROR, "Attempted to add starting window to "
+                                + "token but already cleaned");
+                        return WindowManagerGlobal.ADD_DUPLICATE_ADD;
+                    }
                 }
             } else if (rootType == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
