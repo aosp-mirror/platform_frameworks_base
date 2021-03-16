@@ -35,6 +35,7 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -189,6 +190,10 @@ public final class SurfaceControl implements Parcelable {
             long barrierObject, long frame);
     private static native void nativeReparent(long transactionObj, long nativeObject,
             long newParentNativeObject);
+    private static native void nativeSetBuffer(long transactionObj, long nativeObject,
+            GraphicBuffer buffer);
+    private static native void nativeSetColorSpace(long transactionObj, long nativeObject,
+            int colorSpace);
 
     private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
 
@@ -3362,6 +3367,31 @@ public final class SurfaceControl implements Parcelable {
             } else {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, 0, SKIP_SCREENSHOT);
             }
+            return this;
+        }
+
+        /**
+         * Set a buffer for a SurfaceControl. This can only be used for SurfaceControls that were
+         * created as type {@link #FX_SURFACE_BLAST}
+         *
+         * @hide
+         */
+        public Transaction setBuffer(SurfaceControl sc, GraphicBuffer buffer) {
+            checkPreconditions(sc);
+            nativeSetBuffer(mNativeObject, sc.mNativeObject, buffer);
+            return this;
+        }
+
+        /**
+         * Set the color space for the SurfaceControl. The supported color spaces are SRGB
+         * and Display P3, other color spaces will be treated as SRGB. This can only be used for
+         * SurfaceControls that were created as type {@link #FX_SURFACE_BLAST}
+         *
+         * @hide
+         */
+        public Transaction setColorSpace(SurfaceControl sc, ColorSpace colorSpace) {
+            checkPreconditions(sc);
+            nativeSetColorSpace(mNativeObject, sc.mNativeObject, colorSpace.getId());
             return this;
         }
 

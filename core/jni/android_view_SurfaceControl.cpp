@@ -30,6 +30,7 @@
 #include <android/hardware/display/IDeviceProductInfoConstants.h>
 #include <android/os/IInputConstants.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
@@ -250,6 +251,15 @@ constexpr jint fromDataspaceToNamedColorSpaceValue(const ui::Dataspace dataspace
             return JNamedColorSpace::DISPLAY_P3;
         default:
             return JNamedColorSpace::SRGB;
+    }
+}
+
+constexpr ui::Dataspace fromNamedColorSpaceValueToDataspace(const jint colorSpace) {
+    switch (colorSpace) {
+        case JNamedColorSpace::DISPLAY_P3:
+            return ui::Dataspace::DISPLAY_P3;
+        default:
+            return ui::Dataspace::V0_SRGB;
     }
 }
 
@@ -551,6 +561,23 @@ static void nativeSetGeometry(JNIEnv* env, jclass clazz, jlong transactionObj, j
         dst.makeInvalid();
     }
     transaction->setGeometry(ctrl, source, dst, orientation);
+}
+
+static void nativeSetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                            jobject bufferObject) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    sp<GraphicBuffer> buffer(
+            android_graphics_GraphicBuffer_getNativeGraphicsBuffer(env, bufferObject));
+    transaction->setBuffer(ctrl, buffer);
+}
+
+static void nativeSetColorSpace(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                                jint colorSpace) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    ui::Dataspace dataspace = fromNamedColorSpaceValueToDataspace(colorSpace);
+    transaction->setDataspace(ctrl, dataspace);
 }
 
 static void nativeSetBlurRegions(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1880,6 +1907,10 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetDisplayedContentSample },
     {"nativeSetGeometry", "(JJLandroid/graphics/Rect;Landroid/graphics/Rect;J)V",
             (void*)nativeSetGeometry },
+    {"nativeSetBuffer", "(JJLandroid/graphics/GraphicBuffer;)V",
+            (void*)nativeSetBuffer },
+    {"nativeSetColorSpace", "(JJI)V",
+            (void*)nativeSetColorSpace },
     {"nativeSyncInputWindows", "(J)V",
             (void*)nativeSyncInputWindows },
     {"nativeGetDisplayBrightnessSupport", "(Landroid/os/IBinder;)Z",

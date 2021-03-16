@@ -36,6 +36,7 @@ import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -45,7 +46,6 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskOrganizerController;
@@ -766,18 +766,21 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             return false;
         }
 
+        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
+                buffer.getHardwareBuffer());
         SurfaceControl screenshot = mService.mWindowManager.mSurfaceControlFactory.apply(null)
                 .setName(wc.getName() + " - Organizer Screenshot")
-                .setBufferSize(bounds.width(), bounds.height())
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setParent(wc.getParentSurfaceControl())
+                .setSecure(buffer.containsSecureLayers())
                 .setCallsite("WindowOrganizerController.takeScreenshot")
+                .setBLASTLayer()
                 .build();
 
-        Surface surface = new Surface();
-        surface.copyFrom(screenshot);
-        surface.attachAndQueueBufferWithColorSpace(buffer.getHardwareBuffer(), null);
-        surface.release();
+        SurfaceControl.Transaction transaction = mService.mWindowManager.mTransactionFactory.get();
+        transaction.setBuffer(screenshot, graphicBuffer);
+        transaction.setColorSpace(screenshot, buffer.getColorSpace());
+        transaction.apply();
 
         outSurfaceControl.copyFrom(screenshot, "WindowOrganizerController.takeScreenshot");
         return true;

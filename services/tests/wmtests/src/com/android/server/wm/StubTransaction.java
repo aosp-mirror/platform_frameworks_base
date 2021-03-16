@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
+import android.graphics.ColorSpace;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -257,6 +259,16 @@ public class StubTransaction extends SurfaceControl.Transaction {
 
     @Override
     public SurfaceControl.Transaction unsetFixedTransformHint(@NonNull SurfaceControl sc) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setBuffer(SurfaceControl sc, GraphicBuffer buffer) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setColorSpace(SurfaceControl sc, ColorSpace colorSpace) {
         return this;
     }
 }
