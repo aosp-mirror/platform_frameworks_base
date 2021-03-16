@@ -50,7 +50,6 @@ public final class RippleAnimationSession {
     private long mStartTime;
     private boolean mForceSoftware;
     private final ValueAnimator mSparkle = ValueAnimator.ofFloat(0, 1);
-    private final ArraySet<Animator> mActiveAnimations = new ArraySet<>(3);
 
     RippleAnimationSession(@NonNull AnimationProperties<Float, Paint> properties,
             boolean forceSoftware) {
@@ -60,12 +59,11 @@ public final class RippleAnimationSession {
         mSparkle.addUpdateListener(anim -> {
             final long now = AnimationUtils.currentAnimationTimeMillis();
             final long elapsed = now - mStartTime - ENTER_ANIM_DURATION;
-            final float phase = (float) elapsed / 1000f;
-            mProperties.getShader().setSecondsOffset(phase);
+            final float phase = (float) elapsed / 30000f;
+            mProperties.getShader().setNoisePhase(phase);
             notifyUpdate();
         });
         mSparkle.setDuration(ENTER_ANIM_DURATION);
-        mSparkle.setStartDelay(ENTER_ANIM_DURATION);
         mSparkle.setInterpolator(LINEAR_INTERPOLATOR);
         mSparkle.setRepeatCount(ValueAnimator.INFINITE);
     }
@@ -81,7 +79,6 @@ public final class RippleAnimationSession {
     }
 
     @NonNull RippleAnimationSession exit(Canvas canvas) {
-        mSparkle.end();
         if (isHwAccelerated(canvas)) exitHardware((RecordingCanvas) canvas);
         else exitSoftware();
         return this;
@@ -89,7 +86,6 @@ public final class RippleAnimationSession {
 
     private void onAnimationEnd(Animator anim) {
         notifyUpdate();
-        mActiveAnimations.remove(anim);
     }
 
     @NonNull RippleAnimationSession setOnSessionEnd(
@@ -119,13 +115,13 @@ public final class RippleAnimationSession {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                mSparkle.end();
                 Consumer<RippleAnimationSession> onEnd = mOnSessionEnd;
                 if (onEnd != null) onEnd.accept(RippleAnimationSession.this);
             }
         });
         expand.setInterpolator(LINEAR_INTERPOLATOR);
         expand.start();
-        mActiveAnimations.add(expand);
     }
 
     private long computeDelay() {
@@ -153,6 +149,7 @@ public final class RippleAnimationSession {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                mSparkle.end();
                 Consumer<RippleAnimationSession> onEnd = mOnSessionEnd;
                 if (onEnd != null) onEnd.accept(RippleAnimationSession.this);
             }
@@ -163,7 +160,6 @@ public final class RippleAnimationSession {
         long delay = computeDelay();
         exit.setStartDelay(delay);
         exit.start();
-        mActiveAnimations.add(exit);
     }
 
     private void enterHardware(RecordingCanvas canvas) {
@@ -182,9 +178,7 @@ public final class RippleAnimationSession {
         expand.start();
         if (!mSparkle.isRunning()) {
             mSparkle.start();
-            mActiveAnimations.add(mSparkle);
         }
-        mActiveAnimations.add(expand);
     }
 
     private void enterSoftware() {

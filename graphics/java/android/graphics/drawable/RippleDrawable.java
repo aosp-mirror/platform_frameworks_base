@@ -915,7 +915,7 @@ public class RippleDrawable extends LayerDrawable {
         shader.setOrigin(w / 2, y / 2);
         shader.setTouch(x, y);
         shader.setResolution(w, h);
-        shader.setSecondsOffset(0);
+        shader.setNoisePhase(0);
         shader.setRadius(radius);
         shader.setProgress(.0f);
         properties = new RippleAnimationSession.AnimationProperties<>(
