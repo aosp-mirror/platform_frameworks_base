@@ -626,14 +626,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mManager.updateWidgets(widgetIdsArray);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        // If we had to fetch Tile from persistent storage, we want to make sure we write it to
-        // options.
-        verify(mAppWidgetManager, times(1))
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
-                        mBundleArgumentCaptor.capture());
-        Bundle bundle = mBundleArgumentCaptor.getValue();
-        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
-        assertThat(tile.getId()).isEqualTo(SHORTCUT_ID);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
