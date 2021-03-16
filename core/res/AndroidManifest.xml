@@ -5659,6 +5659,19 @@
     <permission android:name="android.permission.SET_CLIP_SOURCE"
                 android:protectionLevel="signature|recents" />
 
+    <!-- Allows an application to request installs that update existing packages do so without
+         user action via
+         {@link android.content.pm.PackageInstaller.SessionParams#setRequireUserAction(boolean)}.
+         This permission only grants the ability to make the request and is not a guarantee that the
+         request will be honored. In order to execute the install, the caller must also have the
+         "android.permission.REQUEST_INSTALL_PACKAGES" or "android.permission.INSTALL_PACKAGES"
+         permissions.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"
+                android:protectionLevel="normal" />
+    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"/>
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

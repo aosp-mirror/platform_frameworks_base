@@ -104,8 +104,8 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
-import com.android.server.pm.verify.domain.DomainVerificationShell;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
+import com.android.server.pm.verify.domain.DomainVerificationShell;
 
 import dalvik.system.DexFile;
 
@@ -561,7 +561,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 }
                 final ApkLite apkLite = apkLiteResult.getResult();
                 final PackageLite pkgLite = new PackageLite(null, apkLite.getPath(), apkLite, null,
-                        null, null, null, null, null);
+                        null, null, null, null, null, apkLite.getTargetSdkVersion());
                 sessionSize += PackageHelper.calculateInstalledSize(pkgLite,
                         params.sessionParams.abiOverride, fd.getFileDescriptor());
             } catch (IOException e) {
