@@ -192,6 +192,12 @@ message SecureSettingsProto {
     optional Camera camera = 12;
 
     optional SettingProto carrier_apps_handled = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Clipboard {
+        optional SettingProto show_access_notifications = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Clipboard clipboard = 89;
+
     optional SettingProto cmas_additional_broadcast_pkg = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
     repeated SettingProto completed_categories = 15;
     optional SettingProto connectivity_release_pending_intent_delay_ms = 16 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -647,5 +653,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 89;
+    // Next tag = 90;
 }

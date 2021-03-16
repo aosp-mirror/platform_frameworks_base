@@ -18,7 +18,6 @@ package com.android.systemui.controls.ui
 
 import android.annotation.MainThread
 import android.app.Dialog
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -33,6 +32,7 @@ import android.util.Log
 import android.view.HapticFeedbackConstants
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsComponent
@@ -54,13 +54,15 @@ class ControlActionCoordinatorImpl @Inject constructor(
     private val globalActionsComponent: GlobalActionsComponent,
     private val taskViewFactory: Optional<TaskViewFactory>,
     private val broadcastDispatcher: BroadcastDispatcher,
-    private val lazyUiController: Lazy<ControlsUiController>
+    private val lazyUiController: Lazy<ControlsUiController>,
+    private val controlsMetricsLogger: ControlsMetricsLogger
 ) : ControlActionCoordinator {
     private var dialog: Dialog? = null
     private val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     private var pendingAction: Action? = null
     private var actionsInProgress = mutableSetOf<String>()
-
+    private val isLocked: Boolean
+        get() = !keyguardStateController.isUnlocked()
     override var activityContext: Context? = null
 
     companion object {
@@ -73,6 +75,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {
+        controlsMetricsLogger.touch(cvh, isLocked)
         bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             cvh.action(BooleanAction(templateId, !isChecked))
@@ -80,6 +83,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun touch(cvh: ControlViewHolder, templateId: String, control: Control) {
+        controlsMetricsLogger.touch(cvh, isLocked)
         val blockable = cvh.usePanel()
         bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
@@ -100,12 +104,14 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun setValue(cvh: ControlViewHolder, templateId: String, newValue: Float) {
+        controlsMetricsLogger.drag(cvh, isLocked)
         bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             cvh.action(FloatAction(templateId, newValue))
         }, false /* blockable */))
     }
 
     override fun longPress(cvh: ControlViewHolder) {
+        controlsMetricsLogger.longPress(cvh, isLocked)
         bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             // Long press snould only be called when there is valid control state, otherwise ignore
             cvh.cws.control?.let {
@@ -116,7 +122,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun runPendingAction(controlId: String) {
-        if (!keyguardStateController.isUnlocked()) return
+        if (isLocked) return
         if (pendingAction?.controlId == controlId) {
             pendingAction?.invoke()
             pendingAction = null
@@ -141,28 +147,17 @@ class ControlActionCoordinatorImpl @Inject constructor(
     @VisibleForTesting
     fun bouncerOrRun(action: Action) {
         if (keyguardStateController.isShowing()) {
-            var closeDialog = !keyguardStateController.isUnlocked()
-            if (closeDialog) {
+            if (isLocked) {
                 context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
 
                 // pending actions will only run after the control state has been refreshed
                 pendingAction = action
             }
-
+            val wasLocked = isLocked
             activityStarter.dismissKeyguardThenExecute({
                 Log.d(ControlsUiController.TAG, "Device unlocked, invoking controls action")
-                if (closeDialog) {
-                    activityContext?.let {
-                        val i = Intent().apply {
-                            component = ComponentName(context, ControlsActivity::class.java)
-                            addFlags(
-                                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                            putExtra(ControlsUiController.BACK_TO_GLOBAL_ACTIONS, false)
-                        }
-                        it.startActivity(i)
-                    } ?: run {
-                        globalActionsComponent.handleShowGlobalActionsMenu()
-                    }
+                if (wasLocked && activityContext == null) {
+                    globalActionsComponent.handleShowGlobalActionsMenu()
                 } else {
                     action.invoke()
                 }

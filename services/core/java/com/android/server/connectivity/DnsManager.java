@@ -16,7 +16,6 @@
 
 package com.android.server.connectivity;
 
-import static android.net.ConnectivityManager.PRIVATE_DNS_DEFAULT_MODE_FALLBACK;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.net.resolv.aidl.IDnsResolverUnsolicitedEventListener.VALIDATION_RESULT_FAILURE;
@@ -33,6 +32,7 @@ import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.IDnsResolver;
 import android.net.InetAddresses;
 import android.net.LinkProperties;
@@ -128,7 +128,7 @@ public class DnsManager {
     private static final int DNS_RESOLVER_DEFAULT_MAX_SAMPLES = 64;
 
     public static PrivateDnsConfig getPrivateDnsConfig(ContentResolver cr) {
-        final String mode = getPrivateDnsMode(cr);
+        final String mode = ConnectivityManager.getPrivateDnsMode(cr);
 
         final boolean useTls = !TextUtils.isEmpty(mode) && !PRIVATE_DNS_MODE_OFF.equals(mode);
 
@@ -477,13 +477,6 @@ public class DnsManager {
             result[i++] = addr.getHostAddress();
         }
         return result;
-    }
-
-    private static String getPrivateDnsMode(ContentResolver cr) {
-        String mode = getStringSetting(cr, PRIVATE_DNS_MODE);
-        if (TextUtils.isEmpty(mode)) mode = getStringSetting(cr, PRIVATE_DNS_DEFAULT_MODE);
-        if (TextUtils.isEmpty(mode)) mode = PRIVATE_DNS_DEFAULT_MODE_FALLBACK;
-        return mode;
     }
 
     private static String getStringSetting(ContentResolver cr, String which) {

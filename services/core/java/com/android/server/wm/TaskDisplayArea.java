@@ -57,6 +57,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
+import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1072,11 +1073,17 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * @see #getOrCreateRootTask(int, int, boolean)
      */
     Task getOrCreateRootTask(@Nullable ActivityRecord r,
-            @Nullable ActivityOptions options, @Nullable Task candidateTask, int activityType,
-            boolean onTop) {
-        // First preference is the windowing mode in the activity options if set.
-        int windowingMode = (options != null)
-                ? options.getLaunchWindowingMode() : WINDOWING_MODE_UNDEFINED;
+            @Nullable ActivityOptions options, @Nullable Task candidateTask,
+            @Nullable LaunchParams launchParams, int activityType, boolean onTop) {
+        int windowingMode = WINDOWING_MODE_UNDEFINED;
+        if (launchParams != null) {
+            // If launchParams isn't null, windowing mode is already resolved.
+            windowingMode = launchParams.mWindowingMode;
+        } else if (options != null) {
+            // If launchParams is null and options isn't let's use the windowing mode in the
+            // options.
+            windowingMode = options.getLaunchWindowingMode();
+        }
         // Validate that our desired windowingMode will work under the current conditions.
         // UNDEFINED windowing mode is a valid result and means that the new root task will inherit
         // it's display's windowing mode.

@@ -3115,6 +3115,7 @@
 
   <!-- Notifications: CallStyle -->
   <java-symbol type="layout" name="notification_template_material_call" />
+  <java-symbol type="layout" name="notification_template_material_big_call" />
   <java-symbol type="string" name="call_notification_answer_action" />
   <java-symbol type="string" name="call_notification_decline_action" />
   <java-symbol type="string" name="call_notification_hang_up_action" />
@@ -3986,6 +3987,7 @@
   <java-symbol type="string" name="accessibility_system_action_on_screen_a11y_shortcut_label" />
   <java-symbol type="string" name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" />
   <java-symbol type="string" name="accessibility_system_action_hardware_a11y_shortcut_label" />
+  <java-symbol type="string" name="accessibility_system_action_dismiss_notification_shade" />
 
   <java-symbol type="string" name="accessibility_freeform_caption" />
 

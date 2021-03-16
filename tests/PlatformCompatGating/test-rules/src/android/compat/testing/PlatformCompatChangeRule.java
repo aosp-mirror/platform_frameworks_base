@@ -100,7 +100,6 @@ public class PlatformCompatChangeRule extends CoreCompatChangeRule {
                 platformCompat.setOverridesForTest(new CompatibilityChangeConfig(mConfig),
                         packageName);
                 try {
-                    uiAutomation.dropShellPermissionIdentity();
                     mTestStatement.evaluate();
                 } finally {
                     adoptShellPermissions(uiAutomation);

@@ -33,7 +33,7 @@ import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
-import com.android.wm.shell.transition.ShellTransitions;
+import com.android.wm.shell.transition.RemoteTransitions;
 
 import java.util.Optional;
 
@@ -98,7 +98,7 @@ public interface WMComponent {
     Optional<TaskViewFactory> getTaskViewFactory();
 
     @WMSingleton
-    ShellTransitions getTransitions();
+    RemoteTransitions getTransitions();
 
     @WMSingleton
     Optional<StartingSurface> getStartingSurface();

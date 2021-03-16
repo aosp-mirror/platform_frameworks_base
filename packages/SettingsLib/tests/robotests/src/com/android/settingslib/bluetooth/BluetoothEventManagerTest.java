@@ -353,21 +353,6 @@ public class BluetoothEventManagerTest {
     }
 
     @Test
-    public void showUnbondMessage_reasonRemoved_showCorrectedErrorCode() {
-        mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
-        mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
-        mIntent.putExtra(BluetoothDevice.EXTRA_REASON, BluetoothDevice.UNBOND_REASON_REMOVED);
-        when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedDevice1);
-        when(mCachedDevice1.getName()).thenReturn(DEVICE_NAME);
-
-        mContext.sendBroadcast(mIntent);
-
-        verify(mErrorListener).onShowError(any(Context.class), eq(DEVICE_NAME),
-                eq(R.string.bluetooth_pairing_error_message));
-    }
-
-    @Test
     public void showUnbondMessage_reasonAuthTimeout_showCorrectedErrorCode() {
         mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
