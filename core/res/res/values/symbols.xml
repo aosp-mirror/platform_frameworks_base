@@ -685,7 +685,6 @@
   <java-symbol type="string" name="not_checked" />
   <java-symbol type="array" name="config_ethernet_interfaces" />
   <java-symbol type="bool" name="config_vehicleInternalNetworkAlwaysRequested" />
-  <java-symbol type="array" name="config_wakeonlan_supported_interfaces" />
   <java-symbol type="string" name="config_forceVoiceInteractionServicePackage" />
   <java-symbol type="string" name="config_mms_user_agent" />
   <java-symbol type="string" name="config_mms_user_agent_profile_url" />
@@ -1951,11 +1950,9 @@
   <java-symbol type="integer" name="config_lowBatteryCloseWarningBump" />
   <java-symbol type="integer" name="config_lowBatteryWarningLevel" />
   <java-symbol type="integer" name="config_networkPolicyDefaultWarning" />
-  <java-symbol type="integer" name="config_networkTransitionTimeout" />
   <java-symbol type="integer" name="config_networkNotifySwitchType" />
   <java-symbol type="array" name="config_networkNotifySwitches" />
   <java-symbol type="integer" name="config_networkAvoidBadWifi" />
-  <java-symbol type="string" name="config_networkCaptivePortalServerUrl" />
   <java-symbol type="integer" name="config_networkWakeupPacketMark" />
   <java-symbol type="integer" name="config_networkWakeupPacketMask" />
   <java-symbol type="bool" name="config_apfDrop802_3Frames" />

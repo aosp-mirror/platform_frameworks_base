@@ -188,7 +188,6 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.connectivity.aidl.INetworkAgent;
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
@@ -202,6 +201,7 @@ import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.net.module.util.PermissionUtils;
 import com.android.server.connectivity.AutodestructReference;
+import com.android.server.connectivity.ConnectivityResources;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
 import com.android.server.connectivity.KeepaliveTracker;
@@ -317,6 +317,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private boolean mRestrictBackground;
 
     private final Context mContext;
+    private final ConnectivityResources mResources;
     // The Context is created for UserHandle.ALL.
     private final Context mUserAllContext;
     private final Dependencies mDeps;
@@ -604,7 +605,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private Intent mInitialBroadcast;
 
     private PowerManager.WakeLock mNetTransitionWakeLock;
-    private int mNetTransitionWakeLockTimeout;
     private final PowerManager.WakeLock mPendingIntentWakeLock;
 
     // A helper object to track the current default HTTP proxy. ConnectivityService needs to tell
@@ -1012,6 +1012,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         /**
+         * Get the {@link ConnectivityResources} to use in ConnectivityService.
+         */
+        public ConnectivityResources getResources(@NonNull Context ctx) {
+            return new ConnectivityResources(ctx);
+        }
+
+        /**
          * Create a HandlerThread to use in ConnectivityService.
          */
         public HandlerThread makeHandlerThread() {
@@ -1093,6 +1100,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mSystemProperties = mDeps.getSystemProperties();
         mNetIdManager = mDeps.makeNetIdManager();
         mContext = Objects.requireNonNull(context, "missing Context");
+        mResources = deps.getResources(mContext);
         mNetworkRequestCounter = new PerUidCounter(MAX_NETWORK_REQUESTS_PER_UID);
 
         mMetricsLog = logger;
@@ -1154,8 +1162,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final PowerManager powerManager = (PowerManager) context.getSystemService(
                 Context.POWER_SERVICE);
         mNetTransitionWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        mNetTransitionWakeLockTimeout = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_networkTransitionTimeout);
         mPendingIntentWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         mNetConfigs = new NetworkConfig[ConnectivityManager.MAX_NETWORK_TYPE+1];
@@ -1221,10 +1227,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (DBG) loge("Ignoring protectedNetwork " + p);
             }
         }
-
-        mWolSupportedInterfaces = new ArraySet(
-                mContext.getResources().getStringArray(
-                        com.android.internal.R.array.config_wakeonlan_supported_interfaces));
 
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
@@ -4601,7 +4603,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         mWakelockLogs.log("ACQUIRE for " + forWhom);
         Message msg = mHandler.obtainMessage(EVENT_EXPIRE_NET_TRANSITION_WAKELOCK);
-        mHandler.sendMessageDelayed(msg, mNetTransitionWakeLockTimeout);
+        final int lockTimeout = mResources.get().getInteger(
+                com.android.connectivity.resources.R.integer.config_networkTransitionTimeout);
+        mHandler.sendMessageDelayed(msg, lockTimeout);
     }
 
     // Called when we gain a new default network to release the network transition wakelock in a
@@ -6515,6 +6519,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void updateWakeOnLan(@NonNull LinkProperties lp) {
+        if (mWolSupportedInterfaces == null) {
+            mWolSupportedInterfaces = new ArraySet<>(mResources.get().getStringArray(
+                    com.android.connectivity.resources.R.array
+                            .config_wakeonlan_supported_interfaces));
+        }
         lp.setWakeOnLanSupported(mWolSupportedInterfaces.contains(lp.getInterfaceName()));
     }
 
@@ -8076,8 +8085,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public String getCaptivePortalServerUrl() {
         enforceNetworkStackOrSettingsPermission();
-        String settingUrl = mContext.getResources().getString(
-                R.string.config_networkCaptivePortalServerUrl);
+        String settingUrl = mResources.get().getString(
+                com.android.connectivity.resources.R.string.config_networkCaptivePortalServerUrl);
 
         if (!TextUtils.isEmpty(settingUrl)) {
             return settingUrl;

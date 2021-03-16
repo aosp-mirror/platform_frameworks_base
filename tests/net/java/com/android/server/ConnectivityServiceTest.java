@@ -275,6 +275,7 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.net.module.util.ArrayTrackRecord;
 import com.android.server.ConnectivityService.ConnectivityDiagnosticsCallbackInfo;
 import com.android.server.connectivity.ConnectivityConstants;
+import com.android.server.connectivity.ConnectivityResources;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
@@ -444,6 +445,7 @@ public class ConnectivityServiceTest {
     @Mock NetworkPolicyManager mNetworkPolicyManager;
     @Mock VpnProfileStore mVpnProfileStore;
     @Mock SystemConfigManager mSystemConfigManager;
+    @Mock Resources mResources;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
             ArgumentCaptor.forClass(ResolverParamsParcel.class);
@@ -471,7 +473,7 @@ public class ConnectivityServiceTest {
     private class MockContext extends BroadcastInterceptingContext {
         private final MockContentResolver mContentResolver;
 
-        @Spy private Resources mResources;
+        @Spy private Resources mInternalResources;
         private final LinkedBlockingQueue<Intent> mStartedActivities = new LinkedBlockingQueue<>();
 
         // Map of permission name -> PermissionManager.Permission_{GRANTED|DENIED} constant
@@ -480,19 +482,13 @@ public class ConnectivityServiceTest {
         MockContext(Context base, ContentProvider settingsProvider) {
             super(base);
 
-            mResources = spy(base.getResources());
-            when(mResources.getStringArray(com.android.internal.R.array.networkAttributes)).
-                    thenReturn(new String[] {
+            mInternalResources = spy(base.getResources());
+            when(mInternalResources.getStringArray(com.android.internal.R.array.networkAttributes))
+                    .thenReturn(new String[] {
                             "wifi,1,1,1,-1,true",
                             "mobile,0,0,0,-1,true",
                             "mobile_mms,2,0,2,60000,true",
                             "mobile_supl,3,0,2,60000,true",
-                    });
-
-            when(mResources.getStringArray(
-                    com.android.internal.R.array.config_wakeonlan_supported_interfaces))
-                    .thenReturn(new String[]{
-                            WIFI_WOL_IFNAME,
                     });
 
             mContentResolver = new MockContentResolver();
@@ -559,7 +555,7 @@ public class ConnectivityServiceTest {
 
         @Override
         public Resources getResources() {
-            return mResources;
+            return mInternalResources;
         }
 
         @Override
@@ -1533,6 +1529,17 @@ public class ConnectivityServiceTest {
             return mPolicyTracker;
         }).when(deps).makeMultinetworkPolicyTracker(any(), any(), any());
         doReturn(true).when(deps).getCellular464XlatEnabled();
+
+        doReturn(60000).when(mResources).getInteger(
+                com.android.connectivity.resources.R.integer.config_networkTransitionTimeout);
+        doReturn("").when(mResources).getString(
+                com.android.connectivity.resources.R.string.config_networkCaptivePortalServerUrl);
+        doReturn(new String[]{ WIFI_WOL_IFNAME }).when(mResources).getStringArray(
+                com.android.connectivity.resources.R.array.config_wakeonlan_supported_interfaces);
+        final com.android.server.connectivity.ConnectivityResources connRes = mock(
+                ConnectivityResources.class);
+        doReturn(mResources).when(connRes).get();
+        doReturn(connRes).when(deps).getResources(any());
 
         return deps;
     }

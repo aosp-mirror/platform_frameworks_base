@@ -60,6 +60,7 @@ java_library {
         "services.core",
         "services.net",
         "unsupportedappusage",
+        "ServiceConnectivityResources",
     ],
     static_libs: [
         "modules-utils-os",
