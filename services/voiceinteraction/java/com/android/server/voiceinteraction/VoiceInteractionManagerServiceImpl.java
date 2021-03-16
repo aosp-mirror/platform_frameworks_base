@@ -27,6 +27,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
@@ -35,7 +36,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.os.Bundle;
 import android.os.Handler;
@@ -166,12 +169,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mSessionComponentName = new ComponentName(service.getPackageName(),
                 mInfo.getSessionService());
         final String hotwordDetectionServiceName = mInfo.getHotwordDetectionService();
-        if (hotwordDetectionServiceName != null) {
-            mHotwordDetectionComponentName = new ComponentName(service.getPackageName(),
-                    hotwordDetectionServiceName);
-        } else {
-            mHotwordDetectionComponentName = null;
-        }
+        mHotwordDetectionComponentName = hotwordDetectionServiceName != null
+                ? new ComponentName(service.getPackageName(), hotwordDetectionServiceName) : null;
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         IntentFilter filter = new IntentFilter();
@@ -445,8 +444,22 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     }
 
     boolean isIsolatedProcessLocked(ComponentName componentName) {
-        // TODO : Need to make sure this component exists and is :isolated.
-        return true;
+        IPackageManager pm = AppGlobals.getPackageManager();
+        try {
+            ServiceInfo serviceInfo = pm.getServiceInfo(componentName,
+                    PackageManager.GET_META_DATA
+                            | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, mUser);
+            if (serviceInfo != null) {
+                return (serviceInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
+                        && (serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) == 0;
+            }
+        } catch (RemoteException e) {
+            if (DEBUG) {
+                Slog.w(TAG, "isIsolatedProcess RemoteException : " + e);
+            }
+        }
+        return false;
     }
 
     public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -465,6 +478,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         pw.println("  Service info:");
         mInfo.getServiceInfo().dump(new PrintWriterPrinter(pw), "    ");
         pw.print("  Recognition service="); pw.println(mInfo.getRecognitionService());
+        pw.print("  Hotword detection service="); pw.println(mInfo.getHotwordDetectionService());
         pw.print("  Settings activity="); pw.println(mInfo.getSettingsActivity());
         pw.print("  Supports assist="); pw.println(mInfo.getSupportsAssist());
         pw.print("  Supports launch from keyguard=");
