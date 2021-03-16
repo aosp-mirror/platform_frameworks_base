@@ -1925,6 +1925,81 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(new Rect(500, 0, 2000, 700), rotateBounds);
     }
 
+    /**
+     * Creates a TestDisplayContent using the constructor that takes in display width and height as
+     * parameters and validates that the newly-created TestDisplayContent's DisplayInfo and
+     * WindowConfiguration match the parameters passed into the constructor. Additionally, this test
+     * checks that device-specific overrides are not applied.
+     */
+    @Test
+    public void testCreateTestDisplayContentFromDimensions() {
+        final int displayWidth = 1000;
+        final int displayHeight = 2000;
+        final int windowingMode = WINDOWING_MODE_FULLSCREEN;
+        final boolean ignoreOrientationRequests = false;
+        final float fixedOrientationLetterboxRatio = 0;
+        final DisplayContent testDisplayContent = new TestDisplayContent.Builder(mAtm, displayWidth,
+                displayHeight).build();
+
+        // test display info
+        final DisplayInfo di = testDisplayContent.getDisplayInfo();
+        assertEquals(displayWidth, di.logicalWidth);
+        assertEquals(displayHeight, di.logicalHeight);
+        assertEquals(TestDisplayContent.DEFAULT_LOGICAL_DISPLAY_DENSITY, di.logicalDensityDpi);
+
+        // test configuration
+        final WindowConfiguration windowConfig = testDisplayContent.getConfiguration()
+                .windowConfiguration;
+        assertEquals(displayWidth, windowConfig.getBounds().width());
+        assertEquals(displayHeight, windowConfig.getBounds().height());
+        assertEquals(windowingMode, windowConfig.getWindowingMode());
+
+        // test misc display overrides
+        assertEquals(ignoreOrientationRequests, testDisplayContent.mIgnoreOrientationRequest);
+        assertEquals(fixedOrientationLetterboxRatio, mWm.getFixedOrientationLetterboxAspectRatio(),
+                0 /* delta */);
+    }
+
+    /**
+     * Creates a TestDisplayContent using the constructor that takes in a DisplayInfo as a parameter
+     * and validates that the newly-created TestDisplayContent's DisplayInfo and WindowConfiguration
+     * match the width, height, and density values set in the DisplayInfo passed as a parameter.
+     * Additionally, this test checks that device-specific overrides are not applied.
+     */
+    @Test
+    public void testCreateTestDisplayContentFromDisplayInfo() {
+        final int displayWidth = 1000;
+        final int displayHeight = 2000;
+        final int windowingMode = WINDOWING_MODE_FULLSCREEN;
+        final boolean ignoreOrientationRequests = false;
+        final float fixedOrientationLetterboxRatio = 0;
+        final DisplayInfo testDisplayInfo = new DisplayInfo();
+        mContext.getDisplay().getDisplayInfo(testDisplayInfo);
+        testDisplayInfo.logicalWidth = displayWidth;
+        testDisplayInfo.logicalHeight = displayHeight;
+        testDisplayInfo.logicalDensityDpi = TestDisplayContent.DEFAULT_LOGICAL_DISPLAY_DENSITY;
+        final DisplayContent testDisplayContent = new TestDisplayContent.Builder(mAtm,
+                testDisplayInfo).build();
+
+        // test display info
+        final DisplayInfo di = testDisplayContent.getDisplayInfo();
+        assertEquals(displayWidth, di.logicalWidth);
+        assertEquals(displayHeight, di.logicalHeight);
+        assertEquals(TestDisplayContent.DEFAULT_LOGICAL_DISPLAY_DENSITY, di.logicalDensityDpi);
+
+        // test configuration
+        final WindowConfiguration windowConfig = testDisplayContent.getConfiguration()
+                .windowConfiguration;
+        assertEquals(displayWidth, windowConfig.getBounds().width());
+        assertEquals(displayHeight, windowConfig.getBounds().height());
+        assertEquals(windowingMode, windowConfig.getWindowingMode());
+
+        // test misc display overrides
+        assertEquals(ignoreOrientationRequests, testDisplayContent.mIgnoreOrientationRequest);
+        assertEquals(fixedOrientationLetterboxRatio, mWm.getFixedOrientationLetterboxAspectRatio(),
+                0 /* delta */);
+    }
+
     private boolean isOptionsPanelAtRight(int displayId) {
         return (mWm.getPreferredOptionsPanelGravity(displayId) & Gravity.RIGHT) == Gravity.RIGHT;
     }
