@@ -39180,19 +39180,21 @@ package android.speech {
   }
 
   public class SpeechRecognizer {
-    method public void cancel();
-    method @NonNull public static android.speech.SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull android.content.Context);
-    method public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
-    method public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
+    method @MainThread public void cancel();
+    method @MainThread @NonNull public static android.speech.SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull android.content.Context);
+    method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
+    method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
     method public void destroy();
     method public static boolean isRecognitionAvailable(android.content.Context);
-    method public void setRecognitionListener(android.speech.RecognitionListener);
-    method public void startListening(android.content.Intent);
-    method public void stopListening();
+    method @MainThread public void setRecognitionListener(android.speech.RecognitionListener);
+    method @MainThread public void startListening(android.content.Intent);
+    method @MainThread public void stopListening();
     field public static final String CONFIDENCE_SCORES = "confidence_scores";
     field public static final int ERROR_AUDIO = 3; // 0x3
     field public static final int ERROR_CLIENT = 5; // 0x5
     field public static final int ERROR_INSUFFICIENT_PERMISSIONS = 9; // 0x9
+    field public static final int ERROR_LANGUAGE_NOT_SUPPORTED = 12; // 0xc
+    field public static final int ERROR_LANGUAGE_UNAVAILABLE = 13; // 0xd
     field public static final int ERROR_NETWORK = 2; // 0x2
     field public static final int ERROR_NETWORK_TIMEOUT = 1; // 0x1
     field public static final int ERROR_NO_MATCH = 7; // 0x7
