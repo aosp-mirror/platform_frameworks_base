@@ -41,11 +41,11 @@ public class FaceSensorPropertiesInternal extends SensorPropertiesInternal {
      */
     public FaceSensorPropertiesInternal(int sensorId, @SensorProperties.Strength int strength,
             int maxEnrollmentsPerUser, boolean supportsFaceDetection,
-            boolean supportsSelfIllumination) {
+            boolean supportsSelfIllumination, boolean resetLockoutRequiresChallenge) {
         // resetLockout is managed by the HAL and requires a HardwareAuthToken for all face
         // HAL interfaces (IBiometricsFace@1.0 HIDL and IFace@1.0 AIDL).
         super(sensorId, strength, maxEnrollmentsPerUser,
-                true /* resetLockoutRequiresHardwareAuthToken */);
+                true /* resetLockoutRequiresHardwareAuthToken */, resetLockoutRequiresChallenge);
         this.supportsFaceDetection = supportsFaceDetection;
         this.supportsSelfIllumination = supportsSelfIllumination;
     }

@@ -62,7 +62,12 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken, int sensorLocationX, int sensorLocationY,
             int sensorRadius) {
-        super(sensorId, strength, maxEnrollmentsPerUser, resetLockoutRequiresHardwareAuthToken);
+        // IBiometricsFingerprint@2.1 handles lockout in the framework, so the challenge is not
+        // required as it can only be generated/attested/verified by TEE components.
+        // IFingerprint@1.0 handles lockout below the HAL, but does not require a challenge. See
+        // the HAL interface for more details.
+        super(sensorId, strength, maxEnrollmentsPerUser, resetLockoutRequiresHardwareAuthToken,
+                false /* resetLockoutRequiresChallenge */);
         this.sensorType = sensorType;
         this.sensorLocationX = sensorLocationX;
         this.sensorLocationY = sensorLocationY;
@@ -91,7 +96,8 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken) {
-        super(sensorId, strength, maxEnrollmentsPerUser, resetLockoutRequiresHardwareAuthToken);
+        super(sensorId, strength, maxEnrollmentsPerUser, resetLockoutRequiresHardwareAuthToken,
+                false /* resetLockoutRequiresChallenge */);
         this.sensorType = sensorType;
 
         int[] props = context.getResources().getIntArray(

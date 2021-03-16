@@ -32,18 +32,22 @@ public class SensorPropertiesInternal implements Parcelable {
     @SensorProperties.Strength public final int sensorStrength;
     public final int maxEnrollmentsPerUser;
     public final boolean resetLockoutRequiresHardwareAuthToken;
+    public final boolean resetLockoutRequiresChallenge;
 
     public static SensorPropertiesInternal from(@NonNull SensorPropertiesInternal prop) {
         return new SensorPropertiesInternal(prop.sensorId, prop.sensorStrength,
-                prop.maxEnrollmentsPerUser, prop.resetLockoutRequiresHardwareAuthToken);
+                prop.maxEnrollmentsPerUser, prop.resetLockoutRequiresHardwareAuthToken,
+                prop.resetLockoutRequiresChallenge);
     }
 
     protected SensorPropertiesInternal(int sensorId, @SensorProperties.Strength int sensorStrength,
-            int maxEnrollmentsPerUser, boolean resetLockoutRequiresHardwareAuthToken) {
+            int maxEnrollmentsPerUser, boolean resetLockoutRequiresHardwareAuthToken,
+            boolean resetLockoutRequiresChallenge) {
         this.sensorId = sensorId;
         this.sensorStrength = sensorStrength;
         this.maxEnrollmentsPerUser = maxEnrollmentsPerUser;
         this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
+        this.resetLockoutRequiresChallenge = resetLockoutRequiresChallenge;
     }
 
     protected SensorPropertiesInternal(Parcel in) {
@@ -51,6 +55,7 @@ public class SensorPropertiesInternal implements Parcelable {
         sensorStrength = in.readInt();
         maxEnrollmentsPerUser = in.readInt();
         resetLockoutRequiresHardwareAuthToken = in.readBoolean();
+        resetLockoutRequiresChallenge = in.readBoolean();
     }
 
     public static final Creator<SensorPropertiesInternal> CREATOR =
@@ -77,6 +82,7 @@ public class SensorPropertiesInternal implements Parcelable {
         dest.writeInt(sensorStrength);
         dest.writeInt(maxEnrollmentsPerUser);
         dest.writeBoolean(resetLockoutRequiresHardwareAuthToken);
+        dest.writeBoolean(resetLockoutRequiresChallenge);
     }
 
     @Override
