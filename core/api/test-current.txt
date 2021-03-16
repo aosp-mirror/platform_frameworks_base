@@ -1446,6 +1446,11 @@ package android.media.audiopolicy {
     method @NonNull public android.media.audiopolicy.AudioPolicy.Builder setIsTestFocusPolicy(boolean);
   }
 
+  public final class AudioProductStrategy implements android.os.Parcelable {
+    method public int getLegacyStreamTypeForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method public int getVolumeGroupIdForAudioAttributes(@NonNull android.media.AudioAttributes);
+  }
+
 }
 
 package android.media.tv {

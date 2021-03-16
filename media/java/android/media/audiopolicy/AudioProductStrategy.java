@@ -19,6 +19,7 @@ package android.media.audiopolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.media.AudioAttributes;
 import android.media.AudioSystem;
 import android.media.MediaRecorder;
@@ -240,6 +241,7 @@ public final class AudioProductStrategy implements Parcelable {
      * @return the legacy stream type relevant for the given {@link AudioAttributes}.
      *         If none is found, it return DEFAULT stream type.
      */
+    @TestApi
     public int getLegacyStreamTypeForAudioAttributes(@NonNull AudioAttributes aa) {
         Preconditions.checkNotNull(aa, "AudioAttributes must not be null");
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
@@ -288,6 +290,7 @@ public final class AudioProductStrategy implements Parcelable {
      * @return the volume group id associated with the given audio attributes if found,
      *         {@link AudioVolumeGroup#DEFAULT_VOLUME_GROUP} otherwise.
      */
+    @TestApi
     public int getVolumeGroupIdForAudioAttributes(@NonNull AudioAttributes aa) {
         Preconditions.checkNotNull(aa, "AudioAttributes must not be null");
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
