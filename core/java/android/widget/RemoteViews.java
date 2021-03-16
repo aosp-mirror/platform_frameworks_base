@@ -4493,7 +4493,8 @@ public class RemoteViews implements Parcelable, Filter {
      * Call a method taking one int, a size in pixels, on a view in the layout for this
      * RemoteViews.
      *
-     * The dimension will be resolved from the resources at the time of inflation.
+     * The dimension will be resolved from the resources at the time the {@link RemoteViews} is
+     * (re-)applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4525,7 +4526,8 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one int, a color, on a view in the layout for this RemoteViews.
      *
-     * The ColorStateList will be resolved from the resources at the time of inflation.
+     * The Color will be resolved from the resources at the time the {@link RemoteViews} is (re-)
+     * applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4602,7 +4604,8 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one ColorStateList on a view in the layout for this RemoteViews.
      *
-     * The ColorStateList will be resolved from the resources at the time of inflation.
+     * The ColorStateList will be resolved from the resources at the time the {@link RemoteViews} is
+     * (re-)applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4641,7 +4644,8 @@ public class RemoteViews implements Parcelable, Filter {
      * Call a method taking one float, a size in pixels, on a view in the layout for this
      * RemoteViews.
      *
-     * The dimension will be resolved from the resources at the time of inflation.
+     * The dimension will be resolved from the resources at the time the {@link RemoteViews} is
+     * (re-)applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4657,7 +4661,8 @@ public class RemoteViews implements Parcelable, Filter {
      * Call a method taking one float, a size in pixels, on a view in the layout for this
      * RemoteViews.
      *
-     * The dimension will be resolved from the specified dimension at the time of inflation.
+     * The dimension will be resolved from the resources at the time the {@link RemoteViews} is
+     * (re-)applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4719,7 +4724,8 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one CharSequence on a view in the layout for this RemoteViews.
      *
-     * The CharSequence will be resolved from the resources at the time of inflation.
+     * The CharSequence will be resolved from the resources at the time the {@link RemoteViews} is
+     * (re-)applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
