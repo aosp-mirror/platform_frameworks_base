@@ -231,7 +231,7 @@ import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedTaskListener;
 import android.view.IRecentsAnimationRunner;
 import android.view.IRotationWatcher;
-import android.view.IScrollCaptureCallbacks;
+import android.view.IScrollCaptureResponseListener;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindow;
@@ -7145,10 +7145,10 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param displayId the display for the request
      * @param behindClient token for a window, used to filter the search to windows behind it
      * @param taskId specifies the id of a task the result must belong to or -1 to match any task
-     * @param callbacks to receive responses
+     * @param listener to receive the response
      */
     public void requestScrollCapture(int displayId, @Nullable IBinder behindClient, int taskId,
-            IScrollCaptureCallbacks callbacks) {
+            IScrollCaptureResponseListener listener) {
         if (!checkCallingPermission(READ_FRAME_BUFFER, "requestScrollCapture()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
@@ -7161,7 +7161,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     ProtoLog.e(WM_ERROR,
                             "Invalid displayId for requestScrollCapture: %d", displayId);
                     responseBuilder.setDescription(String.format("bad displayId: %d", displayId));
-                    callbacks.onScrollCaptureResponse(responseBuilder.build());
+                    listener.onScrollCaptureResponse(responseBuilder.build());
                     return;
                 }
                 WindowState topWindow = null;
@@ -7171,19 +7171,19 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState targetWindow = dc.findScrollCaptureTargetWindow(topWindow, taskId);
                 if (targetWindow == null) {
                     responseBuilder.setDescription("findScrollCaptureTargetWindow returned null");
-                    callbacks.onScrollCaptureResponse(responseBuilder.build());
+                    listener.onScrollCaptureResponse(responseBuilder.build());
                     return;
                 }
                 try {
                     // Forward to the window for handling, which will respond using the callback.
-                    targetWindow.mClient.requestScrollCapture(callbacks);
+                    targetWindow.mClient.requestScrollCapture(listener);
                 } catch (RemoteException e) {
                     ProtoLog.w(WM_ERROR,
                             "requestScrollCapture: caught exception dispatching to window."
                                     + "token=%s", targetWindow.mClient.asBinder());
                     responseBuilder.setWindowTitle(targetWindow.getName());
                     responseBuilder.setDescription(String.format("caught exception: %s", e));
-                    callbacks.onScrollCaptureResponse(responseBuilder.build());
+                    listener.onScrollCaptureResponse(responseBuilder.build());
                 }
             }
         } catch (RemoteException e) {
