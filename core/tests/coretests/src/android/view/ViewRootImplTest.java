@@ -205,7 +205,7 @@ public class ViewRootImplTest {
     @Test
     public void requestScrollCapture_withoutContentRoot() {
         final CountDownLatch latch = new CountDownLatch(1);
-        mViewRootImpl.handleScrollCaptureRequest(new IScrollCaptureCallbacks.Default() {
+        mViewRootImpl.handleScrollCaptureRequest(new IScrollCaptureResponseListener.Default() {
             @Override
             public void onScrollCaptureResponse(ScrollCaptureResponse response) {
                 latch.countDown();
@@ -237,7 +237,7 @@ public class ViewRootImplTest {
 
         final CountDownLatch latch = new CountDownLatch(1);
         mViewRootImpl.setScrollCaptureRequestTimeout(100);
-        mViewRootImpl.handleScrollCaptureRequest(new IScrollCaptureCallbacks.Default() {
+        mViewRootImpl.handleScrollCaptureRequest(new IScrollCaptureResponseListener.Default() {
             @Override
             public void onScrollCaptureResponse(ScrollCaptureResponse response) {
                 latch.countDown();

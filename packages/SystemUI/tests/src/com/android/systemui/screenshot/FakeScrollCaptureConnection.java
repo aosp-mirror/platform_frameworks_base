@@ -24,6 +24,7 @@ import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
+import android.os.CancellationSignal;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.view.IScrollCaptureCallbacks;
@@ -37,19 +38,15 @@ import android.view.Surface;
 class FakeScrollCaptureConnection extends IScrollCaptureConnection.Stub {
     private final int[] mColors = {Color.RED, Color.GREEN, Color.BLUE};
     private IScrollCaptureCallbacks mCallbacks;
-    private Surface mSurface;
     private Paint mPaint;
     private int mNextColor;
     private HwuiContext mHwuiContext;
-
-    FakeScrollCaptureConnection(IScrollCaptureCallbacks cb) {
-        mCallbacks = cb;
-    }
+    private CancellationSignal mCancellationSignal;
 
     @Override
-    public ICancellationSignal startCapture(Surface surface) {
-        mSurface = surface;
-        mHwuiContext = new HwuiContext(false, surface);
+    public ICancellationSignal startCapture(Surface surface, IScrollCaptureCallbacks callbacks) {
+        mCallbacks = callbacks;
+        mHwuiContext = new HwuiContext(surface);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setStyle(Paint.Style.FILL);
         try {
@@ -57,7 +54,9 @@ class FakeScrollCaptureConnection extends IScrollCaptureConnection.Stub {
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
-        return null;
+        ICancellationSignal signal = CancellationSignal.createTransport();
+        mCancellationSignal = CancellationSignal.fromTransport(signal);
+        return signal;
     }
 
     @Override
@@ -72,7 +71,9 @@ class FakeScrollCaptureConnection extends IScrollCaptureConnection.Stub {
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
-        return null;
+        ICancellationSignal signal = CancellationSignal.createTransport();
+        mCancellationSignal = CancellationSignal.fromTransport(signal);
+        return signal;
     }
 
     @Override
@@ -83,15 +84,15 @@ class FakeScrollCaptureConnection extends IScrollCaptureConnection.Stub {
             e.rethrowAsRuntimeException();
         } finally {
             mHwuiContext.destroy();
-            mSurface = null;
             mCallbacks = null;
         }
-        return null;
+        ICancellationSignal signal = CancellationSignal.createTransport();
+        mCancellationSignal = CancellationSignal.fromTransport(signal);
+        return signal;
     }
 
     @Override
     public void close() throws RemoteException {
-
     }
 
     // From android.view.Surface, but issues render requests synchronously with waitForPresent(true)
@@ -99,21 +100,16 @@ class FakeScrollCaptureConnection extends IScrollCaptureConnection.Stub {
         private final RenderNode mRenderNode;
         private final HardwareRenderer mHardwareRenderer;
         private RecordingCanvas mCanvas;
-        private final boolean mIsWideColorGamut;
 
-        HwuiContext(boolean isWideColorGamut, Surface surface) {
+        HwuiContext(Surface surface) {
             mRenderNode = RenderNode.create("HwuiCanvas", null);
             mRenderNode.setClipToBounds(false);
             mRenderNode.setForceDarkAllowed(false);
-            mIsWideColorGamut = isWideColorGamut;
 
             mHardwareRenderer = new HardwareRenderer();
             mHardwareRenderer.setContentRoot(mRenderNode);
             mHardwareRenderer.setSurface(surface, true);
-            mHardwareRenderer.setColorMode(
-                    isWideColorGamut
-                            ? ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT
-                            : ActivityInfo.COLOR_MODE_DEFAULT);
+            mHardwareRenderer.setColorMode(ActivityInfo.COLOR_MODE_DEFAULT);
             mHardwareRenderer.setLightSourceAlpha(0.0f, 0.0f);
             mHardwareRenderer.setLightSourceGeometry(0.0f, 0.0f, 0.0f, 0.0f);
         }
@@ -141,10 +137,6 @@ class FakeScrollCaptureConnection extends IScrollCaptureConnection.Stub {
 
         void destroy() {
             mHardwareRenderer.destroy();
-        }
-
-        boolean isWideColorGamut() {
-            return mIsWideColorGamut;
         }
     }
 }
