@@ -92,7 +92,6 @@ import android.provider.Settings.SettingNotFoundException;
 import android.security.AndroidKeyStoreMaintenance;
 import android.security.Authorization;
 import android.security.KeyStore;
-import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.keystore.UserNotAuthenticatedException;
@@ -157,7 +156,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -264,13 +262,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         @Override
         public void onStart() {
-            Optional<Boolean> keystore2_enabled =
-                    android.sysprop.Keystore2Properties.keystore2_enabled();
-            if (keystore2_enabled.isPresent() && keystore2_enabled.get()) {
-                android.security.keystore2.AndroidKeyStoreProvider.install();
-            } else {
-                AndroidKeyStoreProvider.install();
-            }
+            android.security.keystore2.AndroidKeyStoreProvider.install();
             mLockSettingsService = new LockSettingsService(getContext());
             publishBinderService("lock_settings", mLockSettingsService);
         }
