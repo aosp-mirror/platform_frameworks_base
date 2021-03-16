@@ -5449,16 +5449,28 @@ public final class ActiveServices {
         }
     }
 
+    boolean canStartForegroundServiceLocked(int callingPid, int callingUid, String callingPackage) {
+        if (!mAm.mConstants.mFlagBackgroundFgsStartRestrictionEnabled) {
+            return true;
+        }
+        final @ReasonCode int allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
+                callingPackage, callingPid, callingUid, null /* serviceRecord */,
+                false /* allowBackgroundActivityStarts */);
+        final @ReasonCode int allowStartFgs = shouldAllowFgsStartForegroundLocked(
+                allowWhileInUse, callingPid, callingUid, callingPackage, null /* targetService */);
+        return allowStartFgs != REASON_DENIED;
+    }
+
     /**
      * Should allow while-in-use permissions in FGS or not.
      * A typical BG started FGS is not allowed to have while-in-use permissions.
      * @param callingPackage caller app's package name.
      * @param callingUid caller app's uid.
-     * @param r the service to start.
+     * @param targetService the service to start.
      * @return {@link ReasonCode}
      */
     private @ReasonCode int shouldAllowFgsWhileInUsePermissionLocked(String callingPackage,
-            int callingPid, int callingUid, ServiceRecord r,
+            int callingPid, int callingUid, @Nullable ServiceRecord targetService,
             boolean allowBackgroundActivityStarts) {
         int ret = REASON_DENIED;
 
@@ -5520,8 +5532,8 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
-            if (r.app != null) {
-                ActiveInstrumentation instr = r.app.getActiveInstrumentation();
+            if (targetService != null && targetService.app != null) {
+                ActiveInstrumentation instr = targetService.app.getActiveInstrumentation();
                 if (instr != null && instr.mHasBackgroundActivityStartsPermission) {
                     ret = REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
                 }
@@ -5567,16 +5579,44 @@ public final class ActiveServices {
     private @ReasonCode int shouldAllowFgsStartForegroundLocked(
             @ReasonCode int allowWhileInUse, String callingPackage, int callingPid,
             int callingUid, Intent intent, ServiceRecord r, boolean allowBackgroundActivityStarts) {
-        int ret = allowWhileInUse;
         FgsStartTempAllowList.TempFgsAllowListEntry tempAllowListReason =
                 r.mInfoTempFgsAllowListReason = mAm.isAllowlistedForFgsStartLOSP(callingUid);
+        int ret = shouldAllowFgsStartForegroundLocked(allowWhileInUse, callingPid, callingUid,
+                callingPackage, r);
 
-        final StringBuilder sb = new StringBuilder(64);
         final int uidState = mAm.getUidStateLocked(callingUid);
+        final String debugInfo =
+                "[callingPackage: " + callingPackage
+                        + "; callingUid: " + callingUid
+                        + "; uidState: " + ProcessList.makeProcStateString(uidState)
+                        + "; intent: " + intent
+                        + "; code:" + reasonCodeToString(ret)
+                        + "; tempAllowListReason:<"
+                        + (tempAllowListReason == null ? null :
+                                (tempAllowListReason.mReason
+                                        + ",reasonCode:"
+                                        + reasonCodeToString(tempAllowListReason.mReasonCode)
+                                        + ",duration:" + tempAllowListReason.mDuration
+                                        + ",callingUid:" + tempAllowListReason.mCallingUid))
+                        + ">"
+                        + "; targetSdkVersion:" + r.appInfo.targetSdkVersion
+                        + "]";
+        if (!debugInfo.equals(r.mInfoAllowStartForeground)) {
+            r.mLoggedInfoAllowStartForeground = false;
+            r.mInfoAllowStartForeground = debugInfo;
+        }
+        return ret;
+    }
+
+    private @ReasonCode int shouldAllowFgsStartForegroundLocked(@ReasonCode int allowWhileInUse,
+            int callingPid, int callingUid, String callingPackage,
+            @Nullable ServiceRecord targetService) {
+        int ret = allowWhileInUse;
+
         if (ret == REASON_DENIED) {
+            final int uidState = mAm.getUidStateLocked(callingUid);
             // Is the calling UID at PROCESS_STATE_TOP or above?
             if (uidState <= PROCESS_STATE_TOP) {
-                sb.append("uidState=").append(uidState);
                 ret = getReasonCodeFromProcState(uidState);
             }
         }
@@ -5648,8 +5688,10 @@ public final class ActiveServices {
 
         // NOTE this should always be the last check.
         if (ret == REASON_DENIED) {
-            if (isPackageExemptedFromFgsRestriction(r.appInfo.packageName, r.appInfo.uid)
-                    || isPackageExemptedFromFgsRestriction(callingPackage, callingUid)) {
+            if (isPackageExemptedFromFgsRestriction(callingPackage, callingUid)) {
+                ret = REASON_EXEMPTED_PACKAGE;
+            } else if (targetService != null && isPackageExemptedFromFgsRestriction(
+                    targetService.appInfo.packageName, targetService.appInfo.uid)) {
                 ret = REASON_EXEMPTED_PACKAGE;
             }
         }
@@ -5660,28 +5702,6 @@ public final class ActiveServices {
             if (isCompanionApp) {
                 ret = REASON_COMPANION_DEVICE_MANAGER;
             }
-        }
-
-        final String debugInfo =
-                "[callingPackage: " + callingPackage
-                        + "; callingUid: " + callingUid
-                        + "; uidState: " + ProcessList.makeProcStateString(uidState)
-                        + "; intent: " + intent
-                        + "; code:" + reasonCodeToString(ret)
-                        + "; tempAllowListReason:<" +
-                        (tempAllowListReason == null ? null :
-                                (tempAllowListReason.mReason
-                                + ",reasonCode:"
-                                + reasonCodeToString(tempAllowListReason.mReasonCode)
-                                + ",duration:" + tempAllowListReason.mDuration
-                                + ",callingUid:" + tempAllowListReason.mCallingUid))
-                        + ">"
-                        + "; extra:" + sb.toString()
-                        + "; targetSdkVersion:" + r.appInfo.targetSdkVersion
-                        + "]";
-        if (!debugInfo.equals(r.mInfoAllowStartForeground)) {
-            r.mLoggedInfoAllowStartForeground = false;
-            r.mInfoAllowStartForeground = debugInfo;
         }
 
         return ret;

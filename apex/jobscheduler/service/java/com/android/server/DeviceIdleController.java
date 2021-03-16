@@ -2692,7 +2692,7 @@ public class DeviceIdleController extends SystemService
     void addPowerSaveTempAllowlistAppChecked(String packageName, long duration,
             int userId, @ReasonCode int reasonCode, @Nullable String reason)
             throws RemoteException {
-        getContext().enforceCallingPermission(
+        getContext().enforceCallingOrSelfPermission(
                 Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
                 "No permission to change device idle whitelist");
         final int callingUid = Binder.getCallingUid();
@@ -2715,7 +2715,7 @@ public class DeviceIdleController extends SystemService
 
     void removePowerSaveTempAllowlistAppChecked(String packageName, int userId)
             throws RemoteException {
-        getContext().enforceCallingPermission(
+        getContext().enforceCallingOrSelfPermission(
                 Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
                 "No permission to change device idle whitelist");
         final int callingUid = Binder.getCallingUid();
