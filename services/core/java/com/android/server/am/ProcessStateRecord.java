@@ -43,6 +43,7 @@ import static android.os.Process.SYSTEM_UID;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ProcessRecord.TAG;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.os.Binder;
@@ -385,6 +386,16 @@ final class ProcessStateRecord {
      */
     @GuardedBy("mService")
     private boolean mReachable;
+
+    /**
+     * The most recent time when the last visible activity within this process became invisible.
+     *
+     * <p> It'll be set to 0 if there is never a visible activity, or Long.MAX_VALUE if there is
+     * any visible activities within this process at this moment.</p>
+     */
+    @GuardedBy("mService")
+    @ElapsedRealtimeLong
+    private long mLastInvisibleTime;
 
     // Below are the cached task info for OomAdjuster only
     private static final int VALUE_INVALID = -1;
@@ -1040,18 +1051,19 @@ final class ProcessStateRecord {
 
     @GuardedBy("mService")
     void computeOomAdjFromActivitiesIfNecessary(OomAdjuster.ComputeOomAdjWindowCallback callback,
-            int adj, boolean foregroundActivities, int procState, int schedGroup, int appUid,
-            int logUid, int processCurTop) {
+            int adj, boolean foregroundActivities, boolean hasVisibleActivities, int procState,
+            int schedGroup, int appUid, int logUid, int processCurTop) {
         if (mCachedAdj != ProcessList.INVALID_ADJ) {
             return;
         }
-        callback.initialize(mApp, adj, foregroundActivities, procState, schedGroup, appUid, logUid,
-                processCurTop);
+        callback.initialize(mApp, adj, foregroundActivities, hasVisibleActivities, procState,
+                schedGroup, appUid, logUid, processCurTop);
         final int minLayer = Math.min(ProcessList.VISIBLE_APP_LAYER_MAX,
                 mApp.getWindowProcessController().computeOomAdjFromActivities(callback));
 
         mCachedAdj = callback.adj;
         mCachedForegroundActivities = callback.foregroundActivities;
+        mCachedHasVisibleActivities = callback.mHasVisibleActivities ? VALUE_TRUE : VALUE_FALSE;
         mCachedProcState = callback.procState;
         mCachedSchedGroup = callback.schedGroup;
 
@@ -1263,6 +1275,21 @@ final class ProcessStateRecord {
         return mAllowStartFgs;
     }
 
+    @GuardedBy("mService")
+    void updateLastInvisibleTime(boolean hasVisibleActivities) {
+        if (hasVisibleActivities) {
+            mLastInvisibleTime = Long.MAX_VALUE;
+        } else if (mLastInvisibleTime == Long.MAX_VALUE) {
+            mLastInvisibleTime = SystemClock.elapsedRealtime();
+        }
+    }
+
+    @GuardedBy("mService")
+    @ElapsedRealtimeLong
+    long getLastInvisibleTime() {
+        return mLastInvisibleTime;
+    }
+
     @GuardedBy({"mService", "mProcLock"})
     void dump(PrintWriter pw, String prefix, long nowUptime) {
         if (mReportedInteraction || mFgInteractionTime != 0) {
@@ -1338,6 +1365,15 @@ final class ProcessStateRecord {
         if (mLastTopTime > 0) {
             pw.print(prefix); pw.print("lastTopTime=");
             TimeUtils.formatDuration(mLastTopTime, nowUptime, pw);
+            pw.println();
+        }
+        if (mLastInvisibleTime > 0 && mLastInvisibleTime < Long.MAX_VALUE) {
+            pw.print(prefix); pw.print("lastInvisibleTime=");
+            final long elapsedRealtimeNow = SystemClock.elapsedRealtime();
+            final long currentTimeNow = System.currentTimeMillis();
+            final long lastInvisibleCurrentTime =
+                    currentTimeNow - elapsedRealtimeNow + mLastInvisibleTime;
+            TimeUtils.dumpTimeWithDelta(pw, lastInvisibleCurrentTime, currentTimeNow);
             pw.println();
         }
         if (mHasStartedServices) {

@@ -24,6 +24,7 @@ import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
+import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
 import static android.os.PowerWhitelistManager.REASON_ACTIVITY_STARTER;
 import static android.os.PowerWhitelistManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerWhitelistManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
@@ -5556,6 +5557,14 @@ public final class ActiveServices {
                         if (instr != null
                                 && instr.mHasBackgroundForegroundServiceStartsPermission) {
                             return REASON_INSTR_BACKGROUND_FGS_PERMISSION;
+                        }
+                        final long lastInvisibleTime = app.mState.getLastInvisibleTime();
+                        if (lastInvisibleTime > 0 && lastInvisibleTime < Long.MAX_VALUE) {
+                            final long sinceLastInvisible = SystemClock.elapsedRealtime()
+                                    - lastInvisibleTime;
+                            if (sinceLastInvisible < mAm.mConstants.mFgToBgFgsGraceDuration) {
+                                return REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
+                            }
                         }
                     }
                 }
