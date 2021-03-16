@@ -42,15 +42,19 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityOptions;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,6 +88,48 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     @After
     public void tearDown() throws Exception {
         mPinnedTask.removeImmediately();
+    }
+
+    @Test
+    public void getOrCreateLaunchRootRespectsResolvedWindowingMode() {
+        final Task rootTask = createTaskStackOnDisplay(
+                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        rootTask.mCreatedByOrganizer = true;
+        final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
+        taskDisplayArea.setLaunchRootTask(
+                rootTask, new int[]{WINDOWING_MODE_FREEFORM}, new int[]{ACTIVITY_TYPE_STANDARD});
+
+        final Task candidateRootTask = createTaskStackOnDisplay(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
+        final LaunchParams launchParams = new LaunchParams();
+        launchParams.mWindowingMode = WINDOWING_MODE_FREEFORM;
+
+        final Task actualRootTask = taskDisplayArea.getOrCreateRootTask(
+                activity, null /* options */, candidateRootTask,
+                launchParams, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        assertSame(rootTask, actualRootTask.getRootTask());
+    }
+
+    @Test
+    public void getOrCreateLaunchRootUsesActivityOptionsWindowingMode() {
+        final Task rootTask = createTaskStackOnDisplay(
+                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        rootTask.mCreatedByOrganizer = true;
+        final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
+        taskDisplayArea.setLaunchRootTask(
+                rootTask, new int[]{WINDOWING_MODE_FREEFORM}, new int[]{ACTIVITY_TYPE_STANDARD});
+
+        final Task candidateRootTask = createTaskStackOnDisplay(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        final Task actualRootTask = taskDisplayArea.getOrCreateRootTask(
+                activity, options, candidateRootTask,
+                null /* launchParams */, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        assertSame(rootTask, actualRootTask.getRootTask());
     }
 
     @Test

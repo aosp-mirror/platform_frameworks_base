@@ -51,7 +51,7 @@ public class PacProxySelector extends ProxySelector {
                 ServiceManager.getService(PROXY_SERVICE));
         if (mProxyService == null) {
             // Added because of b10267814 where mako is restarting.
-            Log.e(TAG, "PacProxyInstaller: no proxy service");
+            Log.e(TAG, "PacProxyService: no proxy service");
         }
         mDefaultList = Lists.newArrayList(java.net.Proxy.NO_PROXY);
     }

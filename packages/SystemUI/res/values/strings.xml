@@ -851,8 +851,6 @@
     <string name="quick_settings_wifi_label">Wi-Fi</string>
     <!-- QuickSettings: Internet [CHAR LIMIT=NONE] -->
     <string name="quick_settings_internet_label">Internet</string>
-    <!-- QuickSettings: Airplane-safe [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_airplane_safe_label">Airplane-safe</string>
     <!-- QuickSettings: networks available [CHAR LIMIT=NONE] -->
     <string name="quick_settings_networks_available">Networks available</string>
     <!-- QuickSettings: networks unavailable [CHAR LIMIT=NONE] -->

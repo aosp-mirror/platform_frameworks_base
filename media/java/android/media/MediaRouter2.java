@@ -21,6 +21,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -89,6 +90,7 @@ public final class MediaRouter2 {
     private final CopyOnWriteArrayList<ControllerCreationRequest> mControllerCreationRequests =
             new CopyOnWriteArrayList<>();
 
+    // TODO: Specify the fields that are only used (or not used) by system media router.
     private final String mClientPackageName;
     private final ManagerCallback mManagerCallback;
 
@@ -132,18 +134,34 @@ public final class MediaRouter2 {
     }
 
     /**
-     * Gets an instance of the media router which controls the app's media routing.
+     * Gets an instance of the system media router which controls the app's media routing.
      * Returns {@code null} if the given package name is invalid.
+     * There are several things to note when using the media routers created with this method.
      * <p>
-     * Note: For media routers created with this method, the discovery preference passed to
-     * {@link #registerRouteCallback} will have no effect. The callback will be called accordingly
-     * with the client app's discovery preference. Therefore, it is recommended to pass
+     * First of all, the discovery preference passed to {@link #registerRouteCallback}
+     * will have no effect. The callback will be called accordingly with the client app's
+     * discovery preference. Therefore, it is recommended to pass
      * {@link RouteDiscoveryPreference#EMPTY} there.
+     * <p>
+     * Also, do not keep/compare the instances of the {@link RoutingController}, since they are
+     * always newly created with the latest session information whenever below methods are called:
+     * <ul>
+     * <li> {@link #getControllers()} </li>
+     * <li> {@link #getController(String)}} </li>
+     * <li> {@link TransferCallback#onTransfer(RoutingController, RoutingController)} </li>
+     * <li> {@link TransferCallback#onStop(RoutingController)} </li>
+     * <li> {@link ControllerCallback#onControllerUpdated(RoutingController)} </li>
+     * </ul>
+     * Therefore, in order to track the current routing status, keep the controller's ID instead,
+     * and use {@link #getController(String)} and {@link #getSystemController()} for
+     * getting controllers.
+     * <p>
+     * Finally, it will have no effect to call {@link #setOnGetControllerHintsListener}.
      *
      * @param clientPackageName the package name of the app to control
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     @Nullable
     public static MediaRouter2 getInstance(@NonNull Context context,
             @NonNull String clientPackageName) {
@@ -168,9 +186,37 @@ public final class MediaRouter2 {
                 instance = new MediaRouter2(context, clientPackageName);
                 sSystemMediaRouter2Map.put(clientPackageName, instance);
                 // TODO: Remove router instance once it is not needed.
-                instance.registerManagerCallback();
+                instance.registerManagerCallbackForSystemRouter();
             }
             return instance;
+        }
+    }
+
+    /**
+     * Starts scanning remote routes.
+     * Note that calling start/stopScan is applied to all system routers in the same process.
+     *
+     * @see #stopScan()
+     * @hide
+     */
+    @SystemApi
+    public void startScan() {
+        if (isSystemRouter()) {
+            sManager.startScan();
+        }
+    }
+
+    /**
+     * Stops scanning remote routes to reduce resource consumption.
+     * Note that calling start/stopScan is applied to all system routers in the same process.
+     *
+     * @see #startScan()
+     * @hide
+     */
+    @SystemApi
+    public void stopScan() {
+        if (isSystemRouter()) {
+            sManager.stopScan();
         }
     }
 
@@ -209,13 +255,15 @@ public final class MediaRouter2 {
     }
 
     private MediaRouter2(Context context, String clientPackageName) {
+        mContext = context;
         mClientPackageName = clientPackageName;
         mManagerCallback = new ManagerCallback();
-        mContext = context;
-        mMediaRouterService = null;
-        mPackageName = null;
         mHandler = new Handler(Looper.getMainLooper());
-        mSystemController = null;
+        mSystemController = new SystemRoutingController(sManager.getSystemRoutingSession());
+        mMediaRouterService = null; // TODO: Make this non-null and check permission.
+
+        // Only used by non-system MediaRouter2.
+        mPackageName = null;
     }
 
     /**
@@ -240,7 +288,7 @@ public final class MediaRouter2 {
      * @see #getInstance(Context, String)
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     @Nullable
     public String getClientPackageName() {
         return mClientPackageName;
@@ -358,7 +406,8 @@ public final class MediaRouter2 {
      *
      * @hide
      */
-    //@SystemApi
+    @SystemApi
+    @NonNull
     public List<MediaRoute2Info> getAllRoutes() {
         if (isSystemRouter()) {
             return sManager.getAllRoutes();
@@ -377,10 +426,6 @@ public final class MediaRouter2 {
      */
     @NonNull
     public List<MediaRoute2Info> getRoutes() {
-        if (isSystemRouter()) {
-            return sManager.getAvailableRoutes(mClientPackageName);
-        }
-
         synchronized (mLock) {
             if (mShouldUpdateRoutes) {
                 mShouldUpdateRoutes = false;
@@ -474,6 +519,9 @@ public final class MediaRouter2 {
      *                 {@code null} for unset.
      */
     public void setOnGetControllerHintsListener(@Nullable OnGetControllerHintsListener listener) {
+        if (isSystemRouter()) {
+            return;
+        }
         mOnGetControllerHintsListener = listener;
     }
 
@@ -519,7 +567,7 @@ public final class MediaRouter2 {
      * @param route the route you want to transfer the media to.
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     public void transfer(@NonNull RoutingController controller, @NonNull MediaRoute2Info route) {
         if (isSystemRouter()) {
             sManager.transfer(controller.getRoutingSessionInfo(), route);
@@ -606,6 +654,23 @@ public final class MediaRouter2 {
     }
 
     /**
+     * Gets a {@link RoutingController} whose ID is equal to the given ID.
+     * Returns {@code null} if there is no matching controller.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public RoutingController getController(@NonNull String id) {
+        Objects.requireNonNull(id, "id must not be null");
+        for (RoutingController controller : getControllers()) {
+            if (TextUtils.equals(id, controller.getId())) {
+                return controller;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets the list of currently active {@link RoutingController routing controllers} on which
      * media can be played.
      * <p>
@@ -614,15 +679,25 @@ public final class MediaRouter2 {
      */
     @NonNull
     public List<RoutingController> getControllers() {
-        // TODO: Do not create the controller instances every time,
-        //       Instead, update the list using the sessions' ID and session related callbacks.
+        List<RoutingController> result = new ArrayList<>();
+
         if (isSystemRouter()) {
-            return sManager.getRoutingSessions(mClientPackageName).stream()
-                    .map(info -> new RoutingController(info))
-                    .collect(Collectors.toList());
+            // Unlike non-system MediaRouter2, controller instances cannot be kept,
+            // since the transfer events initiated from other apps will not come through manager.
+            List<RoutingSessionInfo> sessions = sManager.getRoutingSessions(mClientPackageName);
+            for (RoutingSessionInfo session : sessions) {
+                RoutingController controller;
+                if (session.isSystemSession()) {
+                    mSystemController.setRoutingSessionInfo(session);
+                    controller = mSystemController;
+                } else {
+                    controller = new RoutingController(session);
+                }
+                result.add(controller);
+            }
+            return result;
         }
 
-        List<RoutingController> result = new ArrayList<>();
         result.add(0, mSystemController);
         synchronized (mLock) {
             result.addAll(mNonSystemRoutingControllers.values());
@@ -639,8 +714,14 @@ public final class MediaRouter2 {
      * @param volume The new volume value between 0 and {@link MediaRoute2Info#getVolumeMax}.
      * @hide
      */
+    @SystemApi
     public void setRouteVolume(@NonNull MediaRoute2Info route, int volume) {
         Objects.requireNonNull(route, "route must not be null");
+
+        if (isSystemRouter()) {
+            sManager.setRouteVolume(route, volume);
+            return;
+        }
 
         MediaRouter2Stub stub;
         synchronized (mLock) {
@@ -928,8 +1009,9 @@ public final class MediaRouter2 {
 
     /**
      * Registers {@link MediaRouter2Manager.Callback} for getting events.
+     * Should only used for system media routers.
      */
-    private void registerManagerCallback() {
+    private void registerManagerCallbackForSystemRouter() {
         // Using direct executor here, since MediaRouter2Manager also posts to the main handler.
         sManager.registerCallback(Runnable::run, mManagerCallback);
     }
@@ -939,6 +1021,16 @@ public final class MediaRouter2 {
         return routes.stream()
                 .filter(route -> route.hasAnyFeatures(discoveryRequest.getPreferredFeatures()))
                 .collect(Collectors.toList());
+    }
+
+    private void updateAllRoutesFromManager() {
+        synchronized (mLock) {
+            mRoutes.clear();
+            for (MediaRoute2Info route : sManager.getAllRoutes()) {
+                mRoutes.put(route.getId(), route);
+            }
+            mShouldUpdateRoutes = true;
+        }
     }
 
     private void notifyRoutesAdded(List<MediaRoute2Info> routes) {
@@ -968,6 +1060,13 @@ public final class MediaRouter2 {
                 record.mExecutor.execute(
                         () -> record.mRouteCallback.onRoutesChanged(filteredRoutes));
             }
+        }
+    }
+
+    private void notifyPreferredFeaturesChanged(List<String> features) {
+        for (RouteCallbackRecord record: mRouteCallbackRecords) {
+            record.mExecutor.execute(
+                    () -> record.mRouteCallback.onPreferredFeaturesChanged(features));
         }
     }
 
@@ -1024,6 +1123,17 @@ public final class MediaRouter2 {
          * @param routes the list of routes that have been changed. It's never empty.
          */
         public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
+
+        /**
+         * Called when the client app's preferred features are changed.
+         * When this is called, it is recommended to {@link #getRoutes()} to get the routes
+         * that are currently available to the app.
+         *
+         * @param preferredFeatures the new preferred features set by the application
+         * @hide
+         */
+        @SystemApi
+        public void onPreferredFeaturesChanged(@NonNull List<String> preferredFeatures) {}
     }
 
     /**
@@ -1129,6 +1239,11 @@ public final class MediaRouter2 {
         RoutingController(@NonNull RoutingSessionInfo sessionInfo) {
             mSessionInfo = sessionInfo;
             mState = CONTROLLER_STATE_ACTIVE;
+        }
+
+        RoutingController(@NonNull RoutingSessionInfo sessionInfo, int state) {
+            mSessionInfo = sessionInfo;
+            mState = state;
         }
 
         /**
@@ -1291,6 +1406,11 @@ public final class MediaRouter2 {
                 return;
             }
 
+            if (isSystemRouter()) {
+                sManager.selectRoute(getRoutingSessionInfo(), route);
+                return;
+            }
+
             MediaRouter2Stub stub;
             synchronized (mLock) {
                 stub = mStub;
@@ -1335,6 +1455,11 @@ public final class MediaRouter2 {
             List<MediaRoute2Info> deselectableRoutes = getDeselectableRoutes();
             if (!checkRouteListContainsRouteId(deselectableRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring deselecting a non-deselectable route=" + route);
+                return;
+            }
+
+            if (isSystemRouter()) {
+                sManager.deselectRoute(getRoutingSessionInfo(), route);
                 return;
             }
 
@@ -1407,6 +1532,12 @@ public final class MediaRouter2 {
                 Log.w(TAG, "setVolume: Called on released controller. Ignoring.");
                 return;
             }
+
+            if (isSystemRouter()) {
+                sManager.setSessionVolume(getRoutingSessionInfo(), volume);
+                return;
+            }
+
             MediaRouter2Stub stub;
             synchronized (mLock) {
                 stub = mStub;
@@ -1469,6 +1600,11 @@ public final class MediaRouter2 {
                 }
                 shouldNotifyStop = (mState == CONTROLLER_STATE_ACTIVE);
                 mState = CONTROLLER_STATE_RELEASED;
+            }
+
+            if (isSystemRouter()) {
+                sManager.releaseSession(getRoutingSessionInfo());
+                return;
             }
 
             synchronized (mLock) {
@@ -1539,6 +1675,12 @@ public final class MediaRouter2 {
         }
 
         private List<MediaRoute2Info> getRoutesWithIds(List<String> routeIds) {
+            if (isSystemRouter()) {
+                return getRoutes().stream()
+                        .filter(r -> routeIds.contains(r.getId()))
+                        .collect(Collectors.toList());
+            }
+
             synchronized (mLock) {
                 return routeIds.stream().map(mRoutes::get)
                         .filter(Objects::nonNull)
@@ -1722,12 +1864,17 @@ public final class MediaRouter2 {
         }
     }
 
+    // Note: All methods are run on main thread.
     class ManagerCallback implements MediaRouter2Manager.Callback {
 
         @Override
         public void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {
-            List<MediaRoute2Info> filteredRoutes =
-                    sManager.filterRoutesForPackage(routes, mClientPackageName);
+            updateAllRoutesFromManager();
+
+            List<MediaRoute2Info> filteredRoutes;
+            synchronized (mLock) {
+                filteredRoutes = filterRoutes(routes, mDiscoveryPreference);
+            }
             if (filteredRoutes.isEmpty()) {
                 return;
             }
@@ -1739,8 +1886,12 @@ public final class MediaRouter2 {
 
         @Override
         public void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {
-            List<MediaRoute2Info> filteredRoutes =
-                    sManager.filterRoutesForPackage(routes, mClientPackageName);
+            updateAllRoutesFromManager();
+
+            List<MediaRoute2Info> filteredRoutes;
+            synchronized (mLock) {
+                filteredRoutes = filterRoutes(routes, mDiscoveryPreference);
+            }
             if (filteredRoutes.isEmpty()) {
                 return;
             }
@@ -1752,8 +1903,12 @@ public final class MediaRouter2 {
 
         @Override
         public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {
-            List<MediaRoute2Info> filteredRoutes =
-                    sManager.filterRoutesForPackage(routes, mClientPackageName);
+            updateAllRoutesFromManager();
+
+            List<MediaRoute2Info> filteredRoutes;
+            synchronized (mLock) {
+                filteredRoutes = filterRoutes(routes, mDiscoveryPreference);
+            }
             if (filteredRoutes.isEmpty()) {
                 return;
             }
@@ -1764,31 +1919,98 @@ public final class MediaRouter2 {
         }
 
         @Override
-        public void onSessionUpdated(@NonNull RoutingSessionInfo session) {
-            // TODO: Call ControllerCallback.onControllerUpdated
-        }
-
-        @Override
         public void onTransferred(@NonNull RoutingSessionInfo oldSession,
-                @Nullable RoutingSessionInfo newSession) {
-            // TODO: Call TransferCallback.onTransfer
+                @NonNull RoutingSessionInfo newSession) {
+            if (!oldSession.isSystemSession()
+                    && !TextUtils.equals(mClientPackageName, oldSession.getClientPackageName())) {
+                return;
+            }
+
+            if (!newSession.isSystemSession()
+                    && !TextUtils.equals(mClientPackageName, newSession.getClientPackageName())) {
+                return;
+            }
+
+            // For successful in-session transfer, onControllerUpdated() handles it.
+            if (TextUtils.equals(oldSession.getId(), newSession.getId())) {
+                return;
+            }
+
+
+            RoutingController oldController;
+            if (oldSession.isSystemSession()) {
+                mSystemController.setRoutingSessionInfo(oldSession);
+                oldController = mSystemController;
+            } else {
+                oldController = new RoutingController(oldSession);
+            }
+
+            RoutingController newController;
+            if (oldSession.isSystemSession()) {
+                mSystemController.setRoutingSessionInfo(newSession);
+                newController = mSystemController;
+            } else {
+                newController = new RoutingController(newSession);
+            }
+
+            notifyTransfer(oldController, newController);
         }
 
         @Override
         public void onTransferFailed(@NonNull RoutingSessionInfo session,
                 @NonNull MediaRoute2Info route) {
-            // TODO: Call TransferCallback.onTransferFailure
+            if (!session.isSystemSession()
+                    && !TextUtils.equals(mClientPackageName, session.getClientPackageName())) {
+                return;
+            }
+            notifyTransferFailure(route);
+        }
+
+        @Override
+        public void onSessionUpdated(@NonNull RoutingSessionInfo session) {
+            if (!session.isSystemSession()
+                    && !TextUtils.equals(mClientPackageName, session.getClientPackageName())) {
+                return;
+            }
+
+            RoutingController controller;
+            if (session.isSystemSession()) {
+                mSystemController.setRoutingSessionInfo(session);
+                controller = mSystemController;
+            } else {
+                controller = new RoutingController(session);
+            }
+            notifyControllerUpdated(controller);
         }
 
         @Override
         public void onSessionReleased(@NonNull RoutingSessionInfo session) {
-            // TODO: Call TransferCallback.onStop()
+            if (session.isSystemSession()) {
+                Log.e(TAG, "onSessionReleased: Called on system session. Ignoring.");
+                return;
+            }
+
+            if (!TextUtils.equals(mClientPackageName, session.getClientPackageName())) {
+                return;
+            }
+
+            notifyStop(new RoutingController(session, RoutingController.CONTROLLER_STATE_RELEASED));
         }
 
         @Override
         public void onPreferredFeaturesChanged(@NonNull String packageName,
                 @NonNull List<String> preferredFeatures) {
-            // Does nothing.
+            if (!TextUtils.equals(mClientPackageName, packageName)) {
+                return;
+            }
+
+            synchronized (mLock) {
+                mDiscoveryPreference = new RouteDiscoveryPreference.Builder(
+                        preferredFeatures, true).build();
+            }
+
+            updateAllRoutesFromManager();
+            notifyPreferredFeaturesChanged(preferredFeatures);
         }
 
         @Override

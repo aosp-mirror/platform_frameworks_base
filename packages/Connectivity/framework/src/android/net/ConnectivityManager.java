@@ -23,6 +23,8 @@ import static android.net.NetworkRequest.Type.TRACK_BEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
 import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 import static android.net.QosCallback.QosCallbackRegistrationException;
+import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
+import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -31,11 +33,13 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.IpSecManager.UdpEncapsulationSocket;
@@ -63,6 +67,7 @@ import android.os.ServiceSpecificException;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Range;
@@ -802,24 +807,27 @@ public class ConnectivityManager {
     /**
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final String PRIVATE_DNS_MODE_OFF = "off";
     /**
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final String PRIVATE_DNS_MODE_OPPORTUNISTIC = "opportunistic";
     /**
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = "hostname";
-    /**
-     * The default Private DNS mode.
-     *
-     * This may change from release to release or may become dependent upon
-     * the capabilities of the underlying platform.
-     *
-     * @hide
-     */
-    public static final String PRIVATE_DNS_DEFAULT_MODE_FALLBACK = PRIVATE_DNS_MODE_OPPORTUNISTIC;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(value = {
+            PRIVATE_DNS_MODE_OFF,
+            PRIVATE_DNS_MODE_OPPORTUNISTIC,
+            PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
+    })
+    public @interface PrivateDnsMode {}
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private final IConnectivityManager mService;
@@ -5127,5 +5135,25 @@ public class ConnectivityManager {
     @NonNull
     public static Range<Integer> getIpSecNetIdRange() {
         return new Range(TUN_INTF_NETID_START, TUN_INTF_NETID_START + TUN_INTF_NETID_RANGE - 1);
+    }
+
+    /**
+     * Get private DNS mode from settings.
+     *
+     * @param cr The ContentResolver to query private DNS mode from settings.
+     * @return A string of private DNS mode as one of the PRIVATE_DNS_MODE_* constants.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @NonNull
+    @PrivateDnsMode
+    public static String getPrivateDnsMode(@NonNull ContentResolver cr) {
+        String mode = Settings.Global.getString(cr, PRIVATE_DNS_MODE);
+        if (TextUtils.isEmpty(mode)) mode = Settings.Global.getString(cr, PRIVATE_DNS_DEFAULT_MODE);
+        // If both PRIVATE_DNS_MODE and PRIVATE_DNS_DEFAULT_MODE are not set, choose
+        // PRIVATE_DNS_MODE_OPPORTUNISTIC as default mode.
+        if (TextUtils.isEmpty(mode)) mode = PRIVATE_DNS_MODE_OPPORTUNISTIC;
+        return mode;
     }
 }

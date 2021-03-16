@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.transition;
 
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
@@ -25,7 +23,6 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
@@ -33,8 +30,6 @@ import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
-
-import androidx.annotation.BinderThread;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
@@ -47,8 +42,6 @@ import java.util.ArrayList;
  * if the request includes a specific remote.
  */
 public class RemoteTransitionHandler implements Transitions.TransitionHandler {
-    private static final String TAG = "RemoteTransitionHandler";
-
     private final ShellExecutor mMainExecutor;
 
     /** Includes remotes explicitly requested by, eg, ActivityOptions */
@@ -58,33 +51,15 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     private final ArrayList<Pair<TransitionFilter, IRemoteTransition>> mFilters =
             new ArrayList<>();
 
-    private final IBinder.DeathRecipient mTransitionDeathRecipient =
-            new IBinder.DeathRecipient() {
-                @Override
-                @BinderThread
-                public void binderDied() {
-                    mMainExecutor.execute(() -> {
-                        mFilters.clear();
-                    });
-                }
-            };
-
     RemoteTransitionHandler(@NonNull ShellExecutor mainExecutor) {
         mMainExecutor = mainExecutor;
     }
 
     void addFiltered(TransitionFilter filter, IRemoteTransition remote) {
-        try {
-            remote.asBinder().linkToDeath(mTransitionDeathRecipient, 0 /* flags */);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to link to death");
-            return;
-        }
         mFilters.add(new Pair<>(filter, remote));
     }
 
     void removeFiltered(IRemoteTransition remote) {
-        remote.asBinder().unlinkToDeath(mTransitionDeathRecipient, 0 /* flags */);
         for (int i = mFilters.size() - 1; i >= 0; --i) {
             if (mFilters.get(i).second == remote) {
                 mFilters.remove(i);

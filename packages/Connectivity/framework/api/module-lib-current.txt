@@ -8,9 +8,13 @@ package android.net {
   public class ConnectivityManager {
     method @NonNull @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public java.util.List<android.net.NetworkStateSnapshot> getAllNetworkStateSnapshot();
     method @NonNull public static android.util.Range<java.lang.Integer> getIpSecNetIdRange();
+    method @NonNull public static String getPrivateDnsMode(@NonNull android.content.ContentResolver);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerSystemDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void requestBackgroundNetwork(@NonNull android.net.NetworkRequest, @NonNull android.os.Handler, @NonNull android.net.ConnectivityManager.NetworkCallback);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
+    field public static final String PRIVATE_DNS_MODE_OFF = "off";
+    field public static final String PRIVATE_DNS_MODE_OPPORTUNISTIC = "opportunistic";
+    field public static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = "hostname";
   }
 
   public final class NetworkAgentConfig implements android.os.Parcelable {

@@ -291,8 +291,10 @@ public abstract class NotificationViewWrapper implements TransformableView {
      *
      * @param expandable should this view be expandable
      * @param onClickListener the listener to invoke when the expand affordance is clicked on
+     * @param requestLayout the expandability changed during onLayout, so a requestLayout required
      */
-    public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {}
+    public void updateExpandability(boolean expandable, View.OnClickListener onClickListener,
+            boolean requestLayout) {}
 
     /** Set the expanded state on the view wrapper */
     public void setExpanded(boolean expanded) {}

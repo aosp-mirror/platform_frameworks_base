@@ -2621,6 +2621,48 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         return !TextUtils.isEmpty(uri.getUserInfo());
     }
 
+    /**
+     * Returns the given content URI explicitly associated with the given {@link UserHandle}.
+     *
+     * @param contentUri The content URI to be associated with a user handle.
+     * @param userHandle The user handle with which to associate the URI.
+     *
+     * @throws IllegalArgumentException if
+     * <ul>
+     *  <li>the given URI is not content URI (a content URI has {@link Uri#getScheme} equal to
+     *  {@link ContentResolver.SCHEME_CONTENT}) or</li>
+     *  <li>the given URI is already explicitly associated with a {@link UserHandle}, which is
+     *  different than the given one.</li>
+     *  </ul>
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static Uri createContentUriAsUser(
+            @NonNull Uri contentUri, @NonNull UserHandle userHandle) {
+        if (!ContentResolver.SCHEME_CONTENT.equals(contentUri.getScheme())) {
+            throw new IllegalArgumentException(String.format(
+                "Given URI [%s] is not a content URI: ", contentUri));
+        }
+
+        int userId = userHandle.getIdentifier();
+        if (uriHasUserId(contentUri)) {
+            if (String.valueOf(userId).equals(contentUri.getUserInfo())) {
+                return contentUri;
+            }
+            throw new IllegalArgumentException(String.format(
+                "Given URI [%s] already has a user ID, different from given user handle [%s]",
+                contentUri,
+                userId));
+        }
+
+        Uri.Builder builder = contentUri.buildUpon();
+        builder.encodedAuthority(
+                "" + userHandle.getIdentifier() + "@" + contentUri.getEncodedAuthority());
+        return builder.build();
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     public static Uri maybeAddUserId(Uri uri, int userId) {

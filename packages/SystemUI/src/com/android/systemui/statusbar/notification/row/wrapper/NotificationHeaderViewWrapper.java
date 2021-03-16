@@ -261,7 +261,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
+    public void updateExpandability(boolean expandable, View.OnClickListener onClickListener,
+            boolean requestLayout) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
         mExpandButton.setOnClickListener(expandable ? onClickListener : null);
         if (mAltExpandTarget != null) {
@@ -272,6 +273,13 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         }
         if (mNotificationHeader != null) {
             mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
+        }
+        // Unfortunately, the NotificationContentView has to layout its children in order to
+        // determine their heights, and that affects the button visibility.  If that happens
+        // (thankfully it is rare) then we need to request layout of the expand button's parent
+        // in order to ensure it gets laid out correctly.
+        if (requestLayout) {
+            mExpandButton.getParent().requestLayout();
         }
     }
 

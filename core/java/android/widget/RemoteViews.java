@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.annotation.Px;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
@@ -74,6 +75,7 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.IntArray;
 import android.util.Log;
+import android.util.LongArray;
 import android.util.Pair;
 import android.util.SizeF;
 import android.util.SparseIntArray;
@@ -112,6 +114,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -224,6 +227,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int SET_VIEW_OUTLINE_RADIUS_TAG = 28;
     private static final int SET_ON_CHECKED_CHANGE_RESPONSE_TAG = 29;
     private static final int NIGHT_MODE_REFLECTION_ACTION_TAG = 30;
+    private static final int SET_REMOTE_COLLECTION_ITEMS_ADAPTER_TAG = 31;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -897,6 +901,72 @@ public class RemoteViews implements Parcelable, Filter {
 
         int viewTypeCount;
         ArrayList<RemoteViews> list;
+    }
+
+    private static class SetRemoteCollectionItemListAdapterAction extends Action {
+        private final RemoteCollectionItems mItems;
+
+        SetRemoteCollectionItemListAdapterAction(@IdRes int id, RemoteCollectionItems items) {
+            viewId = id;
+            mItems = items;
+        }
+
+        SetRemoteCollectionItemListAdapterAction(Parcel parcel) {
+            viewId = parcel.readInt();
+            mItems = parcel.readTypedObject(RemoteCollectionItems.CREATOR);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(viewId);
+            dest.writeTypedObject(mItems, flags);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, InteractionHandler handler,
+                ColorResources colorResources) throws ActionException {
+            View target = root.findViewById(viewId);
+            if (target == null) return;
+
+            if (!(target instanceof AdapterView)) {
+                Log.e(LOG_TAG, "Cannot call setRemoteAdapter on a view which is not "
+                        + "an AdapterView (id: " + viewId + ")");
+                return;
+            }
+
+            AdapterView adapterView = (AdapterView) target;
+            Adapter adapter = adapterView.getAdapter();
+            // We can reuse the adapter if it's a RemoteCollectionItemsAdapter and the view type
+            // count hasn't increased. Note that AbsListView allocates a fixed size array for view
+            // recycling in setAdapter, so we must call setAdapter again if the number of view types
+            // increases.
+            if (adapter instanceof RemoteCollectionItemsAdapter
+                    && adapter.getViewTypeCount() >= mItems.getViewTypeCount()) {
+                try {
+                    ((RemoteCollectionItemsAdapter) adapter).setData(
+                            mItems, handler, colorResources);
+                } catch (Throwable throwable) {
+                    // setData should never failed with the validation in the items builder, but if
+                    // it does, catch and rethrow.
+                    throw new ActionException(throwable);
+                }
+                return;
+            }
+
+            try {
+                adapterView.setAdapter(
+                        new RemoteCollectionItemsAdapter(mItems, handler, colorResources));
+            } catch (Throwable throwable) {
+                // This could throw if the AdapterView somehow doesn't accept BaseAdapter due to
+                // a type error.
+                throw new ActionException(throwable);
+            }
+        }
+
+        @Override
+        public int getActionTag() {
+            return SET_REMOTE_COLLECTION_ITEMS_ADAPTER_TAG;
+        }
     }
 
     private class SetRemoteViewsAdapterIntent extends Action {
@@ -3543,6 +3613,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return new SetOnCheckedChangeResponse(parcel);
             case NIGHT_MODE_REFLECTION_ACTION_TAG:
                 return new NightModeReflectionAction(parcel);
+            case SET_REMOTE_COLLECTION_ITEMS_ADAPTER_TAG:
+                return new SetRemoteCollectionItemListAdapterAction(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }
@@ -4212,6 +4284,25 @@ public class RemoteViews implements Parcelable, Filter {
     public void setRemoteAdapter(@IdRes int viewId, ArrayList<RemoteViews> list,
             int viewTypeCount) {
         addAction(new SetRemoteViewsAdapterList(viewId, list, viewTypeCount));
+    }
+
+    /**
+     * Creates a simple Adapter for the viewId specified. The viewId must point to an AdapterView,
+     * ie. {@link ListView}, {@link GridView}, {@link StackView} or {@link AdapterViewAnimator}.
+     * This is a simpler but less flexible approach to populating collection widgets. Its use is
+     * encouraged for most scenarios, as long as the total memory within the list of RemoteViews
+     * is relatively small (ie. doesn't contain large or numerous Bitmaps, see {@link
+     * RemoteViews#setImageViewBitmap}). In the case of numerous images, the use of API is still
+     * possible by setting image URIs instead of Bitmaps, see {@link RemoteViews#setImageViewUri}.
+     *
+     * This API is supported in the compatibility library for previous API levels, see
+     * RemoteViewsCompat.
+     *
+     * @param viewId The id of the {@link AdapterView}.
+     * @param items The items to display in the {@link AdapterView}.
+     */
+    public void setRemoteAdapter(@IdRes int viewId, @NonNull RemoteCollectionItems items) {
+        addAction(new SetRemoteCollectionItemListAdapterAction(viewId, items));
     }
 
     /**
@@ -6024,6 +6115,203 @@ public class RemoteViews implements Parcelable, Filter {
             return false;
         }
         return true;
+    }
+
+    /** Representation of a fixed list of items to be displayed in a RemoteViews collection. */
+    public static final class RemoteCollectionItems implements Parcelable {
+        private final long[] mIds;
+        private final RemoteViews[] mViews;
+        private final boolean mHasStableIds;
+        private final int mViewTypeCount;
+
+        RemoteCollectionItems(
+                long[] ids, RemoteViews[] views, boolean hasStableIds, int viewTypeCount) {
+            mIds = ids;
+            mViews = views;
+            mHasStableIds = hasStableIds;
+            mViewTypeCount = viewTypeCount;
+            if (ids.length != views.length) {
+                throw new IllegalArgumentException(
+                        "RemoteCollectionItems has different number of ids and views");
+            }
+            if (viewTypeCount < 1) {
+                throw new IllegalArgumentException("View type count must be >= 1");
+            }
+            int layoutIdCount = (int) Arrays.stream(views)
+                    .mapToInt(RemoteViews::getLayoutId)
+                    .distinct()
+                    .count();
+            if (layoutIdCount > viewTypeCount) {
+                throw new IllegalArgumentException(
+                        "View type count is set to " + viewTypeCount + ", but the collection "
+                                + "contains " + layoutIdCount + " different layout ids");
+            }
+        }
+
+        RemoteCollectionItems(Parcel in) {
+            int length = in.readInt();
+            mIds = new long[length];
+            in.readLongArray(mIds);
+            mViews = new RemoteViews[length];
+            in.readTypedArray(mViews, RemoteViews.CREATOR);
+            mHasStableIds = in.readBoolean();
+            mViewTypeCount = in.readInt();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeInt(mIds.length);
+            dest.writeLongArray(mIds);
+            dest.writeTypedArray(mViews, flags);
+            dest.writeBoolean(mHasStableIds);
+            dest.writeInt(mViewTypeCount);
+        }
+
+        /**
+         * Returns the id for {@code position}. See {@link #hasStableIds()} for whether this id
+         * should be considered meaningful across collection updates.
+         *
+         * @return Id for the position.
+         */
+        public long getItemId(int position) {
+            return mIds[position];
+        }
+
+        /**
+         * Returns the {@link RemoteViews} to display at {@code position}.
+         *
+         * @return RemoteViews for the position.
+         */
+        @NonNull
+        public RemoteViews getItemView(int position) {
+            return mViews[position];
+        }
+
+        /**
+         * Returns the number of elements in the collection.
+         *
+         * @return Count of items.
+         */
+        public int getItemCount() {
+            return mIds.length;
+        }
+
+        /**
+         * Returns the view type count for the collection when used in an adapter
+         *
+         * @return Count of view types for the collection when used in an adapter.
+         * @see android.widget.Adapter#getViewTypeCount()
+         */
+        public int getViewTypeCount() {
+            return mViewTypeCount;
+        }
+
+        /**
+         * Indicates whether the item ids are stable across changes to the underlying data.
+         *
+         * @return True if the same id always refers to the same object.
+         * @see android.widget.Adapter#hasStableIds()
+         */
+        public boolean hasStableIds() {
+            return mHasStableIds;
+        }
+
+        @NonNull
+        public static final Creator<RemoteCollectionItems> CREATOR =
+                new Creator<RemoteCollectionItems>() {
+            @NonNull
+            @Override
+            public RemoteCollectionItems createFromParcel(@NonNull Parcel source) {
+                return new RemoteCollectionItems(source);
+            }
+
+            @NonNull
+            @Override
+            public RemoteCollectionItems[] newArray(int size) {
+                return new RemoteCollectionItems[size];
+            }
+        };
+
+        /** Builder class for {@link RemoteCollectionItems} objects.*/
+        public static final class Builder {
+            private final LongArray mIds = new LongArray();
+            private final List<RemoteViews> mViews = new ArrayList<>();
+            private boolean mHasStableIds;
+            private int mViewTypeCount;
+
+            /**
+             * Adds a {@link RemoteViews} to the collection.
+             *
+             * @param id Id to associate with the row. Use {@link #setHasStableIds(boolean)} to
+             *           indicate that ids are stable across changes to the collection.
+             * @param view RemoteViews to display for the row.
+             */
+            @NonNull
+            // Covered by getItemId, getItemView, getItemCount.
+            @SuppressLint("MissingGetterMatchingBuilder")
+            public Builder addItem(long id, @NonNull RemoteViews view) {
+                if (view == null) throw new NullPointerException();
+                if (view.hasMultipleLayouts()) {
+                    throw new IllegalArgumentException(
+                            "RemoteViews used in a RemoteCollectionItems cannot specify separate "
+                                    + "layouts for orientations or sizes.");
+                }
+                mIds.add(id);
+                mViews.add(view);
+                return this;
+            }
+
+            /**
+             * Sets whether the item ids are stable across changes to the underlying data.
+             *
+             * @see android.widget.Adapter#hasStableIds()
+             */
+            @NonNull
+            public Builder setHasStableIds(boolean hasStableIds) {
+                mHasStableIds = hasStableIds;
+                return this;
+            }
+
+            /**
+             * Sets the view type count for the collection when used in an adapter. This can be set
+             * to the maximum number of different layout ids that will be used by RemoteViews in
+             * this collection.
+             *
+             * If this value is not set, then a value will be inferred from the provided items. As
+             * a result, the adapter may need to be recreated when the list is updated with
+             * previously unseen RemoteViews layouts for new items.
+             *
+             * @see android.widget.Adapter#getViewTypeCount()
+             */
+            @NonNull
+            public Builder setViewTypeCount(int viewTypeCount) {
+                mViewTypeCount = viewTypeCount;
+                return this;
+            }
+
+            /** Creates the {@link RemoteCollectionItems} defined by this builder. */
+            @NonNull
+            public RemoteCollectionItems build() {
+                if (mViewTypeCount < 1) {
+                    // If a view type count wasn't specified, set it to be the number of distinct
+                    // layout ids used in the items.
+                    mViewTypeCount = (int) mViews.stream()
+                            .mapToInt(RemoteViews::getLayoutId)
+                            .distinct()
+                            .count();
+                }
+                return new RemoteCollectionItems(
+                        mIds.toArray(),
+                        mViews.toArray(new RemoteViews[0]),
+                        mHasStableIds,
+                        Math.max(mViewTypeCount, 1));
+            }
+        }
     }
 
     /**

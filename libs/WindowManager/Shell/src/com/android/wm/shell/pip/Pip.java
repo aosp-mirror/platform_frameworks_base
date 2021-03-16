@@ -16,10 +16,15 @@
 
 package com.android.wm.shell.pip;
 
+import android.annotation.Nullable;
+import android.app.PictureInPictureParams;
+import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.pip.phone.PipTouchHandler;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -29,14 +34,6 @@ import java.util.function.Consumer;
  */
 @ExternalThread
 public interface Pip {
-
-    /**
-     * Returns a binder that can be passed to an external process to manipulate PIP.
-     */
-    default IPip createExternalInterface() {
-        return null;
-    }
-
     /**
      * Expand PIP, it's possible that specific request to activate the window via Alt-tab.
      */
@@ -110,6 +107,30 @@ public interface Pip {
      * Called when showing Pip menu.
      */
     default void showPictureInPictureMenu() {}
+
+    /**
+     * Called by Launcher when swiping an auto-pip enabled Activity to home starts
+     * @param componentName {@link ComponentName} represents the Activity entering PiP
+     * @param activityInfo {@link ActivityInfo} tied to the Activity
+     * @param pictureInPictureParams {@link PictureInPictureParams} tied to the Activity
+     * @param launcherRotation Rotation Launcher is in
+     * @param shelfHeight Shelf height when landing PiP window onto Launcher
+     * @return Destination bounds of PiP window based on the parameters passed in
+     */
+    default Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
+            PictureInPictureParams pictureInPictureParams,
+            int launcherRotation, int shelfHeight) {
+        return null;
+    }
+
+    /**
+     * Called by Launcher when swiping an auto-pip enable Activity to home finishes
+     * @param componentName {@link ComponentName} represents the Activity entering PiP
+     * @param destinationBounds Destination bounds of PiP window
+     */
+    default void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
+        return;
+    }
 
     /**
      * Called by NavigationBar in order to listen in for PiP bounds change. This is mostly used

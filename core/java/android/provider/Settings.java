@@ -9877,6 +9877,14 @@ public final class Settings {
                 "reminder_exp_learning_event_count";
 
         /**
+         * Whether to show clipboard access notifications.
+         *
+         * @hide
+         */
+        public static final String CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS =
+                "clipboard_show_access_notifications";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */

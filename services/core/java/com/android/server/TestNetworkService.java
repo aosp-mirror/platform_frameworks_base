@@ -90,7 +90,12 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         mCm = mContext.getSystemService(ConnectivityManager.class);
         mNetworkProvider = new NetworkProvider(mContext, mHandler.getLooper(),
                 TEST_NETWORK_PROVIDER_NAME);
-        mCm.registerNetworkProvider(mNetworkProvider);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mCm.registerNetworkProvider(mNetworkProvider);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**

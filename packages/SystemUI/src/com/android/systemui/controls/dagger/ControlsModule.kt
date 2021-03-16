@@ -18,6 +18,8 @@ package com.android.systemui.controls.dagger
 
 import android.app.Activity
 import android.content.pm.PackageManager
+import com.android.systemui.controls.ControlsMetricsLogger
+import com.android.systemui.controls.ControlsMetricsLoggerImpl
 import com.android.systemui.controls.controller.ControlsBindingController
 import com.android.systemui.controls.controller.ControlsBindingControllerImpl
 import com.android.systemui.controls.controller.ControlsController
@@ -78,6 +80,9 @@ abstract class ControlsModule {
 
     @Binds
     abstract fun provideUiController(controller: ControlsUiControllerImpl): ControlsUiController
+
+    @Binds
+    abstract fun provideMetricsLogger(logger: ControlsMetricsLoggerImpl): ControlsMetricsLogger
 
     @Binds
     abstract fun provideControlActionCoordinator(
