@@ -195,7 +195,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceSensorProperties.get(anyInt())).thenReturn(new FaceSensorPropertiesInternal(
                 0 /* id */,
                 FaceSensorProperties.STRENGTH_STRONG, 1 /* maxTemplatesAllowed */,
-                false /* supportsFaceDetection */, true /* supportsSelfIllumination */));
+                false /* supportsFaceDetection */, true /* supportsSelfIllumination */,
+                false /* resetLockoutRequiresChallenge */));
 
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);

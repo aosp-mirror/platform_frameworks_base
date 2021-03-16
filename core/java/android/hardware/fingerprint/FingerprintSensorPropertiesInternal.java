@@ -36,12 +36,6 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
     public final @FingerprintSensorProperties.SensorType int sensorType;
 
     /**
-     * IBiometricsFingerprint@2.1 does not manage timeout below the HAL, so the Gatekeeper HAT
-     * cannot be checked
-     */
-    public final boolean resetLockoutRequiresHardwareAuthToken;
-
-    /**
      * The location of the center of the sensor if applicable. For example, sensors of type
      * {@link FingerprintSensorProperties#TYPE_UDFPS_OPTICAL} would report this value as the
      * distance in pixels, measured from the left edge of the screen.
@@ -68,9 +62,13 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken, int sensorLocationX, int sensorLocationY,
             int sensorRadius) {
-        super(sensorId, strength, maxEnrollmentsPerUser);
+        // IBiometricsFingerprint@2.1 handles lockout in the framework, so the challenge is not
+        // required as it can only be generated/attested/verified by TEE components.
+        // IFingerprint@1.0 handles lockout below the HAL, but does not require a challenge. See
+        // the HAL interface for more details.
+        super(sensorId, strength, maxEnrollmentsPerUser, resetLockoutRequiresHardwareAuthToken,
+                false /* resetLockoutRequiresChallenge */);
         this.sensorType = sensorType;
-        this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
         this.sensorLocationX = sensorLocationX;
         this.sensorLocationY = sensorLocationY;
         this.sensorRadius = sensorRadius;
@@ -98,9 +96,9 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken) {
-        super(sensorId, strength, maxEnrollmentsPerUser);
+        super(sensorId, strength, maxEnrollmentsPerUser, resetLockoutRequiresHardwareAuthToken,
+                false /* resetLockoutRequiresChallenge */);
         this.sensorType = sensorType;
-        this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
 
         int[] props = context.getResources().getIntArray(
                 com.android.internal.R.array.config_udfps_sensor_props);
@@ -119,7 +117,6 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
     protected FingerprintSensorPropertiesInternal(Parcel in) {
         super(in);
         sensorType = in.readInt();
-        resetLockoutRequiresHardwareAuthToken = in.readBoolean();
         sensorLocationX = in.readInt();
         sensorLocationY = in.readInt();
         sensorRadius = in.readInt();
@@ -147,7 +144,6 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(sensorType);
-        dest.writeBoolean(resetLockoutRequiresHardwareAuthToken);
         dest.writeInt(sensorLocationX);
         dest.writeInt(sensorLocationY);
         dest.writeInt(sensorRadius);
