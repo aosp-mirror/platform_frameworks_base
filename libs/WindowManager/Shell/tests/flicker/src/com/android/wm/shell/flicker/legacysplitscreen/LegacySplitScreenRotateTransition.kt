@@ -17,11 +17,13 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import org.junit.Test
 
 abstract class LegacySplitScreenRotateTransition(
     testSpec: FlickerTestParameter
@@ -44,4 +46,16 @@ abstract class LegacySplitScreenRotateTransition(
                 }
             }
         }
+
+    @FlakyTest
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
+    @FlakyTest
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
 }
