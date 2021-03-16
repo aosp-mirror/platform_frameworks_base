@@ -188,7 +188,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         any(),
                         lpCaptor.capture(),
                         ncCaptor.capture(),
-                        anyInt(),
+                        any(),
                         any(),
                         anyInt());
         verify(mIpSecSvc)

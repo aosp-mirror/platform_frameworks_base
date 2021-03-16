@@ -202,6 +202,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
@@ -9160,7 +9161,8 @@ public class ConnectivityServiceTest {
                 ConnectivityManager.getNetworkTypeName(TYPE_MOBILE),
                 TelephonyManager.getNetworkTypeName(TelephonyManager.NETWORK_TYPE_LTE));
         return new NetworkAgentInfo(null, new Network(NET_ID), info, new LinkProperties(),
-                nc, 0, mServiceContext, null, new NetworkAgentConfig(), mService, null, null, 0,
+                nc, new NetworkScore.Builder().setLegacyInt(0).build(),
+                mServiceContext, null, new NetworkAgentConfig(), mService, null, null, 0,
                 INVALID_UID, mQosCallbackTracker, new ConnectivityService.Dependencies());
     }
 
