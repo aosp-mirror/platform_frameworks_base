@@ -25,6 +25,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.RemoteAnimationDefinition;
+import android.window.SizeConfigurationBuckets;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 
@@ -49,8 +50,8 @@ interface IActivityClientController {
     oneway void activityDestroyed(in IBinder token);
     oneway void activityRelaunched(in IBinder token);
 
-    oneway void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
-            in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
+    oneway void reportSizeConfigurations(in IBinder token,
+            in SizeConfigurationBuckets sizeConfigurations);
     boolean moveActivityTaskToBack(in IBinder token, boolean nonRoot);
     boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
     boolean navigateUpTo(in IBinder token, in Intent target, int resultCode,
