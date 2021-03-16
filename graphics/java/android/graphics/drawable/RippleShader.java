@@ -23,6 +23,7 @@ import android.graphics.Shader;
 
 final class RippleShader extends RuntimeShader {
     private static final String SHADER_UNIFORMS =  "uniform vec2 in_origin;\n"
+            + "uniform vec2 in_touch;\n"
             + "uniform float in_progress;\n"
             + "uniform float in_maxRadius;\n"
             + "uniform vec2 in_resolution;\n"
@@ -79,12 +80,13 @@ final class RippleShader extends RuntimeShader {
             + "    float fadeIn = subProgress(0., 0.175, in_progress);\n"
             + "    float fadeOutNoise = subProgress(0.375, 1., in_progress);\n"
             + "    float fadeOutRipple = subProgress(0.375, 0.75, in_progress);\n"
-            + "    float ring = getRingMask(p, in_origin, in_maxRadius, fadeIn);\n"
+            + "    vec2 center = mix(in_touch, in_origin, fadeIn);\n"
+            + "    float ring = getRingMask(p, center, in_maxRadius, fadeIn);\n"
             + "    float alpha = min(fadeIn, 1. - fadeOutNoise);\n"
             + "    float sparkle = sparkles(p, in_progress * 0.25 + in_secondsOffset)\n"
             + "        * ring * alpha;\n"
             + "    float fade = min(fadeIn, 1.-fadeOutRipple);\n"
-            + "    vec4 circle = in_color * (softCircle(p, in_origin, in_maxRadius "
+            + "    vec4 circle = in_color * (softCircle(p, center, in_maxRadius "
             + "      * fadeIn, 0.2) * fade);\n"
             + "    float mask = in_hasMask == 1. ? sample(in_shader).a > 0. ? 1. : 0. : 1.;\n"
             + "    return mix(circle, vec4(sparkle), sparkle) * mask;\n"
@@ -115,6 +117,10 @@ final class RippleShader extends RuntimeShader {
 
     public void setOrigin(float x, float y) {
         setUniform("in_origin", new float[] {x, y});
+    }
+
+    public void setTouch(float x, float y) {
+        setUniform("in_touch", new float[] {x, y});
     }
 
     public void setProgress(float progress) {
