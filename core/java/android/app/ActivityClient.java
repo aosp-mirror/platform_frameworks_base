@@ -25,6 +25,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.util.Singleton;
 import android.view.RemoteAnimationDefinition;
+import android.window.SizeConfigurationBuckets;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 
@@ -104,12 +105,9 @@ public class ActivityClient {
         }
     }
 
-    void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
-            int[] verticalSizeConfigurations, int[] smallestSizeConfigurations) {
+    void reportSizeConfigurations(IBinder token, SizeConfigurationBuckets sizeConfigurations) {
         try {
-            getActivityClientController().reportSizeConfigurations(token,
-                    horizontalSizeConfiguration, verticalSizeConfigurations,
-                    smallestSizeConfigurations);
+            getActivityClientController().reportSizeConfigurations(token, sizeConfigurations);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
