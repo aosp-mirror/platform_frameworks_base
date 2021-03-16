@@ -71,8 +71,12 @@ abstract class UdfpsAnimationView extends FrameLayout {
         return false;
     }
 
-    private void updateAlpha() {
-        getDrawable().setAlpha(mPauseAuth ? mAlpha : 255);
+    protected void updateAlpha() {
+        getDrawable().setAlpha(calculateAlpha());
+    }
+
+    protected final int calculateAlpha() {
+        return mPauseAuth ? mAlpha : 255;
     }
 
     private int expansionToAlpha(float expansion) {

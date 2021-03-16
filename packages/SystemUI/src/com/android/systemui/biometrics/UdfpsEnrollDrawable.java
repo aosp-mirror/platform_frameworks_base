@@ -128,6 +128,7 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
         mSensorOutlinePaint.setAlpha(alpha);
         mBlueFill.setAlpha(alpha);
         mBlueStroke.setAlpha(alpha);
+        mMovingTargetFpIcon.setAlpha(alpha);
         invalidateSelf();
     }
 }
