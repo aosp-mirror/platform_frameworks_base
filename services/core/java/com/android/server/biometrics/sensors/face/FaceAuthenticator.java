@@ -104,4 +104,11 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     public long getAuthenticatorId(int callingUserId) throws RemoteException {
         return mFaceService.getAuthenticatorId(mSensorId, callingUserId);
     }
+
+    @Override
+    public void resetLockout(IBinder token, String opPackageName, int userId,
+            byte[] hardwareAuthToken) throws RemoteException {
+        mFaceService.resetLockout(token, mSensorId, userId, hardwareAuthToken,
+                opPackageName);
+    }
 }
