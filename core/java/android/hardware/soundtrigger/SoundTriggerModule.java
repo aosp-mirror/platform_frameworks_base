@@ -354,18 +354,20 @@ public class SoundTriggerModule {
         }
 
         @Override
-        public synchronized void onRecognition(int handle, RecognitionEvent event)
+        public synchronized void onRecognition(int handle, RecognitionEvent event,
+                int captureSession)
                 throws RemoteException {
             Message m = mHandler.obtainMessage(EVENT_RECOGNITION,
-                    ConversionUtil.aidl2apiRecognitionEvent(handle, event));
+                    ConversionUtil.aidl2apiRecognitionEvent(handle, captureSession, event));
             mHandler.sendMessage(m);
         }
 
         @Override
-        public synchronized void onPhraseRecognition(int handle, PhraseRecognitionEvent event)
+        public synchronized void onPhraseRecognition(int handle, PhraseRecognitionEvent event,
+                int captureSession)
                 throws RemoteException {
             Message m = mHandler.obtainMessage(EVENT_RECOGNITION,
-                    ConversionUtil.aidl2apiPhraseRecognitionEvent(handle, event));
+                    ConversionUtil.aidl2apiPhraseRecognitionEvent(handle, captureSession, event));
             mHandler.sendMessage(m);
         }
 

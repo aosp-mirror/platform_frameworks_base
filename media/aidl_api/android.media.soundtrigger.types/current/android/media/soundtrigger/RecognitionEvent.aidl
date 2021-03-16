@@ -38,7 +38,6 @@ parcelable RecognitionEvent {
   android.media.soundtrigger.RecognitionStatus status = android.media.soundtrigger.RecognitionStatus.INVALID;
   android.media.soundtrigger.SoundModelType type = android.media.soundtrigger.SoundModelType.INVALID;
   boolean captureAvailable;
-  int captureSession;
   int captureDelayMs;
   int capturePreambleMs;
   boolean triggerInData;

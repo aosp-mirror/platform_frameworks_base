@@ -294,17 +294,18 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
             }
 
             @Override
-            public void onRecognition(int modelHandle, RecognitionEvent event)
+            public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
                     throws RemoteException {
                 enforcePermissions("Sound trigger recognition.");
-                mDelegate.onRecognition(modelHandle, event);
+                mDelegate.onRecognition(modelHandle, event, captureSession);
             }
 
             @Override
-            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event)
+            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event,
+                    int captureSession)
                     throws RemoteException {
                 enforcePermissions("Sound trigger phrase recognition.");
-                mDelegate.onPhraseRecognition(modelHandle, event);
+                mDelegate.onPhraseRecognition(modelHandle, event, captureSession);
             }
 
             @Override

@@ -194,19 +194,19 @@ class ConversionUtil {
     }
 
     public static SoundTrigger.RecognitionEvent aidl2apiRecognitionEvent(
-            int modelHandle, RecognitionEvent aidlEvent) {
+            int modelHandle, int captureSession, RecognitionEvent aidlEvent) {
         // The API recognition event doesn't allow for a null audio format, even though it doesn't
         // always make sense. We thus replace it with a default.
         AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(aidlEvent.audioConfig);
         return new SoundTrigger.GenericRecognitionEvent(
                 aidlEvent.status,
-                modelHandle, aidlEvent.captureAvailable, aidlEvent.captureSession,
+                modelHandle, aidlEvent.captureAvailable, captureSession,
                 aidlEvent.captureDelayMs, aidlEvent.capturePreambleMs, aidlEvent.triggerInData,
                 audioFormat, aidlEvent.data);
     }
 
     public static SoundTrigger.RecognitionEvent aidl2apiPhraseRecognitionEvent(
-            int modelHandle,
+            int modelHandle, int captureSession,
             PhraseRecognitionEvent aidlEvent) {
         SoundTrigger.KeyphraseRecognitionExtra[] apiExtras =
                 new SoundTrigger.KeyphraseRecognitionExtra[aidlEvent.phraseExtras.length];
@@ -218,7 +218,7 @@ class ConversionUtil {
         AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(aidlEvent.common.audioConfig);
         return new SoundTrigger.KeyphraseRecognitionEvent(aidlEvent.common.status, modelHandle,
                 aidlEvent.common.captureAvailable,
-                aidlEvent.common.captureSession, aidlEvent.common.captureDelayMs,
+                captureSession, aidlEvent.common.captureDelayMs,
                 aidlEvent.common.capturePreambleMs, aidlEvent.common.triggerInData,
                 audioFormat, aidlEvent.common.data,
                 apiExtras);

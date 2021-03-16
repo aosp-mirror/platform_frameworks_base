@@ -298,8 +298,6 @@ class ConversionUtil {
         aidlEvent.status = hidl2aidlRecognitionStatus(hidlEvent.status);
         aidlEvent.type = hidl2aidlSoundModelType(hidlEvent.type);
         aidlEvent.captureAvailable = hidlEvent.captureAvailable;
-        // hidlEvent.captureSession is never a valid field.
-        aidlEvent.captureSession = -1;
         aidlEvent.captureDelayMs = hidlEvent.captureDelayMs;
         aidlEvent.capturePreambleMs = hidlEvent.capturePreambleMs;
         aidlEvent.triggerInData = hidlEvent.triggerInData;

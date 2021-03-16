@@ -475,7 +475,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                 ISoundTriggerCallback callback;
                 RecognitionEvent aidlEvent =
                         ConversionUtil.hidl2aidlRecognitionEvent(recognitionEvent);
-                aidlEvent.captureSession = mSession.mSessionHandle;
                 synchronized (SoundTriggerModule.this) {
                     if (aidlEvent.status != RecognitionStatus.FORCED) {
                         setState(ModelState.LOADED);
@@ -485,7 +484,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                 // The callback must be invoked outside of the lock.
                 try {
                     if (callback != null) {
-                        callback.onRecognition(mHandle, aidlEvent);
+                        callback.onRecognition(mHandle, aidlEvent, mSession.mSessionHandle);
                     }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.
@@ -499,8 +498,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                 ISoundTriggerCallback callback;
                 PhraseRecognitionEvent aidlEvent =
                         ConversionUtil.hidl2aidlPhraseRecognitionEvent(phraseRecognitionEvent);
-                aidlEvent.common.captureSession = mSession.mSessionHandle;
-
                 synchronized (SoundTriggerModule.this) {
                     if (aidlEvent.common.status != RecognitionStatus.FORCED) {
                         setState(ModelState.LOADED);
@@ -511,7 +508,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                 // The callback must be invoked outside of the lock.
                 try {
                     if (callback != null) {
-                        mCallback.onPhraseRecognition(mHandle, aidlEvent);
+                        mCallback.onPhraseRecognition(mHandle, aidlEvent, mSession.mSessionHandle);
                     }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.

@@ -702,7 +702,8 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             }
 
             @Override
-            public void onRecognition(int modelHandle, @NonNull RecognitionEvent event) {
+            public void onRecognition(int modelHandle, @NonNull RecognitionEvent event,
+                    int captureSession) {
                 synchronized (SoundTriggerMiddlewareValidation.this) {
                     ModelState modelState = mLoadedModels.get(modelHandle);
                     if (event.status != RecognitionStatus.FORCED) {
@@ -712,7 +713,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
                 // Calling the delegate callback must be done outside the lock.
                 try {
-                    mCallback.onRecognition(modelHandle, event);
+                    mCallback.onRecognition(modelHandle, event, captureSession);
                 } catch (Exception e) {
                     Log.w(TAG, "Client callback exception.", e);
                     synchronized (SoundTriggerMiddlewareValidation.this) {
@@ -726,7 +727,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
             @Override
             public void onPhraseRecognition(int modelHandle,
-                    @NonNull PhraseRecognitionEvent event) {
+                    @NonNull PhraseRecognitionEvent event, int captureSession) {
                 synchronized (SoundTriggerMiddlewareValidation.this) {
                     ModelState modelState = mLoadedModels.get(modelHandle);
                     if (event.common.status != RecognitionStatus.FORCED) {
@@ -736,7 +737,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
                 // Calling the delegate callback must be done outside the lock.
                 try {
-                    mCallback.onPhraseRecognition(modelHandle, event);
+                    mCallback.onPhraseRecognition(modelHandle, event, captureSession);
                 } catch (Exception e) {
                     Log.w(TAG, "Client callback exception.", e);
                     synchronized (SoundTriggerMiddlewareValidation.this) {

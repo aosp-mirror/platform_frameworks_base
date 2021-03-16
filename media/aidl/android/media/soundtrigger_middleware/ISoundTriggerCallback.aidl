@@ -31,7 +31,7 @@ oneway interface ISoundTriggerCallback {
      * In case of abortion, the caller may retry after the next onRecognitionAvailabilityChange()
      * callback.
      */
-    void onRecognition(int modelHandle, in RecognitionEvent event);
+    void onRecognition(int modelHandle, in RecognitionEvent event, int captureSession);
      /**
       * Invoked whenever a phrase recognition event is triggered (typically, on recognition, but
       * also in case of external aborting of a recognition or a forced recognition event - see the
@@ -39,7 +39,7 @@ oneway interface ISoundTriggerCallback {
       * In case of abortion, the caller may retry after the next onRecognitionAvailabilityChange()
       * callback.
       */
-    void onPhraseRecognition(int modelHandle, in PhraseRecognitionEvent event);
+    void onPhraseRecognition(int modelHandle, in PhraseRecognitionEvent event, int captureSession);
     /**
      * Notifies the client that some start/load operations that have previously failed for resource
      * reasons (threw a ServiceSpecificException(RESOURCE_CONTENTION) or have been preempted) may

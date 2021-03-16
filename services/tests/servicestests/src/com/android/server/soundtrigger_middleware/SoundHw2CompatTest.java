@@ -975,11 +975,11 @@ public class SoundHw2CompatTest {
                     eventCaptor = ArgumentCaptor.forClass(
                     android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.RecognitionEvent.class);
 
-            hwCallback.recognitionCallback(TestUtil.createRecognitionEvent_2_0(handle, status, 555),
+            hwCallback.recognitionCallback(TestUtil.createRecognitionEvent_2_0(handle, status),
                     99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eventCaptor.capture());
-            TestUtil.validateRecognitionEvent_2_1(eventCaptor.getValue(), handle, status, 555);
+            TestUtil.validateRecognitionEvent_2_1(eventCaptor.getValue(), handle, status);
         }
 
         {
@@ -991,11 +991,10 @@ public class SoundHw2CompatTest {
                     android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.PhraseRecognitionEvent.class);
 
             hwCallback.phraseRecognitionCallback(
-                    TestUtil.createPhraseRecognitionEvent_2_0(handle, status, 666), 99);
+                    TestUtil.createPhraseRecognitionEvent_2_0(handle, status), 99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eventCaptor.capture());
-            TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status,
-                    666);
+            TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status);
         }
         verifyNoMoreInteractions(canonicalCallback);
         clearInvocations(canonicalCallback);
@@ -1013,11 +1012,11 @@ public class SoundHw2CompatTest {
                     android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.RecognitionEvent.class);
 
             hwCallback.recognitionCallback_2_1(
-                    TestUtil.createRecognitionEvent_2_1(handle, status, 777),
+                    TestUtil.createRecognitionEvent_2_1(handle, status),
                     99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eventCaptor.capture());
-            TestUtil.validateRecognitionEvent_2_1(eventCaptor.getValue(), handle, status, 777);
+            TestUtil.validateRecognitionEvent_2_1(eventCaptor.getValue(), handle, status);
         }
 
         {
@@ -1029,11 +1028,10 @@ public class SoundHw2CompatTest {
                     android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.PhraseRecognitionEvent.class);
 
             hwCallback.phraseRecognitionCallback_2_1(
-                    TestUtil.createPhraseRecognitionEvent_2_1(handle, status, 888), 99);
+                    TestUtil.createPhraseRecognitionEvent_2_1(handle, status), 99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eventCaptor.capture());
-            TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status,
-                    888);
+            TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status);
         }
         verifyNoMoreInteractions(canonicalCallback);
         clearInvocations(canonicalCallback);
@@ -1051,11 +1049,11 @@ public class SoundHw2CompatTest {
                     android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.RecognitionEvent.class);
 
             hwCallback.recognitionCallback_2_1(
-                    TestUtil.createRecognitionEvent_2_1(handle, status, 444),
+                    TestUtil.createRecognitionEvent_2_1(handle, status),
                     99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eventCaptor.capture());
-            TestUtil.validateRecognitionEvent_2_1(eventCaptor.getValue(), handle, status, 444);
+            TestUtil.validateRecognitionEvent_2_1(eventCaptor.getValue(), handle, status);
         }
 
         {
@@ -1067,11 +1065,10 @@ public class SoundHw2CompatTest {
                     android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.PhraseRecognitionEvent.class);
 
             hwCallback.phraseRecognitionCallback_2_1(
-                    TestUtil.createPhraseRecognitionEvent_2_1(handle, status, 555), 99);
+                    TestUtil.createPhraseRecognitionEvent_2_1(handle, status), 99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eventCaptor.capture());
-            TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status,
-                    555);
+            TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status);
         }
 
         {

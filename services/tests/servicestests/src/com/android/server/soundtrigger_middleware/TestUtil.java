@@ -282,7 +282,7 @@ public class TestUtil {
 
     public static android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionEvent createRecognitionEvent_2_0(
             int hwHandle,
-            int status, int captureSession) {
+            int status) {
         android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionEvent halEvent =
                 new android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionEvent();
         halEvent.status = status;
@@ -290,7 +290,7 @@ public class TestUtil {
         halEvent.model = hwHandle;
         halEvent.captureAvailable = true;
         // This field is ignored.
-        halEvent.captureSession = captureSession;
+        halEvent.captureSession = 9999;
         halEvent.captureDelayMs = 234;
         halEvent.capturePreambleMs = 345;
         halEvent.triggerInData = true;
@@ -307,21 +307,19 @@ public class TestUtil {
 
     public static ISoundTriggerHwCallback.RecognitionEvent createRecognitionEvent_2_1(
             int hwHandle,
-            int status, int captureSession) {
+            int status) {
         ISoundTriggerHwCallback.RecognitionEvent halEvent =
                 new ISoundTriggerHwCallback.RecognitionEvent();
-        halEvent.header = createRecognitionEvent_2_0(hwHandle, status, captureSession);
+        halEvent.header = createRecognitionEvent_2_0(hwHandle, status);
         halEvent.header.data.clear();
         halEvent.data = HidlMemoryUtil.byteArrayToHidlMemory(new byte[]{31, 32, 33});
         return halEvent;
     }
 
-    public static void validateRecognitionEvent(RecognitionEvent event, int status,
-            int captureSession) {
+    public static void validateRecognitionEvent(RecognitionEvent event, int status) {
         assertEquals(status, event.status);
         assertEquals(SoundModelType.GENERIC, event.type);
         assertTrue(event.captureAvailable);
-        assertEquals(captureSession, event.captureSession);
         assertEquals(234, event.captureDelayMs);
         assertEquals(345, event.capturePreambleMs);
         assertTrue(event.triggerInData);
@@ -334,12 +332,11 @@ public class TestUtil {
     public static void validateRecognitionEvent_2_1(
             android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.RecognitionEvent event,
             int hwHandle,
-            int status, int captureSession) {
+            int status) {
         assertEquals(status, event.header.status);
         assertEquals(hwHandle, event.header.model);
         assertEquals(SoundModelType.GENERIC, event.header.type);
         assertTrue(event.header.captureAvailable);
-        assertEquals(captureSession, event.header.captureSession);
         assertEquals(234, event.header.captureDelayMs);
         assertEquals(345, event.header.capturePreambleMs);
         assertTrue(event.header.triggerInData);
@@ -350,10 +347,10 @@ public class TestUtil {
     }
 
     public static android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.PhraseRecognitionEvent
-    createPhraseRecognitionEvent_2_0(int hwHandle, int status, int captureSession) {
+    createPhraseRecognitionEvent_2_0(int hwHandle, int status) {
         android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.PhraseRecognitionEvent halEvent =
                 new android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.PhraseRecognitionEvent();
-        halEvent.common = createRecognitionEvent_2_0(hwHandle, status, captureSession);
+        halEvent.common = createRecognitionEvent_2_0(hwHandle, status);
 
         android.hardware.soundtrigger.V2_0.PhraseRecognitionExtra halExtra =
                 new android.hardware.soundtrigger.V2_0.PhraseRecognitionExtra();
@@ -371,10 +368,10 @@ public class TestUtil {
     }
 
     public static ISoundTriggerHwCallback.PhraseRecognitionEvent createPhraseRecognitionEvent_2_1(
-            int hwHandle, int status, int captureSession) {
+            int hwHandle, int status) {
         ISoundTriggerHwCallback.PhraseRecognitionEvent halEvent =
                 new ISoundTriggerHwCallback.PhraseRecognitionEvent();
-        halEvent.common = createRecognitionEvent_2_1(hwHandle, status, captureSession);
+        halEvent.common = createRecognitionEvent_2_1(hwHandle, status);
 
         android.hardware.soundtrigger.V2_0.PhraseRecognitionExtra halExtra =
                 new android.hardware.soundtrigger.V2_0.PhraseRecognitionExtra();
@@ -391,9 +388,8 @@ public class TestUtil {
         return halEvent;
     }
 
-    public static void validatePhraseRecognitionEvent(PhraseRecognitionEvent event, int status,
-            int captureSession) {
-        validateRecognitionEvent(event.common, status, captureSession);
+    public static void validatePhraseRecognitionEvent(PhraseRecognitionEvent event, int status) {
+        validateRecognitionEvent(event.common, status);
 
         assertEquals(1, event.phraseExtras.length);
         assertEquals(123, event.phraseExtras[0].id);
@@ -407,8 +403,8 @@ public class TestUtil {
 
     public static void validatePhraseRecognitionEvent_2_1(
             android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.PhraseRecognitionEvent event,
-            int handle, int status, int captureSession) {
-        validateRecognitionEvent_2_1(event.common, handle, status, captureSession);
+            int handle, int status) {
+        validateRecognitionEvent_2_1(event.common, handle, status);
 
         assertEquals(1, event.phraseExtras.size());
         assertEquals(123, event.phraseExtras.get(0).id);

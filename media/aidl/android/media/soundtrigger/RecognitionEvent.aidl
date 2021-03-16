@@ -31,8 +31,6 @@ parcelable RecognitionEvent {
     SoundModelType type = SoundModelType.INVALID;
     /** Is it possible to capture audio from this utterance buffered by the implementation. */
     boolean captureAvailable;
-    /* Audio session ID. framework use. */
-    int captureSession;
     /**
      * Delay in ms between end of model detection and start of audio available for capture.
      * A negative value is possible (e.g. if key phrase is also available for Capture.
