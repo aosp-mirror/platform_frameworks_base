@@ -15,6 +15,8 @@
  */
 package com.android.systemui.qs;
 
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
+
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_SECURITY_FOOTER_VIEW;
 
 import android.app.AlertDialog;
@@ -244,8 +246,14 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             if (organizationName == null) {
                 return mContext.getString(R.string.quick_settings_disclosure_management);
             }
-            return mContext.getString(R.string.quick_settings_disclosure_named_management,
-                    organizationName);
+            if (isFinancedDevice()) {
+                return mContext.getString(
+                        R.string.quick_settings_financed_disclosure_named_management,
+                        organizationName);
+            } else {
+                return mContext.getString(R.string.quick_settings_disclosure_named_management,
+                        organizationName);
+            }
         } // end if(isDeviceManaged)
         if (hasCACertsInWorkProfile) {
             if (workProfileOrganizationName == null) {
@@ -355,6 +363,10 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                 .inflate(R.layout.quick_settings_footer_dialog, null, false);
 
         // device management section
+        TextView deviceManagementSubtitle =
+                dialogView.findViewById(R.id.device_management_subtitle);
+        deviceManagementSubtitle.setText(getManagementTitle(deviceOwnerOrganization));
+
         CharSequence managementMessage = getManagementMessage(isDeviceManaged,
                 deviceOwnerOrganization, isProfileOwnerOfOrganizationOwnedDevice,
                 workProfileOrganizationName);
@@ -468,7 +480,8 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         }
     }
 
-    private String getSettingsButton() {
+    @VisibleForTesting
+    String getSettingsButton() {
         return mContext.getString(R.string.monitoring_button_view_policies);
     }
 
@@ -490,8 +503,13 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             return null;
         }
         if (isDeviceManaged && organizationName != null) {
-            return mContext.getString(
-                    R.string.monitoring_description_named_management, organizationName);
+            if (isFinancedDevice()) {
+                return mContext.getString(R.string.monitoring_financed_description_named_management,
+                        organizationName, organizationName);
+            } else {
+                return mContext.getString(
+                        R.string.monitoring_description_named_management, organizationName);
+            }
         } else if (isProfileOwnerOfOrganizationOwnedDevice && workProfileOrganizationName != null) {
             return mContext.getString(
                     R.string.monitoring_description_named_management, workProfileOrganizationName);
@@ -557,12 +575,21 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         return message;
     }
 
-    private int getTitle(String deviceOwner) {
-        if (deviceOwner != null) {
-            return R.string.monitoring_title_device_owned;
+    @VisibleForTesting
+    CharSequence getManagementTitle(CharSequence deviceOwnerOrganization) {
+        if (deviceOwnerOrganization != null && isFinancedDevice()) {
+            return mContext.getString(R.string.monitoring_title_financed_device,
+                    deviceOwnerOrganization);
         } else {
-            return R.string.monitoring_title;
+            return mContext.getString(R.string.monitoring_title_device_owned);
         }
+    }
+
+    private boolean isFinancedDevice() {
+        return mSecurityController.isDeviceManaged()
+                && mSecurityController.getDeviceOwnerType(
+                        mSecurityController.getDeviceOwnerComponentOnAnyUser())
+                == DEVICE_OWNER_TYPE_FINANCED;
     }
 
     private final Runnable mUpdateIcon = new Runnable() {

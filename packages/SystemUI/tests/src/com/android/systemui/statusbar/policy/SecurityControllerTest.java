@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -62,6 +64,9 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SecurityControllerTest extends SysuiTestCase {
+    private static final ComponentName DEVICE_OWNER_COMPONENT =
+            new ComponentName("com.android.foo", "bar");
+
     private final DevicePolicyManager mDevicePolicyManager = mock(DevicePolicyManager.class);
     private final IKeyChainService.Stub mKeyChainService = mock(IKeyChainService.Stub.class);
     private final UserManager mUserManager = mock(UserManager.class);
@@ -124,6 +129,22 @@ public class SecurityControllerTest extends SysuiTestCase {
     public void testGetDeviceOwnerOrganizationName() {
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn("organization");
         assertEquals("organization", mSecurityController.getDeviceOwnerOrganizationName());
+    }
+
+    @Test
+    public void testGetDeviceOwnerComponentOnAnyUser() {
+        when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser())
+                .thenReturn(DEVICE_OWNER_COMPONENT);
+        assertEquals(mSecurityController.getDeviceOwnerComponentOnAnyUser(),
+                DEVICE_OWNER_COMPONENT);
+    }
+
+    @Test
+    public void testGetDeviceOwnerType() {
+        when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
+        assertEquals(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT),
+                DEVICE_OWNER_TYPE_FINANCED);
     }
 
     @Test
