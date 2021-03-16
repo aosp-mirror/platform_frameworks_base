@@ -1390,6 +1390,21 @@ public class AppStandbyControllerTests {
     }
 
     @Test
+    public void testRestrictApp_MainReason() throws Exception {
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_DEFAULT);
+        mInjector.mElapsedRealtime += 4 * RESTRICTED_THRESHOLD;
+
+        mController.restrictApp(PACKAGE_1, USER_ID, REASON_MAIN_PREDICTED, 0);
+        // Call should be ignored.
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
+
+        mController.restrictApp(PACKAGE_1, USER_ID, REASON_MAIN_FORCED_BY_USER, 0);
+        // Call should go through
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+    }
+
+    @Test
     public void testAddActiveDeviceAdmin() throws Exception {
         assertActiveAdmins(USER_ID, (String[]) null);
         assertActiveAdmins(USER_ID2, (String[]) null);
