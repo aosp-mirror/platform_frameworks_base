@@ -19,6 +19,7 @@ package com.android.server.wm.flicker.ime
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -184,7 +185,12 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 1)
+                .getConfigNonRotationTests(
+                    repetitions = 1,
+                    supportedNavigationModes = listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                    )
+                )
         }
     }
 }
