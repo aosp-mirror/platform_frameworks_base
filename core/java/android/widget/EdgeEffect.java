@@ -354,13 +354,14 @@ public class EdgeEffect {
         mDistance = Math.max(0f, mPullDistance);
         mVelocity = 0;
 
-        final float absdd = Math.abs(deltaDistance);
-        mGlowAlpha = mGlowAlphaStart = Math.min(MAX_ALPHA,
-                mGlowAlpha + (absdd * PULL_DISTANCE_ALPHA_GLOW_FACTOR));
-
         if (mPullDistance == 0) {
             mGlowScaleY = mGlowScaleYStart = 0;
+            mGlowAlpha = mGlowAlphaStart = 0;
         } else {
+            final float absdd = Math.abs(deltaDistance);
+            mGlowAlpha = mGlowAlphaStart = Math.min(MAX_ALPHA,
+                    mGlowAlpha + (absdd * PULL_DISTANCE_ALPHA_GLOW_FACTOR));
+
             final float scale = (float) (Math.max(0, 1 - 1 /
                     Math.sqrt(Math.abs(mPullDistance) * mBounds.height()) - 0.3d) / 0.7d);
 
@@ -698,7 +699,9 @@ public class EdgeEffect {
 
         mGlowAlpha = mGlowAlphaStart + (mGlowAlphaFinish - mGlowAlphaStart) * interp;
         mGlowScaleY = mGlowScaleYStart + (mGlowScaleYFinish - mGlowScaleYStart) * interp;
-        mDistance = calculateDistanceFromGlowValues(mGlowScaleY, mGlowAlpha);
+        if (mState != STATE_PULL) {
+            mDistance = calculateDistanceFromGlowValues(mGlowScaleY, mGlowAlpha);
+        }
         mDisplacement = (mDisplacement + mTargetDisplacement) / 2;
 
         if (t >= 1.f - EPSILON) {
