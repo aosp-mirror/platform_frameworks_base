@@ -68,6 +68,7 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
@@ -318,8 +319,20 @@ public class WallpaperManager {
         private int mCachedWallpaperUserId;
         private Bitmap mDefaultWallpaper;
         private Handler mMainLooperHandler;
-        private ArrayMap<LocalWallpaperColorConsumer, ILocalWallpaperColorConsumer>
-                mLocalColorCallbacks = new ArrayMap<>();
+        private ArrayMap<RectF, ArraySet<LocalWallpaperColorConsumer>> mLocalColorAreas =
+                new ArrayMap<>();
+        private ILocalWallpaperColorConsumer mLocalColorCallback =
+                new ILocalWallpaperColorConsumer.Stub() {
+                    @Override
+                    public void onColorsChanged(RectF area, WallpaperColors colors) {
+                        ArraySet<LocalWallpaperColorConsumer> callbacks =
+                                mLocalColorAreas.get(area);
+                        if (callbacks == null) return;
+                        for (LocalWallpaperColorConsumer callback: callbacks) {
+                            callback.onColorsChanged(area, colors);
+                        }
+                    }
+                };
 
         Globals(IWallpaperManager service, Looper looper) {
             mService = service;
@@ -361,37 +374,46 @@ public class WallpaperManager {
             }
         }
 
-        private ILocalWallpaperColorConsumer wrap(LocalWallpaperColorConsumer callback) {
-            ILocalWallpaperColorConsumer callback2 = new ILocalWallpaperColorConsumer.Stub() {
-                @Override
-                public void onColorsChanged(RectF area, WallpaperColors colors) {
-                    callback.onColorsChanged(area, colors);
-                }
-            };
-            mLocalColorCallbacks.put(callback, callback2);
-            return callback2;
-        }
-
         public void addOnColorsChangedListener(@NonNull LocalWallpaperColorConsumer callback,
                 @NonNull List<RectF> regions, int which, int userId, int displayId) {
+            for (RectF area: regions) {
+                ArraySet<LocalWallpaperColorConsumer> callbacks = mLocalColorAreas.get(area);
+                if (callbacks == null) {
+                    callbacks = new ArraySet<>();
+                    mLocalColorAreas.put(area, callbacks);
+                }
+                callbacks.add(callback);
+            }
             try {
-                mService.addOnLocalColorsChangedListener(wrap(callback) , regions, which,
+                mService.addOnLocalColorsChangedListener(mLocalColorCallback , regions, which,
                                                          userId, displayId);
             } catch (RemoteException e) {
                 // Can't get colors, connection lost.
+                Log.e(TAG, "Can't register for local color updates", e);
             }
         }
 
         public void removeOnColorsChangedListener(
                 @NonNull LocalWallpaperColorConsumer callback, int which, int userId,
                 int displayId) {
-            ILocalWallpaperColorConsumer callback2 = mLocalColorCallbacks.remove(callback);
-            if (callback2 == null) return;
+            final ArrayList<RectF> removeAreas = new ArrayList<>();
+            for (RectF area : mLocalColorAreas.keySet()) {
+                ArraySet<LocalWallpaperColorConsumer> callbacks = mLocalColorAreas.get(area);
+                if (callbacks == null) continue;
+                callbacks.remove(callback);
+                if (callbacks.size() == 0) {
+                    mLocalColorAreas.remove(area);
+                    removeAreas.add(area);
+                }
+            }
             try {
-                mService.removeOnLocalColorsChangedListener(
-                        callback2, which, userId, displayId);
+                if (removeAreas.size() > 0) {
+                    mService.removeOnLocalColorsChangedListener(
+                            mLocalColorCallback, removeAreas, which, userId, displayId);
+                }
             } catch (RemoteException e) {
                 // Can't get colors, connection lost.
+                Log.e(TAG, "Can't unregister for local color updates", e);
             }
         }
 
