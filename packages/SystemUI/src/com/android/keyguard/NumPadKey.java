@@ -178,13 +178,6 @@ public class NumPadKey extends ViewGroup {
     }
 
     @Override
-    public void setLayoutParams(ViewGroup.LayoutParams params) {
-        if (mAnimator != null) mAnimator.updateMargin((ViewGroup.MarginLayoutParams) params);
-
-        super.setLayoutParams(params);
-    }
-
-    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         measureChildren(widthMeasureSpec, heightMeasureSpec);
