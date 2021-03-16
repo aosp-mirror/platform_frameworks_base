@@ -79,6 +79,10 @@ abstract class UdfpsAnimationView extends FrameLayout {
         return mPauseAuth ? mAlpha : 255;
     }
 
+    boolean isPauseAuth() {
+        return mPauseAuth;
+    }
+
     private int expansionToAlpha(float expansion) {
         // Fade to 0 opacity when reaching this expansion amount
         final float maxExpansion = 0.4f;
