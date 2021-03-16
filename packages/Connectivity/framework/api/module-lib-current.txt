@@ -25,6 +25,11 @@ package android.net {
     field public static final int TRANSPORT_TEST = 7; // 0x7
   }
 
+  public class ParseException extends java.lang.RuntimeException {
+    ctor public ParseException(@NonNull String);
+    ctor public ParseException(@NonNull String, @NonNull Throwable);
+  }
+
   public final class TcpRepairWindow {
     ctor public TcpRepairWindow(int, int, int, int, int, int);
     field public final int maxWindow;
