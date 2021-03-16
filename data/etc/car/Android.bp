@@ -185,3 +185,18 @@ prebuilt_etc {
     src: "com.android.car.activityresolver.xml",
     filename_from_src: true,
 }
+
+prebuilt_etc {
+   name: "allowed_privapp_com.android.car.cluster.home",
+   sub_dir: "permissions",
+   src: "com.android.car.cluster.home.xml",
+   filename_from_src: true,
+}
+
+prebuilt_etc {
+   name: "allowed_privapp_com.android.car.messenger",
+   sub_dir: "permissions",
+   src: "com.android.car.messenger.xml",
+   filename_from_src: true,
+}
+
