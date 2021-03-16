@@ -29,8 +29,7 @@ import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.dockedStackDividerBecomesVisible
 import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
@@ -60,6 +59,11 @@ class EnterSplitScreenDockActivity(
             }
         }
 
+    override val ignoredWindows: List<String>
+        get() = listOf(LAUNCHER_PACKAGE_NAME, WALLPAPER_TITLE, LIVE_WALLPAPER_PACKAGE_NAME,
+            splitScreenApp.defaultWindowName, WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+
     @FlakyTest(bugId = 169271943)
     @Test
     fun dockedStackPrimaryBoundsIsVisible() =
@@ -73,12 +77,8 @@ class EnterSplitScreenDockActivity(
     @FlakyTest(bugId = 178531736)
     @Test
     // b/178531736
-    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry(
-            listOf(LAUNCHER_PACKAGE_NAME,
-                WALLPAPER_TITLE, LIVE_WALLPAPER_PACKAGE_NAME,
-                splitScreenApp.defaultWindowName)
-        )
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     @Presubmit
     @Test
@@ -91,12 +91,8 @@ class EnterSplitScreenDockActivity(
     @FlakyTest(bugId = 178531736)
     @Test
     // b/178531736
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry(
-            listOf(LAUNCHER_PACKAGE_NAME,
-                WALLPAPER_TITLE, LIVE_WALLPAPER_PACKAGE_NAME,
-                splitScreenApp.defaultWindowName)
-        )
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     @Presubmit
     @Test
