@@ -4425,7 +4425,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case EVENT_PROXY_HAS_CHANGED: {
-                    handleApplyDefaultProxy((ProxyInfo)msg.obj);
+                    final Pair<Network, ProxyInfo> arg = (Pair<Network, ProxyInfo>) msg.obj;
+                    handleApplyDefaultProxy(arg.second);
                     break;
                 }
                 case EVENT_REGISTER_NETWORK_PROVIDER: {

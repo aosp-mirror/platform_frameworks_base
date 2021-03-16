@@ -51,4 +51,11 @@ oneway interface IDisplayHasherService {
      * @param callback The callback invoked to send back the VerifiedDisplayHash.
      */
     void verifyDisplayHash(in byte[] salt, in DisplayHash displayHash, in RemoteCallback callback);
+
+    /**
+     * Call to get a map of supported algorithms and their {@link DisplayHashParams}
+     *
+     * @param callback The callback invoked to send back the map of algorithms to DisplayHashParams.
+     */
+    void getDisplayHashAlgorithms(in RemoteCallback callback);
 }

@@ -46,7 +46,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
-import com.android.server.display.DisplayDeviceConfig.HighBrightnessModeData;
 
 import java.io.PrintWriter;
 
@@ -220,12 +219,14 @@ class AutomaticBrightnessController {
             float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, LogicalDisplay display, Context context) {
+            HysteresisLevels screenBrightnessThresholds, LogicalDisplay display, Context context,
+            HighBrightnessModeController hbmController) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor, mapper,
                 lightSensorWarmUpTime, brightnessMin, brightnessMax, dozeScaleFactor,
                 lightSensorRate, initialLightSensorRate, brighteningLightDebounceConfig,
                 darkeningLightDebounceConfig, resetAmbientLuxAfterWarmUpConfig,
-                ambientBrightnessThresholds, screenBrightnessThresholds, display, context
+                ambientBrightnessThresholds, screenBrightnessThresholds, display, context,
+                hbmController
         );
     }
 
@@ -236,7 +237,8 @@ class AutomaticBrightnessController {
             float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, LogicalDisplay display, Context context) {
+            HysteresisLevels screenBrightnessThresholds, LogicalDisplay display, Context context,
+            HighBrightnessModeController hbmController) {
         mInjector = injector;
         mContext = context;
         mCallbacks = callbacks;
@@ -273,20 +275,7 @@ class AutomaticBrightnessController {
         mPendingForegroundAppPackageName = null;
         mForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
         mPendingForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
-
-        final DisplayDeviceConfig ddConfig =
-                display.getPrimaryDisplayDeviceLocked().getDisplayDeviceConfig();
-        HighBrightnessModeData hbmData =
-                ddConfig != null ? ddConfig.getHighBrightnessModeData() : null;
-
-        final Runnable hbmChangeCallback = () -> {
-            updateAutoBrightness(true /*sendUpdate*/, false /*userInitiatedChange*/);
-            // TODO: b/175937645 - Callback to DisplayManagerService to indicate a change to the HBM
-            // allowance has been made so that the brightness limits can be calculated
-            // appropriately.
-        };
-        mHbmController = new HighBrightnessModeController(mHandler, brightnessMin, brightnessMax,
-                hbmData, hbmChangeCallback);
+        mHbmController = hbmController;
     }
 
     /**
@@ -327,6 +316,7 @@ class AutomaticBrightnessController {
     public void configure(boolean enable, @Nullable BrightnessConfiguration configuration,
             float brightness, boolean userChangedBrightness, float adjustment,
             boolean userChangedAutoBrightnessAdjustment, int displayPolicy) {
+        mHbmController.setAutoBrightnessEnabled(enable);
         // While dozing, the application processor may be suspended which will prevent us from
         // receiving new information from the light sensor. On some devices, we may be able to
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor

@@ -392,6 +392,23 @@ public class WindowMagnificationManagerTest {
         assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
     }
 
+    @Test
+    public void onWindowMagnificationActivationState_magnifierEnabled_notifyActivatedState() {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, NaN, NaN);
+
+        verify(mMockCallback).onWindowMagnificationActivationState(eq(true));
+    }
+
+    @Test
+    public void onWindowMagnificationActivationState_magnifierDisabled_notifyDeactivatedState() {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, NaN, NaN);
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, true);
+
+        verify(mMockCallback).onWindowMagnificationActivationState(eq(false));
+    }
+
     private MotionEvent generatePointersDownEvent(PointF[] pointersLocation) {
         final int len = pointersLocation.length;
 

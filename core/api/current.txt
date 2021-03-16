@@ -3027,6 +3027,7 @@ package android.accessibilityservice {
     field public static final int GLOBAL_ACTION_ACCESSIBILITY_BUTTON_CHOOSER = 12; // 0xc
     field public static final int GLOBAL_ACTION_ACCESSIBILITY_SHORTCUT = 13; // 0xd
     field public static final int GLOBAL_ACTION_BACK = 1; // 0x1
+    field public static final int GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE = 15; // 0xf
     field public static final int GLOBAL_ACTION_HOME = 2; // 0x2
     field public static final int GLOBAL_ACTION_KEYCODE_HEADSETHOOK = 10; // 0xa
     field public static final int GLOBAL_ACTION_LOCK_SCREEN = 8; // 0x8
@@ -9909,6 +9910,7 @@ package android.content {
     method public String getHtmlText();
     method public android.content.Intent getIntent();
     method public CharSequence getText();
+    method @Nullable public android.view.textclassifier.TextLinks getTextLinks();
     method public android.net.Uri getUri();
   }
 
@@ -9918,6 +9920,8 @@ package android.content {
     method public static boolean compareMimeTypes(String, String);
     method public int describeContents();
     method public String[] filterMimeTypes(String);
+    method public int getClassificationStatus();
+    method @FloatRange(from=0.0, to=1.0) public float getConfidenceScore(@NonNull String);
     method public android.os.PersistableBundle getExtras();
     method public CharSequence getLabel();
     method public String getMimeType(int);
@@ -9927,6 +9931,9 @@ package android.content {
     method public boolean isStyledText();
     method public void setExtras(android.os.PersistableBundle);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CLASSIFICATION_COMPLETE = 3; // 0x3
+    field public static final int CLASSIFICATION_NOT_COMPLETE = 1; // 0x1
+    field public static final int CLASSIFICATION_NOT_PERFORMED = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.content.ClipDescription> CREATOR;
     field public static final String MIMETYPE_TEXT_HTML = "text/html";
     field public static final String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
@@ -10954,6 +10961,7 @@ package android.content {
     field public static final String ACTION_MANAGED_PROFILE_UNLOCKED = "android.intent.action.MANAGED_PROFILE_UNLOCKED";
     field public static final String ACTION_MANAGE_NETWORK_USAGE = "android.intent.action.MANAGE_NETWORK_USAGE";
     field public static final String ACTION_MANAGE_PACKAGE_STORAGE = "android.intent.action.MANAGE_PACKAGE_STORAGE";
+    field public static final String ACTION_MANAGE_UNUSED_APPS = "android.intent.action.MANAGE_UNUSED_APPS";
     field public static final String ACTION_MEDIA_BAD_REMOVAL = "android.intent.action.MEDIA_BAD_REMOVAL";
     field public static final String ACTION_MEDIA_BUTTON = "android.intent.action.MEDIA_BUTTON";
     field public static final String ACTION_MEDIA_CHECKING = "android.intent.action.MEDIA_CHECKING";
@@ -21889,6 +21897,7 @@ package android.media {
     method @NonNull public java.util.List<byte[]> getOfflineLicenseKeySetIds();
     method public int getOfflineLicenseState(@NonNull byte[]);
     method public int getOpenSessionCount();
+    method @Nullable public android.media.metrics.PlaybackComponent getPlaybackComponent(@NonNull byte[]);
     method @NonNull public byte[] getPropertyByteArray(String);
     method @NonNull public String getPropertyString(@NonNull String);
     method @NonNull public android.media.MediaDrm.ProvisionRequest getProvisionRequest();
@@ -36863,11 +36872,12 @@ package android.security {
     method @NonNull public static android.content.Intent createInstallIntent();
     method @NonNull public static android.content.Intent createManageCredentialsIntent(@NonNull android.security.AppUriAuthenticationPolicy);
     method @Nullable @WorkerThread public static java.security.cert.X509Certificate[] getCertificateChain(@NonNull android.content.Context, @NonNull String) throws java.lang.InterruptedException, android.security.KeyChainException;
-    method @NonNull public static android.security.AppUriAuthenticationPolicy getCredentialManagementAppPolicy(@NonNull android.content.Context) throws java.lang.SecurityException;
+    method @NonNull @WorkerThread public static android.security.AppUriAuthenticationPolicy getCredentialManagementAppPolicy(@NonNull android.content.Context) throws java.lang.SecurityException;
     method @Nullable @WorkerThread public static java.security.PrivateKey getPrivateKey(@NonNull android.content.Context, @NonNull String) throws java.lang.InterruptedException, android.security.KeyChainException;
     method @Deprecated public static boolean isBoundKeyAlgorithm(@NonNull String);
-    method public static boolean isCredentialManagementApp(@NonNull android.content.Context);
+    method @WorkerThread public static boolean isCredentialManagementApp(@NonNull android.content.Context);
     method public static boolean isKeyAlgorithmSupported(@NonNull String);
+    method @RequiresPermission(value="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP", conditional=true) @WorkerThread public static boolean removeCredentialManagementApp(@NonNull android.content.Context);
     field public static final String ACTION_KEYCHAIN_CHANGED = "android.security.action.KEYCHAIN_CHANGED";
     field public static final String ACTION_KEY_ACCESS_CHANGED = "android.security.action.KEY_ACCESS_CHANGED";
     field @Deprecated public static final String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
@@ -51913,6 +51923,7 @@ package android.view.textclassifier {
     field public static final String TYPE_PHONE = "phone";
     field public static final String TYPE_UNKNOWN = "";
     field public static final String TYPE_URL = "url";
+    field public static final String WIDGET_TYPE_CLIPBOARD = "clipboard";
     field public static final String WIDGET_TYPE_CUSTOM_EDITTEXT = "customedit";
     field public static final String WIDGET_TYPE_CUSTOM_TEXTVIEW = "customview";
     field public static final String WIDGET_TYPE_CUSTOM_UNSELECTABLE_TEXTVIEW = "nosel-customview";
@@ -55027,6 +55038,7 @@ package android.widget {
     method public void setRelativeScrollPosition(@IdRes int, int);
     method @Deprecated public void setRemoteAdapter(int, @IdRes int, android.content.Intent);
     method public void setRemoteAdapter(@IdRes int, android.content.Intent);
+    method public void setRemoteAdapter(@IdRes int, @NonNull android.widget.RemoteViews.RemoteCollectionItems);
     method public void setScrollPosition(@IdRes int, int);
     method public void setShort(@IdRes int, String, short);
     method public void setString(@IdRes int, String, String);
@@ -55064,6 +55076,25 @@ package android.widget {
   public static class RemoteViews.ActionException extends java.lang.RuntimeException {
     ctor public RemoteViews.ActionException(Exception);
     ctor public RemoteViews.ActionException(String);
+  }
+
+  public static final class RemoteViews.RemoteCollectionItems implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getItemCount();
+    method public long getItemId(int);
+    method @NonNull public android.widget.RemoteViews getItemView(int);
+    method public int getViewTypeCount();
+    method public boolean hasStableIds();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.widget.RemoteViews.RemoteCollectionItems> CREATOR;
+  }
+
+  public static final class RemoteViews.RemoteCollectionItems.Builder {
+    ctor public RemoteViews.RemoteCollectionItems.Builder();
+    method @NonNull public android.widget.RemoteViews.RemoteCollectionItems.Builder addItem(long, @NonNull android.widget.RemoteViews);
+    method @NonNull public android.widget.RemoteViews.RemoteCollectionItems build();
+    method @NonNull public android.widget.RemoteViews.RemoteCollectionItems.Builder setHasStableIds(boolean);
+    method @NonNull public android.widget.RemoteViews.RemoteCollectionItems.Builder setViewTypeCount(int);
   }
 
   public static class RemoteViews.RemoteResponse {

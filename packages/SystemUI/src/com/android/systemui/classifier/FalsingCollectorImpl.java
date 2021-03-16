@@ -27,7 +27,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
 import com.android.systemui.util.time.SystemClock;
@@ -49,7 +48,6 @@ class FalsingCollectorImpl implements FalsingCollector {
     private final HistoryTracker mHistoryTracker;
     private final ProximitySensor mProximitySensor;
     private final StatusBarStateController mStatusBarStateController;
-    private final KeyguardStateController mKeyguardStateController;
     private final SystemClock mSystemClock;
 
     private int mState;
@@ -89,14 +87,13 @@ class FalsingCollectorImpl implements FalsingCollector {
     FalsingCollectorImpl(FalsingDataProvider falsingDataProvider, FalsingManager falsingManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor, HistoryTracker historyTracker,
             ProximitySensor proximitySensor, StatusBarStateController statusBarStateController,
-            KeyguardStateController keyguardStateController, SystemClock systemClock) {
+            SystemClock systemClock) {
         mFalsingDataProvider = falsingDataProvider;
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mHistoryTracker = historyTracker;
         mProximitySensor = proximitySensor;
         mStatusBarStateController = statusBarStateController;
-        mKeyguardStateController = keyguardStateController;
         mSystemClock = systemClock;
 
 
@@ -258,10 +255,6 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onTouchEvent(MotionEvent ev) {
-        if (!mKeyguardStateController.isShowing()) {
-            avoidGesture();
-            return;
-        }
         // We delay processing down events to see if another component wants to process them.
         // If #avoidGesture is called after a MotionEvent.ACTION_DOWN, all following motion events
         // will be ignored by the collector until another MotionEvent.ACTION_DOWN is passed in.
@@ -283,8 +276,8 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void avoidGesture() {
-        mAvoidGesture = true;
         if (mPendingDownEvent != null) {
+            mAvoidGesture = true;
             mPendingDownEvent.recycle();
             mPendingDownEvent = null;
         }

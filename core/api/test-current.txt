@@ -1380,10 +1380,6 @@ package android.media {
     method public int getMaxMacroBlocks();
   }
 
-  public final class MediaDrm implements java.lang.AutoCloseable {
-    method @Nullable public android.media.metrics.PlaybackComponent getPlaybackComponent(@NonNull byte[]);
-  }
-
   public final class MediaRoute2Info implements android.os.Parcelable {
     method @NonNull public String getOriginalId();
   }
@@ -1950,8 +1946,7 @@ package android.provider {
 package android.security {
 
   public final class KeyChain {
-    method @RequiresPermission("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP") public static boolean removeCredentialManagementApp(@NonNull android.content.Context);
-    method @RequiresPermission("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP") public static boolean setCredentialManagementApp(@NonNull android.content.Context, @NonNull String, @NonNull android.security.AppUriAuthenticationPolicy);
+    method @RequiresPermission("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP") @WorkerThread public static boolean setCredentialManagementApp(@NonNull android.content.Context, @NonNull String, @NonNull android.security.AppUriAuthenticationPolicy);
   }
 
   public class KeyStoreException extends java.lang.Exception {
@@ -2736,6 +2731,7 @@ package android.view.inputmethod {
 
   public final class InputMethodManager {
     method public int getDisplayId();
+    method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodListAsUser(int);
     method public boolean hasActiveInputConnection(@Nullable android.view.View);
     method public boolean isInputMethodPickerShown();
   }

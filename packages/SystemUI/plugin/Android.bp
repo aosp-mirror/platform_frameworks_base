@@ -25,7 +25,10 @@ java_library {
 
     name: "SystemUIPluginLib",
 
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "bcsmartspace/src/**/*.java",
+    ],
 
     static_libs: [
         "PluginCoreLib",

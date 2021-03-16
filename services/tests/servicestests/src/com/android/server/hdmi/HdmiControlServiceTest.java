@@ -45,7 +45,6 @@ import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -667,7 +666,6 @@ public class HdmiControlServiceTest {
     @Test
     public void initCecVersion_limitToMinimumSupportedVersion() {
         mNativeWrapper.setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-        Log.e("MARVIN", "set setting CEC");
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
@@ -679,9 +677,7 @@ public class HdmiControlServiceTest {
 
     @Test
     public void initCecVersion_limitToAtLeast1_4() {
-        Log.e("MARVIN", "set HAL CEC to 0");
         mNativeWrapper.setCecVersion(0x0);
-        Log.e("MARVIN", "set setting CEC to 2");
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
@@ -694,7 +690,6 @@ public class HdmiControlServiceTest {
     @Test
     public void initCecVersion_useHighestMatchingVersion() {
         mNativeWrapper.setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0);
-        Log.e("MARVIN", "set setting CEC");
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);

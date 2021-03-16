@@ -962,7 +962,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             int delay = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
-                    ANR_DELAY_MILLIS_DEVICE_CONFIG_KEY, 0);
+                    ANR_DELAY_MILLIS_DEVICE_CONFIG_KEY, 5000);
             Slog.v(TAG, "getAnrDelayMillis for " + packageName + ". " + delay + "ms");
             return delay;
         }
@@ -1791,7 +1791,7 @@ class StorageManagerService extends IStorageManager.Stub
     public StorageManagerService(Context context) {
         sSelf = this;
         mVoldAppDataIsolationEnabled = SystemProperties.getBoolean(
-                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
+                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
         mContext = context;
         mResolver = mContext.getContentResolver();
         mCallbacks = new Callbacks(FgThread.get().getLooper());

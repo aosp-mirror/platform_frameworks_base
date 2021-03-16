@@ -56,12 +56,15 @@ import java.util.function.Consumer;
  *
  * <p>Build/Install/Run:
  *
- * atest FrameworksMockingCoreTests:android.view.DisplayTests
+ * atest FrameworksMockingCoreTests:android.view.DisplayTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
-public class DisplayTests {
+public class DisplayTest {
 
     private static final int APP_WIDTH = 272;
     private static final int APP_HEIGHT = 700;

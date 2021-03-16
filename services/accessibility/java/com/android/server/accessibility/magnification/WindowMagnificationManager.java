@@ -93,6 +93,13 @@ public class WindowMagnificationManager implements
          * @param scale the target scale, or {@link Float#NaN} to leave unchanged
          */
         void onPerformScaleAction(int displayId, float scale);
+
+        /**
+         * Called when the state of the magnification activation is changed.
+         *
+         * @param activated {@code true} if the magnification is activated, otherwise {@code false}.
+         */
+        void onWindowMagnificationActivationState(boolean activated);
     }
 
     private final Callback mCallback;
@@ -264,6 +271,7 @@ public class WindowMagnificationManager implements
      */
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
             @Nullable MagnificationAnimationCallback animationCallback) {
+        final boolean enabled;
         synchronized (mLock) {
             if (mConnectionWrapper == null) {
                 return;
@@ -272,8 +280,12 @@ public class WindowMagnificationManager implements
             if (magnifier == null) {
                 magnifier = createWindowMagnifier(displayId);
             }
-            magnifier.enableWindowMagnificationInternal(scale, centerX, centerY,
+            enabled = magnifier.enableWindowMagnificationInternal(scale, centerX, centerY,
                     animationCallback);
+        }
+
+        if (enabled) {
+            mCallback.onWindowMagnificationActivationState(true);
         }
     }
 
@@ -296,15 +308,20 @@ public class WindowMagnificationManager implements
      */
     void disableWindowMagnification(int displayId, boolean clear,
             MagnificationAnimationCallback animationCallback) {
+        final boolean disabled;
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
             if (magnifier == null || mConnectionWrapper == null) {
                 return;
             }
-            magnifier.disableWindowMagnificationInternal(animationCallback);
+            disabled = magnifier.disableWindowMagnificationInternal(animationCallback);
             if (clear) {
                 mWindowMagnifiers.delete(displayId);
             }
+        }
+
+        if (disabled) {
+            mCallback.onWindowMagnificationActivationState(false);
         }
     }
 
@@ -560,26 +577,35 @@ public class WindowMagnificationManager implements
         }
 
         @GuardedBy("mLock")
-        void enableWindowMagnificationInternal(float scale, float centerX, float centerY,
+        boolean enableWindowMagnificationInternal(float scale, float centerX, float centerY,
                 @Nullable MagnificationAnimationCallback animationCallback) {
             if (mEnabled) {
-                return;
+                return false;
             }
             final float normScale = MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
             if (mWindowMagnificationManager.enableWindowMagnificationInternal(mDisplayId, normScale,
                     centerX, centerY, animationCallback)) {
                 mScale = normScale;
                 mEnabled = true;
+
+                return true;
             }
+            return false;
         }
 
         @GuardedBy("mLock")
-        void disableWindowMagnificationInternal(
+        boolean disableWindowMagnificationInternal(
                 @Nullable MagnificationAnimationCallback animationResultCallback) {
-            if (mEnabled && mWindowMagnificationManager.disableWindowMagnificationInternal(
+            if (!mEnabled) {
+                return false;
+            }
+            if (mWindowMagnificationManager.disableWindowMagnificationInternal(
                     mDisplayId, animationResultCallback)) {
                 mEnabled = false;
+
+                return true;
             }
+            return false;
         }
 
         @GuardedBy("mLock")

@@ -241,6 +241,7 @@ public final class AppSearchSession implements Closeable {
             documentBundles.add(documents.get(i).getBundle());
         }
         try {
+            // TODO(b/173532925) a timestamp needs to be sent here to calculate binder latency
             mService.putDocuments(mPackageName, mDatabaseName, documentBundles, mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
