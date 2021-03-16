@@ -3390,6 +3390,8 @@
   <java-symbol type="drawable" name="ic_accessibility_color_correction" />
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
 
+  <java-symbol type="string" name="reduce_bright_colors_feature_name" />
+
   <!-- com.android.internal.widget.RecyclerView -->
   <java-symbol type="id" name="item_touch_helper_previous_elevation"/>
   <java-symbol type="dimen" name="item_touch_helper_max_drag_scroll_per_frame"/>
