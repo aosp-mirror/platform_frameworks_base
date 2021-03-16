@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,9 +28,11 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,16 +55,24 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private StatusBar mStatusBar;
+    @Mock
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock
+    private DumpManager mDumpManager;
 
     private UdfpsKeyguardViewController mController;
 
     // Capture listeners so that they can be used to send events
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerCaptor;
-    private StatusBarStateController.StateListener mParentListener;
-    private StatusBarStateController.StateListener mDozeListener;
+    private StatusBarStateController.StateListener mParentStatusBarStateListener;
+    private StatusBarStateController.StateListener mStatusBarStateListener;
 
     @Captor private ArgumentCaptor<StatusBar.ExpansionChangedListener> mExpansionListenerCaptor;
     private StatusBar.ExpansionChangedListener mExpansionListener;
+
+    @Captor private ArgumentCaptor<StatusBarKeyguardViewManager.AlternateAuthInterceptor>
+            mAltAuthInterceptorCaptor;
+    private StatusBarKeyguardViewManager.AlternateAuthInterceptor mAltAuthInterceptor;
 
     @Before
     public void setUp() {
@@ -68,7 +80,9 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         mController = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
-                mStatusBar);
+                mStatusBar,
+                mStatusBarKeyguardViewManager,
+                mDumpManager);
     }
 
     @Test
@@ -86,7 +100,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     @Test
     public void testViewControllerQueriesSBStateOnAttached() {
         mController.onViewAttached();
-        verify(mStatusBarStateController).getState();
+        verify(mStatusBarStateController, times(2)).getState();
         verify(mStatusBarStateController).getDozeAmount();
 
         final float dozeAmount = .88f;
@@ -106,8 +120,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         captureExpansionListener();
         mController.onViewDetached();
 
-        verify(mStatusBarStateController).removeCallback(mParentListener);
-        verify(mStatusBarStateController).removeCallback(mDozeListener);
+        verify(mStatusBarStateController).removeCallback(mParentStatusBarStateListener);
+        verify(mStatusBarStateController).removeCallback(mStatusBarStateListener);
         verify(mStatusBar).removeExpansionChangedListener(mExpansionListener);
     }
 
@@ -118,21 +132,88 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
         final float linear = .55f;
         final float eased = .65f;
-        mDozeListener.onDozeAmountChanged(linear, eased);
+        mStatusBarStateListener.onDozeAmountChanged(linear, eased);
 
         verify(mView).onDozeAmountChanged(linear, eased);
+    }
+
+    @Test
+    public void testShouldNotPauseAuthOnKeyguard() {
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureExpansionListener();
+
+        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
+
+        assertFalse(mController.shouldPauseAuth());
+    }
+
+    @Test
+    public void testShouldPauseAuthOnShadeLocked() {
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureExpansionListener();
+
+        sendStatusBarStateChanged(StatusBarState.SHADE_LOCKED);
+
+        assertTrue(mController.shouldPauseAuth());
+    }
+
+    @Test
+    public void testOverrideShouldPauseAuthOnShadeLocked() {
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureAltAuthInterceptor();
+
+        sendStatusBarStateChanged(StatusBarState.SHADE_LOCKED);
+        assertTrue(mController.shouldPauseAuth());
+
+        mAltAuthInterceptor.showAlternativeAuthMethod(); // force show
+        assertFalse(mController.shouldPauseAuth());
+        assertTrue(mAltAuthInterceptor.isShowingAlternativeAuth());
+
+        mAltAuthInterceptor.reset(); // stop force show
+        assertTrue(mController.shouldPauseAuth());
+        assertFalse(mAltAuthInterceptor.isShowingAlternativeAuth());
+    }
+
+    @Test
+    public void testOnDetachedStateReset() {
+        // GIVEN view is attached, alt auth is force being shown
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureAltAuthInterceptor();
+
+        mAltAuthInterceptor.showAlternativeAuthMethod(); // alt auth force show
+
+        // WHEN view is detached
+        mController.onViewDetached();
+
+        // THEN alt auth state reports not showing
+        assertFalse(mAltAuthInterceptor.isShowingAlternativeAuth());
+    }
+
+    private void sendStatusBarStateChanged(int statusBarState) {
+        mStatusBarStateListener.onStateChanged(statusBarState);
+        mParentStatusBarStateListener.onStateChanged(statusBarState);
     }
 
     private void captureStatusBarStateListeners() {
         verify(mStatusBarStateController, times(2)).addCallback(mStateListenerCaptor.capture());
         List<StatusBarStateController.StateListener> stateListeners =
                 mStateListenerCaptor.getAllValues();
-        mParentListener = stateListeners.get(0);
-        mDozeListener = stateListeners.get(1);
+        mParentStatusBarStateListener = stateListeners.get(0);
+        mStatusBarStateListener = stateListeners.get(1);
     }
 
     private void captureExpansionListener() {
         verify(mStatusBar).addExpansionChangedListener(mExpansionListenerCaptor.capture());
         mExpansionListener = mExpansionListenerCaptor.getValue();
+    }
+
+    private void captureAltAuthInterceptor() {
+        verify(mStatusBarKeyguardViewManager).setAlternateAuthInterceptor(
+                mAltAuthInterceptorCaptor.capture());
+        mAltAuthInterceptor = mAltAuthInterceptorCaptor.getValue();
     }
 }
