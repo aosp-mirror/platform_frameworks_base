@@ -16,15 +16,35 @@
 
 package com.android.wm.shell.startingsurface;
 
+import android.graphics.Rect;
+import android.os.IBinder;
+import android.view.SurfaceControl;
+import android.window.StartingWindowInfo;
+
+import java.util.function.BiConsumer;
 /**
  * Interface to engage starting window feature.
  */
 public interface StartingSurface {
+    /**
+     * Called when a task need a starting window.
+     */
+    void addStartingWindow(StartingWindowInfo windowInfo, IBinder appToken);
+    /**
+     * Called when the content of a task is ready to show, starting window can be removed.
+     */
+    void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
+            boolean playRevealAnimation);
+    /**
+     * Called when the Task wants to copy the splash screen.
+     * @param taskId
+     */
+    void copySplashScreenView(int taskId);
 
     /**
-     * Returns a binder that can be passed to an external process to manipulate starting windows.
+     * Registers the starting window listener.
+     *
+     * @param listener The callback when need a starting window.
      */
-    default IStartingWindow createExternalInterface() {
-        return null;
-    }
+    void setStartingWindowListener(BiConsumer<Integer, Integer> listener);
 }

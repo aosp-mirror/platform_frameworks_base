@@ -31,7 +31,6 @@ import com.android.systemui.classifier.FalsingDataProvider.SessionListener;
 import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.sensors.ThresholdSensor;
 
 import java.io.FileDescriptor;
@@ -68,7 +67,6 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final SingleTapClassifier mSingleTapClassifier;
     private final DoubleTapClassifier mDoubleTapClassifier;
     private final HistoryTracker mHistoryTracker;
-    private final KeyguardStateController mKeyguardStateController;
     private final boolean mTestHarness;
     private final MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
@@ -115,8 +113,7 @@ public class BrightLineFalsingManager implements FalsingManager {
             DockManager dockManager, MetricsLogger metricsLogger,
             @Named(BRIGHT_LINE_GESTURE_CLASSIFERS) Set<FalsingClassifier> classifiers,
             SingleTapClassifier singleTapClassifier, DoubleTapClassifier doubleTapClassifier,
-            HistoryTracker historyTracker, KeyguardStateController keyguardStateController,
-            @TestHarness boolean testHarness) {
+            HistoryTracker historyTracker, @TestHarness boolean testHarness) {
         mDataProvider = falsingDataProvider;
         mDockManager = dockManager;
         mMetricsLogger = metricsLogger;
@@ -124,7 +121,6 @@ public class BrightLineFalsingManager implements FalsingManager {
         mSingleTapClassifier = singleTapClassifier;
         mDoubleTapClassifier = doubleTapClassifier;
         mHistoryTracker = historyTracker;
-        mKeyguardStateController = keyguardStateController;
         mTestHarness = testHarness;
 
         mDataProvider.addSessionListener(mSessionListener);
@@ -138,10 +134,6 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
-        if (skipFalsing()) {
-            return false;
-        }
-
         boolean result;
 
         mDataProvider.setInteractionType(interactionType);
@@ -203,10 +195,6 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseTap(boolean robustCheck, double falsePenalty) {
-        if (skipFalsing()) {
-            return false;
-        }
-
         FalsingClassifier.Result singleTapResult =
                 mSingleTapClassifier.isTap(mDataProvider.getRecentMotionEvents());
         mPriorResults = Collections.singleton(singleTapResult);
@@ -245,10 +233,6 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseDoubleTap() {
-        if (skipFalsing()) {
-            return false;
-        }
-
         FalsingClassifier.Result result = mDoubleTapClassifier.classifyGesture();
         mPriorResults = Collections.singleton(result);
         if (result.isFalse()) {
@@ -260,10 +244,6 @@ public class BrightLineFalsingManager implements FalsingManager {
             }
         }
         return result.isFalse();
-    }
-
-    private boolean skipFalsing() {
-        return !mKeyguardStateController.isShowing();
     }
 
     @Override

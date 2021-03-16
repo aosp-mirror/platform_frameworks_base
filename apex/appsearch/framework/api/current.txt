@@ -18,9 +18,10 @@ package android.app.appsearch {
   }
 
   public static final class AppSearchManager.SearchContext.Builder {
-    ctor public AppSearchManager.SearchContext.Builder();
+    ctor @Deprecated public AppSearchManager.SearchContext.Builder();
+    ctor public AppSearchManager.SearchContext.Builder(@NonNull String);
     method @NonNull public android.app.appsearch.AppSearchManager.SearchContext build();
-    method @NonNull public android.app.appsearch.AppSearchManager.SearchContext.Builder setDatabaseName(@NonNull String);
+    method @Deprecated @NonNull public android.app.appsearch.AppSearchManager.SearchContext.Builder setDatabaseName(@NonNull String);
   }
 
   public interface AppSearchMigrationHelper {

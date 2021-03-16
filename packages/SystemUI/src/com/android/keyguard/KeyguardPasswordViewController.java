@@ -189,23 +189,22 @@ public class KeyguardPasswordViewController
             return;
         }
         if (wasDisabled) {
-            mInputMethodManager.showSoftInput(mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
+            showInput();
         }
     }
 
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
-
-        mPasswordEntry.requestFocus();
         if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
             showInput();
         }
     }
 
     private void showInput() {
-        mPasswordEntry.post(() -> {
-            if (mPasswordEntry.isFocused() && mView.isShown()) {
+        mView.post(() -> {
+            if (mView.isShown()) {
+                mPasswordEntry.requestFocus();
                 mInputMethodManager.showSoftInput(
                         mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
             }
@@ -214,7 +213,18 @@ public class KeyguardPasswordViewController
 
     @Override
     public void onPause() {
-        super.onPause();
+        if (!mPasswordEntry.isVisibleToUser()) {
+            // Reset all states directly and then hide IME when the screen turned off.
+            super.onPause();
+        } else {
+            // In order not to break the IME hide animation by resetting states too early after
+            // the password checked, make sure resetting states after the IME hiding animation
+            // finished.
+            mView.setOnFinishImeAnimationRunnable(() -> {
+                mPasswordEntry.clearFocus();
+                super.onPause();
+            });
+        }
         mInputMethodManager.hideSoftInputFromWindow(mView.getWindowToken(), 0);
     }
 

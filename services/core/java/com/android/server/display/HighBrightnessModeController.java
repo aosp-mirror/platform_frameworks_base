@@ -37,7 +37,7 @@ import java.util.LinkedList;
 class HighBrightnessModeController {
     private static final String TAG = "HighBrightnessModeController";
 
-    private static final boolean DEBUG_HBM = false;
+    private static final boolean DEBUG = false;
 
     private final float mBrightnessMin;
     private final float mBrightnessMax;
@@ -48,6 +48,7 @@ class HighBrightnessModeController {
 
     private boolean mIsInAllowedAmbientRange = false;
     private boolean mIsTimeAvailable = false;
+    private boolean mIsAutoBrightnessEnabled = false;
     private float mAutoBrightness;
 
     /**
@@ -84,6 +85,17 @@ class HighBrightnessModeController {
         };
     }
 
+    void setAutoBrightnessEnabled(boolean isEnabled) {
+        if (isEnabled == mIsAutoBrightnessEnabled) {
+            return;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "setAutoBrightness( " + isEnabled + " )");
+        }
+        mIsAutoBrightnessEnabled = isEnabled;
+        mIsInAllowedAmbientRange = false; // reset when auto-brightness switches
+    }
+
     float getCurrentBrightnessMin() {
         return mBrightnessMin;
     }
@@ -102,7 +114,7 @@ class HighBrightnessModeController {
     }
 
     void onAmbientLuxChange(float ambientLux) {
-        if (!deviceSupportsHbm()) {
+        if (!deviceSupportsHbm() || !mIsAutoBrightnessEnabled) {
             return;
         }
 
@@ -132,7 +144,7 @@ class HighBrightnessModeController {
                 mEvents.addFirst(new HbmEvent(mRunningStartTimeMillis, currentTime));
                 mRunningStartTimeMillis = -1;
 
-                if (DEBUG_HBM) {
+                if (DEBUG) {
                     Slog.d(TAG, "New HBM event: " + mEvents.getFirst());
                 }
             }
@@ -142,7 +154,7 @@ class HighBrightnessModeController {
     }
 
     private boolean isCurrentlyAllowed() {
-        return mIsTimeAvailable && mIsInAllowedAmbientRange;
+        return mIsAutoBrightnessEnabled && mIsTimeAvailable && mIsInAllowedAmbientRange;
     }
 
     private boolean deviceSupportsHbm() {
@@ -167,7 +179,7 @@ class HighBrightnessModeController {
             timeAlreadyUsed = currentTime - mRunningStartTimeMillis;
         }
 
-        if (DEBUG_HBM) {
+        if (DEBUG) {
             Slog.d(TAG, "Time already used after current session: " + timeAlreadyUsed);
         }
 
@@ -187,7 +199,7 @@ class HighBrightnessModeController {
             timeAlreadyUsed += event.endTimeMillis - startTimeMillis;
         }
 
-        if (DEBUG_HBM) {
+        if (DEBUG) {
             Slog.d(TAG, "Time already used after all sessions: " + timeAlreadyUsed);
         }
 
@@ -220,7 +232,7 @@ class HighBrightnessModeController {
             nextTimeout = timeWhenMinIsGainedBack;
         }
 
-        if (DEBUG_HBM) {
+        if (DEBUG) {
             Slog.d(TAG, "HBM recalculated.  IsAllowedWithoutRestrictions: "
                     + isAllowedWithoutRestrictions
                     + ", isOnlyAllowedToStayOn: " + isOnlyAllowedToStayOn

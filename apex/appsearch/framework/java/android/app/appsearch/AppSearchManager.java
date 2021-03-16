@@ -30,17 +30,19 @@ import java.util.function.Consumer;
  * Provides access to the centralized AppSearch index maintained by the system.
  *
  * <p>AppSearch is a search library for managing structured data featuring:
+ *
  * <ul>
- *     <li>A fully offline on-device solution
- *     <li>A set of APIs for applications to index documents and retrieve them via full-text search
- *     <li>APIs for applications to allow the System to display their content on system UI surfaces
- *     <li>Similarly, APIs for applications to allow the System to share their content with other
- *     specified applications.
+ *   <li>A fully offline on-device solution
+ *   <li>A set of APIs for applications to index documents and retrieve them via full-text search
+ *   <li>APIs for applications to allow the System to display their content on system UI surfaces
+ *   <li>Similarly, APIs for applications to allow the System to share their content with other
+ *       specified applications.
  * </ul>
  *
  * <p>Applications create a database by opening an {@link AppSearchSession}.
  *
  * <p>Example:
+ *
  * <pre>
  * AppSearchManager appSearchManager = context.getSystemService(AppSearchManager.class);
  *
@@ -51,11 +53,12 @@ import java.util.function.Consumer;
  * });</pre>
  *
  * <p>After opening the session, a schema must be set in order to define the organizational
- * structure of data. The schema is set by calling {@link AppSearchSession#setSchema}. The schema
- * is composed of a collection of {@link AppSearchSchema} objects, each of which defines a unique
- * type of data.
+ * structure of data. The schema is set by calling {@link AppSearchSession#setSchema}. The schema is
+ * composed of a collection of {@link AppSearchSchema} objects, each of which defines a unique type
+ * of data.
  *
  * <p>Example:
+ *
  * <pre>
  * AppSearchSchema emailSchemaType = new AppSearchSchema.Builder("Email")
  *     .addProperty(new StringPropertyConfig.Builder("subject")
@@ -73,15 +76,16 @@ import java.util.function.Consumer;
  * });</pre>
  *
  * <p>The basic unit of data in AppSearch is represented as a {@link GenericDocument} object,
- * containing a URI, namespace, time-to-live, score, and properties. A namespace organizes a
- * logical group of documents. For example, a namespace can be created to group documents on a
- * per-account basis. A URI identifies a single document within a namespace. The combination
- * of URI and namespace uniquely identifies a {@link GenericDocument} in the database.
+ * containing a URI, namespace, time-to-live, score, and properties. A namespace organizes a logical
+ * group of documents. For example, a namespace can be created to group documents on a per-account
+ * basis. A URI identifies a single document within a namespace. The combination of URI and
+ * namespace uniquely identifies a {@link GenericDocument} in the database.
  *
- * <p>Once the schema has been set, {@link GenericDocument} objects can be put into the database
- * and indexed by calling {@link AppSearchSession#put}.
+ * <p>Once the schema has been set, {@link GenericDocument} objects can be put into the database and
+ * indexed by calling {@link AppSearchSession#put}.
  *
  * <p>Example:
+ *
  * <pre>
  * // Although for this example we use GenericDocument directly, we recommend extending
  * // GenericDocument to create specific types (i.e. Email) with specific setters/getters.
@@ -106,18 +110,12 @@ import java.util.function.Consumer;
  * and namespace.
  *
  * <p>Document removal is done either by time-to-live expiration, or explicitly calling a remove
- * operation. Remove operations can be done by URI and namespace via
- * {@link AppSearchSession#remove(RemoveByUriRequest, Executor, BatchResultCallback)},
- * or by query via {@link AppSearchSession#remove(String, SearchSpec, Executor, Consumer)}.
+ * operation. Remove operations can be done by URI and namespace via {@link
+ * AppSearchSession#remove(RemoveByUriRequest, Executor, BatchResultCallback)}, or by query via
+ * {@link AppSearchSession#remove(String, SearchSpec, Executor, Consumer)}.
  */
 @SystemService(Context.APP_SEARCH_SERVICE)
 public class AppSearchManager {
-    /**
-     * The default empty database name.
-     *
-     * @hide
-     */
-    public static final String DEFAULT_DATABASE_NAME = "";
 
     private final IAppSearchManager mService;
     private final Context mContext;
@@ -149,8 +147,40 @@ public class AppSearchManager {
 
         /** Builder for {@link SearchContext} objects. */
         public static final class Builder {
-            private String mDatabaseName = DEFAULT_DATABASE_NAME;
+            private String mDatabaseName;
             private boolean mBuilt = false;
+
+            /**
+             * TODO(b/181887768): This method exists only for dogfooder transition and must be
+             * removed.
+             *
+             * @deprecated Please supply the databaseName in {@link #Builder(String)} instead. This
+             *     method exists only for dogfooder transition and must be removed.
+             */
+            @Deprecated
+            public Builder() {
+                mDatabaseName = "";
+            }
+
+            /**
+             * Creates a new {@link SearchContext.Builder}.
+             *
+             * <p>{@link AppSearchSession} will create or open a database under the given name.
+             *
+             * <p>Databases with different names are fully separate with distinct types, namespaces,
+             * and data.
+             *
+             * <p>Database name cannot contain {@code '/'}.
+             *
+             * @param databaseName The name of the database.
+             * @throws IllegalArgumentException if the databaseName contains {@code '/'}.
+             */
+            public Builder(@NonNull String databaseName) {
+                Objects.requireNonNull(databaseName);
+                Preconditions.checkArgument(
+                        !databaseName.contains("/"), "Database name cannot contain '/'");
+                mDatabaseName = databaseName;
+            }
 
             /**
              * Sets the name of the database associated with {@link AppSearchSession}.
@@ -164,16 +194,21 @@ public class AppSearchManager {
              *
              * <p>If not specified, defaults to the empty string.
              *
+             * <p>TODO(b/181887768): This method exists only for dogfooder transition and must be
+             * removed.
+             *
              * @param databaseName The name of the database.
              * @throws IllegalArgumentException if the databaseName contains {@code '/'}.
+             * @deprecated Please supply the databaseName in {@link #Builder(String)} instead. This
+             *     method exists only for dogfooder transition and must be removed.
              */
+            @Deprecated
             @NonNull
             public Builder setDatabaseName(@NonNull String databaseName) {
                 Preconditions.checkState(!mBuilt, "Builder has already been used");
                 Objects.requireNonNull(databaseName);
-                if (databaseName.contains("/")) {
-                    throw new IllegalArgumentException("Database name cannot contain '/'");
-                }
+                Preconditions.checkArgument(
+                        !databaseName.contains("/"), "Database name cannot contain '/'");
                 mDatabaseName = databaseName;
                 return this;
             }

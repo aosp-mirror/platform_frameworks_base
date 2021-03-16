@@ -15476,10 +15476,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
-        String currentMode = mInjector.settingsGlobalGetString(PRIVATE_DNS_MODE);
-        if (currentMode == null) {
-            currentMode = ConnectivityManager.PRIVATE_DNS_DEFAULT_MODE_FALLBACK;
-        }
+        final String currentMode =
+                ConnectivityManager.getPrivateDnsMode(mContext.getContentResolver());
         switch (currentMode) {
             case ConnectivityManager.PRIVATE_DNS_MODE_OFF:
                 return PRIVATE_DNS_MODE_OFF;

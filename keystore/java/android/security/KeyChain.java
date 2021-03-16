@@ -601,7 +601,7 @@ public final class KeyChain {
     }
 
     /**
-     * Check whether the caller is the credential management app {@link CredentialManagementApp}.
+     * Check whether the caller is the credential management app {@code CredentialManagementApp}.
      * The credential management app has the ability to manage the user's KeyChain credentials
      * on unmanaged devices.
      *
@@ -611,6 +611,7 @@ public final class KeyChain {
      *
      * @return {@code true} if the caller is the credential management app.
      */
+    @WorkerThread
     public static boolean isCredentialManagementApp(@NonNull Context context) {
         boolean isCredentialManagementApp = false;
         try (KeyChainConnection keyChainConnection = KeyChain.bind(context)) {
@@ -634,6 +635,7 @@ public final class KeyChain {
      * @return the credential management app's authentication policy.
      * @throws SecurityException if the caller is not the credential management app.
      */
+    @WorkerThread
     @NonNull
     public static AppUriAuthenticationPolicy getCredentialManagementAppPolicy(
             @NonNull Context context) throws SecurityException {
@@ -665,6 +667,7 @@ public final class KeyChain {
      * @hide
      */
     @TestApi
+    @WorkerThread
     @RequiresPermission(Manifest.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP)
     public static boolean setCredentialManagementApp(@NonNull Context context,
             @NonNull String packageName, @NonNull AppUriAuthenticationPolicy authenticationPolicy) {
@@ -680,13 +683,21 @@ public final class KeyChain {
     }
 
     /**
-     * Remove the user's KeyChain credentials on unmanaged devices.
+     * Called by the credential management app {@code CredentialManagementApp} to unregister as
+     * the credential management app and stop managing the user's credentials.
+     *
+     * <p> All credentials previously installed by the credential management app will be removed
+     * from the user's device.
+     *
+     * <p> An app holding {@code MANAGE_CREDENTIAL_MANAGEMENT_APP} permission can also call this
+     * method to remove the current credential management app, even if it's not the current
+     * credential management app itself.
      *
      * @return {@code true} if the credential management app was successfully removed.
-     * @hide
      */
-    @TestApi
-    @RequiresPermission(Manifest.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP)
+    @WorkerThread
+    @RequiresPermission(value = Manifest.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP,
+            conditional = true)
     public static boolean removeCredentialManagementApp(@NonNull Context context) {
         try (KeyChainConnection keyChainConnection = KeyChain.bind(context)) {
             keyChainConnection.getService().removeCredentialManagementApp();

@@ -148,7 +148,7 @@ public final class MediaRouter2Manager {
 
     /**
      * Starts scanning remote routes.
-     * @see #stopScan(String)
+     * @see #stopScan()
      */
     public void startScan() {
         Client client = getOrCreateClient();
@@ -163,7 +163,7 @@ public final class MediaRouter2Manager {
 
     /**
      * Stops scanning remote routes to reduce resource consumption.
-     * @see #startScan(String)
+     * @see #startScan()
      */
     public void stopScan() {
         Client client = getOrCreateClient();
@@ -788,8 +788,8 @@ public final class MediaRouter2Manager {
      * Requests releasing a session.
      * <p>
      * If a session is released, any operation on the session will be ignored.
-     * {@link Callback#onTransferred(RoutingSessionInfo, RoutingSessionInfo)} with {@code null}
-     * session will be called when the session is released.
+     * {@link Callback#onSessionReleased(RoutingSessionInfo)} will be called
+     * when the session is released.
      * </p>
      *
      * @see Callback#onTransferred(RoutingSessionInfo, RoutingSessionInfo)
@@ -945,10 +945,10 @@ public final class MediaRouter2Manager {
          * Called when media is transferred.
          *
          * @param oldSession the previous session
-         * @param newSession the new session or {@code null} if the session is released.
+         * @param newSession the new session
          */
         default void onTransferred(@NonNull RoutingSessionInfo oldSession,
-                @Nullable RoutingSessionInfo newSession) { }
+                @NonNull RoutingSessionInfo newSession) { }
 
         /**
          * Called when {@link #transfer(RoutingSessionInfo, MediaRoute2Info)} fails.

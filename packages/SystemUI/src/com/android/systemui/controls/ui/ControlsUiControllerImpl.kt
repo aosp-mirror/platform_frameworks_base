@@ -43,6 +43,7 @@ import android.widget.ListPopupWindow
 import android.widget.Space
 import android.widget.TextView
 import com.android.systemui.R
+import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlInfo
@@ -58,6 +59,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.ShadeController
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
 import java.text.Collator
@@ -77,7 +79,9 @@ class ControlsUiControllerImpl @Inject constructor (
     val controlActionCoordinator: ControlActionCoordinator,
     private val activityStarter: ActivityStarter,
     private val shadeController: ShadeController,
-    private val iconCache: CustomIconCache
+    private val iconCache: CustomIconCache,
+    private val controlsMetricsLogger: ControlsMetricsLogger,
+    private val keyguardStateController: KeyguardStateController
 ) : ControlsUiController {
 
     companion object {
@@ -133,7 +137,8 @@ class ControlsUiControllerImpl @Inject constructor (
         return object : ControlsListingController.ControlsListingCallback {
             override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
                 val lastItems = serviceInfos.map {
-                    SelectionItem(it.loadLabel(), "", it.loadIcon(), it.componentName)
+                    val uid = it.serviceInfo.applicationInfo.uid
+                    SelectionItem(it.loadLabel(), "", it.loadIcon(), it.componentName, uid)
                 }
                 uiExecutor.execute {
                     parent.removeAllViews()
@@ -282,8 +287,19 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun showControlsView(items: List<SelectionItem>) {
         controlViewsById.clear()
 
-        createListView()
-        createDropDown(items)
+        val itemsByComponent = items.associateBy { it.componentName }
+        val itemsWithStructure = mutableListOf<SelectionItem>()
+        allStructures.mapNotNullTo(itemsWithStructure) {
+            itemsByComponent.get(it.componentName)?.copy(structure = it.structure)
+        }
+        itemsWithStructure.sortWith(localeComparator)
+
+        val selectionItem = findSelectionItem(selectedStructure, itemsWithStructure) ?: items[0]
+
+        controlsMetricsLogger.refreshBegin(selectionItem.uid, !keyguardStateController.isUnlocked())
+
+        createListView(selectionItem)
+        createDropDown(itemsWithStructure, selectionItem)
         createMenu()
     }
 
@@ -325,22 +341,13 @@ class ControlsUiControllerImpl @Inject constructor (
         })
     }
 
-    private fun createDropDown(items: List<SelectionItem>) {
+    private fun createDropDown(items: List<SelectionItem>, selected: SelectionItem) {
         items.forEach {
             RenderInfo.registerComponentIcon(it.componentName, it.icon)
         }
 
-        val itemsByComponent = items.associateBy { it.componentName }
-        val itemsWithStructure = mutableListOf<SelectionItem>()
-        allStructures.mapNotNullTo(itemsWithStructure) {
-            itemsByComponent.get(it.componentName)?.copy(structure = it.structure)
-        }
-        itemsWithStructure.sortWith(localeComparator)
-
-        val selectionItem = findSelectionItem(selectedStructure, itemsWithStructure) ?: items[0]
-
         var adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
-            addAll(itemsWithStructure)
+            addAll(items)
         }
 
         /*
@@ -349,13 +356,13 @@ class ControlsUiControllerImpl @Inject constructor (
          * a similar effect
          */
         val spinner = parent.requireViewById<TextView>(R.id.app_or_structure_spinner).apply {
-            setText(selectionItem.getTitle())
+            setText(selected.getTitle())
             // override the default color on the dropdown drawable
             (getBackground() as LayerDrawable).getDrawable(0)
                 .setTint(context.resources.getColor(R.color.control_spinner_dropdown, null))
         }
 
-        if (itemsWithStructure.size == 1) {
+        if (items.size == 1) {
             spinner.setBackground(null)
             return
         }
@@ -388,7 +395,7 @@ class ControlsUiControllerImpl @Inject constructor (
         })
     }
 
-    private fun createListView() {
+    private fun createListView(selected: SelectionItem) {
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_with_favorites, parent, true)
 
@@ -421,9 +428,11 @@ class ControlsUiControllerImpl @Inject constructor (
                     controlsController.get(),
                     uiExecutor,
                     bgExecutor,
-                    controlActionCoordinator
+                    controlActionCoordinator,
+                    controlsMetricsLogger,
+                    selected.uid
                 )
-                cvh.bindData(it)
+                cvh.bindData(it, false /* isLocked, will be ignored on initial load */)
                 controlViewsById.put(key, cvh)
             }
         }
@@ -528,6 +537,7 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
+        val isLocked = !keyguardStateController.isUnlocked()
         controls.forEach { c ->
             controlsById.get(ControlKey(componentName, c.getControlId()))?.let {
                 Log.d(ControlsUiController.TAG, "onRefreshState() for id: " + c.getControlId())
@@ -536,8 +546,8 @@ class ControlsUiControllerImpl @Inject constructor (
                 val key = ControlKey(componentName, c.getControlId())
                 controlsById.put(key, cws)
 
-                uiExecutor.execute {
-                    controlViewsById.get(key)?.bindData(cws)
+                controlViewsById.get(key)?.let {
+                    uiExecutor.execute { it.bindData(cws, isLocked) }
                 }
             }
         }
@@ -566,7 +576,8 @@ private data class SelectionItem(
     val appName: CharSequence,
     val structure: CharSequence,
     val icon: Drawable,
-    val componentName: ComponentName
+    val componentName: ComponentName,
+    val uid: Int
 ) {
     fun getTitle() = if (structure.isEmpty()) { appName } else { structure }
 }

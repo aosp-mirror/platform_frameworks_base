@@ -31,6 +31,7 @@ import com.android.internal.jank.InteractionJankMonitor;
  * A Base class for all Keyguard password/pattern/pin related inputs.
  */
 public abstract class KeyguardInputView extends LinearLayout {
+    private Runnable mOnFinishImeAnimationRunnable;
 
     public KeyguardInputView(Context context) {
         super(context);
@@ -47,7 +48,8 @@ public abstract class KeyguardInputView extends LinearLayout {
 
     abstract CharSequence getTitle();
 
-    void animateForIme(float interpolatedFraction) {
+    void animateForIme(float interpolatedFraction, boolean appearingAnim) {
+        return;
     }
 
     boolean disallowInterceptTouch(MotionEvent event) {
@@ -85,4 +87,14 @@ public abstract class KeyguardInputView extends LinearLayout {
         };
     }
 
+    public void setOnFinishImeAnimationRunnable(Runnable onFinishImeAnimationRunnable) {
+        mOnFinishImeAnimationRunnable = onFinishImeAnimationRunnable;
+    }
+
+    public void runOnFinishImeAnimationRunnable() {
+        if (mOnFinishImeAnimationRunnable != null) {
+            mOnFinishImeAnimationRunnable.run();
+            mOnFinishImeAnimationRunnable = null;
+        }
+    }
 }
