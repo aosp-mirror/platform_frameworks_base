@@ -1595,7 +1595,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     public NavigationBarTransitions getBarTransitions() {
-        return mNavigationBarView.getBarTransitions();
+        if (mNavigationBarView != null) {
+            return mNavigationBarView.getBarTransitions();
+        }
+        return null;
     }
 
     public void finishBarAnimations() {
