@@ -23,8 +23,6 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
@@ -115,7 +113,7 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry_Flaky() {
         Assume.assumeTrue(testSpec.isRotated)
-        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
     }
 
     @Presubmit
@@ -129,7 +127,7 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
     @Test
     fun visibleLayersShownMoreThanOneConsecutiveEntry_Flaky() {
         Assume.assumeTrue(testSpec.isRotated)
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry()
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
     companion object {

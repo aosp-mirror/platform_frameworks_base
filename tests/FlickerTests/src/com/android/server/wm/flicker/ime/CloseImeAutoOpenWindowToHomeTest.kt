@@ -31,8 +31,6 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -42,6 +40,7 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -100,8 +99,13 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
 
     @Presubmit
     @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        testSpec.assertWm {
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE,
+                WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+                WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME))
+        }
+    }
 
     @Presubmit
     @Test
@@ -164,14 +168,20 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     @Test
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         Assume.assumeFalse(testSpec.isRotated)
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+        testSpec.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                listOf(IME_WINDOW_TITLE, WindowManagerStateHelper.SPLASH_SCREEN_NAME))
+        }
     }
 
     @FlakyTest
     @Test
     fun visibleLayersShownMoreThanOneConsecutiveEntry_Flaky() {
         Assume.assumeTrue(testSpec.isRotated)
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+        testSpec.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                listOf(IME_WINDOW_TITLE, WindowManagerStateHelper.SPLASH_SCREEN_NAME))
+        }
     }
 
     companion object {

@@ -39,8 +39,7 @@ import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -102,8 +101,13 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        testSpec.assertWm {
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE,
+                WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+                WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME))
+        }
+    }
 
     @Presubmit
     @Test
@@ -155,8 +159,12 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
 
     @FlakyTest
     @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+    fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        testSpec.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                listOf(IME_WINDOW_TITLE, WindowManagerStateHelper.SPLASH_SCREEN_NAME))
+        }
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
