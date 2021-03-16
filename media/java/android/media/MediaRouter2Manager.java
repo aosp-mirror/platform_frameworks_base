@@ -237,6 +237,20 @@ public final class MediaRouter2Manager {
     }
 
     /**
+     * Returns the preferred features of the specified package name.
+     */
+    @NonNull
+    public List<String> getPreferredFeatures(@NonNull String packageName) {
+        Objects.requireNonNull(packageName, "packageName must not be null");
+
+        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
+        if (preferredFeatures == null) {
+            preferredFeatures = Collections.emptyList();
+        }
+        return preferredFeatures;
+    }
+
+    /**
      * Returns a list of routes which are related to the given package name in the given route list.
      */
     @NonNull
