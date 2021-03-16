@@ -121,9 +121,19 @@ public class PasswordTextView extends View {
     public PasswordTextView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        setFocusableInTouchMode(true);
-        setFocusable(true);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PasswordTextView);
+        TypedArray a = context.obtainStyledAttributes(attrs, android.R.styleable.View);
+        try {
+            // If defined, use the provided values. If not, set them to true by default.
+            boolean isFocusable = a.getBoolean(android.R.styleable.View_focusable,
+                    /* defValue= */ true);
+            boolean isFocusableInTouchMode = a.getBoolean(
+                    android.R.styleable.View_focusableInTouchMode, /* defValue= */ true);
+            setFocusable(isFocusable);
+            setFocusableInTouchMode(isFocusableInTouchMode);
+        } finally {
+            a.recycle();
+        }
+        a = context.obtainStyledAttributes(attrs, R.styleable.PasswordTextView);
         try {
             mTextHeightRaw = a.getInt(R.styleable.PasswordTextView_scaledTextSize, 0);
             mGravity = a.getInt(R.styleable.PasswordTextView_android_gravity, Gravity.CENTER);

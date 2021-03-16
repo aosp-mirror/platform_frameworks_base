@@ -325,7 +325,7 @@ public class LinkAddress implements Parcelable {
     public LinkAddress(@NonNull String address, int flags, int scope) {
         // This may throw an IllegalArgumentException; catching it is the caller's responsibility.
         // TODO: consider rejecting mapped IPv4 addresses such as "::ffff:192.0.2.5/24".
-        Pair<InetAddress, Integer> ipAndMask = NetworkUtils.parseIpAndMask(address);
+        Pair<InetAddress, Integer> ipAndMask = NetworkUtils.legacyParseIpAndMask(address);
         init(ipAndMask.first, ipAndMask.second, flags, scope, LIFETIME_UNKNOWN, LIFETIME_UNKNOWN);
     }
 

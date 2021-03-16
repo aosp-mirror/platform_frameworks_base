@@ -1990,6 +1990,13 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.CARRIER_APPS_HANDLED,
                 SecureSettingsProto.CARRIER_APPS_HANDLED);
+
+        final long clipboardToken = p.start(SecureSettingsProto.CLIPBOARD);
+        dumpSetting(s, p,
+                Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS,
+                SecureSettingsProto.Clipboard.SHOW_ACCESS_NOTIFICATIONS);
+        p.end(clipboardToken);
+
         dumpSetting(s, p,
                 Settings.Secure.CMAS_ADDITIONAL_BROADCAST_PKG,
                 SecureSettingsProto.CMAS_ADDITIONAL_BROADCAST_PKG);

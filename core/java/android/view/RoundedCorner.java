@@ -163,7 +163,7 @@ public final class RoundedCorner implements Parcelable {
      * @hide
      */
     public boolean isEmpty() {
-        return mRadius == 0 || mCenter.x == 0 || mCenter.y == 0;
+        return mRadius == 0 || mCenter.x <= 0 || mCenter.y <= 0;
     }
 
     private String getPositionString(@Position int position) {

@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.transition;
+package android.net;
 
-import android.window.IRemoteTransition;
-import android.window.TransitionFilter;
+import android.net.Network;
+import android.net.ProxyInfo;
 
-/**
- * Interface that is exposed to remote callers to manipulate the transitions feature.
- */
-interface IShellTransitions {
-
-    /**
-     * Registers a remote transition handler.
-     */
-    oneway void registerRemote(in TransitionFilter filter,
-            in IRemoteTransition remoteTransition) = 1;
-
-    /**
-     * Unregisters a remote transition handler.
-     */
-    oneway void unregisterRemote(in IRemoteTransition remoteTransition) = 2;
+/** {@hide} */
+oneway interface IPacProxyInstalledListener {
+    void onPacProxyInstalled(in Network network, in ProxyInfo proxy);
 }

@@ -17,12 +17,15 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
+
+import androidx.annotation.Nullable;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
@@ -32,13 +35,19 @@ import com.android.systemui.R;
  */
 public class NumPadButton extends AlphaOptimizedImageButton {
 
+    @Nullable
     private NumPadAnimator mAnimator;
 
     public NumPadButton(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mAnimator = new NumPadAnimator(context, (LayerDrawable) getBackground(),
-                attrs.getStyleAttribute());
+        Drawable background = getBackground();
+        if (background instanceof LayerDrawable) {
+            mAnimator = new NumPadAnimator(context, (LayerDrawable) background,
+                    attrs.getStyleAttribute());
+        } else {
+            mAnimator = null;
+        }
     }
 
     @Override
@@ -93,9 +102,11 @@ public class NumPadButton extends AlphaOptimizedImageButton {
      * By default, the new layout will be enabled. Invoking will revert to the old style
      */
     public void disableNewLayout() {
-        mAnimator = null;
-        ContextThemeWrapper ctw = new ContextThemeWrapper(getContext(), R.style.NumPadKey);
-        setBackground(getContext().getResources().getDrawable(
-                R.drawable.ripple_drawable_pin, ctw.getTheme()));
+        if (mAnimator != null) {
+            mAnimator = null;
+            ContextThemeWrapper ctw = new ContextThemeWrapper(getContext(), R.style.NumPadKey);
+            setBackground(getContext().getResources().getDrawable(
+                    R.drawable.ripple_drawable_pin, ctw.getTheme()));
+        }
     }
 }

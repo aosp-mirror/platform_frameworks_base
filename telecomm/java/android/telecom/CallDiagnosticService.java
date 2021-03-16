@@ -27,6 +27,8 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.telephony.Annotation;
+import android.telephony.ims.ImsReasonInfo;
 import android.util.ArrayMap;
 
 import com.android.internal.telecom.ICallDiagnosticService;
@@ -104,6 +106,12 @@ public abstract class CallDiagnosticService extends Service {
         public void receiveBluetoothCallQualityReport(BluetoothCallQualityReport qualityReport)
                 throws RemoteException {
             handleBluetoothCallQualityReport(qualityReport);
+        }
+
+        @Override
+        public void notifyCallDisconnected(@NonNull String callId,
+                @NonNull DisconnectCause disconnectCause) throws RemoteException {
+            handleCallDisconnected(callId, disconnectCause);
         }
     }
 
@@ -325,6 +333,32 @@ public abstract class CallDiagnosticService extends Service {
         if (diagnosticCall != null) {
             getExecutor().execute(
                     () -> diagnosticCall.onReceiveDeviceToDeviceMessage(message, value));
+        }
+    }
+
+    /**
+     * Handles a request from the Telecom framework to get a disconnect message from the
+     * {@link CallDiagnosticService}.
+     * @param callId The ID of the call.
+     * @param disconnectCause The telecom disconnect cause.
+     */
+    private void handleCallDisconnected(@NonNull String callId,
+            @NonNull DisconnectCause disconnectCause) {
+        Log.i(this, "handleCallDisconnected: call=%s; cause=%s", callId, disconnectCause);
+        DiagnosticCall diagnosticCall = mDiagnosticCallByTelecomCallId.get(callId);
+        CharSequence message;
+        if (disconnectCause.getImsReasonInfo() != null) {
+            message = diagnosticCall.onCallDisconnected(disconnectCause.getImsReasonInfo());
+        } else {
+            message = diagnosticCall.onCallDisconnected(
+                    disconnectCause.getTelephonyDisconnectCause(),
+                    disconnectCause.getTelephonyPreciseDisconnectCause());
+        }
+        try {
+            mAdapter.overrideDisconnectMessage(callId, message);
+        } catch (RemoteException e) {
+            Log.w(this, "handleCallDisconnected: call=%s; cause=%s; %s",
+                    callId, disconnectCause, e);
         }
     }
 

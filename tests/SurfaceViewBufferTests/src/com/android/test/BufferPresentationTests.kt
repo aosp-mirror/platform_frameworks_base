@@ -17,6 +17,7 @@ package com.android.test
 
 import com.android.server.wm.flicker.traces.layers.LayersTraceSubject.Companion.assertThat
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -92,5 +93,81 @@ class BufferPresentationTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase
         }
 
         assertThat(trace).hasFrameSequence("SurfaceView", 1..numFrames)
+    }
+
+    @Test
+    // Leave IGBP in sync mode, try to dequeue and queue as fast as possible. Check that we
+    // occasionally get timeout errors.
+    fun testSyncMode_dequeueWithoutBlockingFails() {
+        val numFrames = 1000L
+        runOnUiThread { activity ->
+            assertEquals(0, activity.mSurfaceProxy.SurfaceSetDequeueTimeout(3L))
+            var failures = false
+            for (i in 1..numFrames) {
+                if (activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 0 /* ms */) != 0) {
+                    failures = true
+                    break
+                }
+                activity.mSurfaceProxy.SurfaceQueueBuffer(0)
+            }
+            assertTrue(failures)
+        }
+    }
+
+    @Test
+    // Set IGBP to be in async mode, try to dequeue and queue as fast as possible. Client should be
+    // able to dequeue and queue buffers without being blocked.
+    fun testAsyncMode_dequeueWithoutBlocking() {
+        val numFrames = 1000L
+        runOnUiThread { activity ->
+            assertEquals(0, activity.mSurfaceProxy.SurfaceSetDequeueTimeout(3L))
+            assertEquals(0, activity.mSurfaceProxy.SurfaceSetAsyncMode(async = true))
+            for (i in 1..numFrames) {
+                assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 0 /* ms */))
+                activity.mSurfaceProxy.SurfaceQueueBuffer(0)
+            }
+        }
+    }
+
+    @Test
+    // Disable triple buffering in the system and leave IGBP in sync mode. Check that we
+    // occasionally get timeout errors.
+    fun testSyncModeWithDisabledTripleBuffering_dequeueWithoutBlockingFails() {
+        val numFrames = 1000L
+        runOnUiThread { activity ->
+            assertEquals(0, activity.mSurfaceProxy.SurfaceSetMaxDequeuedBufferCount(1))
+            assertEquals(0, activity.mSurfaceProxy.SurfaceSetDequeueTimeout(3L))
+            var failures = false
+            for (i in 1..numFrames) {
+                if (activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 0 /* ms */) != 0) {
+                    failures = true
+                    break
+                }
+                activity.mSurfaceProxy.SurfaceQueueBuffer(0)
+            }
+            assertTrue(failures)
+        }
+    }
+
+    @Test
+    // Disable triple buffering in the system and set IGBP to be in async mode. Try to dequeue and
+    // queue as fast as possible. Without triple buffering, the client does not have an extra buffer
+    // to dequeue and will not be able to dequeue and queue buffers without being blocked.
+    fun testAsyncModeWithDisabledTripleBuffering_dequeueWithoutBlockingFails() {
+        val numFrames = 1000L
+        runOnUiThread { activity ->
+            assertEquals(0, activity.mSurfaceProxy.SurfaceSetMaxDequeuedBufferCount(1))
+            assertEquals(0, activity.mSurfaceProxy.SurfaceSetDequeueTimeout(3L))
+            assertEquals(0, activity.mSurfaceProxy.SurfaceSetAsyncMode(async = true))
+            var failures = false
+            for (i in 1..numFrames) {
+                if (activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 0 /* ms */) != 0) {
+                    failures = true
+                    break
+                }
+                activity.mSurfaceProxy.SurfaceQueueBuffer(0)
+            }
+            assertTrue(failures)
+        }
     }
 }

@@ -62,6 +62,13 @@ public class RoundedCornerTest {
     }
 
     @Test
+    public void testIsEmpty_negativeCenter() {
+        RoundedCorner roundedCorner =
+                new RoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT, 1, -2, -3);
+        assertThat(roundedCorner.isEmpty(), is(true));
+    }
+
+    @Test
     public void testEquals() {
         RoundedCorner roundedCorner = new RoundedCorner(
                 RoundedCorner.POSITION_BOTTOM_LEFT, 2, 3, 4);

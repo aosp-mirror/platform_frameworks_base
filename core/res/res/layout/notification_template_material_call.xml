@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +18,6 @@
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:clipChildren="false"
     android:tag="call"
     android:theme="@style/Theme.DeviceDefault.Notification"
@@ -29,58 +27,46 @@
     <include layout="@layout/notification_template_conversation_icon_container" />
 
     <LinearLayout
-        android:id="@+id/notification_action_list_margin_target"
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/notification_action_list_height"
-        android:orientation="vertical"
+        android:layout_height="80dp"
+        android:orientation="horizontal"
         >
 
         <LinearLayout
+            android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_gravity="top"
-            android:orientation="horizontal"
+            android:layout_marginStart="@dimen/conversation_content_start"
+            android:orientation="vertical"
+            android:minHeight="68dp"
             >
 
-            <LinearLayout
-                android:id="@+id/notification_main_column"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="@dimen/conversation_content_start"
-                android:layout_marginEnd="@dimen/notification_content_margin_end"
-                android:orientation="vertical"
-                android:minHeight="68dp"
-                >
-
-                <include
-                    layout="@layout/notification_template_conversation_header"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    />
-
-                <include layout="@layout/notification_template_text" />
-
-                <include
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/notification_progress_bar_height"
-                    android:layout_marginTop="@dimen/notification_progress_margin_top"
-                    layout="@layout/notification_template_progress"
-                    />
-            </LinearLayout>
-
-            <!-- TODO(b/179178086): remove padding from main column when this is visible -->
-            <include layout="@layout/notification_expand_button"
+            <include
+                layout="@layout/notification_template_conversation_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top|end"
                 />
+
+            <include layout="@layout/notification_template_text" />
 
         </LinearLayout>
 
-        <include layout="@layout/notification_material_action_list" />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:minWidth="@dimen/notification_content_margin_end"
+            >
+
+            <include
+                layout="@layout/notification_expand_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                />
+
+        </FrameLayout>
 
     </LinearLayout>
 

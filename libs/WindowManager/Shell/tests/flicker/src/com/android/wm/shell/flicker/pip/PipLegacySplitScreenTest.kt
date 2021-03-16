@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -78,7 +78,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipWindowInsideDisplayBounds() {
         testSpec.assertWm {
@@ -86,7 +86,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
@@ -96,15 +96,15 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipLayerInsideDisplayBounds() {
         testSpec.assertLayers {
@@ -112,7 +112,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun bothAppLayersVisible() {
         testSpec.assertLayersEnd {
@@ -121,11 +121,11 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun navBarLayerIsAlwaysVisible() = super.navBarLayerIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun statusBarLayerIsAlwaysVisible() = super.statusBarLayerIsAlwaysVisible()
 

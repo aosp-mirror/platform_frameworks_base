@@ -1901,6 +1901,20 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.AUTO_REVOKE_PERMISSIONS";
 
     /**
+     * Activity action: Launch UI to manage unused apps (hibernated apps).
+     *
+     * <p>
+     * Input: Nothing.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_UNUSED_APPS =
+            "android.intent.action.MANAGE_UNUSED_APPS";
+
+    /**
      * Activity action: Launch UI to review permissions for an app.
      * The system uses this intent if permission review for apps not
      * supporting the new runtime permissions model is enabled. In

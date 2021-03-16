@@ -185,8 +185,8 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             if (timeoutMs == 0) {
                 mMessageAreaController.setMessage(mView.getWrongPasswordStringId());
             }
+            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
         }
-        mView.resetPasswordText(true /* animate */, !matched /* announce deletion if no match */);
     }
 
     protected void verifyPasswordAndUnlock() {
