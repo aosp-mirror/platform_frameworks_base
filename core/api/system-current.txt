@@ -3071,6 +3071,7 @@ package android.hardware.display {
     field public final float reduceBrightColorsOffset;
     field public final int reduceBrightColorsStrength;
     field public final long timeStamp;
+    field @NonNull public final String uniqueDisplayId;
   }
 
   public final class BrightnessConfiguration implements android.os.Parcelable {

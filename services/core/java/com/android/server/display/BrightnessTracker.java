@@ -110,6 +110,7 @@ public class BrightnessTracker {
     private static final String ATTR_TIMESTAMP = "timestamp";
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_USER = "user";
+    private static final String ATTR_UNIQUE_DISPLAY_ID = "uniqueDisplayId";
     private static final String ATTR_LUX = "lux";
     private static final String ATTR_LUX_TIMESTAMPS = "luxTimestamps";
     private static final String ATTR_BATTERY_LEVEL = "batteryLevel";
@@ -217,6 +218,9 @@ public class BrightnessTracker {
     }
 
     private void backgroundStart(float initialBrightness) {
+        if (DEBUG) {
+            Slog.d(TAG, "Background start");
+        }
         readEvents();
         readAmbientBrightnessStats();
 
@@ -311,7 +315,7 @@ public class BrightnessTracker {
      */
     public void notifyBrightnessChanged(float brightness, boolean userInitiated,
             float powerBrightnessFactor, boolean isUserSetBrightness,
-            boolean isDefaultBrightnessConfig) {
+            boolean isDefaultBrightnessConfig, String uniqueDisplayId) {
         if (DEBUG) {
             Slog.d(TAG, String.format("notifyBrightnessChanged(brightness=%f, userInitiated=%b)",
                         brightness, userInitiated));
@@ -319,13 +323,13 @@ public class BrightnessTracker {
         Message m = mBgHandler.obtainMessage(MSG_BRIGHTNESS_CHANGED,
                 userInitiated ? 1 : 0, 0 /*unused*/, new BrightnessChangeValues(brightness,
                         powerBrightnessFactor, isUserSetBrightness, isDefaultBrightnessConfig,
-                        mInjector.currentTimeMillis()));
+                        mInjector.currentTimeMillis(), uniqueDisplayId));
         m.sendToTarget();
     }
 
     private void handleBrightnessChanged(float brightness, boolean userInitiated,
             float powerBrightnessFactor, boolean isUserSetBrightness,
-            boolean isDefaultBrightnessConfig, long timestamp) {
+            boolean isDefaultBrightnessConfig, long timestamp, String uniqueDisplayId) {
         BrightnessChangeEvent.Builder builder;
 
         synchronized (mDataCollectionLock) {
@@ -350,6 +354,7 @@ public class BrightnessTracker {
             builder.setPowerBrightnessFactor(powerBrightnessFactor);
             builder.setUserBrightnessPoint(isUserSetBrightness);
             builder.setIsDefaultBrightnessConfig(isDefaultBrightnessConfig);
+            builder.setUniqueDisplayId(uniqueDisplayId);
 
             final int readingCount = mLastSensorReadings.size();
             if (readingCount == 0) {
@@ -562,6 +567,7 @@ public class BrightnessTracker {
                 out.attributeLong(null, ATTR_TIMESTAMP, toWrite[i].timeStamp);
                 out.attribute(null, ATTR_PACKAGE_NAME, toWrite[i].packageName);
                 out.attributeInt(null, ATTR_USER, userSerialNo);
+                out.attribute(null, ATTR_UNIQUE_DISPLAY_ID, toWrite[i].uniqueDisplayId);
                 out.attributeFloat(null, ATTR_BATTERY_LEVEL, toWrite[i].batteryLevel);
                 out.attributeBoolean(null, ATTR_NIGHT_MODE, toWrite[i].nightMode);
                 out.attributeInt(null, ATTR_COLOR_TEMPERATURE,
@@ -646,6 +652,8 @@ public class BrightnessTracker {
                     builder.setPackageName(parser.getAttributeValue(null, ATTR_PACKAGE_NAME));
                     builder.setUserId(mInjector.getUserId(mUserManager,
                             parser.getAttributeInt(null, ATTR_USER)));
+                    builder.setUniqueDisplayId(
+                            parser.getAttributeValue(null, ATTR_UNIQUE_DISPLAY_ID));
                     builder.setBatteryLevel(parser.getAttributeFloat(null, ATTR_BATTERY_LEVEL));
                     builder.setNightMode(parser.getAttributeBoolean(null, ATTR_NIGHT_MODE));
                     builder.setColorTemperature(
@@ -980,7 +988,8 @@ public class BrightnessTracker {
                     boolean userInitiatedChange = (msg.arg1 == 1);
                     handleBrightnessChanged(values.brightness, userInitiatedChange,
                             values.powerBrightnessFactor, values.isUserSetBrightness,
-                            values.isDefaultBrightnessConfig, values.timestamp);
+                            values.isDefaultBrightnessConfig, values.timestamp,
+                            values.uniqueDisplayId);
                     break;
                 case MSG_START_SENSOR_LISTENER:
                     startSensorListener();
@@ -1007,20 +1016,22 @@ public class BrightnessTracker {
     }
 
     private static class BrightnessChangeValues {
-        final float brightness;
-        final float powerBrightnessFactor;
-        final boolean isUserSetBrightness;
-        final boolean isDefaultBrightnessConfig;
-        final long timestamp;
+        public final float brightness;
+        public final float powerBrightnessFactor;
+        public final boolean isUserSetBrightness;
+        public final boolean isDefaultBrightnessConfig;
+        public final long timestamp;
+        public final String uniqueDisplayId;
 
         BrightnessChangeValues(float brightness, float powerBrightnessFactor,
                 boolean isUserSetBrightness, boolean isDefaultBrightnessConfig,
-                long timestamp) {
+                long timestamp, String uniqueDisplayId) {
             this.brightness = brightness;
             this.powerBrightnessFactor = powerBrightnessFactor;
             this.isUserSetBrightness = isUserSetBrightness;
             this.isDefaultBrightnessConfig = isDefaultBrightnessConfig;
             this.timestamp = timestamp;
+            this.uniqueDisplayId = uniqueDisplayId;
         }
     }
 
