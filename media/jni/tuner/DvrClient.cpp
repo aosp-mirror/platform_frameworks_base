@@ -314,6 +314,11 @@ Result DvrClient::flush() {
 }
 
 Result DvrClient::close() {
+    if (mDvrMQEventFlag != NULL) {
+        EventFlag::deleteEventFlag(&mDvrMQEventFlag);
+    }
+    mDvrMQ = NULL;
+
     if (mTunerDvr != NULL) {
         Status s = mTunerDvr->close();
         mTunerDvr = NULL;
