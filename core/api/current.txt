@@ -20677,6 +20677,7 @@ package android.media {
     method public android.media.AudioDeviceInfo getPreferredDevice();
     method public android.media.AudioDeviceInfo getRoutedDevice();
     method public int getSampleRate();
+    method @IntRange(from=1) public int getStartThresholdInFrames();
     method public int getState();
     method public int getStreamType();
     method public boolean getTimestamp(android.media.AudioTimestamp);
@@ -20707,6 +20708,7 @@ package android.media {
     method public int setPositionNotificationPeriod(int);
     method public boolean setPreferredDevice(android.media.AudioDeviceInfo);
     method public int setPresentation(@NonNull android.media.AudioPresentation);
+    method @IntRange(from=1) public int setStartThresholdInFrames(@IntRange(from=1) int);
     method @Deprecated protected void setState(int);
     method @Deprecated public int setStereoVolume(float, float);
     method public int setVolume(float);
