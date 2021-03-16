@@ -1076,7 +1076,7 @@ public class AccountManagerService
         } catch (RuntimeException e) {
             // The account manager only throws security exceptions, so let's
             // log all others.
-            if (!(e instanceof SecurityException)) {
+            if (!(e instanceof SecurityException || e instanceof IllegalArgumentException)) {
                 Slog.wtf(TAG, "Account Manager Crash", e);
             }
             throw e;
