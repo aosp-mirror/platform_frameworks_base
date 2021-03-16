@@ -842,23 +842,9 @@ public class TelephonyRegistryManager {
         }
     }
 
-    /**
-     * Notify that the link capacity estimate has changed.
-     * @param slotIndex for the phone object that gets the updated link capacity estimate
-     * @param subId for subscription that gets the updated link capacity estimate
-     * @param linkCapacityEstimateList a list of {@link  LinkCapacityEstimate}
-     */
-    public void notifyLinkCapacityEstimateChanged(int slotIndex, int subId,
-            List<LinkCapacityEstimate> linkCapacityEstimateList) {
-        try {
-            sRegistry.notifyLinkCapacityEstimateChanged(slotIndex, subId, linkCapacityEstimateList);
-        } catch (RemoteException ex) {
-            // system server crash
-        }
-    }
-
     public @NonNull Set<Integer> getEventsFromCallback(
             @NonNull TelephonyCallback telephonyCallback) {
+
         Set<Integer> eventList = new ArraySet<>();
 
         if (telephonyCallback instanceof TelephonyCallback.ServiceStateListener) {
@@ -988,10 +974,6 @@ public class TelephonyRegistryManager {
 
         if (telephonyCallback instanceof TelephonyCallback.AllowedNetworkTypesListener) {
             eventList.add(TelephonyCallback.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED);
-        }
-
-        if (telephonyCallback instanceof TelephonyCallback.LinkCapacityEstimateChangedListener) {
-            eventList.add(TelephonyCallback.EVENT_LINK_CAPACITY_ESTIMATE_CHANGED);
         }
 
         return eventList;

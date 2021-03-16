@@ -14503,6 +14503,34 @@ public class TelephonyManager {
     }
 
     /**
+     * Get carrier bandwidth. In case of Dual connected network this will report
+     * bandwidth per primary and secondary network. It is possible that
+     * some modems may not fill secondary carrier bandwidth.
+     * @return CarrierBandwidth with bandwidth of both primary and secondary carrier.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
+    public CarrierBandwidth getCarrierBandwidth() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCarrierBandwidth(getSubId());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getCarrierBandwidth RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+
+        //Should not reach. Adding return statement to make compiler happy
+        return null;
+    }
+
+    /**
      * Called when userActivity is signalled in the power manager.
      * This should only be called from system Uid.
      * @hide
