@@ -32,7 +32,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DragEvent;
-import android.view.IScrollCaptureCallbacks;
+import android.view.IScrollCaptureResponseListener;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.IWindowSession;
@@ -369,9 +369,9 @@ public class SystemWindows {
         public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {}
 
         @Override
-        public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
+        public void requestScrollCapture(IScrollCaptureResponseListener listener) {
             try {
-                callbacks.onScrollCaptureResponse(
+                listener.onScrollCaptureResponse(
                         new ScrollCaptureResponse.Builder()
                                 .setDescription("Not Implemented")
                                 .build());

@@ -78,7 +78,7 @@ import android.view.ContextThemeWrapper;
 import android.view.CrossWindowBlurListeners;
 import android.view.Gravity;
 import android.view.IRotationWatcher.Stub;
-import android.view.IScrollCaptureCallbacks;
+import android.view.IScrollCaptureResponseListener;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -3940,12 +3940,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /**
      * System request to begin scroll capture.
      *
-     * @param callbacks to receive responses
+     * @param listener to receive the response
      * @hide
      */
     @Override
-    public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
-        getViewRootImpl().dispatchScrollCaptureRequest(callbacks);
+    public void requestScrollCapture(IScrollCaptureResponseListener listener) {
+        getViewRootImpl().dispatchScrollCaptureRequest(listener);
     }
 
     /**

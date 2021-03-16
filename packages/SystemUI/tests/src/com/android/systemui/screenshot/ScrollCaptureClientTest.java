@@ -16,15 +16,15 @@
 
 package com.android.systemui.screenshot;
 
-import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 
 import static java.util.Objects.requireNonNull;
 
@@ -34,7 +34,7 @@ import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
-import android.view.IScrollCaptureCallbacks;
+import android.view.IScrollCaptureResponseListener;
 import android.view.IWindowManager;
 import android.view.ScrollCaptureResponse;
 
@@ -43,29 +43,28 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.screenshot.ScrollCaptureClient.CaptureResult;
-import com.android.systemui.screenshot.ScrollCaptureClient.Connection;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.mockito.stubbing.Answer;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class ScrollCaptureClientTest extends SysuiTestCase {
-    private static final float MAX_PAGES = 3f;
+    private static final float MAX_PAGES = 3.0f;
 
     private Context mContext;
     private IWindowManager mWm;
-
-    @Spy private TestableConsumer<Session> mSessionConsumer;
-    @Spy private TestableConsumer<Connection> mConnectionConsumer;
-    @Spy private TestableConsumer<CaptureResult> mResultConsumer;
-    @Mock private Runnable mRunnable;
 
     @Before
     public void setUp() {
@@ -79,46 +78,50 @@ public class ScrollCaptureClientTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBasicClientFlow() throws RemoteException {
+    public void testDetectAndConnect()
+            throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
         doAnswer((Answer<Void>) invocation -> {
-            IScrollCaptureCallbacks cb = invocation.getArgument(3);
-            cb.onScrollCaptureResponse(new ScrollCaptureResponse.Builder()
+            IScrollCaptureResponseListener listener = invocation.getArgument(3);
+            listener.onScrollCaptureResponse(new ScrollCaptureResponse.Builder()
                     .setBoundsInWindow(new Rect(0, 0, 100, 100))
                     .setWindowBounds(new Rect(0, 0, 100, 100))
-                    .setConnection(new FakeScrollCaptureConnection(cb))
+                    .setConnection(new FakeScrollCaptureConnection())
                     .build());
             return null;
         }).when(mWm).requestScrollCapture(/* displayId */ anyInt(), /* token */  isNull(),
-                /* taskId */ anyInt(), any(IScrollCaptureCallbacks.class));
+                /* taskId */ anyInt(), any(IScrollCaptureResponseListener.class));
 
         // Create client
         ScrollCaptureClient client = new ScrollCaptureClient(mContext, mWm);
 
-        client.request(Display.DEFAULT_DISPLAY, mConnectionConsumer);
-        verify(mConnectionConsumer, timeout(100)).accept(any(Connection.class));
+        // Request scroll capture
+        ListenableFuture<ScrollCaptureResponse> requestFuture =
+                client.request(Display.DEFAULT_DISPLAY);
+        assertNotNull(requestFuture.get(100, TimeUnit.MILLISECONDS));
 
-        Connection conn = mConnectionConsumer.getValue();
+        ScrollCaptureResponse response = requestFuture.get();
+        assertTrue(response.isConnected());
 
-        conn.start(mSessionConsumer, MAX_PAGES);
-        verify(mSessionConsumer, timeout(100)).accept(any(Session.class));
+        // Start a session
+        ListenableFuture<Session> startFuture = client.start(response, MAX_PAGES);
+        assertNotNull(startFuture.get(100, TimeUnit.MILLISECONDS));
 
-        Session session = mSessionConsumer.getValue();
+        Session session = startFuture.get();
         Rect request = new Rect(0, 0, session.getPageWidth(), session.getTileHeight());
 
-        session.requestTile(0, mResultConsumer);
-        verify(mResultConsumer, timeout(100)).accept(any(CaptureResult.class));
+        // Request a tile
+        ListenableFuture<CaptureResult> tileFuture = session.requestTile(0);
+        assertNotNull(tileFuture.get(100, TimeUnit.MILLISECONDS));
 
-        CaptureResult result = mResultConsumer.getValue();
-        assertThat(result.requested).isEqualTo(request);
-        assertThat(result.captured).isEqualTo(result.requested);
-        assertThat(result.image).isNotNull();
+        CaptureResult result = tileFuture.get();
+        assertEquals(request, result.requested);
+        assertEquals(result.requested, result.captured);
+        assertNotNull(result.image);
 
-        session.end(mRunnable);
-        verify(mRunnable, timeout(100)).run();
-
-        // TODO verify image
-        // TODO test threading
-        // TODO test failures
+        // End the session
+        ListenableFuture<Void> endFuture = session.end();
+        CountDownLatch latch = new CountDownLatch(1);
+        endFuture.addListener(latch::countDown, Runnable::run);
+        assertTrue(latch.await(100, TimeUnit.MILLISECONDS));
     }
-
 }
