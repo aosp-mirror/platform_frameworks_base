@@ -10449,9 +10449,30 @@ package android.telecom {
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onBluetoothCallQualityReportReceived(@NonNull android.telecom.BluetoothCallQualityReport);
     method public abstract void onCallAudioStateChanged(@NonNull android.telecom.CallAudioState);
-    method @NonNull public abstract android.telecom.DiagnosticCall onInitializeDiagnosticCall(@NonNull android.telecom.Call.Details);
-    method public abstract void onRemoveDiagnosticCall(@NonNull android.telecom.DiagnosticCall);
+    method @NonNull public abstract android.telecom.CallDiagnostics onInitializeCallDiagnostics(@NonNull android.telecom.Call.Details);
+    method public abstract void onRemoveCallDiagnostics(@NonNull android.telecom.CallDiagnostics);
     field public static final String SERVICE_INTERFACE = "android.telecom.CallDiagnosticService";
+  }
+
+  public abstract class CallDiagnostics {
+    ctor public CallDiagnostics();
+    method public final void clearDiagnosticMessage(int);
+    method public final void displayDiagnosticMessage(int, @NonNull CharSequence);
+    method public abstract void onCallDetailsChanged(@NonNull android.telecom.Call.Details);
+    method @Nullable public abstract CharSequence onCallDisconnected(int, int);
+    method @Nullable public abstract CharSequence onCallDisconnected(@NonNull android.telephony.ims.ImsReasonInfo);
+    method public abstract void onCallQualityReceived(@NonNull android.telephony.CallQuality);
+    method public abstract void onReceiveDeviceToDeviceMessage(int, int);
+    method public final void sendDeviceToDeviceMessage(int, int);
+    field public static final int BATTERY_STATE_CHARGING = 3; // 0x3
+    field public static final int BATTERY_STATE_GOOD = 2; // 0x2
+    field public static final int BATTERY_STATE_LOW = 1; // 0x1
+    field public static final int COVERAGE_GOOD = 2; // 0x2
+    field public static final int COVERAGE_POOR = 1; // 0x1
+    field public static final int MESSAGE_CALL_AUDIO_CODEC = 2; // 0x2
+    field public static final int MESSAGE_CALL_NETWORK_TYPE = 1; // 0x1
+    field public static final int MESSAGE_DEVICE_BATTERY_STATE = 3; // 0x3
+    field public static final int MESSAGE_DEVICE_NETWORK_COVERAGE = 4; // 0x4
   }
 
   public static class CallScreeningService.CallResponse.Builder {
@@ -10514,25 +10535,8 @@ package android.telecom {
     method public final void addExistingConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.Connection, @NonNull android.telecom.Conference);
   }
 
-  public abstract class DiagnosticCall {
-    ctor public DiagnosticCall();
-    method public final void clearDiagnosticMessage(int);
-    method public final void displayDiagnosticMessage(int, @NonNull CharSequence);
-    method public abstract void onCallDetailsChanged(@NonNull android.telecom.Call.Details);
-    method @Nullable public abstract CharSequence onCallDisconnected(int, int);
-    method @Nullable public abstract CharSequence onCallDisconnected(@NonNull android.telephony.ims.ImsReasonInfo);
-    method public abstract void onCallQualityReceived(@NonNull android.telephony.CallQuality);
-    method public abstract void onReceiveDeviceToDeviceMessage(int, int);
-    method public final void sendDeviceToDeviceMessage(int, int);
-    field public static final int BATTERY_STATE_CHARGING = 3; // 0x3
-    field public static final int BATTERY_STATE_GOOD = 2; // 0x2
-    field public static final int BATTERY_STATE_LOW = 1; // 0x1
-    field public static final int COVERAGE_GOOD = 2; // 0x2
-    field public static final int COVERAGE_POOR = 1; // 0x1
-    field public static final int MESSAGE_CALL_AUDIO_CODEC = 2; // 0x2
-    field public static final int MESSAGE_CALL_NETWORK_TYPE = 1; // 0x1
-    field public static final int MESSAGE_DEVICE_BATTERY_STATE = 3; // 0x3
-    field public static final int MESSAGE_DEVICE_NETWORK_COVERAGE = 4; // 0x4
+  @Deprecated public abstract class DiagnosticCall extends android.telecom.CallDiagnostics {
+    ctor @Deprecated public DiagnosticCall();
   }
 
   public abstract class InCallService extends android.app.Service {
