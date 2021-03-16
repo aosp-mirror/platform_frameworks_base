@@ -1795,6 +1795,7 @@ package android.app.usage {
 
   public final class UsageStats implements android.os.Parcelable {
     method public int getAppLaunchCount();
+    method public long getLastTimeComponentUsed();
   }
 
   public final class UsageStatsManager {

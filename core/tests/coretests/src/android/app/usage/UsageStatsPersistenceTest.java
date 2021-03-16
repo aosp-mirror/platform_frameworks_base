@@ -46,7 +46,8 @@ public class UsageStatsPersistenceTest {
     private static final String[] USAGESTATS_PERSISTED_FIELDS = {"mBeginTimeStamp", "mEndTimeStamp",
             "mPackageName", "mPackageToken", "mLastEvent", "mAppLaunchCount", "mChooserCounts",
             "mLastTimeUsed", "mTotalTimeInForeground", "mLastTimeForegroundServiceUsed",
-            "mTotalTimeForegroundServiceUsed", "mLastTimeVisible", "mTotalTimeVisible"};
+            "mTotalTimeForegroundServiceUsed", "mLastTimeVisible", "mTotalTimeVisible",
+            "mLastTimeComponentUsed"};
     // All fields in this list are defined in UsageStats but not persisted
     private static final String[] USAGESTATS_IGNORED_FIELDS = {"CREATOR", "mActivities",
             "mForegroundServices", "mLaunchCount", "mChooserCountsObfuscated"};
