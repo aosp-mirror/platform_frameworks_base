@@ -3205,10 +3205,6 @@ public class ConnectivityManager {
         }
     }
 
-    // TODO : remove this method. It is a stopgap measure to help sheperding a number
-    // of dependent changes that would conflict throughout the automerger graph. Having this
-    // temporarily helps with the process of going through with all these dependent changes across
-    // the entire tree.
     /**
      * @hide
      * Register a NetworkAgent with ConnectivityService.
@@ -3218,20 +3214,8 @@ public class ConnectivityManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_FACTORY})
     public Network registerNetworkAgent(INetworkAgent na, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score, NetworkAgentConfig config) {
-        return registerNetworkAgent(na, ni, lp, nc, score, config, NetworkProvider.ID_NONE);
-    }
-
-    /**
-     * @hide
-     * Register a NetworkAgent with ConnectivityService.
-     * @return Network corresponding to NetworkAgent.
-     */
-    @RequiresPermission(anyOf = {
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_FACTORY})
-    public Network registerNetworkAgent(INetworkAgent na, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score, NetworkAgentConfig config, int providerId) {
+            NetworkCapabilities nc, @NonNull NetworkScore score, NetworkAgentConfig config,
+            int providerId) {
         try {
             return mService.registerNetworkAgent(na, ni, lp, nc, score, config, providerId);
         } catch (RemoteException e) {
