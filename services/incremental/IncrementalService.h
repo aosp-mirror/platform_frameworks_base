@@ -231,6 +231,7 @@ private:
 
         MountId id() const { return mId.load(std::memory_order_relaxed); }
         const content::pm::DataLoaderParamsParcel& params() const { return mParams; }
+        bool isSystemDataLoader() const;
         void setHealthListener(StorageHealthCheckParams&& healthCheckParams,
                                const StorageHealthListener* healthListener);
         long elapsedMsSinceOldestPendingRead();
@@ -330,6 +331,7 @@ private:
         StorageMap storages;
         BindMap bindPoints;
         DataLoaderStubPtr dataLoaderStub;
+        TimePoint startLoadingTs = {};
         std::atomic<int> nextStorageDirNo{0};
         const IncrementalService& incrementalService;
 
@@ -348,12 +350,7 @@ private:
         void disallowReadLogs() { flags &= ~StorageFlags::ReadLogsAllowed; }
         int32_t readLogsAllowed() const { return (flags & StorageFlags::ReadLogsAllowed); }
 
-        void setReadLogsEnabled(bool value) {
-            if (value)
-                flags |= StorageFlags::ReadLogsEnabled;
-            else
-                flags &= ~StorageFlags::ReadLogsEnabled;
-        }
+        void setReadLogsEnabled(bool value);
         int32_t readLogsEnabled() const { return (flags & StorageFlags::ReadLogsEnabled); }
 
         static void cleanupFilesystem(std::string_view root);
@@ -411,6 +408,8 @@ private:
                                              IncFsMount::StorageMap::const_iterator storageIt,
                                              std::string_view path) const;
     int makeDirs(const IncFsMount& ifs, StorageId storageId, std::string_view path, int mode);
+
+    int setStorageParams(IncFsMount& ifs, StorageId storageId, bool enableReadLogs);
     binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
 
     int isFileFullyLoadedFromPath(const IncFsMount& ifs, std::string_view filePath) const;
