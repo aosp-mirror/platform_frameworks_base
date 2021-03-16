@@ -3806,8 +3806,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 ? mNetworkRequests.get(request) : getNriForAppRequest(request);
 
         if (nri != null) {
-            if (Process.SYSTEM_UID != callingUid && Process.NETWORK_STACK_UID != callingUid
-                    && nri.mUid != callingUid) {
+            if (Process.SYSTEM_UID != callingUid && nri.mUid != callingUid) {
                 log(String.format("UID %d attempted to %s for unowned request %s",
                         callingUid, requestedOperation, nri));
                 return null;
