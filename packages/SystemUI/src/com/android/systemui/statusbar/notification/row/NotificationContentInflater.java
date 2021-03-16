@@ -27,8 +27,10 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.CancellationSignal;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.View;
@@ -768,10 +770,26 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             return mReInflateFlags;
         }
 
+        void updateApplicationInfo(StatusBarNotification sbn) {
+            String packageName = sbn.getPackageName();
+            int userId = UserHandle.getUserId(sbn.getUid());
+            final ApplicationInfo appInfo;
+            try {
+                // This method has an internal cache, so we don't need to add our own caching here.
+                appInfo = mContext.getPackageManager().getApplicationInfoAsUser(packageName,
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+                return;
+            }
+            Notification.addFieldsFromContext(appInfo, sbn.getNotification());
+        }
+
         @Override
         protected InflationProgress doInBackground(Void... params) {
             try {
                 final StatusBarNotification sbn = mEntry.getSbn();
+                // Ensure the ApplicationInfo is updated before a builder is recovered.
+                updateApplicationInfo(sbn);
                 final Notification.Builder recoveredBuilder
                         = Notification.Builder.recoverBuilder(mContext,
                         sbn.getNotification());
