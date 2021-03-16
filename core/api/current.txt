@@ -52401,6 +52401,17 @@ package android.view.translation {
     method @Nullable @WorkerThread public android.view.translation.TranslationResponse translate(@NonNull android.view.translation.TranslationRequest);
   }
 
+  public final class UiTranslationManager {
+    method public void registerUiTranslationStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.view.translation.UiTranslationStateCallback);
+    method public void unregisterUiTranslationStateCallback(@NonNull android.view.translation.UiTranslationStateCallback);
+  }
+
+  public interface UiTranslationStateCallback {
+    method public void onFinished();
+    method public void onPaused();
+    method public void onStarted(@NonNull String, @NonNull String);
+  }
+
   public final class ViewTranslationRequest implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.view.autofill.AutofillId getAutofillId();
