@@ -908,7 +908,7 @@ TEST_F(IncrementalServiceTest, testDataLoaderOnRestart) {
     EXPECT_CALL(*mDataLoader, start(_)).Times(6);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
-    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(2);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(3);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
@@ -1119,7 +1119,7 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnhealthyStorage) {
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     EXPECT_CALL(*mLooper, addFd(MockIncFs::kPendingReadsFd, _, _, _, _)).Times(2);
     EXPECT_CALL(*mLooper, removeFd(MockIncFs::kPendingReadsFd)).Times(2);
-    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(4);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(5);
 
     sp<NiceMock<MockStorageHealthListener>> listener{new NiceMock<MockStorageHealthListener>};
     NiceMock<MockStorageHealthListener>* listenerMock = listener.get();
@@ -1289,6 +1289,147 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndDisabled) {
     ASSERT_GE(mDataLoader->setStorageParams(true), 0);
     // Now disable.
     mIncrementalService->disallowReadLogs(storageId);
+    ASSERT_EQ(mDataLoader->setStorageParams(true), -EPERM);
+}
+
+TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndTimedOut) {
+    mVold->setIncFsMountOptionsSuccess();
+    mAppOpsManager->checkPermissionSuccess();
+
+    const auto readLogsMaxInterval = 2h;
+
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    // Enabling and then disabling readlogs.
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true)).Times(2);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false)).Times(1);
+    // After setIncFsMountOptions succeeded expecting to start watching.
+    EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
+    // Not expecting callback removal.
+    EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(1);
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
+
+    // Disable readlogs callback present.
+    ASSERT_EQ(storageId, mTimedQueue->mId);
+    ASSERT_EQ(mTimedQueue->mAfter, readLogsMaxInterval);
+    auto callback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    ASSERT_GE(mDataLoader->setStorageParams(true), 0);
+    // Now advance clock for 1hr.
+    mClock->advance(1h);
+    ASSERT_GE(mDataLoader->setStorageParams(true), 0);
+    // Now call the timed callback, it should turn off the readlogs.
+    callback();
+    // Now advance clock for 2hrs.
+    mClock->advance(readLogsMaxInterval);
+    ASSERT_EQ(mDataLoader->setStorageParams(true), -EPERM);
+}
+
+TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndNoTimedOutForSystem) {
+    mVold->setIncFsMountOptionsSuccess();
+    mAppOpsManager->checkPermissionSuccess();
+
+    const auto readLogsMaxInterval = 2h;
+
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    // Enabling and then disabling readlogs.
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true)).Times(3);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false)).Times(0);
+    // After setIncFsMountOptions succeeded expecting to start watching.
+    EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
+    // Not expecting callback removal.
+    EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(0);
+    // System data loader.
+    mDataLoaderParcel.packageName = "android";
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
+
+    // No readlogs callback.
+    ASSERT_EQ(mTimedQueue->mAfter, 0ms);
+    ASSERT_EQ(mTimedQueue->mWhat, nullptr);
+
+    ASSERT_GE(mDataLoader->setStorageParams(true), 0);
+    // Now advance clock for 1hr.
+    mClock->advance(1h);
+    ASSERT_GE(mDataLoader->setStorageParams(true), 0);
+    // Now advance clock for 2hrs.
+    mClock->advance(readLogsMaxInterval);
+    ASSERT_EQ(mDataLoader->setStorageParams(true), 0);
+}
+
+TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndNewInstall) {
+    mVold->setIncFsMountOptionsSuccess();
+    mAppOpsManager->checkPermissionSuccess();
+
+    const auto readLogsMaxInterval = 2h;
+
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(2);
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    // Enabling and then disabling readlogs.
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true)).Times(3);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false)).Times(1);
+    // After setIncFsMountOptions succeeded expecting to start watching.
+    EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
+    // Not expecting callback removal.
+    EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(2);
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+
+    auto dataLoaderParcel = mDataLoaderParcel;
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(dataLoaderParcel), {}, {},
+                                                  {}, {}));
+
+    // Disable readlogs callback present.
+    ASSERT_EQ(storageId, mTimedQueue->mId);
+    ASSERT_EQ(mTimedQueue->mAfter, readLogsMaxInterval);
+    auto callback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    ASSERT_GE(mDataLoader->setStorageParams(true), 0);
+    // Now advance clock for 1.5hrs.
+    mClock->advance(90min);
+    ASSERT_GE(mDataLoader->setStorageParams(true), 0);
+
+    // New installation.
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
+
+    // New callback present.
+    ASSERT_EQ(storageId, mTimedQueue->mId);
+    ASSERT_EQ(mTimedQueue->mAfter, readLogsMaxInterval);
+    auto callback2 = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    // Old callback should not disable readlogs (setIncFsMountOptions should be called only once).
+    callback();
+    // Advance clock for another 1.5hrs.
+    mClock->advance(90min);
+    // Still success even it's 3hrs past first install.
+    ASSERT_GE(mDataLoader->setStorageParams(true), 0);
+
+    // New one should disable.
+    callback2();
+    // And timeout.
+    mClock->advance(90min);
     ASSERT_EQ(mDataLoader->setStorageParams(true), -EPERM);
 }
 
@@ -1675,7 +1816,7 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsTooShort) {
     EXPECT_CALL(*mDataLoader, start(_)).Times(1);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mIncFs, setUidReadTimeouts(_, _)).Times(0);
-    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(0);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
@@ -1701,6 +1842,9 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
 
     // Empty storage.
     mIncFs->countFilledBlocksEmpty();
+
+    // Mark DataLoader as 'system' so that readlogs don't pollute the timed queue.
+    mDataLoaderParcel.packageName = "android";
 
     TemporaryDir tempDir;
     int storageId =
