@@ -516,7 +516,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         return properties;
     }
 
-    @NonNull
+    @Nullable
     @Override
     public FingerprintSensorPropertiesInternal getSensorProperties(int sensorId) {
         return mSensorProperties;
