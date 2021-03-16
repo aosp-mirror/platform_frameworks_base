@@ -160,7 +160,7 @@ enum DebugLevel {
 /**
  * Property for whether this is running in the emulator.
  */
-#define PROPERTY_QEMU_KERNEL "ro.kernel.qemu"
+#define PROPERTY_IS_EMULATOR "ro.boot.qemu"
 
 #define PROPERTY_RENDERAHEAD "debug.hwui.render_ahead"
 
