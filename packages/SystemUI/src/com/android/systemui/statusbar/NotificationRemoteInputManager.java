@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -69,8 +70,10 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import dagger.Lazy;
 
@@ -630,24 +633,17 @@ public class NotificationRemoteInputManager implements Dumpable {
         Notification.Builder b = Notification.Builder
                 .recoverBuilder(mContext, sbn.getNotification().clone());
         if (remoteInputText != null || uri != null) {
-            RemoteInputHistoryItem[] oldHistoryItems = (RemoteInputHistoryItem[])
-                    sbn.getNotification().extras.getParcelableArray(
-                            Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
-            RemoteInputHistoryItem[] newHistoryItems;
-
-            if (oldHistoryItems == null) {
-                newHistoryItems = new RemoteInputHistoryItem[1];
-            } else {
-                newHistoryItems = new RemoteInputHistoryItem[oldHistoryItems.length + 1];
-                System.arraycopy(oldHistoryItems, 0, newHistoryItems, 1, oldHistoryItems.length);
-            }
-            RemoteInputHistoryItem newItem;
-            if (uri != null) {
-                newItem = new RemoteInputHistoryItem(mimeType, uri, remoteInputText);
-            } else {
-                newItem = new RemoteInputHistoryItem(remoteInputText);
-            }
-            newHistoryItems[0] = newItem;
+            RemoteInputHistoryItem newItem = uri != null
+                    ? new RemoteInputHistoryItem(mimeType, uri, remoteInputText)
+                    : new RemoteInputHistoryItem(remoteInputText);
+            Parcelable[] oldHistoryItems = sbn.getNotification().extras
+                    .getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+            RemoteInputHistoryItem[] newHistoryItems = oldHistoryItems != null
+                    ? Stream.concat(
+                                Stream.of(newItem),
+                                Arrays.stream(oldHistoryItems).map(p -> (RemoteInputHistoryItem) p))
+                            .toArray(RemoteInputHistoryItem[]::new)
+                    : new RemoteInputHistoryItem[] { newItem };
             b.setRemoteInputHistory(newHistoryItems);
         }
         b.setShowRemoteInputSpinner(showSpinner);
