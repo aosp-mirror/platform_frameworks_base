@@ -376,6 +376,8 @@ public final class DisplayManagerService extends SystemService {
     private final ColorSpace mWideColorSpace;
 
     private SensorManager mSensorManager;
+    private BrightnessTracker mBrightnessTracker;
+
 
     // Whether minimal post processing is allowed by the user.
     @GuardedBy("mSyncRoot")
@@ -1162,7 +1164,7 @@ public final class DisplayManagerService extends SystemService {
 
         DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
         if (dpc != null) {
-            dpc.onDisplayChanged();
+            dpc.onDisplayChangedLocked();
         }
     }
 
@@ -1851,7 +1853,10 @@ public final class DisplayManagerService extends SystemService {
             for (int i = 0; i < displayPowerControllerCount; i++) {
                 mDisplayPowerControllers.valueAt(i).dump(pw);
             }
-
+            if (mBrightnessTracker != null) {
+                pw.println();
+                mBrightnessTracker.dump(pw);
+            }
             pw.println();
             mPersistentDataStore.dump(pw);
         }
@@ -1937,9 +1942,12 @@ public final class DisplayManagerService extends SystemService {
             // initPowerManagement has not yet been called.
             return;
         }
+        if (mBrightnessTracker == null) {
+            mBrightnessTracker = new BrightnessTracker(mContext, null);
+        }
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
-                mDisplayBlanker, display);
+                mDisplayBlanker, display, mBrightnessTracker);
         mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
     }
 
