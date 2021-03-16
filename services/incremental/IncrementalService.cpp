@@ -86,6 +86,9 @@ struct Constants {
     static constexpr auto maxBindDelay = 10000s;
     static constexpr auto bindDelayMultiplier = 10;
     static constexpr auto bindDelayJitterDivider = 10;
+
+    // Max interval after system invoked the DL when readlog collection can be enabled.
+    static constexpr auto readLogsMaxInterval = 2h;
 };
 
 static const Constants& constants() {
@@ -290,6 +293,14 @@ void IncrementalService::IncFsMount::cleanupFilesystem(std::string_view root) {
     ::rmdir(path::c_str(root));
 }
 
+void IncrementalService::IncFsMount::setReadLogsEnabled(bool value) {
+    if (value) {
+        flags |= StorageFlags::ReadLogsEnabled;
+    } else {
+        flags &= ~StorageFlags::ReadLogsEnabled;
+    }
+}
+
 IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_view rootDir)
       : mVold(sm.getVoldService()),
         mDataLoaderManager(sm.getDataLoaderManager()),
@@ -406,7 +417,7 @@ void IncrementalService::onDump(int fd) {
 }
 
 bool IncrementalService::needStartDataLoaderLocked(IncFsMount& ifs) {
-    if (ifs.dataLoaderStub->params().packageName == Constants::systemPackage) {
+    if (ifs.dataLoaderStub->isSystemDataLoader()) {
         return true;
     }
 
@@ -658,7 +669,7 @@ StorageId IncrementalService::createLinkedStorage(std::string_view mountPoint,
     return storageId;
 }
 
-bool IncrementalService::startLoading(StorageId storage,
+bool IncrementalService::startLoading(StorageId storageId,
                                       content::pm::DataLoaderParamsParcel&& dataLoaderParams,
                                       const DataLoaderStatusListener& statusListener,
                                       StorageHealthCheckParams&& healthCheckParams,
@@ -666,12 +677,12 @@ bool IncrementalService::startLoading(StorageId storage,
                                       const std::vector<PerUidReadTimeouts>& perUidReadTimeouts) {
     // Per Uid timeouts.
     if (!perUidReadTimeouts.empty()) {
-        setUidReadTimeouts(storage, perUidReadTimeouts);
+        setUidReadTimeouts(storageId, perUidReadTimeouts);
     }
 
     // Re-initialize DataLoader.
     std::unique_lock l(mLock);
-    const auto ifs = getIfsLocked(storage);
+    const auto ifs = getIfsLocked(storageId);
     if (!ifs) {
         return false;
     }
@@ -685,6 +696,32 @@ bool IncrementalService::startLoading(StorageId storage,
     auto dataLoaderStub = prepareDataLoader(*ifs, std::move(dataLoaderParams), &statusListener,
                                             std::move(healthCheckParams), &healthListener);
     CHECK(dataLoaderStub);
+
+    if (dataLoaderStub->isSystemDataLoader()) {
+        // Readlogs from system dataloader (adb) can always be collected.
+        ifs->startLoadingTs = TimePoint::max();
+    } else {
+        // Assign time when installation wants the DL to start streaming.
+        const auto startLoadingTs = mClock->now();
+        ifs->startLoadingTs = startLoadingTs;
+        // Setup a callback to disable the readlogs after max interval.
+        addTimedJob(*mTimedQueue, storageId, Constants::readLogsMaxInterval,
+                    [this, storageId, startLoadingTs]() {
+                        const auto ifs = getIfs(storageId);
+                        if (!ifs) {
+                            LOG(WARNING) << "Can't disable the readlogs, invalid storageId: "
+                                         << storageId;
+                            return;
+                        }
+                        if (ifs->startLoadingTs != startLoadingTs) {
+                            LOG(INFO) << "Can't disable the readlogs, timestamp mismatch (new "
+                                         "installation?): "
+                                      << storageId;
+                            return;
+                        }
+                        setStorageParams(*ifs, storageId, /*enableReadLogs=*/false);
+                    });
+    }
 
     return dataLoaderStub->requestStart();
 }
@@ -735,11 +772,16 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
         LOG(ERROR) << "setStorageParams failed, invalid storageId: " << storageId;
         return -EINVAL;
     }
+    return setStorageParams(*ifs, storageId, enableReadLogs);
+}
 
-    const auto& params = ifs->dataLoaderStub->params();
+int IncrementalService::setStorageParams(IncFsMount& ifs, StorageId storageId,
+                                         bool enableReadLogs) {
+    const auto& params = ifs.dataLoaderStub->params();
     if (enableReadLogs) {
-        if (!ifs->readLogsAllowed()) {
-            LOG(ERROR) << "setStorageParams failed, readlogs disabled for storageId: " << storageId;
+        if (!ifs.readLogsAllowed()) {
+            LOG(ERROR) << "setStorageParams failed, readlogs disallowed for storageId: "
+                       << storageId;
             return -EPERM;
         }
 
@@ -760,9 +802,19 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
                        << " check failed: " << status.toString8();
             return fromBinderStatus(status);
         }
+
+        // Check installation time.
+        const auto now = mClock->now();
+        const auto startLoadingTs = ifs.startLoadingTs;
+        if (startLoadingTs <= now && now - startLoadingTs > Constants::readLogsMaxInterval) {
+            LOG(ERROR) << "setStorageParams failed, readlogs can't be enabled at this time, "
+                          "storageId: "
+                       << storageId;
+            return -EPERM;
+        }
     }
 
-    if (auto status = applyStorageParams(*ifs, enableReadLogs); !status.isOk()) {
+    if (auto status = applyStorageParams(ifs, enableReadLogs); !status.isOk()) {
         LOG(ERROR) << "applyStorageParams failed: " << status.toString8();
         return fromBinderStatus(status);
     }
@@ -2220,6 +2272,10 @@ sp<content::pm::IDataLoader> IncrementalService::DataLoaderStub::getDataLoader()
         return {};
     }
     return dataloader;
+}
+
+bool IncrementalService::DataLoaderStub::isSystemDataLoader() const {
+    return (params().packageName == Constants::systemPackage);
 }
 
 bool IncrementalService::DataLoaderStub::requestCreate() {
