@@ -7701,13 +7701,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             Slog.i(TAG, "  + always: " + info.activityInfo.packageName
                                     + " : linkgen=" + linkGeneration);
                         }
-
-                        if (!intent.hasCategory(CATEGORY_BROWSABLE)
-                                || !intent.hasCategory(CATEGORY_DEFAULT)) {
-                            undefinedList.add(info);
-                            continue;
-                        }
-
                         // Use link-enabled generation as preferredOrder, i.e.
                         // prefer newly-enabled over earlier-enabled.
                         info.preferredOrder = linkGeneration;
