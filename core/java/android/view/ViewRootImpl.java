@@ -330,7 +330,6 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean mUseBLASTAdapter;
     private boolean mForceDisableBLAST;
-    private boolean mEnableTripleBuffering;
 
     private boolean mFastScrollSoundEffectsEnabled;
 
@@ -1178,9 +1177,6 @@ public final class ViewRootImpl implements ViewParent,
                 if ((res & WindowManagerGlobal.ADD_FLAG_USE_BLAST) != 0) {
                     mUseBLASTAdapter = true;
                 }
-                if ((res & WindowManagerGlobal.ADD_FLAG_USE_TRIPLE_BUFFERING) != 0) {
-                    mEnableTripleBuffering = true;
-                }
 
                 if (view instanceof RootViewSurfaceTaker) {
                     mInputQueueCallback =
@@ -1906,7 +1902,7 @@ public final class ViewRootImpl implements ViewParent,
         Surface ret = null;
         if (mBlastBufferQueue == null) {
             mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl, width, height,
-                    format, mEnableTripleBuffering);
+                    format);
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.
             ret = mBlastBufferQueue.createSurface();

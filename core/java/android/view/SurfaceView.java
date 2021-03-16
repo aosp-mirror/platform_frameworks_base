@@ -1296,7 +1296,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             mBlastBufferQueue.destroy();
         }
         mBlastBufferQueue = new BLASTBufferQueue(name, mBlastSurfaceControl, mSurfaceWidth,
-                mSurfaceHeight, mFormat, true /* TODO */);
+                mSurfaceHeight, mFormat);
     }
 
     private void onDrawFinished() {
