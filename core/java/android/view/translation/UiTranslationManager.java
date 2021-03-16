@@ -16,36 +16,28 @@
 
 package android.view.translation;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.assist.ActivityId;
 import android.content.Context;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.IRemoteCallback;
 import android.os.RemoteException;
-import android.util.ArrayMap;
-import android.util.Log;
 import android.view.View;
 import android.view.autofill.AutofillId;
-
-import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 
-// TODO(b/178044703): Describe what UI Translation is.
 /**
  * The {@link UiTranslationManager} class provides ways for apps to use the ui translation
  * function in framework.
+ *
+ * @hide
  */
+@SystemApi
 public final class UiTranslationManager {
 
     private static final String TAG = "UiTranslationManager";
@@ -96,14 +88,6 @@ public final class UiTranslationManager {
     public @interface UiTranslationState {
     }
 
-    // Keys for the data transmitted in the internal UI Translation state callback.
-    /** @hide */
-    public static final String EXTRA_STATE = "state";
-    /** @hide */
-    public static final String EXTRA_SOURCE_LOCALE = "source_locale";
-    /** @hide */
-    public static final String EXTRA_TARGET_LOCALE = "target_locale";
-
     @NonNull
     private final Context mContext;
 
@@ -127,12 +111,9 @@ public final class UiTranslationManager {
      * @param destSpec {@link TranslationSpec} for the translated data.
      * @param viewIds A list of the {@link View}'s {@link AutofillId} which needs to be translated
      * @param taskId the Activity Task id which needs ui translation
-     *
-     * @hide
      */
     // TODO, hide the APIs
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
     public void startTranslation(@NonNull TranslationSpec sourceSpec,
             @NonNull TranslationSpec destSpec, @NonNull List<AutofillId> viewIds,
             int taskId) {
@@ -160,11 +141,8 @@ public final class UiTranslationManager {
      * @throws IllegalArgumentException if the no {@link View}'s {@link AutofillId} in the list
      * @throws NullPointerException the sourceSpec, destSpec, viewIds, activityId or
      *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
     public void startTranslation(@NonNull TranslationSpec sourceSpec,
             @NonNull TranslationSpec destSpec, @NonNull List<AutofillId> viewIds,
             @NonNull ActivityId activityId) {
@@ -193,12 +171,9 @@ public final class UiTranslationManager {
      * NOTE: Please use {@code finishTranslation(ActivityId)} instead.
      *
      * @param taskId the Activity Task id which needs ui translation
-     *
-     * @hide
      */
     // TODO, hide the APIs
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
     public void finishTranslation(int taskId) {
         try {
             mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_FINISHED,
@@ -216,11 +191,8 @@ public final class UiTranslationManager {
      * @param activityId the identifier for the Activity which needs ui translation
      * @throws NullPointerException the activityId or
      *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
     public void finishTranslation(@NonNull ActivityId activityId) {
         try {
             Objects.requireNonNull(activityId);
@@ -240,12 +212,9 @@ public final class UiTranslationManager {
      * NOTE: Please use {@code pauseTranslation(ActivityId)} instead.
      *
      * @param taskId the Activity Task id which needs ui translation
-     *
-     * @hide
      */
     // TODO, hide the APIs
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
     public void pauseTranslation(int taskId) {
         try {
             mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_PAUSED,
@@ -263,11 +232,8 @@ public final class UiTranslationManager {
      * @param activityId the identifier for the Activity which needs ui translation
      * @throws NullPointerException the activityId or
      *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
     public void pauseTranslation(@NonNull ActivityId activityId) {
         try {
             Objects.requireNonNull(activityId);
@@ -287,12 +253,9 @@ public final class UiTranslationManager {
      * NOTE: Please use {@code resumeTranslation(ActivityId)} instead.
      *
      * @param taskId the Activity Task id which needs ui translation
-     *
-     * @hide
      */
     // TODO, hide the APIs
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
     public void resumeTranslation(int taskId) {
         try {
             mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_RESUMED,
@@ -310,11 +273,8 @@ public final class UiTranslationManager {
      * @param activityId the identifier for the Activity which needs ui translation
      * @throws NullPointerException the activityId or
      *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
     public void resumeTranslation(@NonNull ActivityId activityId) {
         try {
             Objects.requireNonNull(activityId);
@@ -324,106 +284,6 @@ public final class UiTranslationManager {
                     activityId.getToken(), activityId.getTaskId(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        }
-    }
-
-    // TODO(b/178044703): Fix the View API link when it becomes public.
-    /**
-     * Register for notifications of UI Translation state changes on the foreground activity. This
-     * is available to the owning application itself and also the current input method.
-     * <p>
-     * The application whose UI is being translated can use this to customize the UI Translation
-     * behavior in ways that aren't made easy by methods like
-     * View#onCreateTranslationRequest().
-     * <p>
-     * Input methods can use this to offer complementary features to UI Translation; for example,
-     * enabling outgoing message translation when the system is translating incoming messages in a
-     * communication app.
-     *
-     * @param callback the callback to register for receiving the state change
-     *         notifications
-     */
-    public void registerUiTranslationStateCallback(
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull UiTranslationStateCallback callback) {
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(callback);
-        synchronized (mCallbacks) {
-            if (mCallbacks.containsKey(callback)) {
-                Log.w(TAG, "registerUiTranslationStateCallback: callback already registered;"
-                        + " ignoring.");
-                return;
-            }
-            final IRemoteCallback remoteCallback =
-                    new UiTranslationStateRemoteCallback(executor, callback);
-            try {
-                mService.registerUiTranslationStateCallback(remoteCallback, mContext.getUserId());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-            mCallbacks.put(callback, remoteCallback);
-        }
-    }
-
-    /**
-     * Unregister {@code callback}.
-     *
-     * @see #registerUiTranslationStateCallback(Executor, UiTranslationStateCallback)
-     */
-    public void unregisterUiTranslationStateCallback(@NonNull UiTranslationStateCallback callback) {
-        Objects.requireNonNull(callback);
-
-        synchronized (mCallbacks) {
-            final IRemoteCallback remoteCallback = mCallbacks.get(callback);
-            if (remoteCallback == null) {
-                Log.w(TAG, "unregisterUiTranslationStateCallback: callback not found; ignoring.");
-                return;
-            }
-            try {
-                mService.unregisterUiTranslationStateCallback(remoteCallback, mContext.getUserId());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-            mCallbacks.remove(callback);
-        }
-    }
-
-    @NonNull
-    @GuardedBy("mCallbacks")
-    private final Map<UiTranslationStateCallback, IRemoteCallback> mCallbacks = new ArrayMap<>();
-
-    private static class UiTranslationStateRemoteCallback extends IRemoteCallback.Stub {
-        private final Executor mExecutor;
-        private final UiTranslationStateCallback mCallback;
-
-        UiTranslationStateRemoteCallback(Executor executor,
-                UiTranslationStateCallback callback) {
-            mExecutor = executor;
-            mCallback = callback;
-        }
-
-        @Override
-        public void sendResult(Bundle bundle) {
-            Binder.clearCallingIdentity();
-            mExecutor.execute(() -> {
-                int state = bundle.getInt(EXTRA_STATE);
-                switch (state) {
-                    case STATE_UI_TRANSLATION_STARTED:
-                    case STATE_UI_TRANSLATION_RESUMED:
-                        mCallback.onStarted(
-                                bundle.getString(EXTRA_SOURCE_LOCALE),
-                                bundle.getString(EXTRA_TARGET_LOCALE));
-                        break;
-                    case STATE_UI_TRANSLATION_PAUSED:
-                        mCallback.onPaused();
-                        break;
-                    case STATE_UI_TRANSLATION_FINISHED:
-                        mCallback.onFinished();
-                        break;
-                    default:
-                        Log.wtf(TAG, "Unexpected translation state:" + state);
-                }
-            });
         }
     }
 }
