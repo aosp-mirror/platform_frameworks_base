@@ -596,24 +596,25 @@ void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
     color.g = g;
     color.b = b;
 
-    transaction->setBackgroundColor(surfaceControl, color, alpha, static_cast<ui::Dataspace>(dataspace));
+    transaction->setBackgroundColor(surfaceControl, color, alpha,
+                                    static_cast<ui::Dataspace>(dataspace));
 }
 
 void ASurfaceTransaction_setFrameRate(ASurfaceTransaction* aSurfaceTransaction,
                                       ASurfaceControl* aSurfaceControl, float frameRate,
                                       int8_t compatibility) {
-    ASurfaceTransaction_setFrameRateWithSeamlessness(aSurfaceTransaction, aSurfaceControl,
-                                                     frameRate, compatibility,
-                                                     /*shouldBeSeamless*/ true);
+    ASurfaceTransaction_setFrameRateWithChangeStrategy(
+            aSurfaceTransaction, aSurfaceControl, frameRate, compatibility,
+            ANATIVEWINDOW_CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS);
 }
 
-void ASurfaceTransaction_setFrameRateWithSeamlessness(ASurfaceTransaction* aSurfaceTransaction,
-                                                      ASurfaceControl* aSurfaceControl,
-                                                      float frameRate, int8_t compatibility,
-                                                      bool shouldBeSeamless) {
+void ASurfaceTransaction_setFrameRateWithChangeStrategy(ASurfaceTransaction* aSurfaceTransaction,
+                                                        ASurfaceControl* aSurfaceControl,
+                                                        float frameRate, int8_t compatibility,
+                                                        int8_t changeFrameRateStrategy) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-    transaction->setFrameRate(surfaceControl, frameRate, compatibility, shouldBeSeamless);
+    transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
 }
