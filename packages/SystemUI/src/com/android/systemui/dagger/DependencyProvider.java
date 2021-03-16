@@ -339,6 +339,7 @@ public class DependencyProvider {
 
     /** */
     @Provides
+    @SysUISingleton
     public AlwaysOnDisplayPolicy provideAlwaysOnDisplayPolicy(Context context) {
         return new AlwaysOnDisplayPolicy(context);
     }
