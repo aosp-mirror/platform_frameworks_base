@@ -16,11 +16,10 @@
   -->
 
 <resources>
-    <dimen name="secondary_app_icon_size">32dp</dimen>
-    <dimen name="preference_title_font_size">16sp</dimen>
-    <dimen name="icon_min_width">56dp</dimen>
-    <dimen name="preference_padding_start">?android:attr/dialogPreferredPadding</dimen>
-    <dimen name="preference_padding_end">?android:attr/dialogPreferredPadding</dimen>
-    <dimen name="app_preference_padding_start">?android:attr/listPreferredItemPaddingStart</dimen>
-    <dimen name="app_icon_min_width">56dp</dimen>
+    <dimen name="preference_title_font_size">20sp</dimen>
+    <dimen name="icon_min_width">48dp</dimen>
+    <dimen name="preference_padding_start">24dp</dimen>
+    <dimen name="preference_padding_end">24dp</dimen>
+    <dimen name="app_preference_padding_start">20dp</dimen>
+    <dimen name="app_icon_min_width">52dp</dimen>
 </resources>
