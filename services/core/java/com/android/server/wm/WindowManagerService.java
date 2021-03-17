@@ -431,7 +431,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
      */
     public static boolean sEnableRemoteKeyguardAnimation =
-            SystemProperties.getBoolean(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, true);
+            SystemProperties.getBoolean(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, false);
 
     private static final String DISABLE_TRIPLE_BUFFERING_PROPERTY =
             "ro.sf.disable_triple_buffer";
