@@ -437,6 +437,14 @@ private:
     void sanityCheckQueue_l() const REQUIRES(mStreamManagerLock);
 
     const audio_attributes_t mAttributes;
+    const std::string mOpPackageName;
+
+   // For legacy compatibility, we lock the stream manager on stop when
+   // there is only one stream.  This allows a play to be called immediately
+   // after stopping, otherwise it is possible that the play might be discarded
+   // (returns 0) because that stream may be in the worker thread call to stop.
+    const bool mLockStreamManagerStop;
+
     std::unique_ptr<ThreadPool> mThreadPool;                  // locked internally
 
     // mStreamManagerLock is used to lock access for transitions between the
@@ -477,8 +485,6 @@ private:
     // The paired stream may be active or restarting.
     // No particular order.
     std::unordered_set<Stream*> mProcessingStreams GUARDED_BY(mStreamManagerLock);
-
-    const std::string           mOpPackageName;
 };
 
 } // namespace android::soundpool

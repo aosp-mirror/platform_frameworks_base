@@ -327,9 +327,6 @@
         <item>"0,1"</item>
     </string-array>
 
-    <!-- The maximum duration (in milliseconds) we expect a network transition to take -->
-    <integer name="config_networkTransitionTimeout">60000</integer>
-
     <!-- Whether/how to notify the user on network switches. See LingerMonitor.java. -->
     <integer translatable="false" name="config_networkNotifySwitchType">0</integer>
 
@@ -341,16 +338,6 @@
          Internet access. Actual device behaviour is controlled by
          Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
     <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
-
-    <!-- Configuration hook for the URL returned by ConnectivityManager#getCaptivePortalServerUrl.
-         If empty, the returned value is controlled by Settings.Global.CAPTIVE_PORTAL_HTTP_URL,
-         and if that value is empty, the framework will use a hard-coded default.
-         This is *NOT* a URL that will always be used by the system network validation to detect
-         captive portals: NetworkMonitor may use different strategies and will not necessarily use
-         this URL. NetworkMonitor behaviour should be configured with NetworkStack resource overlays
-         instead. -->
-    <!--suppress CheckTagEmptyBody -->
-    <string translatable="false" name="config_networkCaptivePortalServerUrl"></string>
 
     <!-- If the hardware supports specially marking packets that caused a wakeup of the
          main CPU, set this value to the mark used. -->
@@ -458,14 +445,6 @@
     <!-- Whether the internal vehicle network should remain active even when no
          apps requested it. -->
     <bool name="config_vehicleInternalNetworkAlwaysRequested">false</bool>
-
-    <!-- Configuration of network interfaces that support WakeOnLAN -->
-    <string-array translatable="false" name="config_wakeonlan_supported_interfaces">
-        <!--
-        <item>wlan0</item>
-        <item>eth0</item>
-        -->
-    </string-array>
 
     <!-- This setting is deprecated, please use
          com.android.networkstack.tethering.R.array.config_mobile_hotspot_provision_app instead. -->

@@ -81,9 +81,18 @@ genrule {
     out: ["services.core.protolog.json"],
 }
 
+genrule {
+    name: "statslog-art-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module art" +
+         " --javaPackage com.android.internal.art --javaClass ArtStatsLog --worksource",
+    out: ["com/android/internal/art/ArtStatsLog.java"],
+}
+
 java_library_static {
     name: "services.core.unboosted",
     srcs: [
+        ":statslog-art-java-gen",
         ":services.core.protologsrc",
         ":dumpstate_aidl",
         ":framework_native_aidl",
@@ -200,6 +209,7 @@ filegroup {
         "java/com/android/server/TestNetworkService.java",
         "java/com/android/server/connectivity/AutodestructReference.java",
         "java/com/android/server/connectivity/ConnectivityConstants.java",
+        "java/com/android/server/connectivity/ConnectivityResources.java",
         "java/com/android/server/connectivity/DnsManager.java",
         "java/com/android/server/connectivity/KeepaliveTracker.java",
         "java/com/android/server/connectivity/LingerMonitor.java",

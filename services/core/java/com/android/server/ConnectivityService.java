@@ -55,6 +55,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
+import static android.net.NetworkRequest.Type.LISTEN_FOR_BEST;
 import static android.net.shared.NetworkMonitorUtils.isPrivateDnsValidationRequired;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.VPN_UID;
@@ -117,6 +118,7 @@ import android.net.NetworkMonitorManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkProvider;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
@@ -188,20 +190,20 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.connectivity.aidl.INetworkAgent;
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.LocationPermissionChecker;
 import com.android.internal.util.MessageUtils;
 import com.android.modules.utils.BasicShellCommandHandler;
 import com.android.net.module.util.BaseNetdUnsolicitedEventListener;
 import com.android.net.module.util.CollectionUtils;
 import com.android.net.module.util.LinkPropertiesUtils.CompareOrUpdateResult;
 import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
+import com.android.net.module.util.LocationPermissionChecker;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.net.module.util.PermissionUtils;
 import com.android.server.connectivity.AutodestructReference;
+import com.android.server.connectivity.ConnectivityResources;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
 import com.android.server.connectivity.KeepaliveTracker;
@@ -317,6 +319,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private boolean mRestrictBackground;
 
     private final Context mContext;
+    private final ConnectivityResources mResources;
     // The Context is created for UserHandle.ALL.
     private final Context mUserAllContext;
     private final Dependencies mDeps;
@@ -604,7 +607,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private Intent mInitialBroadcast;
 
     private PowerManager.WakeLock mNetTransitionWakeLock;
-    private int mNetTransitionWakeLockTimeout;
     private final PowerManager.WakeLock mPendingIntentWakeLock;
 
     // A helper object to track the current default HTTP proxy. ConnectivityService needs to tell
@@ -1012,6 +1014,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         /**
+         * Get the {@link ConnectivityResources} to use in ConnectivityService.
+         */
+        public ConnectivityResources getResources(@NonNull Context ctx) {
+            return new ConnectivityResources(ctx);
+        }
+
+        /**
          * Create a HandlerThread to use in ConnectivityService.
          */
         public HandlerThread makeHandlerThread() {
@@ -1093,6 +1102,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mSystemProperties = mDeps.getSystemProperties();
         mNetIdManager = mDeps.makeNetIdManager();
         mContext = Objects.requireNonNull(context, "missing Context");
+        mResources = deps.getResources(mContext);
         mNetworkRequestCounter = new PerUidCounter(MAX_NETWORK_REQUESTS_PER_UID);
 
         mMetricsLog = logger;
@@ -1154,8 +1164,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final PowerManager powerManager = (PowerManager) context.getSystemService(
                 Context.POWER_SERVICE);
         mNetTransitionWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        mNetTransitionWakeLockTimeout = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_networkTransitionTimeout);
         mPendingIntentWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         mNetConfigs = new NetworkConfig[ConnectivityManager.MAX_NETWORK_TYPE+1];
@@ -1222,10 +1230,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        mWolSupportedInterfaces = new ArraySet(
-                mContext.getResources().getStringArray(
-                        com.android.internal.R.array.config_wakeonlan_supported_interfaces));
-
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
         mPermissionMonitor = new PermissionMonitor(mContext, mNetd);
@@ -1271,12 +1275,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDnsManager = new DnsManager(mContext, mDnsResolver);
         registerPrivateDnsSettingsCallbacks();
 
+        // This NAI is a sentinel used to offer no service to apps that are on a multi-layer
+        // request that doesn't allow fallback to the default network. It should never be visible
+        // to apps. As such, it's not in the list of NAIs and doesn't need many of the normal
+        // arguments like the handler or the DnsResolver.
+        // TODO : remove this ; it is probably better handled with a sentinel request.
         mNoServiceNetwork = new NetworkAgentInfo(null,
                 new Network(NO_SERVICE_NET_ID),
                 new NetworkInfo(TYPE_NONE, 0, "", ""),
-                new LinkProperties(), new NetworkCapabilities(), 0, mContext,
-                null, new NetworkAgentConfig(), this, null,
-                null, 0, INVALID_UID, mQosCallbackTracker, mDeps);
+                new LinkProperties(), new NetworkCapabilities(),
+                new NetworkScore.Builder().setLegacyInt(0).build(), mContext, null,
+                new NetworkAgentConfig(), this, null, null, 0, INVALID_UID, mQosCallbackTracker,
+                mDeps);
     }
 
     private static NetworkCapabilities createDefaultNetworkCapabilitiesForUid(int uid) {
@@ -2947,7 +2957,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_SCORE_CHANGED: {
-                    updateNetworkScore(nai, msg.arg1);
+                    updateNetworkScore(nai, (NetworkScore) arg.second);
                     break;
                 }
                 case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
@@ -3654,6 +3664,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mNetworkRequestInfoLogs.log("REGISTER " + nri);
             for (final NetworkRequest req : nri.mRequests) {
                 mNetworkRequests.put(req, nri);
+                // TODO: Consider update signal strength for other types.
                 if (req.isListen()) {
                     for (final NetworkAgentInfo network : mNetworkAgentInfos) {
                         if (req.networkCapabilities.hasSignalStrength()
@@ -3746,18 +3757,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // listen requests won't keep up a network satisfying it. If this is not a multilayer
         // request, return immediately. For multilayer requests, check to see if any of the
         // multilayer requests may have a potential satisfier.
-        if (!nri.isMultilayerRequest() && nri.mRequests.get(0).isListen()) {
+        if (!nri.isMultilayerRequest() && (nri.mRequests.get(0).isListen()
+                || nri.mRequests.get(0).isListenForBest())) {
             return false;
         }
         for (final NetworkRequest req : nri.mRequests) {
             // This multilayer listen request is satisfied therefore no further requests need to be
             // evaluated deeming this network not a potential satisfier.
-            if (req.isListen() && nri.getActiveRequest() == req) {
+            if ((req.isListen() || req.isListenForBest()) && nri.getActiveRequest() == req) {
                 return false;
             }
             // As non-multilayer listen requests have already returned, the below would only happen
             // for a multilayer request therefore continue to the next request if available.
-            if (req.isListen()) {
+            if (req.isListen() || req.isListenForBest()) {
                 continue;
             }
             // If this Network is already the highest scoring Network for a request, or if
@@ -3797,8 +3809,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 ? mNetworkRequests.get(request) : getNriForAppRequest(request);
 
         if (nri != null) {
-            if (Process.SYSTEM_UID != callingUid && Process.NETWORK_STACK_UID != callingUid
-                    && nri.mUid != callingUid) {
+            if (Process.SYSTEM_UID != callingUid && nri.mUid != callingUid) {
                 log(String.format("UID %d attempted to %s for unowned request %s",
                         callingUid, requestedOperation, nri));
                 return null;
@@ -4601,7 +4612,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         mWakelockLogs.log("ACQUIRE for " + forWhom);
         Message msg = mHandler.obtainMessage(EVENT_EXPIRE_NET_TRANSITION_WAKELOCK);
-        mHandler.sendMessageDelayed(msg, mNetTransitionWakeLockTimeout);
+        final int lockTimeout = mResources.get().getInteger(
+                com.android.connectivity.resources.R.integer.config_networkTransitionTimeout);
+        mHandler.sendMessageDelayed(msg, lockTimeout);
     }
 
     // Called when we gain a new default network to release the network transition wakelock in a
@@ -5539,8 +5552,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 //  request if the app changes network state. http://b/29964605
                 enforceMeteredApnPolicy(networkCapabilities);
                 break;
-            case TRACK_BEST:
-                throw new UnsupportedOperationException("Not implemented yet");
+            case LISTEN_FOR_BEST:
+                enforceAccessPermission();
+                networkCapabilities = new NetworkCapabilities(networkCapabilities);
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported request type " + reqType);
         }
@@ -5548,11 +5563,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ensureSufficientPermissionsForRequest(networkCapabilities,
                 Binder.getCallingPid(), callingUid, callingPackageName);
 
-        // Set the UID range for this request to the single UID of the requester, or to an empty
-        // set of UIDs if the caller has the appropriate permission and UIDs have not been set.
+        // Enforce FOREGROUND if the caller does not have permission to use background network.
+        if (reqType == LISTEN_FOR_BEST) {
+            restrictBackgroundRequestForCaller(networkCapabilities);
+        }
+
+        // Set the UID range for this request to the single UID of the requester, unless the
+        // requester has the permission to specify other UIDs.
         // This will overwrite any allowed UIDs in the requested capabilities. Though there
         // are no visible methods to set the UIDs, an app could use reflection to try and get
         // networks for other apps so it's essential that the UIDs are overwritten.
+        // Also set the requester UID and package name in the request.
         restrictRequestUidsForCallerAndSetRequestorInfo(networkCapabilities,
                 callingUid, callingPackageName);
 
@@ -6079,20 +6100,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nai == getDefaultNetwork();
     }
 
-    // TODO : remove this method. It's a stopgap measure to help sheperding a number of dependent
-    // changes that would conflict throughout the automerger graph. Having this method temporarily
-    // helps with the process of going through with all these dependent changes across the entire
-    // tree.
-    /**
-     * Register a new agent. {@see #registerNetworkAgent} below.
-     */
-    public Network registerNetworkAgent(INetworkAgent na, NetworkInfo networkInfo,
-            LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
-            int currentScore, NetworkAgentConfig networkAgentConfig) {
-        return registerNetworkAgent(na, networkInfo, linkProperties, networkCapabilities,
-                currentScore, networkAgentConfig, NetworkProvider.ID_NONE);
-    }
-
     /**
      * Register a new agent with ConnectivityService to handle a network.
      *
@@ -6103,7 +6110,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *         later : see {@link #updateLinkProperties}.
      * @param networkCapabilities the initial capabilites of this network. They can be updated
      *         later : see {@link #updateCapabilities}.
-     * @param currentScore the initial score of the network. See
+     * @param initialScore the initial score of the network. See
      *         {@link NetworkAgentInfo#getCurrentScore}.
      * @param networkAgentConfig metadata about the network. This is never updated.
      * @param providerId the ID of the provider owning this NetworkAgent.
@@ -6111,10 +6118,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     public Network registerNetworkAgent(INetworkAgent na, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
-            int currentScore, NetworkAgentConfig networkAgentConfig, int providerId) {
+            @NonNull NetworkScore initialScore, NetworkAgentConfig networkAgentConfig,
+            int providerId) {
         Objects.requireNonNull(networkInfo, "networkInfo must not be null");
         Objects.requireNonNull(linkProperties, "linkProperties must not be null");
         Objects.requireNonNull(networkCapabilities, "networkCapabilities must not be null");
+        Objects.requireNonNull(initialScore, "initialScore must not be null");
         Objects.requireNonNull(networkAgentConfig, "networkAgentConfig must not be null");
         if (networkCapabilities.hasTransport(TRANSPORT_TEST)) {
             enforceAnyPermissionOf(Manifest.permission.MANAGE_TEST_NETWORKS);
@@ -6126,7 +6135,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             return registerNetworkAgentInternal(na, networkInfo, linkProperties,
-                    networkCapabilities, currentScore, networkAgentConfig, providerId, uid);
+                    networkCapabilities, initialScore, networkAgentConfig, providerId, uid);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -6134,7 +6143,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private Network registerNetworkAgentInternal(INetworkAgent na, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
-            int currentScore, NetworkAgentConfig networkAgentConfig, int providerId, int uid) {
+            NetworkScore currentScore, NetworkAgentConfig networkAgentConfig, int providerId,
+            int uid) {
         if (networkCapabilities.hasTransport(TRANSPORT_TEST)) {
             // Strictly, sanitizing here is unnecessary as the capabilities will be sanitized in
             // the call to mixInCapabilities below anyway, but sanitizing here means the NAI never
@@ -6515,6 +6525,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void updateWakeOnLan(@NonNull LinkProperties lp) {
+        if (mWolSupportedInterfaces == null) {
+            mWolSupportedInterfaces = new ArraySet<>(mResources.get().getStringArray(
+                    com.android.connectivity.resources.R.array
+                            .config_wakeonlan_supported_interfaces));
+        }
         lp.setWakeOnLanSupported(mWolSupportedInterfaces.contains(lp.getInterfaceName()));
     }
 
@@ -7853,7 +7868,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void updateNetworkScore(@NonNull final NetworkAgentInfo nai, final int score) {
+    private void updateNetworkScore(@NonNull final NetworkAgentInfo nai, final NetworkScore score) {
         if (VDBG || DDBG) log("updateNetworkScore for " + nai.toShortString() + " to " + score);
         nai.setScore(score);
         rematchAllNetworksAndRequests();
@@ -8076,8 +8091,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public String getCaptivePortalServerUrl() {
         enforceNetworkStackOrSettingsPermission();
-        String settingUrl = mContext.getResources().getString(
-                R.string.config_networkCaptivePortalServerUrl);
+        String settingUrl = mResources.get().getString(
+                com.android.connectivity.resources.R.string.config_networkCaptivePortalServerUrl);
 
         if (!TextUtils.isEmpty(settingUrl)) {
             return settingUrl;
