@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.UiContext;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.RemoteException;
@@ -69,8 +70,8 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     @MagnificationState
     private int mState = STATE_DISABLED;
 
-    WindowMagnificationAnimationController(
-            Context context, WindowMagnificationController controller) {
+    WindowMagnificationAnimationController(@UiContext Context context,
+            WindowMagnificationController controller) {
         this(context, controller, newValueAnimator(context.getResources()));
     }
 

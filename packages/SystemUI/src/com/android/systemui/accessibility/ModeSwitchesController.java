@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility;
 
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
+
 import android.annotation.MainThread;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
@@ -106,10 +108,9 @@ public class ModeSwitchesController {
 
         @Override
         protected MagnificationModeSwitch createInstance(Display display) {
-            final Context context = (display.getDisplayId() == Display.DEFAULT_DISPLAY)
-                    ? mContext
-                    : mContext.createDisplayContext(display);
-            return new MagnificationModeSwitch(context);
+            final Context uiContext = mContext.createWindowContext(display,
+                    TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
+            return new MagnificationModeSwitch(uiContext);
         }
     }
 }
