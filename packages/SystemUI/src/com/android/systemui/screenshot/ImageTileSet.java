@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 /**
  * Owns a series of partial screen captures (tiles).
  * <p>
@@ -47,6 +49,7 @@ class ImageTileSet {
     private CallbackRegistry<OnBoundsChangedListener, ImageTileSet, Rect> mOnBoundsListeners;
     private CallbackRegistry<OnContentChangedListener, ImageTileSet, Rect> mContentListeners;
 
+    @Inject
     ImageTileSet(@UiThread Handler handler) {
         mHandler = handler;
     }
