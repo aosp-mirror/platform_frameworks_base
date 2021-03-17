@@ -556,6 +556,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"બાયોમેટ્રિક્સ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"તે તમે જ છો એ ચકાસો"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"આગળ વધવા માટે બાયોમેટ્રિકનો ઉપયોગ કરો"</string>
+    <!-- no translation found for biometric_or_screen_lock_dialog_default_subtitle (159539678371552009) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"પ્રમાણીકરણ રદ કર્યું"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"ઓળખાયેલ નથી"</string>
@@ -589,6 +591,8 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ફિંગરપ્રિન્ટ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ચાલુ રાખવા માટે તમારી ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
+    <!-- no translation found for fingerprint_or_screen_lock_dialog_default_subtitle (5195808203117992200) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ફિંગરપ્રિન્ટ આયકન"</string>
@@ -636,6 +640,8 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"ફેસ અનલૉકનો ઉપયોગ કરો"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ફેસ લૉક અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"આગળ વધવા માટે ફેસ અનલૉકનો ઉપયોગ કરો"</string>
+    <!-- no translation found for face_or_screen_lock_dialog_default_subtitle (5006381531158341844) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"ચહેરા આઇકન"</string>
@@ -665,7 +671,7 @@
     <string name="permdesc_control_incall_experience" msgid="5896723643771737534">"એપ્લિકેશનને કૉલમાં વપરાશકર્તા અનુભવ પ્રદાન કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="8470402862501573795">"ઐતિહાસિક નેટવર્ક ઉપયોગ વાંચો"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="1112962304941637102">"એપ્લિકેશનને ચોક્કસ નેટવર્ક્સ અને ઍપ્લિકેશનો માટે ઐતિહાસિક નેટવર્ક વપરાશ વાંચવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"નેટવર્ક નીતિ મેનેજ કરો"</string>
+    <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"નેટવર્ક પૉલિસી મેનેજ કરો"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"ઍપને નેટવર્ક નીતિઓ મેનેજ કરવાની અને ઍપ-વિશિષ્ટ નિયમો નિર્ધારિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"નેટવર્ક વપરાશ એકાઉન્ટિંગ સંશોધિત કરો"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"એપ્લિકેશનને કેવી રીતે ઍપ્લિકેશનો સામે નેટવર્ક વપરાશ ગણવામાં આવે છે તે સંશોધિત કરવાની મંજૂરી આપે છે. સામાન્ય ઍપ્લિકેશનો દ્વારા ઉપયોગમાં લેવા માટે નથી."</string>
@@ -721,7 +727,7 @@
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ચેતવણી વિના આ Android TV ડિવાઇસ પર રહેલો આ વપરાશકર્તાનો ડેટા કાઢી નાખો."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ચેતવણી વિના આ ફોન પરનો આ વપરાશકર્તાનો ડેટા કાઢી નાખો."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ઉપકરણ વૈશ્વિક પ્રોક્સી સેટ કરો"</string>
-    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"નીતિ સક્ષમ હોય તે વખતે ઉપયોગ કરવા માટેના ઉપકરણ વૈશ્વિક પ્રોક્સીને સેટ કરો. ફક્ત ઉપકરણના માલિક વૈશ્વિક પ્રોક્સી સેટ કરી શકે છે."</string>
+    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"પૉલિસી સક્ષમ હોય તે વખતે ઉપયોગ કરવા માટેના ડિવાઇસ વૈશ્વિક પ્રોક્સીને સેટ કરો. ફક્ત ડિવાઇસના માલિક વૈશ્વિક પ્રોક્સી સેટ કરી શકે છે."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"સ્ક્રીન લૉક પાસવર્ડ સમાપ્તિ સેટ કરો"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"કેટલા સમયાંતરે સ્ક્રીન લૉક પાસવર્ડ, પિન અથવા પૅટર્ન બદલવો આવશ્યક છે, તેને બદલો."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"સંગ્રહ એન્ક્રિપ્શન સેટ કરો"</string>
@@ -999,6 +1005,10 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"તમને આ પૃષ્ઠને ખોલવાની પરવાનગી નથી."</string>
     <string name="text_copied" msgid="2531420577879738860">"ક્લિપબોર્ડ પર ટેક્સ્ટ કૉપિ કરી."</string>
     <string name="copied" msgid="4675902854553014676">"કૉપિ કરેલ"</string>
+    <!-- no translation found for pasted_from_app (5627698450808256545) -->
+    <skip />
+    <!-- no translation found for pasted_from_clipboard (6295556725844421812) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"વધુ"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"મેનૂ+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1372,11 +1382,17 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"બંધ કરો"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> તપાસી રહ્યાં છીએ…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"હાલના કન્ટેન્ટને રિવ્યૂ કરવું"</string>
+    <!-- no translation found for ext_media_checking_notification_message (7986154434946021415) -->
+    <skip />
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"નવું <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> કામ કરી રહ્યું નથી"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"સેટ કરવા માટે ટૅપ કરો"</string>
+    <!-- no translation found for ext_media_new_notification_message (216863352100263668) -->
+    <skip />
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"તમને કદાચ ડિવાઇસને ફરીથી ફૉર્મેટ કરવાની જરૂર પડી શકે છે. બહાર કાઢવા માટે ટૅપ કરો."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ફોટો અને મીડિયા ટ્રાન્સફર કરવા માટે"</string>
+    <!-- no translation found for ext_media_ready_notification_message (8847134811163165935) -->
+    <skip />
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>ની સમસ્યા"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> કામ કરી રહ્યું નથી"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ઠીક કરવા માટે ટૅપ કરો"</string>
@@ -1385,7 +1401,8 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"અસમર્થિત <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> કામ કરી રહ્યું નથી"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"આ ઉપકરણ આ <xliff:g id="NAME">%s</xliff:g> નું સમર્થન કરતું નથી. સમર્થિત ફોર્મેટમાં સેટ કરવા માટે ટૅપ કરો."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"આ ઉપકરણ આ <xliff:g id="NAME">%s</xliff:g> નું સમર્થન કરતું નથી. સમર્થિત ફૉર્મેટમાં સેટ કરવા માટે પસંદ કરો."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (1595482802187036532) -->
+    <skip />
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"તમને કદાચ ડિવાઇસને ફરીથી ફૉર્મેટ કરવાની જરૂર પડી શકે છે"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> અનપેક્ષિત રીતે દૂર કર્યું"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"કન્ટેન્ટ ગુમાવવાનું ટાળવા માટે મીડિયાને દૂર કરતા પહેલાં બહાર કાઢો"</string>

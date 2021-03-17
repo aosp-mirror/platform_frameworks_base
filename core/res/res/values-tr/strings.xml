@@ -204,8 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"Alacakaranlık Hizmeti"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Zaman Dilimi Algılayıcı (Bağlantı yok)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS Zaman Güncelleme Hizmeti"</string>
-    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
-    <skip />
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Müzik Tanıma Yöneticisi Hizmeti"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Cihazınız silinecek"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Yönetim uygulaması kullanılamıyor. Cihazınız şimdi silinecek.\n\nSorularınız varsa kuruluşunuzun yöneticisine başvurun."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Yazdırma işlemi <xliff:g id="OWNER_APP">%s</xliff:g> tarafından devre dışı bırakıldı."</string>
@@ -556,6 +555,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Biyometri veya ekran kilidi kullan"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Siz olduğunuzu doğrulayın"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Devam etmek için biyometri kullanın"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Devam etmek için biyometrik kimlik bilginizi veya ekran kilidinizi kullanın"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biyometrik donanım kullanılamıyor"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Kimlik doğrulama iptal edildi"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Tanınmadı"</string>
@@ -589,6 +589,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Parmak izi kullan"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Parmak izi veya ekran kilidi kullan"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Devam etmek için parmak izinizi kullanın"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Devam etmek için parmak izi veya ekran kilidinizi kullanın"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Parmak izi simgesi"</string>
@@ -636,6 +637,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Yüz tanıma kilidi kullan"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Yüz tanıma veya ekran kilidi kullan"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Devam etmek için yüz tanıma kilidini kullanın"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Devam etmek için yüz veya ekran kilidinizi kullanın"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Yüz simgesi"</string>
@@ -999,6 +1001,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Bu sayfayı açma izniniz yok."</string>
     <string name="text_copied" msgid="2531420577879738860">"Metin panoya kopyalandı."</string>
     <string name="copied" msgid="4675902854553014676">"Kopyalandı"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> uygulaması <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> kaynağından yapıştırdı"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>, panodan yapıştırıldı."</string>
     <string name="more_item_label" msgid="7419249600215749115">"Diğer"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menü+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1372,11 +1376,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Kapat"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> kontrol ediliyor…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Geçerli içerik inceleniyor"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Medya deposu analiz ediliyor"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Yeni <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> çalışmıyor"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Ayarlamak için dokunun"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Kurmak için harici medyayı seçin"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Cihazı yeniden biçimlendirmeniz gerekebilir. Çıkarmak için dokunun."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Fotoğraf ve medya aktarmak için"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Medya dosyalarına göz atın"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> medyasında sorun oluştu"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> çalışmıyor"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Düzeltmek için dokunun"</string>
@@ -1385,7 +1392,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Desteklenmeyen <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> çalışmıyor"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Bu cihaz, bu <xliff:g id="NAME">%s</xliff:g> ortamını desteklemiyor. Desteklenen bir biçimde kurmak için dokunun."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Bu cihaz, bu <xliff:g id="NAME">%s</xliff:g> medyasını desteklemiyor. Desteklenen bir biçimde ayarlamak için seçin."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g> kurulumunu desteklenen biçimde yapmak için seçin."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Cihazı yeniden biçimlendirmeniz gerekebilir"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> beklenmedik şekilde çıkarıldı"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"İçerik kaybı olmaması için medyayı çıkarmadan önce kaldırın"</string>
@@ -1693,7 +1700,7 @@
     <string name="user_switched" msgid="7249833311585228097">"Geçerli kullanıcı: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> adlı kullanıcıya geçiliyor…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> hesabından çıkış yapılıyor…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"Sahibi"</string>
+    <string name="owner_name" msgid="8713560351570795743">"Sahip"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Hata"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Yöneticiniz bu değişikliğe izin vermiyor"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Bu eylemi gerçekleştirecek bir uygulama bulunamadı"</string>
