@@ -78,7 +78,6 @@ public class SystemServicePowerCalculatorTest {
     }
 
     @Test
-    @SkipPresubmit("b/180015146")
     public void testPowerProfileBasedModel() {
         when(mMockUserInfoProvider.exists(anyInt())).thenReturn(true);
 
@@ -154,7 +153,7 @@ public class SystemServicePowerCalculatorTest {
         }
 
         @Override
-        public void readDelta(@Nullable Callback<long[]> cb) {
+        public void readDelta(boolean forcedRead, @Nullable Callback<long[]> cb) {
             if (cb != null) {
                 cb.onUidCpuTime(Process.SYSTEM_UID, mSystemServerCpuTimes);
             }
