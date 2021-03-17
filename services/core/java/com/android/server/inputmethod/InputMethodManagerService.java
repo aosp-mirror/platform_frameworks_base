@@ -3202,7 +3202,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     boolean showCurrentInputLocked(IBinder windowToken, int flags, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         mShowRequested = true;
-        if (mAccessibilityRequestingNoSoftKeyboard) {
+        if (mAccessibilityRequestingNoSoftKeyboard || mImeHiddenByDisplayPolicy) {
             return false;
         }
 
