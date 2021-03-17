@@ -56,7 +56,7 @@ package android.net {
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void requestNetwork(@NonNull android.net.NetworkRequest, int, int, @NonNull android.os.Handler, @NonNull android.net.ConnectivityManager.NetworkCallback);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_AIRPLANE_MODE, android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void setAirplaneMode(boolean);
-    method @RequiresPermission(android.Manifest.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE) public void setOemNetworkPreference(@NonNull android.net.OemNetworkPreferences, @Nullable java.util.concurrent.Executor, @Nullable android.net.ConnectivityManager.OnSetOemNetworkPreferenceListener);
+    method @RequiresPermission(android.Manifest.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE) public void setOemNetworkPreference(@NonNull android.net.OemNetworkPreferences, @Nullable java.util.concurrent.Executor, @Nullable Runnable);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public boolean shouldAvoidBadWifi();
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(@NonNull android.net.Network, @NonNull android.os.Bundle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
@@ -67,6 +67,8 @@ package android.net {
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void unregisterTetheringEventCallback(@NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
+    field public static final int PROFILE_NETWORK_PREFERENCE_DEFAULT = 0; // 0x0
+    field public static final int PROFILE_NETWORK_PREFERENCE_ENTERPRISE = 1; // 0x1
     field public static final int TETHERING_BLUETOOTH = 2; // 0x2
     field public static final int TETHERING_USB = 1; // 0x1
     field public static final int TETHERING_WIFI = 0; // 0x0
@@ -76,10 +78,6 @@ package android.net {
     field public static final int TYPE_NONE = -1; // 0xffffffff
     field @Deprecated public static final int TYPE_PROXY = 16; // 0x10
     field @Deprecated public static final int TYPE_WIFI_P2P = 13; // 0xd
-  }
-
-  public static interface ConnectivityManager.OnSetOemNetworkPreferenceListener {
-    method public void onComplete();
   }
 
   @Deprecated public abstract static class ConnectivityManager.OnStartTetheringCallback {
