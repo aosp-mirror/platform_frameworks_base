@@ -4322,4 +4322,5 @@
 
   <java-symbol type="id" name="remote_views_next_child" />
   <java-symbol type="id" name="remote_views_stable_id" />
+  <java-symbol type="id" name="remote_views_override_id" />
 </resources>
