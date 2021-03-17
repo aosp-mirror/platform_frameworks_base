@@ -25,7 +25,7 @@ public class AppSearchEmailTest {
     @Test
     public void testBuildEmailAndGetValue() {
         AppSearchEmail email =
-                new AppSearchEmail.Builder("uri")
+                new AppSearchEmail.Builder("namespace", "uri")
                         .setFrom("FakeFromAddress")
                         .setCc("CC1", "CC2")
                         // Score and Property are mixed into the middle to make sure
@@ -37,6 +37,7 @@ public class AppSearchEmailTest {
                         .setBody("EmailBody")
                         .build();
 
+        assertThat(email.getNamespace()).isEqualTo("namespace");
         assertThat(email.getUri()).isEqualTo("uri");
         assertThat(email.getFrom()).isEqualTo("FakeFromAddress");
         assertThat(email.getTo()).isNull();

@@ -823,12 +823,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
     },
-    "-1159577965": {
-      "message": "Focus requested for input consumer=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/InputMonitor.java"
-    },
     "-1156118957": {
       "message": "Updated config=%s",
       "level": "DEBUG",
@@ -2479,12 +2473,6 @@
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
-    "690411811": {
-      "message": "goodToGo(): No apps to animate",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_REMOTE_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
     "691515534": {
       "message": "  Commit wallpaper becoming invisible: %s",
       "level": "VERBOSE",
@@ -2604,12 +2592,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
-    "883475718": {
-      "message": "Report configuration: %s %s %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityClientController.java"
     },
     "892244061": {
       "message": "Waiting for drawn %s: removed=%b visible=%b mHasSurface=%b drawState=%d",
@@ -2916,6 +2898,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "1305412562": {
+      "message": "Report configuration: %s %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityClientController.java"
     },
     "1316533291": {
       "message": "State movement: %s from:%s to:%s reason:%s",

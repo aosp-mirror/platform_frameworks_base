@@ -81,6 +81,7 @@ import java.util.concurrent.TimeUnit;
 public class BrightnessTrackerTest {
     private static final float DEFAULT_INITIAL_BRIGHTNESS = 2.5f;
     private static final boolean DEFAULT_COLOR_SAMPLING_ENABLED = true;
+    private static final String DEFAULT_DISPLAY_ID = "123";
     private static final float FLOAT_DELTA = 0.01f;
 
     private BrightnessTracker mTracker;
@@ -285,18 +286,20 @@ public class BrightnessTrackerTest {
 
     @Test
     public void testBrightnessEvent() {
-        final int brightness = 20;
+        final float brightness = 0.5f;
+        final String displayId = "1234";
 
         startTracker(mTracker);
         mInjector.mSensorListener.onSensorChanged(createSensorEvent(1.0f));
         mInjector.incrementTime(TimeUnit.SECONDS.toMillis(2));
-        notifyBrightnessChanged(mTracker, brightness);
+        notifyBrightnessChanged(mTracker, brightness, displayId);
         List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
         mTracker.stop();
 
         assertEquals(1, events.size());
         BrightnessChangeEvent event = events.get(0);
         assertEquals(mInjector.currentTimeMillis(), event.timeStamp);
+        assertEquals(displayId, event.uniqueDisplayId);
         assertEquals(1, event.luxValues.length);
         assertEquals(1.0f, event.luxValues[0], FLOAT_DELTA);
         assertEquals(mInjector.currentTimeMillis() - TimeUnit.SECONDS.toMillis(2),
@@ -314,6 +317,7 @@ public class BrightnessTrackerTest {
     public void testBrightnessFullPopulatedEvent() {
         final int initialBrightness = 230;
         final int brightness = 130;
+        final String displayId = "1234";
 
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_ACTIVATED, 1);
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, 3333);
@@ -326,7 +330,7 @@ public class BrightnessTrackerTest {
                 batteryChangeEvent(30, 60));
         mInjector.mSensorListener.onSensorChanged(createSensorEvent(1000.0f));
         final long sensorTime = mInjector.currentTimeMillis();
-        notifyBrightnessChanged(mTracker, brightness);
+        notifyBrightnessChanged(mTracker, brightness, displayId);
         List<BrightnessChangeEvent> eventsNoPackage
                 = mTracker.getEvents(0, false).getList();
         List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
@@ -335,6 +339,7 @@ public class BrightnessTrackerTest {
         assertEquals(1, events.size());
         BrightnessChangeEvent event = events.get(0);
         assertEquals(event.timeStamp, mInjector.currentTimeMillis());
+        assertEquals(displayId, event.uniqueDisplayId);
         assertArrayEquals(new float[] {1000.0f}, event.luxValues, 0.01f);
         assertArrayEquals(new long[] {sensorTime}, event.luxTimestamps);
         assertEquals(brightness, event.brightness, FLOAT_DELTA);
@@ -364,7 +369,7 @@ public class BrightnessTrackerTest {
         final int systemUpdatedBrightness = 20;
         notifyBrightnessChanged(mTracker, systemUpdatedBrightness, false /*userInitiated*/,
                 0.5f /*powerBrightnessFactor(*/, false /*isUserSetBrightness*/,
-                false /*isDefaultBrightnessConfig*/);
+                false /*isDefaultBrightnessConfig*/, DEFAULT_DISPLAY_ID);
         List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
         // No events because we filtered out our change.
         assertEquals(0, events.size());
@@ -455,6 +460,7 @@ public class BrightnessTrackerTest {
                 + "batteryLevel=\"1.0\" nightMode=\"false\" colorTemperature=\"0\" "
                 + "reduceBrightColors=\"false\" reduceBrightColorsStrength=\"40\" "
                 + "reduceBrightColorsOffset=\"0\"\n"
+                + "uniqueDisplayId=\"123\""
                 + "lux=\"32.2,31.1\" luxTimestamps=\""
                 + Long.toString(someTimeAgo) + "," + Long.toString(someTimeAgo) + "\""
                 + "defaultConfig=\"true\" powerSaveFactor=\"0.5\" userPoint=\"true\" />"
@@ -465,6 +471,7 @@ public class BrightnessTrackerTest {
                 + "batteryLevel=\"0.5\" nightMode=\"true\" colorTemperature=\"3235\" "
                 + "reduceBrightColors=\"true\" reduceBrightColorsStrength=\"40\" "
                 + "reduceBrightColorsOffset=\"0\"\n"
+                + "uniqueDisplayId=\"456\""
                 + "lux=\"132.2,131.1\" luxTimestamps=\""
                 + Long.toString(someTimeAgo) + "," + Long.toString(someTimeAgo) + "\""
                 + "colorSampleDuration=\"3456\" colorValueBuckets=\"123,598,23,19\"/>"
@@ -476,6 +483,7 @@ public class BrightnessTrackerTest {
                 + "batteryLevel=\"1.0\" nightMode=\"false\" colorTemperature=\"0\" "
                 + "reduceBrightColors=\"false\" reduceBrightColorsStrength=\"40\" "
                 + "reduceBrightColorsOffset=\"0\"\n"
+                + "uniqueDisplayId=\"789\""
                 + "lux=\"32.2,31.1\" luxTimestamps=\""
                 + Long.toString(twoMonthsAgo) + "," + Long.toString(twoMonthsAgo) + "\"/>"
                 + "</events>";
@@ -485,6 +493,7 @@ public class BrightnessTrackerTest {
         BrightnessChangeEvent event = events.get(0);
         assertEquals(someTimeAgo, event.timeStamp);
         assertEquals(194.2, event.brightness, FLOAT_DELTA);
+        assertEquals("123", event.uniqueDisplayId);
         assertArrayEquals(new float[] {32.2f, 31.1f}, event.luxValues, FLOAT_DELTA);
         assertArrayEquals(new long[] {someTimeAgo, someTimeAgo}, event.luxTimestamps);
         assertEquals(32.333, event.lastBrightness, FLOAT_DELTA);
@@ -503,6 +512,7 @@ public class BrightnessTrackerTest {
         event = events.get(0);
         assertEquals(someTimeAgo, event.timeStamp);
         assertEquals(71, event.brightness, FLOAT_DELTA);
+        assertEquals("456", event.uniqueDisplayId);
         assertArrayEquals(new float[] {132.2f, 131.1f}, event.luxValues, FLOAT_DELTA);
         assertArrayEquals(new long[] {someTimeAgo, someTimeAgo}, event.luxTimestamps);
         assertEquals(32, event.lastBrightness, FLOAT_DELTA);
@@ -575,6 +585,7 @@ public class BrightnessTrackerTest {
     @Test
     public void testWriteThenRead() throws Exception {
         final int brightness = 20;
+        final String displayId = "1234";
 
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_ACTIVATED, 1);
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, 3339);
@@ -593,7 +604,7 @@ public class BrightnessTrackerTest {
         mInjector.incrementTime(TimeUnit.SECONDS.toMillis(3));
         notifyBrightnessChanged(mTracker, brightness, true /*userInitiated*/,
                 0.5f /*powerBrightnessFactor*/, true /*hasUserBrightnessPoints*/,
-                false /*isDefaultBrightnessConfig*/);
+                false /*isDefaultBrightnessConfig*/, displayId);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         mTracker.writeEventsLocked(baos);
         mTracker.stop();
@@ -607,6 +618,7 @@ public class BrightnessTrackerTest {
 
         assertEquals(1, events.size());
         BrightnessChangeEvent event = events.get(0);
+        assertEquals(displayId, event.uniqueDisplayId);
         assertArrayEquals(new float[] {2000.0f, 3000.0f}, event.luxValues, FLOAT_DELTA);
         assertArrayEquals(new long[] {firstSensorTime, secondSensorTime}, event.luxTimestamps);
         assertEquals(brightness, event.brightness, FLOAT_DELTA);
@@ -678,6 +690,7 @@ public class BrightnessTrackerTest {
         builder.setTimeStamp(345L);
         builder.setPackageName("com.example");
         builder.setUserId(12);
+        builder.setUniqueDisplayId("9876");
         float[] luxValues = new float[2];
         luxValues[0] = 3000.0f;
         luxValues[1] = 4000.0f;
@@ -710,6 +723,7 @@ public class BrightnessTrackerTest {
         assertEquals(event.timeStamp, event2.timeStamp);
         assertEquals(event.packageName, event2.packageName);
         assertEquals(event.userId, event2.userId);
+        assertEquals(event.uniqueDisplayId, event2.uniqueDisplayId);
         assertArrayEquals(event.luxValues, event2.luxValues, FLOAT_DELTA);
         assertArrayEquals(event.luxTimestamps, event2.luxTimestamps);
         assertEquals(event.batteryLevel, event2.batteryLevel, FLOAT_DELTA);
@@ -773,7 +787,7 @@ public class BrightnessTrackerTest {
         long eventTime = mInjector.currentTimeMillis();
         mTracker.notifyBrightnessChanged(brightness, true /*userInitiated*/,
                 1.0f /*powerBrightnessFactor*/, false /*isUserSetBrightness*/,
-                false /*isDefaultBrightnessConfig*/);
+                false /*isDefaultBrightnessConfig*/, DEFAULT_DISPLAY_ID);
 
         // Time passes before handler can run.
         mInjector.incrementTime(TimeUnit.SECONDS.toMillis(2));
@@ -789,6 +803,35 @@ public class BrightnessTrackerTest {
         assertEquals(1, events.size());
         BrightnessChangeEvent event = events.get(0);
         assertEquals(eventTime, event.timeStamp);
+    }
+
+    @Test
+    public void testDisplayIdChange() {
+        float firstBrightness = 0.5f;
+        float secondBrightness = 0.75f;
+        String firstDisplayId = "123";
+        String secondDisplayId = "456";
+
+        startTracker(mTracker);
+        mInjector.mSensorListener.onSensorChanged(createSensorEvent(1000.0f));
+
+        notifyBrightnessChanged(mTracker, firstBrightness, firstDisplayId);
+        mInjector.incrementTime(TimeUnit.SECONDS.toMillis(2));
+        List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
+        assertEquals(1, events.size());
+        BrightnessChangeEvent firstEvent = events.get(0);
+        assertEquals(firstDisplayId, firstEvent.uniqueDisplayId);
+        assertEquals(firstBrightness, firstEvent.brightness, 0.001f);
+
+        notifyBrightnessChanged(mTracker, secondBrightness, secondDisplayId);
+        mInjector.incrementTime(TimeUnit.SECONDS.toMillis(2));
+        events = mTracker.getEvents(0, true).getList();
+        assertEquals(2, events.size());
+        BrightnessChangeEvent secondEvent = events.get(1);
+        assertEquals(secondDisplayId, secondEvent.uniqueDisplayId);
+        assertEquals(secondBrightness, secondEvent.brightness, 0.001f);
+
+        mTracker.stop();
     }
 
     private InputStream getInputStream(String data) {
@@ -831,16 +874,21 @@ public class BrightnessTrackerTest {
     }
 
     private void notifyBrightnessChanged(BrightnessTracker tracker, float brightness) {
+        notifyBrightnessChanged(tracker, brightness, DEFAULT_DISPLAY_ID);
+    }
+
+    private void notifyBrightnessChanged(BrightnessTracker tracker, float brightness,
+            String displayId) {
         notifyBrightnessChanged(tracker, brightness, true /*userInitiated*/,
                 1.0f /*powerBrightnessFactor*/, false /*isUserSetBrightness*/,
-                false /*isDefaultBrightnessConfig*/);
+                false /*isDefaultBrightnessConfig*/, displayId);
     }
 
     private void notifyBrightnessChanged(BrightnessTracker tracker, float brightness,
             boolean userInitiated, float powerBrightnessFactor, boolean isUserSetBrightness,
-            boolean isDefaultBrightnessConfig) {
+            boolean isDefaultBrightnessConfig, String displayId) {
         tracker.notifyBrightnessChanged(brightness, userInitiated, powerBrightnessFactor,
-                isUserSetBrightness, isDefaultBrightnessConfig);
+                isUserSetBrightness, isDefaultBrightnessConfig, displayId);
         mInjector.waitForHandler();
     }
 

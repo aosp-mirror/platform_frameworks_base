@@ -345,6 +345,7 @@ import com.android.server.DeviceIdleInternal;
 import com.android.server.DisplayThread;
 import com.android.server.IntentResolver;
 import com.android.server.IoThread;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.NetworkManagementInternal;
@@ -2327,6 +2328,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAppOpsService.publish();
         Slog.d("AppOps", "AppOpsService published");
         LocalServices.addService(ActivityManagerInternal.class, mInternal);
+        LocalManagerRegistry.addManager(ActivityManagerLocal.class,
+                (ActivityManagerLocal) mInternal);
         mActivityTaskManager.onActivityManagerInternalAdded();
         mPendingIntentController.onActivityManagerInternalAdded();
         mAppProfiler.onActivityManagerInternalAdded();
@@ -15086,7 +15089,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @VisibleForTesting
-    public final class LocalService extends ActivityManagerInternal {
+    public final class LocalService extends ActivityManagerInternal
+            implements ActivityManagerLocal {
         @Override
         public String checkContentProviderAccess(String authority, int userId) {
             return mCpHelper.checkContentProviderAccess(authority, userId);
@@ -16007,6 +16011,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void unregisterAnrController(AnrController controller) {
             mActivityTaskManager.unregisterAnrController(controller);
+        }
+
+        @Override
+        public boolean canStartForegroundService(int pid, int uid, @NonNull String packageName) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.canStartForegroundServiceLocked(pid, uid, packageName);
+            }
         }
     }
 

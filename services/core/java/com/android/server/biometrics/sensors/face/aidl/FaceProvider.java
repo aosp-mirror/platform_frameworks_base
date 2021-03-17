@@ -137,7 +137,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceSensorPropertiesInternal internalProp = new FaceSensorPropertiesInternal(
                     prop.commonProps.sensorId, prop.commonProps.sensorStrength,
                     prop.commonProps.maxEnrollmentsPerUser, false /* supportsFaceDetection */,
-                    prop.halControlsPreview);
+                    prop.halControlsPreview, false /* resetLockoutRequiresChallenge */);
             final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
                     internalProp);
 

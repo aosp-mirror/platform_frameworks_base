@@ -20,6 +20,7 @@ import static android.app.usage.UsageEvents.Event.ACTIVITY_DESTROYED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED;
 import static android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED;
+import static android.app.usage.UsageEvents.Event.APP_COMPONENT_USED;
 import static android.app.usage.UsageEvents.Event.CONTINUING_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.END_OF_DAY;
@@ -109,6 +110,13 @@ public final class UsageStats implements Parcelable {
     public long mTotalTimeForegroundServiceUsed;
 
     /**
+     * Last time this package's component is used, measured in milliseconds since the epoch.
+     * See {@link UsageEvents.Event#APP_COMPONENT_USED}
+     * @hide
+     */
+    public long mLastTimeComponentUsed;
+
+    /**
      * {@hide}
      */
     @UnsupportedAppUsage
@@ -166,6 +174,7 @@ public final class UsageStats implements Parcelable {
         mEndTimeStamp = stats.mEndTimeStamp;
         mLastTimeUsed = stats.mLastTimeUsed;
         mLastTimeVisible = stats.mLastTimeVisible;
+        mLastTimeComponentUsed = stats.mLastTimeComponentUsed;
         mLastTimeForegroundServiceUsed = stats.mLastTimeForegroundServiceUsed;
         mTotalTimeInForeground = stats.mTotalTimeInForeground;
         mTotalTimeVisible = stats.mTotalTimeVisible;
@@ -265,6 +274,16 @@ public final class UsageStats implements Parcelable {
     }
 
     /**
+     * Get the last time this package's component was used, measured in milliseconds since the
+     * epoch.
+     * @hide
+     */
+    @SystemApi
+    public long getLastTimeComponentUsed() {
+        return mLastTimeComponentUsed;
+    }
+
+    /**
      * Returns the number of times the app was launched as an activity from outside of the app.
      * Excludes intra-app activity transitions.
      * @hide
@@ -323,6 +342,7 @@ public final class UsageStats implements Parcelable {
             mergeEventMap(mForegroundServices, right.mForegroundServices);
             mLastTimeUsed = Math.max(mLastTimeUsed, right.mLastTimeUsed);
             mLastTimeVisible = Math.max(mLastTimeVisible, right.mLastTimeVisible);
+            mLastTimeComponentUsed = Math.max(mLastTimeComponentUsed, right.mLastTimeComponentUsed);
             mLastTimeForegroundServiceUsed = Math.max(mLastTimeForegroundServiceUsed,
                     right.mLastTimeForegroundServiceUsed);
         }
@@ -598,6 +618,9 @@ public final class UsageStats implements Parcelable {
                     mLastTimeVisible = timeStamp;
                 }
                 break;
+            case APP_COMPONENT_USED:
+                mLastTimeComponentUsed = timeStamp;
+                break;
             default:
                 break;
         }
@@ -620,6 +643,7 @@ public final class UsageStats implements Parcelable {
         dest.writeLong(mEndTimeStamp);
         dest.writeLong(mLastTimeUsed);
         dest.writeLong(mLastTimeVisible);
+        dest.writeLong(mLastTimeComponentUsed);
         dest.writeLong(mLastTimeForegroundServiceUsed);
         dest.writeLong(mTotalTimeInForeground);
         dest.writeLong(mTotalTimeVisible);
@@ -674,6 +698,7 @@ public final class UsageStats implements Parcelable {
             stats.mEndTimeStamp = in.readLong();
             stats.mLastTimeUsed = in.readLong();
             stats.mLastTimeVisible = in.readLong();
+            stats.mLastTimeComponentUsed = in.readLong();
             stats.mLastTimeForegroundServiceUsed = in.readLong();
             stats.mTotalTimeInForeground = in.readLong();
             stats.mTotalTimeVisible = in.readLong();

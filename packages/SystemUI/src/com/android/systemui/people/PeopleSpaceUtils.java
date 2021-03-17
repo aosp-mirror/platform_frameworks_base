@@ -26,6 +26,10 @@ import static android.app.people.ConversationStatus.ACTIVITY_MEDIA;
 import static android.app.people.ConversationStatus.ACTIVITY_NEW_STORY;
 import static android.app.people.ConversationStatus.ACTIVITY_UPCOMING_BIRTHDAY;
 import static android.app.people.ConversationStatus.AVAILABILITY_AVAILABLE;
+import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT;
+import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH;
+import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT;
+import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
 
 import android.annotation.Nullable;
 import android.app.INotificationManager;
@@ -41,6 +45,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Bitmap;
@@ -52,13 +57,16 @@ import android.icu.text.MeasureFormat;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
+import android.util.IconDrawableFactory;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -110,11 +118,17 @@ public class PeopleSpaceUtils {
     public static final String SHORTCUT_ID = "shortcut_id";
 
     public static final String EMPTY_STRING = "";
-    public static final int INVALID_WIDGET_ID = -1;
     public static final int INVALID_USER_ID = -1;
 
     public static final PeopleTileKey EMPTY_KEY =
             new PeopleTileKey(EMPTY_STRING, INVALID_USER_ID, EMPTY_STRING);
+    public static final int SMALL_LAYOUT = 0;
+    public static final int MEDIUM_LAYOUT = 1;
+    @VisibleForTesting
+    static final int REQUIRED_WIDTH_FOR_MEDIUM = 146;
+    private static final int AVATAR_SIZE_FOR_MEDIUM = 56;
+    private static final int DEFAULT_WIDTH = 146;
+    private static final int DEFAULT_HEIGHT = 92;
 
     private static final Pattern DOUBLE_EXCLAMATION_PATTERN = Pattern.compile("[!][!]+");
     private static final Pattern DOUBLE_QUESTION_PATTERN = Pattern.compile("[?][?]+");
@@ -208,7 +222,8 @@ public class PeopleSpaceUtils {
                 //TODO: Delete app widget id when crash is fixed (b/172932636)
                 continue;
             }
-            updateAppWidgetOptionsAndView(appWidgetManager, context, appWidgetId, tile);
+            Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
+            updateAppWidgetViews(appWidgetManager, context, appWidgetId, tile, options);
             widgetIdToTile.put(appWidgetId, tile);
         }
         getBirthdaysOnBackgroundThread(context, appWidgetManager, widgetIdToTile, appWidgetIds);
@@ -343,7 +358,10 @@ public class PeopleSpaceUtils {
                 .stream()
                 .filter(entry -> entry.getRanking() != null
                         && entry.getRanking().getConversationShortcutInfo() != null)
-                .collect(Collectors.toMap(PeopleTileKey::new, e -> e));
+                .collect(Collectors.toMap(PeopleTileKey::new, e -> e,
+                        // Handle duplicate keys to avoid crashes.
+                        (e1, e2) -> e1.getSbn().getNotification().when
+                                > e2.getSbn().getNotification().when ? e1 : e2));
         if (DEBUG) {
             Log.d(TAG, "Number of visible notifications:" + visibleNotifications.size());
         }
@@ -401,9 +419,11 @@ public class PeopleSpaceUtils {
 
     /** Creates a {@link RemoteViews} for {@code tile}. */
     public static RemoteViews createRemoteViews(Context context,
-            PeopleSpaceTile tile, int appWidgetId) {
-        RemoteViews viewsForTile = getViewForTile(context, tile);
-        RemoteViews views = setCommonRemoteViewsFields(context, viewsForTile, tile);
+            PeopleSpaceTile tile, int appWidgetId, Bundle options) {
+        int layoutSize = getLayoutSize(context, options);
+        RemoteViews viewsForTile = getViewForTile(context, tile, layoutSize);
+        int maxAvatarSize = getMaxAvatarSize(context, options, layoutSize);
+        RemoteViews views = setCommonRemoteViewsFields(context, viewsForTile, tile, maxAvatarSize);
         return setLaunchIntents(context, views, tile, appWidgetId);
     }
 
@@ -411,15 +431,16 @@ public class PeopleSpaceUtils {
      * The prioritization for the {@code tile} content is missed calls, followed by notification
      * content, then birthdays, then the most recent status, and finally last interaction.
      */
-    private static RemoteViews getViewForTile(Context context, PeopleSpaceTile tile) {
+    private static RemoteViews getViewForTile(Context context, PeopleSpaceTile tile,
+            int layoutSize) {
         if (Objects.equals(tile.getNotificationCategory(), CATEGORY_MISSED_CALL)) {
             if (DEBUG) Log.d(TAG, "Create missed call view");
-            return createMissedCallRemoteViews(context, tile);
+            return createMissedCallRemoteViews(context, tile, layoutSize);
         }
 
         if (tile.getNotificationKey() != null) {
             if (DEBUG) Log.d(TAG, "Create notification view");
-            return createNotificationRemoteViews(context, tile);
+            return createNotificationRemoteViews(context, tile, layoutSize);
         }
 
         // TODO: Add sorting when we expose timestamp of statuses.
@@ -429,7 +450,7 @@ public class PeopleSpaceUtils {
         ConversationStatus birthdayStatus = getBirthdayStatus(tile, statusesForEntireView);
         if (birthdayStatus != null) {
             if (DEBUG) Log.d(TAG, "Create birthday view");
-            return createStatusRemoteViews(context, birthdayStatus);
+            return createStatusRemoteViews(context, birthdayStatus, layoutSize);
         }
 
         if (!statusesForEntireView.isEmpty()) {
@@ -437,10 +458,48 @@ public class PeopleSpaceUtils {
                 Log.d(TAG,
                         "Create status view for: " + statusesForEntireView.get(0).getActivity());
             }
-            return createStatusRemoteViews(context, statusesForEntireView.get(0));
+            return createStatusRemoteViews(context, statusesForEntireView.get(0), layoutSize);
         }
 
-        return createLastInteractionRemoteViews(context, tile);
+        return createLastInteractionRemoteViews(context, tile, layoutSize);
+    }
+
+    /** Calculates the best layout relative to the size in {@code options}. */
+    private static int getLayoutSize(Context context, Bundle options) {
+        int display = context.getResources().getConfiguration().orientation;
+        int width = display == Configuration.ORIENTATION_PORTRAIT
+                ? options.getInt(OPTION_APPWIDGET_MIN_WIDTH, DEFAULT_WIDTH) : options.getInt(
+                OPTION_APPWIDGET_MAX_WIDTH, DEFAULT_WIDTH);
+        int height = display == Configuration.ORIENTATION_PORTRAIT ? options.getInt(
+                OPTION_APPWIDGET_MAX_HEIGHT, DEFAULT_HEIGHT)
+                : options.getInt(OPTION_APPWIDGET_MIN_HEIGHT, DEFAULT_HEIGHT);
+        // Small layout used below a certain minimum width with any height.
+        if (width < REQUIRED_WIDTH_FOR_MEDIUM) {
+            if (DEBUG) Log.d(TAG, "Small view for width: " + width + " height: " + height);
+            return SMALL_LAYOUT;
+        }
+        if (DEBUG) Log.d(TAG, "Medium view for width: " + width + " height: " + height);
+        return MEDIUM_LAYOUT;
+    }
+
+    /** Returns the max avatar size for {@code layoutSize} under the current {@code options}. */
+    private static int getMaxAvatarSize(Context context, Bundle options, int layoutSize) {
+        int avatarHeightSpace = AVATAR_SIZE_FOR_MEDIUM;
+        int avatarWidthSpace = AVATAR_SIZE_FOR_MEDIUM;
+
+        if (layoutSize == SMALL_LAYOUT) {
+            int display = context.getResources().getConfiguration().orientation;
+            int width = display == Configuration.ORIENTATION_PORTRAIT
+                    ? options.getInt(OPTION_APPWIDGET_MIN_WIDTH, DEFAULT_WIDTH) : options.getInt(
+                    OPTION_APPWIDGET_MAX_WIDTH, DEFAULT_WIDTH);
+            int height = display == Configuration.ORIENTATION_PORTRAIT ? options.getInt(
+                    OPTION_APPWIDGET_MAX_HEIGHT, DEFAULT_HEIGHT)
+                    : options.getInt(OPTION_APPWIDGET_MIN_HEIGHT, DEFAULT_HEIGHT);
+            avatarHeightSpace = height - (8 + 4 + 18 + 8);
+            avatarWidthSpace = width - (4 + 4);
+        }
+        if (DEBUG) Log.d(TAG, "Height: " + avatarHeightSpace + " width: " + avatarWidthSpace);
+        return Math.min(avatarHeightSpace, avatarWidthSpace);
     }
 
     @Nullable
@@ -478,14 +537,22 @@ public class PeopleSpaceUtils {
         }
     }
 
-    private static RemoteViews createStatusRemoteViews(Context context, ConversationStatus status) {
-        RemoteViews views = new RemoteViews(
-                context.getPackageName(), R.layout.people_space_small_avatar_tile);
+    private static RemoteViews createStatusRemoteViews(Context context, ConversationStatus status,
+            int layoutSize) {
+        int layout = layoutSize == SMALL_LAYOUT ? R.layout.people_space_small_view
+                : R.layout.people_space_small_avatar_tile;
+        RemoteViews views = new RemoteViews(context.getPackageName(), layout);
         CharSequence statusText = status.getDescription();
         if (TextUtils.isEmpty(statusText)) {
             statusText = getStatusTextByType(context, status.getActivity());
         }
-        views.setTextViewText(R.id.status, statusText);
+        views.setViewVisibility(R.id.subtext, View.GONE);
+        views.setViewVisibility(R.id.text_content, View.VISIBLE);
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
+        int secondaryTextColor = context.getColor(typedValue.resourceId);
+        views.setInt(R.id.text_content, "setTextColor", secondaryTextColor);
+        views.setTextViewText(R.id.text_content, statusText);
         Icon statusIcon = status.getIcon();
         if (statusIcon != null) {
             views.setImageViewIcon(R.id.image, statusIcon);
@@ -494,6 +561,8 @@ public class PeopleSpaceUtils {
             views.setViewVisibility(R.id.content_background, View.GONE);
         }
         // TODO: Set status pre-defined icons
+        views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_person);
+        ensurePredefinedIconVisibleOnSmallView(views, layoutSize);
         return views;
     }
 
@@ -519,7 +588,7 @@ public class PeopleSpaceUtils {
     }
 
     private static RemoteViews setCommonRemoteViewsFields(Context context, RemoteViews views,
-            PeopleSpaceTile tile) {
+            PeopleSpaceTile tile, int maxAvatarSize) {
         try {
             boolean isAvailable =
                     tile.getStatuses() != null && tile.getStatuses().stream().anyMatch(
@@ -532,27 +601,20 @@ public class PeopleSpaceUtils {
             boolean hasNewStory =
                     tile.getStatuses() != null && tile.getStatuses().stream().anyMatch(
                             c -> c.getActivity() == ACTIVITY_NEW_STORY);
-            if (hasNewStory) {
-                views.setViewVisibility(R.id.person_icon_with_story, View.VISIBLE);
-                views.setViewVisibility(R.id.person_icon_only, View.GONE);
-                views.setImageViewIcon(R.id.person_icon_inside_ring, tile.getUserIcon());
-            } else {
-                views.setViewVisibility(R.id.person_icon_with_story, View.GONE);
-                views.setViewVisibility(R.id.person_icon_only, View.VISIBLE);
-                views.setImageViewIcon(R.id.person_icon_only, tile.getUserIcon());
-            }
-
             views.setTextViewText(R.id.name, tile.getUserName().toString());
-            views.setImageViewIcon(R.id.person_icon, tile.getUserIcon());
             views.setBoolean(R.id.content_background, "setClipToOutline", true);
+            Icon icon = tile.getUserIcon();
+            PeopleStoryIconFactory storyIcon = new PeopleStoryIconFactory(context,
+                    context.getPackageManager(),
+                    IconDrawableFactory.newInstance(context, false),
+                    maxAvatarSize);
+            Drawable drawable = icon.loadDrawable(context);
+            Drawable personDrawable = storyIcon.getPeopleTileDrawable(drawable,
+                    tile.getPackageName(), getUserId(tile), tile.isImportantConversation(),
+                    hasNewStory);
+            Bitmap bitmap = convertDrawableToBitmap(personDrawable);
+            views.setImageViewBitmap(R.id.person_icon, bitmap);
 
-            views.setImageViewBitmap(
-                    R.id.package_icon,
-                    PeopleSpaceUtils.convertDrawableToBitmap(
-                            context.getPackageManager().getApplicationIcon(
-                                    tile.getPackageName())
-                    )
-            );
             return views;
         } catch (Exception e) {
             Log.e(TAG, "Failed to set common fields: " + e);
@@ -585,47 +647,77 @@ public class PeopleSpaceUtils {
         } catch (Exception e) {
             Log.e(TAG, "Failed to add launch intents: " + e);
         }
+
         return views;
     }
 
     private static RemoteViews createMissedCallRemoteViews(Context context,
-            PeopleSpaceTile tile) {
-        RemoteViews views = new RemoteViews(
-                context.getPackageName(), R.layout.people_space_small_avatar_tile);
-        views.setTextViewText(R.id.status, tile.getNotificationContent());
-        views.setImageViewResource(R.id.status_defined_icon, R.drawable.ic_phone_missed);
+            PeopleSpaceTile tile, int layoutSize) {
+        int layout = layoutSize == SMALL_LAYOUT ? R.layout.people_space_small_view
+                : R.layout.people_space_small_avatar_tile;
+        RemoteViews views = new RemoteViews(context.getPackageName(), layout);
+        views.setViewVisibility(R.id.subtext, View.GONE);
+        views.setViewVisibility(R.id.text_content, View.VISIBLE);
+        views.setTextViewText(R.id.text_content, tile.getNotificationContent());
+        views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_phone_missed);
+        ensurePredefinedIconVisibleOnSmallView(views, layoutSize);
         views.setBoolean(R.id.content_background, "setClipToOutline", true);
         return views;
     }
 
+    private static void ensurePredefinedIconVisibleOnSmallView(RemoteViews views, int layoutSize) {
+        if (layoutSize == SMALL_LAYOUT) {
+            views.setViewVisibility(R.id.name, View.GONE);
+            views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
+        }
+    }
+
     private static RemoteViews createNotificationRemoteViews(Context context,
-            PeopleSpaceTile tile) {
-        RemoteViews views = new RemoteViews(
-                context.getPackageName(), R.layout.people_space_notification_content_tile);
+            PeopleSpaceTile tile, int layoutSize) {
+        int layout = layoutSize == SMALL_LAYOUT ? R.layout.people_space_small_view
+                : R.layout.people_space_small_avatar_tile;
+        RemoteViews views = new RemoteViews(context.getPackageName(), layout);
+        if (layoutSize != MEDIUM_LAYOUT) {
+            views.setViewVisibility(R.id.name, View.GONE);
+            views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
+        }
         Uri image = tile.getNotificationDataUri();
+        ensurePredefinedIconVisibleOnSmallView(views, layoutSize);
         if (image != null) {
             // TODO: Use NotificationInlineImageCache
             views.setImageViewUri(R.id.image, image);
             views.setViewVisibility(R.id.content_background, View.VISIBLE);
             views.setBoolean(R.id.content_background, "setClipToOutline", true);
-            views.setViewVisibility(R.id.content, View.GONE);
+            views.setViewVisibility(R.id.text_content, View.GONE);
+            views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_photo_camera);
         } else {
             CharSequence content = tile.getNotificationContent();
             views = setPunctuationRemoteViewsFields(views, content);
-            views.setTextViewText(R.id.content, content);
-            views.setViewVisibility(R.id.content, View.VISIBLE);
+            views.setTextViewText(R.id.text_content, tile.getNotificationContent());
+            // TODO: Measure max lines from height.
+            views.setInt(R.id.text_content, "setMaxLines", 2);
+            TypedValue typedValue = new TypedValue();
+            context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
+            int primaryTextColor = context.getColor(typedValue.resourceId);
+            views.setInt(R.id.text_content, "setTextColor", primaryTextColor);
+            views.setViewVisibility(R.id.text_content, View.VISIBLE);
             views.setViewVisibility(R.id.content_background, View.GONE);
+            views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_message);
         }
         // TODO: Set subtext as Group Sender name once storing the name in PeopleSpaceTile.
-        views.setTextViewText(R.id.subtext, PeopleSpaceUtils.getLastInteractionString(
-                context, tile.getLastInteractionTimestamp()));
+        views.setViewVisibility(R.id.subtext, View.GONE);
         return views;
     }
 
     private static RemoteViews createLastInteractionRemoteViews(Context context,
-            PeopleSpaceTile tile) {
-        RemoteViews views = new RemoteViews(
-                context.getPackageName(), R.layout.people_space_large_avatar_tile);
+            PeopleSpaceTile tile, int layoutSize) {
+        int layout = layoutSize == SMALL_LAYOUT ? R.layout.people_space_small_view
+                : R.layout.people_space_large_avatar_tile;
+        RemoteViews views = new RemoteViews(context.getPackageName(), layout);
+        if (layoutSize == SMALL_LAYOUT) {
+            views.setViewVisibility(R.id.name, View.VISIBLE);
+            views.setViewVisibility(R.id.predefined_icon, View.GONE);
+        }
         String status = PeopleSpaceUtils.getLastInteractionString(
                 context, tile.getLastInteractionTimestamp());
         views.setTextViewText(R.id.last_interaction, status);
@@ -900,16 +992,20 @@ public class PeopleSpaceUtils {
         removeBirthdayStatusIfPresent(appWidgetManager, context, storedTile, appWidgetId);
     }
 
-    /** Updates tile in app widget options and the current view. */
-    public static void updateAppWidgetOptionsAndView(AppWidgetManager appWidgetManager,
-            Context context, int appWidgetId, PeopleSpaceTile tile) {
-        AppWidgetOptionsHelper.setPeopleTile(appWidgetManager, appWidgetId, tile);
-
+    private static void updateAppWidgetViews(AppWidgetManager appWidgetManager,
+            Context context, int appWidgetId, PeopleSpaceTile tile, Bundle options) {
         if (DEBUG) Log.d(TAG, "Widget: " + appWidgetId + ", " + tile.getUserName());
-        RemoteViews views = createRemoteViews(context, tile, appWidgetId);
+        RemoteViews views = createRemoteViews(context, tile, appWidgetId, options);
 
         // Tell the AppWidgetManager to perform an update on the current app widget.
         appWidgetManager.updateAppWidget(appWidgetId, views);
+    }
+
+    /** Updates tile in app widget options and the current view. */
+    public static void updateAppWidgetOptionsAndView(AppWidgetManager appWidgetManager,
+            Context context, int appWidgetId, PeopleSpaceTile tile) {
+        Bundle options = AppWidgetOptionsHelper.setPeopleTile(appWidgetManager, appWidgetId, tile);
+        updateAppWidgetViews(appWidgetManager, context, appWidgetId, tile, options);
     }
 
     /**

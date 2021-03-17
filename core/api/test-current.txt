@@ -28,6 +28,7 @@ package android {
     field public static final String NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
     field public static final String NETWORK_STACK = "android.permission.NETWORK_STACK";
     field public static final String OVERRIDE_DISPLAY_MODE_REQUESTS = "android.permission.OVERRIDE_DISPLAY_MODE_REQUESTS";
+    field public static final String QUERY_AUDIO_STATE = "android.permission.QUERY_AUDIO_STATE";
     field public static final String QUERY_USERS = "android.permission.QUERY_USERS";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
@@ -729,6 +730,11 @@ package android.content.pm {
     method public static boolean isTranslucentOrFloating(android.content.res.TypedArray);
     field public static final long FORCE_NON_RESIZE_APP = 181136395L; // 0xacbec0bL
     field public static final long FORCE_RESIZE_APP = 174042936L; // 0xa5faf38L
+    field public static final long OVERRIDE_MIN_ASPECT_RATIO = 174042980L; // 0xa5faf64L
+    field public static final long OVERRIDE_MIN_ASPECT_RATIO_LARGE = 180326787L; // 0xabf9183L
+    field public static final float OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE = 1.7777778f;
+    field public static final long OVERRIDE_MIN_ASPECT_RATIO_MEDIUM = 180326845L; // 0xabf91bdL
+    field public static final float OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE = 1.5f;
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
   }
 

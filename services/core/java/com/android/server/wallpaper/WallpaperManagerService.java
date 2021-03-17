@@ -90,7 +90,6 @@ import android.system.Os;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -2447,8 +2446,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     @Override
     public void removeOnLocalColorsChangedListener(
-            @NonNull ILocalWallpaperColorConsumer callback, int which, int userId,
-            int displayId) throws RemoteException {
+            @NonNull ILocalWallpaperColorConsumer callback, List<RectF> removeAreas, int which,
+            int userId, int displayId) throws RemoteException {
         if (which != FLAG_LOCK && which != FLAG_SYSTEM) {
             throw new IllegalArgumentException("which should be either FLAG_LOCK or FLAG_SYSTEM");
         }
@@ -2457,43 +2456,45 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             throw new SecurityException("calling user id does not match");
         }
         final long identity = Binder.clearCallingIdentity();
-        ArrayList<RectF> removeAreas = new ArrayList<>();
-        ArrayList<Pair<RemoteCallbackList, ILocalWallpaperColorConsumer>>
-                callbacksToRemove = new ArrayList<>();
+        ArrayList<RectF> purgeAreas = new ArrayList<>();
+        IBinder binder = callback.asBinder();
         try {
             synchronized (mLock) {
-                ArraySet<RectF> areas = mLocalColorCallbackAreas.remove(callback.asBinder());
-                mLocalColorCallbackDisplayId.remove(callback.asBinder());
-                if (areas == null) areas = new ArraySet<>();
-                for (RectF area : areas) {
-                    RemoteCallbackList callbacks = mLocalColorAreaCallbacks.get(area);
-                    if (callbacks == null) continue;
-                    callbacksToRemove.add(new Pair<>(callbacks, callback));
-                    if (callbacks.getRegisteredCallbackCount() == 0) {
-                        mLocalColorAreaCallbacks.remove(area);
-                        removeAreas.add(area);
-                    }
-                    ArraySet<RectF> displayAreas = mLocalColorDisplayIdAreas.get(displayId);
-                    if (displayAreas != null) {
-                        displayAreas.remove(area);
+                ArraySet<RectF> currentAreas = mLocalColorCallbackAreas.get(binder);
+                if (currentAreas == null) return;
+                currentAreas.removeAll(removeAreas);
+                if (currentAreas.size() == 0) {
+                    mLocalColorCallbackDisplayId.remove(binder);
+                    for (RectF removeArea : removeAreas) {
+                        RemoteCallbackList<ILocalWallpaperColorConsumer> remotes =
+                                mLocalColorAreaCallbacks.get(removeArea);
+                        if (remotes == null) continue;
+                        remotes.unregister(callback);
+                        if (remotes.getRegisteredCallbackCount() == 0) {
+                            mLocalColorAreaCallbacks.remove(removeArea);
+                            purgeAreas.add(removeArea);
+                            ArraySet<RectF> displayAreas = mLocalColorDisplayIdAreas.get(displayId);
+                            if (displayAreas != null) {
+                                displayAreas.remove(removeArea);
+                                if (displayAreas.size() == 0) {
+                                    mLocalColorDisplayIdAreas.remove(displayId);
+                                }
+                            }
+                        }
                     }
                 }
             }
-            for (int i = 0; i < callbacksToRemove.size(); i++) {
-                Pair<RemoteCallbackList, ILocalWallpaperColorConsumer>
-                        pair = callbacksToRemove.get(i);
-                pair.first.unregister(pair.second);
-            }
+
         } catch (Exception e) {
             // ignore any exception
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
 
-        if (removeAreas.size() == 0) return;
+        if (purgeAreas.size() == 0) return;
         IWallpaperEngine engine = getEngine(which, userId, displayId);
         if (engine == null) return;
-        engine.removeLocalColorsAreas(removeAreas);
+        engine.removeLocalColorsAreas(purgeAreas);
     }
 
     @Override

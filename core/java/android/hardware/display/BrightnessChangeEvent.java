@@ -47,6 +47,10 @@ public final class BrightnessChangeEvent implements Parcelable {
      * @hide */
     public final int userId;
 
+    /** The unique id of the screen on which the brightness was changed */
+    @NonNull
+    public final String uniqueDisplayId;
+
     /** Lux values of recent sensor data */
     public final float[] luxValues;
 
@@ -120,15 +124,16 @@ public final class BrightnessChangeEvent implements Parcelable {
 
     /** @hide */
     private BrightnessChangeEvent(float brightness, long timeStamp, String packageName,
-            int userId, float[] luxValues, long[] luxTimestamps, float batteryLevel,
-            float powerBrightnessFactor, boolean nightMode, int colorTemperature,
-            boolean reduceBrightColors, int reduceBrightColorsStrength,
+            int userId, String uniqueDisplayId, float[] luxValues, long[] luxTimestamps,
+            float batteryLevel, float powerBrightnessFactor, boolean nightMode,
+            int colorTemperature, boolean reduceBrightColors, int reduceBrightColorsStrength,
             float reduceBrightColorsOffset, float lastBrightness, boolean isDefaultBrightnessConfig,
             boolean isUserSetBrightness, long[] colorValueBuckets, long colorSampleDuration) {
         this.brightness = brightness;
         this.timeStamp = timeStamp;
         this.packageName = packageName;
         this.userId = userId;
+        this.uniqueDisplayId = uniqueDisplayId;
         this.luxValues = luxValues;
         this.luxTimestamps = luxTimestamps;
         this.batteryLevel = batteryLevel;
@@ -151,6 +156,7 @@ public final class BrightnessChangeEvent implements Parcelable {
         this.timeStamp = other.timeStamp;
         this.packageName = redactPackage ? null : other.packageName;
         this.userId = other.userId;
+        this.uniqueDisplayId = other.uniqueDisplayId;
         this.luxValues = other.luxValues;
         this.luxTimestamps = other.luxTimestamps;
         this.batteryLevel = other.batteryLevel;
@@ -172,6 +178,7 @@ public final class BrightnessChangeEvent implements Parcelable {
         timeStamp = source.readLong();
         packageName = source.readString();
         userId = source.readInt();
+        uniqueDisplayId = source.readString();
         luxValues = source.createFloatArray();
         luxTimestamps = source.createLongArray();
         batteryLevel = source.readFloat();
@@ -209,6 +216,7 @@ public final class BrightnessChangeEvent implements Parcelable {
         dest.writeLong(timeStamp);
         dest.writeString(packageName);
         dest.writeInt(userId);
+        dest.writeString(uniqueDisplayId);
         dest.writeFloatArray(luxValues);
         dest.writeLongArray(luxTimestamps);
         dest.writeFloat(batteryLevel);
@@ -231,6 +239,7 @@ public final class BrightnessChangeEvent implements Parcelable {
         private long mTimeStamp;
         private String mPackageName;
         private int mUserId;
+        private String mUniqueDisplayId;
         private float[] mLuxValues;
         private long[] mLuxTimestamps;
         private float mBatteryLevel;
@@ -267,6 +276,12 @@ public final class BrightnessChangeEvent implements Parcelable {
         /** {@see BrightnessChangeEvent#userId} */
         public Builder setUserId(int userId) {
             mUserId = userId;
+            return this;
+        }
+
+        /** {@see BrightnessChangeEvent#uniqueScreenId} */
+        public Builder setUniqueDisplayId(String uniqueId) {
+            mUniqueDisplayId = uniqueId;
             return this;
         }
 
@@ -354,11 +369,11 @@ public final class BrightnessChangeEvent implements Parcelable {
         /** Builds a BrightnessChangeEvent */
         public BrightnessChangeEvent build() {
             return new BrightnessChangeEvent(mBrightness, mTimeStamp,
-                    mPackageName, mUserId, mLuxValues, mLuxTimestamps, mBatteryLevel,
-                    mPowerBrightnessFactor, mNightMode, mColorTemperature, mReduceBrightColors,
-                    mReduceBrightColorsStrength, mReduceBrightColorsOffset, mLastBrightness,
-                    mIsDefaultBrightnessConfig, mIsUserSetBrightness, mColorValueBuckets,
-                    mColorSampleDuration);
+                    mPackageName, mUserId, mUniqueDisplayId, mLuxValues, mLuxTimestamps,
+                    mBatteryLevel, mPowerBrightnessFactor, mNightMode, mColorTemperature,
+                    mReduceBrightColors, mReduceBrightColorsStrength, mReduceBrightColorsOffset,
+                    mLastBrightness, mIsDefaultBrightnessConfig, mIsUserSetBrightness,
+                    mColorValueBuckets, mColorSampleDuration);
         }
     }
 }

@@ -20,6 +20,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.graphics.Matrix.MSCALE_X;
+import static android.graphics.Matrix.MSCALE_Y;
+import static android.graphics.Matrix.MSKEW_X;
+import static android.graphics.Matrix.MSKEW_Y;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
@@ -229,7 +233,8 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         @Override
-        public void setFinishTaskBounds(int taskId, Rect destinationBounds) {
+        public void setFinishTaskBounds(int taskId, Rect destinationBounds, Rect windowCrop,
+                float[] float9) {
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                     "setFinishTaskBounds(%d): bounds=%s", taskId, destinationBounds);
             final long token = Binder.clearCallingIdentity();
@@ -239,6 +244,8 @@ public class RecentsAnimationController implements DeathRecipient {
                         final TaskAnimationAdapter taskAdapter = mPendingAnimations.get(i);
                         if (taskAdapter.mTask.mTaskId == taskId) {
                             taskAdapter.mFinishBounds.set(destinationBounds);
+                            taskAdapter.mFinishWindowCrop.set(windowCrop);
+                            taskAdapter.mFinishTransform = float9;
                             break;
                         }
                     }
@@ -1084,6 +1091,9 @@ public class RecentsAnimationController implements DeathRecipient {
         private final Rect mLocalBounds = new Rect();
         // The bounds of the target when animation is finished
         private final Rect mFinishBounds = new Rect();
+        // Bounds and transform for the final transaction.
+        private final Rect mFinishWindowCrop = new Rect();
+        private float[] mFinishTransform;
 
         TaskAnimationAdapter(Task task, boolean isRecentTaskInvisible) {
             mTask = task;
@@ -1120,13 +1130,31 @@ public class RecentsAnimationController implements DeathRecipient {
 
         void onCleanup() {
             if (!mFinishBounds.isEmpty()) {
-                // Apply any pending bounds changes
-                final SurfaceControl taskSurface = mTask.getSurfaceControl();
-                mTask.getPendingTransaction()
-                        .setPosition(taskSurface, mFinishBounds.left, mFinishBounds.top)
-                        .setWindowCrop(taskSurface, mFinishBounds.width(), mFinishBounds.height())
+                final SurfaceControl taskSurface = mTask.mSurfaceControl;
+                final Transaction pendingTransaction = mTask.getPendingTransaction();
+                if (mFinishTransform != null) {
+                    pendingTransaction
+                            .setMatrix(taskSurface,
+                                    mFinishTransform[MSCALE_X], mFinishTransform[MSKEW_Y],
+                                    mFinishTransform[MSKEW_X], mFinishTransform[MSCALE_Y]);
+                }
+                float left = mFinishBounds.left;
+                float top = mFinishBounds.top;
+                if (!mFinishWindowCrop.isEmpty()) {
+                    pendingTransaction.setWindowCrop(taskSurface, mFinishWindowCrop);
+                    if (mFinishTransform != null) {
+                        // adjust the position for insets.
+                        left -= mFinishWindowCrop.left * mFinishTransform[MSCALE_X];
+                        top -= mFinishWindowCrop.top * mFinishTransform[MSCALE_Y];
+                    }
+                }
+                pendingTransaction
+                        .setPosition(taskSurface, left, top)
                         .apply();
                 mTask.mLastRecentsAnimationBounds.set(mFinishBounds);
+                // reset the variables
+                mFinishTransform = null;
+                mFinishWindowCrop.setEmpty();
                 mFinishBounds.setEmpty();
             } else if (!mTask.isAttached()) {
                 // Apply the task's pending transaction in case it is detached and its transaction

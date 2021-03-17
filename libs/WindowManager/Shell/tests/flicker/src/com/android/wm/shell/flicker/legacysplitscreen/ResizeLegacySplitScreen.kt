@@ -40,8 +40,6 @@ import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
 import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
@@ -107,8 +105,11 @@ class ResizeLegacySplitScreen(
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
     @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        testSpec.assertWm {
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry()
+        }
+    }
 
     @FlakyTest(bugId = 156223549)
     @Test
@@ -144,8 +145,8 @@ class ResizeLegacySplitScreen(
         testSpec.statusBarLayerRotatesScales(testSpec.config.endRotation)
 
     @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry()
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     @Test
     fun topAppLayerIsAlwaysVisible() {

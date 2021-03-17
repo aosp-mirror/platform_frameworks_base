@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.hardware.fingerprint.FingerprintManager.SENSOR_ID_ANY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -240,10 +242,17 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         return props;
     }
 
-    @NonNull
+    @Nullable
     @Override
     public FingerprintSensorPropertiesInternal getSensorProperties(int sensorId) {
-        return mSensors.get(sensorId).getSensorProperties();
+        if (mSensors.size() == 0) {
+            return null;
+        } else if (sensorId == SENSOR_ID_ANY) {
+            return mSensors.valueAt(0).getSensorProperties();
+        } else {
+            final Sensor sensor = mSensors.get(sensorId);
+            return sensor != null ? sensor.getSensorProperties() : null;
+        }
     }
 
     private void scheduleLoadAuthenticatorIds(int sensorId) {

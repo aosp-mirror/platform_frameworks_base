@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.app.admin.DeviceAdminInfo;
+import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 
 import com.android.systemui.Dumpable;
@@ -33,6 +34,10 @@ public interface SecurityController extends CallbackController<SecurityControlle
     String getProfileOwnerName();
     CharSequence getDeviceOwnerOrganizationName();
     CharSequence getWorkProfileOrganizationName();
+    /** Device owner component even if not on this user. **/
+    ComponentName getDeviceOwnerComponentOnAnyUser();
+    /** Device owner type for a device owner. **/
+    int getDeviceOwnerType(ComponentName admin);
     boolean isNetworkLoggingEnabled();
     boolean isVpnEnabled();
     boolean isVpnRestricted();

@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.app.Instrumentation
+import android.platform.test.annotations.Presubmit
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
@@ -29,7 +30,9 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import org.junit.Test
 
 abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -39,6 +42,15 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
     protected val nonResizeableApp = SplitScreenHelper.getNonResizeable(instrumentation)
     protected val LAUNCHER_PACKAGE_NAME = LauncherStrategyFactory.getInstance(instrumentation)
         .launcherStrategy.supportedLauncherPackage
+
+    /**
+     * List of windows that are ignored when verifying that visible elements appear on 2
+     * consecutive entries in the trace.
+     *
+     * b/182720234
+     */
+    open val ignoredWindows: List<String> = listOf(WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+        WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
 
     protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
@@ -88,11 +100,26 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
             }
         }
 
+    @Presubmit
+    @Test
+    open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        testSpec.assertWm {
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry(ignoredWindows)
+        }
+    }
+
+    @Presubmit
+    @Test
+    open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        testSpec.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(ignoredWindows)
+        }
+    }
+
     companion object {
         internal const val LIVE_WALLPAPER_PACKAGE_NAME =
             "com.breel.wallpapers18.soundviz.wallpaper.variations.SoundVizWallpaperV2"
         internal const val LETTERBOX_NAME = "Letterbox"
         internal const val TOAST_NAME = "Toast"
-        internal const val SPLASH_SCREEN_NAME = "Splash Screen"
     }
 }

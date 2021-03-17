@@ -90,7 +90,7 @@ public abstract class MusicRecognitionService extends Service {
                                             try {
                                                 callback.onRecognitionSucceeded(result, extras);
                                             } catch (RemoteException e) {
-                                                e.rethrowFromSystemServer();
+                                                throw e.rethrowFromSystemServer();
                                             }
                                         }
 
@@ -99,10 +99,17 @@ public abstract class MusicRecognitionService extends Service {
                                             try {
                                                 callback.onRecognitionFailed(failureCode);
                                             } catch (RemoteException e) {
-                                                e.rethrowFromSystemServer();
+                                                throw e.rethrowFromSystemServer();
                                             }
                                         }
                                     }));
+                }
+
+                @Override
+                public void getAttributionTag(
+                        IMusicRecognitionAttributionTagCallback callback) throws RemoteException {
+                    String tag = MusicRecognitionService.this.getAttributionTag();
+                    callback.onAttributionTag(tag);
                 }
             };
 

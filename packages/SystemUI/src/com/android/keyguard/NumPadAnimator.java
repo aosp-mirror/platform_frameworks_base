@@ -24,7 +24,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.view.ContextThemeWrapper;
-import android.view.ViewGroup;
 
 import androidx.annotation.StyleRes;
 
@@ -41,7 +40,6 @@ class NumPadAnimator {
     private GradientDrawable mBackground;
     private RippleDrawable mRipple;
     private GradientDrawable mRippleMask;
-    private int mMargin;
     private int mNormalColor;
     private int mHighlightColor;
     private int mStyle;
@@ -54,8 +52,6 @@ class NumPadAnimator {
         mStyle = style;
 
         reloadColors(context);
-
-        mMargin = context.getResources().getDimensionPixelSize(R.dimen.num_pad_key_margin);
 
         // Actual values will be updated later, usually during an onLayout() call
         mAnimator = new AnimatorSet();
@@ -80,10 +76,6 @@ class NumPadAnimator {
                 }
         });
         mAnimator.playSequentially(mExpandAnimator, mContractAnimator);
-    }
-
-    void updateMargin(ViewGroup.MarginLayoutParams lp) {
-        lp.setMargins(mMargin, mMargin, mMargin, mMargin);
     }
 
     void onLayout(int height) {

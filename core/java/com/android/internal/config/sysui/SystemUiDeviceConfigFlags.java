@@ -474,6 +474,12 @@ public final class SystemUiDeviceConfigFlags {
     public static final String SHARE_USE_SERVICE_TARGETS = "share_use_service_targets";
 
 
+    /*
+     * (long) The duration that the home button must be pressed before triggering Assist
+     */
+    public static final String HOME_BUTTON_LONG_PRESS_DURATION_MS =
+            "home_button_long_press_duration_ms";
+
     private SystemUiDeviceConfigFlags() {
     }
 }

@@ -50,8 +50,10 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import javax.inject.Inject;
@@ -83,6 +85,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     private final DelayableExecutor mFgExecutor;
     @NonNull private final StatusBar mStatusBar;
     @NonNull private final StatusBarStateController mStatusBarStateController;
+    @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
+    @NonNull private final DumpManager mDumpManager;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -299,7 +303,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             WindowManager windowManager,
             @NonNull StatusBarStateController statusBarStateController,
             @Main DelayableExecutor fgExecutor,
-            @NonNull StatusBar statusBar) {
+            @NonNull StatusBar statusBar,
+            @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            @NonNull DumpManager dumpManager) {
         mContext = context;
         mInflater = inflater;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
@@ -309,6 +315,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mFgExecutor = fgExecutor;
         mStatusBar = statusBar;
         mStatusBarStateController = statusBarStateController;
+        mKeyguardViewManager = statusBarKeyguardViewManager;
+        mDumpManager = dumpManager;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -457,7 +465,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                         enrollView,
                         mServerRequest.mEnrollHelper,
                         mStatusBarStateController,
-                        mStatusBar
+                        mStatusBar,
+                        mDumpManager
                 );
             case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD:
                 UdfpsKeyguardView keyguardView = (UdfpsKeyguardView)
@@ -466,7 +475,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 return new UdfpsKeyguardViewController(
                         keyguardView,
                         mStatusBarStateController,
-                        mStatusBar
+                        mStatusBar,
+                        mKeyguardViewManager,
+                        mDumpManager
                 );
             case IUdfpsOverlayController.REASON_AUTH_BP:
                 // note: empty controller, currently shows no visual affordance
@@ -475,7 +486,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 return new UdfpsBpViewController(
                         bpView,
                         mStatusBarStateController,
-                        mStatusBar
+                        mStatusBar,
+                        mDumpManager
                 );
             case IUdfpsOverlayController.REASON_AUTH_FPM_OTHER:
                 UdfpsFpmOtherView authOtherView = (UdfpsFpmOtherView)
@@ -484,7 +496,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 return new UdfpsFpmOtherViewController(
                         authOtherView,
                         mStatusBarStateController,
-                        mStatusBar
+                        mStatusBar,
+                        mDumpManager
                 );
             default:
                 Log.d(TAG, "Animation for reason " + reason + " not supported yet");

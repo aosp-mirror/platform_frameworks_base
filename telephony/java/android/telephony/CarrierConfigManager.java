@@ -4713,6 +4713,16 @@ public class CarrierConfigManager {
     public static final String KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY =
             "allowed_initial_attach_apn_types_string_array";
 
+    /**
+     * Indicates whether or not the carrier will provision merged carrier Wi-Fi offload networks.
+     * Such networks are considered part of the core carrier network.
+     *
+     * This configuration will be use to gate whether such configurations are allowed to the carrier
+     * and correspondingly enable UI elements which are required for such configurations.
+     */
+    public static final String KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL =
+            "carrier_provisions_wifi_merged_networks_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -5276,6 +5286,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_HIDE_ENABLE_2G, false);
         sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
                 new String[]{"ia", "default", "ims", "mms", "dun", "emergency"});
+        sDefaults.putBoolean(KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL, false);
     }
 
     /**

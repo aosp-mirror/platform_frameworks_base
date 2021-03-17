@@ -332,7 +332,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             @NonNull BiometricScheduler scheduler) {
         mSensorProperties = new FaceSensorPropertiesInternal(sensorId,
                 Utils.authenticatorStrengthToPropertyStrength(strength),
-                maxTemplatesAllowed, false /* supportsFaceDetect */, supportsSelfIllumination);
+                maxTemplatesAllowed, false /* supportsFaceDetect */, supportsSelfIllumination,
+                true /* resetLockoutRequiresChallenge */);
         mContext = context;
         mSensorId = sensorId;
         mScheduler = scheduler;

@@ -17,7 +17,6 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -37,11 +36,10 @@ import com.android.systemui.R;
 public class UdfpsEnrollDrawable extends UdfpsDrawable {
     private static final String TAG = "UdfpsAnimationEnroll";
 
-    private static final float SHADOW_RADIUS = 5.f;
-    static final float PROGRESS_BAR_RADIUS = 140.f;
+    static final float PROGRESS_BAR_RADIUS = 180.f;
 
     @NonNull private final Drawable mMovingTargetFpIcon;
-    @NonNull private final Paint mSensorPaint;
+    @NonNull private final Paint mSensorOutlinePaint;
     @NonNull private final Paint mBlueFill;
     @NonNull private final Paint mBlueStroke;
 
@@ -51,11 +49,11 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
     UdfpsEnrollDrawable(@NonNull Context context) {
         super(context);
 
-        mSensorPaint = new Paint(0 /* flags */);
-        mSensorPaint.setAntiAlias(true);
-        mSensorPaint.setColor(Color.WHITE);
-        mSensorPaint.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
-        mSensorPaint.setStyle(Paint.Style.FILL);
+        mSensorOutlinePaint = new Paint(0 /* flags */);
+        mSensorOutlinePaint.setAntiAlias(true);
+        mSensorOutlinePaint.setColor(mContext.getColor(R.color.udfps_enroll_icon));
+        mSensorOutlinePaint.setStyle(Paint.Style.STROKE);
+        mSensorOutlinePaint.setStrokeWidth(2.f);
 
         mBlueFill = new Paint(0 /* flags */);
         mBlueFill.setAntiAlias(true);
@@ -98,18 +96,15 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             return;
         }
 
-        final boolean isNightMode = (mContext.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_YES) != 0;
-        if (!isNightMode) {
-            if (mSensorRect != null) {
-                canvas.drawOval(mSensorRect, mSensorPaint);
-            }
+        if (mSensorRect != null) {
+            canvas.drawOval(mSensorRect, mSensorOutlinePaint);
         }
         mFingerprintDrawable.draw(canvas);
 
         // Draw moving target
         if (mEnrollHelper.isCenterEnrollmentComplete()) {
             mFingerprintDrawable.setAlpha(mAlpha == 255 ? 64 : mAlpha);
+            mSensorOutlinePaint.setAlpha(mAlpha == 255 ? 64 : mAlpha);
 
             canvas.save();
             final PointF point = mEnrollHelper.getNextGuidedEnrollmentPoint();
@@ -123,15 +118,17 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             canvas.restore();
         } else {
             mFingerprintDrawable.setAlpha(mAlpha);
+            mSensorOutlinePaint.setAlpha(mAlpha);
         }
     }
 
     @Override
     public void setAlpha(int alpha) {
         super.setAlpha(alpha);
-        mSensorPaint.setAlpha(alpha);
+        mSensorOutlinePaint.setAlpha(alpha);
         mBlueFill.setAlpha(alpha);
         mBlueStroke.setAlpha(alpha);
+        mMovingTargetFpIcon.setAlpha(alpha);
         invalidateSelf();
     }
 }

@@ -16,13 +16,23 @@
 
 package com.android.systemui.biometrics;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
+import com.android.settingslib.Utils;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.StatusBarState;
 
 /**
  * View corresponding with udfps_keyguard_view.xml
@@ -30,6 +40,14 @@ import com.android.systemui.R;
 public class UdfpsKeyguardView extends UdfpsAnimationView {
     private final UdfpsKeyguardDrawable mFingerprintDrawable;
     private ImageView mFingerprintView;
+    private int mWallpaperTexColor;
+    private int mStatusBarState;
+
+    // used when highlighting fp icon:
+    private int mTextColorPrimary;
+    private ImageView mBgProtection;
+
+    private AnimatorSet mAnimatorSet;
 
     public UdfpsKeyguardView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -38,8 +56,15 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
     @Override
     protected void onFinishInflate() {
+        super.onFinishInflate();
         mFingerprintView = findViewById(R.id.udfps_keyguard_animation_fp_view);
-        mFingerprintView.setImageDrawable(mFingerprintDrawable);
+        mFingerprintView.setForeground(mFingerprintDrawable);
+
+        mBgProtection = findViewById(R.id.udfps_keyguard_fp_bg);
+
+        mWallpaperTexColor = Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor);
+        mTextColorPrimary = Utils.getColorAttrDefaultColor(mContext,
+                android.R.attr.textColorPrimary);
     }
 
     @Override
@@ -54,7 +79,114 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         return true;
     }
 
+    void setStatusBarState(int statusBarState) {
+        mStatusBarState = statusBarState;
+        if (!isShadeLocked()) {
+            mFingerprintView.setAlpha(1f);
+            mFingerprintDrawable.setLockScreenColor(mWallpaperTexColor);
+        }
+    }
+
     void onDozeAmountChanged(float linear, float eased) {
         mFingerprintDrawable.onDozeAmountChanged(linear, eased);
+        invalidate();
+    }
+
+    /**
+     * Animates in the bg protection circle behind the fp icon to highlight the icon.
+     */
+    void animateHighlightFp() {
+        if (mBgProtection.getVisibility() == View.VISIBLE && mBgProtection.getAlpha() == 1f) {
+            // already fully highlighted, don't re-animate
+            return;
+        }
+
+        if (mAnimatorSet != null) {
+            mAnimatorSet.cancel();
+        }
+        ValueAnimator fpIconAnim;
+        if (isShadeLocked()) {
+            // set color and fade in since we weren't showing before
+            mFingerprintDrawable.setLockScreenColor(mTextColorPrimary);
+            fpIconAnim = ObjectAnimator.ofFloat(mFingerprintView, View.ALPHA, 0f, 1f);
+        } else {
+            // update icon color
+            fpIconAnim = new ValueAnimator();
+            fpIconAnim.setIntValues(mWallpaperTexColor, mTextColorPrimary);
+            fpIconAnim.setEvaluator(new ArgbEvaluator());
+            fpIconAnim.addUpdateListener(valueAnimator -> mFingerprintDrawable.setLockScreenColor(
+                    (Integer) valueAnimator.getAnimatedValue()));
+        }
+
+        mAnimatorSet = new AnimatorSet();
+        mAnimatorSet.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mAnimatorSet.setDuration(500);
+        mAnimatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mBgProtection.setVisibility(View.VISIBLE);
+            }
+        });
+
+        mAnimatorSet.playTogether(
+                ObjectAnimator.ofFloat(mBgProtection, View.ALPHA, 0f, 1f),
+                ObjectAnimator.ofFloat(mBgProtection, View.SCALE_X, 0f, 1f),
+                ObjectAnimator.ofFloat(mBgProtection, View.SCALE_Y, 0f, 1f),
+                fpIconAnim);
+        mAnimatorSet.start();
+    }
+
+    private boolean isShadeLocked() {
+        return mStatusBarState == StatusBarState.SHADE_LOCKED;
+    }
+
+    /**
+     * Animates out the bg protection circle behind the fp icon to unhighlight the icon.
+     */
+    void animateUnhighlightFp(@Nullable Runnable onEndAnimation) {
+        if (mBgProtection.getVisibility() == View.GONE) {
+            // already hidden
+            return;
+        }
+
+        if (mAnimatorSet != null) {
+            mAnimatorSet.cancel();
+        }
+        ValueAnimator fpIconAnim;
+        if (isShadeLocked()) {
+            // fade out
+            fpIconAnim = ObjectAnimator.ofFloat(mFingerprintView, View.ALPHA, 1f, 0f);
+        } else {
+            // update icon color
+            fpIconAnim = new ValueAnimator();
+            fpIconAnim.setIntValues(mTextColorPrimary, mWallpaperTexColor);
+            fpIconAnim.setEvaluator(new ArgbEvaluator());
+            fpIconAnim.addUpdateListener(valueAnimator -> mFingerprintDrawable.setLockScreenColor(
+                    (Integer) valueAnimator.getAnimatedValue()));
+        }
+
+        mAnimatorSet = new AnimatorSet();
+        mAnimatorSet.playTogether(
+                ObjectAnimator.ofFloat(mBgProtection, View.ALPHA, 1f, 0f),
+                ObjectAnimator.ofFloat(mBgProtection, View.SCALE_X, 1f, 0f),
+                ObjectAnimator.ofFloat(mBgProtection, View.SCALE_Y, 1f, 0f),
+                fpIconAnim);
+        mAnimatorSet.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mAnimatorSet.setDuration(500);
+
+        mAnimatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mBgProtection.setVisibility(View.GONE);
+                if (onEndAnimation != null) {
+                    onEndAnimation.run();
+                }
+            }
+        });
+        mAnimatorSet.start();
+    }
+
+    boolean isAnimating() {
+        return mAnimatorSet != null && mAnimatorSet.isRunning();
     }
 }

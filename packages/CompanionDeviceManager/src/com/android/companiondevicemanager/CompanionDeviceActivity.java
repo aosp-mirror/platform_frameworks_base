@@ -128,9 +128,11 @@ public class CompanionDeviceActivity extends Activity {
 
         if (useDeviceProfile) {
             profileSummary.setVisibility(View.VISIBLE);
+            String deviceRef = getRequest().isSingleDevice()
+                    ? getService().mDevicesFound.get(0).getDisplayName()
+                    : profileName;
             profileSummary.setText(getString(R.string.profile_summary,
-                    getCallingAppName(),
-                    profileName,
+                    deviceRef,
                     profilePrivacyDisclaimer));
         } else {
             profileSummary.setVisibility(View.GONE);

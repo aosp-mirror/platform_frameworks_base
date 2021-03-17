@@ -102,8 +102,8 @@ public final class GenericDocumentToProtoConverter {
     public static GenericDocument toGenericDocument(@NonNull DocumentProto proto) {
         Preconditions.checkNotNull(proto);
         GenericDocument.Builder<?> documentBuilder =
-                new GenericDocument.Builder<>(proto.getUri(), proto.getSchema())
-                        .setNamespace(proto.getNamespace())
+                new GenericDocument.Builder<>(
+                                proto.getNamespace(), proto.getUri(), proto.getSchema())
                         .setScore(proto.getScore())
                         .setTtlMillis(proto.getTtlMs())
                         .setCreationTimestampMillis(proto.getCreationTimestampMs());

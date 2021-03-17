@@ -40,8 +40,6 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
 import org.junit.Assume
 import org.junit.Test
@@ -128,13 +126,17 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
+        testSpec.assertWm {
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry()
+        }
     }
 
     @FlakyTest
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry()
+        testSpec.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry()
+        }
     }
 
     @Presubmit

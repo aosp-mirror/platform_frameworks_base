@@ -388,6 +388,8 @@ public class AlarmManagerService extends SystemService {
         @VisibleForTesting
         static final String KEY_MAX_INTERVAL = "max_interval";
         @VisibleForTesting
+        static final String KEY_MIN_WINDOW = "min_window";
+        @VisibleForTesting
         static final String KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION
                 = "allow_while_idle_whitelist_duration";
         @VisibleForTesting
@@ -428,11 +430,13 @@ public class AlarmManagerService extends SystemService {
         @VisibleForTesting
         static final String KEY_ALLOW_WHILE_IDLE_COMPAT_WINDOW = "allow_while_idle_compat_window";
 
-        private static final String KEY_CRASH_NON_CLOCK_APPS = "crash_non_clock_apps";
+        @VisibleForTesting
+        static final String KEY_CRASH_NON_CLOCK_APPS = "crash_non_clock_apps";
 
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
         private static final long DEFAULT_MAX_INTERVAL = 365 * INTERVAL_DAY;
+        private static final long DEFAULT_MIN_WINDOW = 10_000;
         private static final long DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION = 10 * 1000;
         private static final long DEFAULT_LISTENER_TIMEOUT = 5 * 1000;
         private static final int DEFAULT_MAX_ALARMS_PER_UID = 500;
@@ -474,6 +478,9 @@ public class AlarmManagerService extends SystemService {
 
         // Maximum alarm recurrence interval
         public long MAX_INTERVAL = DEFAULT_MAX_INTERVAL;
+
+        // Minimum window size for inexact alarms
+        public long MIN_WINDOW = DEFAULT_MIN_WINDOW;
 
         // BroadcastOptions.setTemporaryAppWhitelistDuration() to use for FLAG_ALLOW_WHILE_IDLE.
         public long ALLOW_WHILE_IDLE_WHITELIST_DURATION
@@ -574,6 +581,9 @@ public class AlarmManagerService extends SystemService {
                                 Slog.w(TAG, "Must have positive allow_while_idle quota");
                                 ALLOW_WHILE_IDLE_QUOTA = 1;
                             }
+                            break;
+                        case KEY_MIN_WINDOW:
+                            MIN_WINDOW = properties.getLong(KEY_MIN_WINDOW, DEFAULT_MIN_WINDOW);
                             break;
                         case KEY_ALLOW_WHILE_IDLE_COMPAT_QUOTA:
                             ALLOW_WHILE_IDLE_COMPAT_QUOTA = properties.getInt(
@@ -736,6 +746,11 @@ public class AlarmManagerService extends SystemService {
             pw.print(KEY_MAX_INTERVAL);
             pw.print("=");
             TimeUtils.formatDuration(MAX_INTERVAL, pw);
+            pw.println();
+
+            pw.print(KEY_MIN_WINDOW);
+            pw.print("=");
+            TimeUtils.formatDuration(MIN_WINDOW, pw);
             pw.println();
 
             pw.print(KEY_LISTENER_TIMEOUT);
@@ -1642,6 +1657,7 @@ public class AlarmManagerService extends SystemService {
             // Fix this window in place, so that as time approaches we don't collapse it.
             windowLength = maxElapsed - triggerElapsed;
         } else {
+            windowLength = Math.max(windowLength, mConstants.MIN_WINDOW);
             maxElapsed = triggerElapsed + windowLength;
         }
         synchronized (mLock) {
@@ -1981,8 +1997,10 @@ public class AlarmManagerService extends SystemService {
      * Returns true if the given uid does not require SCHEDULE_EXACT_ALARM to set exact,
      * allow-while-idle alarms.
      */
-    boolean isExemptFromPermission(int uid) {
-        return (UserHandle.isSameApp(mSystemUiUid, uid) || mLocalDeviceIdleController == null
+    boolean isExemptFromExactAlarmPermission(int uid) {
+        return (UserHandle.isSameApp(mSystemUiUid, uid)
+                || UserHandle.isCore(uid)
+                || mLocalDeviceIdleController == null
                 || mLocalDeviceIdleController.isAppOnWhitelist(UserHandle.getAppId(uid)));
     }
 
@@ -2002,54 +2020,43 @@ public class AlarmManagerService extends SystemService {
             mAppOps.checkPackage(callingUid, callingPackage);
 
             final boolean allowWhileIdle = (flags & FLAG_ALLOW_WHILE_IDLE) != 0;
+            final boolean exact = (windowLength == AlarmManager.WINDOW_EXACT);
 
+            // make sure the caller is allowed to use the requested kind of alarm, and also
+            // decide what quota and broadcast options to use.
             Bundle idleOptions = null;
-            if (alarmClock != null || allowWhileIdle) {
-                // make sure the caller is allowed to use the requested kind of alarm, and also
-                // decide what broadcast options to use.
+            if (exact || allowWhileIdle) {
                 final boolean needsPermission;
-                boolean lowQuota;
+                boolean lowerQuota;
                 if (CompatChanges.isChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION,
                         callingPackage, UserHandle.getUserHandleForUid(callingUid))) {
-                    if (windowLength != AlarmManager.WINDOW_EXACT) {
-                        needsPermission = false;
-                        lowQuota = true;
-                        idleOptions = isExemptFromPermission(callingUid) ? mOptsWithFgs.toBundle()
-                                : mOptsWithoutFgs.toBundle();
-                    } else if (alarmClock != null) {
-                        needsPermission = true;
-                        lowQuota = false;
-                        idleOptions = mOptsWithFgs.toBundle();
-                    } else {
-                        needsPermission = true;
-                        lowQuota = false;
-                        idleOptions = mOptsWithFgs.toBundle();
-                    }
+                    needsPermission = exact;
+                    lowerQuota = !exact;
+                    idleOptions = exact ? mOptsWithFgs.toBundle() : mOptsWithoutFgs.toBundle();
                 } else {
                     needsPermission = false;
-                    lowQuota = allowWhileIdle;
+                    lowerQuota = allowWhileIdle;
                     idleOptions = allowWhileIdle ? mOptsWithFgs.toBundle() : null;
                 }
                 if (needsPermission && !canScheduleExactAlarms()) {
-                    if (alarmClock == null && isExemptFromPermission(callingUid)) {
-                        // If the app is on the full system allow-list (not except-idle), we still
-                        // allow the alarms, but with a lower quota to keep pre-S compatibility.
-                        lowQuota = true;
-                    } else {
+                    if (alarmClock != null || !isExemptFromExactAlarmPermission(callingUid)) {
                         final String errorMessage = "Caller " + callingPackage + " needs to hold "
                                 + Manifest.permission.SCHEDULE_EXACT_ALARM + " to set "
-                                + ((allowWhileIdle) ? "exact, allow-while-idle" : "alarm-clock")
-                                + " alarms.";
+                                + "exact alarms.";
                         if (mConstants.CRASH_NON_CLOCK_APPS) {
                             throw new SecurityException(errorMessage);
                         } else {
                             Slog.wtf(TAG, errorMessage);
-                            idleOptions = mOptsWithoutFgs.toBundle();
-                            lowQuota = allowWhileIdle;
                         }
                     }
+                    // If the app is on the full system power allow-list (not except-idle), or we're
+                    // in a soft failure mode, we still allow the alarms.
+                    // We give temporary allowlist to allow-while-idle alarms but without FGS
+                    // capability. Note that apps that are in the power allow-list do not need it.
+                    idleOptions = allowWhileIdle ? mOptsWithoutFgs.toBundle() : null;
+                    lowerQuota = allowWhileIdle;
                 }
-                if (lowQuota) {
+                if (lowerQuota) {
                     flags &= ~FLAG_ALLOW_WHILE_IDLE;
                     flags |= FLAG_ALLOW_WHILE_IDLE_COMPAT;
                 }
@@ -2998,13 +3005,10 @@ public class AlarmManagerService extends SystemService {
     /**
      * Called when an app loses {@link Manifest.permission#SCHEDULE_EXACT_ALARM} to remove alarms
      * that the app is no longer eligible to use.
-     * TODO (b/179541791): Revisit and write tests once UX is final.
+     * TODO (b/179541791): Add revocation history to dumpsys.
      */
     void removeExactAlarmsOnPermissionRevokedLocked(int uid, String packageName) {
-        if (UserHandle.isCore(uid) || uid == mSystemUiUid) {
-            return;
-        }
-        if (isExemptFromPermission(uid)) {
+        if (isExemptFromExactAlarmPermission(uid)) {
             return;
         }
         if (!CompatChanges.isChangeEnabled(
@@ -3015,7 +3019,7 @@ public class AlarmManagerService extends SystemService {
 
         final Predicate<Alarm> whichAlarms =
                 a -> (a.uid == uid && a.packageName.equals(packageName)
-                        && ((a.flags & FLAG_ALLOW_WHILE_IDLE) != 0 || a.alarmClock != null));
+                        && a.windowLength == AlarmManager.WINDOW_EXACT);
         final ArrayList<Alarm> removed = mAlarmStore.remove(whichAlarms);
         final boolean didRemove = !removed.isEmpty();
         if (didRemove) {
@@ -3872,6 +3876,7 @@ public class AlarmManagerService extends SystemService {
 
         return alarm.creatorUid;
     }
+
 
     @VisibleForTesting
     class AlarmHandler extends Handler {

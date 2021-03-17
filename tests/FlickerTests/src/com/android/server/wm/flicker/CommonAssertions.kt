@@ -35,15 +35,6 @@ fun FlickerTestParameter.navBarWindowIsAlwaysVisible() {
     }
 }
 
-@JvmOverloads
-fun FlickerTestParameter.visibleWindowsShownMoreThanOneConsecutiveEntry(
-    ignoreWindows: List<String> = emptyList()
-) {
-    assertWm {
-        this.visibleWindowsShownMoreThanOneConsecutiveEntry(ignoreWindows)
-    }
-}
-
 fun FlickerTestParameter.launcherReplacesAppWindowAsTopWindow(testApp: IAppHelper) {
     assertWm {
         this.showsAppWindowOnTop(testApp.getPackage())
@@ -181,15 +172,6 @@ fun FlickerTestParameter.statusBarLayerRotatesScales(
     }
     assertLayersEnd {
         this.coversExactly(endingPos, STATUS_BAR_WINDOW_NAME)
-    }
-}
-
-@JvmOverloads
-fun FlickerTestParameter.visibleLayersShownMoreThanOneConsecutiveEntry(
-    ignoreLayers: List<String> = emptyList()
-) {
-    assertLayers {
-        this.visibleLayersShownMoreThanOneConsecutiveEntry(ignoreLayers)
     }
 }
 

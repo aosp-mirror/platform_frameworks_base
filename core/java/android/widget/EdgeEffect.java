@@ -177,7 +177,7 @@ public class EdgeEffect {
     private long mStartTime;
     private float mDuration;
     private float mStretchIntensity = DEFAULT_MAX_STRETCH_INTENSITY;
-    private float mStretchDistanceFraction = 0.1f;
+    private float mStretchDistanceFraction = 1f;
     private float mStretchDistance = -1f;
 
     private final Interpolator mInterpolator = new DecelerateInterpolator();
@@ -656,7 +656,7 @@ public class EdgeEffect {
                     //  for now leverage placeholder logic if no stretch distance is provided to
                     //  consume the displacement ratio times the minimum of the width or height
                     mStretchDistance > 0 ? mStretchDistance :
-                            (mStretchDistanceFraction * Math.min(mWidth, mHeight))
+                            (mStretchDistanceFraction * Math.max(mWidth, mHeight))
             );
         }
 

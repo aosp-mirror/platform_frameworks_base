@@ -116,7 +116,6 @@ package android.app.appsearch {
 
   public abstract static class AppSearchSchema.PropertyConfig {
     method public int getCardinality();
-    method public int getDataType();
     method @NonNull public String getName();
     field public static final int CARDINALITY_OPTIONAL = 2; // 0x2
     field public static final int CARDINALITY_REPEATED = 1; // 0x1
@@ -181,14 +180,15 @@ package android.app.appsearch {
     method public int getScore();
     method public long getTtlMillis();
     method @NonNull public String getUri();
-    field public static final String DEFAULT_NAMESPACE = "";
+    field @Deprecated public static final String DEFAULT_NAMESPACE = "";
   }
 
   public static class GenericDocument.Builder<BuilderType extends android.app.appsearch.GenericDocument.Builder> {
-    ctor public GenericDocument.Builder(@NonNull String, @NonNull String);
+    ctor @Deprecated public GenericDocument.Builder(@NonNull String, @NonNull String);
+    ctor public GenericDocument.Builder(@NonNull String, @NonNull String, @NonNull String);
     method @NonNull public android.app.appsearch.GenericDocument build();
     method @NonNull public BuilderType setCreationTimestampMillis(long);
-    method @NonNull public BuilderType setNamespace(@NonNull String);
+    method @Deprecated @NonNull public BuilderType setNamespace(@NonNull String);
     method @NonNull public BuilderType setPropertyBoolean(@NonNull String, @NonNull boolean...);
     method @NonNull public BuilderType setPropertyBytes(@NonNull String, @NonNull byte[]...);
     method @NonNull public BuilderType setPropertyDocument(@NonNull String, @NonNull android.app.appsearch.GenericDocument...);
@@ -207,12 +207,13 @@ package android.app.appsearch {
   }
 
   public static final class GetByUriRequest.Builder {
-    ctor public GetByUriRequest.Builder();
+    ctor @Deprecated public GetByUriRequest.Builder();
+    ctor public GetByUriRequest.Builder(@NonNull String);
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addProjection(@NonNull String, @NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUris(@NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUris(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.GetByUriRequest build();
-    method @NonNull public android.app.appsearch.GetByUriRequest.Builder setNamespace(@NonNull String);
+    method @Deprecated @NonNull public android.app.appsearch.GetByUriRequest.Builder setNamespace(@NonNull String);
   }
 
   public class GlobalSearchSession implements java.io.Closeable {
@@ -243,11 +244,12 @@ package android.app.appsearch {
   }
 
   public static final class RemoveByUriRequest.Builder {
-    ctor public RemoveByUriRequest.Builder();
+    ctor @Deprecated public RemoveByUriRequest.Builder();
+    ctor public RemoveByUriRequest.Builder(@NonNull String);
     method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUris(@NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUris(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.RemoveByUriRequest build();
-    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder setNamespace(@NonNull String);
+    method @Deprecated @NonNull public android.app.appsearch.RemoveByUriRequest.Builder setNamespace(@NonNull String);
   }
 
   public final class ReportUsageRequest {
@@ -257,30 +259,50 @@ package android.app.appsearch {
   }
 
   public static final class ReportUsageRequest.Builder {
-    ctor public ReportUsageRequest.Builder();
+    ctor @Deprecated public ReportUsageRequest.Builder();
+    ctor public ReportUsageRequest.Builder(@NonNull String);
     method @NonNull public android.app.appsearch.ReportUsageRequest build();
-    method @NonNull public android.app.appsearch.ReportUsageRequest.Builder setNamespace(@NonNull String);
+    method @Deprecated @NonNull public android.app.appsearch.ReportUsageRequest.Builder setNamespace(@NonNull String);
     method @NonNull public android.app.appsearch.ReportUsageRequest.Builder setUri(@NonNull String);
     method @NonNull public android.app.appsearch.ReportUsageRequest.Builder setUsageTimeMillis(long);
   }
 
   public final class SearchResult {
     method @NonNull public String getDatabaseName();
-    method @NonNull public android.app.appsearch.GenericDocument getDocument();
+    method @Deprecated @NonNull public android.app.appsearch.GenericDocument getDocument();
+    method @NonNull public android.app.appsearch.GenericDocument getGenericDocument();
     method @NonNull public java.util.List<android.app.appsearch.SearchResult.MatchInfo> getMatches();
     method @NonNull public String getPackageName();
   }
 
+  public static final class SearchResult.Builder {
+    ctor public SearchResult.Builder(@NonNull String, @NonNull String);
+    method @NonNull public android.app.appsearch.SearchResult.Builder addMatch(@NonNull android.app.appsearch.SearchResult.MatchInfo);
+    method @NonNull public android.app.appsearch.SearchResult build();
+    method @NonNull public android.app.appsearch.SearchResult.Builder setGenericDocument(@NonNull android.app.appsearch.GenericDocument);
+  }
+
   public static final class SearchResult.MatchInfo {
     method @NonNull public CharSequence getExactMatch();
-    method @NonNull public android.app.appsearch.SearchResult.MatchRange getExactMatchPosition();
+    method @Deprecated @NonNull public android.app.appsearch.SearchResult.MatchRange getExactMatchPosition();
+    method @NonNull public android.app.appsearch.SearchResult.MatchRange getExactMatchRange();
     method @NonNull public String getFullText();
     method @NonNull public String getPropertyPath();
     method @NonNull public CharSequence getSnippet();
-    method @NonNull public android.app.appsearch.SearchResult.MatchRange getSnippetPosition();
+    method @Deprecated @NonNull public android.app.appsearch.SearchResult.MatchRange getSnippetPosition();
+    method @NonNull public android.app.appsearch.SearchResult.MatchRange getSnippetRange();
+  }
+
+  public static final class SearchResult.MatchInfo.Builder {
+    ctor public SearchResult.MatchInfo.Builder();
+    method @NonNull public android.app.appsearch.SearchResult.MatchInfo build();
+    method @NonNull public android.app.appsearch.SearchResult.MatchInfo.Builder setExactMatchRange(@NonNull android.app.appsearch.SearchResult.MatchRange);
+    method @NonNull public android.app.appsearch.SearchResult.MatchInfo.Builder setPropertyPath(@NonNull String);
+    method @NonNull public android.app.appsearch.SearchResult.MatchInfo.Builder setSnippetRange(@NonNull android.app.appsearch.SearchResult.MatchRange);
   }
 
   public static final class SearchResult.MatchRange {
+    ctor public SearchResult.MatchRange(int, int);
     method public int getEnd();
     method public int getStart();
   }
@@ -362,6 +384,19 @@ package android.app.appsearch {
     method @NonNull public java.util.List<android.app.appsearch.SetSchemaResponse.MigrationFailure> getMigrationFailures();
   }
 
+  public static final class SetSchemaResponse.Builder {
+    ctor public SetSchemaResponse.Builder();
+    method @NonNull public android.app.appsearch.SetSchemaResponse.Builder addDeletedType(@NonNull String);
+    method @NonNull public android.app.appsearch.SetSchemaResponse.Builder addDeletedTypes(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.SetSchemaResponse.Builder addIncompatibleType(@NonNull String);
+    method @NonNull public android.app.appsearch.SetSchemaResponse.Builder addIncompatibleTypes(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.SetSchemaResponse.Builder addMigratedType(@NonNull String);
+    method @NonNull public android.app.appsearch.SetSchemaResponse.Builder addMigratedTypes(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.SetSchemaResponse.Builder addMigrationFailure(@NonNull android.app.appsearch.SetSchemaResponse.MigrationFailure);
+    method @NonNull public android.app.appsearch.SetSchemaResponse.Builder addMigrationFailures(@NonNull java.util.Collection<android.app.appsearch.SetSchemaResponse.MigrationFailure>);
+    method @NonNull public android.app.appsearch.SetSchemaResponse build();
+  }
+
   public static class SetSchemaResponse.MigrationFailure {
     method @NonNull public android.app.appsearch.AppSearchResult<java.lang.Void> getAppSearchResult();
     method @NonNull public String getNamespace();
@@ -369,11 +404,23 @@ package android.app.appsearch {
     method @NonNull public String getUri();
   }
 
+  public static final class SetSchemaResponse.MigrationFailure.Builder {
+    ctor public SetSchemaResponse.MigrationFailure.Builder();
+    method @NonNull public android.app.appsearch.SetSchemaResponse.MigrationFailure build();
+    method @NonNull public android.app.appsearch.SetSchemaResponse.MigrationFailure.Builder setAppSearchResult(@NonNull android.app.appsearch.AppSearchResult<java.lang.Void>);
+    method @NonNull public android.app.appsearch.SetSchemaResponse.MigrationFailure.Builder setNamespace(@NonNull String);
+    method @NonNull public android.app.appsearch.SetSchemaResponse.MigrationFailure.Builder setSchemaType(@NonNull String);
+    method @NonNull public android.app.appsearch.SetSchemaResponse.MigrationFailure.Builder setUri(@NonNull String);
+  }
+
 }
 
 package android.app.appsearch.exceptions {
 
   public class AppSearchException extends java.lang.Exception {
+    ctor public AppSearchException(int);
+    ctor public AppSearchException(int, @Nullable String);
+    ctor public AppSearchException(int, @Nullable String, @Nullable Throwable);
     method public int getResultCode();
     method @NonNull public <T> android.app.appsearch.AppSearchResult<T> toAppSearchResult();
   }

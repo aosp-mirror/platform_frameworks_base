@@ -316,6 +316,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
 import android.window.IRemoteTransition;
+import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
@@ -563,12 +564,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // The locusId associated with this activity, if set.
     private LocusId mLocusId;
 
-    // These configurations are collected from application's resources based on size-sensitive
-    // qualifiers. For example, layout-w800dp will be added to mHorizontalSizeConfigurations as 800
-    // and drawable-sw400dp will be added to both as 400.
-    private int[] mVerticalSizeConfigurations;
-    private int[] mHorizontalSizeConfigurations;
-    private int[] mSmallestSizeConfigurations;
+    private SizeConfigurationBuckets mSizeConfigurations;
 
     /**
      * The precomputed display insets for resolving configuration. It will be non-null if
@@ -664,13 +660,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // naturally.
     private boolean mInSizeCompatModeForBounds = false;
 
-    // Whether this activity is letterboxed for fixed orientation. If letterboxed due to fixed
-    // orientation then aspect ratio restrictions are also already respected.
+    // Bounds populated in resolveFixedOrientationConfiguration when this activity is letterboxed
+    // for fixed orientation. If not null, they are used as parent container in
+    // resolveSizeCompatModeConfiguration and in a constructor of CompatDisplayInsets. If
+    // letterboxed due to fixed orientation then aspect ratio restrictions are also respected.
     // This happens when an activity has fixed orientation which doesn't match orientation of the
     // parent because a display is ignoring orientation request or fixed to user rotation.
     // See WindowManagerService#getIgnoreOrientationRequest and
     // WindowManagerService#getFixedToUserRotation for more context.
-    private boolean mIsLetterboxedForFixedOrientationAndAspectRatio = false;
+    @Nullable
+    private Rect mLetterboxBoundsForFixedOrientationAndAspectRatio;
 
     // activity is not displayed?
     // TODO: rename to mNoDisplay
@@ -1078,11 +1077,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.println(prefix + "supportsEnterPipOnTaskSwitch: "
                         + supportsEnterPipOnTaskSwitch);
             }
-            if (info.maxAspectRatio != 0) {
-                pw.println(prefix + "maxAspectRatio=" + info.maxAspectRatio);
+            if (info.getMaxAspectRatio() != 0) {
+                pw.println(prefix + "maxAspectRatio=" + info.getMaxAspectRatio());
             }
-            if (info.minAspectRatio != 0) {
-                pw.println(prefix + "minAspectRatio=" + info.minAspectRatio);
+            if (info.getMinAspectRatio() != 0) {
+                pw.println(prefix + "minAspectRatio=" + info.getMinAspectRatio());
+            }
+            if (info.getMinAspectRatio() != info.getManifestMinAspectRatio()) {
+                // Log the fact that we've overridden the min aspect ratio from the manifest
+                pw.println(prefix + "manifestMinAspectRatio="
+                        + info.getManifestMinAspectRatio());
             }
             pw.println(prefix + "supportsSizeChanges="
                     + ActivityInfo.sizeChangesSupportModeToString(info.supportsSizeChanges()));
@@ -1168,52 +1172,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         info.applicationInfo = aInfo;
     }
 
-    private boolean crossesHorizontalSizeThreshold(int firstDp, int secondDp) {
-        return crossesSizeThreshold(mHorizontalSizeConfigurations, firstDp, secondDp);
-    }
-
-    private boolean crossesVerticalSizeThreshold(int firstDp, int secondDp) {
-        return crossesSizeThreshold(mVerticalSizeConfigurations, firstDp, secondDp);
-    }
-
-    private boolean crossesSmallestSizeThreshold(int firstDp, int secondDp) {
-        return crossesSizeThreshold(mSmallestSizeConfigurations, firstDp, secondDp);
-    }
-
-    /**
-     * The purpose of this method is to decide whether the activity needs to be relaunched upon
-     * changing its size. In most cases the activities don't need to be relaunched, if the resize
-     * is small, all the activity content has to do is relayout itself within new bounds. There are
-     * cases however, where the activity's content would be completely changed in the new size and
-     * the full relaunch is required.
-     *
-     * The activity will report to us vertical and horizontal thresholds after which a relaunch is
-     * required. These thresholds are collected from the application resource qualifiers. For
-     * example, if application has layout-w600dp resource directory, then it needs a relaunch when
-     * we resize from width of 650dp to 550dp, as it crosses the 600dp threshold. However, if
-     * it resizes width from 620dp to 700dp, it won't be relaunched as it stays on the same side
-     * of the threshold.
-     */
-    private static boolean crossesSizeThreshold(int[] thresholds, int firstDp,
-            int secondDp) {
-        if (thresholds == null) {
-            return false;
-        }
-        for (int i = thresholds.length - 1; i >= 0; i--) {
-            final int threshold = thresholds[i];
-            if ((firstDp < threshold && secondDp >= threshold)
-                    || (firstDp >= threshold && secondDp < threshold)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void setSizeConfigurations(int[] horizontalSizeConfiguration,
-            int[] verticalSizeConfigurations, int[] smallestSizeConfigurations) {
-        mHorizontalSizeConfigurations = horizontalSizeConfiguration;
-        mVerticalSizeConfigurations = verticalSizeConfigurations;
-        mSmallestSizeConfigurations = smallestSizeConfigurations;
+    void setSizeConfigurations(SizeConfigurationBuckets sizeConfigurations) {
+        mSizeConfigurations = sizeConfigurations;
     }
 
     private void scheduleActivityMovedToDisplay(int displayId, Configuration config) {
@@ -6863,7 +6823,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
-    private void updateCompatDisplayInsets(@Nullable Rect fixedOrientationBounds) {
+    private void updateCompatDisplayInsets() {
         if (mCompatDisplayInsets != null || !shouldCreateCompatDisplayInsets()) {
             // The override configuration is set only once in size compatibility mode.
             return;
@@ -6891,7 +6851,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // The role of CompatDisplayInsets is like the override bounds.
         mCompatDisplayInsets =
-                new CompatDisplayInsets(mDisplayContent, this, fixedOrientationBounds);
+                new CompatDisplayInsets(
+                        mDisplayContent, this, mLetterboxBoundsForFixedOrientationAndAspectRatio);
     }
 
     @VisibleForTesting
@@ -6945,8 +6906,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 || windowingMode == WINDOWING_MODE_FULLSCREEN) {
             resolveFixedOrientationConfiguration(newParentConfiguration);
         }
-        final Rect fixedOrientationBounds = isLetterboxedForFixedOrientationAndAspectRatio()
-                ? new Rect(resolvedConfig.windowConfiguration.getBounds()) : null;
 
         if (mCompatDisplayInsets != null) {
             resolveSizeCompatModeConfiguration(newParentConfiguration);
@@ -6966,7 +6925,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (mVisibleRequested) {
-            updateCompatDisplayInsets(fixedOrientationBounds);
+            updateCompatDisplayInsets();
         }
 
         // TODO(b/175212232): Consolidate position logic from each "resolve" method above here.
@@ -7001,7 +6960,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * WindowManagerService#getIgnoreOrientationRequest} for more context.
      */
     boolean isLetterboxedForFixedOrientationAndAspectRatio() {
-        return mIsLetterboxedForFixedOrientationAndAspectRatio;
+        return mLetterboxBoundsForFixedOrientationAndAspectRatio != null;
     }
 
     /**
@@ -7012,7 +6971,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * in this methiod.
      */
     private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig) {
-        mIsLetterboxedForFixedOrientationAndAspectRatio = false;
+        mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
         if (handlesOrientationChangeFromDescendant()) {
             // No need to letterbox because of fixed orientation. Display will handle
             // fixed-orientation requests.
@@ -7053,8 +7012,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Adjust the fixed orientation letterbox bounds to fit the app request aspect ratio in
         // order to use the extra available space.
-        final float maxAspectRatio = info.maxAspectRatio;
-        final float minAspectRatio = info.minAspectRatio;
+        final float maxAspectRatio = info.getMaxAspectRatio();
+        final float minAspectRatio = info.getMinAspectRatio();
         if (aspect > maxAspectRatio && maxAspectRatio != 0) {
             aspect = maxAspectRatio;
         } else if (aspect < minAspectRatio) {
@@ -7089,7 +7048,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Calculate app bounds using fixed orientation bounds because they will be needed later
         // for comparison with size compat app bounds in {@link resolveSizeCompatModeConfiguration}.
         task.computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
-        mIsLetterboxedForFixedOrientationAndAspectRatio = true;
+        mLetterboxBoundsForFixedOrientationAndAspectRatio = new Rect(resolvedBounds);
     }
 
     /**
@@ -7291,21 +7250,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // The rest of the condition is that only one side is smaller than the container, but it
         // still needs to exclude the cases where the size is limited by the fixed aspect ratio.
-        if (info.maxAspectRatio > 0) {
+        if (info.getMaxAspectRatio() > 0) {
             final float aspectRatio = (0.5f + Math.max(appWidth, appHeight))
                     / Math.min(appWidth, appHeight);
-            if (aspectRatio >= info.maxAspectRatio) {
+            if (aspectRatio >= info.getMaxAspectRatio()) {
                 // The current size has reached the max aspect ratio.
                 return false;
             }
         }
-        if (info.minAspectRatio > 0) {
+        if (info.getMinAspectRatio() > 0) {
             // The activity should have at least the min aspect ratio, so this checks if the
             // container still has available space to provide larger aspect ratio.
             final float containerAspectRatio =
                     (0.5f + Math.max(containerAppWidth, containerAppHeight))
                             / Math.min(containerAppWidth, containerAppHeight);
-            if (containerAspectRatio <= info.minAspectRatio) {
+            if (containerAspectRatio <= info.getMinAspectRatio()) {
                 // The long side has reached the parent.
                 return false;
             }
@@ -7472,9 +7431,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
     private void applyAspectRatio(Rect outBounds, Rect containingAppBounds,
             Rect containingBounds) {
-        final float maxAspectRatio = info.maxAspectRatio;
+        final float maxAspectRatio = info.getMaxAspectRatio();
         final Task rootTask = getRootTask();
-        final float minAspectRatio = info.minAspectRatio;
+        final float minAspectRatio = info.getMinAspectRatio();
 
         if (task == null || rootTask == null
                 || (inMultiWindowMode() && !shouldCreateCompatDisplayInsets())
@@ -7635,6 +7594,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (getConfiguration().equals(mTmpConfig) && !forceNewConfig && !displayChanged) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration & display "
                     + "unchanged in %s", this);
+            // It's possible that resolveOverrideConfiguration was called before mVisibleRequested
+            // became true and mCompatDisplayInsets may not have been created so ensure
+            // that mCompatDisplayInsets is created here.
+            if (mVisibleRequested) {
+                updateCompatDisplayInsets();
+            }
             return true;
         }
 
@@ -7784,26 +7749,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Determine what has changed.  May be nothing, if this is a config that has come back from
         // the app after going idle.  In that case we just want to leave the official config object
         // now in the activity and do nothing else.
-        final Configuration currentConfig = getConfiguration();
-        int changes = lastReportedConfig.diff(currentConfig);
-        // We don't want to use size changes if they don't cross boundaries that are important to
-        // the app.
-        if ((changes & CONFIG_SCREEN_SIZE) != 0) {
-            final boolean crosses = crossesHorizontalSizeThreshold(lastReportedConfig.screenWidthDp,
-                    currentConfig.screenWidthDp)
-                    || crossesVerticalSizeThreshold(lastReportedConfig.screenHeightDp,
-                    currentConfig.screenHeightDp);
-            if (!crosses) {
-                changes &= ~CONFIG_SCREEN_SIZE;
-            }
-        }
-        if ((changes & CONFIG_SMALLEST_SCREEN_SIZE) != 0) {
-            final int oldSmallest = lastReportedConfig.smallestScreenWidthDp;
-            final int newSmallest = currentConfig.smallestScreenWidthDp;
-            if (!crossesSmallestSizeThreshold(oldSmallest, newSmallest)) {
-                changes &= ~CONFIG_SMALLEST_SCREEN_SIZE;
-            }
-        }
+        int changes = lastReportedConfig.diff(getConfiguration());
+        changes = SizeConfigurationBuckets.filterDiff(
+                    changes, lastReportedConfig, getConfiguration(), mSizeConfigurations);
         // We don't want window configuration to cause relaunches.
         if ((changes & CONFIG_WINDOW_CONFIGURATION) != 0) {
             changes &= ~CONFIG_WINDOW_CONFIGURATION;

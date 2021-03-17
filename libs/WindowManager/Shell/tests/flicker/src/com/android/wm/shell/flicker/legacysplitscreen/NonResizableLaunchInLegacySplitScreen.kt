@@ -29,8 +29,7 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.layerBecomesInvisible
 import com.android.server.wm.flicker.layerBecomesVisible
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
@@ -67,6 +66,12 @@ class NonResizableLaunchInLegacySplitScreen(
             }
         }
 
+    override val ignoredWindows: List<String>
+        get() = listOf(DOCKED_STACK_DIVIDER, LAUNCHER_PACKAGE_NAME, LETTERBOX_NAME,
+            nonResizeableApp.defaultWindowName, splitScreenApp.defaultWindowName,
+            WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+
     @Presubmit
     @Test
     fun layerBecomesVisible() = testSpec.layerBecomesVisible(nonResizeableApp.defaultWindowName)
@@ -77,14 +82,8 @@ class NonResizableLaunchInLegacySplitScreen(
 
     @FlakyTest(bugId = 178447631)
     @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry(
-            listOf(DOCKED_STACK_DIVIDER,
-                LAUNCHER_PACKAGE_NAME,
-                LETTERBOX_NAME,
-                nonResizeableApp.defaultWindowName,
-                splitScreenApp.defaultWindowName)
-        )
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     @Presubmit
     @Test
@@ -98,14 +97,8 @@ class NonResizableLaunchInLegacySplitScreen(
 
     @FlakyTest(bugId = 178447631)
     @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry(
-            listOf(DOCKED_STACK_DIVIDER,
-                LAUNCHER_PACKAGE_NAME,
-                LETTERBOX_NAME,
-                nonResizeableApp.defaultWindowName,
-                splitScreenApp.defaultWindowName)
-        )
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

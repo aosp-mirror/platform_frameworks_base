@@ -63,6 +63,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -82,9 +83,11 @@ import android.view.ViewConfiguration;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.Watchdog.Monitor;
+import com.android.server.am.ActivityManagerLocal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -114,6 +117,13 @@ public class MediaSessionService extends SystemService implements Monitor {
      */
     private static final String MEDIA_BUTTON_RECEIVER = "media_button_receiver";
 
+    /**
+     * Denotes the duration during which an app receiving a media session callback will be
+     * exempted from FGS-from-BG restriction and so will be allowed to start an FGS even if it is
+     * in the background state while it receives a media session callback.
+     */
+    private static final long FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS = 10_000;
+
     private final Context mContext;
     private final SessionManagerImpl mSessionManagerImpl;
     private final MessageHandler mHandler = new MessageHandler();
@@ -136,6 +146,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private KeyguardManager mKeyguardManager;
     private AudioManager mAudioManager;
     private boolean mHasFeatureLeanback;
+    private ActivityManagerLocal mActivityManagerLocal;
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
@@ -219,6 +230,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         final IntentFilter filter = new IntentFilter(
                 NotificationManager.ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED);
         mContext.registerReceiver(mNotificationListenerEnabledChangedReceiver, filter);
+
+        mActivityManagerLocal = LocalManagerRegistry.getManager(ActivityManagerLocal.class);
     }
 
     @Override
@@ -536,6 +549,26 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
         throw new IllegalArgumentException("packageName is not owned by the calling process");
+    }
+
+    void tempAllowlistTargetPkgIfPossible(int targetUid, String targetPackage,
+            int callingPid, int callingUid, String callingPackage, String reason) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            enforcePackageName(callingPackage, callingUid);
+            if (targetUid != callingUid && mActivityManagerLocal.canStartForegroundService(
+                    callingPid, callingUid, callingPackage)) {
+                final Context userContext = mContext.createContextAsUser(
+                        UserHandle.of(UserHandle.getUserId(targetUid)), /* flags= */ 0);
+                final PowerExemptionManager powerExemptionManager = userContext.getSystemService(
+                        PowerExemptionManager.class);
+                powerExemptionManager.addToTemporaryAllowList(targetPackage,
+                        FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS,
+                        PowerExemptionManager.REASON_MEDIA_SESSION_CALLBACK, reason);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
