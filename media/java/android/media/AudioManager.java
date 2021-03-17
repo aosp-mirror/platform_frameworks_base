@@ -3185,6 +3185,23 @@ public class AudioManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int NUM_SOUND_EFFECTS = 16;
 
+    /** @hide */
+    @IntDef(prefix = { "FX_" }, value = {
+            FX_KEY_CLICK,
+            FX_FOCUS_NAVIGATION_UP,
+            FX_FOCUS_NAVIGATION_DOWN,
+            FX_FOCUS_NAVIGATION_LEFT,
+            FX_FOCUS_NAVIGATION_RIGHT,
+            FX_KEYPRESS_STANDARD,
+            FX_KEYPRESS_SPACEBAR,
+            FX_KEYPRESS_DELETE,
+            FX_KEYPRESS_RETURN,
+            FX_KEYPRESS_INVALID,
+            FX_BACK
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemSoundEffect {}
+
     /**
      * @hide Number of FX_FOCUS_NAVIGATION_REPEAT_* sound effects
      */
@@ -3260,22 +3277,11 @@ public class AudioManager {
 
     /**
      * Plays a sound effect (Key clicks, lid open/close...)
-     * @param effectType The type of sound effect. One of
-     *            {@link #FX_KEY_CLICK},
-     *            {@link #FX_FOCUS_NAVIGATION_UP},
-     *            {@link #FX_FOCUS_NAVIGATION_DOWN},
-     *            {@link #FX_FOCUS_NAVIGATION_LEFT},
-     *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
-     *            {@link #FX_KEYPRESS_STANDARD},
-     *            {@link #FX_KEYPRESS_SPACEBAR},
-     *            {@link #FX_KEYPRESS_DELETE},
-     *            {@link #FX_KEYPRESS_RETURN},
-     *            {@link #FX_KEYPRESS_INVALID},
-     *            {@link #FX_BACK},
+     * @param effectType The type of sound effect.
      * NOTE: This version uses the UI settings to determine
      * whether sounds are heard or not.
      */
-    public void playSoundEffect(int effectType) {
+    public void playSoundEffect(@SystemSoundEffect int effectType) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
             return;
         }
@@ -3294,24 +3300,13 @@ public class AudioManager {
 
     /**
      * Plays a sound effect (Key clicks, lid open/close...)
-     * @param effectType The type of sound effect. One of
-     *            {@link #FX_KEY_CLICK},
-     *            {@link #FX_FOCUS_NAVIGATION_UP},
-     *            {@link #FX_FOCUS_NAVIGATION_DOWN},
-     *            {@link #FX_FOCUS_NAVIGATION_LEFT},
-     *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
-     *            {@link #FX_KEYPRESS_STANDARD},
-     *            {@link #FX_KEYPRESS_SPACEBAR},
-     *            {@link #FX_KEYPRESS_DELETE},
-     *            {@link #FX_KEYPRESS_RETURN},
-     *            {@link #FX_KEYPRESS_INVALID},
-     *            {@link #FX_BACK},
+     * @param effectType The type of sound effect.
      * @param userId The current user to pull sound settings from
      * NOTE: This version uses the UI settings to determine
      * whether sounds are heard or not.
      * @hide
      */
-    public void  playSoundEffect(int effectType, int userId) {
+    public void  playSoundEffect(@SystemSoundEffect int effectType, int userId) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
             return;
         }
@@ -3330,25 +3325,14 @@ public class AudioManager {
 
     /**
      * Plays a sound effect (Key clicks, lid open/close...)
-     * @param effectType The type of sound effect. One of
-     *            {@link #FX_KEY_CLICK},
-     *            {@link #FX_FOCUS_NAVIGATION_UP},
-     *            {@link #FX_FOCUS_NAVIGATION_DOWN},
-     *            {@link #FX_FOCUS_NAVIGATION_LEFT},
-     *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
-     *            {@link #FX_KEYPRESS_STANDARD},
-     *            {@link #FX_KEYPRESS_SPACEBAR},
-     *            {@link #FX_KEYPRESS_DELETE},
-     *            {@link #FX_KEYPRESS_RETURN},
-     *            {@link #FX_KEYPRESS_INVALID},
-     *            {@link #FX_BACK},
+     * @param effectType The type of sound effect.
      * @param volume Sound effect volume.
      * The volume value is a raw scalar so UI controls should be scaled logarithmically.
      * If a volume of -1 is specified, the AudioManager.STREAM_MUSIC stream volume minus 3dB will be used.
      * NOTE: This version is for applications that have their own
      * settings panel for enabling and controlling volume.
      */
-    public void  playSoundEffect(int effectType, float volume) {
+    public void  playSoundEffect(@SystemSoundEffect int effectType, float volume) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
             return;
         }
