@@ -9138,7 +9138,7 @@ public class AppOpsManager {
                 try {
                     sFullLog = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                             FULL_LOG, false);
-                } catch (SecurityException e) {
+                } catch (Exception e) {
                     // This should not happen, but it may, in rare cases
                     sFullLog = false;
                 }
