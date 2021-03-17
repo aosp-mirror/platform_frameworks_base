@@ -17,17 +17,24 @@
 package com.android.server.translation;
 
 import static android.view.translation.TranslationManager.STATUS_SYNC_CALL_SUCCESS;
+import static android.view.translation.UiTranslationManager.EXTRA_SOURCE_LOCALE;
+import static android.view.translation.UiTranslationManager.EXTRA_STATE;
+import static android.view.translation.UiTranslationManager.EXTRA_TARGET_LOCALE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.service.translation.TranslationServiceInfo;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
+import android.view.inputmethod.InputMethodInfo;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationManager.UiTranslationState;
 
@@ -36,6 +43,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.SyncResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.ActivityTokens;
 
@@ -174,5 +182,50 @@ final class TranslationManagerServiceImpl extends
         } catch (RemoteException e) {
             Slog.w(TAG, "Update UiTranslationState fail: " + e);
         }
+        invokeCallbacks(state, sourceSpec, destSpec);
     }
+
+    private void invokeCallbacks(
+            int state, TranslationSpec sourceSpec, TranslationSpec targetSpec) {
+        Bundle res = new Bundle();
+        res.putInt(EXTRA_STATE, state);
+        // TODO(177500482): Store the locale pair so it can be sent for RESUME events.
+        if (sourceSpec != null) {
+            res.putString(EXTRA_SOURCE_LOCALE, sourceSpec.getLanguage());
+            res.putString(EXTRA_TARGET_LOCALE, targetSpec.getLanguage());
+        }
+        // TODO(177500482): Only support the *current* Input Method.
+        List<InputMethodInfo> enabledInputMethods =
+                LocalServices.getService(InputMethodManagerInternal.class)
+                        .getEnabledInputMethodListAsUser(mUserId);
+        mCallbacks.broadcast((callback, uid) -> {
+            // Code here is non-optimal since it's temporary..
+            boolean isIme = false;
+            for (InputMethodInfo inputMethod : enabledInputMethods) {
+                if ((int) uid == inputMethod.getServiceInfo().applicationInfo.uid) {
+                    isIme = true;
+                }
+            }
+            // TODO(177500482): Invoke it for the application being translated too.
+            if (!isIme) {
+                return;
+            }
+            try {
+                callback.sendResult(res);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to invoke UiTranslationStateCallback: " + e);
+            }
+        });
+    }
+
+    public void registerUiTranslationStateCallback(IRemoteCallback callback, int sourceUid) {
+        mCallbacks.register(callback, sourceUid);
+        // TODO(177500482): trigger the callback here if we're already translating the UI.
+    }
+
+    public void unregisterUiTranslationStateCallback(IRemoteCallback callback) {
+        mCallbacks.unregister(callback);
+    }
+
+    private final RemoteCallbackList<IRemoteCallback> mCallbacks = new RemoteCallbackList<>();
 }
