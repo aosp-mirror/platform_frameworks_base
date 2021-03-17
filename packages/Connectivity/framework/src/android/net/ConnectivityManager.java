@@ -77,7 +77,6 @@ import android.util.SparseIntArray;
 import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.Protocol;
 
 import libcore.net.event.NetworkEventDispatcher;
 
@@ -3551,29 +3550,28 @@ public class ConnectivityManager {
         }
     }
 
-    private static final int BASE = Protocol.BASE_CONNECTIVITY_MANAGER;
     /** @hide */
-    public static final int CALLBACK_PRECHECK            = BASE + 1;
+    public static final int CALLBACK_PRECHECK            = 1;
     /** @hide */
-    public static final int CALLBACK_AVAILABLE           = BASE + 2;
+    public static final int CALLBACK_AVAILABLE           = 2;
     /** @hide arg1 = TTL */
-    public static final int CALLBACK_LOSING              = BASE + 3;
+    public static final int CALLBACK_LOSING              = 3;
     /** @hide */
-    public static final int CALLBACK_LOST                = BASE + 4;
+    public static final int CALLBACK_LOST                = 4;
     /** @hide */
-    public static final int CALLBACK_UNAVAIL             = BASE + 5;
+    public static final int CALLBACK_UNAVAIL             = 5;
     /** @hide */
-    public static final int CALLBACK_CAP_CHANGED         = BASE + 6;
+    public static final int CALLBACK_CAP_CHANGED         = 6;
     /** @hide */
-    public static final int CALLBACK_IP_CHANGED          = BASE + 7;
+    public static final int CALLBACK_IP_CHANGED          = 7;
     /** @hide obj = NetworkCapabilities, arg1 = seq number */
-    private static final int EXPIRE_LEGACY_REQUEST       = BASE + 8;
+    private static final int EXPIRE_LEGACY_REQUEST       = 8;
     /** @hide */
-    public static final int CALLBACK_SUSPENDED           = BASE + 9;
+    public static final int CALLBACK_SUSPENDED           = 9;
     /** @hide */
-    public static final int CALLBACK_RESUMED             = BASE + 10;
+    public static final int CALLBACK_RESUMED             = 10;
     /** @hide */
-    public static final int CALLBACK_BLK_CHANGED         = BASE + 11;
+    public static final int CALLBACK_BLK_CHANGED         = 11;
 
     /** @hide */
     public static String getCallbackName(int whichCallback) {
