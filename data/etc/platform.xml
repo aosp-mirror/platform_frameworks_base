@@ -60,10 +60,6 @@
         <group gid="log" />
     </permission>
 
-    <permission name="android.permission.MANAGE_EXTERNAL_STORAGE" >
-        <group gid="external_storage" />
-    </permission>
-
     <permission name="android.permission.ACCESS_MTP" >
         <group gid="mtp" />
     </permission>

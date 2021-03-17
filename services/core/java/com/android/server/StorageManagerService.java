@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.Manifest.permission.ACCESS_MTP;
 import static android.Manifest.permission.INSTALL_PACKAGES;
+import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
@@ -4603,6 +4604,25 @@ class StorageManagerService extends IStorageManager.Stub
                         + UserHandle.formatUid(uid));
             }
             return mode;
+        }
+
+        @Override
+        public boolean hasExternalStorageAccess(int uid, String packageName) {
+            try {
+                if (mIPackageManager.checkUidPermission(
+                                MANAGE_EXTERNAL_STORAGE, uid) == PERMISSION_GRANTED) {
+                    return true;
+                }
+
+                if (mIAppOpsService.checkOperation(
+                                OP_MANAGE_EXTERNAL_STORAGE, uid, packageName) == MODE_ALLOWED) {
+                    return true;
+                }
+            } catch (RemoteException e) {
+                Slog.w("Failed to check MANAGE_EXTERNAL_STORAGE access for " + packageName, e);
+            }
+
+            return false;
         }
 
         @Override

@@ -225,6 +225,12 @@ public class Process {
     public static final int FSVERITY_CERT_UID = 1075;
 
     /**
+     * GID that gives access to USB OTG (unreliable) volumes on /mnt/media_rw/<vol name>
+     * @hide
+     */
+    public static final int EXTERNAL_STORAGE_GID = 1077;
+
+    /**
      * GID that gives write access to app-private data directories on external
      * storage (used on devices without sdcardfs only).
      * @hide
