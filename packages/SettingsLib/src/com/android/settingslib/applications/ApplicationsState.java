@@ -1496,6 +1496,13 @@ public class ApplicationsState {
         }
     }
 
+    /**
+     * Whether the packages for the  user have been initialized.
+     */
+    public boolean isUserAdded(int userId) {
+        return mEntriesMap.contains(userId);
+    }
+
     public interface Callbacks {
         void onRunningStateChanged(boolean running);
 
