@@ -217,6 +217,7 @@ package android.net {
     method public void markConnected();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
+    method public void onBandwidthUpdateRequested();
     method public void onNetworkCreated();
     method public void onNetworkDisconnected();
     method public void onNetworkUnwanted();
@@ -236,6 +237,7 @@ package android.net {
     method public final void sendQosSessionAvailable(int, int, @NonNull android.net.QosSessionAttributes);
     method public final void sendQosSessionLost(int, int, int);
     method public final void sendSocketKeepaliveEvent(int, int);
+    method @Deprecated public void setLegacySubtype(int, @NonNull String);
     method public final void setUnderlyingNetworks(@Nullable java.util.List<android.net.Network>);
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
@@ -256,7 +258,12 @@ package android.net {
   public static final class NetworkAgentConfig.Builder {
     ctor public NetworkAgentConfig.Builder();
     method @NonNull public android.net.NetworkAgentConfig build();
+    method @NonNull public android.net.NetworkAgentConfig.Builder disableNat64Detection();
+    method @NonNull public android.net.NetworkAgentConfig.Builder disableProvisioningNotification();
     method @NonNull public android.net.NetworkAgentConfig.Builder setExplicitlySelected(boolean);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyExtraInfo(@NonNull String);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacySubType(int);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacySubTypeName(@NonNull String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyType(int);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyTypeName(@NonNull String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setPartialConnectivityAcceptable(boolean);
@@ -405,6 +412,7 @@ package android.net {
   }
 
   public abstract class SocketKeepalive implements java.lang.AutoCloseable {
+    field public static final int ERROR_NO_SUCH_SLOT = -33; // 0xffffffdf
     field public static final int SUCCESS = 0; // 0x0
   }
 
