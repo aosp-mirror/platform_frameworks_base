@@ -173,7 +173,7 @@ public class ClipboardService extends SystemService {
 
     private static final String TAG = "ClipboardService";
     private static final boolean IS_EMULATOR =
-        SystemProperties.getBoolean("ro.kernel.qemu", false);
+            SystemProperties.getBoolean("ro.boot.qemu", false);
 
     // DeviceConfig properties
     private static final String PROPERTY_SHOW_ACCESS_NOTIFICATIONS = "show_access_notifications";
