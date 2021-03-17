@@ -322,7 +322,8 @@ open class AndroidPackageParsingTestBase {
             configChanges=${this.configChanges}
             descriptionRes=${this.descriptionRes}
             directBootAware=${this.directBootAware}
-            documentLaunchMode=${this.documentLaunchMode}
+            documentLaunchMode=${this.documentLaunchMode
+            .ignored("Update for fixing b/128526493 and the testing is no longer valid")}
             enabled=${this.enabled}
             exported=${this.exported}
             flags=${Integer.toBinaryString(this.flags)}
