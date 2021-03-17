@@ -10025,10 +10025,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
   }
 
-  public static interface TelephonyCallback.PhysicalChannelConfigListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPhysicalChannelConfigChanged(@NonNull java.util.List<android.telephony.PhysicalChannelConfig>);
-  }
-
   public static interface TelephonyCallback.PreciseCallStateListener {
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
   }

@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.WorkerThread;
 import android.app.usage.NetworkStats.Bucket;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -201,6 +202,7 @@ public class NetworkStatsManager {
      * default network {@link NetworkStats.Bucket#DEFAULT_NETWORK_ALL},
      * metered {@link NetworkStats.Bucket#METERED_ALL},
      * and roaming {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -219,6 +221,7 @@ public class NetworkStatsManager {
      * @return Bucket object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
+    @WorkerThread
     public Bucket querySummaryForDevice(int networkType, String subscriberId,
             long startTime, long endTime) throws SecurityException, RemoteException {
         NetworkTemplate template;
@@ -240,6 +243,7 @@ public class NetworkStatsManager {
      * uid {@link NetworkStats.Bucket#UID_ALL}, tag {@link NetworkStats.Bucket#TAG_NONE},
      * metered {@link NetworkStats.Bucket#METERED_ALL}, and roaming
      * {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -258,6 +262,7 @@ public class NetworkStatsManager {
      * @return Bucket object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
+    @WorkerThread
     public Bucket querySummaryForUser(int networkType, String subscriberId, long startTime,
             long endTime) throws SecurityException, RemoteException {
         NetworkTemplate template;
@@ -283,6 +288,7 @@ public class NetworkStatsManager {
      * means buckets' start and end timestamps are going to be the same as the 'startTime' and
      * 'endTime' parameters. State, uid, metered, and roaming are going to vary, and tag is going to
      * be the same.
+     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -301,6 +307,7 @@ public class NetworkStatsManager {
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
+    @WorkerThread
     public NetworkStats querySummary(int networkType, String subscriberId, long startTime,
             long endTime) throws SecurityException, RemoteException {
         NetworkTemplate template;
@@ -326,9 +333,11 @@ public class NetworkStatsManager {
 
     /**
      * Query network usage statistics details for a given uid.
+     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @see #queryDetailsForUidTagState(int, String, long, long, int, int, int)
      */
+    @WorkerThread
     public NetworkStats queryDetailsForUid(int networkType, String subscriberId,
             long startTime, long endTime, int uid) throws SecurityException {
         return queryDetailsForUidTagState(networkType, subscriberId, startTime, endTime, uid,
@@ -344,9 +353,11 @@ public class NetworkStatsManager {
 
     /**
      * Query network usage statistics details for a given uid and tag.
+     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @see #queryDetailsForUidTagState(int, String, long, long, int, int, int)
      */
+    @WorkerThread
     public NetworkStats queryDetailsForUidTag(int networkType, String subscriberId,
             long startTime, long endTime, int uid, int tag) throws SecurityException {
         return queryDetailsForUidTagState(networkType, subscriberId, startTime, endTime, uid,
@@ -365,6 +376,7 @@ public class NetworkStatsManager {
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
      * method cannot be used to measure data usage on a fine grained time scale.
+     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -387,6 +399,7 @@ public class NetworkStatsManager {
      * @return Statistics object or null if an error happened during statistics collection.
      * @throws SecurityException if permissions are insufficient to read network statistics.
      */
+    @WorkerThread
     public NetworkStats queryDetailsForUidTagState(int networkType, String subscriberId,
             long startTime, long endTime, int uid, int tag, int state) throws SecurityException {
         NetworkTemplate template;
@@ -425,6 +438,7 @@ public class NetworkStatsManager {
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
      * method cannot be used to measure data usage on a fine grained time scale.
+     * This may take a long time, and apps should avoid calling this on their main thread.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -443,6 +457,7 @@ public class NetworkStatsManager {
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
+    @WorkerThread
     public NetworkStats queryDetails(int networkType, String subscriberId, long startTime,
             long endTime) throws SecurityException, RemoteException {
         NetworkTemplate template;

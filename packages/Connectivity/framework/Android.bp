@@ -23,7 +23,6 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-// TODO: use a java_library in the bootclasspath instead
 filegroup {
     name: "framework-connectivity-internal-sources",
     srcs: [
