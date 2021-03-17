@@ -174,6 +174,7 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.ConnectivityManager.PacketKeepaliveCallback;
 import android.net.ConnectivityManager.TooManyRequestsException;
+import android.net.ConnectivitySettingsManager;
 import android.net.ConnectivityThread;
 import android.net.DataStallReportParcelable;
 import android.net.EthernetManager;
@@ -1503,7 +1504,7 @@ public class ConnectivityServiceTest {
         mQosCallbackTracker = mock(QosCallbackTracker.class);
 
         // Ensure that the default setting for Captive Portals is used for most tests
-        setCaptivePortalMode(Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT);
+        setCaptivePortalMode(ConnectivitySettingsManager.CAPTIVE_PORTAL_MODE_PROMPT);
         setAlwaysOnNetworks(false);
         setPrivateDnsSettings(PRIVATE_DNS_MODE_OFF, "ignored.example.com");
     }
@@ -3357,7 +3358,7 @@ public class ConnectivityServiceTest {
                 .addCapability(NET_CAPABILITY_VALIDATED).build();
         mCm.registerNetworkCallback(validatedRequest, validatedCallback);
 
-        setCaptivePortalMode(Settings.Global.CAPTIVE_PORTAL_MODE_AVOID);
+        setCaptivePortalMode(ConnectivitySettingsManager.CAPTIVE_PORTAL_MODE_AVOID);
         // Bring up a network with a captive portal.
         // Expect it to fail to connect and not result in any callbacks.
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
@@ -4007,20 +4008,21 @@ public class ConnectivityServiceTest {
 
     private void setCaptivePortalMode(int mode) {
         ContentResolver cr = mServiceContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.CAPTIVE_PORTAL_MODE, mode);
+        Settings.Global.putInt(cr, ConnectivitySettingsManager.CAPTIVE_PORTAL_MODE, mode);
     }
 
     private void setAlwaysOnNetworks(boolean enable) {
         ContentResolver cr = mServiceContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.MOBILE_DATA_ALWAYS_ON, enable ? 1 : 0);
+        Settings.Global.putInt(cr, ConnectivitySettingsManager.MOBILE_DATA_ALWAYS_ON,
+                enable ? 1 : 0);
         mService.updateAlwaysOnNetworks();
         waitForIdle();
     }
 
     private void setPrivateDnsSettings(String mode, String specifier) {
         final ContentResolver cr = mServiceContext.getContentResolver();
-        Settings.Global.putString(cr, Settings.Global.PRIVATE_DNS_MODE, mode);
-        Settings.Global.putString(cr, Settings.Global.PRIVATE_DNS_SPECIFIER, specifier);
+        Settings.Global.putString(cr, ConnectivitySettingsManager.PRIVATE_DNS_MODE, mode);
+        Settings.Global.putString(cr, ConnectivitySettingsManager.PRIVATE_DNS_SPECIFIER, specifier);
         mService.updatePrivateDnsSettings();
         waitForIdle();
     }
@@ -4258,7 +4260,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testAvoidBadWifiSetting() throws Exception {
         final ContentResolver cr = mServiceContext.getContentResolver();
-        final String settingName = Settings.Global.NETWORK_AVOID_BAD_WIFI;
+        final String settingName = ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI;
 
         mPolicyTracker.mConfigRestrictsAvoidBadWifi = false;
         String[] values = new String[] {null, "0", "1"};
@@ -4315,7 +4317,7 @@ public class ConnectivityServiceTest {
         TestNetworkCallback validatedWifiCallback = new TestNetworkCallback();
         mCm.registerNetworkCallback(validatedWifiRequest, validatedWifiCallback);
 
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_AVOID_BAD_WIFI, 0);
+        Settings.Global.putInt(cr, ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI, 0);
         mPolicyTracker.reevaluate();
 
         // Bring up validated cell.
@@ -4383,7 +4385,7 @@ public class ConnectivityServiceTest {
         validatedWifiCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
 
         // Simulate the user selecting "switch" and checking the don't ask again checkbox.
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_AVOID_BAD_WIFI, 1);
+        Settings.Global.putInt(cr, ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI, 1);
         mPolicyTracker.reevaluate();
 
         // We now switch to cell.
@@ -4396,11 +4398,11 @@ public class ConnectivityServiceTest {
 
         // Simulate the user turning the cellular fallback setting off and then on.
         // We switch to wifi and then to cell.
-        Settings.Global.putString(cr, Settings.Global.NETWORK_AVOID_BAD_WIFI, null);
+        Settings.Global.putString(cr, ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI, null);
         mPolicyTracker.reevaluate();
         defaultCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         assertEquals(mCm.getActiveNetwork(), wifiNetwork);
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_AVOID_BAD_WIFI, 1);
+        Settings.Global.putInt(cr, ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI, 1);
         mPolicyTracker.reevaluate();
         defaultCallback.expectAvailableCallbacksValidated(mCellNetworkAgent);
         assertEquals(mCm.getActiveNetwork(), cellNetwork);
@@ -4419,7 +4421,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testMeteredMultipathPreferenceSetting() throws Exception {
         final ContentResolver cr = mServiceContext.getContentResolver();
-        final String settingName = Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE;
+        final String settingName = ConnectivitySettingsManager.NETWORK_METERED_MULTIPATH_PREFERENCE;
 
         for (int config : Arrays.asList(0, 3, 2)) {
             for (String setting: Arrays.asList(null, "0", "2", "1")) {

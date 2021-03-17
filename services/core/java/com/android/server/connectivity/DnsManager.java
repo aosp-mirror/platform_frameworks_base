@@ -18,15 +18,15 @@ package com.android.server.connectivity;
 
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
+import static android.net.ConnectivitySettingsManager.DNS_RESOLVER_MAX_SAMPLES;
+import static android.net.ConnectivitySettingsManager.DNS_RESOLVER_MIN_SAMPLES;
+import static android.net.ConnectivitySettingsManager.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS;
+import static android.net.ConnectivitySettingsManager.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_DEFAULT_MODE;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_SPECIFIER;
 import static android.net.resolv.aidl.IDnsResolverUnsolicitedEventListener.VALIDATION_RESULT_FAILURE;
 import static android.net.resolv.aidl.IDnsResolverUnsolicitedEventListener.VALIDATION_RESULT_SUCCESS;
-import static android.provider.Settings.Global.DNS_RESOLVER_MAX_SAMPLES;
-import static android.provider.Settings.Global.DNS_RESOLVER_MIN_SAMPLES;
-import static android.provider.Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS;
-import static android.provider.Settings.Global.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT;
-import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
-import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
-import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 
 import android.annotation.NonNull;
 import android.content.ContentResolver;
