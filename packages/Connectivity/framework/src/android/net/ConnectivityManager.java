@@ -915,8 +915,8 @@ public class ConnectivityManager {
 
     /**
      * @hide
-     * TODO: Expose for SystemServer when becomes a module.
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public void systemReady() {
         try {
             mService.systemReady();
