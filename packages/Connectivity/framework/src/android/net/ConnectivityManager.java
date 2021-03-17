@@ -5203,8 +5203,7 @@ public class ConnectivityManager {
     /**
      * Get private DNS mode from settings.
      *
-     * @param context The Context to get its ContentResolver to query the private DNS mode from
-     *                settings.
+     * @param context The Context to query the private DNS mode from settings.
      * @return A string of private DNS mode as one of the PRIVATE_DNS_MODE_* constants.
      *
      * @hide
