@@ -107,6 +107,8 @@ public:
     virtual ErrorCode unlink(const Control& control, std::string_view path) const = 0;
     virtual UniqueFd openForSpecialOps(const Control& control, FileId id) const = 0;
     virtual ErrorCode writeBlocks(std::span<const incfs::DataBlock> blocks) const = 0;
+    virtual ErrorCode reserveSpace(const Control& control, std::string_view path,
+                                   IncFsSize size) const = 0;
     virtual WaitResult waitForPendingReads(
             const Control& control, std::chrono::milliseconds timeout,
             std::vector<incfs::ReadInfo>* pendingReadsBuffer) const = 0;
