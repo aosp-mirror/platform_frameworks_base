@@ -22317,6 +22317,8 @@ package android.media {
     field public static final String MIMETYPE_AUDIO_G711_ALAW = "audio/g711-alaw";
     field public static final String MIMETYPE_AUDIO_G711_MLAW = "audio/g711-mlaw";
     field public static final String MIMETYPE_AUDIO_MPEG = "audio/mpeg";
+    field public static final String MIMETYPE_AUDIO_MPEGH_MHA1 = "audio/mha1";
+    field public static final String MIMETYPE_AUDIO_MPEGH_MHM1 = "audio/mhm1";
     field public static final String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
     field public static final String MIMETYPE_AUDIO_OPUS = "audio/opus";
     field public static final String MIMETYPE_AUDIO_QCELP = "audio/qcelp";
