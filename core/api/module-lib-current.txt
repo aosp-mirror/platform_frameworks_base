@@ -109,6 +109,10 @@ package android.os {
     method public default int getStability();
   }
 
+  public class Process {
+    field public static final int VPN_UID = 1016; // 0x3f8
+  }
+
   public class StatsServiceManager {
     method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsCompanionServiceRegisterer();
     method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsManagerServiceRegisterer();
