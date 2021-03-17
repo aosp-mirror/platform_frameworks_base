@@ -1,7 +1,11 @@
 {
   "presubmit": [
     {
-      "file_patterns": ["Battery[^/]*\\.java"],
+      "file_patterns": [
+        "Battery[^/]*\\.java",
+        "Kernel[^/]*\\.java",
+        "[^/]*Power[^/]*\\.java"
+      ],
       "name": "FrameworksCoreTests",
       "options": [
         { "include-filter": "com.android.internal.os.BatteryStatsTests" },
