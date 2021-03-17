@@ -539,6 +539,11 @@ public class AlarmManager {
      * scheduled as exact.  Applications are strongly discouraged from using exact
      * alarms unnecessarily as they reduce the OS's ability to minimize battery use.
      *
+     * <p>
+     * Starting with {@link Build.VERSION_CODES#S}, apps require the
+     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM} permission to use this
+     * API.
+     *
      * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should go
      *        off, using the appropriate clock (depending on the alarm type).
@@ -558,6 +563,7 @@ public class AlarmManager {
      * @see #RTC
      * @see #RTC_WAKEUP
      */
+    @RequiresPermission(value = Manifest.permission.SCHEDULE_EXACT_ALARM, conditional = true)
     public void setExact(@AlarmType int type, long triggerAtMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, operation, null, null, null,
                 null, null);
@@ -571,7 +577,13 @@ public class AlarmManager {
      * The OnAlarmListener's {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
+     *
+     * <p>
+     * Starting with {@link Build.VERSION_CODES#S}, apps require the
+     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM} permission to use this
+     * API.
      */
+    @RequiresPermission(value = Manifest.permission.SCHEDULE_EXACT_ALARM, conditional = true)
     public void setExact(@AlarmType int type, long triggerAtMillis, String tag,
             OnAlarmListener listener, Handler targetHandler) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, null, listener, tag,

@@ -42,7 +42,7 @@ import android.view.IDisplayFoldListener;
 import android.view.IDisplayWindowRotationController;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedTaskListener;
-import android.view.IScrollCaptureCallbacks;
+import android.view.IScrollCaptureResponseListener;
 import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
 import android.view.ISystemGestureExclusionListener;
@@ -744,10 +744,10 @@ interface IWindowManager
      * @param behindClient token for a window, used to filter the search to windows behind it, or
      *                     {@code null} to accept a window at any zOrder
      * @param taskId specifies the id of a task the result must belong to, or -1 to ignore task ids
-     * @param callbacks the object to receive replies
+     * @param listener the object to receive the response
      */
     void requestScrollCapture(int displayId, IBinder behindClient, int taskId,
-            IScrollCaptureCallbacks callbacks);
+            IScrollCaptureResponseListener listener);
 
     /**
      * Holds the WM lock for the specified amount of milliseconds.

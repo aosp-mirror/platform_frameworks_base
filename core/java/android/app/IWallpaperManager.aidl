@@ -167,7 +167,8 @@ interface IWallpaperManager {
     * @hide
     */
     void removeOnLocalColorsChangedListener(
-            in ILocalWallpaperColorConsumer callback, int which, int userId, int displayId);
+            in ILocalWallpaperColorConsumer callback, in List<RectF> area,
+            int which, int userId, int displayId);
 
     /**
     * @hide

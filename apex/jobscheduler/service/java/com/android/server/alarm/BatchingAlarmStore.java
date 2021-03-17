@@ -27,6 +27,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.StatLogger;
 
 import java.text.SimpleDateFormat;
@@ -40,6 +41,8 @@ import java.util.function.Predicate;
  * This keeps the alarms in batches, which are sorted on the start time of their delivery window.
  */
 public class BatchingAlarmStore implements AlarmStore {
+    @VisibleForTesting
+    static final String TAG = BatchingAlarmStore.class.getSimpleName();
 
     private final ArrayList<Batch> mAlarmBatches = new ArrayList<>();
     private int mSize;
@@ -49,7 +52,7 @@ public class BatchingAlarmStore implements AlarmStore {
         int REBATCH_ALL_ALARMS = 0;
     }
 
-    final StatLogger mStatLogger = new StatLogger("BatchingAlarmStore stats", new String[]{
+    final StatLogger mStatLogger = new StatLogger(TAG + " stats", new String[]{
             "REBATCH_ALL_ALARMS",
     });
 
@@ -209,6 +212,11 @@ public class BatchingAlarmStore implements AlarmStore {
         for (Batch b : mAlarmBatches) {
             b.dumpDebug(pos, AlarmManagerServiceDumpProto.PENDING_ALARM_BATCHES, nowElapsed);
         }
+    }
+
+    @Override
+    public String getName() {
+        return TAG;
     }
 
     private void insertAndBatchAlarm(Alarm alarm) {

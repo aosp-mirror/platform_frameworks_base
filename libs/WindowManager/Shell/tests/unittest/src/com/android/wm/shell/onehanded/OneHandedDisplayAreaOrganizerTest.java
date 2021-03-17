@@ -122,7 +122,6 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
 
         mSpiedDisplayAreaOrganizer = spy(new OneHandedDisplayAreaOrganizer(mContext,
                 mWindowManager,
-                mMockDisplayController,
                 mMockAnimationController,
                 mTutorialHandler,
                 mMockBackgroundOrganizer,
@@ -167,6 +166,15 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
 
         verify(mSpiedDisplayAreaOrganizer, times(DISPLAYAREA_INFO_COUNT)).onDisplayAreaVanished(
                 any());
+    }
+
+    @Test
+    public void testRotation_getNewDisplayBounds() {
+        when(mMockLeash.isValid()).thenReturn(false);
+        // Rotate 0 -> 90
+        mSpiedDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_90,
+                mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).getDisplayBounds();
     }
 
     @Test

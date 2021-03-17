@@ -504,8 +504,10 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         final File visibleFile = getFileForDocId(documentId, true);
 
         final int pfdMode = ParcelFileDescriptor.parseMode(mode);
-        if (pfdMode == ParcelFileDescriptor.MODE_READ_ONLY || visibleFile == null) {
-            return openFileForRead(file);
+        if (visibleFile == null) {
+            return ParcelFileDescriptor.open(file, pfdMode);
+        } else if (pfdMode == ParcelFileDescriptor.MODE_READ_ONLY) {
+            return openFileForRead(visibleFile);
         } else {
             try {
                 // When finished writing, kick off media scanner
@@ -522,6 +524,10 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
     private ParcelFileDescriptor openFileForRead(final File target) throws FileNotFoundException {
         final Uri uri = MediaStore.scanFile(getContext().getContentResolver(), target);
+        if (uri == null) {
+            Log.w(TAG, "Failed to retrieve media store URI for: " + target);
+            return ParcelFileDescriptor.open(target, ParcelFileDescriptor.MODE_READ_ONLY);
+        }
 
         // Passing the calling uid via EXTRA_MEDIA_CAPABILITIES_UID, so that the decision to
         // transcode or not transcode can be made based upon the calling app's uid, and not based
@@ -532,7 +538,8 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         final AssetFileDescriptor afd =
                 getContext().getContentResolver().openTypedAssetFileDescriptor(uri, "*/*", opts);
         if (afd == null) {
-            return null;
+            Log.w(TAG, "Failed to open with media_capabilities uid for URI: " + uri);
+            return ParcelFileDescriptor.open(target, ParcelFileDescriptor.MODE_READ_ONLY);
         }
 
         return afd.getParcelFileDescriptor();

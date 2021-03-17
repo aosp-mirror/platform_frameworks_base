@@ -76,10 +76,14 @@ public class RecentsAnimationControllerCompat {
      * accordingly. This should be called before `finish`
      * @param taskId Task id of the Activity in PiP mode.
      * @param destinationBounds Bounds of the PiP window on home.
+     * @param windowCrop bounds to crop as part of final transform.
+     * @param float9 An array of 9 floats to be used as matrix transform.
      */
-    public void setFinishTaskBounds(int taskId, Rect destinationBounds) {
+    public void setFinishTaskBounds(int taskId, Rect destinationBounds, Rect windowCrop,
+            float[] float9) {
         try {
-            mAnimationController.setFinishTaskBounds(taskId, destinationBounds);
+            mAnimationController.setFinishTaskBounds(taskId, destinationBounds, windowCrop,
+                    float9);
         } catch (RemoteException e) {
             Log.d(TAG, "Failed to set finish task bounds", e);
         }

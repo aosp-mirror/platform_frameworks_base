@@ -347,7 +347,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         final @FingerprintSensorProperties.SensorType int sensorType =
                 mIsUdfps ? FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
                         : FingerprintSensorProperties.TYPE_REAR;
-        // resetLockout is controlled by the framework, so hardwareAuthToken is not required
+        // IBiometricsFingerprint@2.1 does not manage timeout below the HAL, so the Gatekeeper HAT
+        // cannot be checked
         final boolean resetLockoutRequiresHardwareAuthToken = false;
         final int maxEnrollmentsPerUser = mContext.getResources()
                 .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
@@ -515,7 +516,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         return properties;
     }
 
-    @NonNull
+    @Nullable
     @Override
     public FingerprintSensorPropertiesInternal getSensorProperties(int sensorId) {
         return mSensorProperties;

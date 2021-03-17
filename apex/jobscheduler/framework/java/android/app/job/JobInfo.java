@@ -59,15 +59,6 @@ import java.util.Objects;
  * constraint on the JobInfo object that you are creating. Otherwise, the builder would throw an
  * exception when building. From Android version {@link Build.VERSION_CODES#Q} and onwards, it is
  * valid to schedule jobs with no constraints.
- * <p> Prior to Android version {@link Build.VERSION_CODES#S}, jobs could only have a maximum of 100
- * jobs scheduled at a time. Starting with Android version {@link Build.VERSION_CODES#S}, that limit
- * has been increased to 150. Expedited jobs also count towards the limit.
- * <p> In Android version {@link Build.VERSION_CODES#LOLLIPOP}, jobs had a maximum execution time
- * of one minute. Starting with Android version {@link Build.VERSION_CODES#M} and ending with
- * Android version {@link Build.VERSION_CODES#R}, jobs had a maximum execution time of 10 minutes.
- * Starting from Android version {@link Build.VERSION_CODES#S}, jobs will still be stopped after
- * 10 minutes if the system is busy or needs the resources, but if not, jobs may continue running
- * longer than 10 minutes.
  */
 public class JobInfo implements Parcelable {
     private static String TAG = "JobInfo";
@@ -1471,7 +1462,7 @@ public class JobInfo implements Parcelable {
          * <ol>
          *     <li>Run as soon as possible</li>
          *     <li>Be less restricted during Doze and battery saver</li>
-         *     <li>Have network access</li>
+         *     <li>Have the same network access as foreground services</li>
          *     <li>Be less likely to be killed than regular jobs</li>
          *     <li>Be subject to background location throttling</li>
          * </ol>

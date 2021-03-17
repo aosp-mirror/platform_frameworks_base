@@ -253,7 +253,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
             return other == null;
         }
         return other != null && mInfo.flags == other.flags
-                && mInfo.maxAspectRatio == other.maxAspectRatio
+                && mInfo.getMaxAspectRatio() == other.getMaxAspectRatio()
                 && Objects.equals(mInfo.launchToken, other.launchToken)
                 && Objects.equals(mInfo.getComponentName(), other.getComponentName());
     }

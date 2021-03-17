@@ -415,9 +415,7 @@ public class AppSearchImplTest {
                                 + AppSearchImpl.CHECK_OPTIMIZE_INTERVAL;
                 i++) {
             GenericDocument document =
-                    new GenericDocument.Builder<>("uri" + i, "type")
-                            .setNamespace("namespace")
-                            .build();
+                    new GenericDocument.Builder<>("namespace", "uri" + i, "type").build();
             mAppSearchImpl.putDocument("package", "database", document);
         }
 
@@ -477,7 +475,7 @@ public class AppSearchImplTest {
 
         // Insert document
         GenericDocument document =
-                new GenericDocument.Builder<>("uri", "type").setNamespace("namespace").build();
+                new GenericDocument.Builder<>("namespace", "uri", "type").build();
         mAppSearchImpl.putDocument("package", "database", document);
 
         // Rewrite SearchSpec
@@ -517,11 +515,11 @@ public class AppSearchImplTest {
 
         // Insert documents
         GenericDocument document1 =
-                new GenericDocument.Builder<>("uri", "typeA").setNamespace("namespace").build();
+                new GenericDocument.Builder<>("namespace", "uri", "typeA").build();
         mAppSearchImpl.putDocument("package", "database1", document1);
 
         GenericDocument document2 =
-                new GenericDocument.Builder<>("uri", "typeB").setNamespace("namespace").build();
+                new GenericDocument.Builder<>("namespace", "uri", "typeB").build();
         mAppSearchImpl.putDocument("package", "database2", document2);
 
         // Rewrite SearchSpec
@@ -561,7 +559,7 @@ public class AppSearchImplTest {
 
         // Insert document
         GenericDocument document =
-                new GenericDocument.Builder<>("uri", "type").setNamespace("namespace").build();
+                new GenericDocument.Builder<>("namespace", "uri", "type").build();
         mAppSearchImpl.putDocument("package", "database", document);
 
         // If 'allowedPrefixedSchemas' is empty, this returns false since there's nothing to
@@ -614,7 +612,7 @@ public class AppSearchImplTest {
 
         // Insert package1 document
         GenericDocument document =
-                new GenericDocument.Builder<>("uri", "schema1").setNamespace("namespace").build();
+                new GenericDocument.Builder<>("namespace", "uri", "schema1").build();
         mAppSearchImpl.putDocument("package1", "database1", document);
 
         // No query filters specified, package2 shouldn't be able to query for package1's documents.
@@ -625,14 +623,13 @@ public class AppSearchImplTest {
         assertThat(searchResultPage.getResults()).isEmpty();
 
         // Insert package2 document
-        document =
-                new GenericDocument.Builder<>("uri", "schema2").setNamespace("namespace").build();
+        document = new GenericDocument.Builder<>("namespace", "uri", "schema2").build();
         mAppSearchImpl.putDocument("package2", "database2", document);
 
         // No query filters specified. package2 should only get its own documents back.
         searchResultPage = mAppSearchImpl.query("package2", "database2", "", searchSpec);
         assertThat(searchResultPage.getResults()).hasSize(1);
-        assertThat(searchResultPage.getResults().get(0).getDocument()).isEqualTo(document);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document);
     }
 
     /**
@@ -665,7 +662,7 @@ public class AppSearchImplTest {
 
         // Insert package1 document
         GenericDocument document =
-                new GenericDocument.Builder<>("uri", "schema1").setNamespace("namespace").build();
+                new GenericDocument.Builder<>("namespace", "uri", "schema1").build();
         mAppSearchImpl.putDocument("package1", "database1", document);
 
         // "package1" filter specified, but package2 shouldn't be able to query for package1's
@@ -680,8 +677,7 @@ public class AppSearchImplTest {
         assertThat(searchResultPage.getResults()).isEmpty();
 
         // Insert package2 document
-        document =
-                new GenericDocument.Builder<>("uri", "schema2").setNamespace("namespace").build();
+        document = new GenericDocument.Builder<>("namespace", "uri", "schema2").build();
         mAppSearchImpl.putDocument("package2", "database2", document);
 
         // "package2" filter specified, package2 should only get its own documents back.
@@ -692,7 +688,7 @@ public class AppSearchImplTest {
                         .build();
         searchResultPage = mAppSearchImpl.query("package2", "database2", "", searchSpec);
         assertThat(searchResultPage.getResults()).hasSize(1);
-        assertThat(searchResultPage.getResults().get(0).getDocument()).isEqualTo(document);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document);
     }
 
     @Test
@@ -1073,7 +1069,7 @@ public class AppSearchImplTest {
         for (SearchResult result : searchResultPage.getResults()) {
             assertThat(result.getPackageName()).isEqualTo("com.package.foo");
             assertThat(result.getDatabaseName()).isEqualTo("databaseName");
-            assertThat(result.getDocument())
+            assertThat(result.getGenericDocument())
                     .isEqualTo(
                             GenericDocumentToProtoConverter.toGenericDocument(
                                     strippedDocumentProto.build()));
@@ -1128,9 +1124,7 @@ public class AppSearchImplTest {
                     appSearchImpl.putDocument(
                             "package",
                             "database",
-                            new GenericDocument.Builder<>("uri", "type")
-                                    .setNamespace("namespace")
-                                    .build());
+                            new GenericDocument.Builder<>("namespace", "uri", "type").build());
                 });
 
         expectThrows(

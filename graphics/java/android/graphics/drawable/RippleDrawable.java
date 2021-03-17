@@ -842,7 +842,7 @@ public class RippleDrawable extends LayerDrawable {
         if (shouldAnimate && mRunningAnimations.size() <= MAX_RIPPLES) {
             RippleAnimationSession.AnimationProperties<Float, Paint> properties =
                     createAnimationProperties(x, y, w, h);
-            mRunningAnimations.add(new RippleAnimationSession(properties, !useCanvasProps, w, h)
+            mRunningAnimations.add(new RippleAnimationSession(properties, !useCanvasProps)
                     .setOnAnimationUpdated(() -> invalidateSelf(false))
                     .setOnSessionEnd(session -> {
                         mRunningAnimations.remove(session);
@@ -912,14 +912,14 @@ public class RippleDrawable extends LayerDrawable {
                 ? mState.mColor.getColorForState(getState(), Color.BLACK)
                 : mMaskColorFilter.getColor();
         shader.setColor(color);
-        shader.setOrigin(x, y);
+        shader.setOrigin(w / 2, y / 2);
+        shader.setTouch(x, y);
         shader.setResolution(w, h);
-        shader.setSecondsOffset(0);
+        shader.setNoisePhase(0);
         shader.setRadius(radius);
         shader.setProgress(.0f);
         properties = new RippleAnimationSession.AnimationProperties<>(
-                x, y, radius, p, 0f,
-                shader);
+                w / 2, h / 2, radius, p, 0f, shader);
         if (mMaskShader == null) {
             shader.setShader(null);
         } else {

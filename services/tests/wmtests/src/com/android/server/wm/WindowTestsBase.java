@@ -714,6 +714,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private int mLaunchMode;
         private int mResizeMode = RESIZE_MODE_RESIZEABLE;
         private float mMaxAspectRatio;
+        private float mMinAspectRatio;
         private boolean mSupportsSizeChanges;
         private int mScreenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
         private boolean mLaunchTaskBehind = false;
@@ -790,6 +791,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         ActivityBuilder setMaxAspectRatio(float maxAspectRatio) {
             mMaxAspectRatio = maxAspectRatio;
+            return this;
+        }
+
+        ActivityBuilder setMinAspectRatio(float minAspectRatio) {
+            mMinAspectRatio = minAspectRatio;
             return this;
         }
 
@@ -884,7 +890,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             aInfo.flags |= mActivityFlags;
             aInfo.launchMode = mLaunchMode;
             aInfo.resizeMode = mResizeMode;
-            aInfo.maxAspectRatio = mMaxAspectRatio;
+            aInfo.setMaxAspectRatio(mMaxAspectRatio);
+            aInfo.setMinAspectRatio(mMinAspectRatio);
             aInfo.supportsSizeChanges = mSupportsSizeChanges;
             aInfo.screenOrientation = mScreenOrientation;
             aInfo.configChanges |= mConfigChanges;

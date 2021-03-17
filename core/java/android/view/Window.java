@@ -2619,10 +2619,10 @@ public abstract class Window {
     /**
      * System request to begin scroll capture.
      *
-     * @param callbacks to receive responses
+     * @param listener to receive the response
      * @hide
      */
-    public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
+    public void requestScrollCapture(IScrollCaptureResponseListener listener) {
     }
 
     /**

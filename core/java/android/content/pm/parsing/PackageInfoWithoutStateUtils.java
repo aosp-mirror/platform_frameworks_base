@@ -474,9 +474,9 @@ public class PackageInfoWithoutStateUtils {
         ai.screenOrientation = a.getScreenOrientation();
         ai.resizeMode = a.getResizeMode();
         Float maxAspectRatio = a.getMaxAspectRatio();
-        ai.maxAspectRatio = maxAspectRatio != null ? maxAspectRatio : 0f;
+        ai.setMaxAspectRatio(maxAspectRatio != null ? maxAspectRatio : 0f);
         Float minAspectRatio = a.getMinAspectRatio();
-        ai.minAspectRatio = minAspectRatio != null ? minAspectRatio : 0f;
+        ai.setMinAspectRatio(minAspectRatio != null ? minAspectRatio : 0f);
         ai.supportsSizeChanges = a.getSupportsSizeChanges();
         ai.requestedVrComponent = a.getRequestedVrComponent();
         ai.rotationAnimation = a.getRotationAnimation();

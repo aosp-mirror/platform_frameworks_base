@@ -22,12 +22,10 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.WALLPAPER_TITLE
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.canSplitScreen
 import com.android.server.wm.flicker.helpers.openQuickstep
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.Assert
@@ -66,28 +64,24 @@ class EnterSplitScreenNonResizableNotDock(
             }
         }
 
+    override val ignoredWindows: List<String>
+        get() = listOf(LAUNCHER_PACKAGE_NAME,
+            WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME,
+            nonResizeableApp.defaultWindowName,
+            splitScreenApp.defaultWindowName)
+
     @Test
     fun dockedStackDividerIsInvisible() = testSpec.dockedStackDividerIsInvisible()
 
     @FlakyTest(bugId = 178447631)
     @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry(
-            listOf(LAUNCHER_PACKAGE_NAME,
-                SPLASH_SCREEN_NAME,
-                nonResizeableApp.defaultWindowName,
-                splitScreenApp.defaultWindowName)
-        )
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry(
-            listOf(WALLPAPER_TITLE,
-                LAUNCHER_PACKAGE_NAME,
-                SPLASH_SCREEN_NAME,
-                nonResizeableApp.defaultWindowName,
-                splitScreenApp.defaultWindowName)
-        )
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     @Test
     fun appWindowIsVisible() {

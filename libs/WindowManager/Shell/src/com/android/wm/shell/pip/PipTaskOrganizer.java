@@ -41,6 +41,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PictureInPictureParams;
@@ -423,12 +424,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         if (mInSwipePipToHomeTransition) {
             final Rect destinationBounds = mPipBoundsState.getBounds();
+            final SurfaceControl.Transaction tx =
+                    mSurfaceControlTransactionFactory.getTransaction();
+            mSurfaceTransactionHelper.resetScale(tx, mLeash, destinationBounds);
+            mSurfaceTransactionHelper.crop(tx, mLeash, destinationBounds);
             // animation is finished in the Launcher and here we directly apply the final touch.
             applyEnterPipSyncTransaction(destinationBounds, () -> {
                 // ensure menu's settled in its final bounds first
                 finishResizeForMenu(destinationBounds);
                 sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
-            });
+            }, tx);
             mInSwipePipToHomeTransition = false;
             return;
         }
@@ -490,16 +495,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // mState is set right after the animation is kicked off to block any resize
             // requests such as offsetPip that may have been called prior to the transition.
             mState = State.ENTERING_PIP;
-        });
+        }, null /* boundsChangeTransaction */);
     }
 
-    private void applyEnterPipSyncTransaction(Rect destinationBounds, Runnable runnable) {
+    private void applyEnterPipSyncTransaction(Rect destinationBounds, Runnable runnable,
+            @Nullable SurfaceControl.Transaction boundsChangeTransaction) {
         // PiP menu is attached late in the process here to avoid any artifacts on the leash
         // caused by addShellRoot when in gesture navigation mode.
         mPipMenuController.attach(mLeash);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
         wct.setBounds(mToken, destinationBounds);
+        if (boundsChangeTransaction != null) {
+            wct.setBoundsChangeTransaction(mToken, boundsChangeTransaction);
+        }
         wct.scheduleFinishEnterPip(mToken, destinationBounds);
         mSyncTransactionQueue.queue(wct);
         if (runnable != null) {

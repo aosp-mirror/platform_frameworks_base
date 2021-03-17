@@ -20,7 +20,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- TODO: add background protection -->
+    <!-- Background protection -->
+    <ImageView
+        android:id="@+id/udfps_keyguard_fp_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/fingerprint_bg"
+        android:visibility="gone"/>
 
     <!-- Fingerprint -->
     <ImageView

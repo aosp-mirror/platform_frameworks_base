@@ -110,16 +110,16 @@ public class PeopleProvider extends ContentProvider {
         }
 
         if (DEBUG) Log.i(TAG, "Returning tile preview for shortcutId: " + shortcutId);
-        RemoteViews view = PeopleSpaceUtils.createRemoteViews(getContext(), tile, 0);
         final Bundle bundle = new Bundle();
+        RemoteViews view = PeopleSpaceUtils.createRemoteViews(getContext(), tile, 0, bundle);
         bundle.putParcelable(PeopleProviderUtils.RESPONSE_KEY_REMOTE_VIEWS, view);
         return bundle;
     }
 
     private boolean doesCallerHavePermission() {
         return getContext().checkPermission(
-                    PeopleProviderUtils.GET_PEOPLE_TILE_PREVIEW_PERMISSION,
-                    Binder.getCallingPid(), Binder.getCallingUid())
+                PeopleProviderUtils.GET_PEOPLE_TILE_PREVIEW_PERMISSION,
+                Binder.getCallingPid(), Binder.getCallingUid())
                 == PackageManager.PERMISSION_GRANTED;
     }
 

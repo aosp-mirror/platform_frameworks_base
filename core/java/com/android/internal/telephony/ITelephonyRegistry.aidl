@@ -23,6 +23,7 @@ import android.telephony.BarringInfo;
 import android.telephony.CallQuality;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
+import android.telephony.LinkCapacityEstimate;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.PhoneCapability;
@@ -96,4 +97,6 @@ interface ITelephonyRegistry {
             in List<PhysicalChannelConfig> configs);
     void notifyDataEnabled(in int phoneId, int subId, boolean enabled, int reason);
     void notifyAllowedNetworkTypesChanged(in int phoneId, in int subId, in int reason, in long allowedNetworkType);
+    void notifyLinkCapacityEstimateChanged(in int phoneId, in int subId,
+            in List<LinkCapacityEstimate> linkCapacityEstimateList);
 }

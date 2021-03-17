@@ -453,7 +453,8 @@ public abstract class PanelViewController {
                 // We need to collapse the panel since we peeked to the small height.
                 mView.postOnAnimation(mPostCollapseRunnable);
             }
-        } else if (!mStatusBar.isBouncerShowing()) {
+        } else if (!mStatusBar.isBouncerShowing()
+                && !mStatusBarKeyguardViewManager.isShowingAlternativeAuthOrAnimating()) {
             boolean expands = onEmptySpaceClick(mInitialTouchX);
             onTrackingStopped(expands);
         }

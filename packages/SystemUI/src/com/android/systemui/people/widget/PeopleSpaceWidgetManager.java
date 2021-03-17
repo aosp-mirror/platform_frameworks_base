@@ -217,8 +217,7 @@ public class PeopleSpaceWidgetManager {
                 .setUserName(info.getLabel())
                 .setUserIcon(
                         PeopleSpaceTile.convertDrawableToIcon(mLauncherApps.getShortcutIconDrawable(
-                                info, 0))
-                )
+                                info, 0)))
                 .setContactUri(uri)
                 .setStatuses(conversation.getStatuses())
                 .setLastInteractionTimestamp(conversation.getLastEventTimestamp())
@@ -250,9 +249,12 @@ public class PeopleSpaceWidgetManager {
             }
             storedTile = storedTile
                     .toBuilder()
+                    // Reset notification content.
                     .setNotificationKey(null)
                     .setNotificationContent(null)
                     .setNotificationDataUri(null)
+                    // Reset missed calls category.
+                    .setNotificationCategory(null)
                     .build();
         }
         updateAppWidgetOptionsAndView(mAppWidgetManager, mContext, appWidgetId, storedTile);
@@ -333,6 +335,8 @@ public class PeopleSpaceWidgetManager {
             addNewWidget(appWidgetId, optionsKey);
             AppWidgetOptionsHelper.removePeopleTileKey(mAppWidgetManager, appWidgetId);
         }
+        // Update views for new widget dimensions.
+        updateWidgets(new int[]{appWidgetId});
     }
 
     /** Adds{@code tile} mapped to {@code appWidgetId}. */

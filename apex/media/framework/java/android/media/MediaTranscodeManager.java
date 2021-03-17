@@ -26,6 +26,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -34,6 +35,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.annotation.MinSdk;
 
 import java.io.FileNotFoundException;
 import java.lang.annotation.Retention;
@@ -99,6 +101,7 @@ import java.util.concurrent.Executors;
  TODO(hkuang): Clarify whether supports framerate conversion.
  @hide
  */
+@MinSdk(Build.VERSION_CODES.S)
 @SystemApi
 public final class MediaTranscodeManager {
     private static final String TAG = "MediaTranscodeManager";
