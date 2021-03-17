@@ -106,6 +106,7 @@ import android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
 import android.net.ConnectivityDiagnosticsManager.DataStallReport;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.ConnectivitySettingsManager;
 import android.net.DataStallReportParcelable;
 import android.net.DnsResolverServiceManager;
 import android.net.ICaptivePortal;
@@ -8244,7 +8245,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         Settings.Global.putString(mContext.getContentResolver(),
-                Settings.Global.NETWORK_AVOID_BAD_WIFI, null);
+                ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI, null);
     }
 
     @Override
