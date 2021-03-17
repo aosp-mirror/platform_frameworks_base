@@ -42,7 +42,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.FileUtils;
-import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.recovery.KeyChainSnapshot;
@@ -109,7 +108,7 @@ public class KeySyncTaskTest {
     private RecoverySnapshotStorage mRecoverySnapshotStorage;
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private File mDatabaseFile;
-    private AndroidKeyStoreSecretKey mWrappingKey;
+    private SecretKey mWrappingKey;
     private PlatformEncryptionKey mEncryptKey;
 
     private KeySyncTask mKeySyncTask;
@@ -848,7 +847,7 @@ public class KeySyncTaskTest {
         return keyGenerator.generateKey();
     }
 
-    private AndroidKeyStoreSecretKey generateAndroidKeyStoreKey() throws Exception {
+    private SecretKey generateAndroidKeyStoreKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(
                 KEY_ALGORITHM,
                 ANDROID_KEY_STORE_PROVIDER);
@@ -857,7 +856,7 @@ public class KeySyncTaskTest {
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .build());
-        return (AndroidKeyStoreSecretKey) keyGenerator.generateKey();
+        return keyGenerator.generateKey();
     }
 
     private static byte[] utf8Bytes(String s) {
