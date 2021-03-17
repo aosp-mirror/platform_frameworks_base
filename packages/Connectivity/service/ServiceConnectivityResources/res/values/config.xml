@@ -42,4 +42,14 @@
         -->
     </string-array>
 
+    <string-array translatable="false" name="config_legacy_networktype_restore_timers">
+        <item>2,60000</item><!-- mobile_mms -->
+        <item>3,60000</item><!-- mobile_supl -->
+        <item>4,60000</item><!-- mobile_dun -->
+        <item>5,60000</item><!-- mobile_hipri -->
+        <item>10,60000</item><!-- mobile_fota -->
+        <item>11,60000</item><!-- mobile_ims -->
+        <item>12,60000</item><!-- mobile_cbs -->
+    </string-array>
+
 </resources>

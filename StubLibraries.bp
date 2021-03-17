@@ -422,10 +422,6 @@ droidstubs {
     name: "hwbinder-stubs-docs",
     srcs: [
         "core/java/android/os/HidlSupport.java",
-        "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/IntRange.java",
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/SystemApi.java",
         "core/java/android/os/HidlMemory.java",
         "core/java/android/os/HwBinder.java",
         "core/java/android/os/HwBlob.java",
@@ -451,6 +447,7 @@ droidstubs {
 java_library_static {
     name: "hwbinder.stubs",
     sdk_version: "core_current",
+    libs: ["stub-annotations"],
     srcs: [
         ":hwbinder-stubs-docs",
     ],
