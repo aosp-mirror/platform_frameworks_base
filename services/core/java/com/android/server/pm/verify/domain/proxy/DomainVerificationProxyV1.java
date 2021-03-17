@@ -207,20 +207,24 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
                 int callingUid = response.callingUid;
                 if (!successfulDomains.isEmpty()) {
                     try {
-                        mManager.setDomainVerificationStatusInternal(callingUid, domainSetId,
-                                successfulDomains, DomainVerificationState.STATE_SUCCESS);
-                    } catch (DomainVerificationManager.InvalidDomainSetException
-                            | PackageManager.NameNotFoundException e) {
+                        if (mManager.setDomainVerificationStatusInternal(callingUid, domainSetId,
+                                successfulDomains, DomainVerificationState.STATE_SUCCESS)
+                                != DomainVerificationManager.STATUS_OK) {
+                            Slog.e(TAG, "Failure reporting successful domains for " + packageName);
+                        }
+                    } catch (Exception e) {
                         Slog.e(TAG, "Failure reporting successful domains for " + packageName, e);
                     }
                 }
 
                 if (!failedDomains.isEmpty()) {
                     try {
-                        mManager.setDomainVerificationStatusInternal(callingUid, domainSetId,
-                                failedDomains, DomainVerificationState.STATE_LEGACY_FAILURE);
-                    } catch (DomainVerificationManager.InvalidDomainSetException
-                            | PackageManager.NameNotFoundException e) {
+                        if (mManager.setDomainVerificationStatusInternal(callingUid, domainSetId,
+                                failedDomains, DomainVerificationState.STATE_LEGACY_FAILURE)
+                                != DomainVerificationManager.STATUS_OK) {
+                            Slog.e(TAG, "Failure reporting failed domains for " + packageName);
+                        }
+                    } catch (Exception e) {
                         Slog.e(TAG, "Failure reporting failed domains for " + packageName, e);
                     }
                 }
