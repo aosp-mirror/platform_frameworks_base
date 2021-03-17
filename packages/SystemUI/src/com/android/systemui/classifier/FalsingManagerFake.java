@@ -24,6 +24,8 @@ import com.android.systemui.util.sensors.ThresholdSensor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Simple Fake for testing where {@link FalsingManager} is required.
@@ -37,6 +39,8 @@ public class FalsingManagerFake implements FalsingManager {
     private boolean mShouldEnforceBouncer;
     private boolean mIsReportingEnabled;
     private boolean mIsFalseRobustTap;
+
+    private final List<FalsingBeliefListener> mFalsingBeliefListeners = new ArrayList<>();
 
     @Override
     public void onSuccessfulUnlock() {
@@ -126,5 +130,15 @@ public class FalsingManagerFake implements FalsingManager {
     @Override
     public void onProximityEvent(ThresholdSensor.ThresholdSensorEvent proximityEvent) {
 
+    }
+
+    @Override
+    public void addFalsingBeliefListener(FalsingBeliefListener listener) {
+        mFalsingBeliefListeners.add(listener);
+    }
+
+    @Override
+    public void removeFalsingBeliefListener(FalsingBeliefListener listener) {
+        mFalsingBeliefListeners.remove(listener);
     }
 }
