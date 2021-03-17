@@ -208,8 +208,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"שירות דמדומים"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"מזהה אזור זמן (ללא צורך בקישוריות)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"‏שירות עדכון הזמן של GNSS"</string>
-    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
-    <skip />
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"השירות של מנהל זיהוי המוזיקה"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"תתבצע מחיקה של המכשיר"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"לא ניתן להשתמש באפליקציה של מנהל המערכת.\n\nאם יש לך שאלות, יש ליצור קשר עם מנהל המערכת של הארגון."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ההדפסה הושבתה על ידי <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -562,6 +561,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"שימוש במידע ביומטרי בנעילת מסך"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"אימות זהותך"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"יש להשתמש במידע ביומטרי כדי להמשיך"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"יש להשתמש במידע הביומטרי או בנעילת המסך כדי להמשיך"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"חומרה ביומטרית לא זמינה"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"האימות בוטל"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"לא זוהתה"</string>
@@ -595,6 +595,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"שימוש בטביעת אצבע"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"שימוש בטביעת אצבע או בנעילת מסך"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"יש להשתמש בטביעת האצבע כדי להמשיך"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"יש להשתמש בטביעת האצבע או בנעילת המסך כדי להמשיך"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"סמל טביעת אצבע"</string>
@@ -642,6 +643,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"שחרור נעילה על ידי זיהוי פנים"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"שימוש בזיהוי פנים או בנעילת מסך"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"יש להשתמש בשחרור נעילה על ידי זיהוי פנים כדי להמשיך"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"יש להשתמש בזיהוי הפנים או בנעילת המסך כדי להמשיך"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"סמל הפנים"</string>
@@ -1005,6 +1007,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"אין לך הרשאה לפתוח דף זה."</string>
     <string name="text_copied" msgid="2531420577879738860">"הטקסט הועתק ללוח."</string>
     <string name="copied" msgid="4675902854553014676">"ההעתקה בוצעה"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"האפליקציה <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> הודבקה מ-<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"האפליקציה <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> הודבקה מהלוח"</string>
     <string name="more_item_label" msgid="7419249600215749115">"עוד"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"תפריט+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1361,7 +1365,7 @@
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"הגדרת שעה"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"הגדרת תאריך"</string>
     <string name="date_time_set" msgid="4603445265164486816">"הגדרה"</string>
-    <string name="date_time_done" msgid="8363155889402873463">"בוצע"</string>
+    <string name="date_time_done" msgid="8363155889402873463">"סיום"</string>
     <string name="perms_new_perm_prefix" msgid="6984556020395757087"><font size="12" fgcolor="#ff33b5e5">"חדש: "</font></string>
     <string name="perms_description_app" msgid="2747752389870161996">"מטעם <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="5729199278862516390">"לא דרושים אישורים"</string>
@@ -1412,11 +1416,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"כיבוי"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"בתהליך בדיקה של <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"מתבצעת בדיקה של התוכן הנוכחי"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"אחסון המדיה בתהליך ניתוח"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> חדש"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"המדיה <xliff:g id="NAME">%s</xliff:g> לא פועלת"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"צריך להקיש כדי להגדיר"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"יש לבחור כדי להגדיר"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ייתכן שיהיה צורך לפרמט מחדש את המכשיר. יש להקיש כדי להוציא את המדיה."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"להעברת תמונות ומדיה"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"עיון בקובצי המדיה"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"בעיה עם <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"המדיה <xliff:g id="NAME">%s</xliff:g> לא פועלת"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"יש להקיש כדי לתקן את הבעיה"</string>
@@ -1425,7 +1432,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> לא נתמך"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"המדיה <xliff:g id="NAME">%s</xliff:g> לא פועלת"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"מכשיר זה אינו תומך ב-<xliff:g id="NAME">%s</xliff:g> זה. הקש כדי להגדיר בפורמט נתמך."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"<xliff:g id="NAME">%s</xliff:g> לא נתמך במכשיר הזה. בחר כדי להגדיר בפורמט שנתמך."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"יש לבחור כדי להגדיר את <xliff:g id="NAME">%s</xliff:g> בפורמט נתמך."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ייתכן שיהיה צורך לפרמט מחדש את המכשיר"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> הוסר באופן בלתי צפוי"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"יש לבחור באפשרות להוצאת מדיה לפני ההסרה, כדי לא לאבד תוכן"</string>
@@ -1691,7 +1698,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"‏שרטטת קו ביטול נעילה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את הנעילה של מכשיר ה-Android TV באמצעות חשבון אימייל.\n\n נסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון אימייל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"הסר"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"הסרה"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"האם להעלות את עוצמת הקול מעל לרמה המומלצת?\n\nהאזנה בעוצמת קול גבוהה למשכי זמן ממושכים עלולה לפגוע בשמיעה."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"להשתמש בקיצור הדרך לתכונת הנגישות?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"כשקיצור הדרך מופעל, לחיצה על שני לחצני עוצמת הקול למשך שלוש שניות מפעילה את תכונת הנגישות."</string>
@@ -1735,7 +1742,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"כדי לעבור בין תכונות, יש להחליק כלפי מעלה בעזרת שלוש אצבעות ולהחזיק."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"הגדלה"</string>
     <string name="user_switched" msgid="7249833311585228097">"המשתמש הנוכחי <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"עובר אל <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"מעבר אל <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"מתבצע ניתוק של <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"בעלים"</string>
     <string name="error_message_title" msgid="4082495589294631966">"שגיאה"</string>
@@ -1850,7 +1857,7 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"צפייה במסך מלא"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"כדי לצאת, פשוט מחליקים אצבע מלמעלה למטה."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"הבנתי"</string>
-    <string name="done_label" msgid="7283767013231718521">"בוצע"</string>
+    <string name="done_label" msgid="7283767013231718521">"סיום"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"מחוון שעות מעגלי"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"מחוון דקות מעגלי"</string>
     <string name="select_hours" msgid="5982889657313147347">"בחר שעות"</string>

@@ -208,8 +208,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"Сервис для определения наступления сумерек"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Определитель часового пояса (работает без Интернета)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Синхронизация времени с помощью ГНСС"</string>
-    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
-    <skip />
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Сервис управления распознаванием музыки"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Все данные с устройства будут удалены"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Невозможно использовать приложение для администрирования. С устройства будут удалены все данные.\n\nЕсли у вас возникли вопросы, обратитесь к администратору."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Функция печати отключена приложением \"<xliff:g id="OWNER_APP">%s</xliff:g>\""</string>
@@ -561,7 +560,8 @@
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Использовать биометрию"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Использовать биометрию или блокировку экрана"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Подтвердите, что это вы"</string>
-    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Чтобы продолжить, используйте биометрические данные"</string>
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Чтобы продолжить, используйте биометрические данные."</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Чтобы продолжить, используйте биометрию или данные для разблокировки экрана."</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометрическое оборудование недоступно"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Аутентификация отменена"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Не распознано"</string>
@@ -569,7 +569,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Укажите PIN-код, пароль или графический ключ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ошибка аутентификации."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Использовать блокировку экрана"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Чтобы продолжить, введите учетные данные устройства"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Чтобы продолжить, введите учетные данные устройства."</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Отсканирована только часть отпечатка. Повторите попытку."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не удалось распознать отпечаток. Повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Очистите сканер и повторите попытку."</string>
@@ -595,6 +595,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Использовать отпечаток пальца"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Использовать отпечаток пальца или блокировку экрана"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Чтобы продолжить, используйте цифровой отпечаток"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Чтобы продолжить, используйте отпечаток пальца или данные для разблокировки экрана."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок отпечатка пальца"</string>
@@ -641,7 +642,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Лицо <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Использовать фейсконтроль"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Использовать фейсконтроль или блокировку экрана"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Чтобы продолжить, используйте фейсконтроль"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Чтобы продолжить, используйте фейсконтроль."</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Чтобы продолжить, посмотрите на экран или используйте данные для разблокировки."</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Значок лица"</string>
@@ -1005,6 +1007,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"У вас нет доступа к этой странице."</string>
     <string name="text_copied" msgid="2531420577879738860">"Текст скопирован в буфер обмена."</string>
     <string name="copied" msgid="4675902854553014676">"Скопировано"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"Данные из приложения \"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>\" вставлены в приложение \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\"."</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Данные из буфера обмена вставлены в приложение \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="more_item_label" msgid="7419249600215749115">"Ещё"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Меню+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta +"</string>
@@ -1412,11 +1416,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Отключить"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Проверка накопителя (<xliff:g id="NAME">%s</xliff:g>)…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Выполняем проверку контента."</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Анализ хранилища мультимедиа…"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Новый накопитель: <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> не работает"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Нажмите, чтобы настроить."</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Выберите, чтобы настроить."</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Возможно, потребуется отформатировать устройство. Нажмите, чтобы извлечь его."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Для переноса фотографий и других файлов"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Посмотрите медиафайлы."</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Проблема с накопителем (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> не работает"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Нажмите здесь, чтобы исправить."</string>
@@ -1425,7 +1432,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> не поддерживается"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> не работает"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Устройство не поддерживает этот носитель (<xliff:g id="NAME">%s</xliff:g>). Нажмите, чтобы настроить."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Внешний носитель (<xliff:g id="NAME">%s</xliff:g>) не поддерживается на этом устройстве. Выберите, чтобы изменить формат."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Выберите, чтобы настроить носитель (<xliff:g id="NAME">%s</xliff:g>) в поддерживаемом формате."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Возможно, потребуется отформатировать устройство."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Карта \"<xliff:g id="NAME">%s</xliff:g>\" извлечена неправильно"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Перед тем как извлечь накопитель, отключите его, чтобы избежать потери данных."</string>
@@ -1735,7 +1742,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Для переключения между функциями проведите по экрану снизу вверх тремя пальцами и задержите их."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Увеличение"</string>
     <string name="user_switched" msgid="7249833311585228097">"Выбран аккаунт пользователя <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Смена профиля на <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Смена профиля на \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Выход из аккаунта <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Владелец"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Ошибка"</string>
@@ -2022,7 +2029,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Новости и журналы"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Карты и навигация"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Работа"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Доступность"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Специальные возможности"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Хранилище устройства"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Отладка по USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ч."</string>
