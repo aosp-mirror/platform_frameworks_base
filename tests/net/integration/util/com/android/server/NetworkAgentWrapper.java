@@ -69,12 +69,12 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
     private int mStopKeepaliveError = SocketKeepalive.NO_KEEPALIVE;
     private Integer mExpectedKeepaliveSlot = null;
 
-    public NetworkAgentWrapper(int transport, LinkProperties linkProperties, Context context)
-            throws Exception {
+    public NetworkAgentWrapper(int transport, LinkProperties linkProperties,
+            NetworkCapabilities ncTemplate, Context context) throws Exception {
         final int type = transportToLegacyType(transport);
         final String typeName = ConnectivityManager.getNetworkTypeName(type);
         mNetworkInfo = new NetworkInfo(type, 0, typeName, "Mock");
-        mNetworkCapabilities = new NetworkCapabilities();
+        mNetworkCapabilities = (ncTemplate != null) ? ncTemplate : new NetworkCapabilities();
         mNetworkCapabilities.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
         mNetworkCapabilities.addTransportType(transport);
         switch (transport) {
