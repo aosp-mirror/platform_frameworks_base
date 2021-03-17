@@ -2,3 +2,5 @@ per-file AssetTest.java = file:/core/java/android/content/res/OWNERS
 per-file ContextTest.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *Launcher* = file:/core/java/android/content/pm/LAUNCHER_OWNERS
 per-file *Shortcut* = file:/core/java/android/content/pm/SHORTCUT_OWNERS
+per-file ComponentCallbacksControllerTest = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ComponentCallbacksControllerTest = charlesccchen@google.com
