@@ -37,6 +37,7 @@ import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_PRIVDNS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_PARTIAL;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_ENTERPRISE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_FOREGROUND;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
@@ -98,7 +99,7 @@ import android.net.INetworkActivityListener;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
-import android.net.IOnSetOemNetworkPreferenceListener;
+import android.net.IOnCompleteListener;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
 import android.net.InetAddresses;
@@ -215,6 +216,7 @@ import com.android.server.connectivity.NetworkNotificationManager;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
 import com.android.server.connectivity.NetworkRanker;
 import com.android.server.connectivity.PermissionMonitor;
+import com.android.server.connectivity.ProfileNetworkPreferences;
 import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.QosCallbackTracker;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -559,8 +561,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int EVENT_SET_REQUIRE_VPN_FOR_UIDS = 47;
 
     /**
-     * used internally when setting the default networks for OemNetworkPreferences.
-     * obj = OemNetworkPreferences
+     * Used internally when setting the default networks for OemNetworkPreferences.
+     * obj = Pair<OemNetworkPreferences, listener>
      */
     private static final int EVENT_SET_OEM_NETWORK_PREFERENCE = 48;
 
@@ -568,6 +570,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * Used to indicate the system default network becomes active.
      */
     private static final int EVENT_REPORT_NETWORK_ACTIVITY = 49;
+
+    /**
+     * Used internally when setting a network preference for a user profile.
+     * obj = Pair<ProfileNetworkPreference, Listener>
+     */
+    private static final int EVENT_SET_PROFILE_NETWORK_PREFERENCE = 50;
 
     /**
      * Argument for {@link #EVENT_PROVISIONING_NOTIFICATION} to indicate that the notification
@@ -1290,11 +1298,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private static NetworkCapabilities createDefaultNetworkCapabilitiesForUid(int uid) {
+        return createDefaultNetworkCapabilitiesForUidRange(new UidRange(uid, uid));
+    }
+
+    private static NetworkCapabilities createDefaultNetworkCapabilitiesForUidRange(
+            @NonNull final UidRange uids) {
         final NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addCapability(NET_CAPABILITY_INTERNET);
         netCap.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
         netCap.removeCapability(NET_CAPABILITY_NOT_VPN);
-        netCap.setSingleUid(uid);
+        netCap.setUids(Collections.singleton(uids));
         return netCap;
     }
 
@@ -4533,11 +4546,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     handleSetRequireVpnForUids(toBool(msg.arg1), (UidRange[]) msg.obj);
                     break;
                 case EVENT_SET_OEM_NETWORK_PREFERENCE: {
-                    final Pair<OemNetworkPreferences, IOnSetOemNetworkPreferenceListener> arg =
-                            (Pair<OemNetworkPreferences,
-                                    IOnSetOemNetworkPreferenceListener>) msg.obj;
+                    final Pair<OemNetworkPreferences, IOnCompleteListener> arg =
+                            (Pair<OemNetworkPreferences, IOnCompleteListener>) msg.obj;
                     handleSetOemNetworkPreference(arg.first, arg.second);
                     break;
+                }
+                case EVENT_SET_PROFILE_NETWORK_PREFERENCE: {
+                    final Pair<ProfileNetworkPreferences.Preference, IOnCompleteListener> arg =
+                            (Pair<ProfileNetworkPreferences.Preference, IOnCompleteListener>)
+                                    msg.obj;
+                    handleSetProfileNetworkPreference(arg.first, arg.second);
                 }
                 case EVENT_REPORT_NETWORK_ACTIVITY:
                     mNetworkActivityTracker.handleReportNetworkActivity();
@@ -5109,6 +5127,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void onUserRemoved(UserHandle user) {
         mPermissionMonitor.onUserRemoved(user);
+        // If there was a network preference for this user, remove it.
+        handleSetProfileNetworkPreference(new ProfileNetworkPreferences.Preference(user, null),
+                null /* listener */);
         if (mOemNetworkPreferences.getNetworkPreferences().size() > 0) {
             handleSetOemNetworkPreference(mOemNetworkPreferences, null);
         }
@@ -5907,10 +5928,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @GuardedBy("mBlockedAppUids")
     private final HashSet<Integer> mBlockedAppUids = new HashSet<>();
 
-    // Current OEM network preferences.
+    // Current OEM network preferences. This object must only be written to on the handler thread.
+    // Since it is immutable and always non-null, other threads may read it if they only care
+    // about seeing a consistent object but not that it is current.
     @NonNull
     private OemNetworkPreferences mOemNetworkPreferences =
             new OemNetworkPreferences.Builder().build();
+    // Current per-profile network preferences. This object follows the same threading rules as
+    // the OEM network preferences above.
+    @NonNull
+    private ProfileNetworkPreferences mProfileNetworkPreferences = new ProfileNetworkPreferences();
 
     // The always-on request for an Internet-capable network that apps without a specific default
     // fall back to.
@@ -9111,6 +9138,143 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mQosCallbackTracker.unregisterCallback(callback);
     }
 
+    // Network preference per-profile and OEM network preferences can't be set at the same
+    // time, because it is unclear what should happen if both preferences are active for
+    // one given UID. To make it possible, the stack would have to clarify what would happen
+    // in case both are active at the same time. The implementation may have to be adjusted
+    // to implement the resulting rules. For example, a priority could be defined between them,
+    // where the OEM preference would be considered less or more important than the enterprise
+    // preference ; this would entail implementing the priorities somehow, e.g. by doing
+    // UID arithmetic with UID ranges or passing a priority to netd so that the routing rules
+    // are set at the right level. Other solutions are possible, e.g. merging of the
+    // preferences for the relevant UIDs.
+    private static void throwConcurrentPreferenceException() {
+        throw new IllegalStateException("Can't set NetworkPreferenceForUser and "
+                + "set OemNetworkPreference at the same time");
+    }
+
+    /**
+     * Request that a user profile is put by default on a network matching a given preference.
+     *
+     * See the documentation for the individual preferences for a description of the supported
+     * behaviors.
+     *
+     * @param profile the profile concerned.
+     * @param preference the preference for this profile, as one of the PROFILE_NETWORK_PREFERENCE_*
+     *                   constants.
+     * @param listener an optional listener to listen for completion of the operation.
+     */
+    @Override
+    public void setProfileNetworkPreference(@NonNull final UserHandle profile,
+            @ConnectivityManager.ProfileNetworkPreference final int preference,
+            @Nullable final IOnCompleteListener listener) {
+        Objects.requireNonNull(profile);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (DBG) {
+            log("setProfileNetworkPreference " + profile + " to " + preference);
+        }
+        if (profile.getIdentifier() < 0) {
+            throw new IllegalArgumentException("Must explicitly specify a user handle ("
+                    + "UserHandle.CURRENT not supported)");
+        }
+        final UserManager um;
+        try {
+            um = mContext.createContextAsUser(profile, 0 /* flags */)
+                    .getSystemService(UserManager.class);
+        } catch (IllegalStateException e) {
+            throw new IllegalArgumentException("Profile does not exist");
+        }
+        if (!um.isManagedProfile()) {
+            throw new IllegalArgumentException("Profile must be a managed profile");
+        }
+        // Strictly speaking, mOemNetworkPreferences should only be touched on the
+        // handler thread. However it is an immutable object, so reading the reference is
+        // safe - it's just possible the value is slightly outdated. For the final check,
+        // see #handleSetProfileNetworkPreference. But if this can be caught here it is a
+        // lot easier to understand, so opportunistically check it.
+        if (!mOemNetworkPreferences.isEmpty()) {
+            throwConcurrentPreferenceException();
+        }
+        final NetworkCapabilities nc;
+        switch (preference) {
+            case ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT:
+                nc = null;
+                break;
+            case ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE:
+                final UidRange uids = UidRange.createForUser(profile);
+                nc = createDefaultNetworkCapabilitiesForUidRange(uids);
+                nc.addCapability(NET_CAPABILITY_ENTERPRISE);
+                nc.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Invalid preference in setProfileNetworkPreference");
+        }
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_PROFILE_NETWORK_PREFERENCE,
+                new Pair<>(new ProfileNetworkPreferences.Preference(profile, nc), listener)));
+    }
+
+    private void validateNetworkCapabilitiesOfProfileNetworkPreference(
+            @Nullable final NetworkCapabilities nc) {
+        if (null == nc) return; // Null caps are always allowed. It means to remove the setting.
+        ensureRequestableCapabilities(nc);
+    }
+
+    private ArraySet<NetworkRequestInfo> createNrisFromProfileNetworkPreferences(
+            @NonNull final ProfileNetworkPreferences prefs) {
+        final ArraySet<NetworkRequestInfo> result = new ArraySet<>();
+        for (final ProfileNetworkPreferences.Preference pref : prefs.preferences) {
+            // The NRI for a user should be comprised of two layers:
+            // - The request for the capabilities
+            // - The request for the default network, for fallback. Create an image of it to
+            //   have the correct UIDs in it (also a request can only be part of one NRI, because
+            //   of lookups in 1:1 associations like mNetworkRequests).
+            // Note that denying a fallback can be implemented simply by not adding the second
+            // request.
+            final ArrayList<NetworkRequest> nrs = new ArrayList<>();
+            nrs.add(createNetworkRequest(NetworkRequest.Type.REQUEST, pref.capabilities));
+            nrs.add(createDefaultRequest());
+            setNetworkRequestUids(nrs, pref.capabilities.getUids());
+            final NetworkRequestInfo nri = new NetworkRequestInfo(nrs);
+            result.add(nri);
+        }
+        return result;
+    }
+
+    private void handleSetProfileNetworkPreference(
+            @NonNull final ProfileNetworkPreferences.Preference preference,
+            @Nullable final IOnCompleteListener listener) {
+        // setProfileNetworkPreference and setOemNetworkPreference are mutually exclusive, in
+        // particular because it's not clear what preference should win in case both apply
+        // to the same app.
+        // The binder call has already checked this, but as mOemNetworkPreferences is only
+        // touched on the handler thread, it's theoretically not impossible that it has changed
+        // since.
+        if (!mOemNetworkPreferences.isEmpty()) {
+            // This may happen on a device with an OEM preference set when a user is removed.
+            // In this case, it's safe to ignore. In particular this happens in the tests.
+            loge("handleSetProfileNetworkPreference, but OEM network preferences not empty");
+            return;
+        }
+
+        validateNetworkCapabilitiesOfProfileNetworkPreference(preference.capabilities);
+
+        mProfileNetworkPreferences = mProfileNetworkPreferences.plus(preference);
+        final ArraySet<NetworkRequestInfo> nris =
+                createNrisFromProfileNetworkPreferences(mProfileNetworkPreferences);
+        replaceDefaultNetworkRequestsForPreference(nris);
+        // Finally, rematch.
+        rematchAllNetworksAndRequests();
+
+        if (null != listener) {
+            try {
+                listener.onComplete();
+            } catch (RemoteException e) {
+                loge("Listener for setProfileNetworkPreference has died");
+            }
+        }
+    }
+
     private void enforceAutomotiveDevice() {
         final boolean isAutomotiveDevice =
                 mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
@@ -9129,16 +9293,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * Calling this will overwrite the existing preference.
      *
      * @param preference {@link OemNetworkPreferences} The application network preference to be set.
-     * @param listener {@link ConnectivityManager.OnSetOemNetworkPreferenceListener} Listener used
+     * @param listener {@link ConnectivityManager.OnCompleteListener} Listener used
      * to communicate completion of setOemNetworkPreference();
      */
     @Override
     public void setOemNetworkPreference(
             @NonNull final OemNetworkPreferences preference,
-            @Nullable final IOnSetOemNetworkPreferenceListener listener) {
+            @Nullable final IOnCompleteListener listener) {
 
         enforceAutomotiveDevice();
         enforceOemNetworkPreferencesPermission();
+
+        if (!mProfileNetworkPreferences.isEmpty()) {
+            // Strictly speaking, mProfileNetworkPreferences should only be touched on the
+            // handler thread. However it is an immutable object, so reading the reference is
+            // safe - it's just possible the value is slightly outdated. For the final check,
+            // see #handleSetOemPreference. But if this can be caught here it is a
+            // lot easier to understand, so opportunistically check it.
+            throwConcurrentPreferenceException();
+        }
 
         Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
         validateOemNetworkPreferences(preference);
@@ -9158,11 +9331,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void handleSetOemNetworkPreference(
             @NonNull final OemNetworkPreferences preference,
-            @Nullable final IOnSetOemNetworkPreferenceListener listener) {
+            @Nullable final IOnCompleteListener listener) {
         Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
         if (DBG) {
             log("set OEM network preferences :" + preference.toString());
         }
+        // setProfileNetworkPreference and setOemNetworkPreference are mutually exclusive, in
+        // particular because it's not clear what preference should win in case both apply
+        // to the same app.
+        // The binder call has already checked this, but as mOemNetworkPreferences is only
+        // touched on the handler thread, it's theoretically not impossible that it has changed
+        // since.
+        if (!mProfileNetworkPreferences.isEmpty()) {
+            logwtf("handleSetOemPreference, but per-profile network preferences not empty");
+            return;
+        }
+
         final ArraySet<NetworkRequestInfo> nris =
                 new OemNetworkRequestFactory().createNrisFromOemNetworkPreferences(preference);
         replaceDefaultNetworkRequestsForPreference(nris);
