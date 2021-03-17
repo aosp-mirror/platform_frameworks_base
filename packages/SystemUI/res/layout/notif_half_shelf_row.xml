@@ -53,7 +53,7 @@
             android:textSize="14sp"
             android:ellipsize="end"
             android:maxLines="1"
-            style="@style/TextAppearance.NotificationInfo.Title"
+            style="@style/TextAppearance.NotificationImportanceChannel"
         />
 
         <TextView
@@ -67,7 +67,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:layout_below="@id/channel_name"
-            style="@style/TextAppearance.NotificationInfo.Secondary"
+            style="@style/TextAppearance.NotificationImportanceApp"
         />
     </RelativeLayout>
 
