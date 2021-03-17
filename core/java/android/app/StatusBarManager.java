@@ -331,10 +331,12 @@ public class StatusBarManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "Send {@link "
-            + "android.content.Intent#ACTION_CLOSE_SYSTEM_DIALOGS} instead.")
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "This operation"
+            + " is not allowed anymore, please see {@link android.content"
+            + ".Intent#ACTION_CLOSE_SYSTEM_DIALOGS} for more details.")
     @TestApi
     public void collapsePanels() {
+
         try {
             final IStatusBarService svc = getService();
             if (svc != null) {
