@@ -1063,6 +1063,12 @@
     <dimen name="global_actions_power_dialog_item_width">255dp</dimen>
     <dimen name="global_actions_power_dialog_item_bottom_margin">45dp</dimen>
 
+    <!-- Power Menu Lite -->
+    <dimen name="global_actions_button_size">96dp</dimen>
+    <dimen name="global_actions_button_padding">38dp</dimen>
+    <dimen name="global_actions_corner_radius">28dp</dimen>
+    <dimen name="global_actions_lite_padding">24dp</dimen>
+
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
     <dimen name="burn_in_prevention_offset_x">8dp</dimen>
