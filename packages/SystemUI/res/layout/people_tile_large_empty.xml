@@ -20,40 +20,48 @@
     <LinearLayout
         android:id="@+id/item"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
+        android:gravity="center"
         android:background="@drawable/people_space_tile_view_card"
         android:orientation="vertical"
-        android:paddingHorizontal="4dp"
-        android:paddingVertical="8dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="16dp">
 
         <ImageView
             android:id="@+id/person_icon"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <ImageView
-            android:id="@+id/predefined_icon"
-            android:layout_gravity="center"
-            android:paddingTop="4dp"
-            android:layout_width="18dp"
-            android:layout_height="22dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/name"
             android:layout_gravity="center"
-            android:paddingTop="4dp"
+            android:paddingTop="14dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:ellipsize="end"
-            android:maxLines="1"
-            android:paddingHorizontal="8dp"
+            android:singleLine="true"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="14sp" />
+            android:textSize="16sp" />
+        <TextView
+            android:id="@+id/last_interaction"
+            android:layout_gravity="center"
+            android:text="@string/empty_status"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+            android:textSize="14sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"/>
+        <ImageView
+            android:id="@+id/availability"
+            android:layout_gravity="center"
+            android:layout_width="10dp"
+            android:layout_height="26dp"
+            android:paddingTop="16dp"
+            android:background="@drawable/circle_green_10dp"/>
     </LinearLayout>
 </FrameLayout>
