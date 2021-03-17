@@ -17,6 +17,10 @@
 package com.android.server;
 
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
+import static android.content.pm.PackageManager.FEATURE_BLUETOOTH;
+import static android.content.pm.PackageManager.FEATURE_WATCH;
+import static android.content.pm.PackageManager.FEATURE_WIFI;
+import static android.content.pm.PackageManager.FEATURE_WIFI_DIRECT;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport.KEY_NETWORK_PROBES_ATTEMPTED_BITMASK;
 import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport.KEY_NETWORK_PROBES_SUCCEEDED_BITMASK;
@@ -28,9 +32,23 @@ import static android.net.ConnectivityDiagnosticsManager.DataStallReport.KEY_TCP
 import static android.net.ConnectivityDiagnosticsManager.DataStallReport.KEY_TCP_PACKET_FAIL_RATE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
+import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.ConnectivityManager.TYPE_MOBILE_CBS;
+import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
+import static android.net.ConnectivityManager.TYPE_MOBILE_EMERGENCY;
+import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
+import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
+import static android.net.ConnectivityManager.TYPE_MOBILE_IA;
+import static android.net.ConnectivityManager.TYPE_MOBILE_IMS;
+import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
+import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
 import static android.net.ConnectivityManager.TYPE_NONE;
+import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.TYPE_VPN;
+import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_PRIVDNS;
@@ -112,7 +130,6 @@ import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
-import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMonitorManager;
@@ -626,11 +643,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private UserManager mUserManager;
 
-    private NetworkConfig[] mNetConfigs;
-    private int mNetworksDefined;
-
     // the set of network types that can only be enabled by system/sig apps
-    private List mProtectedNetworks;
+    private List<Integer> mProtectedNetworks;
 
     private Set<String> mWolSupportedInterfaces;
 
@@ -720,18 +734,63 @@ public class ConnectivityService extends IConnectivityManager.Stub
          *    They are therefore not thread-safe with respect to each other.
          *  - getNetworkForType() can be called at any time on binder threads. It is synchronized
          *    on mTypeLists to be thread-safe with respect to a concurrent remove call.
+         *  - getRestoreTimerForType(type) is also synchronized on mTypeLists.
          *  - dump is thread-safe with respect to concurrent add and remove calls.
          */
         private final ArrayList<NetworkAgentInfo> mTypeLists[];
         @NonNull
         private final ConnectivityService mService;
 
+        // Restore timers for requestNetworkForFeature (network type -> timer in ms). Types without
+        // an entry have no timer (equivalent to -1). Lazily loaded.
+        @NonNull
+        private ArrayMap<Integer, Integer> mRestoreTimers = new ArrayMap<>();
+
         LegacyTypeTracker(@NonNull ConnectivityService service) {
             mService = service;
             mTypeLists = new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE + 1];
         }
 
-        public void addSupportedType(int type) {
+        public void loadSupportedTypes(@NonNull Context ctx, @NonNull TelephonyManager tm) {
+            final PackageManager pm = ctx.getPackageManager();
+            if (pm.hasSystemFeature(FEATURE_WIFI)) {
+                addSupportedType(TYPE_WIFI);
+            }
+            if (pm.hasSystemFeature(FEATURE_WIFI_DIRECT)) {
+                addSupportedType(TYPE_WIFI_P2P);
+            }
+            if (tm.isDataCapable()) {
+                // Telephony does not have granular support for these types: they are either all
+                // supported, or none is supported
+                addSupportedType(TYPE_MOBILE);
+                addSupportedType(TYPE_MOBILE_MMS);
+                addSupportedType(TYPE_MOBILE_SUPL);
+                addSupportedType(TYPE_MOBILE_DUN);
+                addSupportedType(TYPE_MOBILE_HIPRI);
+                addSupportedType(TYPE_MOBILE_FOTA);
+                addSupportedType(TYPE_MOBILE_IMS);
+                addSupportedType(TYPE_MOBILE_CBS);
+                addSupportedType(TYPE_MOBILE_IA);
+                addSupportedType(TYPE_MOBILE_EMERGENCY);
+            }
+            if (pm.hasSystemFeature(FEATURE_BLUETOOTH)) {
+                addSupportedType(TYPE_BLUETOOTH);
+            }
+            if (pm.hasSystemFeature(FEATURE_WATCH)) {
+                // TYPE_PROXY is only used on Wear
+                addSupportedType(TYPE_PROXY);
+            }
+            // Ethernet is often not specified in the configs, although many devices can use it via
+            // USB host adapters. Add it as long as the ethernet service is here.
+            if (ctx.getSystemService(Context.ETHERNET_SERVICE) != null) {
+                addSupportedType(TYPE_ETHERNET);
+            }
+
+            // Always add TYPE_VPN as a supported type
+            addSupportedType(TYPE_VPN);
+        }
+
+        private void addSupportedType(int type) {
             if (mTypeLists[type] != null) {
                 throw new IllegalStateException(
                         "legacy list for type " + type + "already initialized");
@@ -750,6 +809,35 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
             return null;
+        }
+
+        public int getRestoreTimerForType(int type) {
+            synchronized (mTypeLists) {
+                if (mRestoreTimers == null) {
+                    mRestoreTimers = loadRestoreTimers();
+                }
+                return mRestoreTimers.getOrDefault(type, -1);
+            }
+        }
+
+        private ArrayMap<Integer, Integer> loadRestoreTimers() {
+            final String[] configs = mService.mResources.get().getStringArray(
+                    com.android.connectivity.resources.R.array
+                            .config_legacy_networktype_restore_timers);
+            final ArrayMap<Integer, Integer> ret = new ArrayMap<>(configs.length);
+            for (final String config : configs) {
+                final String[] splits = TextUtils.split(config, ",");
+                if (splits.length != 2) {
+                    logwtf("Invalid restore timer token count: " + config);
+                    continue;
+                }
+                try {
+                    ret.put(Integer.parseInt(splits[0]), Integer.parseInt(splits[1]));
+                } catch (NumberFormatException e) {
+                    logwtf("Invalid restore timer number format: " + config, e);
+                }
+            }
+            return ret;
         }
 
         private void maybeLogBroadcast(NetworkAgentInfo nai, DetailedState state, int type,
@@ -1174,64 +1262,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNetTransitionWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mPendingIntentWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
-        mNetConfigs = new NetworkConfig[ConnectivityManager.MAX_NETWORK_TYPE+1];
-
-        // TODO: What is the "correct" way to do determine if this is a wifi only device?
-        boolean wifiOnly = mSystemProperties.getBoolean("ro.radio.noril", false);
-        log("wifiOnly=" + wifiOnly);
-        String[] naStrings = context.getResources().getStringArray(
-                com.android.internal.R.array.networkAttributes);
-        for (String naString : naStrings) {
-            try {
-                NetworkConfig n = new NetworkConfig(naString);
-                if (VDBG) log("naString=" + naString + " config=" + n);
-                if (n.type > ConnectivityManager.MAX_NETWORK_TYPE) {
-                    loge("Error in networkAttributes - ignoring attempt to define type " +
-                            n.type);
-                    continue;
-                }
-                if (wifiOnly && ConnectivityManager.isNetworkTypeMobile(n.type)) {
-                    log("networkAttributes - ignoring mobile as this dev is wifiOnly " +
-                            n.type);
-                    continue;
-                }
-                if (mNetConfigs[n.type] != null) {
-                    loge("Error in networkAttributes - ignoring attempt to redefine type " +
-                            n.type);
-                    continue;
-                }
-                mLegacyTypeTracker.addSupportedType(n.type);
-
-                mNetConfigs[n.type] = n;
-                mNetworksDefined++;
-            } catch(Exception e) {
-                // ignore it - leave the entry null
-            }
-        }
-
-        // Forcibly add TYPE_VPN as a supported type, if it has not already been added via config.
-        if (mNetConfigs[TYPE_VPN] == null) {
-            // mNetConfigs is used only for "restore time", which isn't applicable to VPNs, so we
-            // don't need to add TYPE_VPN to mNetConfigs.
-            mLegacyTypeTracker.addSupportedType(TYPE_VPN);
-            mNetworksDefined++;  // used only in the log() statement below.
-        }
-
-        // Do the same for Ethernet, since it's often not specified in the configs, although many
-        // devices can use it via USB host adapters.
-        if (mNetConfigs[TYPE_ETHERNET] == null
-                && mContext.getSystemService(Context.ETHERNET_SERVICE) != null) {
-            mLegacyTypeTracker.addSupportedType(TYPE_ETHERNET);
-            mNetworksDefined++;
-        }
-
-        if (VDBG) log("mNetworksDefined=" + mNetworksDefined);
-
-        mProtectedNetworks = new ArrayList<Integer>();
+        mLegacyTypeTracker.loadSupportedTypes(mContext, mTelephonyManager);
+        mProtectedNetworks = new ArrayList<>();
         int[] protectedNetworks = context.getResources().getIntArray(
                 com.android.internal.R.array.config_protectedNetworks);
         for (int p : protectedNetworks) {
-            if ((mNetConfigs[p] != null) && (mProtectedNetworks.contains(p) == false)) {
+            if (mLegacyTypeTracker.isTypeSupported(p) && !mProtectedNetworks.contains(p)) {
                 mProtectedNetworks.add(p);
             } else {
                 if (DBG) loge("Ignoring protectedNetwork " + p);
@@ -2640,9 +2676,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // if the system property isn't set, use the value for the apn type
         int ret = RESTORE_DEFAULT_NETWORK_DELAY;
 
-        if ((networkType <= ConnectivityManager.MAX_NETWORK_TYPE) &&
-                (mNetConfigs[networkType] != null)) {
-            ret = mNetConfigs[networkType].restoreTime;
+        if (mLegacyTypeTracker.isTypeSupported(networkType)) {
+            ret = mLegacyTypeTracker.getRestoreTimerForType(networkType);
         }
         return ret;
     }
@@ -4853,6 +4888,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private static void logwtf(String s) {
         Log.wtf(TAG, s);
+    }
+
+    private static void logwtf(String s, Throwable t) {
+        Log.wtf(TAG, s, t);
     }
 
     private static void loge(String s) {
@@ -8917,13 +8956,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         private int transportTypeToLegacyType(int type) {
             switch (type) {
                 case NetworkCapabilities.TRANSPORT_CELLULAR:
-                    return ConnectivityManager.TYPE_MOBILE;
+                    return TYPE_MOBILE;
                 case NetworkCapabilities.TRANSPORT_WIFI:
-                    return ConnectivityManager.TYPE_WIFI;
+                    return TYPE_WIFI;
                 case NetworkCapabilities.TRANSPORT_BLUETOOTH:
-                    return ConnectivityManager.TYPE_BLUETOOTH;
+                    return TYPE_BLUETOOTH;
                 case NetworkCapabilities.TRANSPORT_ETHERNET:
-                    return ConnectivityManager.TYPE_ETHERNET;
+                    return TYPE_ETHERNET;
                 default:
                     loge("Unexpected transport in transportTypeToLegacyType: " + type);
             }
