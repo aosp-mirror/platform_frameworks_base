@@ -16,6 +16,9 @@
 
 package com.android.internal.accessibility.util;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
@@ -28,6 +31,10 @@ import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TRIPLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
+import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_ALL;
+import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_FULL_SCREEN;
+import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_UNKNOWN_MODE;
+import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_WINDOW;
 
 import android.content.ComponentName;
 import android.view.accessibility.AccessibilityManager;
@@ -113,6 +120,19 @@ public final class AccessibilityStatsLogUtils {
                 UNKNOWN_STATUS);
     }
 
+    /**
+     * Logs the magnification activated mode and its duration of the usage.
+     * Calls this when the magnification is disabled.
+     *
+     * @param mode The activated magnification mode.
+     * @param duration The duration in milliseconds during the magnification is activated.
+     */
+    public static void logMagnificationUsageState(int mode, long duration) {
+        FrameworkStatsLog.write(FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED,
+                convertToLoggingMagnificationMode(mode),
+                duration);
+    }
+
     private static int convertToLoggingShortcutType(@ShortcutType int shortcutType) {
         switch (shortcutType) {
             case ACCESSIBILITY_BUTTON:
@@ -126,5 +146,19 @@ public final class AccessibilityStatsLogUtils {
     private static int convertToLoggingServiceStatus(boolean enabled) {
         return enabled ? ACCESSIBILITY_SHORTCUT_REPORTED__SERVICE_STATUS__ENABLED
                 : ACCESSIBILITY_SHORTCUT_REPORTED__SERVICE_STATUS__DISABLED;
+    }
+
+    private static int convertToLoggingMagnificationMode(int mode) {
+        switch (mode) {
+            case ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN:
+                return MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_FULL_SCREEN;
+            case ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW:
+                return MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_WINDOW;
+            case ACCESSIBILITY_MAGNIFICATION_MODE_ALL:
+                return MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_ALL;
+
+            default:
+                return MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_UNKNOWN_MODE;
+        }
     }
 }
