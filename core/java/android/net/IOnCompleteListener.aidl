@@ -18,6 +18,6 @@
 package android.net;
 
 /** @hide */
-oneway interface IOnSetOemNetworkPreferenceListener {
+oneway interface IOnCompleteListener {
     void onComplete();
 }
