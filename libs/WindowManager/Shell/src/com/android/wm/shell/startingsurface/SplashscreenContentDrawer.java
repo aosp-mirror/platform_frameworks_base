@@ -129,8 +129,8 @@ public class SplashscreenContentDrawer {
         } else if (attrs.mWindowBgResId != 0) {
             themeBGDrawable = context.getDrawable(attrs.mWindowBgResId);
         } else {
-            Slog.w(TAG, "Window background not exist!");
             themeBGDrawable = createDefaultBackgroundDrawable();
+            Slog.w(TAG, "Window background does not exist, using " + themeBGDrawable);
         }
         final int animationDuration;
         final Drawable iconDrawable;

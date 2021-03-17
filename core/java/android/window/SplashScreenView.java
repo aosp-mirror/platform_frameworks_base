@@ -200,14 +200,14 @@ public final class SplashScreenView extends FrameLayout {
                 view.mParceledIconBitmap = mParceledIconBitmap;
             }
             // branding image
-            if (mBrandingImageHeight > 0 && mBrandingImageWidth > 0) {
+            if (mBrandingImageHeight > 0 && mBrandingImageWidth > 0 && mBrandingDrawable != null) {
                 final ViewGroup.LayoutParams params = view.mBrandingImageView.getLayoutParams();
                 params.width = mBrandingImageWidth;
                 params.height = mBrandingImageHeight;
                 view.mBrandingImageView.setLayoutParams(params);
-            }
-            if (mBrandingDrawable != null) {
                 view.mBrandingImageView.setBackground(mBrandingDrawable);
+            } else {
+                view.mBrandingImageView.setVisibility(GONE);
             }
             if (mParceledBrandingBitmap != null) {
                 view.mParceledBrandingBitmap = mParceledBrandingBitmap;
