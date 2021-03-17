@@ -90,6 +90,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -1207,9 +1208,21 @@ public class AppOpsManager {
      */
     public static final int OP_COARSE_LOCATION_SOURCE = AppProtoEnums.APP_OP_COARSE_LOCATION_SOURCE;
 
+    /**
+     * Allow apps to create the requests to manage the media files without user confirmation.
+     *
+     * @see android.Manifest.permission#MANAGE_MEDIA
+     * @see android.provider.MediaStore#createDeleteRequest(ContentResolver, Collection)
+     * @see android.provider.MediaStore#createTrashRequest(ContentResolver, Collection, boolean)
+     * @see android.provider.MediaStore#createWriteRequest(ContentResolver, Collection)
+     *
+     * @hide
+     */
+    public static final int OP_MANAGE_MEDIA = AppProtoEnums.APP_OP_MANAGE_MEDIA;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 110;
+    public static final int _NUM_OP = 111;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1607,6 +1620,18 @@ public class AppOpsManager {
      */
     public static final String OPSTR_COARSE_LOCATION_SOURCE = "android:coarse_location_source";
 
+    /**
+     * Allow apps to create the requests to manage the media files without user confirmation.
+     *
+     * @see android.Manifest.permission#MANAGE_MEDIA
+     * @see android.provider.MediaStore#createDeleteRequest(ContentResolver, Collection)
+     * @see android.provider.MediaStore#createTrashRequest(ContentResolver, Collection, boolean)
+     * @see android.provider.MediaStore#createWriteRequest(ContentResolver, Collection)
+     *
+     * @hide
+     */
+    public static final String OPSTR_MANAGE_MEDIA = "android:manage_media";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1688,6 +1713,7 @@ public class AppOpsManager {
             OP_MANAGE_ONGOING_CALLS,
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             OP_SCHEDULE_EXACT_ALARM,
+            OP_MANAGE_MEDIA,
     };
 
     /**
@@ -1809,6 +1835,7 @@ public class AppOpsManager {
             OP_SCHEDULE_EXACT_ALARM,            // SCHEDULE_EXACT_ALARM
             OP_FINE_LOCATION,                   // OP_FINE_LOCATION_SOURCE
             OP_COARSE_LOCATION,                 // OP_COARSE_LOCATION_SOURCE
+            OP_MANAGE_MEDIA,                    // MANAGE_MEDIA
     };
 
     /**
@@ -1925,6 +1952,7 @@ public class AppOpsManager {
             OPSTR_SCHEDULE_EXACT_ALARM,
             OPSTR_FINE_LOCATION_SOURCE,
             OPSTR_COARSE_LOCATION_SOURCE,
+            OPSTR_MANAGE_MEDIA,
     };
 
     /**
@@ -2042,6 +2070,7 @@ public class AppOpsManager {
             "SCHEDULE_EXACT_ALARM",
             "FINE_LOCATION_SOURCE",
             "COARSE_LOCATION_SOURCE",
+            "MANAGE_MEDIA",
     };
 
     /**
@@ -2160,6 +2189,7 @@ public class AppOpsManager {
             Manifest.permission.SCHEDULE_EXACT_ALARM,
             null, // no permission for OP_ACCESS_FINE_LOCATION_SOURCE,
             null, // no permission for OP_ACCESS_COARSE_LOCATION_SOURCE,
+            Manifest.permission.MANAGE_MEDIA,
     };
 
     /**
@@ -2278,6 +2308,7 @@ public class AppOpsManager {
             null, // SCHEDULE_EXACT_ALARM
             null, // ACCESS_FINE_LOCATION_SOURCE
             null, // ACCESS_COARSE_LOCATION_SOURCE
+            null, // MANAGE_MEDIA
     };
 
     /**
@@ -2395,6 +2426,7 @@ public class AppOpsManager {
             null, // SCHEDULE_EXACT_ALARM
             null, // ACCESS_FINE_LOCATION_SOURCE
             null, // ACCESS_COARSE_LOCATION_SOURCE
+            null, // MANAGE_MEDIA
     };
 
     /**
@@ -2511,6 +2543,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // SCHEDULE_EXACT_ALARM
             AppOpsManager.MODE_ALLOWED, // ACCESS_FINE_LOCATION_SOURCE
             AppOpsManager.MODE_ALLOWED, // ACCESS_COARSE_LOCATION_SOURCE
+            AppOpsManager.MODE_DEFAULT, // MANAGE_MEDIA
     };
 
     /**
@@ -2631,6 +2664,7 @@ public class AppOpsManager {
             false, // SCHEDULE_EXACT_ALARM
             false, // ACCESS_FINE_LOCATION_SOURCE
             false, // ACCESS_COARSE_LOCATION_SOURCE
+            false, // MANAGE_MEDIA
     };
 
     /**
