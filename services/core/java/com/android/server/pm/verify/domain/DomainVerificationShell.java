@@ -89,7 +89,7 @@ public class DomainVerificationShell {
         pw.println("    must be declared by the package for this to work. This command will not");
         pw.println("    report a failure for domains that could not be applied.");
         pw.println("      --user <USER_ID>: the user to change selections for");
-        pw.println("      --package <PACKAGE>: the package to set, or \"all\" to set all packages");
+        pw.println("      --package <PACKAGE>: the package to set");
         pw.println("      <ENABLED>: whether or not to approve the domain");
         pw.println("      <DOMAINS>: space separated list of domains to change, or \"all\" to");
         pw.println("        change every domain.");
@@ -217,8 +217,6 @@ public class DomainVerificationShell {
         if (TextUtils.isEmpty(packageName)) {
             commandHandler.getErrPrintWriter().println("Error: no package specified");
             return false;
-        } else if (packageName.equalsIgnoreCase("all")) {
-            packageName = null;
         }
 
         if (userId == null) {
@@ -469,13 +467,15 @@ public class DomainVerificationShell {
          * Variant for use by PackageManagerShellCommand to allow the system/developer to override
          * the state for a domain.
          *
-         * @param packageName the package whose state to change, or all packages if non is
-         *                    specified
+         * If an approval fails because of a higher level owner, this method will silently skip the
+         * domain.
+         *
+         * @param packageName the package whose state to change
          * @param enabled     whether the domain is now approved by the user
          * @param domains     the set of domains to change, or null to affect all domains
          */
         void setDomainVerificationUserSelectionInternal(@UserIdInt int userId,
-                @Nullable String packageName, boolean enabled, @Nullable ArraySet<String> domains)
+                @NonNull String packageName, boolean enabled, @Nullable ArraySet<String> domains)
                 throws PackageManager.NameNotFoundException;
 
         /**
