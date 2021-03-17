@@ -123,16 +123,9 @@ static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* 
 }
 
 static void android_server_SystemServer_fdtrackAbort(JNIEnv*, jobject) {
-    raise(BIONIC_SIGNAL_FDTRACK);
-
-    // Wait for a bit to allow fdtrack to dump backtraces to logcat.
-    std::this_thread::sleep_for(5s);
-
-    // Abort on a different thread to avoid ART dumping runtime stacks.
-    std::thread([]() {
-        LOG_ALWAYS_FATAL("b/140703823: aborting due to fd leak: check logs for fd "
-                         "backtraces");
-    }).join();
+    sigval val;
+    val.sival_int = 1;
+    sigqueue(getpid(), BIONIC_SIGNAL_FDTRACK, val);
 }
 
 static jlong android_server_SystemServer_startIncrementalService(JNIEnv* env, jclass klass,
