@@ -18437,12 +18437,12 @@ package android.hardware.camera2 {
   }
 
   public class MultiResolutionImageReader implements java.lang.AutoCloseable {
+    ctor public MultiResolutionImageReader(@NonNull java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo>, int, @IntRange(from=1) int);
     method public void close();
     method protected void finalize();
     method public void flush();
     method @NonNull public android.hardware.camera2.params.MultiResolutionStreamInfo getStreamInfoForImageReader(@NonNull android.media.ImageReader);
     method @NonNull public android.view.Surface getSurface();
-    method @NonNull public static android.hardware.camera2.MultiResolutionImageReader newInstance(@NonNull java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo>, int, @IntRange(from=1) int);
     method public void setOnImageAvailableListener(@Nullable android.media.ImageReader.OnImageAvailableListener, @Nullable java.util.concurrent.Executor);
   }
 
@@ -18553,10 +18553,10 @@ package android.hardware.camera2.params {
   }
 
   public class MultiResolutionStreamInfo {
-    ctor public MultiResolutionStreamInfo(int, int, @NonNull String);
-    method public int getHeight();
+    ctor public MultiResolutionStreamInfo(@IntRange(from=1) int, @IntRange(from=1) int, @NonNull String);
+    method @IntRange(from=1) public int getHeight();
     method @NonNull public String getPhysicalCameraId();
-    method public int getWidth();
+    method @IntRange(from=1) public int getWidth();
   }
 
   public final class OisSample {

@@ -17,6 +17,7 @@
 package android.hardware.camera2.params;
 
 import android.annotation.NonNull;
+import android.annotation.IntRange;
 
 import java.util.Objects;
 
@@ -50,9 +51,22 @@ public class MultiResolutionStreamInfo {
      * MultiResolutionStreamConfigurationMap#getOutputInfo} or {@link
      * MultiResolutionStreamConfigurationMap#getInputInfo} to obtain them for a particular format
      * instead.</p>
+     *
+     * @param streamWidth The width in pixels of the camera stream
+     * @param streamHeight The height in pixels of the camera stream
+     * @param physicalCameraId The physical camera Id the camera stream is associated with
+     * @throws IllegalArgumentException if the streamWidth or streamHeight is invalid (either zero
+     *                                  or negative).
      */
-    public MultiResolutionStreamInfo(int streamWidth, int streamHeight,
+    public MultiResolutionStreamInfo(@IntRange(from = 1) int streamWidth,
+            @IntRange(from = 1) int streamHeight,
             @NonNull String physicalCameraId) {
+        if (streamWidth <= 0) {
+            throw new IllegalArgumentException("Invalid stream width " + streamWidth);
+        }
+        if (streamHeight <= 0) {
+            throw new IllegalArgumentException("Invalid stream height " + streamHeight);
+        }
         mStreamWidth = streamWidth;
         mStreamHeight = streamHeight;
         mPhysicalCameraId = physicalCameraId;
@@ -61,14 +75,14 @@ public class MultiResolutionStreamInfo {
     /**
      * The width of this particular image buffer stream in pixels.
      */
-    public int getWidth() {
+    public @IntRange(from = 1) int getWidth() {
         return mStreamWidth;
     }
 
     /**
      * The height of this particular image buffer stream in pixels.
      */
-    public int getHeight() {
+    public @IntRange(from = 1) int getHeight() {
         return mStreamHeight;
     }
 
