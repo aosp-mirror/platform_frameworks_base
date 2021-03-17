@@ -1513,10 +1513,7 @@ public class ConnectivityServiceTest {
     }
 
     private ConnectivityService.Dependencies makeDependencies() {
-        doReturn(TEST_TCP_INIT_RWND).when(mSystemProperties)
-                .getInt("net.tcp.default_init_rwnd", 0);
         doReturn(false).when(mSystemProperties).getBoolean("ro.radio.noril", false);
-        doNothing().when(mSystemProperties).setTcpInitRwnd(anyInt());
         final ConnectivityService.Dependencies deps = mock(ConnectivityService.Dependencies.class);
         doReturn(mCsHandlerThread).when(deps).makeHandlerThread();
         doReturn(mNetIdManager).when(deps).makeNetIdManager();
@@ -7993,7 +7990,6 @@ public class ConnectivityServiceTest {
 
         // Switching default network updates TCP buffer sizes.
         verifyTcpBufferSizeChange(ConnectivityService.DEFAULT_TCP_BUFFER_SIZES);
-        verify(mSystemProperties, times(1)).setTcpInitRwnd(eq(TEST_TCP_INIT_RWND));
         // Add an IPv4 address. Expect prefix discovery to be stopped. Netd doesn't tell us that
         // the NAT64 prefix was removed because one was never discovered.
         cellLp.addLinkAddress(myIpv4);
@@ -8479,14 +8475,12 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(false);
         networkCallback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
         verifyTcpBufferSizeChange(ConnectivityService.DEFAULT_TCP_BUFFER_SIZES);
-        verify(mSystemProperties, times(1)).setTcpInitRwnd(eq(TEST_TCP_INIT_RWND));
         // Change link Properties should have updated tcp buffer size.
         LinkProperties lp = new LinkProperties();
         lp.setTcpBufferSizes(testTcpBufferSizes);
         mCellNetworkAgent.sendLinkProperties(lp);
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
         verifyTcpBufferSizeChange(testTcpBufferSizes);
-        verify(mSystemProperties, times(2)).setTcpInitRwnd(eq(TEST_TCP_INIT_RWND));
         // Clean up.
         mCellNetworkAgent.disconnect();
         networkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
