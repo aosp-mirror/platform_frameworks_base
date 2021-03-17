@@ -77,6 +77,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
@@ -215,6 +216,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationGuts mGuts;
     private NotificationEntry mEntry;
     private String mAppName;
+    private FalsingManager mFalsingManager;
     private FalsingCollector mFalsingCollector;
 
     /**
@@ -884,6 +886,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mNotificationParent.updateBackgroundForGroupState();
         }
         updateBackgroundClipping();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        // Other parts of the system may intercept and handle all the falsing.
+        // Otherwise, if we see motion and follow-on events, try to classify them as a tap.
+        if (ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
+            mFalsingManager.isFalseTap(true, 0.3);
+        }
+        return super.onInterceptTouchEvent(ev);
     }
 
     @Override
@@ -1569,6 +1581,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             OnExpandClickListener onExpandClickListener,
             NotificationMediaManager notificationMediaManager,
             CoordinateOnClickListener onFeedbackClickListener,
+            FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             StatusBarStateController statusBarStateController,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
@@ -1594,6 +1607,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mOnExpandClickListener = onExpandClickListener;
         mMediaManager = notificationMediaManager;
         setOnFeedbackClickListener(onFeedbackClickListener);
+        mFalsingManager = falsingManager;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
 
