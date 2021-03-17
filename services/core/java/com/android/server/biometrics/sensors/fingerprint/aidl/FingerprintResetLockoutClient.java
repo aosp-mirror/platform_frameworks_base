@@ -63,6 +63,12 @@ class FingerprintResetLockoutClient extends HalClientMonitor<ISession> {
     }
 
     @Override
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
+        startHalOperation();
+    }
+
+    @Override
     protected void startHalOperation() {
         try {
             getFreshDaemon().resetLockout(mSequentialId, mHardwareAuthToken);
