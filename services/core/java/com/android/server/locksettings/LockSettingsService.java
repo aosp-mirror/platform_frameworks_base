@@ -19,6 +19,7 @@ package com.android.server.locksettings;
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.READ_CONTACTS;
+import static android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_ALL;
@@ -159,6 +160,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -1077,6 +1079,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         mContext.enforceCallingOrSelfPermission(BIOMETRIC_PERMISSION, "LockSettingsBiometric");
     }
 
+    private boolean hasPermission(String permission) {
+        return mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED;
+    }
+
     @Override
     public boolean hasSecureLockScreen() {
         return mHasSecureLockScreen;
@@ -1578,42 +1584,52 @@ public class LockSettingsService extends ILockSettings.Stub {
             throw new UnsupportedOperationException(
                     "This operation requires secure lock screen feature");
         }
-        checkWritePermission(userId);
-        enforceFrpResolved();
+        if (!hasPermission(PERMISSION) && !hasPermission(SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS)) {
+            throw new SecurityException(
+                    "setLockCredential requires SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS or "
+                            + PERMISSION);
+        }
 
-        // When changing credential for profiles with unified challenge, some callers
-        // will pass in empty credential while others will pass in the credential of
-        // the parent user. setLockCredentialInternal() handles the formal case (empty
-        // credential) correctly but not the latter. As a stopgap fix, convert the latter
-        // case to the formal. The long-term fix would be fixing LSS such that it should
-        // accept only the parent user credential on its public API interfaces, swap it
-        // with the profile's random credential at that API boundary (i.e. here) and make
-        // sure LSS internally does not special case profile with unififed challenge: b/80170828.
-        if (!savedCredential.isNone() && isManagedProfileWithUnifiedLock(userId)) {
-            // Verify the parent credential again, to make sure we have a fresh enough
-            // auth token such that getDecryptedPasswordForTiedProfile() inside
-            // setLockCredentialInternal() can function correctly.
-            verifyCredential(savedCredential, mUserManager.getProfileParent(userId).id,
-                    0 /* flags */);
-            savedCredential.zeroize();
-            savedCredential = LockscreenCredential.createNone();
-        }
-        synchronized (mSeparateChallengeLock) {
-            if (!setLockCredentialInternal(credential, savedCredential,
-                    userId, /* isLockTiedToParent= */ false)) {
-                scheduleGc();
-                return false;
+        long identity = Binder.clearCallingIdentity();
+        try {
+            enforceFrpResolved();
+            // When changing credential for profiles with unified challenge, some callers
+            // will pass in empty credential while others will pass in the credential of
+            // the parent user. setLockCredentialInternal() handles the formal case (empty
+            // credential) correctly but not the latter. As a stopgap fix, convert the latter
+            // case to the formal. The long-term fix would be fixing LSS such that it should
+            // accept only the parent user credential on its public API interfaces, swap it
+            // with the profile's random credential at that API boundary (i.e. here) and make
+            // sure LSS internally does not special case profile with unififed challenge: b/80170828
+            if (!savedCredential.isNone() && isManagedProfileWithUnifiedLock(userId)) {
+                // Verify the parent credential again, to make sure we have a fresh enough
+                // auth token such that getDecryptedPasswordForTiedProfile() inside
+                // setLockCredentialInternal() can function correctly.
+                verifyCredential(savedCredential, mUserManager.getProfileParent(userId).id,
+                        0 /* flags */);
+                savedCredential.zeroize();
+                savedCredential = LockscreenCredential.createNone();
             }
-            setSeparateProfileChallengeEnabledLocked(userId, true, /* unused */ null);
-            notifyPasswordChanged(userId);
+            synchronized (mSeparateChallengeLock) {
+                if (!setLockCredentialInternal(credential, savedCredential,
+                        userId, /* isLockTiedToParent= */ false)) {
+                    scheduleGc();
+                    return false;
+                }
+                setSeparateProfileChallengeEnabledLocked(userId, true, /* unused */ null);
+                notifyPasswordChanged(userId);
+            }
+            if (mUserManager.getUserInfo(userId).isManagedProfile()) {
+                // Make sure the profile doesn't get locked straight after setting work challenge.
+                setDeviceUnlockedForUser(userId);
+            }
+            notifySeparateProfileChallengeChanged(userId);
+            onPostPasswordChanged(credential, userId);
+            scheduleGc();
+            return true;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
-        if (mUserManager.getUserInfo(userId).isManagedProfile()) {
-            // Make sure the profile doesn't get locked straight after setting work challenge.
-            setDeviceUnlockedForUser(userId);
-        }
-        notifySeparateProfileChallengeChanged(userId);
-        scheduleGc();
-        return true;
     }
 
     /**
@@ -1714,8 +1730,155 @@ public class LockSettingsService extends ILockSettings.Stub {
         return true;
     }
 
+    private void onPostPasswordChanged(LockscreenCredential newCredential, int userHandle) {
+        updateEncryptionPasswordIfNeeded(newCredential, userHandle);
+        if (newCredential.isPattern()) {
+            setBoolean(LockPatternUtils.PATTERN_EVER_CHOSEN_KEY, true, userHandle);
+        }
+        updatePasswordHistory(newCredential, userHandle);
+        mContext.getSystemService(TrustManager.class).reportEnabledTrustAgentsChanged(userHandle);
+    }
+
+    /**
+     * Update device encryption password if calling user is USER_SYSTEM and device supports
+     * encryption.
+     */
+    private void updateEncryptionPasswordIfNeeded(LockscreenCredential credential, int userHandle) {
+        // Update the device encryption password.
+        if (userHandle != UserHandle.USER_SYSTEM || !isDeviceEncryptionEnabled()) {
+            return;
+        }
+        if (!shouldEncryptWithCredentials()) {
+            updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
+            return;
+        }
+        if (credential.isNone()) {
+            // Set the encryption password to default.
+            setCredentialRequiredToDecrypt(false);
+        }
+        updateEncryptionPassword(credential.getStorageCryptType(), credential.getCredential());
+    }
+
+    /**
+     * Store the hash of the *current* password in the password history list, if device policy
+     * enforces password history requirement.
+     */
+    private void updatePasswordHistory(LockscreenCredential password, int userHandle) {
+        if (password.isNone()) {
+            return;
+        }
+        if (password.isPattern()) {
+            // Do not keep track of historical patterns
+            return;
+        }
+        // Add the password to the password history. We assume all
+        // password hashes have the same length for simplicity of implementation.
+        String passwordHistory = getString(
+                LockPatternUtils.PASSWORD_HISTORY_KEY, /* defaultValue= */ null, userHandle);
+        if (passwordHistory == null) {
+            passwordHistory = "";
+        }
+        int passwordHistoryLength = getRequestedPasswordHistoryLength(userHandle);
+        if (passwordHistoryLength == 0) {
+            passwordHistory = "";
+        } else {
+            final byte[] hashFactor = getHashFactor(password, userHandle);
+            final byte[] salt = getSalt(userHandle).getBytes();
+            String hash = password.passwordToHistoryHash(hashFactor, salt);
+            if (hash == null) {
+                Slog.e(TAG, "Compute new style password hash failed, fallback to legacy style");
+                hash = password.legacyPasswordToHash(salt);
+            }
+            if (TextUtils.isEmpty(passwordHistory)) {
+                passwordHistory = hash;
+            } else {
+                String[] history = passwordHistory.split(
+                        LockPatternUtils.PASSWORD_HISTORY_DELIMITER);
+                StringJoiner joiner = new StringJoiner(LockPatternUtils.PASSWORD_HISTORY_DELIMITER);
+                joiner.add(hash);
+                for (int i = 0; i < passwordHistoryLength - 1 && i < history.length; i++) {
+                    joiner.add(history[i]);
+                }
+                passwordHistory = joiner.toString();
+            }
+        }
+        setString(LockPatternUtils.PASSWORD_HISTORY_KEY, passwordHistory, userHandle);
+    }
+
+    private String getSalt(int userId) {
+        long salt = getLong(LockPatternUtils.LOCK_PASSWORD_SALT_KEY, 0, userId);
+        if (salt == 0) {
+            try {
+                salt = SecureRandom.getInstance("SHA1PRNG").nextLong();
+                setLong(LockPatternUtils.LOCK_PASSWORD_SALT_KEY, salt, userId);
+                Slog.v(TAG, "Initialized lock password salt for user: " + userId);
+            } catch (NoSuchAlgorithmException e) {
+                // Throw an exception rather than storing a password we'll never be able to recover
+                throw new IllegalStateException("Couldn't get SecureRandom number", e);
+            }
+        }
+        return Long.toHexString(salt);
+    }
+
+    private int getRequestedPasswordHistoryLength(int userId) {
+        return mInjector.getDevicePolicyManager().getPasswordHistoryLength(null, userId);
+    }
+
+    private static boolean isDeviceEncryptionEnabled() {
+        return StorageManager.isEncrypted();
+    }
+
+    private boolean shouldEncryptWithCredentials() {
+        return isCredentialRequiredToDecrypt() && !isDoNotAskCredentialsOnBootSet();
+    }
+
+    private boolean isDoNotAskCredentialsOnBootSet() {
+        return mInjector.getDevicePolicyManager().getDoNotAskCredentialsOnBoot();
+    }
+
+    private boolean isCredentialRequiredToDecrypt() {
+        final int value = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, -1);
+        return value != 0;
+    }
+
     private VerifyCredentialResponse convertResponse(GateKeeperResponse gateKeeperResponse) {
         return VerifyCredentialResponse.fromGateKeeperResponse(gateKeeperResponse);
+    }
+
+    private void setCredentialRequiredToDecrypt(boolean required) {
+        if (isDeviceEncryptionEnabled()) {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, required ? 1 : 0);
+        }
+    }
+
+    /** Update the encryption password if it is enabled **/
+    @Override
+    public void updateEncryptionPassword(final int type, final byte[] password) {
+        if (!hasSecureLockScreen() && password != null && password.length != 0) {
+            throw new UnsupportedOperationException(
+                    "This operation requires the lock screen feature.");
+        }
+        if (!isDeviceEncryptionEnabled()) {
+            return;
+        }
+        final IBinder service = ServiceManager.getService("mount");
+        if (service == null) {
+            Slog.e(TAG, "Could not find the mount service to update the encryption password");
+            return;
+        }
+
+        // TODO(b/120484642): This is a location where we still use a String for vold
+        String passwordString = password != null ? new String(password) : null;
+        mHandler.post(() -> {
+            IStorageManager storageManager = mInjector.getStorageManager();
+            try {
+                storageManager.changeEncryptionPassword(type, passwordString);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error changing encryption password", e);
+            }
+        });
     }
 
     @VisibleForTesting /** Note: this method is overridden in unit tests */
@@ -1963,10 +2126,16 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Nullable
     public VerifyCredentialResponse verifyCredential(LockscreenCredential credential,
             int userId, int flags) {
-        checkPasswordReadPermission();
+        if (!hasPermission(PERMISSION) && !hasPermission(SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS)) {
+            throw new SecurityException(
+                    "verifyCredential requires SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS or "
+                            + PERMISSION);
+        }
+        final long identity = Binder.clearCallingIdentity();
         try {
             return doVerifyCredential(credential, userId, null /* progressCallback */, flags);
         } finally {
+            Binder.restoreCallingIdentity(identity);
             scheduleGc();
         }
     }
@@ -3449,8 +3618,12 @@ public class LockSettingsService extends ILockSettings.Stub {
                 throw new UnsupportedOperationException(
                         "This operation requires secure lock screen feature.");
             }
-            return LockSettingsService.this.setLockCredentialWithToken(
-                    credential, tokenHandle, token, userId);
+            if (!LockSettingsService.this.setLockCredentialWithToken(
+                    credential, tokenHandle, token, userId)) {
+                return false;
+            }
+            onPostPasswordChanged(credential, userId);
+            return true;
         }
 
         @Override
