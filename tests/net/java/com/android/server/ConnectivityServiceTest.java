@@ -5423,6 +5423,7 @@ public class ConnectivityServiceTest {
 
         final Set<UidRange> ranges = uidRangesForUid(uid);
         mMockVpn.registerAgent(ranges);
+        mService.setUnderlyingNetworksForVpn(new Network[0]);
 
         // VPN networks do not satisfy the default request and are automatically validated
         // by NetworkMonitor
@@ -5431,19 +5432,12 @@ public class ConnectivityServiceTest {
         mMockVpn.getAgent().setNetworkValid(false /* isStrictMode */);
 
         mMockVpn.connect(false);
-        mService.setUnderlyingNetworksForVpn(new Network[0]);
 
-        genericNetworkCallback.expectAvailableCallbacksUnvalidated(mMockVpn);
+        genericNetworkCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
         genericNotVpnNetworkCallback.assertNoCallback();
         wifiNetworkCallback.assertNoCallback();
-        vpnNetworkCallback.expectAvailableCallbacksUnvalidated(mMockVpn);
-        defaultCallback.expectAvailableCallbacksUnvalidated(mMockVpn);
-        assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
-
-        genericNetworkCallback.expectCallback(CallbackEntry.NETWORK_CAPS_UPDATED, mMockVpn);
-        genericNotVpnNetworkCallback.assertNoCallback();
-        vpnNetworkCallback.expectCapabilitiesThat(mMockVpn, nc -> null == nc.getUids());
-        defaultCallback.expectCallback(CallbackEntry.NETWORK_CAPS_UPDATED, mMockVpn);
+        vpnNetworkCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
+        defaultCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
         assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
 
         ranges.clear();
