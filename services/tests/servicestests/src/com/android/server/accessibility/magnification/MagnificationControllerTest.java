@@ -16,6 +16,9 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+
 import static com.android.server.accessibility.AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID;
 
 import static org.junit.Assert.assertEquals;
@@ -24,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
@@ -280,6 +284,27 @@ public class MagnificationControllerTest {
 
         verify(mWindowMagnificationManager).setScale(eq(TEST_DISPLAY), eq(newScale));
         verify(mWindowMagnificationManager).persistScale(eq(TEST_DISPLAY));
+    }
+
+    @Test
+    public void onWindowMagnificationActivationState_windowActivated_logWindowDuration() {
+        mMagnificationController.onWindowMagnificationActivationState(true);
+
+        mMagnificationController.onWindowMagnificationActivationState(false);
+
+        verify(mMagnificationController).logMagnificationUsageState(
+                eq(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW), anyLong());
+    }
+
+    @Test
+    public void
+            onFullScreenMagnificationActivationState_fullScreenActivated_logFullScreenDuration() {
+        mMagnificationController.onFullScreenMagnificationActivationState(true);
+
+        mMagnificationController.onFullScreenMagnificationActivationState(false);
+
+        verify(mMagnificationController).logMagnificationUsageState(
+                eq(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN), anyLong());
     }
 
     @Test
