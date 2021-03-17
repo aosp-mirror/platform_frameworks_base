@@ -5203,7 +5203,8 @@ public class ConnectivityManager {
     /**
      * Get private DNS mode from settings.
      *
-     * @param cr The ContentResolver to query private DNS mode from settings.
+     * @param context The Context to get its ContentResolver to query the private DNS mode from
+     *                settings.
      * @return A string of private DNS mode as one of the PRIVATE_DNS_MODE_* constants.
      *
      * @hide
@@ -5211,7 +5212,8 @@ public class ConnectivityManager {
     @SystemApi(client = MODULE_LIBRARIES)
     @NonNull
     @PrivateDnsMode
-    public static String getPrivateDnsMode(@NonNull ContentResolver cr) {
+    public static String getPrivateDnsMode(@NonNull Context context) {
+        final ContentResolver cr = context.getContentResolver();
         String mode = Settings.Global.getString(cr, PRIVATE_DNS_MODE);
         if (TextUtils.isEmpty(mode)) mode = Settings.Global.getString(cr, PRIVATE_DNS_DEFAULT_MODE);
         // If both PRIVATE_DNS_MODE and PRIVATE_DNS_DEFAULT_MODE are not set, choose

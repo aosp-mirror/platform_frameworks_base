@@ -127,13 +127,17 @@ public class DnsManager {
     private static final int DNS_RESOLVER_DEFAULT_MIN_SAMPLES = 8;
     private static final int DNS_RESOLVER_DEFAULT_MAX_SAMPLES = 64;
 
-    public static PrivateDnsConfig getPrivateDnsConfig(ContentResolver cr) {
-        final String mode = ConnectivityManager.getPrivateDnsMode(cr);
+    /**
+     * Get PrivateDnsConfig.
+     */
+    public static PrivateDnsConfig getPrivateDnsConfig(Context context) {
+        final String mode = ConnectivityManager.getPrivateDnsMode(context);
 
         final boolean useTls = !TextUtils.isEmpty(mode) && !PRIVATE_DNS_MODE_OFF.equals(mode);
 
         if (PRIVATE_DNS_MODE_PROVIDER_HOSTNAME.equals(mode)) {
-            final String specifier = getStringSetting(cr, PRIVATE_DNS_SPECIFIER);
+            final String specifier = getStringSetting(context.getContentResolver(),
+                    PRIVATE_DNS_SPECIFIER);
             return new PrivateDnsConfig(specifier, null);
         }
 
@@ -268,7 +272,7 @@ public class DnsManager {
     }
 
     public PrivateDnsConfig getPrivateDnsConfig() {
-        return getPrivateDnsConfig(mContentResolver);
+        return getPrivateDnsConfig(mContext);
     }
 
     public void removeNetwork(Network network) {
