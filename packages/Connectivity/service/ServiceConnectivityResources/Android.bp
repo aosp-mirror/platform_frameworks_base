@@ -21,7 +21,7 @@ package {
 
 android_app {
     name: "ServiceConnectivityResources",
-    sdk_version: "system_current",
+    sdk_version: "module_current",
     resource_dirs: [
         "res",
     ],
