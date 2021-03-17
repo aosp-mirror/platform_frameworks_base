@@ -36,7 +36,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.TrafficStatsConstants;
+import com.android.net.module.util.NetworkStackConstants;
 
 import libcore.io.IoUtils;
 
@@ -446,7 +446,7 @@ public class NetworkDiagnostics {
                 int sockType, int protocol, long writeTimeout, long readTimeout, int dstPort)
                 throws ErrnoException, IOException {
             final int oldTag = TrafficStats.getAndSetThreadStatsTag(
-                    TrafficStatsConstants.TAG_SYSTEM_PROBE);
+                    NetworkStackConstants.TAG_SYSTEM_PROBE);
             try {
                 mFileDescriptor = Os.socket(mAddressFamily, sockType, protocol);
             } finally {
@@ -745,7 +745,7 @@ public class NetworkDiagnostics {
             if (ensureMeasurementNecessary()) return;
 
             // No need to restore the tag, since this thread is only used for this measurement.
-            TrafficStats.getAndSetThreadStatsTag(TrafficStatsConstants.TAG_SYSTEM_PROBE);
+            TrafficStats.getAndSetThreadStatsTag(NetworkStackConstants.TAG_SYSTEM_PROBE);
 
             try (SSLSocket sslSocket = setupSSLSocket()) {
                 sendDoTProbe(sslSocket);
