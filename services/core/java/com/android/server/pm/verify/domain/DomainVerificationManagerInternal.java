@@ -333,10 +333,10 @@ public interface DomainVerificationManagerInternal {
     @Nullable
     UUID getDomainVerificationInfoId(@NonNull String packageName);
 
+    @DomainVerificationManager.Error
     @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
-    void setDomainVerificationStatusInternal(int callingUid, @NonNull UUID domainSetId,
-            @NonNull Set<String> domains, int state)
-            throws IllegalArgumentException, NameNotFoundException;
+    int setDomainVerificationStatusInternal(int callingUid, @NonNull UUID domainSetId,
+            @NonNull Set<String> domains, int state) throws NameNotFoundException;
 
 
     interface Connection extends DomainVerificationEnforcer.Callback {
