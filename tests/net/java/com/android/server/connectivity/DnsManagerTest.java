@@ -312,14 +312,14 @@ public class DnsManagerTest {
     @Test
     public void testOverrideDefaultMode() throws Exception {
         // Hard-coded default is opportunistic mode.
-        final PrivateDnsConfig cfgAuto = DnsManager.getPrivateDnsConfig(mContentResolver);
+        final PrivateDnsConfig cfgAuto = DnsManager.getPrivateDnsConfig(mCtx);
         assertTrue(cfgAuto.useTls);
         assertEquals("", cfgAuto.hostname);
         assertEquals(new InetAddress[0], cfgAuto.ips);
 
         // Pretend a gservices push sets the default to "off".
         Settings.Global.putString(mContentResolver, PRIVATE_DNS_DEFAULT_MODE, "off");
-        final PrivateDnsConfig cfgOff = DnsManager.getPrivateDnsConfig(mContentResolver);
+        final PrivateDnsConfig cfgOff = DnsManager.getPrivateDnsConfig(mCtx);
         assertFalse(cfgOff.useTls);
         assertEquals("", cfgOff.hostname);
         assertEquals(new InetAddress[0], cfgOff.ips);
@@ -328,7 +328,7 @@ public class DnsManagerTest {
         Settings.Global.putString(
                 mContentResolver, PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
         Settings.Global.putString(mContentResolver, PRIVATE_DNS_SPECIFIER, "strictmode.com");
-        final PrivateDnsConfig cfgStrict = DnsManager.getPrivateDnsConfig(mContentResolver);
+        final PrivateDnsConfig cfgStrict = DnsManager.getPrivateDnsConfig(mCtx);
         assertTrue(cfgStrict.useTls);
         assertEquals("strictmode.com", cfgStrict.hostname);
         assertEquals(new InetAddress[0], cfgStrict.ips);
