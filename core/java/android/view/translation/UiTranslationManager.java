@@ -404,26 +404,27 @@ public final class UiTranslationManager {
 
         @Override
         public void sendResult(Bundle bundle) {
-            Binder.clearCallingIdentity();
-            mExecutor.execute(() -> {
-                int state = bundle.getInt(EXTRA_STATE);
-                switch (state) {
-                    case STATE_UI_TRANSLATION_STARTED:
-                    case STATE_UI_TRANSLATION_RESUMED:
-                        mCallback.onStarted(
-                                bundle.getString(EXTRA_SOURCE_LOCALE),
-                                bundle.getString(EXTRA_TARGET_LOCALE));
-                        break;
-                    case STATE_UI_TRANSLATION_PAUSED:
-                        mCallback.onPaused();
-                        break;
-                    case STATE_UI_TRANSLATION_FINISHED:
-                        mCallback.onFinished();
-                        break;
-                    default:
-                        Log.wtf(TAG, "Unexpected translation state:" + state);
-                }
-            });
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> onStateChange(bundle)));
+        }
+
+        private void onStateChange(Bundle bundle) {
+            int state = bundle.getInt(EXTRA_STATE);
+            switch (state) {
+                case STATE_UI_TRANSLATION_STARTED:
+                case STATE_UI_TRANSLATION_RESUMED:
+                    mCallback.onStarted(
+                            bundle.getString(EXTRA_SOURCE_LOCALE),
+                            bundle.getString(EXTRA_TARGET_LOCALE));
+                    break;
+                case STATE_UI_TRANSLATION_PAUSED:
+                    mCallback.onPaused();
+                    break;
+                case STATE_UI_TRANSLATION_FINISHED:
+                    mCallback.onFinished();
+                    break;
+                default:
+                    Log.wtf(TAG, "Unexpected translation state:" + state);
+            }
         }
     }
 }
