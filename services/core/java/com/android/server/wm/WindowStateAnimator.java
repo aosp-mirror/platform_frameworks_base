@@ -272,14 +272,15 @@ class WindowStateAnimator {
             }
             mDrawState = COMMIT_DRAW_PENDING;
             layoutNeeded = true;
+        }
 
-            if (postDrawTransaction != null) {
+        if (postDrawTransaction != null) {
+            if (mLastHidden) {
                 mPostDrawTransaction.merge(postDrawTransaction);
+                layoutNeeded = true;
+            } else {
+                postDrawTransaction.apply();
             }
-        } else if (postDrawTransaction != null) {
-            // If draw state is not pending we may delay applying this transaction from the client,
-            // so apply it now.
-            postDrawTransaction.apply();
         }
 
         return layoutNeeded;
