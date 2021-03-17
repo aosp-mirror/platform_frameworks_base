@@ -65,6 +65,7 @@ import android.os.Trace;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.Slog;
 import android.view.RemoteAnimationDefinition;
+import android.window.SizeConfigurationBuckets;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -73,8 +74,6 @@ import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.vr.VrManagerInternal;
-
-import java.util.Arrays;
 
 /**
  * Server side implementation for the client activity to interact with system.
@@ -244,16 +243,14 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
-            int[] verticalSizeConfigurations, int[] smallestSizeConfigurations) {
-        ProtoLog.v(WM_DEBUG_CONFIGURATION, "Report configuration: %s %s %s",
-                token, Arrays.toString(horizontalSizeConfiguration),
-                Arrays.toString(verticalSizeConfigurations));
+    public void reportSizeConfigurations(IBinder token,
+            SizeConfigurationBuckets sizeConfigurations) {
+        ProtoLog.v(WM_DEBUG_CONFIGURATION, "Report configuration: %s %s",
+                token, sizeConfigurations);
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
             if (r != null) {
-                r.setSizeConfigurations(horizontalSizeConfiguration, verticalSizeConfigurations,
-                        smallestSizeConfigurations);
+                r.setSizeConfigurations(sizeConfigurations);
             }
         }
     }

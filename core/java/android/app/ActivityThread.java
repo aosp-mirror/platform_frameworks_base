@@ -158,7 +158,6 @@ import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.util.SuperNotCalledException;
 import android.util.UtilConfig;
 import android.util.proto.ProtoOutputStream;
@@ -180,6 +179,7 @@ import android.view.contentcapture.IContentCaptureManager;
 import android.view.contentcapture.IContentCaptureOptionsCallback;
 import android.view.translation.TranslationSpec;
 import android.webkit.WebView;
+import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreen;
 import android.window.SplashScreenView;
 
@@ -603,6 +603,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @LifecycleState
         private int mLifecycleState = PRE_ON_CREATE;
+
+        private SizeConfigurationBuckets mSizeConfigurations;
 
         @VisibleForTesting
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -3764,23 +3766,8 @@ public final class ActivityThread extends ClientTransactionHandler
         if (configurations == null) {
             return;
         }
-        SparseIntArray horizontal = new SparseIntArray();
-        SparseIntArray vertical = new SparseIntArray();
-        SparseIntArray smallest = new SparseIntArray();
-        for (int i = configurations.length - 1; i >= 0; i--) {
-            Configuration config = configurations[i];
-            if (config.screenHeightDp != Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
-                vertical.put(config.screenHeightDp, 0);
-            }
-            if (config.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
-                horizontal.put(config.screenWidthDp, 0);
-            }
-            if (config.smallestScreenWidthDp != Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
-                smallest.put(config.smallestScreenWidthDp, 0);
-            }
-        }
-        ActivityClient.getInstance().reportSizeConfigurations(r.token, horizontal.copyKeys(),
-                vertical.copyKeys(), smallest.copyKeys());
+        r.mSizeConfigurations = new SizeConfigurationBuckets(configurations);
+        ActivityClient.getInstance().reportSizeConfigurations(r.token, r.mSizeConfigurations);
     }
 
     private void deliverNewIntents(ActivityClientRecord r, List<ReferrerIntent> intents) {
@@ -5773,7 +5760,10 @@ public final class ActivityThread extends ClientTransactionHandler
             // onConfigurationChanged.
             // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
             // ResourcesImpl constructions.
-            final int diff = activity.mCurrentConfig.diffPublicOnly(newConfig);
+            int diff = activity.mCurrentConfig.diffPublicOnly(newConfig);
+            final ActivityClientRecord cr = getActivityClient(activityToken);
+            diff = SizeConfigurationBuckets.filterDiff(diff, activity.mCurrentConfig, newConfig,
+                    cr != null ? cr.mSizeConfigurations : null);
 
             if (diff == 0) {
                 if (!shouldUpdateWindowMetricsBounds(activity.mCurrentConfig, newConfig)

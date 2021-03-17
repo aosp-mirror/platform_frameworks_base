@@ -448,7 +448,8 @@ public class DisplayPolicy {
 
         final Looper looper = UiThread.getHandler().getLooper();
         mHandler = new PolicyHandler(looper);
-        mSystemGestures = new SystemGesturesPointerEventListener(mContext, mHandler,
+        // TODO(b/181821798) Migrate SystemGesturesPointerEventListener to use window context.
+        mSystemGestures = new SystemGesturesPointerEventListener(mUiContext, mHandler,
                 new SystemGesturesPointerEventListener.Callbacks() {
                     @Override
                     public void onSwipeFromTop() {

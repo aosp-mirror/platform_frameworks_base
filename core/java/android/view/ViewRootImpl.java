@@ -5356,7 +5356,7 @@ public final class ViewRootImpl implements ViewParent,
                     updateLocationInParentDisplay(msg.arg1, msg.arg2);
                 } break;
                 case MSG_REQUEST_SCROLL_CAPTURE:
-                    handleScrollCaptureRequest((IScrollCaptureCallbacks) msg.obj);
+                    handleScrollCaptureRequest((IScrollCaptureResponseListener) msg.obj);
                     break;
             }
         }
@@ -9267,10 +9267,10 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * Dispatches a scroll capture request to the view hierarchy on the ui thread.
      *
-     * @param callbacks for replies
+     * @param listener for the response
      */
-    public void dispatchScrollCaptureRequest(@NonNull IScrollCaptureCallbacks callbacks) {
-        mHandler.obtainMessage(MSG_REQUEST_SCROLL_CAPTURE, callbacks).sendToTarget();
+    public void dispatchScrollCaptureRequest(@NonNull IScrollCaptureResponseListener listener) {
+        mHandler.obtainMessage(MSG_REQUEST_SCROLL_CAPTURE, listener).sendToTarget();
     }
 
     /**
@@ -9317,10 +9317,10 @@ public final class ViewRootImpl implements ViewParent,
      * A call to {@link IScrollCaptureCallbacks#onScrollCaptureResponse(ScrollCaptureResponse)}
      * will follow.
      *
-     * @param callbacks to receive responses
+     * @param listener to receive responses
      * @see ScrollCaptureTargetSelector
      */
-    public void handleScrollCaptureRequest(@NonNull IScrollCaptureCallbacks callbacks) {
+    public void handleScrollCaptureRequest(@NonNull IScrollCaptureResponseListener listener) {
         ScrollCaptureSearchResults results =
                 new ScrollCaptureSearchResults(mContext.getMainExecutor());
 
@@ -9335,7 +9335,7 @@ public final class ViewRootImpl implements ViewParent,
             getChildVisibleRect(rootView, rect, point);
             rootView.dispatchScrollCaptureSearch(rect, point, results::addTarget);
         }
-        Runnable onComplete = () -> dispatchScrollCaptureSearchResult(callbacks, results);
+        Runnable onComplete = () -> dispatchScrollCaptureSearchResponse(listener, results);
         results.setOnCompleteListener(onComplete);
         if (!results.isComplete()) {
             mHandler.postDelayed(results::finish, getScrollCaptureRequestTimeout());
@@ -9343,8 +9343,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /** Called by {@link #handleScrollCaptureRequest} when a result is returned */
-    private void dispatchScrollCaptureSearchResult(
-            @NonNull IScrollCaptureCallbacks callbacks,
+    private void dispatchScrollCaptureSearchResponse(
+            @NonNull IScrollCaptureResponseListener listener,
             @NonNull ScrollCaptureSearchResults results) {
 
         ScrollCaptureTarget selectedTarget = results.getTopResult();
@@ -9361,7 +9361,7 @@ public final class ViewRootImpl implements ViewParent,
         if (selectedTarget == null) {
             response.setDescription("No scrollable targets found in window");
             try {
-                callbacks.onScrollCaptureResponse(response.build());
+                listener.onScrollCaptureResponse(response.build());
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send scroll capture search result", e);
             }
@@ -9387,11 +9387,11 @@ public final class ViewRootImpl implements ViewParent,
 
         // Create a connection and return it to the caller
         ScrollCaptureConnection connection = new ScrollCaptureConnection(
-                mView.getContext().getMainExecutor(), selectedTarget, callbacks);
+                mView.getContext().getMainExecutor(), selectedTarget);
         response.setConnection(connection);
 
         try {
-            callbacks.onScrollCaptureResponse(response.build());
+            listener.onScrollCaptureResponse(response.build());
         } catch (RemoteException e) {
             if (DEBUG_SCROLL_CAPTURE) {
                 Log.w(TAG, "Failed to send scroll capture search response.", e);
@@ -9691,10 +9691,10 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
+        public void requestScrollCapture(IScrollCaptureResponseListener listener) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchScrollCaptureRequest(callbacks);
+                viewAncestor.dispatchScrollCaptureRequest(listener);
             }
         }
     }

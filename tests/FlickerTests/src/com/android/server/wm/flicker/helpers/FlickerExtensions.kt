@@ -16,31 +16,13 @@
 
 package com.android.server.wm.flicker.helpers
 
-import android.os.RemoteException
-import android.view.Surface
 import com.android.server.wm.flicker.Flicker
+import com.android.server.wm.flicker.rules.ChangeDisplayOrientationRule
 
 /**
  * Changes the device [rotation] and wait for the rotation animation to complete
  *
  * @param rotation New device rotation
  */
-fun Flicker.setRotation(rotation: Int) {
-    try {
-        when (rotation) {
-            Surface.ROTATION_270 -> device.setOrientationRight()
-            Surface.ROTATION_90 -> device.setOrientationLeft()
-            Surface.ROTATION_0 -> device.setOrientationNatural()
-            else -> device.setOrientationNatural()
-        }
-
-        wmHelper.waitForRotation(rotation)
-        wmHelper.waitForNavBarStatusBarVisible()
-        wmHelper.waitForAppTransitionIdle()
-
-        // Ensure WindowManagerService wait until all animations have completed
-        instrumentation.uiAutomation.syncInputTransactions()
-    } catch (e: RemoteException) {
-        throw RuntimeException(e)
-    }
-}
+fun Flicker.setRotation(rotation: Int) =
+    ChangeDisplayOrientationRule.setRotation(rotation, instrumentation, wmHelper)

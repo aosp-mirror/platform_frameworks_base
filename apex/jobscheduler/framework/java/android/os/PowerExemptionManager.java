@@ -29,6 +29,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UserHandleAware;
 import android.content.Context;
 
 import java.lang.annotation.Retention;
@@ -295,6 +296,11 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_SHELL = 316;
+    /**
+     * Media session callbacks.
+     * @hide
+     */
+    public static final int REASON_MEDIA_SESSION_CALLBACK = 317;
 
     /**
      * The list of BG-FGS-Launch and temp-allow-list reason code.
@@ -354,6 +360,7 @@ public class PowerExemptionManager {
             REASON_EVENT_SMS,
             REASON_EVENT_MMS,
             REASON_SHELL,
+            REASON_MEDIA_SESSION_CALLBACK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}
@@ -451,6 +458,7 @@ public class PowerExemptionManager {
      * @param reasonCode one of {@link ReasonCode}, use {@link #REASON_UNKNOWN} if not sure.
      * @param reason a optional human readable reason string, could be null or empty string.
      */
+    @UserHandleAware
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public void addToTemporaryAllowList(@NonNull String packageName, long durationMs,
             @ReasonCode int reasonCode, @Nullable String reason) {
@@ -474,6 +482,7 @@ public class PowerExemptionManager {
      *                    used for logging purposes. Could be null or empty string.
      * @return The duration (in milliseconds) that the app is allow-listed for
      */
+    @UserHandleAware
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public long addToTemporaryAllowListForEvent(@NonNull String packageName,
             @AllowListEvent int event, @ReasonCode int reasonCode, @Nullable String reason) {
@@ -626,6 +635,8 @@ public class PowerExemptionManager {
                 return "EVENT_MMS";
             case REASON_SHELL:
                 return "SHELL";
+            case REASON_MEDIA_SESSION_CALLBACK:
+                return "MEDIA_SESSION_CALLBACK";
             default:
                 return "(unknown:" + reasonCode + ")";
         }

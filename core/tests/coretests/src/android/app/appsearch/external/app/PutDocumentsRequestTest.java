@@ -31,8 +31,8 @@ public class PutDocumentsRequestTest {
     public void addGenericDocument_byCollection() {
         Set<AppSearchEmail> emails =
                 ImmutableSet.of(
-                        new AppSearchEmail.Builder("test1").build(),
-                        new AppSearchEmail.Builder("test2").build());
+                        new AppSearchEmail.Builder("namespace", "test1").build(),
+                        new AppSearchEmail.Builder("namespace", "test2").build());
         PutDocumentsRequest request =
                 new PutDocumentsRequest.Builder().addGenericDocuments(emails).build();
 

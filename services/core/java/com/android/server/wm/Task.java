@@ -4911,9 +4911,15 @@ class Task extends WindowContainer<WindowContainer> {
         task.mLastNonFullscreenBounds = lastNonFullscreenBounds;
         task.setBounds(lastNonFullscreenBounds);
         task.mWindowLayoutAffinity = windowLayoutAffinity;
+        if (activities.size() > 0) {
+            // We need to add the task into hierarchy before adding child to it.
+            final DisplayContent dc =
+                    taskSupervisor.mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY);
+            dc.getDefaultTaskDisplayArea().addChild(task, POSITION_BOTTOM);
 
-        for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-            task.addChild(activities.get(activityNdx));
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                task.addChild(activities.get(activityNdx));
+            }
         }
 
         if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Restored task=" + task);

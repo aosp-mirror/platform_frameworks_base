@@ -28,48 +28,27 @@
         <LinearLayout
             android:orientation="horizontal"
             android:gravity="center"
+            android:layout_gravity="center"
             android:paddingVertical="2dp"
             android:paddingHorizontal="8dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <LinearLayout
-                android:background="@drawable/people_space_new_story_outline"
-                android:id="@+id/person_icon_with_story"
-                android:gravity="center_horizontal"
-                android:layout_width="60dp"
-                android:layout_height="60dp">
-                <ImageView
-                    android:id="@+id/person_icon_inside_ring"
-                    android:layout_marginEnd="4dp"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"/>
-            </LinearLayout>
             <ImageView
-                android:id="@+id/person_icon_only"
+                android:id="@+id/person_icon"
                 android:layout_width="60dp"
                 android:layout_height="60dp"/>
-
             <ImageView
-                android:id="@+id/package_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="-20dp"
-                android:layout_marginTop="22dp"/>
-
+                android:id="@+id/availability"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/circle_green_10dp"/>
             <LinearLayout
                 android:orientation="vertical"
-                android:paddingStart="8dp"
+                android:paddingStart="4dp"
+                android:gravity="top"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <ImageView
-                    android:id="@+id/availability"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:background="@drawable/circle_green_10dp"/>
                 <TextView
                     android:id="@+id/name"
                     android:text="@string/empty_user_name"

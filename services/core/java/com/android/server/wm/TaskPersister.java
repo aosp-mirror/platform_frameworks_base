@@ -328,10 +328,19 @@ public class TaskPersister implements PersisterQueue.Listener {
                                 // mWriteQueue.add(new TaskWriteQueueItem(task));
 
                                 final int taskId = task.mTaskId;
-                                if (mService.mRootWindowContainer.anyTaskForId(taskId,
+                                final boolean persistedTask = task.hasActivity();
+                                if (persistedTask && mRecentTasks.getTask(taskId) != null) {
+                                    // The persisted task is added into hierarchy and will also be
+                                    // added to recent tasks later. So this task should not exist
+                                    // in recent tasks before it is added.
+                                    Slog.wtf(TAG, "Existing persisted task with taskId " + taskId
+                                            + " found");
+                                } else if (!persistedTask
+                                        && mService.mRootWindowContainer.anyTaskForId(taskId,
                                         MATCH_ATTACHED_TASK_OR_RECENT_TASKS) != null) {
                                     // Should not happen.
-                                    Slog.wtf(TAG, "Existing task with taskId " + taskId + "found");
+                                    Slog.wtf(TAG, "Existing task with taskId " + taskId
+                                            + " found");
                                 } else if (userId != task.mUserId) {
                                     // Should not happen.
                                     Slog.wtf(TAG, "Task with userId " + task.mUserId + " found in "

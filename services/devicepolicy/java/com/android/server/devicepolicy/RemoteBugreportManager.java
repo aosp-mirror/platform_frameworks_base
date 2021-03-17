@@ -207,7 +207,7 @@ public class RemoteBugreportManager {
             return true;
         } catch (RemoteException re) {
             // should never happen
-            Slog.e(LOG_TAG, re, "Failed to make remote calls to start bugreportremote service");
+            Slog.e(LOG_TAG, "Failed to make remote calls to start bugreportremote service", re);
             return false;
         } finally {
             mInjector.binderRestoreCallingIdentity(callingIdentity);

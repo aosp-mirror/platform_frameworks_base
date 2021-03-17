@@ -260,6 +260,9 @@ public final class MediaRouter2 {
         mManagerCallback = new ManagerCallback();
         mHandler = new Handler(Looper.getMainLooper());
         mSystemController = new SystemRoutingController(sManager.getSystemRoutingSession());
+        mDiscoveryPreference = new RouteDiscoveryPreference.Builder(
+                sManager.getPreferredFeatures(clientPackageName), true).build();
+        updateAllRoutesFromManager();
         mMediaRouterService = null; // TODO: Make this non-null and check permission.
 
         // Only used by non-system MediaRouter2.
@@ -1946,7 +1949,7 @@ public final class MediaRouter2 {
             }
 
             RoutingController newController;
-            if (oldSession.isSystemSession()) {
+            if (newSession.isSystemSession()) {
                 mSystemController.setRoutingSessionInfo(newSession);
                 newController = mSystemController;
             } else {

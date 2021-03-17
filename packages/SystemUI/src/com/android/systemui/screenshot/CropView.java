@@ -26,6 +26,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.Log;
@@ -91,6 +93,25 @@ public class CropView extends View {
         mCropTouchMargin = 24 * getResources().getDisplayMetrics().density;
 
         setAccessibilityDelegate(new AccessibilityHelper());
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+
+        SavedState ss = new SavedState(superState);
+        ss.mTopBoundary = getTopBoundary();
+        ss.mBottomBoundary = getBottomBoundary();
+        return ss;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+
+        setBoundaryTo(CropBoundary.TOP, ss.mTopBoundary);
+        setBoundaryTo(CropBoundary.BOTTOM, ss.mBottomBoundary);
     }
 
     @Override
@@ -380,6 +401,44 @@ public class CropView extends View {
          */
         void onCropMotionEvent(MotionEvent event, CropBoundary boundary, float boundaryPosition,
                 int boundaryPositionPx);
+    }
 
+    static class SavedState extends BaseSavedState {
+        float mTopBoundary;
+        float mBottomBoundary;
+
+        /**
+         * Constructor called from {@link CropView#onSaveInstanceState()}
+         */
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        /**
+         * Constructor called from {@link #CREATOR}
+         */
+        private SavedState(Parcel in) {
+            super(in);
+            mTopBoundary = in.readFloat();
+            mBottomBoundary = in.readFloat();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeFloat(mTopBoundary);
+            out.writeFloat(mBottomBoundary);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 }

@@ -47,10 +47,7 @@ public class AppSearchTestUtils {
         AppSearchBatchResult<String, GenericDocument> result =
                 checkIsBatchResultSuccess(
                         session.getByUri(
-                                new GetByUriRequest.Builder()
-                                        .setNamespace(namespace)
-                                        .addUris(uris)
-                                        .build()));
+                                new GetByUriRequest.Builder(namespace).addUris(uris).build()));
         assertThat(result.getSuccesses()).hasSize(uris.length);
         assertThat(result.getFailures()).isEmpty();
         List<GenericDocument> list = new ArrayList<>(uris.length);
@@ -80,7 +77,7 @@ public class AppSearchTestUtils {
         List<GenericDocument> documents = new ArrayList<>();
         while (results.size() > 0) {
             for (SearchResult result : results) {
-                documents.add(result.getDocument());
+                documents.add(result.getGenericDocument());
             }
             results = searchResults.getNextPage().get();
         }

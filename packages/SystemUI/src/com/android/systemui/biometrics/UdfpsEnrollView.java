@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
@@ -28,8 +29,9 @@ import com.android.systemui.R;
  * View corresponding with udfps_enroll_view.xml
  */
 public class UdfpsEnrollView extends UdfpsAnimationView {
-    private final UdfpsEnrollDrawable mFingerprintDrawable;
-    private ImageView mFingerprintView;
+    @NonNull private final UdfpsEnrollDrawable mFingerprintDrawable;
+    @NonNull private ImageView mFingerprintView;
+    @NonNull private UdfpsProgressBar mProgressBar;
 
     public UdfpsEnrollView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -37,9 +39,17 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
     }
 
     @Override
+    protected void updateAlpha() {
+        super.updateAlpha();
+        mProgressBar.setAlpha(calculateAlpha());
+        mProgressBar.getProgressDrawable().setAlpha(calculateAlpha());
+    }
+
+    @Override
     protected void onFinishInflate() {
         mFingerprintView = findViewById(R.id.udfps_enroll_animation_fp_view);
         mFingerprintView.setImageDrawable(mFingerprintDrawable);
+        mProgressBar = findViewById(R.id.progress_bar);
     }
 
     @Override

@@ -16,6 +16,9 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.NonNull;
+
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -27,9 +30,15 @@ import com.android.systemui.statusbar.phone.StatusBar;
  */
 class UdfpsFpmOtherViewController extends UdfpsAnimationViewController<UdfpsFpmOtherView> {
     protected UdfpsFpmOtherViewController(
-            UdfpsFpmOtherView view,
-            StatusBarStateController statusBarStateController,
-            StatusBar statusBar) {
-        super(view, statusBarStateController, statusBar);
+            @NonNull UdfpsFpmOtherView view,
+            @NonNull StatusBarStateController statusBarStateController,
+            @NonNull StatusBar statusBar,
+            @NonNull DumpManager dumpManager) {
+        super(view, statusBarStateController, statusBar, dumpManager);
+    }
+
+    @Override
+    @NonNull String getTag() {
+        return "UdfpsFpmOtherViewController";
     }
 }

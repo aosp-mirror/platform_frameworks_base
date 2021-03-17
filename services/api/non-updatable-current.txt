@@ -35,6 +35,14 @@ package com.android.server {
 
 }
 
+package com.android.server.am {
+
+  public interface ActivityManagerLocal {
+    method public boolean canStartForegroundService(int, int, @NonNull String);
+  }
+
+}
+
 package com.android.server.role {
 
   public interface RoleServicePlatformHelper {

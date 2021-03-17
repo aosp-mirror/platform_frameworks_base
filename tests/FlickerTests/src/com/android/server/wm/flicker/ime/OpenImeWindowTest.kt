@@ -19,6 +19,7 @@ package com.android.server.wm.flicker.ime
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -32,8 +33,6 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.appWindowAlwaysVisibleOnTop
 import com.android.server.wm.flicker.dsl.FlickerBuilder
@@ -155,21 +154,32 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @FlakyTest
     @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry()
+    fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        testSpec.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry()
+        }
+    }
 
     @FlakyTest
     @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        testSpec.assertWm {
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry()
+        }
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 5,
-                    supportedRotations = listOf(Surface.ROTATION_0))
+                .getConfigNonRotationTests(
+                    repetitions = 5,
+                    supportedRotations = listOf(Surface.ROTATION_0),
+                    supportedNavigationModes = listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                    )
+                )
         }
     }
 }

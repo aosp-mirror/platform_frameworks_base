@@ -88,6 +88,17 @@ public enum ScrimState {
         }
     },
 
+    AUTH_SCRIMMED {
+        @Override
+        public void prepare(ScrimState previousState) {
+            mFrontTint = Color.BLACK;
+
+            mBehindAlpha = 0f;
+            mFrontAlpha = .66f;
+            mBubbleAlpha = 0f;
+        }
+    },
+
     /**
      * Showing password challenge on the keyguard.
      */

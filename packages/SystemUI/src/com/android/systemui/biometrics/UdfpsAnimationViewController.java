@@ -24,9 +24,15 @@ import android.annotation.NonNull;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
+import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.ViewController;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Handles:
@@ -39,33 +45,50 @@ import com.android.systemui.util.ViewController;
  *      - doze time event
  */
 abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
-        extends ViewController<T> {
+        extends ViewController<T> implements Dumpable {
     @NonNull final StatusBarStateController mStatusBarStateController;
     @NonNull final StatusBar mStatusBar;
+    @NonNull final DumpManager mDumpManger;
 
     private boolean mNotificationShadeExpanded;
     private int mStatusBarState;
 
     protected UdfpsAnimationViewController(
             T view,
-            StatusBarStateController statusBarStateController,
-            StatusBar statusBar) {
+            @NonNull StatusBarStateController statusBarStateController,
+            @NonNull StatusBar statusBar,
+            @NonNull DumpManager dumpManager) {
         super(view);
         mStatusBarStateController = statusBarStateController;
         mStatusBar = statusBar;
+        mDumpManger = dumpManager;
     }
+
+    abstract @NonNull String getTag();
 
     @Override
     protected void onViewAttached() {
         mStatusBarStateController.addCallback(mStateListener);
         mStateListener.onStateChanged(mStatusBarStateController.getState());
         mStatusBar.addExpansionChangedListener(mStatusBarExpansionChangedListener);
+
+        mDumpManger.registerDumpable(getTag(), this);
     }
 
     @Override
     protected void onViewDetached() {
         mStatusBarStateController.removeCallback(mStateListener);
         mStatusBar.removeExpansionChangedListener(mStatusBarExpansionChangedListener);
+
+        mDumpManger.unregisterDumpable(getTag());
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("mStatusBarState=" + StatusBarState.toShortString(mStatusBarState));
+        pw.println("mNotificationShadeExpanded=" + mNotificationShadeExpanded);
+        pw.println("shouldPauseAuth()=" + shouldPauseAuth());
+        pw.println("isPauseAuth=" + mView.isPauseAuth());
     }
 
     /**

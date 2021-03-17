@@ -259,6 +259,11 @@ Result FilterClient::setDataSource(sp<FilterClient> filterClient){
 }
 
 Result FilterClient::close() {
+    if (mFilterMQEventFlag != NULL) {
+        EventFlag::deleteEventFlag(&mFilterMQEventFlag);
+    }
+    mFilterMQ = NULL;
+
     if (mTunerFilter != NULL) {
         Status s = mTunerFilter->close();
         closeAvSharedMemory();

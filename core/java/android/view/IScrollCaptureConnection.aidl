@@ -18,6 +18,7 @@ package android.view;
 
 import android.graphics.Rect;
 import android.os.ICancellationSignal;
+import android.view.IScrollCaptureCallbacks;
 import android.view.Surface;
 
 
@@ -31,11 +32,12 @@ interface IScrollCaptureConnection {
     /**
      * Informs the target that it has been selected for scroll capture.
      *
-     * @param surface a return channel for image buffers
+     * @param surface used to shuttle image buffers between processes
+     * @param callbacks a return channel for requests
      *
-     * @return a cancallation signal which is used cancel the request
+     * @return a cancallation signal which is used cancel the start request
      */
-    ICancellationSignal startCapture(in Surface surface);
+    ICancellationSignal startCapture(in Surface surface, IScrollCaptureCallbacks callbacks);
 
     /**
      * Request the target capture an image within the provided rectangle.

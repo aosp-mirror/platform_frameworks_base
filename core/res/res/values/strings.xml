@@ -453,6 +453,9 @@
     <!-- Attribution for Gnss Time Update service. [CHAR LIMIT=NONE]-->
     <string name="gnss_time_update_service">GNSS Time Update Service</string>
 
+    <!-- Attribution for MusicRecognitionManagerService. [CHAR LIMIT=NONE]-->
+    <string name="music_recognition_manager_service">Music Recognition Manager Service</string>
+
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
     <string name="factory_reset_warning">Your device will be erased</string>

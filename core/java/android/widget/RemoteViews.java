@@ -4426,8 +4426,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /**
      * Sets an OutlineProvider on the view whose corner radius is a dimension calculated using
-     * {@link TypedValue#applyDimension(int, float, DisplayMetrics)}. This outline may change shape
-     * during system transitions.
+     * {@link TypedValue#applyDimension(int, float, DisplayMetrics)}.
      *
      * <p>NOTE: It is recommended to use {@link TypedValue#COMPLEX_UNIT_PX} only for 0.
      * Setting margins in pixels will behave poorly when the RemoteViews object is used on a
@@ -4440,7 +4439,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /**
      * Sets an OutlineProvider on the view whose corner radius is a dimension resource with
-     * {@code resId}. This outline may change shape during system transitions.
+     * {@code resId}.
      */
     public void setViewOutlinePreferredRadiusDimen(@IdRes int viewId, @DimenRes int resId) {
         addAction(new SetViewOutlinePreferredRadiusAction(viewId, resId));
@@ -4494,7 +4493,8 @@ public class RemoteViews implements Parcelable, Filter {
      * Call a method taking one int, a size in pixels, on a view in the layout for this
      * RemoteViews.
      *
-     * The dimension will be resolved from the resources at the time of inflation.
+     * The dimension will be resolved from the resources at the time the {@link RemoteViews} is
+     * (re-)applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4526,7 +4526,8 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one int, a color, on a view in the layout for this RemoteViews.
      *
-     * The ColorStateList will be resolved from the resources at the time of inflation.
+     * The Color will be resolved from the resources at the time the {@link RemoteViews} is (re-)
+     * applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4603,7 +4604,8 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one ColorStateList on a view in the layout for this RemoteViews.
      *
-     * The ColorStateList will be resolved from the resources at the time of inflation.
+     * The ColorStateList will be resolved from the resources at the time the {@link RemoteViews} is
+     * (re-)applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4642,7 +4644,8 @@ public class RemoteViews implements Parcelable, Filter {
      * Call a method taking one float, a size in pixels, on a view in the layout for this
      * RemoteViews.
      *
-     * The dimension will be resolved from the resources at the time of inflation.
+     * The dimension will be resolved from the resources at the time the {@link RemoteViews} is
+     * (re-)applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4658,7 +4661,8 @@ public class RemoteViews implements Parcelable, Filter {
      * Call a method taking one float, a size in pixels, on a view in the layout for this
      * RemoteViews.
      *
-     * The dimension will be resolved from the specified dimension at the time of inflation.
+     * The dimension will be resolved from the resources at the time the {@link RemoteViews} is
+     * (re-)applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4720,7 +4724,8 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one CharSequence on a view in the layout for this RemoteViews.
      *
-     * The CharSequence will be resolved from the resources at the time of inflation.
+     * The CharSequence will be resolved from the resources at the time the {@link RemoteViews} is
+     * (re-)applied.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.

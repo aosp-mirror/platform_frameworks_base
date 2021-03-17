@@ -16,34 +16,62 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.NonNull;
+
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Class that coordinates non-HBM animations during keyguard authentication.
  */
 public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<UdfpsKeyguardView> {
+    @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
+
     private boolean mForceShow;
 
     protected UdfpsKeyguardViewController(
-            UdfpsKeyguardView view,
-            StatusBarStateController statusBarStateController,
-            StatusBar statusBar) {
-        super(view, statusBarStateController, statusBar);
+            @NonNull UdfpsKeyguardView view,
+            @NonNull StatusBarStateController statusBarStateController,
+            @NonNull StatusBar statusBar,
+            @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            @NonNull DumpManager dumpManager) {
+        super(view, statusBarStateController, statusBar, dumpManager);
+        mKeyguardViewManager = statusBarKeyguardViewManager;
+    }
+
+    @Override
+    @NonNull String getTag() {
+        return "UdfpsKeyguardViewController";
     }
 
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
-        mStatusBarStateController.addCallback(mStateListener);
+
         final float dozeAmount = mStatusBarStateController.getDozeAmount();
+        mStatusBarStateController.addCallback(mStateListener);
         mStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
+        mStateListener.onStateChanged(mStatusBarStateController.getState());
+        mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
     }
 
     @Override
     protected void onViewDetached() {
         super.onViewDetached();
         mStatusBarStateController.removeCallback(mStateListener);
+        mAlternateAuthInterceptor.reset();
+        mKeyguardViewManager.setAlternateAuthInterceptor(null);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        super.dump(fd, pw, args);
+        pw.println("mForceShow=" + mForceShow);
     }
 
     /**
@@ -56,7 +84,11 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
         mForceShow = forceShow;
         updatePauseAuth();
-        // TODO: animate show/hide background protection
+        if (mForceShow) {
+            mView.animateHighlightFp();
+        } else {
+            mView.animateUnhighlightFp(() -> mKeyguardViewManager.cancelPostAuthActions());
+        }
     }
 
     /**
@@ -76,6 +108,50 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         @Override
         public void onDozeAmountChanged(float linear, float eased) {
             mView.onDozeAmountChanged(linear, eased);
+            if (linear != 0) forceShow(false);
+        }
+
+        @Override
+        public void onStateChanged(int statusBarState) {
+            mView.setStatusBarState(statusBarState);
         }
     };
+
+    private final StatusBarKeyguardViewManager.AlternateAuthInterceptor mAlternateAuthInterceptor =
+            new StatusBarKeyguardViewManager.AlternateAuthInterceptor() {
+                @Override
+                public boolean showAlternativeAuthMethod() {
+                    if (mForceShow) {
+                        return false;
+                    }
+
+                    forceShow(true);
+                    return true;
+                }
+
+                @Override
+                public boolean reset() {
+                    if (!mForceShow) {
+                        return false;
+                    }
+
+                    forceShow(false);
+                    return true;
+                }
+
+                @Override
+                public boolean isShowingAlternativeAuth() {
+                    return mForceShow;
+                }
+
+                @Override
+                public boolean isAnimating() {
+                    return mView.isAnimating();
+                }
+
+                @Override
+                public void dump(PrintWriter pw) {
+                    pw.print(getTag());
+                }
+            };
 }
