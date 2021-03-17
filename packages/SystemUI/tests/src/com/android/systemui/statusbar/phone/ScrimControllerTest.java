@@ -917,11 +917,11 @@ public class ScrimControllerTest extends SysuiTestCase {
         HashSet<ScrimState> regularStates = new HashSet<>(Arrays.asList(
                 ScrimState.UNINITIALIZED, ScrimState.KEYGUARD, ScrimState.BOUNCER,
                 ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR, ScrimState.UNLOCKED,
-                ScrimState.BUBBLE_EXPANDED, ScrimState.SHADE_LOCKED));
+                ScrimState.BUBBLE_EXPANDED, ScrimState.SHADE_LOCKED, ScrimState.AUTH_SCRIMMED));
 
         for (ScrimState state : ScrimState.values()) {
             if (!lowPowerModeStates.contains(state) && !regularStates.contains(state)) {
-                Assert.fail("Scrim state not whitelisted nor blacklisted as low power mode");
+                Assert.fail("Scrim state isn't categorized as a low power or regular state.");
             }
         }
     }
