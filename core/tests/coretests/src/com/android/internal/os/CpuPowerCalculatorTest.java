@@ -101,7 +101,6 @@ public class CpuPowerCalculatorTest {
     }
 
     @Test
-    @SkipPresubmit("b/180015146")
     public void testTimerBasedModel() {
         when(mMockUserInfoProvider.exists(anyInt())).thenReturn(true);
 
