@@ -2653,13 +2653,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } catch (RemoteException | ServiceSpecificException e) {
             loge("Can't set TCP buffer sizes:" + e);
         }
-
-        final Integer rwndValue = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.TCP_DEFAULT_INIT_RWND,
-                    mSystemProperties.getInt("net.tcp.default_init_rwnd", 0));
-        if (rwndValue != 0) {
-            mSystemProperties.setTcpInitRwnd(rwndValue);
-        }
     }
 
     @Override
