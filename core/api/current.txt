@@ -42283,6 +42283,7 @@ package android.telephony {
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public void getNetworkSlicingConfiguration(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.data.SlicingConfig,android.telephony.TelephonyManager.SlicingException>);
     method public String getNetworkSpecifier();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int getNetworkType();
+    method @Nullable @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method @Deprecated public int getPhoneCount();
     method public int getPhoneType();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE}) public int getPreferredOpportunisticDataSubscription();
