@@ -15621,8 +15621,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Objects.requireNonNull(who, "ComponentName is null");
         enforceDeviceOwner(who);
-        final String currentMode =
-                ConnectivityManager.getPrivateDnsMode(mContext.getContentResolver());
+        final String currentMode = ConnectivityManager.getPrivateDnsMode(mContext);
         switch (currentMode) {
             case ConnectivityManager.PRIVATE_DNS_MODE_OFF:
                 return PRIVATE_DNS_MODE_OFF;
