@@ -368,7 +368,8 @@ public class VisibilityStore {
                     packageAccessibleDocuments.toArray(new GenericDocument[0]));
         }
 
-        mAppSearchImpl.putDocument(PACKAGE_NAME, DATABASE_NAME, visibilityDocument.build());
+        mAppSearchImpl.putDocument(
+                PACKAGE_NAME, DATABASE_NAME, visibilityDocument.build(), /*logger=*/ null);
 
         // Update derived data structures.
         mNotPlatformSurfaceableMap.put(prefix, schemasNotPlatformSurfaceable);
