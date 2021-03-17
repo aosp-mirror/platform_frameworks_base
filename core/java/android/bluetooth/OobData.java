@@ -76,7 +76,7 @@ public final class OobData implements Parcelable {
     private static final String TAG = "OobData";
     /** The {@link OobData#mClassicLength} may be. (AD 3.1.1) (CSS 1.6.2) @hide */
     @SystemApi
-    private static final int OOB_LENGTH_OCTETS = 2;
+    public static final int OOB_LENGTH_OCTETS = 2;
     /**
      * The length for the {@link OobData#mDeviceAddressWithType}(6) and Address Type(1).
      * (AD 3.1.2) (CSS 1.6.2)
@@ -590,7 +590,6 @@ public final class OobData implements Parcelable {
          *
          * @hide
          */
-        @SystemApi
         private ClassicBuilder(@NonNull byte[] confirmationHash, @NonNull byte[] classicLength,
                 @NonNull byte[] deviceAddressWithType) {
             Preconditions.checkNotNull(confirmationHash);
