@@ -4673,10 +4673,26 @@
          corners of the activity won't be rounded. -->
     <integer name="config_letterboxActivityCornersRadius">0</integer>
 
+    <!-- Blur radius for the Option 3 in R.integer.config_letterboxBackgroundType. Values < 0 are
+        ignored and 0 is used. -->
+    <dimen name="config_letterboxBackgroundWallpaperBlurRadius">100dp</dimen>
+
+    <!-- Alpha of a black translucent scrim showed over wallpaper letterbox background when
+        the Option 3 is selected for R.integer.config_letterboxBackgroundType.
+        Values < 0 or >= 1 are ignored and 0.0 (transparent) is used instead. -->
+    <item name="config_letterboxBackgroundWallaperDarkScrimAlpha" format="float" type="dimen">
+        0.5
+    </item>
+
     <!-- Corners appearance of the letterbox background.
             0 - Solid background using color specified in R.color.config_letterboxBackgroundColor.
             1 - Color specified in R.attr.colorBackground for the letterboxed application.
             2 - Color specified in R.attr.colorBackgroundFloating for the letterboxed application.
+            3 - Wallpaper with dimmed with blur or/and dark scrim. At least one of the following
+            parameters should be > 0: config_letterboxBackgroundWallpaperBlurRadius,
+            config_letterboxBackgroundWallaperDarkScrimAlpha. If it's not the case or blur radius
+            provided but blur isn't supported by the device and this option
+            is selected then implementation will default to option 0.
         If given value is outside of this range, the option 0 will be assummed. -->
     <integer name="config_letterboxBackgroundType">0</integer>
 
@@ -4686,6 +4702,9 @@
             R.attr.colorBackground isn't specified for the app.
             - Option 2 is selected for R.integer.config_letterboxBackgroundType and
             R.attr.colorBackgroundFloating isn't specified for the app.
+            - Option 3 is selected for R.integer.config_letterboxBackgroundType and blur requested
+            but isn't supported on the device or both dark scrim alpha and blur radius aren't
+            provided.
         Defaults to black if not specified.
      -->
     <color name="config_letterboxBackgroundColor">#000</color>

@@ -4173,7 +4173,9 @@
   <java-symbol type="dimen" name="controls_thumbnail_image_max_width" />
 
   <java-symbol type="dimen" name="config_fixedOrientationLetterboxAspectRatio" />
+  <java-symbol type="dimen" name="config_letterboxBackgroundWallpaperBlurRadius" />
   <java-symbol type="integer" name="config_letterboxActivityCornersRadius" />
+  <java-symbol type="dimen" name="config_letterboxBackgroundWallaperDarkScrimAlpha" />
   <java-symbol type="integer" name="config_letterboxBackgroundType" />
   <java-symbol type="color" name="config_letterboxBackgroundColor" />
 
