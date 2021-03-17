@@ -16,7 +16,6 @@
 
 package com.android.settingslib.net;
 
-import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.NetworkStatsHistory.FIELD_RX_BYTES;
 import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
@@ -59,7 +58,6 @@ public class DataUsageController {
             PERIOD_BUILDER, Locale.getDefault());
 
     private final Context mContext;
-    private final ConnectivityManager mConnectivityManager;
     private final INetworkStatsService mStatsService;
     private final NetworkPolicyManager mPolicyManager;
     private final NetworkStatsManager mNetworkStatsManager;
@@ -71,7 +69,6 @@ public class DataUsageController {
 
     public DataUsageController(Context context) {
         mContext = context;
-        mConnectivityManager = ConnectivityManager.from(context);
         mStatsService = INetworkStatsService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         mPolicyManager = NetworkPolicyManager.from(mContext);
@@ -236,7 +233,7 @@ public class DataUsageController {
 
     public boolean isMobileDataSupported() {
         // require both supported network and ready SIM
-        return mConnectivityManager.isNetworkSupported(TYPE_MOBILE)
+        return getTelephonyManager().isDataCapable()
                 && getTelephonyManager().getSimState() == SIM_STATE_READY;
     }
 
