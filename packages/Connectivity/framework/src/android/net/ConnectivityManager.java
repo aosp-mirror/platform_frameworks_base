@@ -64,6 +64,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -968,6 +969,33 @@ public class ConnectivityManager {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Preference for {@link #setNetworkPreferenceForUser(UserHandle, int, Executor, Runnable)}.
+     * Specify that the traffic for this user should by follow the default rules.
+     * @hide
+     */
+    @SystemApi
+    public static final int PROFILE_NETWORK_PREFERENCE_DEFAULT = 0;
+
+    /**
+     * Preference for {@link #setNetworkPreferenceForUser(UserHandle, int, Executor, Runnable)}.
+     * Specify that the traffic for this user should by default go on a network with
+     * {@link NetworkCapabilities#NET_CAPABILITY_ENTERPRISE}, and on the system default network
+     * if no such network is available.
+     * @hide
+     */
+    @SystemApi
+    public static final int PROFILE_NETWORK_PREFERENCE_ENTERPRISE = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            PROFILE_NETWORK_PREFERENCE_DEFAULT,
+            PROFILE_NETWORK_PREFERENCE_ENTERPRISE
+    })
+    public @interface ProfileNetworkPreference {
     }
 
     /**
@@ -5067,19 +5095,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Listener for {@link #setOemNetworkPreference(OemNetworkPreferences, Executor,
-     * OnSetOemNetworkPreferenceListener)}.
-     * @hide
-     */
-    @SystemApi
-    public interface OnSetOemNetworkPreferenceListener {
-        /**
-         * Called when setOemNetworkPreference() successfully completes.
-         */
-        void onComplete();
-    }
-
-    /**
      * Used by automotive devices to set the network preferences used to direct traffic at an
      * application level as per the given OemNetworkPreferences. An example use-case would be an
      * automotive OEM wanting to provide connectivity for applications critical to the usage of a
@@ -5101,16 +5116,16 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE)
     public void setOemNetworkPreference(@NonNull final OemNetworkPreferences preference,
             @Nullable @CallbackExecutor final Executor executor,
-            @Nullable final OnSetOemNetworkPreferenceListener listener) {
+            @Nullable final Runnable listener) {
         Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
         if (null != listener) {
             Objects.requireNonNull(executor, "Executor must be non-null");
         }
-        final IOnSetOemNetworkPreferenceListener listenerInternal = listener == null ? null :
-                new IOnSetOemNetworkPreferenceListener.Stub() {
+        final IOnCompleteListener listenerInternal = listener == null ? null :
+                new IOnCompleteListener.Stub() {
                     @Override
                     public void onComplete() {
-                        executor.execute(listener::onComplete);
+                        executor.execute(listener::run);
                     }
         };
 
@@ -5118,6 +5133,52 @@ public class ConnectivityManager {
             mService.setOemNetworkPreference(preference, listenerInternal);
         } catch (RemoteException e) {
             Log.e(TAG, "setOemNetworkPreference() failed for preference: " + preference.toString());
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request that a user profile is put by default on a network matching a given preference.
+     *
+     * See the documentation for the individual preferences for a description of the supported
+     * behaviors.
+     *
+     * @param profile the profile concerned.
+     * @param preference the preference for this profile.
+     * @param executor an executor to execute the listener on. Optional if listener is null.
+     * @param listener an optional listener to listen for completion of the operation.
+     * @throws IllegalArgumentException if {@code profile} is not a valid user profile.
+     * @throws SecurityException if missing the appropriate permissions.
+     * @hide
+     */
+    // This function is for establishing per-profile default networking and can only be called by
+    // the device policy manager, running as the system server. It would make no sense to call it
+    // on a context for a user because it does not establish a setting on behalf of a user, rather
+    // it establishes a setting for a user on behalf of the DPM.
+    @SuppressLint({"UserHandle"})
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+    public void setProfileNetworkPreference(@NonNull final UserHandle profile,
+            @ProfileNetworkPreference final int preference,
+            @Nullable @CallbackExecutor final Executor executor,
+            @Nullable final Runnable listener) {
+        if (null != listener) {
+            Objects.requireNonNull(executor, "Pass a non-null executor, or a null listener");
+        }
+        final IOnCompleteListener proxy;
+        if (null == listener) {
+            proxy = null;
+        } else {
+            proxy = new IOnCompleteListener.Stub() {
+                @Override
+                public void onComplete() {
+                    executor.execute(listener::run);
+                }
+            };
+        }
+        try {
+            mService.setProfileNetworkPreference(profile, preference, proxy);
+        } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
