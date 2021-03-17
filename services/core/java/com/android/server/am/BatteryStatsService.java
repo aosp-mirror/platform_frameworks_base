@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
+import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -1927,7 +1928,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
-                mStats.updateWifiState(info, elapsedRealtime, uptime);
+                mStats.updateWifiState(info, POWER_DATA_UNAVAILABLE, elapsedRealtime, uptime);
             });
         }
     }
@@ -1945,7 +1946,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.updateBluetoothStateLocked(info, elapsedRealtime, uptime);
+                    mStats.updateBluetoothStateLocked(
+                            info, POWER_DATA_UNAVAILABLE, elapsedRealtime, uptime);
                 }
             });
         }

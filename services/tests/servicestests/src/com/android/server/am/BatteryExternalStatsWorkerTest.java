@@ -17,8 +17,10 @@
 package com.android.server.am;
 
 import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_ALL;
+import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_BT;
 import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_CPU;
 import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_DISPLAY;
+import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -39,6 +41,7 @@ import android.util.SparseArray;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.PowerProfile;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -61,7 +64,7 @@ public class BatteryExternalStatsWorkerTest {
     public void setUp() {
         final Context context = InstrumentationRegistry.getContext();
 
-        mBatteryStatsImpl = new TestBatteryStatsImpl();
+        mBatteryStatsImpl = new TestBatteryStatsImpl(context);
         mPowerStatsInternal = new TestPowerStatsInternal();
         mBatteryExternalStatsWorker = new BatteryExternalStatsWorker(new TestInjector(context),
                 mBatteryStatsImpl);
@@ -72,12 +75,23 @@ public class BatteryExternalStatsWorkerTest {
         final int numCpuClusters = 4;
         final int numOther = 3;
 
-        final IntArray tempAllIds = new IntArray();
         // Add some energy consumers used by BatteryExternalStatsWorker.
+        final IntArray tempAllIds = new IntArray();
+
         final int displayId = mPowerStatsInternal.addEnergyConsumer(EnergyConsumerType.DISPLAY, 0,
                 "display");
         tempAllIds.add(displayId);
         mPowerStatsInternal.incrementEnergyConsumption(displayId, 12345);
+
+        final int wifiId = mPowerStatsInternal.addEnergyConsumer(EnergyConsumerType.WIFI, 0,
+                "wifi");
+        tempAllIds.add(wifiId);
+        mPowerStatsInternal.incrementEnergyConsumption(wifiId, 23456);
+
+        final int btId = mPowerStatsInternal.addEnergyConsumer(EnergyConsumerType.BLUETOOTH, 0,
+                "bt");
+        tempAllIds.add(btId);
+        mPowerStatsInternal.incrementEnergyConsumption(btId, 34567);
 
         final int[] cpuClusterIds = new int[numCpuClusters];
         for (int i = 0; i < numCpuClusters; i++) {
@@ -108,6 +122,18 @@ public class BatteryExternalStatsWorkerTest {
         // Results should only have the display energy consumer
         assertEquals(1, displayResults.length);
         assertEquals(displayId, displayResults[0].id);
+
+        final EnergyConsumerResult[] wifiResults =
+                mBatteryExternalStatsWorker.getMeasuredEnergyLocked(UPDATE_WIFI).getNow(null);
+        // Results should only have the wifi energy consumer
+        assertEquals(1, wifiResults.length);
+        assertEquals(wifiId, wifiResults[0].id);
+
+        final EnergyConsumerResult[] bluetoothResults =
+                mBatteryExternalStatsWorker.getMeasuredEnergyLocked(UPDATE_BT).getNow(null);
+        // Results should only have the bluetooth energy consumer
+        assertEquals(1, bluetoothResults.length);
+        assertEquals(btId, bluetoothResults[0].id);
 
         final EnergyConsumerResult[] cpuResults =
                 mBatteryExternalStatsWorker.getMeasuredEnergyLocked(UPDATE_CPU).getNow(null);
@@ -148,6 +174,9 @@ public class BatteryExternalStatsWorkerTest {
     }
 
     public class TestBatteryStatsImpl extends BatteryStatsImpl {
+        public TestBatteryStatsImpl(Context context) {
+            mPowerProfile = new PowerProfile(context, true /* forTest */);
+        }
     }
 
     public class TestPowerStatsInternal extends PowerStatsInternal {
