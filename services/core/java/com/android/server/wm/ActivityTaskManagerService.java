@@ -312,9 +312,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
     // How long we wait until we timeout on key dispatching.
-    public static final int KEY_DISPATCHING_TIMEOUT_MS = 5 * 1000;
+    public static final int KEY_DISPATCHING_TIMEOUT_MS = 5 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
     // How long we wait until we timeout on key dispatching during instrumentation.
-    static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS = 60 * 1000;
+    static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS =
+            60 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
     // How long we permit background activity starts after an activity in the process
     // started or finished.
     static final long ACTIVITY_BG_START_GRACE_PERIOD_MS = 10 * 1000;
