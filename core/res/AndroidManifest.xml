@@ -987,6 +987,23 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:protectionLevel="signature|appop|preinstalled" />
 
+    <!-- Allows an application to modify and delete media files on this device or any connected
+         storage device without user confirmation. Applications must already be granted the
+         {@link #READ_EXTERNAL_STORAGE} or {@link #MANAGE_EXTERNAL_STORAGE}} permissions for this
+         permission to take effect.
+         <p>Even if applications are granted this permission, if applications want to modify or
+         delete media files, they also must get the access by calling
+         {@link android.provider.MediaStore#createWriteRequest(ContentResolver, Collection)},
+         {@link android.provider.MediaStore#createDeleteRequest(ContentResolver, Collection)}, or
+         {@link android.provider.MediaStore#createTrashRequest(ContentResolver, Collection, boolean)}.
+         <p>This permission doesn't give read or write access directly. It only prevents the user
+         confirmation dialog for these requests.
+         <p>If applications are not granted {@link #ACCESS_MEDIA_LOCATION}, the system also pops up
+         the user confirmation dialog for the write request.
+         <p>Protection level: signature|appop|preinstalled -->
+    <permission android:name="android.permission.MANAGE_MEDIA"
+        android:protectionLevel="signature|appop|preinstalled" />
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device location                          -->
     <!-- ====================================================================== -->
