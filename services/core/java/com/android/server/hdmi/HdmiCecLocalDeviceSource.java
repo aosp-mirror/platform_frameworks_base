@@ -107,14 +107,18 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void sendStandby(int deviceId) {
         assertRunOnServiceThread();
-        String sendStandbyOnSleep = mService.getHdmiCecConfig().getStringValue(
+        String powerControlMode = mService.getHdmiCecConfig().getStringValue(
                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
-        if (sendStandbyOnSleep.equals(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST)) {
+        if (powerControlMode.equals(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST)) {
             mService.sendCecCommand(
                     HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_BROADCAST));
             return;
         }
         mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
+        if (powerControlMode.equals(HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM)) {
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_AUDIO_SYSTEM));
+        }
     }
 
     @ServiceThreadOnly
