@@ -23,14 +23,17 @@ package {
 
 android_test {
     name: "PackageManagerServiceUnitTests",
-    srcs: ["src/**/*.kt"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
     static_libs: [
         "androidx.test.rules",
         "androidx.test.runner",
         "junit",
+        "kotlin-test",
         "services.core",
         "servicestests-utils",
-        "testng",
         "truth-prebuilt",
     ],
     platform_apis: true,
