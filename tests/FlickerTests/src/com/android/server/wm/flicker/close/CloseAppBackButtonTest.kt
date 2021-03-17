@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.close
 
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -50,12 +49,7 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    repetitions = 5,
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
-                )
+                .getConfigNonRotationTests(repetitions = 5)
         }
     }
 }
