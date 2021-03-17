@@ -24,6 +24,7 @@ import android.media.soundtrigger.Phrase;
  * information indicated by phrases field.
  * {@hide}
  */
+@JavaDerive(equals = true, toString = true)
 @VintfStability
 parcelable PhraseSoundModel {
     /** Common part of sound model descriptor */

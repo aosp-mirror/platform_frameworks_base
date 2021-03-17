@@ -22,6 +22,7 @@ import android.media.soundtrigger.Properties;
  * module, as well its capabilities.
  * {@hide}
  */
+@JavaDerive(equals = true, toString = true)
 parcelable SoundTriggerModuleDescriptor {
     /** Module handle to be used for attaching to it. */
     int handle;

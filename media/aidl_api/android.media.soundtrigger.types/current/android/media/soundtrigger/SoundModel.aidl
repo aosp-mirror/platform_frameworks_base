@@ -33,7 +33,7 @@
 
 package android.media.soundtrigger;
 /* @hide */
-@VintfStability
+@JavaDerive(equals=true, toString=true) @VintfStability
 parcelable SoundModel {
   android.media.soundtrigger.SoundModelType type = android.media.soundtrigger.SoundModelType.INVALID;
   String uuid;

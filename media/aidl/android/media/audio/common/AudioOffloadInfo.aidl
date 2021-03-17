@@ -28,6 +28,7 @@ import android.media.audio.common.AudioUsage;
  *
  * {@hide}
  */
+@JavaDerive(equals = true, toString = true)
 @VintfStability
 parcelable AudioOffloadInfo {
     int sampleRateHz;

@@ -33,7 +33,7 @@
 
 package android.media.soundtrigger;
 /* @hide */
-@VintfStability
+@JavaDerive(equals=true, toString=true) @VintfStability
 parcelable RecognitionEvent {
   android.media.soundtrigger.RecognitionStatus status = android.media.soundtrigger.RecognitionStatus.INVALID;
   android.media.soundtrigger.SoundModelType type = android.media.soundtrigger.SoundModelType.INVALID;

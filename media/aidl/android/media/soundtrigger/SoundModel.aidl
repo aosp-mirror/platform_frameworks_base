@@ -23,6 +23,7 @@ import android.os.ParcelFileDescriptor;
  * aggregation.
  * {@hide}
  */
+@JavaDerive(equals = true, toString = true)
 @VintfStability
 parcelable SoundModel {
     /** Model type. */

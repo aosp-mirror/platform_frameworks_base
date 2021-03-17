@@ -21,6 +21,7 @@ import android.media.soundtrigger.PhraseRecognitionExtra;
  * Configuration for tuning behavior of an active recognition process.
  * {@hide}
  */
+@JavaDerive(equals = true, toString = true)
 @VintfStability
 parcelable RecognitionConfig {
     /* Capture and buffer audio for this recognition instance. */

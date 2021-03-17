@@ -33,7 +33,7 @@
 
 package android.media.soundtrigger;
 /* @hide */
-@VintfStability
+@JavaDerive(equals=true, toString=true) @VintfStability
 parcelable RecognitionConfig {
   boolean captureRequested;
   android.media.soundtrigger.PhraseRecognitionExtra[] phraseRecognitionExtras;

@@ -21,6 +21,7 @@ import android.media.soundtrigger.ConfidenceLevel;
  * Specialized recognition event for key phrase detection.
  * {@hide}
  */
+@JavaDerive(equals = true, toString = true)
 @VintfStability
 parcelable PhraseRecognitionExtra {
     /** Keyphrase ID */

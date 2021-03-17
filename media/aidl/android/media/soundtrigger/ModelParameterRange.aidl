@@ -20,6 +20,7 @@ package android.media.soundtrigger;
  *
  * {@hide}
  */
+@JavaDerive(equals = true, toString = true)
 @VintfStability
 parcelable ModelParameterRange {
     /** Minimum (inclusive) */

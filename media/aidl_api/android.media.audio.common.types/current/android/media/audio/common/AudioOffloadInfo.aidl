@@ -34,7 +34,7 @@
 
 package android.media.audio.common;
 /* @hide */
-@VintfStability
+@JavaDerive(equals=true, toString=true) @VintfStability
 parcelable AudioOffloadInfo {
   int sampleRateHz;
   int channelMask;

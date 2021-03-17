@@ -23,6 +23,7 @@ import android.media.soundtrigger.RecognitionEvent;
    process).
  * {@hide}
  */
+@JavaDerive(equals = true, toString = true)
 @VintfStability
 parcelable PhraseRecognitionEvent {
     /** Common recognition event. */
