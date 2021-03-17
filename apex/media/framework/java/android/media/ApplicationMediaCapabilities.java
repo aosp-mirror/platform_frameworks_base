@@ -19,10 +19,13 @@ package android.media;
 import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+
+import com.android.modules.annotation.MinSdk;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -77,6 +80,7 @@ import java.util.Set;
  There are four types of HDR video(Dolby-Vision, HDR10, HDR10+, HLG) supported by the platform,
  application will only need to specify individual types they supported.
  */
+@MinSdk(Build.VERSION_CODES.S)
 public final class ApplicationMediaCapabilities implements Parcelable {
     private static final String TAG = "ApplicationMediaCapabilities";
 

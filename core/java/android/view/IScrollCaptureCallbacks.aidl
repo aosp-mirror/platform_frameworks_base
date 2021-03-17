@@ -27,13 +27,6 @@ import android.view.Surface;
  */
 interface IScrollCaptureCallbacks {
     /**
-     * Provides the result of WindowManagerService#requestScrollCapture
-     *
-     * @param response the response which describes the result
-     */
-    oneway void onScrollCaptureResponse(in ScrollCaptureResponse response);
-
-    /**
      * Called in reply to IScrollCaptureConnection#startCapture, when the remote end has confirmed
      * the request and is ready to begin capturing images.
      */

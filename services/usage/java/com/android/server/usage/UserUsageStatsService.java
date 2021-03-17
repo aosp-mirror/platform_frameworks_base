@@ -1003,6 +1003,8 @@ class UserUsageStatsService {
                     formatElapsedTime(usageStats.mTotalTimeVisible, prettyDates));
             pw.printPair("lastTimeVisible",
                     formatDateTime(usageStats.mLastTimeVisible, prettyDates));
+            pw.printPair("lastTimeComponentUsed",
+                    formatDateTime(usageStats.mLastTimeComponentUsed, prettyDates));
             pw.printPair("totalTimeFS",
                     formatElapsedTime(usageStats.mTotalTimeForegroundServiceUsed, prettyDates));
             pw.printPair("lastTimeFS",

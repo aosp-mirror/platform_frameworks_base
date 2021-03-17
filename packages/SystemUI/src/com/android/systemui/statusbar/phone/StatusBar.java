@@ -4147,7 +4147,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @VisibleForTesting
-    void updateScrimController() {
+    public void updateScrimController() {
         Trace.beginSection("StatusBar#updateScrimController");
 
         // We don't want to end up in KEYGUARD state when we're unlocking with
@@ -4163,7 +4163,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationPanelViewController.isLaunchingAffordanceWithPreview();
         mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
 
-        if (mBouncerShowing) {
+        if (mStatusBarKeyguardViewManager.isShowingAlternativeAuth()) {
+            mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
+        } else if (mBouncerShowing) {
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by
             // FLAG_DISMISS_KEYGUARD_ACTIVITY.

@@ -4890,8 +4890,8 @@ public class PackageParser {
         info.maxRecents = target.info.maxRecents;
         info.windowLayout = target.info.windowLayout;
         info.resizeMode = target.info.resizeMode;
-        info.maxAspectRatio = target.info.maxAspectRatio;
-        info.minAspectRatio = target.info.minAspectRatio;
+        info.setMaxAspectRatio(target.info.getMaxAspectRatio());
+        info.setMinAspectRatio(target.info.getManifestMinAspectRatio());
         info.supportsSizeChanges = target.info.supportsSizeChanges;
         info.requestedVrComponent = target.info.requestedVrComponent;
 
@@ -8157,7 +8157,7 @@ public class PackageParser {
                 return;
             }
 
-            info.maxAspectRatio = maxAspectRatio;
+            info.setMaxAspectRatio(maxAspectRatio);
             mHasMaxAspectRatio = true;
         }
 
@@ -8173,7 +8173,7 @@ public class PackageParser {
                 return;
             }
 
-            info.minAspectRatio = minAspectRatio;
+            info.setMinAspectRatio(minAspectRatio);
             mHasMinAspectRatio = true;
         }
 

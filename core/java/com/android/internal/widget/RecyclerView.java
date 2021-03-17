@@ -16,10 +16,16 @@
 
 package com.android.internal.widget;
 
+import static android.widget.EdgeEffect.TYPE_GLOW;
+import static android.widget.EdgeEffect.TYPE_STRETCH;
+import static android.widget.EdgeEffect.USE_STRETCH_EDGE_EFFECT_BY_DEFAULT;
+import static android.widget.EdgeEffect.USE_STRETCH_EDGE_EFFECT_FOR_SUPPORTED;
+
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.Compatibility;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -460,6 +466,8 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
     private final int[] mScrollConsumed = new int[2];
     private final int[] mNestedOffsets = new int[2];
 
+    private int mEdgeEffectType;
+
     /**
      * These are views that had their a11y importance changed during a layout. We defer these events
      * until the end of the layout because a11y service may make sync calls back to the RV while
@@ -587,6 +595,14 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
         }
 
+        boolean defaultToStretch = Compatibility.isChangeEnabled(USE_STRETCH_EDGE_EFFECT_BY_DEFAULT)
+                || Compatibility.isChangeEnabled(USE_STRETCH_EDGE_EFFECT_FOR_SUPPORTED);
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.EdgeEffect);
+        mEdgeEffectType = a.getInt(com.android.internal.R.styleable.EdgeEffect_edgeEffectType,
+                defaultToStretch ? TYPE_STRETCH : TYPE_GLOW);
+        a.recycle();
+
         // Re-set whether nested scrolling is enabled so that it is set on all API levels
         setNestedScrollingEnabled(nestedScrollingEnabled);
     }
@@ -607,6 +623,28 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             RecyclerViewAccessibilityDelegate accessibilityDelegate) {
         mAccessibilityDelegate = accessibilityDelegate;
         setAccessibilityDelegate(mAccessibilityDelegate);
+    }
+
+    /**
+     * Returns the {@link EdgeEffect#getType()} used for all EdgeEffects.
+     *
+     * @return @link EdgeEffect#getType()} used for all EdgeEffects.
+     */
+    @EdgeEffect.EdgeEffectType
+    public int getEdgeEffectType() {
+        return mEdgeEffectType;
+    }
+
+    /**
+     * Sets the {@link EdgeEffect#getType()} used in all EdgeEffects.
+     * Any existing over-scroll effects are cleared and new effects are created as needed.
+     *
+     * @param type the {@link EdgeEffect#getType()} used in all EdgeEffects.
+     */
+    public void setEdgeEffectType(@EdgeEffect.EdgeEffectType int type) {
+        mEdgeEffectType = type;
+        invalidateGlows();
+        invalidate();
     }
 
     /**
@@ -2183,6 +2221,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             return;
         }
         mLeftGlow = new EdgeEffect(getContext());
+        mLeftGlow.setType(mEdgeEffectType);
         if (mClipToPadding) {
             mLeftGlow.setSize(getMeasuredHeight() - getPaddingTop() - getPaddingBottom(),
                     getMeasuredWidth() - getPaddingLeft() - getPaddingRight());
@@ -2196,6 +2235,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             return;
         }
         mRightGlow = new EdgeEffect(getContext());
+        mRightGlow.setType(mEdgeEffectType);
         if (mClipToPadding) {
             mRightGlow.setSize(getMeasuredHeight() - getPaddingTop() - getPaddingBottom(),
                     getMeasuredWidth() - getPaddingLeft() - getPaddingRight());
@@ -2209,6 +2249,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             return;
         }
         mTopGlow = new EdgeEffect(getContext());
+        mTopGlow.setType(mEdgeEffectType);
         if (mClipToPadding) {
             mTopGlow.setSize(getMeasuredWidth() - getPaddingLeft() - getPaddingRight(),
                     getMeasuredHeight() - getPaddingTop() - getPaddingBottom());
@@ -2223,6 +2264,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             return;
         }
         mBottomGlow = new EdgeEffect(getContext());
+        mBottomGlow.setType(mEdgeEffectType);
         if (mClipToPadding) {
             mBottomGlow.setSize(getMeasuredWidth() - getPaddingLeft() - getPaddingRight(),
                     getMeasuredHeight() - getPaddingTop() - getPaddingBottom());
@@ -2663,7 +2705,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
                 mInitialTouchX = mLastTouchX = (int) (e.getX() + 0.5f);
                 mInitialTouchY = mLastTouchY = (int) (e.getY() + 0.5f);
 
-                if (mScrollState == SCROLL_STATE_SETTLING) {
+                if (stopGlowAnimations(e) || mScrollState == SCROLL_STATE_SETTLING) {
                     getParent().requestDisallowInterceptTouchEvent(true);
                     setScrollState(SCROLL_STATE_DRAGGING);
                 }
@@ -2729,6 +2771,38 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             }
         }
         return mScrollState == SCROLL_STATE_DRAGGING;
+    }
+
+    /**
+     * This stops any edge glow animation that is currently running by applying a
+     * 0 length pull at the displacement given by the provided MotionEvent. On pre-S devices,
+     * this method does nothing, allowing any animating edge effect to continue animating and
+     * returning <code>false</code> always.
+     *
+     * @param e The motion event to use to indicate the finger position for the displacement of
+     *          the current pull.
+     * @return <code>true</code> if any edge effect had an existing effect to be drawn ond the
+     * animation was stopped or <code>false</code> if no edge effect had a value to display.
+     */
+    private boolean stopGlowAnimations(MotionEvent e) {
+        boolean stopped = false;
+        if (mLeftGlow != null && mLeftGlow.getDistance() != 0) {
+            mLeftGlow.onPullDistance(0, 1 - (e.getY() / getHeight()));
+            stopped = true;
+        }
+        if (mRightGlow != null && mRightGlow.getDistance() != 0) {
+            mRightGlow.onPullDistance(0, e.getY() / getHeight());
+            stopped = true;
+        }
+        if (mTopGlow != null && mTopGlow.getDistance() != 0) {
+            mTopGlow.onPullDistance(0, e.getX() / getWidth());
+            stopped = true;
+        }
+        if (mBottomGlow != null && mBottomGlow.getDistance() != 0) {
+            mBottomGlow.onPullDistance(0, 1 - e.getX() / getWidth());
+            stopped = true;
+        }
+        return stopped;
     }
 
     @Override
@@ -2807,6 +2881,8 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
                 final int y = (int) (e.getY(index) + 0.5f);
                 int dx = mLastTouchX - x;
                 int dy = mLastTouchY - y;
+                dx -= releaseHorizontalGlow(dx, e.getY());
+                dy -= releaseVerticalGlow(dy, e.getX());
 
                 if (dispatchNestedPreScroll(dx, dy, mScrollConsumed, mScrollOffset)) {
                     dx -= mScrollConsumed[0];
@@ -2885,6 +2961,72 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
         vtev.recycle();
 
         return true;
+    }
+
+    /**
+     * If either of the horizontal edge glows are currently active, this consumes part or all of
+     * deltaX on the edge glow.
+     *
+     * @param deltaX The pointer motion, in pixels, in the horizontal direction, positive
+     *                         for moving down and negative for moving up.
+     * @param y The vertical position of the pointer.
+     * @return The amount of <code>deltaX</code> that has been consumed by the
+     * edge glow.
+     */
+    private int releaseHorizontalGlow(int deltaX, float y) {
+        // First allow releasing existing overscroll effect:
+        float consumed = 0;
+        float displacement = y / getHeight();
+        float pullDistance = (float) deltaX / getWidth();
+        if (mLeftGlow != null && mLeftGlow.getDistance() != 0) {
+            consumed = -mLeftGlow.onPullDistance(-pullDistance, 1 - displacement);
+            if (mLeftGlow.getDistance() == 0) {
+                mLeftGlow.onRelease();
+            }
+        } else if (mRightGlow != null && mRightGlow.getDistance() != 0) {
+            consumed = mRightGlow.onPullDistance(pullDistance, displacement);
+            if (mRightGlow.getDistance() == 0) {
+                mRightGlow.onRelease();
+            }
+        }
+        int pixelsConsumed = Math.round(consumed * getWidth());
+        if (pixelsConsumed != 0) {
+            invalidate();
+        }
+        return pixelsConsumed;
+    }
+
+    /**
+     * If either of the vertical edge glows are currently active, this consumes part or all of
+     * deltaY on the edge glow.
+     *
+     * @param deltaY The pointer motion, in pixels, in the vertical direction, positive
+     *                         for moving down and negative for moving up.
+     * @param x The vertical position of the pointer.
+     * @return The amount of <code>deltaY</code> that has been consumed by the
+     * edge glow.
+     */
+    private int releaseVerticalGlow(int deltaY, float x) {
+        // First allow releasing existing overscroll effect:
+        float consumed = 0;
+        float displacement = x / getWidth();
+        float pullDistance = (float) deltaY / getHeight();
+        if (mTopGlow != null && mTopGlow.getDistance() != 0) {
+            consumed = -mTopGlow.onPullDistance(-pullDistance, displacement);
+            if (mTopGlow.getDistance() == 0) {
+                mTopGlow.onRelease();
+            }
+        } else if (mBottomGlow != null && mBottomGlow.getDistance() != 0) {
+            consumed = mBottomGlow.onPullDistance(pullDistance, 1 - displacement);
+            if (mBottomGlow.getDistance() == 0) {
+                mBottomGlow.onRelease();
+            }
+        }
+        int pixelsConsumed = Math.round(consumed * getHeight());
+        if (pixelsConsumed != 0) {
+            invalidate();
+        }
+        return pixelsConsumed;
     }
 
     private void resetTouch() {

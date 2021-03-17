@@ -23,7 +23,6 @@ import android.graphics.drawable.VectorDrawable;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
-import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
@@ -48,13 +47,6 @@ public class NumPadButton extends AlphaOptimizedImageButton {
         } else {
             mAnimator = null;
         }
-    }
-
-    @Override
-    public void setLayoutParams(ViewGroup.LayoutParams params) {
-        if (mAnimator != null) mAnimator.updateMargin((ViewGroup.MarginLayoutParams) params);
-
-        super.setLayoutParams(params);
     }
 
     @Override

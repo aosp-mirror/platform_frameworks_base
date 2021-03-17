@@ -20,7 +20,6 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.view.Choreographer;
-import android.view.Surface;
 import android.view.SurfaceControl;
 
 /**
@@ -89,24 +88,6 @@ public class PipSurfaceTransactionHelper {
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
                 .setWindowCrop(leash, mTmpDestinationRect)
                 .setPosition(leash, positionX, positionY);
-    }
-
-    public void reset(SurfaceControl.Transaction tx, SurfaceControl leash, Rect destinationBounds,
-            @Surface.Rotation int rotation) {
-        resetScale(tx, leash, destinationBounds);
-        if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
-            final int degree = (rotation == Surface.ROTATION_90) ? -90 : 90;
-            mTmpTransform.setRotate(degree, 0, 0);
-            tx.setMatrix(leash, mTmpTransform, mTmpFloat9);
-        }
-        resetCornerRadius(tx, leash);
-        crop(tx, leash, destinationBounds);
-    }
-
-    public void resetScale(SurfaceControl.Transaction tx, SurfaceControl leash,
-            Rect destinationBounds) {
-        tx.setMatrix(leash, Matrix.IDENTITY_MATRIX, mTmpFloat9)
-                .setPosition(leash, destinationBounds.left, destinationBounds.top);
     }
 
     public void resetCornerRadius(SurfaceControl.Transaction tx, SurfaceControl leash) {

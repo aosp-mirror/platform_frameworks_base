@@ -4251,12 +4251,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         mPowerManager.wakeUp(wakeTime, reason, details);
-
-        // Turn on the connected TV and switch HDMI input if we're a HDMI playback device.
-        final HdmiControl hdmiControl = getHdmiControl();
-        if (hdmiControl != null) {
-            hdmiControl.turnOnTv();
-        }
         return true;
     }
 

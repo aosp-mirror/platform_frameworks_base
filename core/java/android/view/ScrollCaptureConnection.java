@@ -32,6 +32,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -50,8 +51,9 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
     private final Object mLock = new Object();
     private final Rect mScrollBounds;
     private final Point mPositionInWindow;
-    private final CloseGuard mCloseGuard;
     private final Executor mUiThread;
+    private final CloseGuard mCloseGuard = new CloseGuard();
+
 
     private ScrollCaptureCallback mLocal;
     private IScrollCaptureCallbacks mRemote;
@@ -60,42 +62,38 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
 
     private CancellationSignal mCancellation;
 
-    private volatile boolean mStarted;
-    private volatile boolean mConnected;
+    private volatile boolean mActive;
 
     /**
      * Constructs a ScrollCaptureConnection.
      *
+     * @param uiThread an executor for the UI thread of the containing View
      * @param selectedTarget  the target the client is controlling
-     * @param remote the callbacks to reply to system requests
      *
      * @hide
      */
     public ScrollCaptureConnection(
             @NonNull Executor uiThread,
-            @NonNull ScrollCaptureTarget selectedTarget,
-            @NonNull IScrollCaptureCallbacks remote) {
+            @NonNull ScrollCaptureTarget selectedTarget) {
         mUiThread = requireNonNull(uiThread, "<uiThread> must non-null");
         requireNonNull(selectedTarget, "<selectedTarget> must non-null");
-        mRemote = requireNonNull(remote, "<callbacks> must non-null");
         mScrollBounds = requireNonNull(Rect.copyOrNull(selectedTarget.getScrollBounds()),
                 "target.getScrollBounds() must be non-null to construct a client");
-
         mLocal = selectedTarget.getCallback();
         mPositionInWindow = new Point(selectedTarget.getPositionInWindow());
-
-        mCloseGuard = new CloseGuard();
-        mCloseGuard.open("close");
-        mConnected = true;
     }
 
     @BinderThread
     @Override
-    public ICancellationSignal startCapture(Surface surface) throws RemoteException {
-        checkConnected();
+    public ICancellationSignal startCapture(@NonNull Surface surface,
+            @NonNull IScrollCaptureCallbacks remote) throws RemoteException {
+
+        mCloseGuard.open("close");
+
         if (!surface.isValid()) {
             throw new RemoteException(new IllegalArgumentException("surface must be valid"));
         }
+        mRemote = requireNonNull(remote, "<callbacks> must non-null");
 
         ICancellationSignal cancellation = CancellationSignal.createTransport();
         mCancellation = CancellationSignal.fromTransport(cancellation);
@@ -110,7 +108,7 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
 
     @UiThread
     private void onStartCaptureCompleted() {
-        mStarted = true;
+        mActive = true;
         try {
             mRemote.onCaptureStarted();
         } catch (RemoteException e) {
@@ -119,13 +117,11 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
         }
     }
 
-
     @BinderThread
     @Override
     public ICancellationSignal requestImage(Rect requestRect) throws RemoteException {
         Trace.beginSection("requestImage");
-        checkConnected();
-        checkStarted();
+        checkActive();
 
         ICancellationSignal cancellation = CancellationSignal.createTransport();
         mCancellation = CancellationSignal.fromTransport(cancellation);
@@ -152,8 +148,7 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
     @BinderThread
     @Override
     public ICancellationSignal endCapture() throws RemoteException {
-        checkConnected();
-        checkStarted();
+        checkActive();
 
         ICancellationSignal cancellation = CancellationSignal.createTransport();
         mCancellation = CancellationSignal.fromTransport(cancellation);
@@ -167,64 +162,48 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
 
     @UiThread
     private void onEndCaptureCompleted() {
-        synchronized (mLock) {
-            mStarted = false;
-            try {
+        mActive = false;
+        try {
+            if (mRemote != null) {
                 mRemote.onCaptureEnded();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Shutting down due to error: ", e);
-                close();
             }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Caught exception confirming capture end!", e);
+        } finally {
+            close();
         }
     }
 
     @BinderThread
     @Override
     public void close() {
-        if (mStarted) {
-            Log.w(TAG, "close(): capture is still started?! Ending now.");
-
+        if (mActive) {
+            if (mCancellation != null) {
+                Log.w(TAG, "close(): cancelling pending operation.");
+                mCancellation.cancel();
+                mCancellation = null;
+            }
+            Log.w(TAG, "close(): capture session still active! Ending now.");
             // -> UiThread
             mUiThread.execute(() -> mLocal.onScrollCaptureEnd(() -> { /* ignore */ }));
-            mStarted = false;
+            mActive = false;
         }
-        disconnect();
+        mActive = false;
+        mSession = null;
+        mRemote = null;
+        mLocal = null;
+        mCloseGuard.close();
+        Reference.reachabilityFence(this);
     }
 
-    /**
-     * Shuts down this client and releases references to dependent objects. No attempt is made
-     * to notify the controller, use with caution!
-     */
-    private void disconnect() {
+    @VisibleForTesting
+    public boolean isActive() {
+        return mActive;
+    }
+
+    private void checkActive() throws RemoteException {
         synchronized (mLock) {
-            mSession = null;
-            mConnected = false;
-            mStarted = false;
-            mRemote = null;
-            mLocal = null;
-            mCloseGuard.close();
-        }
-    }
-
-    public boolean isConnected() {
-        return mConnected;
-    }
-
-    public boolean isStarted() {
-        return mStarted;
-    }
-
-    private synchronized void checkConnected() throws RemoteException {
-        synchronized (mLock) {
-            if (!mConnected) {
-                throw new RemoteException(new IllegalStateException("Not connected"));
-            }
-        }
-    }
-
-    private void checkStarted() throws RemoteException {
-        synchronized (mLock) {
-            if (!mStarted) {
+            if (!mActive) {
                 throw new RemoteException(new IllegalStateException("Not started!"));
             }
         }
@@ -233,24 +212,16 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
     /** @return a string representation of the state of this client */
     public String toString() {
         return "ScrollCaptureConnection{"
-                + "connected=" + mConnected
-                + ", started=" + mStarted
+                + "active=" + mActive
                 + ", session=" + mSession
                 + ", remote=" + mRemote
                 + ", local=" + mLocal
                 + "}";
     }
 
-    @VisibleForTesting
-    public CancellationSignal getCancellation() {
-        return mCancellation;
-    }
-
     protected void finalize() throws Throwable {
         try {
-            if (mCloseGuard != null) {
-                mCloseGuard.warnIfOpen();
-            }
+            mCloseGuard.warnIfOpen();
             close();
         } finally {
             super.finalize();

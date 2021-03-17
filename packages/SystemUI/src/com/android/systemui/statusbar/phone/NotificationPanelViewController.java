@@ -3386,6 +3386,9 @@ public class NotificationPanelViewController extends PanelViewController {
         return new TouchHandler() {
             @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
+                if (mStatusBarKeyguardViewManager.isShowingAlternativeAuthOrAnimating()) {
+                    return true;
+                }
                 if (mBlockTouches || mQsFullyExpanded && mQs.disallowPanelTouches()) {
                     return false;
                 }
@@ -3413,6 +3416,12 @@ public class NotificationPanelViewController extends PanelViewController {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                final boolean showingOrAnimatingAltAuth =
+                        mStatusBarKeyguardViewManager.isShowingAlternativeAuthOrAnimating();
+                if (showingOrAnimatingAltAuth) {
+                    mStatusBarKeyguardViewManager.resetAlternateAuth();
+                }
+
                 if (mBlockTouches || (mQsFullyExpanded && mQs != null
                         && mQs.disallowPanelTouches())) {
                     return false;
@@ -3464,7 +3473,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     handled = true;
                 }
                 handled |= super.onTouch(v, event);
-                return !mDozing || mPulsing || handled;
+                return !mDozing || mPulsing || handled || showingOrAnimatingAltAuth;
             }
         };
     }

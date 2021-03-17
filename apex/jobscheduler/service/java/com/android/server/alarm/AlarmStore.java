@@ -134,6 +134,11 @@ public interface AlarmStore {
     void dumpProto(ProtoOutputStream pos, long nowElapsed);
 
     /**
+     * @return a name for this alarm store that can be used for debugging and tests.
+     */
+    String getName();
+
+    /**
      * A functional interface used to update the alarm. Used to describe the update in
      * {@link #updateAlarmDeliveries(AlarmDeliveryCalculator)}
      */

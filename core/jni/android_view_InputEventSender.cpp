@@ -172,16 +172,16 @@ int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
         // as part of finishing an IME session, in which case the publisher will
         // soon be disposed as well.
         if (kDebugDispatchCycle) {
-            ALOGD("channel '%s' ~ Consumer closed input channel or an error occurred.  "
-                    "events=0x%x", getInputChannelName().c_str(), events);
+            ALOGD("channel '%s' ~ Consumer closed input channel or an error occurred.  events=0x%x",
+                  getInputChannelName().c_str(), events);
         }
 
         return 0; // remove the callback
     }
 
     if (!(events & ALOOPER_EVENT_INPUT)) {
-        ALOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
-                "events=0x%x", getInputChannelName().c_str(), events);
+        ALOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  events=0x%x",
+              getInputChannelName().c_str(), events);
         return 1;
     }
 
@@ -219,8 +219,7 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
         mPublishedSeqMap.erase(it);
 
         if (kDebugDispatchCycle) {
-            ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, "
-                  "pendingEvents=%zu.",
+            ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, pendingEvents=%zu.",
                   getInputChannelName().c_str(), seq, result->handled ? "true" : "false",
                   mPublishedSeqMap.size());
         }
@@ -229,8 +228,8 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
             if (!senderObj.get()) {
                 senderObj.reset(jniGetReferent(env, mSenderWeakGlobal));
                 if (!senderObj.get()) {
-                    ALOGW("channel '%s' ~ Sender object was finalized "
-                            "without being disposed.", getInputChannelName().c_str());
+                    ALOGW("channel '%s' ~ Sender object was finalized without being disposed.",
+                          getInputChannelName().c_str());
                     return DEAD_OBJECT;
                 }
             }

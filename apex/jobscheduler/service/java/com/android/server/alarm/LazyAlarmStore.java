@@ -25,6 +25,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.StatLogger;
 
 import java.text.SimpleDateFormat;
@@ -38,6 +39,8 @@ import java.util.function.Predicate;
  * This keeps the alarms in a sorted list, and only batches them at the time of delivery.
  */
 public class LazyAlarmStore implements AlarmStore {
+    @VisibleForTesting
+    static final String TAG = LazyAlarmStore.class.getSimpleName();
 
     private final ArrayList<Alarm> mAlarms = new ArrayList<>();
     private Runnable mOnAlarmClockRemoved;
@@ -47,7 +50,7 @@ public class LazyAlarmStore implements AlarmStore {
         int GET_NEXT_WAKEUP_DELIVERY_TIME = 1;
     }
 
-    final StatLogger mStatLogger = new StatLogger("LazyAlarmStore stats", new String[]{
+    final StatLogger mStatLogger = new StatLogger(TAG + " stats", new String[]{
             "GET_NEXT_DELIVERY_TIME",
             "GET_NEXT_WAKEUP_DELIVERY_TIME",
     });
@@ -213,5 +216,10 @@ public class LazyAlarmStore implements AlarmStore {
         for (final Alarm a : mAlarms) {
             a.dumpDebug(pos, AlarmManagerServiceDumpProto.PENDING_ALARMS, nowElapsed);
         }
+    }
+
+    @Override
+    public String getName() {
+        return TAG;
     }
 }

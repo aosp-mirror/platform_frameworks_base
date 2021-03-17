@@ -41,11 +41,11 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.app.Person;
 import android.app.RemoteInput;
-import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
@@ -534,8 +534,8 @@ public final class NotificationEntry extends ListEntry {
             return false;
         }
         Bundle extras = mSbn.getNotification().extras;
-        RemoteInputHistoryItem[] replyTexts = (RemoteInputHistoryItem[]) extras.getParcelableArray(
-                Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+        Parcelable[] replyTexts =
+                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         if (!ArrayUtils.isEmpty(replyTexts)) {
             return true;
         }
