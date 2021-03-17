@@ -166,6 +166,10 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         mEnableHeadsUpNotificationWhenNotificationShadeOpen = mResources.getBoolean(
                 com.android.car.notification.R.bool
                         .config_enableHeadsUpNotificationWhenNotificationShadeOpen);
+
+        // Inflate view on instantiation to properly initialize listeners even if panel has
+        // not been opened.
+        getOverlayViewGlobalStateController().inflateView(this);
     }
 
     // CommandQueue.Callbacks
