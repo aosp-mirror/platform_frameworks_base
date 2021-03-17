@@ -110,6 +110,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -165,13 +166,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     static final String TAG_TASKS = TAG + POSTFIX_TASKS;
 
     /** How long we wait until giving up on the last activity telling us it is idle. */
-    private static final int IDLE_TIMEOUT = 10 * 1000;
+    private static final int IDLE_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     /** How long we can hold the sleep wake lock before giving up. */
-    private static final int SLEEP_TIMEOUT = 5 * 1000;
+    private static final int SLEEP_TIMEOUT = 5 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     // How long we can hold the launch wake lock before giving up.
-    private static final int LAUNCH_TIMEOUT = 10 * 1000;
+    private static final int LAUNCH_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     /** How long we wait until giving up on the activity telling us it released the top state. */
     private static final int TOP_RESUMED_STATE_LOSS_TIMEOUT = 500;
