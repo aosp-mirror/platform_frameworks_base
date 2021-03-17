@@ -202,6 +202,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
@@ -275,6 +276,7 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.net.module.util.ArrayTrackRecord;
 import com.android.server.ConnectivityService.ConnectivityDiagnosticsCallbackInfo;
 import com.android.server.connectivity.ConnectivityConstants;
+import com.android.server.connectivity.ConnectivityResources;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
@@ -444,6 +446,7 @@ public class ConnectivityServiceTest {
     @Mock NetworkPolicyManager mNetworkPolicyManager;
     @Mock VpnProfileStore mVpnProfileStore;
     @Mock SystemConfigManager mSystemConfigManager;
+    @Mock Resources mResources;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
             ArgumentCaptor.forClass(ResolverParamsParcel.class);
@@ -471,7 +474,7 @@ public class ConnectivityServiceTest {
     private class MockContext extends BroadcastInterceptingContext {
         private final MockContentResolver mContentResolver;
 
-        @Spy private Resources mResources;
+        @Spy private Resources mInternalResources;
         private final LinkedBlockingQueue<Intent> mStartedActivities = new LinkedBlockingQueue<>();
 
         // Map of permission name -> PermissionManager.Permission_{GRANTED|DENIED} constant
@@ -480,19 +483,13 @@ public class ConnectivityServiceTest {
         MockContext(Context base, ContentProvider settingsProvider) {
             super(base);
 
-            mResources = spy(base.getResources());
-            when(mResources.getStringArray(com.android.internal.R.array.networkAttributes)).
-                    thenReturn(new String[] {
+            mInternalResources = spy(base.getResources());
+            when(mInternalResources.getStringArray(com.android.internal.R.array.networkAttributes))
+                    .thenReturn(new String[] {
                             "wifi,1,1,1,-1,true",
                             "mobile,0,0,0,-1,true",
                             "mobile_mms,2,0,2,60000,true",
                             "mobile_supl,3,0,2,60000,true",
-                    });
-
-            when(mResources.getStringArray(
-                    com.android.internal.R.array.config_wakeonlan_supported_interfaces))
-                    .thenReturn(new String[]{
-                            WIFI_WOL_IFNAME,
                     });
 
             mContentResolver = new MockContentResolver();
@@ -559,7 +556,7 @@ public class ConnectivityServiceTest {
 
         @Override
         public Resources getResources() {
-            return mResources;
+            return mInternalResources;
         }
 
         @Override
@@ -1082,6 +1079,10 @@ public class ConnectivityServiceTest {
         public void triggerUnfulfillable(NetworkRequest r) {
             super.releaseRequestAsUnfulfillableByAnyFactory(r);
         }
+
+        public void assertNoRequestChanged() {
+            assertNull(mRequestHistory.poll(0, r -> true));
+        }
     }
 
     private Set<UidRange> uidRangesForUids(int... uids) {
@@ -1533,6 +1534,17 @@ public class ConnectivityServiceTest {
             return mPolicyTracker;
         }).when(deps).makeMultinetworkPolicyTracker(any(), any(), any());
         doReturn(true).when(deps).getCellular464XlatEnabled();
+
+        doReturn(60000).when(mResources).getInteger(
+                com.android.connectivity.resources.R.integer.config_networkTransitionTimeout);
+        doReturn("").when(mResources).getString(
+                com.android.connectivity.resources.R.string.config_networkCaptivePortalServerUrl);
+        doReturn(new String[]{ WIFI_WOL_IFNAME }).when(mResources).getStringArray(
+                com.android.connectivity.resources.R.array.config_wakeonlan_supported_interfaces);
+        final com.android.server.connectivity.ConnectivityResources connRes = mock(
+                ConnectivityResources.class);
+        doReturn(mResources).when(connRes).get();
+        doReturn(connRes).when(deps).getResources(any());
 
         return deps;
     }
@@ -9153,7 +9165,8 @@ public class ConnectivityServiceTest {
                 ConnectivityManager.getNetworkTypeName(TYPE_MOBILE),
                 TelephonyManager.getNetworkTypeName(TelephonyManager.NETWORK_TYPE_LTE));
         return new NetworkAgentInfo(null, new Network(NET_ID), info, new LinkProperties(),
-                nc, 0, mServiceContext, null, new NetworkAgentConfig(), mService, null, null, 0,
+                nc, new NetworkScore.Builder().setLegacyInt(0).build(),
+                mServiceContext, null, new NetworkAgentConfig(), mService, null, null, 0,
                 INVALID_UID, mQosCallbackTracker, new ConnectivityService.Dependencies());
     }
 
@@ -11112,11 +11125,99 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(cellCb);
     }
 
+    // Cannot be part of MockNetworkFactory since it requires method of the test.
+    private void expectNoRequestChanged(@NonNull MockNetworkFactory factory) {
+        waitForIdle();
+        factory.assertNoRequestChanged();
+    }
+
     @Test
-    public void testRegisterBestMatchingNetworkCallback() throws Exception {
-        final NetworkRequest request = new NetworkRequest.Builder().build();
-        assertThrows(UnsupportedOperationException.class,
-                () -> mCm.registerBestMatchingNetworkCallback(request, new NetworkCallback(),
-                        mCsHandlerThread.getThreadHandler()));
+    public void testRegisterBestMatchingNetworkCallback_noIssueToFactory() throws Exception {
+        // Prepare mock mms factory.
+        final HandlerThread handlerThread = new HandlerThread("MockCellularFactory");
+        handlerThread.start();
+        NetworkCapabilities filter = new NetworkCapabilities()
+                .addTransportType(TRANSPORT_CELLULAR)
+                .addCapability(NET_CAPABILITY_MMS);
+        final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
+                mServiceContext, "testFactory", filter, mCsHandlerThread);
+        testFactory.setScoreFilter(40);
+
+        try {
+            // Register the factory and expect it will see default request, because all requests
+            // are sent to all factories.
+            testFactory.register();
+            testFactory.expectRequestAdd();
+            testFactory.assertRequestCountEquals(1);
+            // The factory won't try to start the network since the default request doesn't
+            // match the filter (no INTERNET capability).
+            assertFalse(testFactory.getMyStartRequested());
+
+            // Register callback for listening best matching network. Verify that the request won't
+            // be sent to factory.
+            final TestNetworkCallback bestMatchingCb = new TestNetworkCallback();
+            mCm.registerBestMatchingNetworkCallback(
+                    new NetworkRequest.Builder().addCapability(NET_CAPABILITY_MMS).build(),
+                    bestMatchingCb, mCsHandlerThread.getThreadHandler());
+            bestMatchingCb.assertNoCallback();
+            expectNoRequestChanged(testFactory);
+            testFactory.assertRequestCountEquals(1);
+            assertFalse(testFactory.getMyStartRequested());
+
+            // Fire a normal mms request, verify the factory will only see the request.
+            final TestNetworkCallback mmsNetworkCallback = new TestNetworkCallback();
+            final NetworkRequest mmsRequest = new NetworkRequest.Builder()
+                    .addCapability(NET_CAPABILITY_MMS).build();
+            mCm.requestNetwork(mmsRequest, mmsNetworkCallback);
+            testFactory.expectRequestAdd();
+            testFactory.assertRequestCountEquals(2);
+            assertTrue(testFactory.getMyStartRequested());
+
+            // Unregister best matching callback, verify factory see no change.
+            mCm.unregisterNetworkCallback(bestMatchingCb);
+            expectNoRequestChanged(testFactory);
+            testFactory.assertRequestCountEquals(2);
+            assertTrue(testFactory.getMyStartRequested());
+        } finally {
+            testFactory.terminate();
+        }
+    }
+
+    @Test
+    public void testRegisterBestMatchingNetworkCallback_trackBestNetwork() throws Exception {
+        final TestNetworkCallback bestMatchingCb = new TestNetworkCallback();
+        mCm.registerBestMatchingNetworkCallback(
+                new NetworkRequest.Builder().addCapability(NET_CAPABILITY_TRUSTED).build(),
+                bestMatchingCb, mCsHandlerThread.getThreadHandler());
+
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        bestMatchingCb.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        bestMatchingCb.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
+
+        // Change something on cellular to trigger capabilities changed, since the callback
+        // only cares about the best network, verify it received nothing from cellular.
+        mCellNetworkAgent.addCapability(NET_CAPABILITY_TEMPORARILY_NOT_METERED);
+        bestMatchingCb.assertNoCallback();
+
+        // Make cellular the best network again, verify the callback now tracks cellular.
+        mWiFiNetworkAgent.adjustScore(-50);
+        bestMatchingCb.expectAvailableCallbacksValidated(mCellNetworkAgent);
+
+        // Make cellular temporary non-trusted, which will not satisfying the request.
+        // Verify the callback switch from/to the other network accordingly.
+        mCellNetworkAgent.removeCapability(NET_CAPABILITY_TRUSTED);
+        bestMatchingCb.expectAvailableCallbacksValidated(mWiFiNetworkAgent);
+        mCellNetworkAgent.addCapability(NET_CAPABILITY_TRUSTED);
+        bestMatchingCb.expectAvailableDoubleValidatedCallbacks(mCellNetworkAgent);
+
+        // Verify the callback doesn't care about wifi disconnect.
+        mWiFiNetworkAgent.disconnect();
+        bestMatchingCb.assertNoCallback();
+        mCellNetworkAgent.disconnect();
+        bestMatchingCb.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
     }
 }

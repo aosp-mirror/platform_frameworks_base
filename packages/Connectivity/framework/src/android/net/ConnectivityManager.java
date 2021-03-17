@@ -18,11 +18,13 @@ package android.net;
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
+import static android.net.NetworkRequest.Type.LISTEN_FOR_BEST;
 import static android.net.NetworkRequest.Type.REQUEST;
-import static android.net.NetworkRequest.Type.TRACK_BEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
 import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 import static android.net.QosCallback.QosCallbackRegistrationException;
+import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
+import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -31,11 +33,13 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.IpSecManager.UdpEncapsulationSocket;
@@ -63,6 +67,7 @@ import android.os.ServiceSpecificException;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Range;
@@ -802,24 +807,27 @@ public class ConnectivityManager {
     /**
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final String PRIVATE_DNS_MODE_OFF = "off";
     /**
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final String PRIVATE_DNS_MODE_OPPORTUNISTIC = "opportunistic";
     /**
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = "hostname";
-    /**
-     * The default Private DNS mode.
-     *
-     * This may change from release to release or may become dependent upon
-     * the capabilities of the underlying platform.
-     *
-     * @hide
-     */
-    public static final String PRIVATE_DNS_DEFAULT_MODE_FALLBACK = PRIVATE_DNS_MODE_OPPORTUNISTIC;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(value = {
+            PRIVATE_DNS_MODE_OFF,
+            PRIVATE_DNS_MODE_OPPORTUNISTIC,
+            PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
+    })
+    public @interface PrivateDnsMode {}
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private final IConnectivityManager mService;
@@ -3205,10 +3213,6 @@ public class ConnectivityManager {
         }
     }
 
-    // TODO : remove this method. It is a stopgap measure to help sheperding a number
-    // of dependent changes that would conflict throughout the automerger graph. Having this
-    // temporarily helps with the process of going through with all these dependent changes across
-    // the entire tree.
     /**
      * @hide
      * Register a NetworkAgent with ConnectivityService.
@@ -3218,20 +3222,8 @@ public class ConnectivityManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_FACTORY})
     public Network registerNetworkAgent(INetworkAgent na, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score, NetworkAgentConfig config) {
-        return registerNetworkAgent(na, ni, lp, nc, score, config, NetworkProvider.ID_NONE);
-    }
-
-    /**
-     * @hide
-     * Register a NetworkAgent with ConnectivityService.
-     * @return Network corresponding to NetworkAgent.
-     */
-    @RequiresPermission(anyOf = {
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_FACTORY})
-    public Network registerNetworkAgent(INetworkAgent na, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score, NetworkAgentConfig config, int providerId) {
+            NetworkCapabilities nc, @NonNull NetworkScore score, NetworkAgentConfig config,
+            int providerId) {
         try {
             return mService.registerNetworkAgent(na, ni, lp, nc, score, config, providerId);
         } catch (RemoteException e) {
@@ -4249,15 +4241,33 @@ public class ConnectivityManager {
     }
 
     /**
-     * @hide
+     * Registers to receive notifications about the best matching network which satisfy the given
+     * {@link NetworkRequest}.  The callbacks will continue to be called until
+     * either the application exits or {@link #unregisterNetworkCallback(NetworkCallback)} is
+     * called.
+     *
+     * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
+     * number of outstanding requests to 100 per app (identified by their UID), shared with
+     * {@link #registerNetworkCallback} and its variants and {@link #requestNetwork} as well as
+     * {@link ConnectivityDiagnosticsManager#registerConnectivityDiagnosticsCallback}.
+     * Requesting a network with this method will count toward this limit. If this limit is
+     * exceeded, an exception will be thrown. To avoid hitting this issue and to conserve resources,
+     * make sure to unregister the callbacks with
+     * {@link #unregisterNetworkCallback(NetworkCallback)}.
+     *
+     *
+     * @param request {@link NetworkRequest} describing this request.
+     * @param networkCallback The {@link NetworkCallback} that the system will call as suitable
+     *                        networks change state.
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     * @throws RuntimeException if the app already has too many callbacks registered.
      */
-    // TODO: Make it public api.
     @SuppressLint("ExecutorRegistration")
     public void registerBestMatchingNetworkCallback(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
         final NetworkCapabilities nc = request.networkCapabilities;
         final CallbackHandler cbHandler = new CallbackHandler(handler);
-        sendRequestForNetwork(nc, networkCallback, 0, TRACK_BEST, TYPE_NONE, cbHandler);
+        sendRequestForNetwork(nc, networkCallback, 0, LISTEN_FOR_BEST, TYPE_NONE, cbHandler);
     }
 
     /**
@@ -5113,9 +5123,9 @@ public class ConnectivityManager {
     }
 
     // The first network ID of IPSec tunnel interface.
-    private static final int TUN_INTF_NETID_START = 0xFC00;
+    private static final int TUN_INTF_NETID_START = 0xFC00; // 0xFC00 = 64512
     // The network ID range of IPSec tunnel interface.
-    private static final int TUN_INTF_NETID_RANGE = 0x0400;
+    private static final int TUN_INTF_NETID_RANGE = 0x0400; // 0x0400 = 1024
 
     /**
      * Get the network ID range reserved for IPSec tunnel interfaces.
@@ -5127,5 +5137,25 @@ public class ConnectivityManager {
     @NonNull
     public static Range<Integer> getIpSecNetIdRange() {
         return new Range(TUN_INTF_NETID_START, TUN_INTF_NETID_START + TUN_INTF_NETID_RANGE - 1);
+    }
+
+    /**
+     * Get private DNS mode from settings.
+     *
+     * @param cr The ContentResolver to query private DNS mode from settings.
+     * @return A string of private DNS mode as one of the PRIVATE_DNS_MODE_* constants.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @NonNull
+    @PrivateDnsMode
+    public static String getPrivateDnsMode(@NonNull ContentResolver cr) {
+        String mode = Settings.Global.getString(cr, PRIVATE_DNS_MODE);
+        if (TextUtils.isEmpty(mode)) mode = Settings.Global.getString(cr, PRIVATE_DNS_DEFAULT_MODE);
+        // If both PRIVATE_DNS_MODE and PRIVATE_DNS_DEFAULT_MODE are not set, choose
+        // PRIVATE_DNS_MODE_OPPORTUNISTIC as default mode.
+        if (TextUtils.isEmpty(mode)) mode = PRIVATE_DNS_MODE_OPPORTUNISTIC;
+        return mode;
     }
 }
