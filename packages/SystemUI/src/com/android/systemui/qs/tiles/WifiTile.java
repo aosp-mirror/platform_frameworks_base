@@ -177,8 +177,10 @@ public class WifiTile extends QSTileImpl<SignalState> {
             }
         }
         boolean transientEnabling = arg == ARG_SHOW_TRANSIENT_ENABLING;
-        boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0) && (cb.ssid != null);
-        boolean wifiNotConnected = (cb.wifiSignalIconId > 0) && (cb.ssid == null);
+        boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0)
+                && (cb.ssid != null || cb.wifiSignalIconId != WifiIcons.QS_WIFI_NO_NETWORK);
+        boolean wifiNotConnected = (cb.ssid == null)
+                && (cb.wifiSignalIconId == WifiIcons.QS_WIFI_NO_NETWORK);
         boolean enabledChanging = state.value != cb.enabled;
         if (enabledChanging) {
             mDetailAdapter.setItemsVisible(cb.enabled);
@@ -210,7 +212,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
             state.label = r.getString(R.string.quick_settings_wifi_label);
         } else if (wifiConnected) {
             state.icon = ResourceIcon.get(cb.wifiSignalIconId);
-            state.label = removeDoubleQuotes(cb.ssid);
+            state.label = cb.ssid != null ? removeDoubleQuotes(cb.ssid) : getTileLabel();
         } else if (wifiNotConnected) {
             state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_NO_NETWORK);
             state.label = r.getString(R.string.quick_settings_wifi_label);
