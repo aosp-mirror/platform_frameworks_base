@@ -306,6 +306,39 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
                 /* newWindowY = screenCenterY - offsetY */ mScreenHalfHeight - mMenuHalfHeight);
     }
 
+
+    @Test
+    public void tapOnAndDragMenuToScreenSide_transformShapeHalfOval() {
+        mMenuView.show();
+        mMenuView.onTargetsChanged(mTargets);
+        mMenuView.setSizeType(0);
+        mMenuView.setShapeType(/* oval */ 0);
+        final int currentWindowX = mMenuView.mCurrentLayoutParams.x;
+        final int currentWindowY = mMenuView.mCurrentLayoutParams.y;
+        final MotionEvent downEvent =
+                mMotionEventHelper.obtainMotionEvent(0, 1,
+                        MotionEvent.ACTION_DOWN,
+                        currentWindowX + /* offsetXToMenuCenterX */ mMenuHalfWidth,
+                        currentWindowY + /* offsetYToMenuCenterY */ mMenuHalfHeight);
+        final MotionEvent moveEvent =
+                mMotionEventHelper.obtainMotionEvent(2, 3,
+                        MotionEvent.ACTION_MOVE,
+                        /* downX */(currentWindowX + mMenuHalfWidth)
+                                + /* offsetXToScreenRightSide */ mMenuHalfWidth,
+                        /* downY */ (currentWindowY +  mMenuHalfHeight));
+        final MotionEvent upEvent =
+                mMotionEventHelper.obtainMotionEvent(4, 5,
+                        MotionEvent.ACTION_UP,
+                        /* downX */(currentWindowX + mMenuHalfWidth)
+                                + /* offsetXToScreenRightSide */ mMenuHalfWidth,
+                        /* downY */ (currentWindowY +  mMenuHalfHeight));
+        mListView.dispatchTouchEvent(downEvent);
+        mListView.dispatchTouchEvent(moveEvent);
+        mListView.dispatchTouchEvent(upEvent);
+
+        assertThat(mMenuView.mShapeType).isEqualTo(/* halfOval */ 1);
+    }
+
     @After
     public void tearDown() {
         mInterceptMotionEvent = null;
