@@ -1002,6 +1002,24 @@ public final class BluetoothDevice implements Parcelable {
     public static final String EXTRA_MAS_INSTANCE =
             "android.bluetooth.device.extra.MAS_INSTANCE";
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+        prefix = { "ADDRESS_TYPE_" },
+        value = {
+            /** Hardware MAC Address */
+            ADDRESS_TYPE_PUBLIC,
+            /** Address is either resolvable, non-resolvable or static.*/
+            ADDRESS_TYPE_RANDOM,
+        }
+    )
+    public @interface AddressType {}
+
+    /** Hardware MAC Address of the device */
+    public static final int ADDRESS_TYPE_PUBLIC = 0;
+    /** Address is either resolvable, non-resolvable or static. */
+    public static final int ADDRESS_TYPE_RANDOM = 1;
+
     /**
      * Lazy initialization. Guaranteed final after first object constructed, or
      * getService() called.
@@ -1010,6 +1028,7 @@ public final class BluetoothDevice implements Parcelable {
     private static volatile IBluetooth sService;
 
     private final String mAddress;
+    @AddressType private final int mAddressType;
 
     /*package*/
     @UnsupportedAppUsage
@@ -1064,6 +1083,7 @@ public final class BluetoothDevice implements Parcelable {
         }
 
         mAddress = address;
+        mAddressType = ADDRESS_TYPE_PUBLIC;
     }
 
     @Override

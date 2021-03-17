@@ -1726,6 +1726,17 @@ package android.bluetooth.le {
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.ResultStorageDescriptor> CREATOR;
   }
 
+  public final class ScanFilter implements android.os.Parcelable {
+    method public int getAddressType();
+    method @Nullable public byte[] getIrk();
+  }
+
+  public static final class ScanFilter.Builder {
+    method @NonNull public android.bluetooth.le.ScanFilter.Builder setDeviceAddress(@NonNull String, int);
+    method @NonNull public android.bluetooth.le.ScanFilter.Builder setDeviceAddress(@NonNull String, int, @NonNull byte[]);
+    field public static final int LEN_IRK_OCTETS = 16; // 0x10
+  }
+
   public final class ScanSettings implements android.os.Parcelable {
     field public static final int SCAN_RESULT_TYPE_ABBREVIATED = 1; // 0x1
     field public static final int SCAN_RESULT_TYPE_FULL = 0; // 0x0
