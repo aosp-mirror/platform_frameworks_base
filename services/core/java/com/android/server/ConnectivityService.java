@@ -6316,6 +6316,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return newNc;
     }
 
+    private void updateNetworkInfoForRoamingAndSuspended(NetworkAgentInfo nai,
+            NetworkCapabilities prevNc, NetworkCapabilities newNc) {
+        final boolean prevSuspended = !prevNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        final boolean suspended = !newNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        final boolean prevRoaming = !prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+        final boolean roaming = !newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+        if (prevSuspended != suspended) {
+            // TODO (b/73132094) : remove this call once the few users of onSuspended and
+            // onResumed have been removed.
+            notifyNetworkCallbacks(nai, suspended ? ConnectivityManager.CALLBACK_SUSPENDED
+                    : ConnectivityManager.CALLBACK_RESUMED);
+        }
+        if (prevSuspended != suspended || prevRoaming != roaming) {
+            // updateNetworkInfo will mix in the suspended info from the capabilities and
+            // take appropriate action for the network having possibly changed state.
+            updateNetworkInfo(nai, nai.networkInfo);
+        }
+    }
+
     /**
      * Update the NetworkCapabilities for {@code nai} to {@code nc}. Specifically:
      *
@@ -6347,25 +6366,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // on this network. We might have been called by rematchNetworkAndRequests when a
             // network changed foreground state.
             processListenRequests(nai);
-            final boolean prevSuspended = !prevNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
-            final boolean suspended = !newNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
-            final boolean prevRoaming = !prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
-            final boolean roaming = !newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
-            if (prevSuspended != suspended || prevRoaming != roaming) {
-                // TODO (b/73132094) : remove this call once the few users of onSuspended and
-                // onResumed have been removed.
-                notifyNetworkCallbacks(nai, suspended ? ConnectivityManager.CALLBACK_SUSPENDED
-                        : ConnectivityManager.CALLBACK_RESUMED);
-                // updateNetworkInfo will mix in the suspended info from the capabilities and
-                // take appropriate action for the network having possibly changed state.
-                updateNetworkInfo(nai, nai.networkInfo);
-            }
         } else {
             // If the requestable capabilities have changed or the score changed, we can't have been
             // called by rematchNetworkAndRequests, so it's safe to start a rematch.
             rematchAllNetworksAndRequests();
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
+        updateNetworkInfoForRoamingAndSuspended(nai, prevNc, newNc);
 
         // TODO : static analysis indicates that prevNc can't be null here (getAndSetNetworkCaps
         // never returns null), so mark the relevant members and functions in nai as @NonNull and
