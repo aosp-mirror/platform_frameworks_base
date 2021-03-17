@@ -4488,7 +4488,7 @@
     <permission android:name="android.permission.FACTORY_TEST"
         android:protectionLevel="signature" />
 
-    <!-- @hide @TestApi Allows an application to broadcast the intent {@link
+    <!-- @hide @TestApi @SystemApi Allows an application to broadcast the intent {@link
          android.content.Intent#ACTION_CLOSE_SYSTEM_DIALOGS}.
          <p>Not for use by third-party applications.
     -->
