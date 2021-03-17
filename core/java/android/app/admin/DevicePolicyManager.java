@@ -2426,7 +2426,7 @@ public class DevicePolicyManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = {"PRIVATE_DNS_MODE_"}, value = {
+    @IntDef(prefix = {"PRIVATE_DNS_MODE_"}, value = {
             PRIVATE_DNS_MODE_UNKNOWN,
             PRIVATE_DNS_MODE_OFF,
             PRIVATE_DNS_MODE_OPPORTUNISTIC,
