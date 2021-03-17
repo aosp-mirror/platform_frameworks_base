@@ -24,6 +24,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,6 +45,7 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
             super.transition(this, it)
             setup {
                 eachRun {
+                    removeAllTasksButHome()
                     this.setRotation(testSpec.config.startRotation)
                 }
             }
