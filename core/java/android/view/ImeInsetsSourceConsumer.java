@@ -51,8 +51,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     @Override
-    public void onWindowFocusGained() {
-        super.onWindowFocusGained();
+    public void onWindowFocusGained(boolean hasViewFocus) {
+        super.onWindowFocusGained(hasViewFocus);
         getImm().registerImeConsumer(this);
     }
 
