@@ -191,6 +191,7 @@ public class VibratorControllerTest {
 
     @Test
     public void on_withDuration_turnsVibratorOn() {
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
         VibratorController controller = createController();
         controller.on(100, 10);
 
@@ -241,7 +242,9 @@ public class VibratorControllerTest {
 
     @Test
     public void off_turnsOffVibrator() {
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
         VibratorController controller = createController();
+
         controller.on(100, 1);
         assertTrue(controller.isVibrating());
 
@@ -253,6 +256,7 @@ public class VibratorControllerTest {
 
     @Test
     public void registerVibratorStateListener_callbacksAreTriggered() throws Exception {
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
         VibratorController controller = createController();
 
         controller.registerVibratorStateListener(mVibratorStateListenerMock);
@@ -271,6 +275,7 @@ public class VibratorControllerTest {
 
     @Test
     public void unregisterVibratorStateListener_callbackNotTriggeredAfter() throws Exception {
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
         VibratorController controller = createController();
 
         controller.registerVibratorStateListener(mVibratorStateListenerMock);
