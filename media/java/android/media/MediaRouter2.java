@@ -259,7 +259,8 @@ public final class MediaRouter2 {
         mClientPackageName = clientPackageName;
         mManagerCallback = new ManagerCallback();
         mHandler = new Handler(Looper.getMainLooper());
-        mSystemController = new SystemRoutingController(sManager.getSystemRoutingSession());
+        mSystemController = new SystemRoutingController(
+                ensureClientPackageNameForSystemSession(sManager.getSystemRoutingSession()));
         mDiscoveryPreference = new RouteDiscoveryPreference.Builder(
                 sManager.getPreferredFeatures(clientPackageName), true).build();
         updateAllRoutesFromManager();
@@ -691,7 +692,8 @@ public final class MediaRouter2 {
             for (RoutingSessionInfo session : sessions) {
                 RoutingController controller;
                 if (session.isSystemSession()) {
-                    mSystemController.setRoutingSessionInfo(session);
+                    mSystemController.setRoutingSessionInfo(
+                            ensureClientPackageNameForSystemSession(session));
                     controller = mSystemController;
                 } else {
                     controller = new RoutingController(session);
@@ -1017,6 +1019,23 @@ public final class MediaRouter2 {
     private void registerManagerCallbackForSystemRouter() {
         // Using direct executor here, since MediaRouter2Manager also posts to the main handler.
         sManager.registerCallback(Runnable::run, mManagerCallback);
+    }
+
+    /**
+     * Returns a {@link RoutingSessionInfo} which has the client package name.
+     * The client package name is set only when the given sessionInfo doesn't have it.
+     * Should only used for system media routers.
+     */
+    private RoutingSessionInfo ensureClientPackageNameForSystemSession(
+            @NonNull RoutingSessionInfo sessionInfo) {
+        if (!sessionInfo.isSystemSession()
+                || !TextUtils.isEmpty(sessionInfo.getClientPackageName())) {
+            return sessionInfo;
+        }
+
+        return new RoutingSessionInfo.Builder(sessionInfo)
+                .setClientPackageName(mClientPackageName)
+                .build();
     }
 
     private List<MediaRoute2Info> filterRoutes(List<MediaRoute2Info> routes,
@@ -1942,7 +1961,8 @@ public final class MediaRouter2 {
 
             RoutingController oldController;
             if (oldSession.isSystemSession()) {
-                mSystemController.setRoutingSessionInfo(oldSession);
+                mSystemController.setRoutingSessionInfo(
+                        ensureClientPackageNameForSystemSession(oldSession));
                 oldController = mSystemController;
             } else {
                 oldController = new RoutingController(oldSession);
@@ -1950,7 +1970,8 @@ public final class MediaRouter2 {
 
             RoutingController newController;
             if (newSession.isSystemSession()) {
-                mSystemController.setRoutingSessionInfo(newSession);
+                mSystemController.setRoutingSessionInfo(
+                        ensureClientPackageNameForSystemSession(newSession));
                 newController = mSystemController;
             } else {
                 newController = new RoutingController(newSession);
@@ -1978,7 +1999,8 @@ public final class MediaRouter2 {
 
             RoutingController controller;
             if (session.isSystemSession()) {
-                mSystemController.setRoutingSessionInfo(session);
+                mSystemController.setRoutingSessionInfo(
+                        ensureClientPackageNameForSystemSession(session));
                 controller = mSystemController;
             } else {
                 controller = new RoutingController(session);
