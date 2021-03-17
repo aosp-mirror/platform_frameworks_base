@@ -16,8 +16,8 @@
 
 package android.net.util;
 
-import static android.provider.Settings.Global.NETWORK_AVOID_BAD_WIFI;
-import static android.provider.Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI;
+import static android.net.ConnectivitySettingsManager.NETWORK_METERED_MULTIPATH_PREFERENCE;
 
 import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
@@ -110,8 +110,8 @@ public class MultinetworkPolicyTracker {
         mHandler = handler;
         mAvoidBadWifiCallback = avoidBadWifiCallback;
         mSettingsUris = Arrays.asList(
-            Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI),
-            Settings.Global.getUriFor(NETWORK_METERED_MULTIPATH_PREFERENCE));
+                Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI),
+                Settings.Global.getUriFor(NETWORK_METERED_MULTIPATH_PREFERENCE));
         mResolver = mContext.getContentResolver();
         mSettingObserver = new SettingObserver();
         mBroadcastReceiver = new BroadcastReceiver() {
