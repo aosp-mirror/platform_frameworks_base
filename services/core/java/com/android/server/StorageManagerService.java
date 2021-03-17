@@ -3375,7 +3375,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    /*
+    /**
      * Returns PendingIntent which can be used by Apps with MANAGE_EXTERNAL_STORAGE permission
      * to launch the manageSpaceActivity of the App specified by packageName.
      */
@@ -3436,6 +3436,13 @@ class StorageManagerService extends IStorageManager.Stub
 
         mStorageSessionController.notifyAppIoResumed(volumeUuid, uid, tid, reason);
     }
+
+    @Override
+    public boolean isAppIoBlocked(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
+        return isAppIoBlocked(uid);
+    }
+
 
     private boolean isAppIoBlocked(int uid) {
         return mStorageSessionController.isAppIoBlocked(uid);
