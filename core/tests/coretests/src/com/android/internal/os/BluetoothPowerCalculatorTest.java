@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.annotation.Nullable;
 import android.os.BatteryConsumer;
+import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
 import android.os.SystemBatteryConsumer;
 
@@ -60,7 +61,8 @@ public class BluetoothPowerCalculatorTest {
         BluetoothPowerCalculator calculator =
                 new BluetoothPowerCalculator(mStatsRule.getPowerProfile());
 
-        mStatsRule.apply(calculator);
+        mStatsRule.apply(new BatteryUsageStatsQuery.Builder().powerProfileModeledOnly().build(),
+                calculator);
 
         assertBluetoothPowerAndDuration(
                 mStatsRule.getUidBatteryConsumer(Process.BLUETOOTH_UID),
@@ -91,7 +93,8 @@ public class BluetoothPowerCalculatorTest {
         BluetoothPowerCalculator calculator =
                 new BluetoothPowerCalculator(mStatsRule.getPowerProfile());
 
-        mStatsRule.apply(calculator);
+        mStatsRule.apply(new BatteryUsageStatsQuery.Builder().powerProfileModeledOnly().build(),
+                calculator);
 
         assertBluetoothPowerAndDuration(
                 mStatsRule.getUidBatteryConsumer(Process.BLUETOOTH_UID),
