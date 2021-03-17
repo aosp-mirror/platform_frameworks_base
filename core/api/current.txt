@@ -5654,6 +5654,7 @@ package android.app {
     field public static final String EXTRA_PEOPLE_LIST = "android.people.list";
     field public static final String EXTRA_PICTURE = "android.picture";
     field public static final String EXTRA_PICTURE_CONTENT_DESCRIPTION = "android.pictureContentDescription";
+    field public static final String EXTRA_PICTURE_ICON = "android.pictureIcon";
     field public static final String EXTRA_PROGRESS = "android.progress";
     field public static final String EXTRA_PROGRESS_INDETERMINATE = "android.progressIndeterminate";
     field public static final String EXTRA_PROGRESS_MAX = "android.progressMax";
@@ -5802,6 +5803,7 @@ package android.app {
     method @NonNull public android.app.Notification.BigPictureStyle bigLargeIcon(@Nullable android.graphics.Bitmap);
     method @NonNull public android.app.Notification.BigPictureStyle bigLargeIcon(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.app.Notification.BigPictureStyle bigPicture(@Nullable android.graphics.Bitmap);
+    method @NonNull public android.app.Notification.BigPictureStyle bigPicture(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.app.Notification.BigPictureStyle bigPictureContentDescription(@Nullable CharSequence);
     method @NonNull public android.app.Notification.BigPictureStyle setBigContentTitle(@Nullable CharSequence);
     method @NonNull public android.app.Notification.BigPictureStyle setSummaryText(@Nullable CharSequence);

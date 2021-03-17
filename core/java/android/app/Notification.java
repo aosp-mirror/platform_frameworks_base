@@ -1196,6 +1196,13 @@ public class Notification implements Parcelable
     public static final String EXTRA_PICTURE = "android.picture";
 
     /**
+     * {@link #extras} key: this is an {@link Icon} of an image to be
+     * shown in {@link BigPictureStyle} expanded notifications, supplied to
+     * {@link BigPictureStyle#bigPicture(Icon)}.
+     */
+    public static final String EXTRA_PICTURE_ICON = "android.pictureIcon";
+
+    /**
      * {@link #extras} key: this is a content description of the big picture supplied from
      * {@link BigPictureStyle#bigPicture(Bitmap)}, supplied to
      * {@link BigPictureStyle#bigPictureContentDescription(CharSequence)}.
@@ -2657,6 +2664,14 @@ public class Notification implements Parcelable
         }
     }
 
+    private static void visitIconUri(@NonNull Consumer<Uri> visitor, @Nullable Icon icon) {
+        if (icon == null) return;
+        final int iconType = icon.getType();
+        if (iconType == TYPE_URI || iconType == TYPE_URI_ADAPTIVE_BITMAP) {
+            visitor.accept(icon.getUri());
+        }
+    }
+
     /**
      * Note all {@link Uri} that are referenced internally, with the expectation
      * that Uri permission grants will need to be issued to ensure the recipient
@@ -2672,7 +2687,19 @@ public class Notification implements Parcelable
         if (bigContentView != null) bigContentView.visitUris(visitor);
         if (headsUpContentView != null) headsUpContentView.visitUris(visitor);
 
+        visitIconUri(visitor, mSmallIcon);
+        visitIconUri(visitor, mLargeIcon);
+
+        if (actions != null) {
+            for (Action action : actions) {
+                visitIconUri(visitor, action.getIcon());
+            }
+        }
+
         if (extras != null) {
+            visitIconUri(visitor, extras.getParcelable(EXTRA_LARGE_ICON_BIG));
+            visitIconUri(visitor, extras.getParcelable(EXTRA_PICTURE_ICON));
+
             // NOTE: The documentation of EXTRA_AUDIO_CONTENTS_URI explicitly says that it is a
             // String representation of a Uri, but the previous implementation (and unit test) of
             // this method has always treated it as a Uri object. Given the inconsistency,
@@ -2691,14 +2718,12 @@ public class Notification implements Parcelable
             ArrayList<Person> people = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST);
             if (people != null && !people.isEmpty()) {
                 for (Person p : people) {
-                    if (p.getIconUri() != null) {
-                        visitor.accept(p.getIconUri());
-                    }
+                    visitor.accept(p.getIconUri());
                 }
             }
 
             final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON);
-            if (person != null && person.getIconUri() != null) {
+            if (person != null) {
                 visitor.accept(person.getIconUri());
             }
         }
@@ -2711,7 +2736,7 @@ public class Notification implements Parcelable
                     visitor.accept(message.getDataUri());
 
                     Person senderPerson = message.getSenderPerson();
-                    if (senderPerson != null && senderPerson.getIconUri() != null) {
+                    if (senderPerson != null) {
                         visitor.accept(senderPerson.getIconUri());
                     }
                 }
@@ -2724,19 +2749,15 @@ public class Notification implements Parcelable
                     visitor.accept(message.getDataUri());
 
                     Person senderPerson = message.getSenderPerson();
-                    if (senderPerson != null && senderPerson.getIconUri() != null) {
+                    if (senderPerson != null) {
                         visitor.accept(senderPerson.getIconUri());
                     }
                 }
             }
         }
 
-        if (mBubbleMetadata != null && mBubbleMetadata.getIcon() != null) {
-            final Icon icon = mBubbleMetadata.getIcon();
-            final int iconType = icon.getType();
-            if (iconType == TYPE_URI_ADAPTIVE_BITMAP || iconType == TYPE_URI) {
-                visitor.accept(icon.getUri());
-            }
+        if (mBubbleMetadata != null) {
+            visitIconUri(visitor, mBubbleMetadata.getIcon());
         }
     }
 
@@ -7220,7 +7241,7 @@ public class Notification implements Parcelable
      * @see Notification#bigContentView
      */
     public static class BigPictureStyle extends Style {
-        private Bitmap mPicture;
+        private Icon mPictureIcon;
         private Icon mBigLargeIcon;
         private boolean mBigLargeIconSet = false;
         private CharSequence mPictureContentDescription;
@@ -7269,8 +7290,12 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public Bitmap getBigPicture() {
-            return mPicture;
+        @Nullable
+        public Icon getBigPicture() {
+            if (mPictureIcon != null) {
+                return mPictureIcon;
+            }
+            return null;
         }
 
         /**
@@ -7278,7 +7303,16 @@ public class Notification implements Parcelable
          */
         @NonNull
         public BigPictureStyle bigPicture(@Nullable Bitmap b) {
-            mPicture = b;
+            mPictureIcon = b == null ? null : Icon.createWithBitmap(b);
+            return this;
+        }
+
+        /**
+         * Provide the content Uri to be used as the payload for the BigPicture notification.
+         */
+        @NonNull
+        public BigPictureStyle bigPicture(@Nullable Icon icon) {
+            mPictureIcon = icon;
             return this;
         }
 
@@ -7320,10 +7354,8 @@ public class Notification implements Parcelable
         @Override
         public void purgeResources() {
             super.purgeResources();
-            if (mPicture != null &&
-                mPicture.isMutable() &&
-                mPicture.getAllocationByteCount() >= MIN_ASHMEM_BITMAP_SIZE) {
-                mPicture = mPicture.asShared();
+            if (mPictureIcon != null) {
+                mPictureIcon.convertToAshmem();
             }
             if (mBigLargeIcon != null) {
                 mBigLargeIcon.convertToAshmem();
@@ -7338,14 +7370,14 @@ public class Notification implements Parcelable
             super.reduceImageSizes(context);
             Resources resources = context.getResources();
             boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
-            if (mPicture != null) {
+            if (mPictureIcon != null) {
                 int maxPictureWidth = resources.getDimensionPixelSize(isLowRam
                         ? R.dimen.notification_big_picture_max_height_low_ram
                         : R.dimen.notification_big_picture_max_height);
                 int maxPictureHeight = resources.getDimensionPixelSize(isLowRam
                         ? R.dimen.notification_big_picture_max_width_low_ram
                         : R.dimen.notification_big_picture_max_width);
-                mPicture = Icon.scaleDownIfNecessary(mPicture, maxPictureWidth, maxPictureHeight);
+                mPictureIcon.scaleDownIfNecessary(maxPictureWidth, maxPictureHeight);
             }
             if (mBigLargeIcon != null) {
                 int rightIconSize = resources.getDimensionPixelSize(isLowRam
@@ -7360,12 +7392,12 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeContentView(boolean increasedHeight) {
-            if (mPicture == null || !mShowBigPictureWhenCollapsed) {
+            if (mPictureIcon == null || !mShowBigPictureWhenCollapsed) {
                 return super.makeContentView(increasedHeight);
             }
 
             Icon oldLargeIcon = mBuilder.mN.mLargeIcon;
-            mBuilder.mN.mLargeIcon = Icon.createWithBitmap(mPicture);
+            mBuilder.mN.mLargeIcon = mPictureIcon;
             // The legacy largeIcon might not allow us to clear the image, as it's taken in
             // replacement if the other one is null. Because we're restoring these legacy icons
             // for old listeners, this is in general non-null.
@@ -7390,12 +7422,12 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            if (mPicture == null || !mShowBigPictureWhenCollapsed) {
+            if (mPictureIcon == null || !mShowBigPictureWhenCollapsed) {
                 return super.makeHeadsUpContentView(increasedHeight);
             }
 
             Icon oldLargeIcon = mBuilder.mN.mLargeIcon;
-            mBuilder.mN.mLargeIcon = Icon.createWithBitmap(mPicture);
+            mBuilder.mN.mLargeIcon = mPictureIcon;
             // The legacy largeIcon might not allow us to clear the image, as it's taken in
             // replacement if the other one is null. Because we're restoring these legacy icons
             // for old listeners, this is in general non-null.
@@ -7452,7 +7484,7 @@ public class Notification implements Parcelable
                 mBuilder.mN.largeIcon = largeIconLegacy;
             }
 
-            contentView.setImageViewBitmap(R.id.big_picture, mPicture);
+            contentView.setImageViewIcon(R.id.big_picture, mPictureIcon);
 
             if (mPictureContentDescription != null) {
                 contentView.setContentDescription(R.id.big_picture, mPictureContentDescription);
@@ -7475,7 +7507,17 @@ public class Notification implements Parcelable
                         mPictureContentDescription);
             }
             extras.putBoolean(EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED, mShowBigPictureWhenCollapsed);
-            extras.putParcelable(EXTRA_PICTURE, mPicture);
+
+            // If the icon contains a bitmap, use the old extra so that listeners which look for
+            // that extra can still find the picture.  Don't include the new extra in that case,
+            // to avoid duplicating data.
+            if (mPictureIcon != null && mPictureIcon.getType() == Icon.TYPE_BITMAP) {
+                extras.putParcelable(EXTRA_PICTURE, mPictureIcon.getBitmap());
+                extras.putParcelable(EXTRA_PICTURE_ICON, null);
+            } else {
+                extras.putParcelable(EXTRA_PICTURE, null);
+                extras.putParcelable(EXTRA_PICTURE_ICON, mPictureIcon);
+            }
         }
 
         /**
@@ -7496,7 +7538,16 @@ public class Notification implements Parcelable
             }
 
             mShowBigPictureWhenCollapsed = extras.getBoolean(EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED);
-            mPicture = extras.getParcelable(EXTRA_PICTURE);
+
+            // When this style adds a picture, we only add one of the keys.  If both were added,
+            // it would most likely be a legacy app trying to override the picture in some way.
+            // Because of that case it's better to give precedence to the legacy field.
+            Bitmap bitmapPicture = extras.getParcelable(EXTRA_PICTURE);
+            if (bitmapPicture != null) {
+                mPictureIcon = Icon.createWithBitmap(bitmapPicture);
+            } else {
+                mPictureIcon = extras.getParcelable(EXTRA_PICTURE_ICON);
+            }
         }
 
         /**
@@ -7518,20 +7569,32 @@ public class Notification implements Parcelable
                 return true;
             }
             BigPictureStyle otherS = (BigPictureStyle) other;
-            return areBitmapsObviouslyDifferent(getBigPicture(), otherS.getBigPicture());
+            return areIconsObviouslyDifferent(getBigPicture(), otherS.getBigPicture());
         }
 
-        private static boolean areBitmapsObviouslyDifferent(Bitmap a, Bitmap b) {
+        private static boolean areIconsObviouslyDifferent(Icon a, Icon b) {
             if (a == b) {
                 return false;
             }
             if (a == null || b == null) {
                 return true;
             }
-            return a.getWidth() != b.getWidth()
-                    || a.getHeight() != b.getHeight()
-                    || a.getConfig() != b.getConfig()
-                    || a.getGenerationId() != b.getGenerationId();
+            if (a.sameAs(b)) {
+                return false;
+            }
+            final int aType = a.getType();
+            if (aType != b.getType()) {
+                return true;
+            }
+            if (aType == Icon.TYPE_BITMAP || aType == Icon.TYPE_ADAPTIVE_BITMAP) {
+                final Bitmap aBitmap = a.getBitmap();
+                final Bitmap bBitmap = b.getBitmap();
+                return aBitmap.getWidth() != bBitmap.getWidth()
+                        || aBitmap.getHeight() != bBitmap.getHeight()
+                        || aBitmap.getConfig() != bBitmap.getConfig()
+                        || aBitmap.getGenerationId() != bBitmap.getGenerationId();
+            }
+            return true;
         }
     }
 
