@@ -75,7 +75,6 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
         mOneHandedController = new OneHandedController(
                 mContext,
-                mWindowManager,
                 mMockDisplayController,
                 mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,

@@ -52,6 +52,7 @@ import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
@@ -216,6 +217,12 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
+    static DisplayLayout provideDisplayLayout() {
+        return new DisplayLayout();
+    }
+
+    @WMSingleton
+    @Provides
     static DragAndDropController provideDragAndDropController(Context context,
             DisplayController displayController) {
         return new DragAndDropController(context, displayController);
@@ -344,11 +351,13 @@ public abstract class WMShellBaseModule {
     @Provides
     static Optional<OneHandedController> provideOneHandedController(Context context,
             WindowManager windowManager, DisplayController displayController,
-            TaskStackListenerImpl taskStackListener, UiEventLogger uiEventLogger,
+            DisplayLayout displayLayout, TaskStackListenerImpl taskStackListener,
+            UiEventLogger uiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return Optional.ofNullable(OneHandedController.create(context, windowManager,
-                displayController, taskStackListener, uiEventLogger, mainExecutor, mainHandler));
+                displayController, displayLayout, taskStackListener, uiEventLogger, mainExecutor,
+                mainHandler));
     }
 
     //
