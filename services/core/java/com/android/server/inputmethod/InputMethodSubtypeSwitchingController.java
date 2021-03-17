@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Printer;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
@@ -502,7 +501,7 @@ final class InputMethodSubtypeSwitchingController {
     public void onUserActionLocked(InputMethodInfo imi, InputMethodSubtype subtype) {
         if (mController == null) {
             if (DEBUG) {
-                Log.e(TAG, "mController shouldn't be null.");
+                Slog.e(TAG, "mController shouldn't be null.");
             }
             return;
         }
@@ -520,7 +519,7 @@ final class InputMethodSubtypeSwitchingController {
             InputMethodSubtype subtype) {
         if (mController == null) {
             if (DEBUG) {
-                Log.e(TAG, "mController shouldn't be null.");
+                Slog.e(TAG, "mController shouldn't be null.");
             }
             return null;
         }
