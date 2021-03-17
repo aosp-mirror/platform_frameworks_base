@@ -58,6 +58,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.annotation.concurrent.GuardedBy;
 
@@ -156,6 +157,40 @@ public final class UserManagerTest {
             }
         }
         fail("Didn't find a guest: " + list);
+    }
+
+    @Test
+    public void testCloneUser() throws Exception {
+        // Test that only one clone user can be created
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        UserInfo userInfo = createProfileForUser("Clone user1",
+                UserManager.USER_TYPE_PROFILE_CLONE,
+                primaryUserId);
+        assertThat(userInfo).isNotNull();
+        UserInfo userInfo2 = createProfileForUser("Clone user2",
+                UserManager.USER_TYPE_PROFILE_CLONE,
+                primaryUserId);
+        assertThat(userInfo2).isNull();
+
+        final Context userContext = mContext.createPackageContextAsUser("system", 0,
+                UserHandle.of(userInfo.id));
+        assertThat(userContext.getSystemService(
+                UserManager.class).sharesMediaWithParent()).isTrue();
+
+        List<UserInfo> list = mUserManager.getUsers();
+        List<UserInfo> cloneUsers = list.stream().filter(
+                user -> (user.id == userInfo.id && user.name.equals("Clone user1")
+                        && user.isCloneProfile()))
+                .collect(Collectors.toList());
+        assertThat(cloneUsers.size()).isEqualTo(1);
+
+        // Verify clone user parent
+        assertThat(mUserManager.getProfileParent(primaryUserId)).isNull();
+        UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
+        assertThat(parentProfileInfo).isNotNull();
+        assertThat(primaryUserId).isEqualTo(parentProfileInfo.id);
+        removeUser(userInfo.id);
+        assertThat(mUserManager.getProfileParent(primaryUserId)).isNull();
     }
 
     @MediumTest

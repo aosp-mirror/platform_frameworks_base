@@ -29,6 +29,7 @@ import static android.os.UserManager.USER_TYPE_FULL_GUEST;
 import static android.os.UserManager.USER_TYPE_FULL_RESTRICTED;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_FULL_SYSTEM;
+import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static android.os.UserManager.USER_TYPE_PROFILE_TEST;
 import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
@@ -100,11 +101,27 @@ public final class UserTypeFactory {
         builders.put(USER_TYPE_FULL_DEMO, getDefaultTypeFullDemo());
         builders.put(USER_TYPE_FULL_RESTRICTED, getDefaultTypeFullRestricted());
         builders.put(USER_TYPE_SYSTEM_HEADLESS, getDefaultTypeSystemHeadless());
+        builders.put(USER_TYPE_PROFILE_CLONE, getDefaultTypeProfileClone());
         if (Build.IS_DEBUGGABLE) {
             builders.put(USER_TYPE_PROFILE_TEST, getDefaultTypeProfileTest());
         }
 
         return builders;
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_PROFILE_CLONE}
+     * configuration.
+     */
+    // TODO(b/182396009): Add default restrictions, if needed for clone user type.
+    private static UserTypeDetails.Builder getDefaultTypeProfileClone() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_PROFILE_CLONE)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowedPerParent(1)
+                .setLabel(0)
+                .setDefaultRestrictions(null)
+                .setSharesMediaWithParent(true);
     }
 
     /**
