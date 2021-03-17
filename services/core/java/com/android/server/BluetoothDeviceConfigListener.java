@@ -17,6 +17,9 @@
 package com.android.server;
 
 import android.provider.DeviceConfig;
+import android.util.Slog;
+
+import java.util.ArrayList;
 
 /**
  * The BluetoothDeviceConfigListener handles system device config change callback and checks
@@ -30,10 +33,12 @@ import android.provider.DeviceConfig;
 class BluetoothDeviceConfigListener {
     private static final String TAG = "BluetoothDeviceConfigListener";
 
-    BluetoothManagerService mService;
+    private final BluetoothManagerService mService;
+    private final boolean mLogDebug;
 
-    BluetoothDeviceConfigListener(BluetoothManagerService service) {
+    BluetoothDeviceConfigListener(BluetoothManagerService service, boolean logDebug) {
         mService = service;
+        mLogDebug = logDebug;
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_BLUETOOTH,
                 (Runnable r) -> r.run(),
@@ -46,6 +51,13 @@ class BluetoothDeviceConfigListener {
                 public void onPropertiesChanged(DeviceConfig.Properties properties) {
                     if (!properties.getNamespace().equals(DeviceConfig.NAMESPACE_BLUETOOTH)) {
                         return;
+                    }
+                    if (mLogDebug) {
+                        ArrayList<String> flags = new ArrayList<>();
+                        for (String name : properties.getKeyset()) {
+                            flags.add(name + "='" + properties.getString(name, "") + "'");
+                        }
+                        Slog.d(TAG, "onPropertiesChanged: " + String.join(",", flags));
                     }
                     boolean foundInit = false;
                     for (String name : properties.getKeyset()) {
