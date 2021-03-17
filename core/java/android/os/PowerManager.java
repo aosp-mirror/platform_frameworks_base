@@ -197,6 +197,9 @@ public final class PowerManager {
      * application as the normal behavior.  Notifications that pop up and want
      * the device to be on are the exception; use this flag to be like them.
      * </p><p>
+     * Android TV playback devices attempt to turn on the HDMI-connected TV via HDMI-CEC on any
+     * wake-up, including wake-ups triggered by wake locks.
+     * </p><p>
      * Cannot be used with {@link #PARTIAL_WAKE_LOCK}.
      * </p>
      */
@@ -1299,6 +1302,9 @@ public final class PowerManager {
      * device will be put to sleep. If the {@link com.android.server.display.DisplayGroup#DEFAULT
      * default display group} is already off then nothing will happen.
      *
+     * <p>If the device is an Android TV playback device and the current active source on the
+     * HDMI-connected TV, it will attempt to turn off that TV via HDMI-CEC.
+     *
      * <p>
      * Overrides all the wake locks that are held.
      * This is what happens when the power key is pressed to turn off the screen.
@@ -1429,6 +1435,10 @@ public final class PowerManager {
      * <p>If the {@link android.view.Display#DEFAULT_DISPLAY default display} is turned off it will
      * be turned on. Additionally, if the device is asleep it will be awoken. If the {@link
      * android.view.Display#DEFAULT_DISPLAY default display} is already on then nothing will happen.
+     *
+     * <p>If the device is an Android TV playback device, it will attempt to turn on the
+     * HDMI-connected TV and become the current active source via the HDMI-CEC One Touch Play
+     * feature.
      *
      * <p>
      * This is what happens when the power key is pressed to turn on the screen.
