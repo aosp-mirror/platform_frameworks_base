@@ -2094,6 +2094,7 @@ package android.bluetooth {
     field public static final int LE_FLAG_SIMULTANEOUS_CONTROLLER = 3; // 0x3
     field public static final int LE_FLAG_SIMULTANEOUS_HOST = 4; // 0x4
     field public static final int LE_TK_OCTETS = 16; // 0x10
+    field public static final int OOB_LENGTH_OCTETS = 2; // 0x2
     field public static final int RANDOMIZER_OCTETS = 16; // 0x10
   }
 
