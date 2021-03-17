@@ -218,7 +218,30 @@ public abstract class TimeZoneProviderService extends Service {
     }
 
     /**
-     * Starts the provider sending updates.
+     * Informs the provider that it should start detecting and reporting the detected time zone
+     * state via the various {@code report} methods. Implementations of {@link
+     * #onStartUpdates(long)} should return immediately, and will typically be used to start
+     * worker threads or begin asynchronous location listening.
+     *
+     * <p>Between {@link #onStartUpdates(long)} and {@link #onStopUpdates()} calls, the Android
+     * system server holds the latest report from the provider in memory. After an initial report,
+     * provider implementations are only required to send a report via {@link
+     * #reportSuggestion(TimeZoneProviderSuggestion)} or via {@link #reportUncertain()} when it
+     * differs from the previous report.
+     *
+     * <p>{@link #reportPermanentFailure(Throwable)} can also be called by provider implementations
+     * in rare cases, after which the provider should consider itself stopped and not make any
+     * further reports. {@link #onStopUpdates()} will not be called in this case.
+     *
+     * <p>The {@code initializationTimeoutMillis} parameter indicates how long the provider has been
+     * granted to call one of the {@code report} methods for the first time. If the provider does
+     * not call one of the {@code report} methods in this time, it may be judged uncertain and the
+     * Android system server may move on to use other providers or detection methods. Providers
+     * should therefore make best efforts during this time to generate a report, which could involve
+     * increased power usage. Providers should preferably report an explicit {@link
+     * #reportUncertain()} if the time zone(s) cannot be detected within the initialization timeout.
+     *
+     * @see #onStopUpdates() for the signal from the system server to stop sending reports
      */
     public abstract void onStartUpdates(@DurationMillisLong long initializationTimeoutMillis);
 
@@ -228,7 +251,8 @@ public abstract class TimeZoneProviderService extends Service {
     }
 
     /**
-     * Stops the provider sending updates.
+     * Stops the provider sending further updates. This will be called after {@link
+     * #onStartUpdates(long)}.
      */
     public abstract void onStopUpdates();
 

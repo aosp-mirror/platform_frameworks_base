@@ -23,31 +23,38 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.accessibility.MotionEventHelper;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -67,8 +74,17 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
     @Mock
     private ViewPropertyAnimator mAnimator;
 
+    private MotionEvent mInterceptMotionEvent;
+
     private RecyclerView mListView;
 
+    private int mMenuHalfWidth;
+    private int mMenuHalfHeight;
+    private int mScreenHalfWidth;
+    private int mScreenHalfHeight;
+    private int mMaxWindowX;
+
+    private final MotionEventHelper mMotionEventHelper = new MotionEventHelper();
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
 
     @Before
@@ -81,8 +97,25 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
 
         mTargets.add(mock(AccessibilityTarget.class));
-        mListView = spy(new RecyclerView(mContext));
-        mMenuView = spy(new AccessibilityFloatingMenuView(mContext));
+        mListView = new RecyclerView(mContext);
+        mMenuView = new AccessibilityFloatingMenuView(mContext, mListView);
+
+        final Resources res = mContext.getResources();
+        final int margin =
+                res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_margin);
+        final int padding =
+                res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_padding);
+        final int iconWidthHeight =
+                res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_small_width_height);
+        final int menuWidth = padding * 2 + iconWidthHeight;
+        final int menuHeight = (padding + iconWidthHeight) * mTargets.size() + padding;
+        final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
+        final int screenHeight = mContext.getResources().getDisplayMetrics().heightPixels;
+        mMenuHalfWidth = menuWidth / 2;
+        mMenuHalfHeight = menuHeight / 2;
+        mScreenHalfWidth = screenWidth / 2;
+        mScreenHalfHeight = screenHeight / 2;
+        mMaxWindowX = screenWidth - margin - menuWidth;
     }
 
     @Test
@@ -169,29 +202,131 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
 
     @Test
     public void setShapeType_halfCircle_translationX() {
+        final RecyclerView listView = spy(new RecyclerView(mContext));
+        final AccessibilityFloatingMenuView menuView =
+                new AccessibilityFloatingMenuView(mContext, listView);
         final int shapeType = 2;
-        doReturn(mAnimator).when(mListView).animate();
+        doReturn(mAnimator).when(listView).animate();
 
-        mMenuView = new AccessibilityFloatingMenuView(mContext, mListView);
-        mMenuView.setShapeType(shapeType);
+        menuView.setShapeType(shapeType);
 
         verify(mAnimator).translationX(anyFloat());
     }
 
     @Test
     public void onTargetsChanged_fadeInOut() {
-        mMenuView.onTargetsChanged(mTargets);
+        final AccessibilityFloatingMenuView menuView = spy(mMenuView);
+        final InOrder inOrderMenuView = inOrder(menuView);
 
-        verify(mMenuView).fadeIn();
-        verify(mMenuView).fadeOut();
+        menuView.onTargetsChanged(mTargets);
+
+        inOrderMenuView.verify(menuView).fadeIn();
+        inOrderMenuView.verify(menuView).fadeOut();
     }
 
     @Test
     public void setSizeType_fadeInOut() {
+        final AccessibilityFloatingMenuView menuView = spy(mMenuView);
+        final InOrder inOrderMenuView = inOrder(menuView);
         final int smallSize = 0;
-        mMenuView.setSizeType(smallSize);
+        menuView.setSizeType(smallSize);
 
-        verify(mMenuView).fadeIn();
-        verify(mMenuView).fadeOut();
+        inOrderMenuView.verify(menuView).fadeIn();
+        inOrderMenuView.verify(menuView).fadeOut();
+    }
+
+    @Test
+    public void tapOnAndDragMenu_interceptUpEvent() {
+        final RecyclerView listView = new RecyclerView(mContext);
+        final TestAccessibilityFloatingMenu menuView =
+                new TestAccessibilityFloatingMenu(mContext, listView);
+
+        menuView.show();
+        menuView.onTargetsChanged(mTargets);
+        menuView.setSizeType(0);
+        menuView.setShapeType(0);
+        final int currentWindowX = mMenuView.mCurrentLayoutParams.x;
+        final int currentWindowY = mMenuView.mCurrentLayoutParams.y;
+        final MotionEvent downEvent =
+                mMotionEventHelper.obtainMotionEvent(0, 1,
+                        MotionEvent.ACTION_DOWN,
+                        currentWindowX + /* offsetXToMenuCenterX */ mMenuHalfWidth,
+                        currentWindowY + /* offsetYToMenuCenterY */ mMenuHalfHeight);
+        final MotionEvent moveEvent =
+                mMotionEventHelper.obtainMotionEvent(2, 3,
+                        MotionEvent.ACTION_MOVE,
+                        /* screenCenterX */mScreenHalfWidth
+                                - /* offsetXToScreenLeftHalfRegion */ 10,
+                        /* screenCenterY */ mScreenHalfHeight);
+        final MotionEvent upEvent =
+                mMotionEventHelper.obtainMotionEvent(4, 5,
+                        MotionEvent.ACTION_UP,
+                        /* screenCenterX */ mScreenHalfWidth
+                                - /* offsetXToScreenLeftHalfRegion */ 10,
+                        /* screenCenterY */ mScreenHalfHeight);
+        listView.dispatchTouchEvent(downEvent);
+        listView.dispatchTouchEvent(moveEvent);
+        listView.dispatchTouchEvent(upEvent);
+
+        assertThat(mInterceptMotionEvent.getAction()).isEqualTo(MotionEvent.ACTION_UP);
+    }
+
+    @Test
+    public void tapOnAndDragMenu_matchLocation() {
+        mMenuView.show();
+        mMenuView.onTargetsChanged(mTargets);
+        mMenuView.setSizeType(0);
+        mMenuView.setShapeType(0);
+        final int currentWindowX = mMenuView.mCurrentLayoutParams.x;
+        final int currentWindowY = mMenuView.mCurrentLayoutParams.y;
+        final MotionEvent downEvent =
+                mMotionEventHelper.obtainMotionEvent(0, 1,
+                        MotionEvent.ACTION_DOWN,
+                        currentWindowX + /* offsetXToMenuCenterX */ mMenuHalfWidth,
+                        currentWindowY + /* offsetYToMenuCenterY */ mMenuHalfHeight);
+        final MotionEvent moveEvent =
+                mMotionEventHelper.obtainMotionEvent(2, 3,
+                        MotionEvent.ACTION_MOVE,
+                        /* screenCenterX */mScreenHalfWidth
+                                + /* offsetXToScreenRightHalfRegion */ 10,
+                        /* screenCenterY */ mScreenHalfHeight);
+        final MotionEvent upEvent =
+                mMotionEventHelper.obtainMotionEvent(4, 5,
+                        MotionEvent.ACTION_UP,
+                        /* screenCenterX */ mScreenHalfWidth
+                                + /* offsetXToScreenRightHalfRegion */ 10,
+                        /* screenCenterY */ mScreenHalfHeight);
+        mListView.dispatchTouchEvent(downEvent);
+        mListView.dispatchTouchEvent(moveEvent);
+        mListView.dispatchTouchEvent(upEvent);
+        mMenuView.mDragAnimator.end();
+
+        assertThat(mMenuView.mCurrentLayoutParams.x).isEqualTo(mMaxWindowX);
+        assertThat(mMenuView.mCurrentLayoutParams.y).isEqualTo(
+                /* newWindowY = screenCenterY - offsetY */ mScreenHalfHeight - mMenuHalfHeight);
+    }
+
+    @After
+    public void tearDown() {
+        mInterceptMotionEvent = null;
+        mMotionEventHelper.recycleEvents();
+    }
+
+    private class TestAccessibilityFloatingMenu extends AccessibilityFloatingMenuView {
+        TestAccessibilityFloatingMenu(Context context, RecyclerView listView) {
+            super(context, listView);
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(@NonNull RecyclerView recyclerView,
+                @NonNull MotionEvent event) {
+            final boolean intercept = super.onInterceptTouchEvent(recyclerView, event);
+
+            if (intercept) {
+                mInterceptMotionEvent = event;
+            }
+
+            return intercept;
+        }
     }
 }

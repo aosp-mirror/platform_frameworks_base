@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip;
+package com.android.systemui.shared.recents;
 
 /**
- * Listener interface that Launcher attaches to SystemUI to get Pip animation callbacks.
+ * Listener interface that Launcher attaches to SystemUI to get split-screen callbacks.
  */
-oneway interface IPipAnimationListener {
-    /**
-     * Notifies the listener that the Pip animation is started.
-     */
-    void onPipAnimationStarted();
+oneway interface ISplitScreenListener {
+    void onStagePositionChanged(int stage, int position);
+    void onTaskStageChanged(int taskId, int stage, boolean visible);
 }

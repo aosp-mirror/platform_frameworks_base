@@ -431,6 +431,13 @@ public class HdmiControlService extends SystemService {
 
     private final SelectRequestBuffer mSelectRequestBuffer = new SelectRequestBuffer();
 
+    @VisibleForTesting HdmiControlService(Context context, List<Integer> deviceTypes) {
+        super(context);
+        mLocalDevices = deviceTypes;
+        mSettingsObserver = new SettingsObserver(mHandler);
+        mHdmiCecConfig = new HdmiCecConfig(context);
+    }
+
     public HdmiControlService(Context context) {
         super(context);
         List<Integer> deviceTypes = HdmiProperties.device_type();

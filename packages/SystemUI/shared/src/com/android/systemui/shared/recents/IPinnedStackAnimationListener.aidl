@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.shared.recents;
 
-import java.util.function.Consumer;
-
-/** Accepts and retains the most recent value for verification */
-class TestableConsumer<T> implements Consumer<T> {
-    T mValue;
-
-    @Override
-    public void accept(T t) {
-        mValue = t;
-    }
-
-    public T getValue() {
-        return mValue;
-    }
+/**
+ * Listener interface that Launcher attaches to SystemUI to get
+ * pinned stack animation callbacks.
+ */
+oneway interface IPinnedStackAnimationListener {
+    /**
+     * Notifies the pinned stack animation is started.
+     */
+    void onPinnedStackAnimationStarted();
 }

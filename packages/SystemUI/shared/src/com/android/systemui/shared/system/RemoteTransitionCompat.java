@@ -137,8 +137,11 @@ public class RemoteTransitionCompat implements Parcelable {
             mWrapped.hideCurrentInputMethod();
         }
 
-        @Override public void setFinishTaskBounds(int taskId, Rect destinationBounds) {
-            if (mWrapped != null) mWrapped.setFinishTaskBounds(taskId, destinationBounds);
+        @Override public void setFinishTaskBounds(int taskId, Rect destinationBounds,
+                Rect windowCrop, float[] float9) {
+            if (mWrapped != null) {
+                mWrapped.setFinishTaskBounds(taskId, destinationBounds, windowCrop, float9);
+            }
         }
 
         @Override public void finish(boolean toHome, boolean sendUserLeaveHint) {

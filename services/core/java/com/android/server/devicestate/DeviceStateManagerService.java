@@ -42,6 +42,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
 import com.android.server.policy.DeviceStatePolicyImpl;
 
@@ -446,6 +447,9 @@ public final class DeviceStateManagerService extends SystemService {
                     topRequest.setStatusLocked(OverrideRequestRecord.STATUS_ACTIVE);
                 }
             }
+
+            FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_STATE_CHANGED,
+                    newState.getIdentifier(), !mCommittedState.isPresent());
 
             mCommittedState = Optional.of(newState);
             mPendingState = Optional.empty();

@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.startingsurface;
+package com.android.wm.shell.transition;
 
-import com.android.wm.shell.startingsurface.IStartingWindowListener;
+import android.annotation.NonNull;
+import android.window.IRemoteTransition;
+import android.window.TransitionFilter;
+
+import com.android.wm.shell.common.annotations.ExternalThread;
 
 /**
- * Interface that is exposed to remote callers to manipulate starting windows.
+ * Interface to manage remote transitions.
  */
-interface IStartingWindow {
+@ExternalThread
+public interface RemoteTransitions {
     /**
-     * Sets listener to get task launching callbacks.
+     * Registers a remote transition.
      */
-    oneway void setStartingWindowListener(IStartingWindowListener listener) = 43;
+    void registerRemote(@NonNull TransitionFilter filter,
+            @NonNull IRemoteTransition remoteTransition);
+
+    /**
+     * Unregisters a remote transition.
+     */
+    void unregisterRemote(@NonNull IRemoteTransition remoteTransition);
 }

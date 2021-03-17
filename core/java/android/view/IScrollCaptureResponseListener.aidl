@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.common;
+package android.view;
 
-import android.content.Context;
+import android.graphics.Rect;
+import android.view.ScrollCaptureResponse;
+import android.view.Surface;
 
 /**
- * An interface for controllers that can receive remote calls.
+ * Asynchronous callback channel for the initial response to a scroll capture request.
+ *
+ * {@hide}
  */
-public interface RemoteCallable<T> {
+interface IScrollCaptureResponseListener {
     /**
-     * Returns a context used for permission checking.
+     * Provides the initial response to a scroll capture request.
+     *
+     * @param response the response which describes the result
      */
-    Context getContext();
-
-    /**
-     * Returns the executor to post the handler callback to.
-     */
-    ShellExecutor getRemoteCallExecutor();
+    oneway void onScrollCaptureResponse(in ScrollCaptureResponse response);
 }

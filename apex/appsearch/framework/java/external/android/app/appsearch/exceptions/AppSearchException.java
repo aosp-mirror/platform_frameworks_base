@@ -32,19 +32,27 @@ public class AppSearchException extends Exception {
     /**
      * Initializes an {@link AppSearchException} with no message.
      *
-     * @hide
+     * @param resultCode One of the constants documented in {@link AppSearchResult#getResultCode}.
      */
     public AppSearchException(@AppSearchResult.ResultCode int resultCode) {
         this(resultCode, /*message=*/ null);
     }
 
-    /** @hide */
+    /**
+     * Initializes an {@link AppSearchException} with a result code and message.
+     *
+     * @param resultCode One of the constants documented in {@link AppSearchResult#getResultCode}.
+     */
     public AppSearchException(
             @AppSearchResult.ResultCode int resultCode, @Nullable String message) {
         this(resultCode, message, /*cause=*/ null);
     }
 
-    /** @hide */
+    /**
+     * Initializes an {@link AppSearchException} with a result code, message and cause.
+     *
+     * @param resultCode One of the constants documented in {@link AppSearchResult#getResultCode}.
+     */
     public AppSearchException(
             @AppSearchResult.ResultCode int resultCode,
             @Nullable String message,
@@ -53,12 +61,16 @@ public class AppSearchException extends Exception {
         mResultCode = resultCode;
     }
 
-    /** Returns the result code this exception was constructed with. */
+    /**
+     * Returns the result code this exception was constructed with.
+     *
+     * @return One of the constants documented in {@link AppSearchResult#getResultCode}.
+     */
     public @AppSearchResult.ResultCode int getResultCode() {
         return mResultCode;
     }
 
-    /** Converts this {@link java.lang.Exception} into a failed {@link AppSearchResult} */
+    /** Converts this {@link java.lang.Exception} into a failed {@link AppSearchResult}. */
     @NonNull
     public <T> AppSearchResult<T> toAppSearchResult() {
         return AppSearchResult.newFailedResult(mResultCode, getMessage());

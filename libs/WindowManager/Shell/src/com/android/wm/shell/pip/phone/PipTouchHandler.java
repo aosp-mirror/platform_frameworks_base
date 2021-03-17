@@ -73,6 +73,7 @@ public class PipTouchHandler {
     // Allow PIP to resize to a slightly bigger state upon touch
     private boolean mEnableResize;
     private final Context mContext;
+    private final PipTaskOrganizer mPipTaskOrganizer;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final @NonNull PipBoundsState mPipBoundsState;
     private final PipUiEventLogger mPipUiEventLogger;
@@ -169,6 +170,7 @@ public class PipTouchHandler {
         mContext = context;
         mMainExecutor = mainExecutor;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
+        mPipTaskOrganizer = pipTaskOrganizer;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
         mMenuController = menuController;
@@ -982,7 +984,9 @@ public class PipTouchHandler {
 
     void setPipExclusionBoundsChangeListener(Consumer<Rect> pipExclusionBoundsChangeListener) {
         mPipExclusionBoundsChangeListener = new WeakReference<>(pipExclusionBoundsChangeListener);
-        pipExclusionBoundsChangeListener.accept(mPipBoundsState.getBounds());
+        pipExclusionBoundsChangeListener.accept(mPipTaskOrganizer.isInPip()
+                ? mPipBoundsState.getBounds() : new Rect());
+
     }
 
     /**

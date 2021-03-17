@@ -565,6 +565,21 @@ public class TelephonyCallback {
     @RequiresPermission(android.Manifest.permission.READ_CALL_LOG)
     public static final int EVENT_LEGACY_CALL_STATE_CHANGED = 36;
 
+
+    /**
+     * Event for changes to the link capacity estimate (LCE)
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE}
+     *
+     * @see LinkCapacityEstimateChangedListener#onLinkCapacityEstimateChanged
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
+    public static final int EVENT_LINK_CAPACITY_ESTIMATE_CHANGED = 37;
+
+
     /**
      * @hide
      */
@@ -604,7 +619,8 @@ public class TelephonyCallback {
             EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED,
             EVENT_DATA_ENABLED_CHANGED,
             EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED,
-            EVENT_LEGACY_CALL_STATE_CHANGED
+            EVENT_LEGACY_CALL_STATE_CHANGED,
+            EVENT_LINK_CAPACITY_ESTIMATE_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -1370,6 +1386,25 @@ public class TelephonyCallback {
             @TelephonyManager.DataEnabledReason int reason);
     }
 
+    /**
+     * Interface for link capacity estimate changed listener.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface LinkCapacityEstimateChangedListener {
+        /**
+         * Callback invoked when the link capacity estimate (LCE) changes
+         *
+         * @param linkCapacityEstimateList a list of {@link LinkCapacityEstimate}
+         * The list size is at least 1.
+         * In case of a dual connected network, the list size could be 2.
+         * Use {@link LinkCapacityEstimate#getType()} to get the type of each element.
+         */
+        @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
+        void onLinkCapacityEstimateChanged(
+                @NonNull List<LinkCapacityEstimate> linkCapacityEstimateList);
+    }
 
     /**
      * The callback methods need to be called on the handler thread where
@@ -1717,6 +1752,17 @@ public class TelephonyCallback {
                     () -> mExecutor.execute(
                             () -> listener.onAllowedNetworkTypesChanged(reason,
                                     allowedNetworkType)));
+        }
+
+        public void onLinkCapacityEstimateChanged(
+                List<LinkCapacityEstimate> linkCapacityEstimateList) {
+            LinkCapacityEstimateChangedListener listener =
+                    (LinkCapacityEstimateChangedListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> listener.onLinkCapacityEstimateChanged(
+                            linkCapacityEstimateList)));
         }
     }
 }

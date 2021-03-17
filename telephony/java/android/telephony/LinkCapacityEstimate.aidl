@@ -14,20 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.onehanded;
+package android.telephony;
 
-/**
- * Interface that is exposed to remote callers to manipulate the OneHanded feature.
- */
-interface IOneHanded {
-
-    /**
-     * Enters one handed mode.
-     */
-    oneway void startOneHanded() = 1;
-
-    /**
-     * Exits one handed mode.
-     */
-    oneway void stopOneHanded() = 2;
-}
+parcelable LinkCapacityEstimate;

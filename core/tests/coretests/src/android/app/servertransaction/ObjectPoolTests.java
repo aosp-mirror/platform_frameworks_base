@@ -133,7 +133,7 @@ public class ObjectPoolTests {
         int ident = 57;
         ActivityInfo activityInfo = new ActivityInfo();
         activityInfo.flags = 42;
-        activityInfo.maxAspectRatio = 2.4f;
+        activityInfo.setMaxAspectRatio(2.4f);
         activityInfo.launchToken = "token";
         activityInfo.applicationInfo = new ApplicationInfo();
         activityInfo.packageName = "packageName";

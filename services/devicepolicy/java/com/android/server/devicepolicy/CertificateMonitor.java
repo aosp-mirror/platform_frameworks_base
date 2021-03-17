@@ -79,16 +79,16 @@ public class CertificateMonitor {
             X509Certificate cert = parseCert(certBuffer);
             pemCert = Credentials.convertToPem(cert);
         } catch (CertificateException | IOException ce) {
-            Slog.e(LOG_TAG, ce, "Problem converting cert");
+            Slog.e(LOG_TAG, "Problem converting cert", ce);
             return null;
         }
 
         try (KeyChainConnection keyChainConnection = mInjector.keyChainBindAsUser(userHandle)) {
             return keyChainConnection.getService().installCaCertificate(pemCert);
         } catch (RemoteException e) {
-            Slog.e(LOG_TAG, e, "installCaCertsToKeyChain(): ");
+            Slog.e(LOG_TAG, "installCaCertsToKeyChain(): ", e);
         } catch (InterruptedException e1) {
-            Slog.w(LOG_TAG, e1, "installCaCertsToKeyChain(): ");
+            Slog.w(LOG_TAG, "installCaCertsToKeyChain(): ", e1);
             Thread.currentThread().interrupt();
         }
         return null;
@@ -100,9 +100,9 @@ public class CertificateMonitor {
                 keyChainConnection.getService().deleteCaCertificate(aliases[i]);
             }
         } catch (RemoteException e) {
-            Slog.e(LOG_TAG, e, "from CaCertUninstaller: ");
+            Slog.e(LOG_TAG, "from CaCertUninstaller: ", e);
         } catch (InterruptedException ie) {
-            Slog.w(LOG_TAG, ie, "CaCertUninstaller: ");
+            Slog.w(LOG_TAG, "CaCertUninstaller: ", ie);
             Thread.currentThread().interrupt();
         }
     }

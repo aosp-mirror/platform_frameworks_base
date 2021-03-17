@@ -27,13 +27,13 @@ public class GenericDocumentTest {
     @Test
     public void testRecreateFromParcel() {
         GenericDocument inDoc =
-                new GenericDocument.Builder<>("uri1", "schema1")
+                new GenericDocument.Builder<>("namespace", "uri1", "schema1")
                         .setScore(42)
                         .setPropertyString("propString", "Hello")
                         .setPropertyBytes("propBytes", new byte[][] {{1, 2}})
                         .setPropertyDocument(
                                 "propDocument",
-                                new GenericDocument.Builder<>("uri2", "schema2")
+                                new GenericDocument.Builder<>("namespace", "uri2", "schema2")
                                         .setPropertyString("propString", "Goodbye")
                                         .setPropertyBytes("propBytes", new byte[][] {{3, 4}})
                                         .build())

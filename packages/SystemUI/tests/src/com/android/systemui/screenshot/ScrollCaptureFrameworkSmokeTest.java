@@ -16,15 +16,16 @@
 
 package com.android.systemui.screenshot;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.Intent;
-import android.graphics.Rect;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.util.Log;
 import android.view.Display;
-import android.view.IScrollCaptureCallbacks;
+import android.view.IScrollCaptureResponseListener;
 import android.view.IWindowManager;
 import android.view.ScrollCaptureResponse;
 import android.view.WindowManagerGlobal;
@@ -45,8 +46,9 @@ import java.util.concurrent.TimeUnit;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class ScrollCaptureTest extends SysuiTestCase {
-    private static final String TAG = "ScrollCaptureTest";
+public class ScrollCaptureFrameworkSmokeTest extends SysuiTestCase {
+    private static final String TAG = "ScrollCaptureFrameworkSmokeTest";
+    private volatile ScrollCaptureResponse mResponse;
 
     /**
      * Verifies that a request traverses from SystemUI, to WindowManager and to the app process and
@@ -64,34 +66,23 @@ public class ScrollCaptureTest extends SysuiTestCase {
         final CountDownLatch latch = new CountDownLatch(1);
         try {
             wms.requestScrollCapture(Display.DEFAULT_DISPLAY, null, -1,
-                    new IScrollCaptureCallbacks.Stub() {
+                    new IScrollCaptureResponseListener.Stub() {
                         @Override
-                        public void onScrollCaptureResponse(ScrollCaptureResponse response)
+                        public void onScrollCaptureResponse(
+                                ScrollCaptureResponse response)
                                 throws RemoteException {
-                            Log.d(TAG, "onScrollCaptureResponse: " + response);
+                            mResponse = response;
                             latch.countDown();
                         }
-
-                        @Override
-                        public void onCaptureStarted() {
-                        }
-
-                        @Override
-                        public void onImageRequestCompleted(int i, Rect rect)
-                                throws RemoteException {
-
-                        }
-
-                        @Override
-                        public void onCaptureEnded() throws RemoteException {
-
-                        }
-
                     });
         } catch (RemoteException e) {
             Log.e(TAG, "request failed", e);
             fail("caught remote exception " + e);
         }
         latch.await(1000, TimeUnit.MILLISECONDS);
+
+        assertNotNull(mResponse);
+        assertTrue(mResponse.isConnected());
+        assertTrue(mResponse.getWindowTitle().contains(ScrollViewActivity.class.getSimpleName()));
     }
 }

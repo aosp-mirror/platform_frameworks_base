@@ -14,6 +14,9 @@
 
 package com.android.systemui.qs;
 
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -24,6 +27,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
@@ -74,6 +79,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     private final String VPN_PACKAGE = "TestVPN";
     private final String VPN_PACKAGE_2 = "TestVPN 2";
     private static final String PARENTAL_CONTROLS_LABEL = "Parental Control App";
+    private static final ComponentName DEVICE_OWNER_COMPONENT =
+            new ComponentName("TestDPC", "Test");
 
     private ViewGroup mRootView;
     private TextView mFooterText;
@@ -101,6 +108,11 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooterIcon = mRootView.findViewById(R.id.footer_icon);
         mPrimaryFooterIcon = mRootView.findViewById(R.id.primary_footer_icon);
         mFooter.setHostEnvironment(null);
+
+        when(mSecurityController.getDeviceOwnerComponentOnAnyUser())
+                .thenReturn(DEVICE_OWNER_COMPONENT);
+        when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
     }
 
     @Test
@@ -140,6 +152,27 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_named_management,
                                         MANAGING_ORGANIZATION),
                 mFooterText.getText());
+        assertEquals(View.VISIBLE, mRootView.getVisibility());
+        assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
+        assertEquals(View.GONE, mPrimaryFooterIcon.getVisibility());
+        // -1 == never set.
+        assertEquals(-1, mFooterIcon.getLastImageResource());
+    }
+
+    @Test
+    public void testManagedFinancedDeviceWithOwnerName() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.getDeviceOwnerOrganizationName())
+                .thenReturn(MANAGING_ORGANIZATION);
+        when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
+
+        mFooter.refreshState();
+
+        TestableLooper.get(this).processAllMessages();
+        assertEquals(mContext.getString(
+                R.string.quick_settings_financed_disclosure_named_management,
+                MANAGING_ORGANIZATION), mFooterText.getText());
         assertEquals(View.VISIBLE, mRootView.getVisibility());
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
         assertEquals(View.GONE, mPrimaryFooterIcon.getVisibility());
@@ -383,6 +416,25 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
+    public void testGetManagementTitleForNonFinancedDevice() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+
+        assertEquals(mContext.getString(R.string.monitoring_title_device_owned),
+                mFooter.getManagementTitle(MANAGING_ORGANIZATION));
+    }
+
+    @Test
+    public void testGetManagementTitleForFinancedDevice() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
+
+        assertEquals(mContext.getString(R.string.monitoring_title_financed_device,
+                MANAGING_ORGANIZATION),
+                mFooter.getManagementTitle(MANAGING_ORGANIZATION));
+    }
+
+    @Test
     public void testGetManagementMessage_noManagement() {
         assertEquals(null, mFooter.getManagementMessage(
                 /* isDeviceManaged= */ false,
@@ -406,6 +458,21 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                              /* organizationName= */ null,
                              /* isProfileOwnerOfOrganizationOwnedDevice= */ false,
                              /* workProfileOrganizationName= */ null));
+    }
+
+    @Test
+    public void testGetManagementMessage_deviceOwner_asFinancedDevice() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
+
+        assertEquals(mContext.getString(R.string.monitoring_financed_description_named_management,
+                MANAGING_ORGANIZATION, MANAGING_ORGANIZATION),
+                mFooter.getManagementMessage(
+                        /* isDeviceManaged= */ true,
+                        MANAGING_ORGANIZATION,
+                        /* isProfileOwnerOfOrganizationOwnedDevice= */ false,
+                        /* workProfileOrganizationName= */ null));
     }
 
     @Test
@@ -585,6 +652,34 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         View view = mFooter.createDialogView();
         TextView textView = (TextView) view.findViewById(R.id.parental_controls_title);
         assertEquals(PARENTAL_CONTROLS_LABEL, textView.getText());
+    }
+
+    @Test
+    public void testCreateDialogViewForFinancedDevice() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.getDeviceOwnerOrganizationName())
+                .thenReturn(MANAGING_ORGANIZATION);
+        when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
+
+        // Initialize AlertDialog which sets the text for the negative button, which is used when
+        // creating the dialog for a financed device.
+        mFooter.showDeviceMonitoringDialog();
+        // The above statement would display the Quick Settings dialog which requires user input,
+        // so simulate the press to continue with the unit test (otherwise, it is stuck).
+        mFooter.onClick(null, DialogInterface.BUTTON_NEGATIVE);
+        View view = mFooter.createDialogView();
+
+        TextView managementSubtitle = view.findViewById(R.id.device_management_subtitle);
+        assertEquals(View.VISIBLE, managementSubtitle.getVisibility());
+        assertEquals(mContext.getString(R.string.monitoring_title_financed_device,
+                MANAGING_ORGANIZATION), managementSubtitle.getText());
+        TextView managementMessage = view.findViewById(R.id.device_management_warning);
+        assertEquals(View.VISIBLE, managementMessage.getVisibility());
+        assertEquals(mContext.getString(R.string.monitoring_financed_description_named_management,
+                MANAGING_ORGANIZATION, MANAGING_ORGANIZATION), managementMessage.getText());
+        assertEquals(mContext.getString(R.string.monitoring_button_view_policies),
+                mFooter.getSettingsButton());
     }
 
     private CharSequence addLink(CharSequence description) {

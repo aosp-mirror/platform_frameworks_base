@@ -57,6 +57,19 @@ import java.util.List;
  * {@link android.content.Context#getSystemService
  * Context.getSystemService(Context.JOB_SCHEDULER_SERVICE)}.
  *
+ * <p> Prior to Android version {@link android.os.Build.VERSION_CODES#S}, jobs could only have
+ * a maximum of 100 jobs scheduled at a time. Starting with Android version
+ * {@link android.os.Build.VERSION_CODES#S}, that limit has been increased to 150.
+ * Expedited jobs also count towards the limit.
+ *
+ * <p> In Android version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, jobs had a maximum
+ * execution time of one minute. Starting with Android version
+ * {@link android.os.Build.VERSION_CODES#M} and ending with Android version
+ * {@link android.os.Build.VERSION_CODES#R}, jobs had a maximum execution time of 10 minutes.
+ * Starting from Android version {@link android.os.Build.VERSION_CODES#S}, jobs will still be
+ * stopped after 10 minutes if the system is busy or needs the resources, but if not, jobs
+ * may continue running longer than 10 minutes.
+ *
  * <p class="caution"><strong>Note:</strong> Beginning with API 30
  * ({@link android.os.Build.VERSION_CODES#R}), JobScheduler will throttle runaway applications.
  * Calling {@link #schedule(JobInfo)} and other such methods with very high frequency can have a

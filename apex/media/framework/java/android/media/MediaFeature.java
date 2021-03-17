@@ -17,6 +17,9 @@
 package android.media;
 
 import android.annotation.StringDef;
+import android.os.Build;
+
+import com.android.modules.annotation.MinSdk;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -24,6 +27,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * MediaFeature defines various media features, e.g. hdr type.
  */
+@MinSdk(Build.VERSION_CODES.S)
 public final class MediaFeature {
      /**
      * Defines tye type of HDR(high dynamic range) video.

@@ -18,10 +18,6 @@ package com.android.wm.shell.onehanded;
 
 import static android.os.UserHandle.USER_CURRENT;
 
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
-
-import android.Manifest;
-import android.annotation.BinderThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.om.IOverlayManager;
@@ -47,8 +43,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.common.ExecutorUtils;
-import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
@@ -60,7 +54,7 @@ import java.io.PrintWriter;
 /**
  * Manages and manipulates the one handed states, transitions, and gesture for phones.
  */
-public class OneHandedController implements RemoteCallable<OneHandedController> {
+public class OneHandedController {
     private static final String TAG = "OneHandedController";
 
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
@@ -170,7 +164,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 new OneHandedBackgroundPanelOrganizer(context, windowManager, displayController,
                         mainExecutor);
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
-                context, windowManager, displayController, animationController, tutorialHandler,
+                context, windowManager, animationController, tutorialHandler,
                 oneHandedBackgroundPanelOrganizer, mainExecutor);
         OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
@@ -243,16 +237,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     public OneHanded asOneHanded() {
         return mImpl;
-    }
-
-    @Override
-    public Context getContext() {
-        return mContext;
-    }
-
-    @Override
-    public ShellExecutor getRemoteCallExecutor() {
-        return mMainExecutor;
     }
 
     /**
@@ -585,22 +569,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         }
     }
 
-    /**
-     * The interface for calls from outside the Shell, within the host process.
-     */
     @ExternalThread
     private class OneHandedImpl implements OneHanded {
-        private IOneHandedImpl mIOneHanded;
-
-        @Override
-        public IOneHanded createExternalInterface() {
-            if (mIOneHanded != null) {
-                mIOneHanded.invalidate();
-            }
-            mIOneHanded = new IOneHandedImpl(OneHandedController.this);
-            return mIOneHanded;
-        }
-
         @Override
         public boolean isOneHandedEnabled() {
             // This is volatile so return directly
@@ -667,41 +637,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             mMainExecutor.execute(() -> {
                 OneHandedController.this.onConfigChanged(newConfig);
             });
-        }
-    }
-
-    /**
-     * The interface for calls from outside the host process.
-     */
-    @BinderThread
-    private static class IOneHandedImpl extends IOneHanded.Stub {
-        private OneHandedController mController;
-
-        IOneHandedImpl(OneHandedController controller) {
-            mController = controller;
-        }
-
-        /**
-         * Invalidates this instance, preventing future calls from updating the controller.
-         */
-        void invalidate() {
-            mController = null;
-        }
-
-        @Override
-        public void startOneHanded() {
-            executeRemoteCallWithTaskPermission(mController, "startOneHanded",
-                    (controller) -> {
-                        controller.startOneHanded();
-                    });
-        }
-
-        @Override
-        public void stopOneHanded() {
-            executeRemoteCallWithTaskPermission(mController, "stopOneHanded",
-                    (controller) -> {
-                        controller.stopOneHanded();
-                    });
         }
     }
 }

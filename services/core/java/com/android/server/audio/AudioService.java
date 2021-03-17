@@ -61,6 +61,8 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.hardware.SensorPrivacyManager;
+import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.hdmi.HdmiAudioSystemClient;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
@@ -520,6 +522,7 @@ public class AudioService extends IAudioService.Stub
     /** Interface for UserManagerService. */
     private final UserManagerInternal mUserManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
+    private final SensorPrivacyManagerInternal mSensorPrivacyManagerInternal;
 
     private final UserRestrictionsListener mUserRestrictionsListener =
             new AudioServiceUserRestrictionsListener();
@@ -720,9 +723,12 @@ public class AudioService extends IAudioService.Stub
     private String mEnabledSurroundFormats;
     private boolean mSurroundModeChanged;
 
+    private boolean mSupportsMicPrivacyToggle;
+
     private boolean mMicMuteFromSwitch;
     private boolean mMicMuteFromApi;
     private boolean mMicMuteFromRestrictions;
+    private boolean mMicMuteFromPrivacyToggle;
     // caches the value returned by AudioSystem.isMicrophoneMuted()
     private boolean mMicMuteFromSystemCached;
 
@@ -822,6 +828,8 @@ public class AudioService extends IAudioService.Stub
 
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mSensorPrivacyManagerInternal =
+                LocalServices.getService(SensorPrivacyManagerInternal.class);
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mAudioEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleAudioEvent");
@@ -830,6 +838,9 @@ public class AudioService extends IAudioService.Stub
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();
+
+        mSupportsMicPrivacyToggle = mContext.getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_MICROPHONE_TOGGLE);
 
         // Initialize volume
         // Priority 1 - Android Property
@@ -1104,6 +1115,16 @@ public class AudioService extends IAudioService.Stub
                 mHdmiPlaybackClient = mHdmiManager.getPlaybackClient();
                 mHdmiAudioSystemClient = mHdmiManager.getAudioSystemClient();
             }
+        }
+
+        if (mSupportsMicPrivacyToggle) {
+            mSensorPrivacyManagerInternal.addSensorPrivacyListenerForAllUsers(
+                    SensorPrivacyManager.Sensors.MICROPHONE, (userId, enabled) -> {
+                        if (userId == getCurrentUserId()) {
+                            mMicMuteFromPrivacyToggle = enabled;
+                            setMicrophoneMuteNoCallerCheck(getCurrentUserId());
+                        }
+                    });
         }
 
         mNm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -3840,11 +3861,12 @@ public class AudioService extends IAudioService.Stub
      * @return true if microphone is reported as muted by primary HAL
      */
     public boolean isMicrophoneMuted() {
-        return mMicMuteFromSystemCached;
+        return mMicMuteFromSystemCached && !mMicMuteFromPrivacyToggle;
     }
 
     private boolean isMicrophoneSupposedToBeMuted() {
-        return mMicMuteFromSwitch || mMicMuteFromRestrictions || mMicMuteFromApi;
+        return mMicMuteFromSwitch || mMicMuteFromRestrictions || mMicMuteFromApi
+                || mMicMuteFromPrivacyToggle;
     }
 
     private void setMicrophoneMuteNoCallerCheck(int userId) {
@@ -7473,6 +7495,13 @@ public class AudioService extends IAudioService.Stub
                 mUserSwitchedReceived = true;
                 // the current audio focus owner is no longer valid
                 mMediaFocusControl.discardAudioFocusOwner();
+
+                if (mSupportsMicPrivacyToggle) {
+                    mMicMuteFromPrivacyToggle = mSensorPrivacyManagerInternal
+                            .isSensorPrivacyEnabled(getCurrentUserId(),
+                                    SensorPrivacyManager.Sensors.MICROPHONE);
+                    setMicrophoneMuteNoCallerCheck(getCurrentUserId());
+                }
 
                 // load volume settings for new user
                 readAudioSettings(true /*userSwitch*/);

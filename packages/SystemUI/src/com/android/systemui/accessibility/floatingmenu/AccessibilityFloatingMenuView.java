@@ -16,6 +16,11 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.util.MathUtils.constrain;
+import static android.util.MathUtils.sq;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.Context;
@@ -31,8 +36,10 @@ import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 
 import androidx.annotation.DimenRes;
@@ -47,6 +54,7 @@ import com.android.systemui.R;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -58,27 +66,49 @@ import java.util.List;
  */
 public class AccessibilityFloatingMenuView extends FrameLayout
         implements RecyclerView.OnItemTouchListener {
-    private static final float DEFAULT_LOCATION_Y_PERCENTAGE = 0.8f;
     private static final int INDEX_MENU_ITEM = 0;
     private static final int FADE_OUT_DURATION_MS = 1000;
     private static final int FADE_EFFECT_DURATION_MS = 3000;
+    private static final int SNAP_TO_LOCATION_DURATION_MS = 150;
+    private static final int MIN_WINDOW_X = 0;
+    private static final int MIN_WINDOW_Y = 0;
+    private static final float LOCATION_Y_PERCENTAGE = 0.8f;
 
     private boolean mIsFadeEffectEnabled;
     private boolean mIsShowing;
+    private boolean mIsDownInEnlargedTouchArea;
+    private boolean mIsDragging = false;
+    @Alignment
+    private int mAlignment = Alignment.RIGHT;
     @SizeType
     private int mSizeType = SizeType.SMALL;
+    @ShapeType
+    private int mShapeType = ShapeType.OVAL;
+    @RadiusType
+    private int mRadiusType = RadiusType.LEFT_HALF_OVAL;
     private int mMargin;
     private int mPadding;
     private int mScreenHeight;
     private int mScreenWidth;
     private int mIconWidth;
     private int mIconHeight;
+    private int mInset;
+    private int mDownX;
+    private int mDownY;
+    private int mRelativeToPointerDownX;
+    private int mRelativeToPointerDownY;
+    private float mRadius;
+    private float mPercentageY = LOCATION_Y_PERCENTAGE;
+    private float mSquareScaledTouchSlop;
     private final RecyclerView mListView;
     private final AccessibilityTargetAdapter mAdapter;
     private float mFadeOutValue;
     private final ValueAnimator mFadeOutAnimator;
+    @VisibleForTesting
+    final ValueAnimator mDragAnimator;
     private final Handler mUiHandler;
-    private final WindowManager.LayoutParams mLayoutParams;
+    @VisibleForTesting
+    final WindowManager.LayoutParams mCurrentLayoutParams;
     private final WindowManager mWindowManager;
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
 
@@ -93,13 +123,35 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     @IntDef({
-            ShapeType.CIRCLE,
-            ShapeType.HALF_CIRCLE
+            ShapeType.OVAL,
+            ShapeType.HALF_OVAL
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ShapeType {
-        int CIRCLE = 0;
-        int HALF_CIRCLE = 1;
+        int OVAL = 0;
+        int HALF_OVAL = 1;
+    }
+
+    @IntDef({
+            RadiusType.LEFT_HALF_OVAL,
+            RadiusType.OVAL,
+            RadiusType.RIGHT_HALF_OVAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface RadiusType {
+        int LEFT_HALF_OVAL = 0;
+        int OVAL = 1;
+        int RIGHT_HALF_OVAL = 2;
+    }
+
+    @IntDef({
+            Alignment.LEFT,
+            Alignment.RIGHT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Alignment {
+        int LEFT = 0;
+        int RIGHT = 1;
     }
 
     public AccessibilityFloatingMenuView(Context context) {
@@ -113,7 +165,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
         mListView = listView;
         mWindowManager = context.getSystemService(WindowManager.class);
-        mLayoutParams = createDefaultLayoutParams();
+        mCurrentLayoutParams = createDefaultLayoutParams();
         mAdapter = new AccessibilityTargetAdapter(mTargets);
         mUiHandler = createUiHandler();
 
@@ -122,30 +174,89 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mFadeOutAnimator.addUpdateListener(
                 (animation) -> setAlpha((float) animation.getAnimatedValue()));
 
+        mDragAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
+        mDragAnimator.setDuration(SNAP_TO_LOCATION_DURATION_MS);
+        mDragAnimator.setInterpolator(new OvershootInterpolator());
+        mDragAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mAlignment = calculateCurrentAlignment();
+                mPercentageY = calculateCurrentPercentageY();
+
+                updateLocationWith(mAlignment, mPercentageY);
+                updateMarginsWith(mAlignment);
+                updateOffsetWith(mShapeType, mAlignment);
+
+                updateInsetWith(getResources().getConfiguration().uiMode, mAlignment);
+
+                mRadiusType = (mAlignment == Alignment.RIGHT)
+                        ? RadiusType.LEFT_HALF_OVAL
+                        : RadiusType.RIGHT_HALF_OVAL;
+                updateRadiusWith(mSizeType, mRadiusType, mTargets.size());
+
+                fadeOut();
+            }
+        });
+
         updateDimensions();
         initListView();
-
-        final int uiMode = context.getResources().getConfiguration().uiMode;
-        updateStrokeWith(uiMode);
+        updateStrokeWith(getResources().getConfiguration().uiMode, mAlignment);
     }
 
     @Override
     public boolean onInterceptTouchEvent(@NonNull RecyclerView recyclerView,
             @NonNull MotionEvent event) {
+        final int currentRawX = (int) event.getRawX();
+        final int currentRawY = (int) event.getRawY();
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 fadeIn();
+
+                mDownX = currentRawX;
+                mDownY = currentRawY;
+                mRelativeToPointerDownX = mCurrentLayoutParams.x - mDownX;
+                mRelativeToPointerDownY = mCurrentLayoutParams.y - mDownY;
+                mListView.animate().translationX(0);
                 break;
             case MotionEvent.ACTION_MOVE:
-                // Do nothing
+                if (mIsDragging
+                        || hasExceededTouchSlop(mDownX, mDownY, currentRawX, currentRawY)) {
+                    if (!mIsDragging) {
+                        mIsDragging = true;
+                        setRadius(mRadius, RadiusType.OVAL);
+                        setInset(0, 0);
+                    }
+
+                    final int newWindowX = currentRawX + mRelativeToPointerDownX;
+                    final int newWindowY = currentRawY + mRelativeToPointerDownY;
+                    mCurrentLayoutParams.x = constrain(newWindowX, MIN_WINDOW_X, getMaxWindowX());
+                    mCurrentLayoutParams.y = constrain(newWindowY, MIN_WINDOW_Y, getMaxWindowY());
+                    mWindowManager.updateViewLayout(this, mCurrentLayoutParams);
+                }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                if (mIsDragging) {
+                    mIsDragging = false;
+
+                    final int maxX = getMaxWindowX();
+                    final int endX = mCurrentLayoutParams.x > ((MIN_WINDOW_X + maxX) / 2)
+                            ? maxX : MIN_WINDOW_X;
+                    final int endY = mCurrentLayoutParams.y;
+                    snapToLocation(endX, endY);
+
+                    // Avoid triggering the listener of the item.
+                    return true;
+                }
+                updateOffsetWith(mShapeType, mAlignment);
+
                 fadeOut();
                 break;
             default: // Do nothing
         }
+
+        // not consume all the events here because keeping the scroll behavior of list view.
         return false;
     }
 
@@ -165,7 +276,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         }
 
         mIsShowing = true;
-        mWindowManager.addView(this, mLayoutParams);
+        mWindowManager.addView(this, mCurrentLayoutParams);
+        setSystemGestureExclusion();
     }
 
     void hide() {
@@ -175,6 +287,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
         mIsShowing = false;
         mWindowManager.removeView(this);
+        setSystemGestureExclusion();
     }
 
     boolean isShowing() {
@@ -188,7 +301,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mTargets.addAll(newTargets);
         mAdapter.notifyDataSetChanged();
 
-        updateRadiusWith(mSizeType, mTargets.size());
+        updateRadiusWith(mSizeType, mRadiusType, mTargets.size());
+        setSystemGestureExclusion();
 
         fadeOut();
     }
@@ -199,10 +313,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mSizeType = newSizeType;
 
         updateIconSizeWith(newSizeType);
-        updateRadiusWith(newSizeType, mTargets.size());
+        updateRadiusWith(newSizeType, mRadiusType, mTargets.size());
 
         // When the icon sized changed, the menu size and location will be impacted.
-        updateLocation();
+        updateLocationWith(mAlignment, mPercentageY);
+        setSystemGestureExclusion();
 
         fadeOut();
     }
@@ -210,16 +325,12 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     void setShapeType(@ShapeType int newShapeType) {
         fadeIn();
 
-        final boolean isCircleShape =
-                newShapeType == ShapeType.CIRCLE;
-        final float offset =
-                isCircleShape
-                        ? 0
-                        : getLayoutWidth() / 2.0f;
-        mListView.animate().translationX(offset);
+        mShapeType = newShapeType;
+
+        updateOffsetWith(newShapeType, mAlignment);
 
         setOnTouchListener(
-                isCircleShape
+                newShapeType == ShapeType.OVAL
                         ? null
                         : (view, event) -> onTouched(event));
 
@@ -241,6 +352,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
             return;
         }
 
+        mFadeOutAnimator.cancel();
         mUiHandler.removeCallbacksAndMessages(null);
         mUiHandler.post(() -> setAlpha(/* completely opaque */ 1.0f));
     }
@@ -255,24 +367,50 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private boolean onTouched(MotionEvent event) {
+        final int action = event.getAction();
         final int currentX = (int) event.getX();
         final int currentY = (int) event.getY();
 
         final int menuHalfWidth = getLayoutWidth() / 2;
         final Rect touchDelegateBounds =
                 new Rect(mMargin, mMargin, mMargin + menuHalfWidth, mMargin + getLayoutHeight());
-        if (touchDelegateBounds.contains(currentX, currentY)) {
-            // In order to correspond to the correct item of list view.
-            event.setLocation(currentX - mMargin, currentY - mMargin);
-            return mListView.dispatchTouchEvent(event);
+        if (action == MotionEvent.ACTION_DOWN
+                && touchDelegateBounds.contains(currentX, currentY)) {
+            mIsDownInEnlargedTouchArea = true;
         }
 
-        return false;
+        if (!mIsDownInEnlargedTouchArea) {
+            return false;
+        }
+
+        if (action == MotionEvent.ACTION_UP
+                || action == MotionEvent.ACTION_CANCEL) {
+            mIsDownInEnlargedTouchArea = false;
+        }
+
+        // In order to correspond to the correct item of list view.
+        event.setLocation(currentX - mMargin, currentY - mMargin);
+        return mListView.dispatchTouchEvent(event);
     }
 
-    private void setRadius(float radius) {
-        final float[] radii = new float[]{radius, radius, 0.0f, 0.0f, 0.0f, 0.0f, radius, radius};
-        getMenuGradientDrawable().setCornerRadii(radii);
+    private boolean hasExceededTouchSlop(int startX, int startY, int endX, int endY) {
+        return (sq(endX - startX) + sq(endY - startY)) > mSquareScaledTouchSlop;
+    }
+
+    private void setRadius(float radius, @RadiusType int type) {
+        getMenuGradientDrawable().setCornerRadii(createRadii(radius, type));
+    }
+
+    private float[] createRadii(float radius, @RadiusType int type) {
+        if (type == RadiusType.LEFT_HALF_OVAL) {
+            return new float[]{radius, radius, 0.0f, 0.0f, 0.0f, 0.0f, radius, radius};
+        }
+
+        if (type == RadiusType.RIGHT_HALF_OVAL) {
+            return new float[]{0.0f, 0.0f, radius, radius, radius, radius, 0.0f, 0.0f};
+        }
+
+        return new float[]{radius, radius, radius, radius, radius, radius, radius, radius};
     }
 
     private Handler createUiHandler() {
@@ -292,6 +430,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_margin);
         mPadding =
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_padding);
+        mInset =
+                res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_stroke_inset);
+
+        mSquareScaledTouchSlop =
+                sq(ViewConfiguration.get(getContext()).getScaledTouchSlop());
     }
 
     private void updateIconSizeWith(@SizeType int sizeType) {
@@ -308,13 +451,20 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private void initListView() {
-        final Drawable listViewBackground =
+        final Drawable background =
                 getContext().getDrawable(R.drawable.accessibility_floating_menu_background);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        mListView.setBackground(listViewBackground);
+        final LayoutParams layoutParams =
+                new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+        mListView.setLayoutParams(layoutParams);
+        final InstantInsetLayerDrawable layerDrawable =
+                new InstantInsetLayerDrawable(new Drawable[]{background});
+        mListView.setBackground(layerDrawable);
         mListView.setAdapter(mAdapter);
         mListView.setLayoutManager(layoutManager);
         mListView.addOnItemTouchListener(this);
+        mListView.animate().setInterpolator(new OvershootInterpolator());
         updateListView();
 
         addView(mListView);
@@ -323,12 +473,9 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private void updateListView() {
         final int elevation =
                 getResources().getDimensionPixelSize(R.dimen.accessibility_floating_menu_elevation);
-        final LayoutParams layoutParams =
-                new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMarginsRelative(mMargin, mMargin, /* end= */ 0, mMargin);
-        mListView.setLayoutParams(layoutParams);
         mListView.setElevation(elevation);
+
+        updateMarginsWith(mAlignment);
     }
 
     private WindowManager.LayoutParams createDefaultLayoutParams() {
@@ -338,10 +485,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
-        final DisplayMetrics dm = getResources().getDisplayMetrics();
+        params.windowAnimations = android.R.style.Animation_Translucent;
         params.gravity = Gravity.START | Gravity.TOP;
-        params.x = dm.widthPixels;
-        params.y = (int) (dm.heightPixels * DEFAULT_LOCATION_Y_PERCENTAGE);
+        params.x = getMaxWindowX();
+        params.y = (int) (getMaxWindowY() * mPercentageY);
 
         return params;
     }
@@ -354,12 +501,37 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         updateListView();
         updateIconSizeWith(mSizeType);
         updateColor();
-        updateStrokeWith(newConfig.uiMode);
-        updateLocation();
+        updateStrokeWith(newConfig.uiMode, mAlignment);
+        updateLocationWith(mAlignment, mPercentageY);
     }
 
-    private LayerDrawable getMenuLayerDrawable() {
-        return (LayerDrawable) mListView.getBackground();
+    private void snapToLocation(int endX, int endY) {
+        mDragAnimator.cancel();
+        mDragAnimator.removeAllUpdateListeners();
+        mDragAnimator.addUpdateListener(anim -> onDragAnimationUpdate(anim, endX, endY));
+        mDragAnimator.start();
+    }
+
+    private void onDragAnimationUpdate(ValueAnimator animator, int endX, int endY) {
+        float value = (float) animator.getAnimatedValue();
+        final int newX = (int) (((1 - value) * mCurrentLayoutParams.x) + (value * endX));
+        final int newY = (int) (((1 - value) * mCurrentLayoutParams.y) + (value * endY));
+
+        mCurrentLayoutParams.x = newX;
+        mCurrentLayoutParams.y = newY;
+        mWindowManager.updateViewLayout(this, mCurrentLayoutParams);
+    }
+
+    private int getMaxWindowX() {
+        return mScreenWidth - mMargin - getLayoutWidth();
+    }
+
+    private int getMaxWindowY() {
+        return mScreenHeight - getWindowHeight();
+    }
+
+    private InstantInsetLayerDrawable getMenuLayerDrawable() {
+        return (InstantInsetLayerDrawable) mListView.getBackground();
     }
 
     private GradientDrawable getMenuGradientDrawable() {
@@ -369,10 +541,30 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     /**
      * Updates the floating menu to be fixed at the side of the screen.
      */
-    private void updateLocation() {
-        mLayoutParams.x = mScreenWidth - mMargin - getLayoutWidth();
-        mLayoutParams.y = (int) (mScreenHeight * DEFAULT_LOCATION_Y_PERCENTAGE);
-        mWindowManager.updateViewLayout(this, mLayoutParams);
+    private void updateLocationWith(@Alignment int side, float percentageCurrentY) {
+        mCurrentLayoutParams.x = (side == Alignment.RIGHT) ? getMaxWindowX() : MIN_WINDOW_X;
+        mCurrentLayoutParams.y = (int) (percentageCurrentY * getMaxWindowY());
+        mWindowManager.updateViewLayout(this, mCurrentLayoutParams);
+    }
+
+    private void updateOffsetWith(@ShapeType int shapeType, @Alignment int side) {
+        final float halfWidth = getLayoutWidth() / 2.0f;
+        final float offset = (shapeType == ShapeType.OVAL) ? 0 : halfWidth;
+        mListView.animate().translationX(side == Alignment.RIGHT ? offset : -offset);
+    }
+
+    private void updateMarginsWith(@Alignment int side) {
+        final LayoutParams layoutParams = (LayoutParams) mListView.getLayoutParams();
+        final int marginLeft = (side == Alignment.LEFT) ? 0 : mMargin;
+        final int marginRight = (side == Alignment.RIGHT) ? 0 : mMargin;
+
+        if (marginLeft == layoutParams.leftMargin
+                && marginRight == layoutParams.rightMargin) {
+            return;
+        }
+
+        layoutParams.setMargins(marginLeft, mMargin, marginRight, mMargin);
+        mListView.setLayoutParams(layoutParams);
     }
 
     private void updateColor() {
@@ -380,17 +572,13 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         getMenuGradientDrawable().setColor(getResources().getColor(menuColorResId));
     }
 
-    private void updateStrokeWith(int uiMode) {
-        final Resources res = getResources();
+    private void updateStrokeWith(int uiMode, @Alignment int side) {
+        updateInsetWith(uiMode, side);
+
         final boolean isNightMode =
                 (uiMode & Configuration.UI_MODE_NIGHT_MASK)
                         == Configuration.UI_MODE_NIGHT_YES;
-
-        final int inset =
-                res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_stroke_inset);
-        final int insetRight = isNightMode ? inset : 0;
-        getMenuLayerDrawable().setLayerInset(INDEX_MENU_ITEM, 0, 0, insetRight, 0);
-
+        final Resources res = getResources();
         final int width =
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_stroke_width);
         final int strokeWidth = isNightMode ? width : 0;
@@ -398,8 +586,43 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         getMenuGradientDrawable().setStroke(strokeWidth, strokeColor);
     }
 
-    private void updateRadiusWith(@SizeType int sizeType, int itemCount) {
-        setRadius(getResources().getDimensionPixelSize(getRadiusResId(sizeType, itemCount)));
+    private void updateRadiusWith(@SizeType int sizeType, @RadiusType int radiusType,
+            int itemCount) {
+        mRadius =
+                getResources().getDimensionPixelSize(getRadiusResId(sizeType, itemCount));
+        setRadius(mRadius, radiusType);
+    }
+
+    private void updateInsetWith(int uiMode, @Alignment int side) {
+        final boolean isNightMode =
+                (uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                        == Configuration.UI_MODE_NIGHT_YES;
+
+        final int layerInset = isNightMode ? mInset : 0;
+        final int insetLeft = (side == Alignment.LEFT) ? layerInset : 0;
+        final int insetRight = (side == Alignment.RIGHT) ? layerInset : 0;
+        setInset(insetLeft, insetRight);
+    }
+
+    private void setInset(int left, int right) {
+        final LayerDrawable layerDrawable = getMenuLayerDrawable();
+        if (layerDrawable.getLayerInsetLeft(INDEX_MENU_ITEM) == left
+                && layerDrawable.getLayerInsetRight(INDEX_MENU_ITEM) == right) {
+            return;
+        }
+
+        layerDrawable.setLayerInset(INDEX_MENU_ITEM, left, 0, right, 0);
+    }
+
+    @Alignment
+    private int calculateCurrentAlignment() {
+        return mCurrentLayoutParams.x >= ((MIN_WINDOW_X + getMaxWindowX()) / 2)
+                ? Alignment.RIGHT
+                : Alignment.LEFT;
+    }
+
+    private float calculateCurrentPercentageY() {
+        return mCurrentLayoutParams.y / (float) getMaxWindowY();
     }
 
     private @DimenRes int getRadiusResId(@SizeType int sizeType, int itemCount) {
@@ -425,6 +648,24 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private int getLayoutHeight() {
-        return (mPadding + mIconHeight) * mTargets.size() + mPadding;
+        return Math.min(mScreenHeight - mMargin * 2,
+                (mPadding + mIconHeight) * mTargets.size() + mPadding);
+    }
+
+    private int getWindowWidth() {
+        return mMargin + getLayoutWidth();
+    }
+
+    private int getWindowHeight() {
+        return Math.min(mScreenHeight, mMargin * 2 + getLayoutHeight());
+    }
+
+    private void setSystemGestureExclusion() {
+        final Rect excludeZone =
+                new Rect(0, 0, getWindowWidth(), getWindowHeight());
+        post(() -> setSystemGestureExclusionRects(
+                mIsShowing
+                        ? Collections.singletonList(excludeZone)
+                        : Collections.emptyList()));
     }
 }

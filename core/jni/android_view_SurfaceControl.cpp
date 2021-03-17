@@ -746,7 +746,7 @@ static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
 
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     Rect crop(l, t, r, b);
-    transaction->setCrop_legacy(ctrl, crop);
+    transaction->setCrop(ctrl, crop);
 }
 
 static void nativeSetCornerRadius(JNIEnv* env, jclass clazz, jlong transactionObj,
