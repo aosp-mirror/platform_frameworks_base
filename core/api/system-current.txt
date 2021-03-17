@@ -126,6 +126,7 @@ package android {
     field public static final String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
     field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
+    field public static final String MANAGE_APP_HIBERNATION = "android.permission.MANAGE_APP_HIBERNATION";
     field public static final String MANAGE_APP_OPS_RESTRICTIONS = "android.permission.MANAGE_APP_OPS_RESTRICTIONS";
     field public static final String MANAGE_APP_PREDICTIONS = "android.permission.MANAGE_APP_PREDICTIONS";
     field public static final String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
@@ -1831,10 +1832,10 @@ package android.app.usage {
 package android.apphibernation {
 
   public final class AppHibernationManager {
-    method public boolean isHibernatingForUser(@NonNull String);
-    method public boolean isHibernatingGlobally(@NonNull String);
-    method public void setHibernatingForUser(@NonNull String, boolean);
-    method public void setHibernatingGlobally(@NonNull String, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public boolean isHibernatingForUser(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public boolean isHibernatingGlobally(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void setHibernatingForUser(@NonNull String, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void setHibernatingGlobally(@NonNull String, boolean);
   }
 
 }
