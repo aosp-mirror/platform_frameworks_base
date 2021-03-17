@@ -18,7 +18,7 @@ package android.net {
     method public long getRefreshTimeMillis();
     method @Nullable public android.net.Uri getUserPortalUrl();
     method public int getUserPortalUrlSource();
-    method @Nullable public String getVenueFriendlyName();
+    method @Nullable public CharSequence getVenueFriendlyName();
     method @Nullable public android.net.Uri getVenueInfoUrl();
     method public int getVenueInfoUrlSource();
     method public boolean isCaptive();
@@ -40,7 +40,7 @@ package android.net {
     method @NonNull public android.net.CaptivePortalData.Builder setSessionExtendable(boolean);
     method @NonNull public android.net.CaptivePortalData.Builder setUserPortalUrl(@Nullable android.net.Uri);
     method @NonNull public android.net.CaptivePortalData.Builder setUserPortalUrl(@Nullable android.net.Uri, int);
-    method @NonNull public android.net.CaptivePortalData.Builder setVenueFriendlyName(@Nullable String);
+    method @NonNull public android.net.CaptivePortalData.Builder setVenueFriendlyName(@Nullable CharSequence);
     method @NonNull public android.net.CaptivePortalData.Builder setVenueInfoUrl(@Nullable android.net.Uri);
     method @NonNull public android.net.CaptivePortalData.Builder setVenueInfoUrl(@Nullable android.net.Uri, int);
   }
