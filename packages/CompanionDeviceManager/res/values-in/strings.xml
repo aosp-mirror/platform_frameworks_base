@@ -20,12 +20,8 @@
     <string name="chooser_title" msgid="2262294130493605839">"Pilih <xliff:g id="PROFILE_NAME">%1$s</xliff:g> untuk dikelola oleh &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"perangkat"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"smartwatch"</string>
-    <!-- no translation found for confirmation_title (814973816731238955) -->
-    <skip />
-    <!-- no translation found for profile_summary (2059360676631420073) -->
-    <skip />
-    <!-- no translation found for consent_yes (8344487259618762872) -->
-    <skip />
-    <!-- no translation found for consent_no (2640796915611404382) -->
-    <skip />
+    <string name="confirmation_title" msgid="814973816731238955">"Tetapkan &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; untuk mengelola &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_summary" msgid="2059360676631420073">"Aplikasi ini diperlukan untuk mengelola <xliff:g id="PROFILE_NAME">%1$s</xliff:g>. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"Izinkan"</string>
+    <string name="consent_no" msgid="2640796915611404382">"Jangan izinkan"</string>
 </resources>
