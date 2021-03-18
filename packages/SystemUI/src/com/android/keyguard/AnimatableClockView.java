@@ -38,8 +38,10 @@ import kotlin.Unit;
  * The time's text color is a gradient that changes its colors based on its controller.
  */
 public class AnimatableClockView extends TextView {
-    private static final CharSequence FORMAT_12_HOUR = "hh\nmm";
-    private static final CharSequence FORMAT_24_HOUR = "HH\nmm";
+    private static final CharSequence DOUBLE_LINE_FORMAT_12_HOUR = "hh\nmm";
+    private static final CharSequence DOUBLE_LINE_FORMAT_24_HOUR = "HH\nmm";
+    private static final CharSequence SINGLE_LINE_FORMAT_12_HOUR = "h:mm";
+    private static final CharSequence SINGLE_LINE_FORMAT_24_HOUR = "H:mm";
     private static final long ANIM_DURATION = 300;
 
     private final Calendar mTime = Calendar.getInstance();
@@ -54,6 +56,8 @@ public class AnimatableClockView extends TextView {
 
     private TextAnimator mTextAnimator = null;
     private Runnable mOnTextAnimatorInitialized;
+
+    private boolean mIsSingleLine;
 
     public AnimatableClockView(Context context) {
         this(context, null, 0, 0);
@@ -78,6 +82,15 @@ public class AnimatableClockView extends TextView {
         } finally {
             ta.recycle();
         }
+
+        ta = context.obtainStyledAttributes(
+                attrs, android.R.styleable.TextView, defStyleAttr, defStyleRes);
+        try {
+            mIsSingleLine = ta.getBoolean(android.R.styleable.TextView_singleLine, false);
+        } finally {
+            ta.recycle();
+        }
+
         refreshFormat();
     }
 
@@ -171,7 +184,16 @@ public class AnimatableClockView extends TextView {
 
     void refreshFormat() {
         final boolean use24HourFormat = DateFormat.is24HourFormat(getContext());
-        mFormat =  use24HourFormat ? FORMAT_24_HOUR : FORMAT_12_HOUR;
+        if (mIsSingleLine && use24HourFormat) {
+            mFormat = SINGLE_LINE_FORMAT_24_HOUR;
+        } else if (!mIsSingleLine && use24HourFormat) {
+            mFormat = DOUBLE_LINE_FORMAT_24_HOUR;
+        } else if (mIsSingleLine && !use24HourFormat) {
+            mFormat = SINGLE_LINE_FORMAT_12_HOUR;
+        } else {
+            mFormat = DOUBLE_LINE_FORMAT_12_HOUR;
+        }
+
         mDescFormat = getBestDateTimePattern(getContext(), use24HourFormat ? "Hm" : "hm");
         refreshTime();
     }
