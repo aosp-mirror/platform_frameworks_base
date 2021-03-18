@@ -66,6 +66,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Mock
     OneHandedGestureHandler mMockGestureHandler;
     @Mock
+    OneHandedSettingsUtil mMockSettingsUitl;
+    @Mock
     OneHandedUiEventLogger mMockUiEventLogger;
     @Mock
     IOverlayManager mMockOverlayManager;
@@ -78,6 +80,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Mock
     Handler mMockShellMainHandler;
 
+    final boolean mDefaultEnabled = true;
     final boolean mDefaultSwipeToNotificationEnabled = false;
     final boolean mDefaultTapAppToExitEnabled = true;
 
@@ -91,6 +94,14 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
         when(mMockBackgroundOrganizer.getBackgroundSurface()).thenReturn(mMockLeash);
+        when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any())).thenReturn(
+                mDefaultEnabled);
+        when(mMockSettingsUitl.getSettingsOneHandedModeTimeout(any())).thenReturn(
+                OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
+        when(mMockSettingsUitl.getSettingsTapsAppToExit(any())).thenReturn(
+                mDefaultTapAppToExitEnabled);
+        when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any())).thenReturn(
+                mDefaultSwipeToNotificationEnabled);
 
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
@@ -101,6 +112,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mMockTouchHandler,
                 mMockTutorialHandler,
                 mMockGestureHandler,
+                mMockSettingsUitl,
                 mSpiedTimeoutHandler,
                 mMockUiEventLogger,
                 mMockOverlayManager,
