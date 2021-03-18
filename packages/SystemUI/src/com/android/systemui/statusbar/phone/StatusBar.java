@@ -4187,7 +4187,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationPanelViewController.isLaunchingAffordanceWithPreview();
         mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
 
-        if (mStatusBarKeyguardViewManager.isShowingAlternativeAuth()) {
+        if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
             mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
         } else if (mBouncerShowing) {
             // Bouncer needs the front scrim when it's on top of an activity,
