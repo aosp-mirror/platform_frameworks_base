@@ -23,6 +23,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
@@ -44,6 +45,8 @@ import android.util.DebugUtils;
 import android.util.Pair;
 import android.util.Range;
 
+import com.android.internal.util.function.pooled.PooledLambda;
+
 import com.google.android.collect.Sets;
 
 import java.lang.annotation.Retention;
@@ -53,6 +56,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 /**
  * Manager for creating and modifying network policy rules.
@@ -60,6 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @hide
  */
 @TestApi
+@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 @SystemService(Context.NETWORK_POLICY_SERVICE)
 public class NetworkPolicyManager {
 
@@ -198,12 +203,157 @@ public class NetworkPolicyManager {
     })
     public @interface SubscriptionOverrideMask {}
 
+    /**
+     * Flag to indicate that an app is not subject to any restrictions that could result in its
+     * network access blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_NONE = 0;
+
+    /**
+     * Flag to indicate that an app is subject to Battery saver restrictions that would
+     * result in its network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_BATTERY_SAVER = 1 << 0;
+
+    /**
+     * Flag to indicate that an app is subject to Doze restrictions that would
+     * result in its network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_DOZE = 1 << 1;
+
+    /**
+     * Flag to indicate that an app is subject to App Standby restrictions that would
+     * result in its network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_APP_STANDBY = 1 << 2;
+
+    /**
+     * Flag to indicate that an app is subject to Restricted mode restrictions that would
+     * result in its network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_RESTRICTED_MODE = 1 << 3;
+
+    /**
+     * Flag to indicate that an app is subject to Data saver restrictions that would
+     * result in its metered network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_METERED_REASON_DATA_SAVER = 1 << 16;
+
+    /**
+     * Flag to indicate that an app is subject to user restrictions that would
+     * result in its metered network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_METERED_REASON_USER_RESTRICTED = 1 << 17;
+
+    /**
+     * Flag to indicate that an app is subject to Device admin restrictions that would
+     * result in its metered network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_METERED_REASON_ADMIN_DISABLED = 1 << 18;
+
+    /** @hide */
+    public static final int BLOCKED_METERED_REASON_MASK = 0xffff0000;
+
+    /**
+     * Flag to indicate that app is not exempt from any network restrictions.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_NONE = 0;
+    /**
+     * Flag to indicate that app is exempt from certain network restrictions because of it being a
+     * system component.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_SYSTEM = 1 << 0;
+    /**
+     * Flag to indicate that app is exempt from certain network restrictions because of it being
+     * in the foreground.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_FOREGROUND = 1 << 1;
+    /**
+     * Flag to indicate that app is exempt from certain network restrictions because of it being
+     * in the {@code allow-in-power-save} list.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_POWER_SAVE_ALLOWLIST = 1 << 2;
+    /**
+     * Flag to indicate that app is exempt from certain network restrictions because of it being
+     * in the {@code allow-in-power-save-except-idle} list.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST = 1 << 3;
+    /**
+     * Flag to indicate that app is exempt from certain network restrictions because of it holding
+     * certain privileged permissions.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS = 1 << 4;
+    /**
+     * Flag to indicate that app is exempt from certain metered network restrictions because user
+     * explicitly exempted it.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_METERED_REASON_USER_EXEMPTED = 1 << 16;
+
+    /** @hide */
+    public static final int ALLOWED_METERED_REASON_MASK = 0xffff0000;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = {"BLOCKED_"}, value = {
+            BLOCKED_REASON_NONE,
+            BLOCKED_REASON_BATTERY_SAVER,
+            BLOCKED_REASON_DOZE,
+            BLOCKED_REASON_APP_STANDBY,
+            BLOCKED_REASON_RESTRICTED_MODE,
+            BLOCKED_METERED_REASON_DATA_SAVER,
+            BLOCKED_METERED_REASON_USER_RESTRICTED,
+            BLOCKED_METERED_REASON_ADMIN_DISABLED,
+    })
+    public @interface BlockedReason {}
+
     private final Context mContext;
     @UnsupportedAppUsage
     private INetworkPolicyManager mService;
 
     private final Map<SubscriptionCallback, SubscriptionCallbackProxy>
-            mCallbackMap = new ConcurrentHashMap<>();
+            mSubscriptionCallbackMap = new ConcurrentHashMap<>();
+    private final Map<NetworkPolicyCallback, NetworkPolicyCallbackProxy>
+            mNetworkPolicyCallbackMap = new ConcurrentHashMap<>();
 
     /** @hide */
     public NetworkPolicyManager(Context context, INetworkPolicyManager service) {
@@ -318,7 +468,7 @@ public class NetworkPolicyManager {
         }
 
         final SubscriptionCallbackProxy callbackProxy = new SubscriptionCallbackProxy(callback);
-        if (null != mCallbackMap.putIfAbsent(callback, callbackProxy)) {
+        if (null != mSubscriptionCallbackMap.putIfAbsent(callback, callbackProxy)) {
             throw new IllegalArgumentException("Callback is already registered.");
         }
         registerListener(callbackProxy);
@@ -331,7 +481,7 @@ public class NetworkPolicyManager {
             throw new NullPointerException("Callback cannot be null.");
         }
 
-        final SubscriptionCallbackProxy callbackProxy = mCallbackMap.remove(callback);
+        final SubscriptionCallbackProxy callbackProxy = mSubscriptionCallbackMap.remove(callback);
         if (callbackProxy == null) return;
 
         unregisterListener(callbackProxy);
@@ -689,6 +839,142 @@ public class NetworkPolicyManager {
         return WifiInfo.sanitizeSsid(ssid);
     }
 
+    /**
+     * Returns whether network access of an UID is blocked or not based on {@code blockedReasons}
+     * corresponding to it.
+     *
+     * {@code blockedReasons} would be a bitwise {@code OR} combination of the
+     * {@code BLOCKED_REASON_*} and/or {@code BLOCKED_METERED_REASON_*} constants.
+     *
+     * @param blockedReasons Value indicating the reasons for why the network access of an UID is
+     *                       blocked. If the value is equal to {@link #BLOCKED_REASON_NONE}, then
+     *                       it indicates that an app's network access is not blocked.
+     * @param meteredNetwork Value indicating whether the network is metered or not.
+     * @return Whether network access is blocked or not.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static boolean isUidBlocked(@BlockedReason int blockedReasons, boolean meteredNetwork) {
+        if (blockedReasons == BLOCKED_REASON_NONE) {
+            return false;
+        }
+        final int blockedOnAllNetworksReason = (blockedReasons & ~BLOCKED_METERED_REASON_MASK);
+        if (blockedOnAllNetworksReason != BLOCKED_REASON_NONE) {
+            return true;
+        }
+        if (meteredNetwork) {
+            return blockedReasons != BLOCKED_REASON_NONE;
+        }
+        return false;
+    }
+
+    /**
+     * Returns the {@code string} representation of {@code blockedReasons} argument.
+     *
+     * @param blockedReasons Value indicating the reasons for why the network access of an UID is
+     *                       blocked.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public static String blockedReasonsToString(@BlockedReason int blockedReasons) {
+        return DebugUtils.flagsToString(NetworkPolicyManager.class, "BLOCKED_", blockedReasons);
+    }
+
+    /**
+     * Register a {@link NetworkPolicyCallback} to listen for changes to network blocked status
+     * of apps.
+     *
+     * Note that when a caller tries to register a new callback, it might replace a previously
+     * registered callback if it is considered equal to the new one, based on the
+     * {@link Object#equals(Object)} check.
+     *
+     * @param executor The {@link Executor} to run the callback on.
+     * @param callback The {@link NetworkPolicyCallback} to be registered.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
+    public void registerNetworkPolicyCallback(@Nullable Executor executor,
+            @NonNull NetworkPolicyCallback callback) {
+        if (callback == null) {
+            throw new NullPointerException("Callback cannot be null.");
+        }
+
+        final NetworkPolicyCallbackProxy callbackProxy = new NetworkPolicyCallbackProxy(
+                executor, callback);
+        registerListener(callbackProxy);
+        mNetworkPolicyCallbackMap.put(callback, callbackProxy);
+    }
+
+    /**
+     * Unregister a previously registered {@link NetworkPolicyCallback}.
+     *
+     * @param callback The {@link NetworkPolicyCallback} to be unregistered.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
+    public void unregisterNetworkPolicyCallback(@NonNull NetworkPolicyCallback callback) {
+        if (callback == null) {
+            throw new NullPointerException("Callback cannot be null.");
+        }
+
+        final NetworkPolicyCallbackProxy callbackProxy = mNetworkPolicyCallbackMap.remove(callback);
+        if (callbackProxy == null) return;
+        unregisterListener(callbackProxy);
+    }
+
+    /**
+     * Interface for the callback to listen for changes to network blocked status of apps.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public interface NetworkPolicyCallback {
+        /**
+         * Called when the reason for why the network access of an UID is blocked changes.
+         *
+         * @param uid The UID for which the blocked status changed.
+         * @param blockedReasons Value indicating the reasons for why the network access of an
+         *                       UID is blocked.
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        default void onUidBlockedReasonChanged(int uid, @BlockedReason int blockedReasons) {}
+    }
+
+    /** @hide */
+    public static class NetworkPolicyCallbackProxy extends Listener {
+        private final Executor mExecutor;
+        private final NetworkPolicyCallback mCallback;
+
+        NetworkPolicyCallbackProxy(@Nullable Executor executor,
+                @NonNull NetworkPolicyCallback callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onBlockedReasonChanged(int uid, @BlockedReason int oldBlockedReasons,
+                @BlockedReason int newBlockedReasons) {
+            if (oldBlockedReasons != newBlockedReasons) {
+                dispatchOnUidBlockedReasonChanged(mExecutor, mCallback, uid, newBlockedReasons);
+            }
+        }
+    }
+
+    private static void dispatchOnUidBlockedReasonChanged(@Nullable Executor executor,
+            @NonNull NetworkPolicyCallback callback, int uid, @BlockedReason int blockedReasons) {
+        if (executor == null) {
+            callback.onUidBlockedReasonChanged(uid, blockedReasons);
+        } else {
+            executor.execute(PooledLambda.obtainRunnable(
+                    NetworkPolicyCallback::onUidBlockedReasonChanged,
+                    callback, uid, blockedReasons).recycleOnUse());
+        }
+    }
+
     /** @hide */
     public static class SubscriptionCallback {
         /**
@@ -743,5 +1029,7 @@ public class NetworkPolicyManager {
         @Override public void onSubscriptionOverride(int subId, int overrideMask,
                 int overrideValue, int[] networkTypes) { }
         @Override public void onSubscriptionPlansChanged(int subId, SubscriptionPlan[] plans) { }
+        @Override public void onBlockedReasonChanged(int uid,
+                int oldBlockedReasons, int newBlockedReasons) { }
     }
 }

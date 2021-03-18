@@ -72,8 +72,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
-import static android.net.NetworkPolicyManager.RULE_NONE;
-import static android.net.NetworkPolicyManager.uidRulesToString;
+import static android.net.NetworkPolicyManager.BLOCKED_REASON_NONE;
+import static android.net.NetworkPolicyManager.blockedReasonsToString;
 import static android.net.NetworkRequest.Type.LISTEN_FOR_BEST;
 import static android.net.shared.NetworkMonitorUtils.isPrivateDnsValidationRequired;
 import static android.os.Process.INVALID_UID;
@@ -117,7 +117,6 @@ import android.net.INetd;
 import android.net.INetworkActivityListener;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
-import android.net.INetworkPolicyListener;
 import android.net.IOnCompleteListener;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
@@ -135,6 +134,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMonitorManager;
 import android.net.NetworkPolicyManager;
+import android.net.NetworkPolicyManager.NetworkPolicyCallback;
 import android.net.NetworkProvider;
 import android.net.NetworkRequest;
 import android.net.NetworkScore;
@@ -331,12 +331,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private volatile boolean mLockdownEnabled;
 
     /**
-     * Stale copy of uid rules provided by NPMS. As long as they are accessed only in internal
-     * handler thread, they don't need a lock.
+     * Stale copy of uid blocked reasons provided by NPMS. As long as they are accessed only in
+     * internal handler thread, they don't need a lock.
      */
-    private SparseIntArray mUidRules = new SparseIntArray();
-    /** Flag indicating if background data is restricted. */
-    private boolean mRestrictBackground;
+    private SparseIntArray mUidBlockedReasons = new SparseIntArray();
 
     private final Context mContext;
     private final ConnectivityResources mResources;
@@ -510,16 +508,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // Handle private DNS validation status updates.
     private static final int EVENT_PRIVATE_DNS_VALIDATION_UPDATE = 38;
 
-    /**
-     * Used to handle onUidRulesChanged event from NetworkPolicyManagerService.
-     */
-    private static final int EVENT_UID_RULES_CHANGED = 39;
-
-    /**
-     * Used to handle onRestrictBackgroundChanged event from NetworkPolicyManagerService.
-     */
-    private static final int EVENT_DATA_SAVER_CHANGED = 40;
-
      /**
       * Event for NetworkMonitor/NetworkAgentInfo to inform ConnectivityService that the network has
       * been tested.
@@ -594,6 +582,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * obj = Pair<ProfileNetworkPreference, Listener>
      */
     private static final int EVENT_SET_PROFILE_NETWORK_PREFERENCE = 50;
+
+    /**
+     * Event to specify that reasons for why an uid is blocked changed.
+     * arg1 = uid
+     * arg2 = blockedReasons
+     */
+    private static final int EVENT_UID_BLOCKED_REASON_CHANGED = 51;
 
     /**
      * Argument for {@link #EVENT_PROVISIONING_NOTIFICATION} to indicate that the notification
@@ -1253,10 +1248,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mLocationPermissionChecker = new LocationPermissionChecker(mContext);
 
-        // To ensure uid rules are synchronized with Network Policy, register for
+        // To ensure uid state is synchronized with Network Policy, register for
         // NetworkPolicyManagerService events must happen prior to NetworkPolicyManagerService
         // reading existing policy from disk.
-        mPolicyManager.registerListener(mPolicyListener);
+        mPolicyManager.registerNetworkPolicyCallback(null, mPolicyCallback);
 
         final PowerManager powerManager = (PowerManager) context.getSystemService(
                 Context.POWER_SERVICE);
@@ -2237,53 +2232,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private final INetworkPolicyListener mPolicyListener = new NetworkPolicyManager.Listener() {
+    private final NetworkPolicyCallback mPolicyCallback = new NetworkPolicyCallback() {
         @Override
-        public void onUidRulesChanged(int uid, int uidRules) {
-            mHandler.sendMessage(mHandler.obtainMessage(EVENT_UID_RULES_CHANGED, uid, uidRules));
-        }
-        @Override
-        public void onRestrictBackgroundChanged(boolean restrictBackground) {
-            // caller is NPMS, since we only register with them
-            if (LOGD_BLOCKED_NETWORKINFO) {
-                log("onRestrictBackgroundChanged(restrictBackground=" + restrictBackground + ")");
-            }
-            mHandler.sendMessage(mHandler.obtainMessage(
-                    EVENT_DATA_SAVER_CHANGED, restrictBackground ? 1 : 0, 0));
+        public void onUidBlockedReasonChanged(int uid, int blockedReasons) {
+            mHandler.sendMessage(mHandler.obtainMessage(EVENT_UID_BLOCKED_REASON_CHANGED,
+                    uid, blockedReasons));
         }
     };
 
-    void handleUidRulesChanged(int uid, int newRules) {
-        // skip update when we've already applied rules
-        final int oldRules = mUidRules.get(uid, RULE_NONE);
-        if (oldRules == newRules) return;
-
-        maybeNotifyNetworkBlockedForNewUidRules(uid, newRules);
-
-        if (newRules == RULE_NONE) {
-            mUidRules.delete(uid);
-        } else {
-            mUidRules.put(uid, newRules);
-        }
-    }
-
-    void handleRestrictBackgroundChanged(boolean restrictBackground) {
-        if (mRestrictBackground == restrictBackground) return;
-
-        final List<UidRange> blockedRanges = mVpnBlockedUidRanges;
-        for (final NetworkAgentInfo nai : mNetworkAgentInfos) {
-            final boolean curMetered = nai.networkCapabilities.isMetered();
-            maybeNotifyNetworkBlocked(nai, curMetered, curMetered, mRestrictBackground,
-                    restrictBackground, blockedRanges, blockedRanges);
-        }
-
-        mRestrictBackground = restrictBackground;
-    }
-
-    private boolean isUidBlockedByRules(int uid, int uidRules, boolean isNetworkMetered,
-            boolean isBackgroundRestricted) {
-        return mPolicyManager.checkUidNetworkingBlocked(uid, uidRules, isNetworkMetered,
-                isBackgroundRestricted);
+    void handleUidBlockedReasonChanged(int uid, int blockedReasons) {
+        maybeNotifyNetworkBlockedForNewState(uid, blockedReasons);
+        mUidBlockedReasons.put(uid, blockedReasons);
     }
 
     private boolean checkAnyPermissionOf(String... permissions) {
@@ -2757,19 +2716,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.decreaseIndent();
         pw.println();
 
-        pw.print("Restrict background: ");
-        pw.println(mRestrictBackground);
-        pw.println();
-
         pw.println("Status for known UIDs:");
         pw.increaseIndent();
-        final int size = mUidRules.size();
+        final int size = mUidBlockedReasons.size();
         for (int i = 0; i < size; i++) {
             // Don't crash if the array is modified while dumping in bugreports.
             try {
-                final int uid = mUidRules.keyAt(i);
-                final int uidRules = mUidRules.get(uid, RULE_NONE);
-                pw.println("UID=" + uid + " rules=" + uidRulesToString(uidRules));
+                final int uid = mUidBlockedReasons.keyAt(i);
+                final int blockedReasons = mUidBlockedReasons.valueAt(i);
+                pw.println("UID=" + uid + " blockedReasons="
+                        + blockedReasonsToString(blockedReasons));
             } catch (ArrayIndexOutOfBoundsException e) {
                 pw.println("  ArrayIndexOutOfBoundsException");
             } catch (ConcurrentModificationException e) {
@@ -4566,11 +4522,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     handlePrivateDnsValidationUpdate(
                             (PrivateDnsValidationUpdate) msg.obj);
                     break;
-                case EVENT_UID_RULES_CHANGED:
-                    handleUidRulesChanged(msg.arg1, msg.arg2);
-                    break;
-                case EVENT_DATA_SAVER_CHANGED:
-                    handleRestrictBackgroundChanged(toBool(msg.arg1));
+                case EVENT_UID_BLOCKED_REASON_CHANGED:
+                    handleUidBlockedReasonChanged(msg.arg1, msg.arg2);
                     break;
                 case EVENT_SET_REQUIRE_VPN_FOR_UIDS:
                     handleSetRequireVpnForUids(toBool(msg.arg1), (UidRange[]) msg.obj);
@@ -5043,8 +4996,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         for (final NetworkAgentInfo nai : mNetworkAgentInfos) {
             final boolean curMetered = nai.networkCapabilities.isMetered();
-            maybeNotifyNetworkBlocked(nai, curMetered, curMetered, mRestrictBackground,
-                    mRestrictBackground, mVpnBlockedUidRanges, newVpnBlockedUidRanges);
+            maybeNotifyNetworkBlocked(nai, curMetered, curMetered,
+                    mVpnBlockedUidRanges, newVpnBlockedUidRanges);
         }
 
         mVpnBlockedUidRanges = newVpnBlockedUidRanges;
@@ -6826,8 +6779,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final boolean meteredChanged = oldMetered != newMetered;
 
         if (meteredChanged) {
-            maybeNotifyNetworkBlocked(nai, oldMetered, newMetered, mRestrictBackground,
-                    mRestrictBackground, mVpnBlockedUidRanges, mVpnBlockedUidRanges);
+            maybeNotifyNetworkBlocked(nai, oldMetered, newMetered,
+                    mVpnBlockedUidRanges, mVpnBlockedUidRanges);
         }
 
         final boolean roamingChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING)
@@ -7950,8 +7903,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final boolean metered = nai.networkCapabilities.isMetered();
         boolean blocked;
         blocked = isUidBlockedByVpn(nri.mUid, mVpnBlockedUidRanges);
-        blocked |= isUidBlockedByRules(nri.mUid, mUidRules.get(nri.mUid),
-                metered, mRestrictBackground);
+        blocked |= NetworkPolicyManager.isUidBlocked(
+                mUidBlockedReasons.get(nri.mUid, BLOCKED_REASON_NONE), metered);
         callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_AVAILABLE, blocked ? 1 : 0);
     }
 
@@ -7969,16 +7922,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *
      * @param nai The target NetworkAgentInfo.
      * @param oldMetered True if the previous network capabilities is metered.
-     * @param newRestrictBackground True if data saver is enabled.
      */
     private void maybeNotifyNetworkBlocked(NetworkAgentInfo nai, boolean oldMetered,
-            boolean newMetered, boolean oldRestrictBackground, boolean newRestrictBackground,
-            List<UidRange> oldBlockedUidRanges, List<UidRange> newBlockedUidRanges) {
+            boolean newMetered, List<UidRange> oldBlockedUidRanges,
+            List<UidRange> newBlockedUidRanges) {
 
         for (int i = 0; i < nai.numNetworkRequests(); i++) {
             NetworkRequest nr = nai.requestAt(i);
             NetworkRequestInfo nri = mNetworkRequests.get(nr);
-            final int uidRules = mUidRules.get(nri.mUid);
             final boolean oldBlocked, newBlocked, oldVpnBlocked, newVpnBlocked;
 
             oldVpnBlocked = isUidBlockedByVpn(nri.mUid, oldBlockedUidRanges);
@@ -7986,10 +7937,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     ? isUidBlockedByVpn(nri.mUid, newBlockedUidRanges)
                     : oldVpnBlocked;
 
-            oldBlocked = oldVpnBlocked || isUidBlockedByRules(nri.mUid, uidRules, oldMetered,
-                    oldRestrictBackground);
-            newBlocked = newVpnBlocked || isUidBlockedByRules(nri.mUid, uidRules, newMetered,
-                    newRestrictBackground);
+            final int blockedReasons = mUidBlockedReasons.get(nri.mUid, BLOCKED_REASON_NONE);
+            oldBlocked = oldVpnBlocked || NetworkPolicyManager.isUidBlocked(
+                    blockedReasons, oldMetered);
+            newBlocked = newVpnBlocked || NetworkPolicyManager.isUidBlocked(
+                    blockedReasons, newMetered);
 
             if (oldBlocked != newBlocked) {
                 callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_BLK_CHANGED,
@@ -7999,19 +7951,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Notify apps with a given UID of the new blocked state according to new uid rules.
+     * Notify apps with a given UID of the new blocked state according to new uid state.
      * @param uid The uid for which the rules changed.
-     * @param newRules The new rules to apply.
+     * @param blockedReasons The reasons for why an uid is blocked.
      */
-    private void maybeNotifyNetworkBlockedForNewUidRules(int uid, int newRules) {
+    private void maybeNotifyNetworkBlockedForNewState(int uid, int blockedReasons) {
         for (final NetworkAgentInfo nai : mNetworkAgentInfos) {
             final boolean metered = nai.networkCapabilities.isMetered();
             final boolean vpnBlocked = isUidBlockedByVpn(uid, mVpnBlockedUidRanges);
             final boolean oldBlocked, newBlocked;
-            oldBlocked = vpnBlocked || isUidBlockedByRules(
-                    uid, mUidRules.get(uid), metered, mRestrictBackground);
-            newBlocked = vpnBlocked || isUidBlockedByRules(
-                    uid, newRules, metered, mRestrictBackground);
+
+            oldBlocked = vpnBlocked || NetworkPolicyManager.isUidBlocked(
+                    mUidBlockedReasons.get(uid, BLOCKED_REASON_NONE), metered);
+            newBlocked = vpnBlocked || NetworkPolicyManager.isUidBlocked(
+                    blockedReasons, metered);
             if (oldBlocked == newBlocked) {
                 continue;
             }
