@@ -15,27 +15,15 @@
 -->
 <resources>
     <style name="Theme.Leanback.Dialog" parent="Theme.Material.BaseDialog">
-      <item name="colorBackground">@color/background_leanback_dark</item>
-      <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
-      <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
-      <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
-      <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
-      <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
-      <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
-      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBarGravityStart</item>
-      <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
-    </style>
-
-    <style name="Theme.Leanback.Light.Dialog" parent="Theme.Material.Light.BaseDialog">
-      <item name="colorBackground">@color/background_leanback_dark</item>
-      <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
-      <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
-      <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
-      <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
-      <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
-      <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
+        <item name="colorBackground">@color/background_leanback_dark</item>
+        <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
+        <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
+        <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
+        <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
+        <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
+        <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
         <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBarGravityStart</item>
-      <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
+        <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
     <style name="Theme.Leanback.Settings.Dialog" parent="Theme.Material.Settings.BaseDialog">
@@ -51,34 +39,23 @@
     </style>
 
     <style name="Theme.Leanback.Dialog.Alert" parent="Theme.Material.Dialog.BaseAlert">
-      <item name="colorBackground">@color/background_leanback_dark</item>
-      <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
-      <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
-      <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
-      <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
-      <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
-      <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
-      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBarGravityStart</item>
-      <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
-    </style>
-
-    <style name="Theme.Leanback.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.BaseAlert">
-      <item name="colorBackground">@color/background_leanback_light</item>
-      <item name="textColorPrimary">@color/primary_text_leanback_light</item>
-      <item name="textColorSecondary">@color/secondary_text_leanback_light</item>
-      <item name="alertDialogStyle">@style/AlertDialog.Leanback.Light</item>
-      <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
-      <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
-      <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
+        <item name="colorBackground">@color/background_leanback_dark</item>
+        <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
+        <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
+        <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
+        <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
+        <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
+        <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
         <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBarGravityStart</item>
-      <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
+        <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
-    <style name="Theme.Leanback.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.BaseAlert">
-        <item name="colorBackground">@color/background_leanback_light</item>
-        <item name="textColorPrimary">@color/primary_text_leanback_light</item>
-        <item name="textColorSecondary">@color/secondary_text_leanback_light</item>
-        <item name="alertDialogStyle">@style/AlertDialog.Leanback.Light</item>
+    <style name="Theme.Leanback.Settings.Dialog.Alert"
+           parent="Theme.Material.Settings.Dialog.BaseAlert">
+        <item name="colorBackground">@color/background_leanback_dark</item>
+        <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
+        <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
+        <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
         <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
         <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
         <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
@@ -144,9 +121,9 @@
         <!-- Icon sizes -->
         <item name="iconfactoryIconSize">@dimen/resolver_icon_size</item>
         <item name="iconfactoryBadgeSize">@dimen/resolver_badge_size</item>
-      </style>
+    </style>
 
     <!-- @hide Special theme for the default system Activity-based Alert dialogs. -->
-    <style name="Theme.Leanback.Dialog.Confirmation" parent="Theme.DeviceDefault.Dialog.Alert" />
+    <style name="Theme.Leanback.Dialog.Confirmation" parent="Theme.DeviceDefault.Dialog.Alert"/>
 
 </resources>
