@@ -37,6 +37,7 @@ import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesManager;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -288,15 +289,15 @@ public final class TextServicesManager {
     }
 
     /**
-     * Retrieve the list of currently enabled spell checkers, or null if there is none.
+     * Retrieve the list of currently enabled spell checkers.
      *
      * @return The list of currently enabled spell checkers.
      */
-    @Nullable
-    @SuppressLint("NullableCollection")
+    @NonNull
     public List<SpellCheckerInfo> getEnabledSpellCheckerInfos() {
         final SpellCheckerInfo[] enabledSpellCheckers = getEnabledSpellCheckers();
-        return enabledSpellCheckers != null ? Arrays.asList(enabledSpellCheckers) : null;
+        return enabledSpellCheckers != null
+                ? Arrays.asList(enabledSpellCheckers) : Collections.emptyList();
     }
 
     /**
