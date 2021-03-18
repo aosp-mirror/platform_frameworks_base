@@ -19,6 +19,7 @@ package com.android.systemui.accessibility;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 
 import android.annotation.NonNull;
+import android.annotation.UiContext;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
@@ -69,7 +70,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     private final MagnificationGestureDetector mGestureDetector;
     private boolean mSingleTapDetected = false;
 
-    MagnificationModeSwitch(Context context) {
+    MagnificationModeSwitch(@UiContext Context context) {
         this(context, createView(context));
     }
 
