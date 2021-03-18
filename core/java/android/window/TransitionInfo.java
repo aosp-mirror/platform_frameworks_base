@@ -16,6 +16,7 @@
 
 package android.window;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -31,6 +32,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
@@ -284,6 +286,8 @@ public final class TransitionInfo implements Parcelable {
         private final Rect mEndAbsBounds = new Rect();
         private final Point mEndRelOffset = new Point();
         private ActivityManager.RunningTaskInfo mTaskInfo = null;
+        private int mStartRotation = ROTATION_UNDEFINED;
+        private int mEndRotation = ROTATION_UNDEFINED;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -301,6 +305,8 @@ public final class TransitionInfo implements Parcelable {
             mEndAbsBounds.readFromParcel(in);
             mEndRelOffset.readFromParcel(in);
             mTaskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
+            mStartRotation = in.readInt();
+            mEndRotation = in.readInt();
         }
 
         /** Sets the parent of this change's container. The parent must be a participant or null. */
@@ -339,6 +345,12 @@ public final class TransitionInfo implements Parcelable {
          */
         public void setTaskInfo(ActivityManager.RunningTaskInfo taskInfo) {
             mTaskInfo = taskInfo;
+        }
+
+        /** Sets the start and end rotation of this container. */
+        public void setRotation(@Surface.Rotation int start, @Surface.Rotation int end) {
+            mStartRotation = start;
+            mEndRotation = end;
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -404,6 +416,14 @@ public final class TransitionInfo implements Parcelable {
             return mTaskInfo;
         }
 
+        public int getStartRotation() {
+            return mStartRotation;
+        }
+
+        public int getEndRotation() {
+            return mEndRotation;
+        }
+
         @Override
         /** @hide */
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -416,6 +436,8 @@ public final class TransitionInfo implements Parcelable {
             mEndAbsBounds.writeToParcel(dest, flags);
             mEndRelOffset.writeToParcel(dest, flags);
             dest.writeTypedObject(mTaskInfo, flags);
+            dest.writeInt(mStartRotation);
+            dest.writeInt(mEndRotation);
         }
 
         @NonNull
@@ -442,7 +464,8 @@ public final class TransitionInfo implements Parcelable {
         public String toString() {
             return "{" + mContainer + "(" + mParent + ") leash=" + mLeash
                     + " m=" + modeToString(mMode) + " f=" + flagsToString(mFlags) + " sb="
-                    + mStartAbsBounds + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + "}";
+                    + mStartAbsBounds + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + " r="
+                    + mStartRotation + "->" + mEndRotation + "}";
         }
     }
 }
