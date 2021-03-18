@@ -11492,10 +11492,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
 
-            final ArrayMap<Uid, Double> uidEstimatedConsumptionMah =
+            final SparseDoubleArray uidEstimatedConsumptionMah =
                     (mGlobalMeasuredEnergyStats != null
                             && mWifiPowerCalculator != null && consumedChargeUC > 0) ?
-                            new ArrayMap<>() : null;
+                            new SparseDoubleArray() : null;
             double totalEstimatedConsumptionMah = 0;
 
             SparseLongArray rxPackets = new SparseLongArray();
@@ -11583,7 +11583,7 @@ public class BatteryStatsImpl extends BatteryStats {
                             }
                         }
 
-                        addDoubleToUidMap(uidEstimatedConsumptionMah, u,
+                        uidEstimatedConsumptionMah.add(u.getUid(),
                                 mWifiPowerCalculator.calcPowerWithoutControllerDataMah(
                                         entry.rxPackets, entry.txPackets,
                                         uidRunningMs, uidScanMs, uidBatchScanMs));
@@ -11709,7 +11709,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     if (uidEstimatedConsumptionMah != null) {
                         double uidEstMah = mWifiPowerCalculator.calcPowerFromControllerDataMah(
                                 scanRxTimeSinceMarkMs, scanTxTimeSinceMarkMs, myIdleTimeMs);
-                        addDoubleToUidMap(uidEstimatedConsumptionMah, uid, uidEstMah);
+                        uidEstimatedConsumptionMah.add(uid.getUid(), uidEstMah);
                     }
                 }
 
@@ -11731,7 +11731,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     uid.getOrCreateWifiControllerActivityLocked().getTxTimeCounters()[0]
                             .addCountLocked(myTxTimeMs);
                     if (uidEstimatedConsumptionMah != null) {
-                        addDoubleToUidMap(uidEstimatedConsumptionMah, uid,
+                        uidEstimatedConsumptionMah.add(uid.getUid(),
                                 mWifiPowerCalculator.calcPowerFromControllerDataMah(
                                         0, myTxTimeMs, 0));
                     }
@@ -11750,7 +11750,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     uid.getOrCreateWifiControllerActivityLocked().getRxTimeCounter()
                             .addCountLocked(myRxTimeMs);
                     if (uidEstimatedConsumptionMah != null) {
-                        addDoubleToUidMap(uidEstimatedConsumptionMah, uid,
+                        uidEstimatedConsumptionMah.add(uid.getUid(),
                                 mWifiPowerCalculator.calcPowerFromControllerDataMah(
                                         myRxTimeMs, 0, 0));
                     }
@@ -12086,10 +12086,10 @@ public class BatteryStatsImpl extends BatteryStats {
             Slog.d(TAG, "  Idle Time:  " + idleTimeMs + " ms");
         }
 
-        final ArrayMap<Uid, Double> uidEstimatedConsumptionMah =
+        final SparseDoubleArray uidEstimatedConsumptionMah =
                 (mGlobalMeasuredEnergyStats != null
                         && mBluetoothPowerCalculator != null && consumedChargeUC > 0) ?
-                        new ArrayMap<>() : null;
+                        new SparseDoubleArray() : null;
 
         long totalScanTimeMs = 0;
 
@@ -12150,7 +12150,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 counter.getTxTimeCounters()[0].addCountLocked(scanTimeTxSinceMarkMs);
 
                 if (uidEstimatedConsumptionMah != null) {
-                    addDoubleToUidMap(uidEstimatedConsumptionMah, u,
+                    uidEstimatedConsumptionMah.add(u.getUid(),
                             mBluetoothPowerCalculator.calculatePowerMah(
                                     scanTimeRxSinceMarkMs, scanTimeTxSinceMarkMs, 0));
                 }
@@ -12217,7 +12217,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     counter.getRxTimeCounter().addCountLocked(timeRxMs);
 
                     if (uidEstimatedConsumptionMah != null) {
-                        addDoubleToUidMap(uidEstimatedConsumptionMah, u,
+                        uidEstimatedConsumptionMah.add(u.getUid(),
                                 mBluetoothPowerCalculator.calculatePowerMah(timeRxMs, 0, 0));
                     }
                 }
@@ -12230,7 +12230,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     counter.getTxTimeCounters()[0].addCountLocked(timeTxMs);
 
                     if (uidEstimatedConsumptionMah != null) {
-                        addDoubleToUidMap(uidEstimatedConsumptionMah, u,
+                        uidEstimatedConsumptionMah.add(u.getUid(),
                                 mBluetoothPowerCalculator.calculatePowerMah(0, timeTxMs, 0));
                     }
                 }
@@ -12452,7 +12452,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // If multidisplay becomes a reality, this is probably more reasonable than pooling.
 
         // On the first pass, collect total time since mark so that we can normalize power.
-        final ArrayMap<Uid, Double> fgTimeUsArray = new ArrayMap<>();
+        final SparseDoubleArray fgTimeUsArray = new SparseDoubleArray();
         final long elapsedRealtimeUs = elapsedRealtimeMs * 1000;
         // TODO(b/175726779): Update and optimize the algorithm (e.g. avoid iterating over ALL uids)
         final int uidStatsSize = mUidStats.size();
@@ -12460,7 +12460,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final Uid uid = mUidStats.valueAt(i);
             final long fgTimeUs = uid.markProcessForegroundTimeUs(elapsedRealtimeMs, true);
             if (fgTimeUs == 0) continue;
-            fgTimeUsArray.put(uid, (double) fgTimeUs);
+            fgTimeUsArray.put(uid.getUid(), (double) fgTimeUs);
         }
         distributeEnergyToUidsLocked(powerBucket, chargeUC, fgTimeUsArray, 0);
     }
@@ -12523,10 +12523,11 @@ public class BatteryStatsImpl extends BatteryStats {
      * <p>A consequence of minRatioDenominator is that the sum over all uids might be less than
      * totalConsumedChargeUC. This is intentional; the remainder is purposefully unnaccounted rather
      * than incorrectly blamed on uids, and implies unknown (non-uid) sources of drain.
+     *
+     * <p>All uids in ratioNumerators must exist in mUidStats already.
      */
-    // TODO(b/182845832): Use some sort of "SparseDoubleArray" instead of ArrayMap<Uid, Double>.
     private void distributeEnergyToUidsLocked(@StandardPowerBucket int bucket,
-            long totalConsumedChargeUC, ArrayMap<Uid, Double> ratioNumerators,
+            long totalConsumedChargeUC, SparseDoubleArray ratioNumerators,
             double minRatioDenominator) {
 
         // If the sum of all app usage was greater than the total, use that instead:
@@ -12538,7 +12539,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (ratioDenominator <= 0) return;
 
         for (int i = ratioNumerators.size() - 1; i >= 0; i--) {
-            final Uid uid = ratioNumerators.keyAt(i);
+            final Uid uid = getAvailableUidStatsLocked(ratioNumerators.keyAt(i));
             final double ratioNumerator = ratioNumerators.valueAt(i);
             final long uidActualUC
                     = (long) (totalConsumedChargeUC * ratioNumerator / ratioDenominator + 0.5);
@@ -12546,15 +12547,79 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    /** Adds the summand to the value stored in uidMap for the given uid. */
-    // TODO(b/182845832): Use some sort of "SparseDoubleArray" instead of ArrayMap<Uid, Double>.
-    private static void addDoubleToUidMap(ArrayMap<Uid, Double> uidMap, Uid uid, double summand) {
-        if (uidMap == null) return;
-        final Double oldVal = uidMap.get(uid);
-        if (oldVal != null) {
-            summand += oldVal;
+    /**
+     * SparseDoubleArray map integers to doubles.
+     * Its implementation is the same as that of {@link SparseLongArray}; see there for details.
+     *
+     * @see SparseLongArray
+     */
+    private static class SparseDoubleArray {
+        /**
+         * The int->double map, but storing the doubles as longs using
+         * {@link Double.doubleToRawLongBits(double)}.
+         */
+        private final SparseLongArray mValues = new SparseLongArray();
+
+        /**
+         * Gets the double mapped from the specified key, or <code>0</code>
+         * if no such mapping has been made.
+         */
+        public double get(int key) {
+            if (mValues.indexOfKey(key) >= 0) {
+                return Double.longBitsToDouble(mValues.get(key));
+            }
+            return 0;
         }
-        uidMap.put(uid, summand);
+
+        /**
+         * Adds a mapping from the specified key to the specified value,
+         * replacing the previous mapping from the specified key if there
+         * was one.
+         */
+        public void put(int key, double value) {
+            mValues.put(key, Double.doubleToRawLongBits(value));
+        }
+
+        /**
+         * Adds a mapping from the specified key to the specified value,
+         * <b>adding</b> to the previous mapping from the specified key if there
+         * was one.
+         */
+        public void add(int key, double summand) {
+            final double oldValue = get(key);
+            put(key, oldValue + summand);
+        }
+
+        /**
+         * Returns the number of key-value mappings that this SparseDoubleArray
+         * currently stores.
+         */
+        public int size() {
+            return mValues.size();
+        }
+
+        /**
+         * Given an index in the range <code>0...size()-1</code>, returns
+         * the key from the <code>index</code>th key-value mapping that this
+         * SparseDoubleArray stores.
+         *
+         * @see SparseLongArray#keyAt(int)
+         */
+        public int keyAt(int index) {
+            return mValues.keyAt(index);
+        }
+
+        /**
+         * Given an index in the range <code>0...size()-1</code>, returns
+         * the value from the <code>index</code>th key-value mapping that this
+         * SparseDoubleArray stores.
+         *
+         * @see SparseLongArray#valueAt(int)
+         */
+        public double valueAt(int index) {
+            return Double.longBitsToDouble(mValues.valueAt(index));
+        }
+
     }
 
     /**
