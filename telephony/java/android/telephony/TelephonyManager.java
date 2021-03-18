@@ -14576,6 +14576,11 @@ public class TelephonyManager {
      */
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
+
+        if (mContext == null) {
+            throw new IllegalStateException("telephony service is null.");
+        }
+
         if (executor == null || callback == null) {
             throw new IllegalArgumentException("TelephonyCallback and executor must be non-null");
         }
