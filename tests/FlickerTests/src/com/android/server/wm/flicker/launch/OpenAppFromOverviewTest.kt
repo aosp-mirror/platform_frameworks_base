@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -28,7 +27,6 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,17 +74,9 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
         testSpec.wallpaperWindowBecomesInvisible()
     }
 
-    @Presubmit
-    @Test
-    override fun navBarLayerRotatesAndScales() {
-        Assume.assumeFalse(testSpec.isRotated)
-        super.navBarLayerRotatesAndScales()
-    }
-
     @FlakyTest
     @Test
-    fun navBarLayerRotatesAndScales_flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
+    override fun navBarLayerRotatesAndScales() {
         super.navBarLayerRotatesAndScales()
     }
 
