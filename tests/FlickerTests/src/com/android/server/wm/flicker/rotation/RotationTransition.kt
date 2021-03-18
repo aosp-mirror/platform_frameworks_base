@@ -18,7 +18,6 @@ package com.android.server.wm.flicker.rotation
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
-import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -74,13 +73,13 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.navBarWindowIsAlwaysVisible()
     }
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     open fun navBarLayerIsAlwaysVisible() {
         testSpec.navBarLayerIsAlwaysVisible()
     }
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     open fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(
@@ -93,20 +92,20 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.statusBarWindowIsAlwaysVisible()
     }
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     open fun statusBarLayerIsAlwaysVisible() {
         testSpec.statusBarLayerIsAlwaysVisible()
     }
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     open fun statusBarLayerRotatesScales() {
         testSpec.statusBarLayerRotatesScales(
             testSpec.config.startRotation, testSpec.config.endRotation)
     }
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
@@ -129,13 +128,13 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
             testSpec.config.endRotation, allStates = false)
     }
 
-    @FlakyTest(bugId = 151179149)
+    @Presubmit
     @Test
     open fun focusDoesNotChange() {
         testSpec.focusDoesNotChange()
     }
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     open fun appLayerRotates_StartingPos() {
         testSpec.assertLayersStart {
@@ -143,7 +142,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     open fun appLayerRotates_EndingPos() {
         testSpec.assertLayersEnd {
