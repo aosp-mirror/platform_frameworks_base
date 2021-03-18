@@ -268,7 +268,6 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Range;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -1159,7 +1158,7 @@ public class ConnectivityServiceTest {
         }
 
         public void setUids(Set<UidRange> uids) {
-            mNetworkCapabilities.setUids(UidRange.toIntRanges(uids));
+            mNetworkCapabilities.setUids(uids);
             if (mAgentRegistered) {
                 mMockNetworkAgent.setNetworkCapabilities(mNetworkCapabilities, true);
             }
@@ -1449,8 +1448,6 @@ public class ConnectivityServiceTest {
     }
 
     private static final int PRIMARY_USER = 0;
-    private static final UidRange PRIMARY_UIDRANGE =
-            UidRange.createForUser(UserHandle.of(PRIMARY_USER));
     private static final int APP1_UID = UserHandle.getUid(PRIMARY_USER, 10100);
     private static final int APP2_UID = UserHandle.getUid(PRIMARY_USER, 10101);
     private static final int VPN_UID = UserHandle.getUid(PRIMARY_USER, 10043);
@@ -6943,7 +6940,7 @@ public class ConnectivityServiceTest {
         final int uid = Process.myUid();
         NetworkCapabilities nc = mCm.getNetworkCapabilities(mMockVpn.getNetwork());
         assertNotNull("nc=" + nc, nc.getUids());
-        assertEquals(nc.getUids(), UidRange.toIntRanges(uidRangesForUids(uid)));
+        assertEquals(nc.getUids(), uidRangesForUids(uid));
         assertVpnTransportInfo(nc, VpnManager.TYPE_VPN_SERVICE);
 
         // Set an underlying network and expect to see the VPN transports change.
@@ -6968,13 +6965,10 @@ public class ConnectivityServiceTest {
 
         // Expect that the VPN UID ranges contain both |uid| and the UID range for the newly-added
         // restricted user.
-        final UidRange rRange = UidRange.createForUser(UserHandle.of(RESTRICTED_USER));
-        final Range<Integer> restrictUidRange = new Range<Integer>(rRange.start, rRange.stop);
-        final Range<Integer> singleUidRange = new Range<Integer>(uid, uid);
         callback.expectCapabilitiesThat(mMockVpn, (caps)
                 -> caps.getUids().size() == 2
-                && caps.getUids().contains(singleUidRange)
-                && caps.getUids().contains(restrictUidRange)
+                && caps.getUids().contains(new UidRange(uid, uid))
+                && caps.getUids().contains(createUidRange(RESTRICTED_USER))
                 && caps.hasTransport(TRANSPORT_VPN)
                 && caps.hasTransport(TRANSPORT_WIFI));
 
@@ -6983,8 +6977,8 @@ public class ConnectivityServiceTest {
         callback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
         callback.expectCapabilitiesThat(mMockVpn, (caps)
                 -> caps.getUids().size() == 2
-                && caps.getUids().contains(singleUidRange)
-                && caps.getUids().contains(restrictUidRange)
+                && caps.getUids().contains(new UidRange(uid, uid))
+                && caps.getUids().contains(createUidRange(RESTRICTED_USER))
                 && caps.hasTransport(TRANSPORT_VPN)
                 && !caps.hasTransport(TRANSPORT_WIFI));
 
@@ -6998,7 +6992,7 @@ public class ConnectivityServiceTest {
         // change made just before that (i.e., loss of TRANSPORT_WIFI) is preserved.
         callback.expectCapabilitiesThat(mMockVpn, (caps)
                 -> caps.getUids().size() == 1
-                && caps.getUids().contains(singleUidRange)
+                && caps.getUids().contains(new UidRange(uid, uid))
                 && caps.hasTransport(TRANSPORT_VPN)
                 && !caps.hasTransport(TRANSPORT_WIFI));
     }
@@ -7656,7 +7650,7 @@ public class ConnectivityServiceTest {
         assertNotNull(underlying);
         mMockVpn.setVpnType(VpnManager.TYPE_VPN_LEGACY);
         // The legacy lockdown VPN only supports userId 0.
-        final Set<UidRange> ranges = Collections.singleton(PRIMARY_UIDRANGE);
+        final Set<UidRange> ranges = Collections.singleton(createUidRange(PRIMARY_USER));
         mMockVpn.registerAgent(ranges);
         mMockVpn.setUnderlyingNetworks(new Network[]{underlying});
         mMockVpn.connect(true);
@@ -8618,7 +8612,7 @@ public class ConnectivityServiceTest {
         lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE));
         // The uid range needs to cover the test app so the network is visible to it.
-        final Set<UidRange> vpnRange = Collections.singleton(PRIMARY_UIDRANGE);
+        final Set<UidRange> vpnRange = Collections.singleton(createUidRange(PRIMARY_USER));
         mMockVpn.establish(lp, VPN_UID, vpnRange);
         assertVpnUidRangesUpdated(true, vpnRange, VPN_UID);
 
@@ -8646,7 +8640,7 @@ public class ConnectivityServiceTest {
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
         lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
         // The uid range needs to cover the test app so the network is visible to it.
-        final Set<UidRange> vpnRange = Collections.singleton(PRIMARY_UIDRANGE);
+        final Set<UidRange> vpnRange = Collections.singleton(createUidRange(PRIMARY_USER));
         mMockVpn.establish(lp, Process.SYSTEM_UID, vpnRange);
         assertVpnUidRangesUpdated(true, vpnRange, Process.SYSTEM_UID);
 
@@ -8662,7 +8656,7 @@ public class ConnectivityServiceTest {
         lp.addRoute(new RouteInfo(new IpPrefix("192.0.2.0/24"), null, "tun0"));
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE));
         // The uid range needs to cover the test app so the network is visible to it.
-        final Set<UidRange> vpnRange = Collections.singleton(PRIMARY_UIDRANGE);
+        final Set<UidRange> vpnRange = Collections.singleton(createUidRange(PRIMARY_USER));
         mMockVpn.establish(lp, Process.SYSTEM_UID, vpnRange);
         assertVpnUidRangesUpdated(true, vpnRange, Process.SYSTEM_UID);
 
@@ -8677,7 +8671,7 @@ public class ConnectivityServiceTest {
         lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
         // The uid range needs to cover the test app so the network is visible to it.
-        final Set<UidRange> vpnRange = Collections.singleton(PRIMARY_UIDRANGE);
+        final Set<UidRange> vpnRange = Collections.singleton(createUidRange(PRIMARY_USER));
         mMockVpn.establish(lp, VPN_UID, vpnRange);
         assertVpnUidRangesUpdated(true, vpnRange, VPN_UID);
 
@@ -8729,7 +8723,7 @@ public class ConnectivityServiceTest {
         lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), RTN_UNREACHABLE));
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
         // The uid range needs to cover the test app so the network is visible to it.
-        final UidRange vpnRange = PRIMARY_UIDRANGE;
+        final UidRange vpnRange = createUidRange(PRIMARY_USER);
         final Set<UidRange> vpnRanges = Collections.singleton(vpnRange);
         mMockVpn.establish(lp, VPN_UID, vpnRanges);
         assertVpnUidRangesUpdated(true, vpnRanges, VPN_UID);
@@ -9010,7 +9004,7 @@ public class ConnectivityServiceTest {
 
     private void setupConnectionOwnerUid(int vpnOwnerUid, @VpnManager.VpnType int vpnType)
             throws Exception {
-        final Set<UidRange> vpnRange = Collections.singleton(PRIMARY_UIDRANGE);
+        final Set<UidRange> vpnRange = Collections.singleton(createUidRange(PRIMARY_USER));
         mMockVpn.setVpnType(vpnType);
         mMockVpn.establish(new LinkProperties(), vpnOwnerUid, vpnRange);
         assertVpnUidRangesUpdated(true, vpnRange, vpnOwnerUid);
@@ -9570,7 +9564,7 @@ public class ConnectivityServiceTest {
         lp.setInterfaceName("tun0");
         lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
-        final UidRange vpnRange = PRIMARY_UIDRANGE;
+        final UidRange vpnRange = createUidRange(PRIMARY_USER);
         Set<UidRange> vpnRanges = Collections.singleton(vpnRange);
         mMockVpn.establish(lp, VPN_UID, vpnRanges);
         assertVpnUidRangesUpdated(true, vpnRanges, VPN_UID);
@@ -9768,7 +9762,7 @@ public class ConnectivityServiceTest {
                 .thenReturn(hasFeature);
     }
 
-    private Range<Integer> getNriFirstUidRange(
+    private UidRange getNriFirstUidRange(
             @NonNull final ConnectivityService.NetworkRequestInfo nri) {
         return nri.mRequests.get(0).networkCapabilities.getUids().iterator().next();
     }
@@ -9951,11 +9945,11 @@ public class ConnectivityServiceTest {
                                 pref));
 
         // Sort by uid to access nris by index
-        nris.sort(Comparator.comparingInt(nri -> getNriFirstUidRange(nri).getLower()));
-        assertEquals(TEST_PACKAGE_UID, (int) getNriFirstUidRange(nris.get(0)).getLower());
-        assertEquals(TEST_PACKAGE_UID, (int) getNriFirstUidRange(nris.get(0)).getUpper());
-        assertEquals(testPackageNameUid2, (int) getNriFirstUidRange(nris.get(1)).getLower());
-        assertEquals(testPackageNameUid2, (int) getNriFirstUidRange(nris.get(1)).getUpper());
+        nris.sort(Comparator.comparingInt(nri -> getNriFirstUidRange(nri).start));
+        assertEquals(TEST_PACKAGE_UID, getNriFirstUidRange(nris.get(0)).start);
+        assertEquals(TEST_PACKAGE_UID, getNriFirstUidRange(nris.get(0)).stop);
+        assertEquals(testPackageNameUid2, getNriFirstUidRange(nris.get(1)).start);
+        assertEquals(testPackageNameUid2, getNriFirstUidRange(nris.get(1)).stop);
     }
 
     @Test
@@ -9985,17 +9979,17 @@ public class ConnectivityServiceTest {
         // UIDs for all users and all managed packages should be present.
         // Two users each with two packages.
         final int expectedUidSize = 2;
-        final List<Range<Integer>> uids =
+        final List<UidRange> uids =
                 new ArrayList<>(nris.get(0).mRequests.get(0).networkCapabilities.getUids());
         assertEquals(expectedUidSize, uids.size());
 
         // Sort by uid to access nris by index
-        uids.sort(Comparator.comparingInt(uid -> uid.getLower()));
+        uids.sort(Comparator.comparingInt(uid -> uid.start));
         final int secondUserTestPackageUid = UserHandle.getUid(secondUser, TEST_PACKAGE_UID);
-        assertEquals(TEST_PACKAGE_UID, (int) uids.get(0).getLower());
-        assertEquals(TEST_PACKAGE_UID, (int) uids.get(0).getUpper());
-        assertEquals(secondUserTestPackageUid, (int) uids.get(1).getLower());
-        assertEquals(secondUserTestPackageUid, (int) uids.get(1).getUpper());
+        assertEquals(TEST_PACKAGE_UID, uids.get(0).start);
+        assertEquals(TEST_PACKAGE_UID, uids.get(0).stop);
+        assertEquals(secondUserTestPackageUid, uids.get(1).start);
+        assertEquals(secondUserTestPackageUid, uids.get(1).stop);
     }
 
     @Test

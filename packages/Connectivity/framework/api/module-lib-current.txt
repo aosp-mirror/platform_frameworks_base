@@ -36,16 +36,7 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
-    method @Nullable public java.util.Set<android.util.Range<java.lang.Integer>> getUids();
     field public static final int TRANSPORT_TEST = 7; // 0x7
-  }
-
-  public static final class NetworkCapabilities.Builder {
-    method @NonNull public android.net.NetworkCapabilities.Builder setUids(@Nullable java.util.Set<android.util.Range<java.lang.Integer>>);
-  }
-
-  public static class NetworkRequest.Builder {
-    method @NonNull public android.net.NetworkRequest.Builder setUids(@Nullable java.util.Set<android.util.Range<java.lang.Integer>>);
   }
 
   public class ParseException extends java.lang.RuntimeException {
