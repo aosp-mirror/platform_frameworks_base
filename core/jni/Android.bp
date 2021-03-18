@@ -233,6 +233,7 @@ cc_library_shared {
                 "libseccomp_policy",
                 "libgrallocusage",
                 "libscrypt_static",
+                "libstatssocket_lazy",
             ],
 
             shared_libs: [
@@ -296,11 +297,8 @@ cc_library_shared {
                 "libnativewindow",
                 "libdl",
                 "libdl_android",
-                "libstatslog",
-                "libstatssocket",
                 "libtimeinstate",
                 "server_configurable_flags",
-                "libstatspull",
             ],
             export_shared_lib_headers: [
                 // our headers include libnativewindow's public headers

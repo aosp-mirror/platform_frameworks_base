@@ -20,7 +20,6 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <log/log.h>
-#include <statslog.h>
 #include <sys/mman.h>
 
 #include <algorithm>
