@@ -451,7 +451,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     void sendDisplayAreaVanished(IDisplayAreaOrganizer organizer) {
         if (organizer == null) return;
-        migrateToNewSurfaceControl();
+        migrateToNewSurfaceControl(getSyncTransaction());
         mOrganizerController.onDisplayAreaVanished(organizer, this);
     }
 

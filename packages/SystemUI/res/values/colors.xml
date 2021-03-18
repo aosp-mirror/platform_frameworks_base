@@ -153,10 +153,9 @@
     <color name="minimize_dock_shadow_end">#00000000</color>
 
     <color name="default_remote_input_background">@*android:color/notification_default_color</color>
-    <color name="remote_input_text_enabled">#ffffffff</color>
     <color name="remote_input_hint">#99ffffff</color>
 
-    <color name="remote_input_accent">#eeeeee</color>
+    <color name="remote_input_accent">?android:attr/colorAccent</color>
 
     <color name="quick_step_track_background_background_dark">#1F000000</color>
     <color name="quick_step_track_background_background_light">#33FFFFFF</color>

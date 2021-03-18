@@ -476,7 +476,6 @@ class MediaDataManager(
                 Notification.EXTRA_COMPACT_ACTIONS)?.toMutableList() ?: mutableListOf<Int>()
         // TODO: b/153736623 look into creating actions when this isn't a media style notification
 
-        val packageContext: Context = sbn.getPackageContext(context)
         if (actions != null) {
             for ((index, action) in actions.withIndex()) {
                 if (action.getIcon() == null) {
@@ -499,7 +498,7 @@ class MediaDataManager(
                     null
                 }
                 val mediaActionIcon = if (action.getIcon()?.getType() == Icon.TYPE_RESOURCE) {
-                    Icon.createWithResource(packageContext, action.getIcon()!!.getResId())
+                    Icon.createWithResource(sbn.packageName, action.getIcon()!!.getResId())
                 } else {
                     action.getIcon()
                 }.setTint(themeText)

@@ -1768,6 +1768,11 @@ public class PackageManagerService extends IPackageManager.Stub
         public int[] getAllUserIds() {
             return mUserManager.getUserIds();
         }
+
+        @Override
+        public boolean doesUserExist(@UserIdInt int userId) {
+            return mUserManager.exists(userId);
+        }
     }
 
     /**
@@ -2639,8 +2644,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // We'll want to include browser possibilities in a few cases
             boolean includeBrowser = false;
 
-            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, candidates,
-                            matchFlags)) {
+            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, matchFlags)) {
                 result.addAll(undefinedList);
                 // Maybe add one for the other profile.
                 if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
@@ -25693,6 +25697,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!convertedFromPreCreated || !readPermissionStateForUser(userId)) {
             mPermissionManager.onUserCreated(userId);
             mLegacyPermissionManager.grantDefaultPermissions(userId);
+            mDomainVerificationManager.clearUser(userId);
         }
     }
 

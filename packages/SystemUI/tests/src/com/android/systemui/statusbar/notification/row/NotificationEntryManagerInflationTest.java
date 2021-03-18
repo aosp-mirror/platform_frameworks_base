@@ -46,6 +46,7 @@ import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
+import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -260,6 +261,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                                 mGutsManager,
                                 true,
                                 null,
+                                new FalsingManagerFake(),
                                 new FalsingCollectorFake(),
                                 mPeopleNotificationIdentifier,
                                 Optional.of(mock(BubblesManager.class))

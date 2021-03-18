@@ -52,7 +52,9 @@ public class MeasuredEnergyStats {
     public static final int POWER_BUCKET_SCREEN_DOZE = 1;
     public static final int POWER_BUCKET_SCREEN_OTHER = 2;
     public static final int POWER_BUCKET_CPU = 3;
-    public static final int NUMBER_STANDARD_POWER_BUCKETS = 4; // Buckets above this are custom.
+    public static final int POWER_BUCKET_WIFI = 4;
+    public static final int POWER_BUCKET_BLUETOOTH = 5;
+    public static final int NUMBER_STANDARD_POWER_BUCKETS = 6; // Buckets above this are custom.
 
     @IntDef(prefix = {"POWER_BUCKET_"}, value = {
             POWER_BUCKET_UNKNOWN,
@@ -60,6 +62,8 @@ public class MeasuredEnergyStats {
             POWER_BUCKET_SCREEN_DOZE,
             POWER_BUCKET_SCREEN_OTHER,
             POWER_BUCKET_CPU,
+            POWER_BUCKET_WIFI,
+            POWER_BUCKET_BLUETOOTH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StandardPowerBucket {

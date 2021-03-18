@@ -3,38 +3,19 @@ package android.media {
 
   public final class MediaTranscodeManager {
     method @Nullable public android.media.MediaTranscodeManager.TranscodingSession enqueueRequest(@NonNull android.media.MediaTranscodeManager.TranscodingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.media.MediaTranscodeManager.OnTranscodingFinishedListener);
-    field public static final int PRIORITY_REALTIME = 1; // 0x1
-    field public static final int TRANSCODING_TYPE_VIDEO = 1; // 0x1
   }
 
   @java.lang.FunctionalInterface public static interface MediaTranscodeManager.OnTranscodingFinishedListener {
     method public void onTranscodingFinished(@NonNull android.media.MediaTranscodeManager.TranscodingSession);
   }
 
-  public static final class MediaTranscodeManager.TranscodingRequest {
+  public abstract static class MediaTranscodeManager.TranscodingRequest {
     method public int getClientPid();
     method public int getClientUid();
     method @Nullable public android.os.ParcelFileDescriptor getDestinationFileDescriptor();
     method @NonNull public android.net.Uri getDestinationUri();
-    method public int getPriority();
     method @Nullable public android.os.ParcelFileDescriptor getSourceFileDescriptor();
     method @NonNull public android.net.Uri getSourceUri();
-    method public int getType();
-    method @Nullable public android.media.MediaFormat getVideoTrackFormat();
-  }
-
-  public static final class MediaTranscodeManager.TranscodingRequest.Builder {
-    ctor public MediaTranscodeManager.TranscodingRequest.Builder();
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest build();
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setClientPid(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setClientUid(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setDestinationFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setDestinationUri(@NonNull android.net.Uri);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setPriority(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setSourceFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setSourceUri(@NonNull android.net.Uri);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setType(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setVideoTrackFormat(@NonNull android.media.MediaFormat);
   }
 
   public static class MediaTranscodeManager.TranscodingRequest.MediaFormatResolver {
@@ -69,6 +50,19 @@ package android.media {
 
   @java.lang.FunctionalInterface public static interface MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener {
     method public void onProgressUpdate(@NonNull android.media.MediaTranscodeManager.TranscodingSession, @IntRange(from=0, to=100) int);
+  }
+
+  public static final class MediaTranscodeManager.VideoTranscodingRequest extends android.media.MediaTranscodeManager.TranscodingRequest {
+    method @NonNull public android.media.MediaFormat getVideoTrackFormat();
+  }
+
+  public static final class MediaTranscodeManager.VideoTranscodingRequest.Builder {
+    ctor public MediaTranscodeManager.VideoTranscodingRequest.Builder(@NonNull android.net.Uri, @NonNull android.net.Uri, @NonNull android.media.MediaFormat);
+    method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest build();
+    method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest.Builder setClientPid(int);
+    method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest.Builder setClientUid(int);
+    method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest.Builder setDestinationFileDescriptor(android.os.ParcelFileDescriptor);
+    method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest.Builder setSourceFileDescriptor(android.os.ParcelFileDescriptor);
   }
 
 }
