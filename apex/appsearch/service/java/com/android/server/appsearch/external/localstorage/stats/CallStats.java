@@ -76,7 +76,7 @@ public class CallStats {
 
     CallStats(@NonNull Builder builder) {
         Preconditions.checkNotNull(builder);
-        mGeneralStats = Preconditions.checkNotNull(builder.mGeneralStats);
+        mGeneralStats = Preconditions.checkNotNull(builder.mGeneralStatsBuilder).build();
         mCallType = builder.mCallType;
         mEstimatedBinderLatencyMillis = builder.mEstimatedBinderLatencyMillis;
         mNumOperationsSucceeded = builder.mNumOperationsSucceeded;
@@ -132,15 +132,23 @@ public class CallStats {
 
     /** Builder for {@link CallStats}. */
     public static class Builder {
-        @NonNull final GeneralStats mGeneralStats;
+        @NonNull final GeneralStats.Builder mGeneralStatsBuilder;
         @CallType int mCallType;
         int mEstimatedBinderLatencyMillis;
         int mNumOperationsSucceeded;
         int mNumOperationsFailed;
 
-        /** Builder takes {@link GeneralStats} to hold general stats. */
-        public Builder(@NonNull GeneralStats generalStats) {
-            mGeneralStats = Preconditions.checkNotNull(generalStats);
+        /** Builder takes {@link GeneralStats.Builder}. */
+        public Builder(@NonNull String packageName, @NonNull String database) {
+            Preconditions.checkNotNull(packageName);
+            Preconditions.checkNotNull(database);
+            mGeneralStatsBuilder = new GeneralStats.Builder(packageName, database);
+        }
+
+        /** Returns {@link GeneralStats.Builder}. */
+        @NonNull
+        public GeneralStats.Builder getGeneralStatsBuilder() {
+            return mGeneralStatsBuilder;
         }
 
         /** Sets type of the call. */
