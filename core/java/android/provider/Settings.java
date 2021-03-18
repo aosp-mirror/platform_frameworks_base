@@ -7037,6 +7037,15 @@ public final class Settings {
             "enabled_accessibility_services";
 
         /**
+         * List of the notified non-accessibility category accessibility services.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String NOTIFIED_NON_ACCESSIBILITY_CATEGORY_SERVICES =
+                "notified_non_accessibility_category_services";
+
+        /**
          * List of the accessibility services to which the user has granted
          * permission to put the device into touch exploration mode.
          *

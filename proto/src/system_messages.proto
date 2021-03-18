@@ -340,5 +340,9 @@ message SystemMessage {
     // Notify the user that window magnification is available.
     // package: android
     NOTE_A11Y_WINDOW_MAGNIFICATION_FEATURE = 1004;
+
+    // Notify the user that some accessibility service has view and control permissions.
+    // package: android
+    NOTE_A11Y_VIEW_AND_CONTROL_ACCESS = 1005;
   }
 }
