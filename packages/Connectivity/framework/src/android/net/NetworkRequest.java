@@ -36,7 +36,6 @@ import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkCapabilities.NetCapability;
@@ -283,9 +282,6 @@ public class NetworkRequest implements Parcelable {
          * @return The builder to facilitate chaining.
          * @hide
          */
-        @NonNull
-        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-        @SuppressLint("MissingGetterMatchingBuilder")
         public Builder setUids(@Nullable Set<Range<Integer>> uids) {
             mNetworkCapabilities.setUids(uids);
             return this;
