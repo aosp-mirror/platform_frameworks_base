@@ -5492,7 +5492,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean hasKeyPair(String callerPackage, String alias) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        Preconditions.checkCallAuthorization(canManageCertificates(caller));
+        Preconditions.checkCallAuthorization(canManageCertificates(caller)
+                || isCredentialManagementApp(caller, alias));
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
             try (KeyChainConnection keyChainConnection =
