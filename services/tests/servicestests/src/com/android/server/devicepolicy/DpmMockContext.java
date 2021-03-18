@@ -224,6 +224,8 @@ public class DpmMockContext extends MockContext {
                 return mMockSystemServices.accountManager;
             case Context.TELEPHONY_SERVICE:
                 return mMockSystemServices.telephonyManager;
+            case Context.CONNECTIVITY_SERVICE:
+                return mMockSystemServices.connectivityManager;
             case Context.APP_OPS_SERVICE:
                 return mMockSystemServices.appOpsManager;
             case Context.CROSS_PROFILE_APPS_SERVICE:

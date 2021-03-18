@@ -10023,37 +10023,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Indicates whether 5g slicing is enabled for specific user.
-     *
-     * This method can be called with permission
-     * {@link android.Manifest.permission#READ_NETWORK_DEVICE_CONFIG} by the profile owner of
-     * a managed profile. And the caller must hold the
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission if query for
-     * other users.
-     *
-     * @param userHandle indicates the user to query the state
-     * @return indicates whether 5g Slice is enabled.
-     * @throws SecurityException if the caller is not granted the permission
-     *         {@link android.Manifest.permission#READ_NETWORK_DEVICE_CONFIG}
-     *         and not profile owner of a managed profile, and not granted the permission
-     *         {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} if query for
-     *         other users.
-     * @hide
-     */
-    @SystemApi
-    public boolean isNetworkSlicingEnabledForUser(@NonNull UserHandle userHandle) {
-        throwIfParentInstance("isNetworkSlicingEnabledForUser");
-        if (mService == null) {
-            return false;
-        }
-        try {
-            return mService.isNetworkSlicingEnabled(userHandle.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * This method is mostly deprecated.
      * Most of the settings that still have an effect have dedicated setter methods or user
      * restrictions. See individual settings for details.
