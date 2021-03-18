@@ -1337,7 +1337,7 @@
     <string name="monitoring_description_named_management">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g>.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin.</string>
 
     <!-- Dialog that a user can access via Quick Settings. The dialog describes what a Creditor can monitor (and the changes they can make) on the user's financed device. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_financed_description_named_management"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> may be able to access data associated with this device and change this device\’s settings.\n\nIf you have questions, contact <xliff:g id="organization_name" example="Foo, Inc.">%2$s</xliff:g>.</string>
+    <string name="monitoring_financed_description_named_management"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> may be able to access data associated with this device, manage apps, and change this device\’s settings.\n\nIf you have questions, contact <xliff:g id="organization_name" example="Foo, Inc.">%2$s</xliff:g>.</string>
 
     <!-- Dialog that a user can access via Quick Settings. The dialog describes what the IT admin can monitor (and the changes they can make) on the user's device. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_management">This device belongs to your organization.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin.</string>
