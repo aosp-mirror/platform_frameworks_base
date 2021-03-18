@@ -985,6 +985,7 @@ public class VoiceInteractionManagerService extends SystemService {
         @Override
         public void setHotwordDetectionServiceConfig(@Nullable Bundle options,
                 @Nullable SharedMemory sharedMemory) {
+            enforceCallingPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION);
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
