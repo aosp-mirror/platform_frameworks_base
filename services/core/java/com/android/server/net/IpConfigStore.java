@@ -22,7 +22,6 @@ import android.net.IpConfiguration.IpAssignment;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.LinkAddress;
 import android.net.ProxyInfo;
-import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
 import android.net.Uri;
 import android.util.ArrayMap;
@@ -322,11 +321,14 @@ public class IpConfigStore {
                                 if (in.readInt() == 1) {
                                     gateway = InetAddresses.parseNumericAddress(in.readUTF());
                                 }
-                                RouteInfo route = new RouteInfo(dest, gateway);
-                                if (route.isIPv4Default() && gatewayAddress == null) {
+                                // If the destination is a default IPv4 route, use the gateway
+                                // address unless already set.
+                                if (dest.getAddress() instanceof Inet4Address
+                                        && dest.getPrefixLength() == 0 && gatewayAddress == null) {
                                     gatewayAddress = gateway;
                                 } else {
-                                    loge("Non-IPv4 default or duplicate route: " + route);
+                                    loge("Non-IPv4 default or duplicate route: "
+                                            + dest.getAddress());
                                 }
                             }
                         } else if (key.equals(DNS_KEY)) {
