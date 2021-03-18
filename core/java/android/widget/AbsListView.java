@@ -4679,6 +4679,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE);
             mTouchMode = TOUCH_MODE_FLING;
             mSuppressIdleStateChangeCall = false;
+            removeCallbacks(this);
             postOnAnimation(this);
 
             if (PROFILE_FLINGING) {
