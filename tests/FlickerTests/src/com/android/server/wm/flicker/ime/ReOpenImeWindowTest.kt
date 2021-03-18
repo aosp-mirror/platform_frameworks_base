@@ -20,6 +20,7 @@ import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -96,7 +97,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
@@ -140,7 +141,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     fun appLayerReplacesWallpaperLayer() =
         testSpec.appLayerReplacesWallpaperLayer(testAppComponentName.className)
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)

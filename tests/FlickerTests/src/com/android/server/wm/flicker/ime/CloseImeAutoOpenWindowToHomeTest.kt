@@ -19,6 +19,7 @@ package com.android.server.wm.flicker.ime
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -115,7 +116,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     @Test
     fun imeAppLayerBecomesInvisible() = testSpec.imeAppLayerBecomesInvisible(testApp)
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
