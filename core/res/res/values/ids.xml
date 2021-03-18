@@ -252,8 +252,5 @@
   <item type="id" name="remote_views_next_child" />
 
   <!-- View tag associating a view with its stable id for potential recycling. -->
-  <item type="id" name="remote_views_stable_id" />
-
-  <!-- View tag associating a view with its overridden id, to ensure valid recycling only. -->
-  <item type="id" name="remote_views_override_id" />
+  <item type="id" name = "remote_views_stable_id" />
 </resources>
