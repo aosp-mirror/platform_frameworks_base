@@ -25,7 +25,6 @@ import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.HardwareBuffer;
 import android.media.MediaCodecInfo.CodecCapabilities;
-import android.media.metrics.PlaybackComponent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1539,7 +1538,7 @@ import java.util.concurrent.locks.ReentrantLock;
   </tbody>
  </table>
  */
-final public class MediaCodec implements PlaybackComponent {
+final public class MediaCodec {
 
     /**
      * Per buffer metadata includes an offset and size specifying
@@ -1696,22 +1695,6 @@ final public class MediaCodec implements PlaybackComponent {
     private static final int CB_ERROR = 3;
     private static final int CB_OUTPUT_FORMAT_CHANGE = 4;
 
-
-    /**
-     * @hide
-     */
-    @Override
-    public void setPlaybackId(@NonNull String playbackId) {
-        // TODO: add a native method to pass the ID to the native code for logging.
-        mPlaybackId = playbackId;
-    }
-    /**
-     * @hide
-     */
-    @Override
-    public String getPlaybackId() {
-        return mPlaybackId;
-    }
 
     private class EventHandler extends Handler {
         private MediaCodec mCodec;
