@@ -5892,4 +5892,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void setSurfaceTranslationY(int translationY) {
         mSurfaceTranslationY = translationY;
     }
+
+    @Override
+    @WindowManager.LayoutParams.WindowType int getWindowType() {
+        return mAttrs.type;
+    }
 }
