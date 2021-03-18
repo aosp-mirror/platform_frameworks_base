@@ -6772,7 +6772,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // The app bounds hasn't been computed yet.
             return false;
         }
-        final Configuration parentConfig = getParent().getConfiguration();
+        final WindowContainer parent = getParent();
+        if (parent == null) {
+            // The parent of detached Activity can be null.
+            return false;
+        }
+        final Configuration parentConfig = parent.getConfiguration();
         // Although colorMode, screenLayout, smallestScreenWidthDp are also fixed, generally these
         // fields should be changed with density and bounds, so here only compares the most
         // significant field.
