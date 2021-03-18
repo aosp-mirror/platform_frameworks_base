@@ -18,7 +18,10 @@ package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.TimeCapabilitiesAndConfig;
+import android.app.time.TimeConfiguration;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.ManualTimeSuggestion;
@@ -36,6 +39,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
+import com.android.server.timezonedetector.CallerIdentityInjector;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -71,6 +75,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     @NonNull private final Handler mHandler;
     @NonNull private final Context mContext;
     @NonNull private final TimeDetectorStrategy mTimeDetectorStrategy;
+    @NonNull private final CallerIdentityInjector mCallerIdentityInjector;
 
     private static TimeDetectorService create(@NonNull Context context) {
         TimeDetectorStrategyImpl.Environment environment = new EnvironmentImpl(context);
@@ -97,9 +102,42 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     @VisibleForTesting
     public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
             @NonNull TimeDetectorStrategy timeDetectorStrategy) {
+        this(context, handler, timeDetectorStrategy, CallerIdentityInjector.REAL);
+    }
+
+    @VisibleForTesting
+    public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
+            @NonNull TimeDetectorStrategy timeDetectorStrategy,
+            @NonNull CallerIdentityInjector callerIdentityInjector) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
         mTimeDetectorStrategy = Objects.requireNonNull(timeDetectorStrategy);
+        mCallerIdentityInjector = Objects.requireNonNull(callerIdentityInjector);
+    }
+
+    @Override
+    public TimeCapabilitiesAndConfig getCapabilitiesAndConfig() {
+        int userId = mCallerIdentityInjector.getCallingUserId();
+        return getTimeCapabilitiesAndConfig(userId);
+    }
+
+    private TimeCapabilitiesAndConfig getTimeCapabilitiesAndConfig(@UserIdInt int userId) {
+        enforceManageTimeDetectorPermission();
+
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
+        try {
+            ConfigurationInternal configurationInternal =
+                    mTimeDetectorStrategy.getConfigurationInternal(userId);
+            return configurationInternal.capabilitiesAndConfig();
+        } finally {
+            mCallerIdentityInjector.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public boolean updateConfiguration(TimeConfiguration timeConfiguration) {
+        // TODO(b/172891783) Add actual logic
+        return false;
     }
 
     @Override
@@ -193,4 +231,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
                 android.Manifest.permission.SET_TIME,
                 "suggest time from external source");
     }
+
+    private void enforceManageTimeDetectorPermission() {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION,
+                "manage time and time zone detection");
+    }
+
 }

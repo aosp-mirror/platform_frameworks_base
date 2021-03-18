@@ -16,10 +16,10 @@
 
 package com.android.server.timezonedetector;
 
-import static android.app.time.TimeZoneCapabilities.CAPABILITY_NOT_ALLOWED;
-import static android.app.time.TimeZoneCapabilities.CAPABILITY_NOT_APPLICABLE;
-import static android.app.time.TimeZoneCapabilities.CAPABILITY_NOT_SUPPORTED;
-import static android.app.time.TimeZoneCapabilities.CAPABILITY_POSSESSED;
+import static android.app.time.Capabilities.CAPABILITY_NOT_ALLOWED;
+import static android.app.time.Capabilities.CAPABILITY_NOT_APPLICABLE;
+import static android.app.time.Capabilities.CAPABILITY_NOT_SUPPORTED;
+import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

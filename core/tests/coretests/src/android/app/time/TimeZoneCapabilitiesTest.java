@@ -16,8 +16,8 @@
 
 package android.app.time;
 
-import static android.app.time.TimeZoneCapabilities.CAPABILITY_NOT_ALLOWED;
-import static android.app.time.TimeZoneCapabilities.CAPABILITY_POSSESSED;
+import static android.app.time.Capabilities.CAPABILITY_NOT_ALLOWED;
+import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
 import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
 
 import static org.junit.Assert.assertEquals;
