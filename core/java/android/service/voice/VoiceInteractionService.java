@@ -353,6 +353,7 @@ public class VoiceInteractionService extends Service {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION)
     @NonNull
     public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
             @SuppressLint("MissingNullability") String keyphrase,  // TODO: nullability properly
