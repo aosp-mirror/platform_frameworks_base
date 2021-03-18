@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -411,8 +412,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private static boolean reportIfNotTop(WindowContainer wc) {
         // Organized tasks need to be reported anyways because Core won't show() their surfaces
         // and we can't rely on onTaskAppeared because it isn't in sync.
+        // Also report wallpaper so it can be handled properly during display change/rotation.
         // TODO(shell-transitions): switch onTaskAppeared usage over to transitions OPEN.
-        return wc.isOrganized();
+        return wc.isOrganized() || isWallpaper(wc);
     }
 
     /** @return the depth of child within ancestor, 0 if child == ancestor, or -1 if not a child. */
@@ -430,7 +432,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     private static boolean isWallpaper(WindowContainer wc) {
-        return wc instanceof WallpaperWindowToken;
+        return wc.asWallpaperToken() != null;
     }
 
     /**
@@ -576,7 +578,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         final ArrayList<WindowContainer> tmpList = new ArrayList<>();
 
         // Build initial set of top-level participants by removing any participants that are no-ops
-        // or children of other participants or are otherwise invalid.
+        // or children of other participants or are otherwise invalid; however, keep around a list
+        // of participants that should always be reported even if they aren't top.
         for (WindowContainer wc : participants) {
             // Don't include detached windows.
             if (!wc.isAttached()) continue;
@@ -584,7 +587,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final ChangeInfo changeInfo = changes.get(wc);
 
             // Reject no-ops
-            if (!changeInfo.hasChanged(wc)) continue;
+            if (!changeInfo.hasChanged(wc)) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "  Rejecting as no-op: %s", wc);
+                continue;
+            }
 
             // Search through ancestors to find the top-most participant (if one exists)
             WindowContainer topParent = null;
@@ -651,10 +658,21 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
     /** Gets the leash surface for a window container */
     private static SurfaceControl getLeashSurface(WindowContainer wc) {
+        final DisplayContent asDC = wc.asDisplayContent();
+        if (asDC != null) {
+            // DisplayContent is the "root", so we use the windowing layer instead to avoid
+            // hardware-screen-level surfaces.
+            return asDC.getWindowingLayer();
+        }
         return wc.getSurfaceControl();
     }
 
     private static SurfaceControl getOrigParentSurface(WindowContainer wc) {
+        if (wc.asDisplayContent() != null) {
+            // DisplayContent is the "root", so we reinterpret it's wc as the window layer
+            // making the parent surface the displaycontent's surface.
+            return wc.getSurfaceControl();
+        }
         return wc.getParent().getSurfaceControl();
     }
 
@@ -744,6 +762,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             change.setEndRelOffset(target.getBounds().left - target.getParent().getBounds().left,
                     target.getBounds().top - target.getParent().getBounds().top);
             change.setFlags(info.getChangeFlags(target));
+            change.setRotation(info.mRotation, target.getWindowConfiguration().getRotation());
             final Task task = target.asTask();
             if (task != null) {
                 final ActivityManager.RunningTaskInfo tinfo = new ActivityManager.RunningTaskInfo();
@@ -773,12 +792,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         int mWindowingMode;
         final Rect mAbsoluteBounds = new Rect();
         boolean mShowWallpaper;
+        int mRotation = ROTATION_UNDEFINED;
 
         ChangeInfo(@NonNull WindowContainer origState) {
             mVisible = origState.isVisibleRequested();
             mWindowingMode = origState.getWindowingMode();
             mAbsoluteBounds.set(origState.getBounds());
             mShowWallpaper = origState.showWallpaper();
+            mRotation = origState.getWindowConfiguration().getRotation();
         }
 
         @VisibleForTesting
@@ -797,7 +818,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     // if mWindowingMode is 0, this container wasn't attached at collect time, so
                     // assume no change in windowing-mode.
                     || (mWindowingMode != 0 && newState.getWindowingMode() != mWindowingMode)
-                    || !newState.getBounds().equals(mAbsoluteBounds);
+                    || !newState.getBounds().equals(mAbsoluteBounds)
+                    || mRotation != newState.getWindowConfiguration().getRotation();
         }
 
         @TransitionInfo.TransitionMode
@@ -826,8 +848,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 //                    checks to use requested visibility.
                 flags |= FLAG_TRANSLUCENT;
             }
-            if (wc instanceof ActivityRecord
-                    && wc.asActivityRecord().mUseTransferredAnimation) {
+            if (wc.asActivityRecord() != null && wc.asActivityRecord().mUseTransferredAnimation) {
                 flags |= FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
             }
             if (isWallpaper(wc)) {

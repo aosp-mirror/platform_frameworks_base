@@ -246,6 +246,21 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
         try {
+            if (transition != null) {
+                // First check if we have a display rotation transition and if so, update it.
+                final DisplayContent dc = DisplayRotation.getDisplayFromTransition(transition);
+                if (dc != null && transition.mChanges.get(dc).mRotation != dc.getRotation()) {
+                    // Go through all tasks and collect them before the rotation
+                    // TODO(shell-transitions): move collect() to onConfigurationChange once
+                    //       wallpaper handling is synchronized.
+                    dc.forAllTasks(task -> {
+                        if (task.isVisible()) transition.collect(task);
+                    });
+                    dc.getInsetsStateController().addProvidersToTransition();
+                    dc.sendNewConfiguration();
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
+            }
             ArraySet<WindowContainer> haveConfigChanges = new ArraySet<>();
             Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
                     t.getChanges().entrySet().iterator();
