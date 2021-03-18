@@ -17,9 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -37,7 +35,6 @@ import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,15 +73,15 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
@@ -94,59 +91,43 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeAppWindowIsAlwaysVisible() = testSpec.imeAppWindowIsAlwaysVisible(testApp)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeAppLayerIsAlwaysVisible() = testSpec.imeAppLayerIsAlwaysVisible(testApp)
 
     @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() {
-        Assume.assumeFalse(testSpec.isRotated)
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
-    }
-
-    @FlakyTest
-    @Test
-    fun navBarLayerRotatesAndScales_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
     }
 
     @Presubmit
     @Test
     fun statusBarLayerRotatesScales() {
-        Assume.assumeFalse(testSpec.isRotated)
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)
     }
 
-    @FlakyTest
-    @Test
-    fun statusBarLayerRotatesScales_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
-        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)
-    }
-
-    @FlakyTest
+    @Presubmit
     @Test
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
