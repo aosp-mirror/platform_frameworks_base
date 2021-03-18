@@ -59,6 +59,19 @@ public class BytesMatcherTest extends TestCase {
     }
 
     @Test
+    public void testPrefix() throws Exception {
+        BytesMatcher matcher = BytesMatcher.decode("⊆cafe,⊆beef/ff00");
+        assertTrue(matcher.test(hexStringToByteArray("cafe")));
+        assertFalse(matcher.test(hexStringToByteArray("caff")));
+        assertTrue(matcher.test(hexStringToByteArray("cafecafe")));
+        assertFalse(matcher.test(hexStringToByteArray("ca")));
+        assertTrue(matcher.test(hexStringToByteArray("beef")));
+        assertTrue(matcher.test(hexStringToByteArray("beff")));
+        assertTrue(matcher.test(hexStringToByteArray("beffbeff")));
+        assertFalse(matcher.test(hexStringToByteArray("be")));
+    }
+
+    @Test
     public void testMacAddress() throws Exception {
         BytesMatcher matcher = BytesMatcher.decode("+cafe00112233/ffffff000000");
         assertTrue(matcher.testMacAddress(
@@ -94,13 +107,23 @@ public class BytesMatcherTest extends TestCase {
     }
 
     @Test
-    public void testSerialize() throws Exception {
+    public void testSerialize_Empty() throws Exception {
         BytesMatcher matcher = new BytesMatcher();
-        matcher.addRejectRule(hexStringToByteArray("cafe00112233"),
+        matcher = BytesMatcher.decode(BytesMatcher.encode(matcher));
+
+        // Also very empty and null values
+        BytesMatcher.decode("");
+        BytesMatcher.decode(null);
+    }
+
+    @Test
+    public void testSerialize_Exact() throws Exception {
+        BytesMatcher matcher = new BytesMatcher();
+        matcher.addExactRejectRule(hexStringToByteArray("cafe00112233"),
                 hexStringToByteArray("ffffff000000"));
-        matcher.addRejectRule(hexStringToByteArray("beef00112233"),
+        matcher.addExactRejectRule(hexStringToByteArray("beef00112233"),
                 null);
-        matcher.addAcceptRule(hexStringToByteArray("000000000000"),
+        matcher.addExactAcceptRule(hexStringToByteArray("000000000000"),
                 hexStringToByteArray("000000000000"));
 
         assertFalse(matcher.test(hexStringToByteArray("cafe00ffffff")));
@@ -113,6 +136,28 @@ public class BytesMatcherTest extends TestCase {
         assertFalse(matcher.test(hexStringToByteArray("cafe00ffffff")));
         assertFalse(matcher.test(hexStringToByteArray("beef00112233")));
         assertTrue(matcher.test(hexStringToByteArray("beef00ffffff")));
+    }
+
+    @Test
+    public void testSerialize_Prefix() throws Exception {
+        BytesMatcher matcher = new BytesMatcher();
+        matcher.addExactRejectRule(hexStringToByteArray("aa"), null);
+        matcher.addExactAcceptRule(hexStringToByteArray("bb"), null);
+        matcher.addPrefixAcceptRule(hexStringToByteArray("aa"), null);
+        matcher.addPrefixRejectRule(hexStringToByteArray("bb"), null);
+
+        assertFalse(matcher.test(hexStringToByteArray("aa")));
+        assertTrue(matcher.test(hexStringToByteArray("bb")));
+        assertTrue(matcher.test(hexStringToByteArray("aaaa")));
+        assertFalse(matcher.test(hexStringToByteArray("bbbb")));
+
+        // Bounce through serialization pass and confirm it still works
+        matcher = BytesMatcher.decode(BytesMatcher.encode(matcher));
+
+        assertFalse(matcher.test(hexStringToByteArray("aa")));
+        assertTrue(matcher.test(hexStringToByteArray("bb")));
+        assertTrue(matcher.test(hexStringToByteArray("aaaa")));
+        assertFalse(matcher.test(hexStringToByteArray("bbbb")));
     }
 
     @Test

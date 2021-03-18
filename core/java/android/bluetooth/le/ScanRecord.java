@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * Represents a scan record from Bluetooth LE scan.
@@ -166,6 +167,27 @@ public final class ScanRecord {
      */
     public byte[] getBytes() {
         return mBytes;
+    }
+
+    /**
+     * Test if any fields contained inside this scan record are matched by the
+     * given matcher.
+     *
+     * @hide
+     */
+    public boolean matchesAnyField(@NonNull Predicate<byte[]> matcher) {
+        int pos = 0;
+        while (pos < mBytes.length) {
+            final int length = mBytes[pos] & 0xFF;
+            if (length == 0) {
+                break;
+            }
+            if (matcher.test(Arrays.copyOfRange(mBytes, pos, pos + length + 1))) {
+                return true;
+            }
+            pos += length + 1;
+        }
+        return false;
     }
 
     private ScanRecord(List<ParcelUuid> serviceUuids,
