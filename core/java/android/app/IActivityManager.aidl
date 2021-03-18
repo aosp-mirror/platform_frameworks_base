@@ -709,4 +709,7 @@ interface IActivityManager {
     ParceledListSlice queryIntentComponentsForIntentSender(in IIntentSender sender, int matchFlags);
 
     int getUidProcessCapabilities(int uid, in String callingPackage);
+
+    /** Blocks until all broadcast queues become idle. */
+    void waitForBroadcastIdle();
 }
