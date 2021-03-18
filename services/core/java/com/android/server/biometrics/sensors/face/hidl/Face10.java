@@ -798,6 +798,11 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             proto.end(userToken);
         }
 
+        proto.write(SensorStateProto.RESET_LOCKOUT_REQUIRES_HARDWARE_AUTH_TOKEN,
+                mSensorProperties.resetLockoutRequiresHardwareAuthToken);
+        proto.write(SensorStateProto.RESET_LOCKOUT_REQUIRES_CHALLENGE,
+                mSensorProperties.resetLockoutRequiresChallenge);
+
         proto.end(sensorToken);
     }
 
