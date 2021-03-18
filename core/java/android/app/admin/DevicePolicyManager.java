@@ -6159,13 +6159,22 @@ public class DevicePolicyManager {
 
     // STOPSHIP(b/174298501): clarify the expected return value following generateKeyPair call.
     /**
-     * Called by a device or profile owner, or delegated certificate installer, to query whether a
-     * certificate and private key are installed under a given alias.
+     * This API can be called by the following to query whether a certificate and private key are
+     * installed under a given alias:
+     * <ul>
+     *    <li>Device owner</li>
+     *    <li>Profile owner</li>
+     *    <li>Delegated certificate installer</li>
+     *    <li>Credential management app</li>
+     * </ul>
+     *
+     * If called by the credential management app, the alias must exist in the credential
+     * management app's {@link android.security.AppUriAuthenticationPolicy}.
      *
      * @param alias The alias under which the key pair is installed.
      * @return {@code true} if a key pair with this alias exists, {@code false} otherwise.
-     * @throws SecurityException if the caller is not a device or profile owner or a delegated
-     *         certificate installer.
+     * @throws SecurityException if the caller is not a device or profile owner, a delegated
+     *         certificate installer or the credential management app.
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
