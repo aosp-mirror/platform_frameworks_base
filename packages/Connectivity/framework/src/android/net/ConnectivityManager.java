@@ -62,7 +62,6 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -842,7 +841,6 @@ public class ConnectivityManager {
 
     private final Context mContext;
 
-    private INetworkPolicyManager mNPManager;
     private final TetheringManager mTetheringManager;
 
     /**
@@ -4764,17 +4762,6 @@ public class ConnectivityManager {
     public @interface RestrictBackgroundStatus {
     }
 
-    private INetworkPolicyManager getNetworkPolicyManager() {
-        synchronized (this) {
-            if (mNPManager != null) {
-                return mNPManager;
-            }
-            mNPManager = INetworkPolicyManager.Stub.asInterface(ServiceManager
-                    .getService(Context.NETWORK_POLICY_SERVICE));
-            return mNPManager;
-        }
-    }
-
     /**
      * Determines if the calling application is subject to metered network restrictions while
      * running on background.
@@ -4785,7 +4772,7 @@ public class ConnectivityManager {
      */
     public @RestrictBackgroundStatus int getRestrictBackgroundStatus() {
         try {
-            return getNetworkPolicyManager().getRestrictBackgroundByCaller();
+            return mService.getRestrictBackgroundStatusByCaller();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
