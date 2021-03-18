@@ -393,14 +393,13 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                 final IFaceServiceReceiver receiver, final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
-            if (provider == null) {
-                Slog.w(TAG, "Null provider for removeAll");
-                return;
+            for (ServiceProvider provider : mServiceProviders) {
+                List<FaceSensorPropertiesInternal> props = provider.getSensorProperties();
+                for (FaceSensorPropertiesInternal prop : props) {
+                    provider.scheduleRemoveAll(prop.sensorId, token, userId, receiver,
+                            opPackageName);
+                }
             }
-
-            provider.second.scheduleRemoveAll(provider.first, token, userId, receiver,
-                    opPackageName);
         }
 
         @Override // Binder call
