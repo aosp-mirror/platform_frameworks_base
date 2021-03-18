@@ -29,7 +29,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * Represents a S-NSSAI as defined in 3GPP TS 24.501.
+ * Represents a S-NSSAI as defined in 3GPP TS 24.501, which represents a network slice.
+ *
+ * There are 2 main fields that define a slice, SliceServiceType and SliceDifferentiator.
+ * SliceServiceType defines the type of service provided by the slice, and SliceDifferentiator is
+ * used to differentiate between multiple slices of the same type. If the devices is not on HPLMN,
+ * the mappedHplmn versions of these 2 fields indicate the corresponding values in HPLMN.
  *
  * @hide
  */
