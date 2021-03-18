@@ -28,8 +28,6 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
-import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -37,7 +35,6 @@ import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.appWindowAlwaysVisibleOnTop
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.layerAlwaysVisible
-import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
@@ -64,13 +61,9 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
             setup {
                 test {
-                    device.wakeUpAndGoToHomeScreen()
                     testApp.launchViaIntent(wmHelper)
-                    this.setRotation(testSpec.config.startRotation)
                 }
             }
             transitions {
@@ -82,7 +75,6 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                 }
                 test {
                     testApp.exit()
-                    this.setRotation(Surface.ROTATION_0)
                 }
             }
         }
@@ -177,6 +169,7 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                     repetitions = 5,
                     supportedRotations = listOf(Surface.ROTATION_0),
                     supportedNavigationModes = listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
                         WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                     )
                 )
