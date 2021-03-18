@@ -84,7 +84,9 @@ class ZigZagClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
+    Result calculateFalsingResult(
+            @Classifier.InteractionType int interactionType,
+            double historyBelief, double historyConfidence) {
         List<MotionEvent> motionEvents = getRecentMotionEvents();
         // Rotate horizontal gestures to be horizontal between their first and last point.
         // Rotate vertical gestures to be vertical between their first and last point.
@@ -156,7 +158,7 @@ class ZigZagClassifier extends FalsingClassifier {
         logDebug("Straightness Deviance: (" + devianceX + "," + devianceY + ") vs "
                 + "(" + maxXDeviance + "," + maxYDeviance + ")");
         return devianceX > maxXDeviance || devianceY > maxYDeviance
-            ? Result.falsed(0.5, getReason()) : Result.passed(0.5);
+            ? falsed(0.5, getReason()) : Result.passed(0.5);
     }
 
     private String getReason() {

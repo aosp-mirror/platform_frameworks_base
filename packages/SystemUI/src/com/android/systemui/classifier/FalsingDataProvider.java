@@ -47,8 +47,6 @@ public class FalsingDataProvider {
     private final List<MotionEventListener> mMotionEventListeners = new ArrayList<>();
     private final List<GestureCompleteListener> mGestureCompleteListeners = new ArrayList<>();
 
-    private @Classifier.InteractionType int mInteractionType;
-
     private TimeLimitedMotionEventBuffer mRecentMotionEvents =
             new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
     private List<MotionEvent> mPriorMotionEvents;
@@ -135,21 +133,6 @@ public class FalsingDataProvider {
 
     public List<MotionEvent> getPriorMotionEvents() {
         return mPriorMotionEvents;
-    }
-
-    /**
-     * interactionType is defined by {@link com.android.systemui.classifier.Classifier}.
-     */
-    public final void setInteractionType(@Classifier.InteractionType int interactionType) {
-        if (mInteractionType != interactionType) {
-            mInteractionType = interactionType;
-            mDirty = true;
-        }
-    }
-
-    /** Return the interaction type that is being compared against for falsing. */
-    public  final int getInteractionType() {
-        return mInteractionType;
     }
 
     /**

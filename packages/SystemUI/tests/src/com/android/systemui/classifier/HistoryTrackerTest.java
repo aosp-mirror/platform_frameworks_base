@@ -121,7 +121,8 @@ public class HistoryTrackerTest extends SysuiTestCase {
     private void addResult(boolean falsed, double confidence) {
         mHistoryTracker.addResults(Collections.singletonList(
                 falsed
-                        ? FalsingClassifier.Result.falsed(confidence, "test")
+                        ? FalsingClassifier.Result.falsed(
+                                confidence, getClass().getSimpleName(), "test")
                         : FalsingClassifier.Result.passed(confidence)),
                 mSystemClock.uptimeMillis());
     }

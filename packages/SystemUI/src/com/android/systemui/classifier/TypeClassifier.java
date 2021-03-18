@@ -38,13 +38,15 @@ public class TypeClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
+    Result calculateFalsingResult(
+            @Classifier.InteractionType int interactionType,
+            double historyBelief, double historyConfidence) {
         boolean vertical = isVertical();
         boolean up = isUp();
         boolean right = isRight();
 
         boolean wrongDirection = true;
-        switch (getInteractionType()) {
+        switch (interactionType) {
             case QUICK_SETTINGS:
             case PULSE_EXPAND:
             case NOTIFICATION_DRAG_DOWN:
@@ -68,10 +70,11 @@ public class TypeClassifier extends FalsingClassifier {
                 break;
         }
 
-        return wrongDirection ? Result.falsed(1, getReason()) : Result.passed(0.5);
+        return wrongDirection ? falsed(1, getReason(interactionType)) : Result.passed(0.5);
     }
 
-    private String getReason() {
-        return String.format("{vertical=%s, up=%s, right=%s}", isVertical(), isUp(), isRight());
+    private String getReason(int interactionType) {
+        return String.format("{interaction=%s, vertical=%s, up=%s, right=%s}",
+                interactionType, isVertical(), isUp(), isRight());
     }
 }

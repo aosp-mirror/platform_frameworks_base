@@ -16,11 +16,12 @@
 
 package com.android.systemui.classifier;
 
+import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.LEFT_AFFORDANCE;
 import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
@@ -69,106 +70,104 @@ public class DiagonalClassifierTest extends ClassifierTest {
     @Test
     public void testPass_UnknownAngle() {
         when(mDataProvider.getAngle()).thenReturn(Float.MAX_VALUE);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testPass_VerticalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(UP_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(DOWN_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testPass_MostlyVerticalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(UP_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(UP_IN_RADIANS - 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(DOWN_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(DOWN_IN_RADIANS - 2 * FIVE_DEG_IN_RADIANS * 2);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testPass_BarelyVerticalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(
                 UP_IN_RADIANS - FORTY_FIVE_DEG_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(
                 UP_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS - 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(
                 DOWN_IN_RADIANS - FORTY_FIVE_DEG_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(
                 DOWN_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS - 2 * FIVE_DEG_IN_RADIANS * 2);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testPass_HorizontalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(RIGHT_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(LEFT_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testPass_MostlyHorizontalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(RIGHT_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(RIGHT_IN_RADIANS - 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(LEFT_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(LEFT_IN_RADIANS - 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testPass_BarelyHorizontalSwipe() {
         when(mDataProvider.getAngle()).thenReturn(
                 RIGHT_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS - 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(
                 LEFT_IN_RADIANS - FORTY_FIVE_DEG_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(
                 LEFT_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS - 2 * FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.getAngle()).thenReturn(
                 RIGHT_IN_RADIANS - FORTY_FIVE_DEG_IN_RADIANS + 2 * FIVE_DEG_IN_RADIANS * 2);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testPass_AffordanceSwipe() {
-        when(mDataProvider.getInteractionType()).thenReturn(LEFT_AFFORDANCE);
         when(mDataProvider.getAngle()).thenReturn(
                 RIGHT_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(LEFT_AFFORDANCE, 0.5, 0).isFalse()).isFalse();
 
-        when(mDataProvider.getInteractionType()).thenReturn(RIGHT_AFFORDANCE);
         when(mDataProvider.getAngle()).thenReturn(
                 LEFT_IN_RADIANS - FORTY_FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(RIGHT_AFFORDANCE, 0.5, 0).isFalse()).isFalse();
 
         // This classifier may return false for other angles, but these are the only
         // two that actually matter, as affordances generally only travel in these two directions.
@@ -182,37 +181,37 @@ public class DiagonalClassifierTest extends ClassifierTest {
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.getAngle()).thenReturn(
                 RIGHT_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS - FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.getAngle()).thenReturn(
                 UP_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS + FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.getAngle()).thenReturn(
                 LEFT_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS - FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.getAngle()).thenReturn(
                 DOWN_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS + FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isTrue();
 
         // Vertical Swipes
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.getAngle()).thenReturn(
                 RIGHT_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS + FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.getAngle()).thenReturn(
                 UP_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS - FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isTrue();
 
 
         when(mDataProvider.getAngle()).thenReturn(
                 LEFT_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS + FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.getAngle()).thenReturn(
                 DOWN_IN_RADIANS + FORTY_FIVE_DEG_IN_RADIANS - FIVE_DEG_IN_RADIANS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isTrue();
     }
 }
