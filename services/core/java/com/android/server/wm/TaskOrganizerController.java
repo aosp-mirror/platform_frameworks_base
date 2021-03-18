@@ -153,7 +153,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 //                }
                 try {
                     mTaskOrganizer.removeStartingWindow(task.mTaskId, firstWindowLeash, mainFrame,
-                            prepareAnimation);
+                    /* TODO(183004107) Revert this when jankiness is solved
+                        prepareAnimation); */ false);
+
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Exception sending onStartTaskFinished callback", e);
                 }
