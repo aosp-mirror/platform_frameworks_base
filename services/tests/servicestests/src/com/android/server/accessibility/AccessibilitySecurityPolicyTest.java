@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
@@ -30,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,9 +50,12 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.testing.DexmakerShareClassLoaderRule;
+import android.testing.TestableContext;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityWindowInfo;
+
+import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -58,7 +64,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -72,9 +80,9 @@ public class AccessibilitySecurityPolicyTest {
     private static final int APP_UID = 10400;
     private static final int APP_PID = 2000;
     private static final int SYSTEM_PID = 558;
-
-    private static final String PERMISSION = "test-permission";
-    private static final String FUNCTION = "test-function-name";
+    private static final int TEST_USER_ID = UserHandle.USER_SYSTEM;
+    private static final ComponentName TEST_COMPONENT_NAME = new ComponentName(
+            "com.android.server.accessibility", "AccessibilitySecurityPolicyTest");
 
     private static final int[] ALWAYS_DISPATCH_EVENTS = {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED,
@@ -108,29 +116,51 @@ public class AccessibilitySecurityPolicyTest {
 
     private AccessibilitySecurityPolicy mA11ySecurityPolicy;
 
+    @Rule
+    public final TestableContext mContext = new TestableContext(
+            getInstrumentation().getTargetContext(), null);
+
     // To mock package-private class
-    @Rule public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
 
-    @Mock private Context mMockContext;
-    @Mock private PackageManager mMockPackageManager;
-    @Mock private UserManager mMockUserManager;
-    @Mock private AppOpsManager mMockAppOpsManager;
-    @Mock private AccessibilityServiceConnection mMockA11yServiceConnection;
-    @Mock private AccessibilityWindowManager mMockA11yWindowManager;
-    @Mock private AppWidgetManagerInternal mMockAppWidgetManager;
-    @Mock private AccessibilitySecurityPolicy.AccessibilityUserManager mMockA11yUserManager;
+    @Mock
+    private PackageManager mMockPackageManager;
+    @Mock
+    private UserManager mMockUserManager;
+    @Mock
+    private AppOpsManager mMockAppOpsManager;
+    @Mock
+    private AccessibilityServiceConnection mMockA11yServiceConnection;
+    @Mock
+    private AccessibilityWindowManager mMockA11yWindowManager;
+    @Mock
+    private AppWidgetManagerInternal mMockAppWidgetManager;
+    @Mock
+    private AccessibilitySecurityPolicy.AccessibilityUserManager mMockA11yUserManager;
+    @Mock
+    private AccessibilityServiceInfo mMockA11yServiceInfo;
+    @Mock
+    private PolicyWarningUIController mPolicyWarningUIController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
-        when(mMockContext.getSystemService(Context.USER_SERVICE)).thenReturn(mMockUserManager);
-        when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mMockAppOpsManager);
+        mContext.setMockPackageManager(mMockPackageManager);
+        mContext.addMockSystemService(Context.USER_SERVICE, mMockUserManager);
+        mContext.addMockSystemService(Context.APP_OPS_SERVICE, mMockAppOpsManager);
+        mContext.getOrCreateTestableResources().addOverride(
+                R.dimen.accessibility_focus_highlight_stroke_width, 1);
 
-        mA11ySecurityPolicy = new AccessibilitySecurityPolicy(mMockContext, mMockA11yUserManager);
+        when(mMockA11yServiceInfo.getComponentName()).thenReturn(TEST_COMPONENT_NAME);
+        when(mMockA11yServiceConnection.getServiceInfo()).thenReturn(mMockA11yServiceInfo);
+
+        mA11ySecurityPolicy = new AccessibilitySecurityPolicy(
+                mPolicyWarningUIController, mContext, mMockA11yUserManager);
         mA11ySecurityPolicy.setAccessibilityWindowManager(mMockA11yWindowManager);
         mA11ySecurityPolicy.setAppWidgetManager(mMockAppWidgetManager);
+        mA11ySecurityPolicy.onSwitchUserLocked(TEST_USER_ID, new HashSet<>());
 
         when(mMockA11yWindowManager.resolveParentWindowIdLocked(anyInt())).then(returnsFirstArg());
     }
@@ -141,7 +171,7 @@ public class AccessibilitySecurityPolicyTest {
             final AccessibilityEvent event = AccessibilityEvent.obtain(ALWAYS_DISPATCH_EVENTS[i]);
             assertTrue("Should dispatch [" + event + "]",
                     mA11ySecurityPolicy.canDispatchAccessibilityEventLocked(
-                            UserHandle.USER_SYSTEM,
+                            TEST_USER_ID,
                             event));
         }
     }
@@ -154,28 +184,28 @@ public class AccessibilitySecurityPolicyTest {
             event.setWindowId(invalidWindowId);
             assertFalse("Shouldn't dispatch [" + event + "]",
                     mA11ySecurityPolicy.canDispatchAccessibilityEventLocked(
-                            UserHandle.USER_SYSTEM,
+                            TEST_USER_ID,
                             event));
         }
     }
 
     @Test
     public void canDispatchAccessibilityEvent_otherEvents_windowIdIsActive_returnTrue() {
-        when(mMockA11yWindowManager.getActiveWindowId(UserHandle.USER_SYSTEM))
+        when(mMockA11yWindowManager.getActiveWindowId(TEST_USER_ID))
                 .thenReturn(WINDOWID);
         for (int i = 0; i < OTHER_EVENTS.length; i++) {
             final AccessibilityEvent event = AccessibilityEvent.obtain(OTHER_EVENTS[i]);
             event.setWindowId(WINDOWID);
             assertTrue("Should dispatch [" + event + "]",
                     mA11ySecurityPolicy.canDispatchAccessibilityEventLocked(
-                            UserHandle.USER_SYSTEM,
+                            TEST_USER_ID,
                             event));
         }
     }
 
     @Test
     public void canDispatchAccessibilityEvent_otherEvents_windowIdExist_returnTrue() {
-        when(mMockA11yWindowManager.getActiveWindowId(UserHandle.USER_SYSTEM))
+        when(mMockA11yWindowManager.getActiveWindowId(TEST_USER_ID))
                 .thenReturn(WINDOWID2);
         when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(WINDOWID))
                 .thenReturn(AccessibilityWindowInfo.obtain());
@@ -184,7 +214,7 @@ public class AccessibilitySecurityPolicyTest {
             event.setWindowId(WINDOWID);
             assertTrue("Should dispatch [" + event + "]",
                     mA11ySecurityPolicy.canDispatchAccessibilityEventLocked(
-                            UserHandle.USER_SYSTEM,
+                            TEST_USER_ID,
                             event));
         }
     }
@@ -192,24 +222,24 @@ public class AccessibilitySecurityPolicyTest {
     @Test
     public void resolveValidReportedPackage_nullPkgName_returnNull() {
         assertNull(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                null, Process.SYSTEM_UID, UserHandle.USER_SYSTEM, SYSTEM_PID));
+                null, Process.SYSTEM_UID, TEST_USER_ID, SYSTEM_PID));
     }
 
     @Test
     public void resolveValidReportedPackage_uidIsSystem_returnPkgName() {
         assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                PACKAGE_NAME, Process.SYSTEM_UID, UserHandle.USER_SYSTEM, SYSTEM_PID),
+                PACKAGE_NAME, Process.SYSTEM_UID, TEST_USER_ID, SYSTEM_PID),
                 PACKAGE_NAME);
     }
 
     @Test
     public void resolveValidReportedPackage_uidAndPkgNameMatched_returnPkgName()
             throws PackageManager.NameNotFoundException {
-        when(mMockPackageManager.getPackageUidAsUser(PACKAGE_NAME, UserHandle.USER_SYSTEM))
+        when(mMockPackageManager.getPackageUidAsUser(PACKAGE_NAME, TEST_USER_ID))
                 .thenReturn(APP_UID);
 
         assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                PACKAGE_NAME, APP_UID, UserHandle.USER_SYSTEM, APP_PID),
+                PACKAGE_NAME, APP_UID, TEST_USER_ID, APP_PID),
                 PACKAGE_NAME);
     }
 
@@ -225,11 +255,11 @@ public class AccessibilitySecurityPolicyTest {
 
         when(mMockAppWidgetManager.getHostedWidgetPackages(widgetHostUid))
                 .thenReturn(widgetPackages);
-        when(mMockPackageManager.getPackageUidAsUser(hostPackageName, UserHandle.USER_SYSTEM))
+        when(mMockPackageManager.getPackageUidAsUser(hostPackageName, TEST_USER_ID))
                 .thenReturn(widgetHostUid);
 
         assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                widgetPackageName, widgetHostUid, UserHandle.USER_SYSTEM, widgetHostPid),
+                widgetPackageName, widgetHostUid, TEST_USER_ID, widgetHostPid),
                 widgetPackageName);
     }
 
@@ -240,16 +270,16 @@ public class AccessibilitySecurityPolicyTest {
         final String[] uidPackages = {PACKAGE_NAME, PACKAGE_NAME2};
         when(mMockPackageManager.getPackagesForUid(APP_UID))
                 .thenReturn(uidPackages);
-        when(mMockPackageManager.getPackageUidAsUser(invalidPackageName, UserHandle.USER_SYSTEM))
+        when(mMockPackageManager.getPackageUidAsUser(invalidPackageName, TEST_USER_ID))
                 .thenThrow(PackageManager.NameNotFoundException.class);
         when(mMockAppWidgetManager.getHostedWidgetPackages(APP_UID))
                 .thenReturn(new ArraySet<>());
-        when(mMockContext.checkPermission(
-                eq(Manifest.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY), anyInt(), eq(APP_UID)))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        mContext.getTestablePermissions().setPermission(
+                Manifest.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY,
+                PackageManager.PERMISSION_DENIED);
 
         assertEquals(PACKAGE_NAME, mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                invalidPackageName, APP_UID, UserHandle.USER_SYSTEM, APP_PID));
+                invalidPackageName, APP_UID, TEST_USER_ID, APP_PID));
     }
 
     @Test
@@ -260,16 +290,16 @@ public class AccessibilitySecurityPolicyTest {
         final String[] uidPackages = {PACKAGE_NAME};
         when(mMockPackageManager.getPackagesForUid(APP_UID))
                 .thenReturn(uidPackages);
-        when(mMockPackageManager.getPackageUidAsUser(wantedPackageName, UserHandle.USER_SYSTEM))
+        when(mMockPackageManager.getPackageUidAsUser(wantedPackageName, TEST_USER_ID))
                 .thenReturn(wantedUid);
         when(mMockAppWidgetManager.getHostedWidgetPackages(APP_UID))
                 .thenReturn(new ArraySet<>());
-        when(mMockContext.checkPermission(
-                eq(Manifest.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY), anyInt(), eq(APP_UID)))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        mContext.getTestablePermissions().setPermission(
+                Manifest.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY,
+                PackageManager.PERMISSION_GRANTED);
 
         assertEquals(wantedPackageName, mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                wantedPackageName, APP_UID, UserHandle.USER_SYSTEM, APP_PID));
+                wantedPackageName, APP_UID, TEST_USER_ID, APP_PID));
     }
 
     @Test
@@ -280,16 +310,16 @@ public class AccessibilitySecurityPolicyTest {
         final String[] uidPackages = {PACKAGE_NAME};
         when(mMockPackageManager.getPackagesForUid(APP_UID))
                 .thenReturn(uidPackages);
-        when(mMockPackageManager.getPackageUidAsUser(wantedPackageName, UserHandle.USER_SYSTEM))
+        when(mMockPackageManager.getPackageUidAsUser(wantedPackageName, TEST_USER_ID))
                 .thenReturn(wantedUid);
         when(mMockAppWidgetManager.getHostedWidgetPackages(APP_UID))
                 .thenReturn(new ArraySet<>());
-        when(mMockContext.checkPermission(
-                eq(Manifest.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY), anyInt(), eq(APP_UID)))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        mContext.getTestablePermissions().setPermission(
+                Manifest.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY,
+                PackageManager.PERMISSION_DENIED);
 
         assertEquals(PACKAGE_NAME, mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                wantedPackageName, APP_UID, UserHandle.USER_SYSTEM, APP_PID));
+                wantedPackageName, APP_UID, TEST_USER_ID, APP_PID));
     }
 
     @Test
@@ -301,7 +331,7 @@ public class AccessibilitySecurityPolicyTest {
     @Test
     public void computeValidReportedPackages_uidIsAppWidgetHost_returnTargetAndWidgetName() {
         final int widgetHostUid = APP_UID;
-        final String targetPackageName =  PACKAGE_NAME;
+        final String targetPackageName = PACKAGE_NAME;
         final String widgetPackageName = PACKAGE_NAME2;
         final ArraySet<String> widgetPackages = new ArraySet<>();
         widgetPackages.add(widgetPackageName);
@@ -320,7 +350,7 @@ public class AccessibilitySecurityPolicyTest {
         when(mMockA11yServiceConnection.getCapabilities())
                 .thenReturn(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT);
 
-        assertFalse(mA11ySecurityPolicy.canGetAccessibilityNodeInfoLocked(UserHandle.USER_SYSTEM,
+        assertFalse(mA11ySecurityPolicy.canGetAccessibilityNodeInfoLocked(TEST_USER_ID,
                 mMockA11yServiceConnection, invalidWindowId));
     }
 
@@ -328,10 +358,10 @@ public class AccessibilitySecurityPolicyTest {
     public void canGetAccessibilityNodeInfo_hasCapAndWindowIsActive_returnTrue() {
         when(mMockA11yServiceConnection.getCapabilities())
                 .thenReturn(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT);
-        when(mMockA11yWindowManager.getActiveWindowId(UserHandle.USER_SYSTEM))
+        when(mMockA11yWindowManager.getActiveWindowId(TEST_USER_ID))
                 .thenReturn(WINDOWID);
 
-        assertTrue(mA11ySecurityPolicy.canGetAccessibilityNodeInfoLocked(UserHandle.USER_SYSTEM,
+        assertTrue(mA11ySecurityPolicy.canGetAccessibilityNodeInfoLocked(TEST_USER_ID,
                 mMockA11yServiceConnection, WINDOWID));
     }
 
@@ -339,12 +369,12 @@ public class AccessibilitySecurityPolicyTest {
     public void canGetAccessibilityNodeInfo_hasCapAndWindowExist_returnTrue() {
         when(mMockA11yServiceConnection.getCapabilities())
                 .thenReturn(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT);
-        when(mMockA11yWindowManager.getActiveWindowId(UserHandle.USER_SYSTEM))
+        when(mMockA11yWindowManager.getActiveWindowId(TEST_USER_ID))
                 .thenReturn(WINDOWID2);
         when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(WINDOWID))
                 .thenReturn(AccessibilityWindowInfo.obtain());
 
-        assertTrue(mA11ySecurityPolicy.canGetAccessibilityNodeInfoLocked(UserHandle.USER_SYSTEM,
+        assertTrue(mA11ySecurityPolicy.canGetAccessibilityNodeInfoLocked(TEST_USER_ID,
                 mMockA11yServiceConnection, WINDOWID));
     }
 
@@ -464,8 +494,10 @@ public class AccessibilitySecurityPolicyTest {
                 .thenReturn(currentUserId);
         doReturn(callingParentId).when(spySecurityPolicy).resolveProfileParentLocked(
                 callingUserId);
-        when(mMockContext.checkCallingPermission(any()))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        mContext.getTestablePermissions().setPermission(Manifest.permission.INTERACT_ACROSS_USERS,
+                PackageManager.PERMISSION_DENIED);
+        mContext.getTestablePermissions().setPermission(
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL, PackageManager.PERMISSION_DENIED);
 
         spySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(
                 UserHandle.USER_CURRENT_OR_SELF);
@@ -482,8 +514,8 @@ public class AccessibilitySecurityPolicyTest {
                 .thenReturn(currentUserId);
         doReturn(callingParentId).when(spySecurityPolicy).resolveProfileParentLocked(
                 callingUserId);
-        when(mMockContext.checkCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        mContext.getTestablePermissions().setPermission(Manifest.permission.INTERACT_ACROSS_USERS,
+                PackageManager.PERMISSION_GRANTED);
 
         assertEquals(wantedUserId,
                 spySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(wantedUserId));
@@ -500,8 +532,8 @@ public class AccessibilitySecurityPolicyTest {
                 .thenReturn(currentUserId);
         doReturn(callingParentId).when(spySecurityPolicy).resolveProfileParentLocked(
                 callingUserId);
-        when(mMockContext.checkCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        mContext.getTestablePermissions().setPermission(
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL, PackageManager.PERMISSION_GRANTED);
 
         assertEquals(wantedUserId,
                 spySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(wantedUserId));
@@ -518,10 +550,10 @@ public class AccessibilitySecurityPolicyTest {
                 .thenReturn(currentUserId);
         doReturn(callingParentId).when(spySecurityPolicy).resolveProfileParentLocked(
                 callingUserId);
-        when(mMockContext.checkCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
-        when(mMockContext.checkCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        mContext.getTestablePermissions().setPermission(Manifest.permission.INTERACT_ACROSS_USERS,
+                PackageManager.PERMISSION_DENIED);
+        mContext.getTestablePermissions().setPermission(
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL, PackageManager.PERMISSION_DENIED);
 
         spySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(wantedUserId);
     }
@@ -562,4 +594,57 @@ public class AccessibilitySecurityPolicyTest {
                 APP_UID, PACKAGE_NAME);
     }
 
+    @Test
+    public void onBoundServicesChanged_bindA11yCategoryService_noUIControllerAction() {
+        final ArrayList<AccessibilityServiceConnection> boundServices = new ArrayList<>();
+        boundServices.add(mMockA11yServiceConnection);
+        when(mMockA11yServiceInfo.isAccessibilityTool()).thenReturn(true);
+
+        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, boundServices);
+
+        verify(mPolicyWarningUIController, never()).onNonA11yCategoryServiceBound(anyInt(), any());
+    }
+
+    @Test
+    public void onBoundServicesChanged_unbindA11yCategoryService_noUIControllerAction() {
+        onBoundServicesChanged_bindA11yCategoryService_noUIControllerAction();
+
+        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, new ArrayList<>());
+
+        verify(mPolicyWarningUIController, never()).onNonA11yCategoryServiceUnbound(anyInt(),
+                any());
+    }
+
+    @Test
+    public void onBoundServicesChanged_bindNonA11yCategoryService_activateUIControllerAction() {
+        final ArrayList<AccessibilityServiceConnection> boundServices = new ArrayList<>();
+        boundServices.add(mMockA11yServiceConnection);
+        when(mMockA11yServiceInfo.isAccessibilityTool()).thenReturn(false);
+
+        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, boundServices);
+
+        verify(mPolicyWarningUIController).onNonA11yCategoryServiceBound(eq(TEST_USER_ID),
+                eq(TEST_COMPONENT_NAME));
+    }
+
+    @Test
+    public void onBoundServicesChanged_unbindNonA11yCategoryService_activateUIControllerAction() {
+        onBoundServicesChanged_bindNonA11yCategoryService_activateUIControllerAction();
+
+        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, new ArrayList<>());
+
+        verify(mPolicyWarningUIController).onNonA11yCategoryServiceUnbound(eq(TEST_USER_ID),
+                eq(TEST_COMPONENT_NAME));
+    }
+
+    @Test
+    public void onSwitchUser_differentUser_activateUIControllerAction() {
+        onBoundServicesChanged_bindNonA11yCategoryService_activateUIControllerAction();
+
+        mA11ySecurityPolicy.onSwitchUserLocked(2, new HashSet<>());
+
+        verify(mPolicyWarningUIController).onSwitchUserLocked(eq(2), eq(new HashSet<>()));
+        verify(mPolicyWarningUIController).onNonA11yCategoryServiceUnbound(eq(TEST_USER_ID),
+                eq(TEST_COMPONENT_NAME));
+    }
 }
