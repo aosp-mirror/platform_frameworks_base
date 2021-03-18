@@ -26,10 +26,10 @@
     </item>
     <item
         android:id="@+id/slider_icon"
-        android:gravity="center_vertical|left"
+        android:gravity="center_vertical|right"
         android:height="@dimen/rounded_slider_icon_size"
         android:width="@dimen/rounded_slider_icon_size"
-        android:left="@dimen/rounded_slider_icon_inset">
+        android:right="@dimen/rounded_slider_icon_inset">
         <com.android.systemui.util.AlphaTintDrawableWrapper
             android:drawable="@drawable/ic_brightness"
             android:tint="?android:attr/colorBackground"
