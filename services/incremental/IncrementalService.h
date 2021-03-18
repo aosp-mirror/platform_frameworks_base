@@ -164,7 +164,8 @@ public:
              std::string_view newPath);
     int unlink(StorageId storage, std::string_view path);
 
-    int isFileFullyLoaded(StorageId storage, std::string_view filePath) const;
+    incfs::LoadingState isFileFullyLoaded(StorageId storage, std::string_view filePath) const;
+    incfs::LoadingState isMountFullyLoaded(StorageId storage) const;
 
     LoadingProgress getLoadingProgress(StorageId storage, bool stopOnFirstIncomplete) const;
 
@@ -412,7 +413,6 @@ private:
     int setStorageParams(IncFsMount& ifs, StorageId storageId, bool enableReadLogs);
     binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
 
-    int isFileFullyLoadedFromPath(const IncFsMount& ifs, std::string_view filePath) const;
     LoadingProgress getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path,
                                                bool stopOnFirstIncomplete) const;
 

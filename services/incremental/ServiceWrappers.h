@@ -102,6 +102,9 @@ public:
     virtual std::string toString(FileId fileId) const = 0;
     virtual std::pair<IncFsBlockIndex, IncFsBlockIndex> countFilledBlocks(
             const Control& control, std::string_view path) const = 0;
+    virtual incfs::LoadingState isFileFullyLoaded(const Control& control,
+                                                  std::string_view path) const = 0;
+    virtual incfs::LoadingState isEverythingFullyLoaded(const Control& control) const = 0;
     virtual ErrorCode link(const Control& control, std::string_view from,
                            std::string_view to) const = 0;
     virtual ErrorCode unlink(const Control& control, std::string_view path) const = 0;
