@@ -36,6 +36,7 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -828,12 +829,24 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
+    public void setUdfpsHbmListener(IUdfpsHbmListener listener) {
+        enforceStatusBarService();
+        if (mBar != null) {
+            try {
+                mBar.setUdfpsHbmListener(listener);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
     public void startTracing() {
         if (mBar != null) {
             try {
                 mBar.startTracing();
                 mTracingEnabled = true;
-            } catch (RemoteException ex) {}
+            } catch (RemoteException ex) {
+            }
         }
     }
 
