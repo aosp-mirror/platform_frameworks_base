@@ -25,6 +25,9 @@ import android.Manifest;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
@@ -38,6 +41,7 @@ import android.hardware.location.IContextHubTransactionCallback;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -112,6 +116,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * Message used by noteOp when this client receives a message from a nanoapp.
      */
     private static final String RECEIVE_MSG_NOTE = "NanoappMessageDelivery ";
+
+    /**
+     * For clients targeting S and above, a SecurityException is thrown when they are in the denied
+     * authorization state and attempt to send a message to a nanoapp.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    private static final long CHANGE_ID_AUTH_STATE_DENIED = 181350407L;
 
     /*
      * The context of the service.
@@ -351,6 +363,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      *
      * @param message the message to send
      * @return the error code of sending the message
+     * @throws SecurityException if this client doesn't have permissions to send a message to the
+     * nanoapp
      */
     @ContextHubTransaction.Result
     @Override
@@ -362,7 +376,13 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             int authState = mMessageChannelNanoappIdMap.getOrDefault(
                     message.getNanoAppId(), AUTHORIZATION_UNKNOWN);
             if (authState == AUTHORIZATION_DENIED) {
-                return ContextHubTransaction.RESULT_FAILED_PERMISSION_DENIED;
+                if (Compatibility.isChangeEnabled(CHANGE_ID_AUTH_STATE_DENIED)) {
+                    throw new SecurityException("Client doesn't have valid permissions to send"
+                            + " message to " + message.getNanoAppId());
+                }
+                // Return a bland error code for apps targeting old SDKs since they wouldn't be able
+                // to use an error code added in S.
+                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
             } else if (authState == AUTHORIZATION_UNKNOWN) {
                 // Only check permissions the first time a nanoapp is queried since nanoapp
                 // permissions don't currently change at runtime. If the host permission changes
