@@ -127,7 +127,6 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onNotificationStartDraggingDown() {
-        updateInteractionType(Classifier.NOTIFICATION_DRAG_DOWN);
     }
 
     @Override
@@ -140,7 +139,6 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onQsDown() {
-        updateInteractionType(Classifier.QUICK_SETTINGS);
     }
 
     @Override
@@ -159,7 +157,6 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onTrackingStarted(boolean secure) {
-        updateInteractionType(secure ? Classifier.BOUNCER_UNLOCK : Classifier.UNLOCK);
     }
 
     @Override
@@ -176,8 +173,6 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onAffordanceSwipingStarted(boolean rightCorner) {
-        updateInteractionType(
-                rightCorner ? Classifier.RIGHT_AFFORDANCE : Classifier.LEFT_AFFORDANCE);
     }
 
     @Override
@@ -186,7 +181,6 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onStartExpandingFromPulse() {
-        updateInteractionType(Classifier.PULSE_EXPAND);
     }
 
     @Override
@@ -237,7 +231,6 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onNotificationStartDismissing() {
-        updateInteractionType(Classifier.NOTIFICATION_DISMISS);
     }
 
     @Override
@@ -300,11 +293,6 @@ class FalsingCollectorImpl implements FalsingCollector {
     @Override
     public void updateFalseConfidence(FalsingClassifier.Result result) {
         mHistoryTracker.addResults(Collections.singleton(result), mSystemClock.uptimeMillis());
-    }
-
-    private void updateInteractionType(@Classifier.InteractionType int type) {
-        logDebug("InteractionType: " + type);
-        mFalsingDataProvider.setInteractionType(type);
     }
 
     private boolean shouldSessionBeActive() {

@@ -62,15 +62,16 @@ class DiagonalClassifier extends FalsingClassifier {
                 VERTICAL_ANGLE_RANGE);
     }
 
-    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
+    Result calculateFalsingResult(
+            @Classifier.InteractionType int interactionType,
+            double historyBelief, double historyConfidence) {
         float angle = getAngle();
 
         if (angle == Float.MAX_VALUE) {  // Unknown angle
             return Result.passed(0);
         }
 
-        if (getInteractionType() == LEFT_AFFORDANCE
-                || getInteractionType() == RIGHT_AFFORDANCE) {
+        if (interactionType == LEFT_AFFORDANCE || interactionType == RIGHT_AFFORDANCE) {
             return Result.passed(0);
         }
 
@@ -86,7 +87,7 @@ class DiagonalClassifier extends FalsingClassifier {
                 || angleBetween(angle, minAngle - NINETY_DEG, maxAngle - NINETY_DEG)
                 || angleBetween(angle, minAngle + ONE_HUNDRED_EIGHTY_DEG,
                 maxAngle + ONE_HUNDRED_EIGHTY_DEG);
-        return falsed ? Result.falsed(0.5f, getReason()) : Result.passed(0.5);
+        return falsed ? falsed(0.5f, getReason()) : Result.passed(0.5);
     }
 
     private String getReason() {

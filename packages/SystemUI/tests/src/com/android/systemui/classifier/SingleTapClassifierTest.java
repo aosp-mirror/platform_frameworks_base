@@ -16,8 +16,8 @@
 
 package com.android.systemui.classifier;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
@@ -70,14 +70,14 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, TOUCH_SLOP, 1);
 
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isFalse();
 
         mMotionEvents.clear();
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, -TOUCH_SLOP + 2, 1);
 
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isFalse();
 
     }
 
@@ -86,14 +86,14 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, TOUCH_SLOP);
 
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isFalse();
 
         mMotionEvents.clear();
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, -TOUCH_SLOP + 2);
 
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isFalse();
     }
 
 
@@ -102,14 +102,14 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, TOUCH_SLOP + 1, 1);
 
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
 
         mMotionEvents.clear();
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, -TOUCH_SLOP - 1, 1);
 
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
 
     }
 
@@ -118,14 +118,14 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, TOUCH_SLOP + 1);
 
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
 
         mMotionEvents.clear();
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, -TOUCH_SLOP - 1);
 
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
     }
 
     @Test
@@ -134,7 +134,7 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 1, MotionEvent.ACTION_MOVE, 1, TOUCH_SLOP + 1);
         addMotionEvent(0, 2, MotionEvent.ACTION_UP, 1, 1);
 
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
     }
 
     @Test
@@ -142,12 +142,12 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
 
-        assertThat(mClassifier.isTap(mMotionEvents).isFalse(), is(false));
+        assertThat(mClassifier.isTap(mMotionEvents).isFalse()).isFalse();
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, TOUCH_SLOP + 1);
 
-        assertThat(mClassifier.isTap(mMotionEvents).isFalse(), is(true));
+        assertThat(mClassifier.isTap(mMotionEvents).isFalse()).isTrue();
 
     }
 

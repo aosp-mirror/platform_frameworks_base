@@ -56,14 +56,15 @@ class PointerCountClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
-        int interactionType = getInteractionType();
+    Result calculateFalsingResult(
+            @Classifier.InteractionType int interactionType,
+            double historyBelief, double historyConfidence) {
         int allowedPointerCount =
                 (interactionType == QUICK_SETTINGS || interactionType == NOTIFICATION_DRAG_DOWN)
                 ? MAX_ALLOWED_POINTERS_SWIPE_DOWN : MAX_ALLOWED_POINTERS;
 
         return mMaxPointerCount > allowedPointerCount
-                ? Result.falsed(1, getReason(allowedPointerCount)) : Result.passed(0);
+                ? falsed(1, getReason(allowedPointerCount)) : Result.passed(0);
     }
 
     private String getReason(int allowedPointerCount) {
