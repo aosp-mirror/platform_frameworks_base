@@ -65,7 +65,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.util.Locale;
@@ -1115,6 +1114,23 @@ public class FullScreenMagnificationControllerTest {
     }
 
     @Test
+    public void testSetForceShowMagnifiableBounds() {
+        register(DISPLAY_0);
+
+        mFullScreenMagnificationController.setForceShowMagnifiableBounds(DISPLAY_0, true);
+
+        verify(mMockWindowManager).setForceShowMagnifiableBounds(DISPLAY_0, true);
+    }
+
+    @Test
+    public void testIsForceShowMagnifiableBounds() {
+        register(DISPLAY_0);
+        mFullScreenMagnificationController.setForceShowMagnifiableBounds(DISPLAY_0, true);
+
+        assertTrue(mFullScreenMagnificationController.isForceShowMagnifiableBounds(DISPLAY_0));
+    }
+
+    @Test
     public void testSetScale_toMagnifying_shouldNotifyActivatedState() {
         setScaleToMagnifying();
 
@@ -1142,14 +1158,11 @@ public class FullScreenMagnificationControllerTest {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
             when(mMockWindowManager.setMagnificationCallbacks(eq(i), any())).thenReturn(true);
         }
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-                Object[] args = invocationOnMock.getArguments();
-                Region regionArg = (Region) args[1];
-                regionArg.set(INITIAL_MAGNIFICATION_REGION);
-                return null;
-            }
+        doAnswer((Answer<Void>) invocationOnMock -> {
+            Object[] args = invocationOnMock.getArguments();
+            Region regionArg = (Region) args[1];
+            regionArg.set(INITIAL_MAGNIFICATION_REGION);
+            return null;
         }).when(mMockWindowManager).getMagnificationRegion(anyInt(), (Region) anyObject());
     }
 
