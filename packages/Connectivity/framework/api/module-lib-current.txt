@@ -16,6 +16,8 @@ package android.net {
     field public static final String PRIVATE_DNS_MODE_OFF = "off";
     field public static final String PRIVATE_DNS_MODE_OPPORTUNISTIC = "opportunistic";
     field public static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = "hostname";
+    field public static final int PROFILE_NETWORK_PREFERENCE_DEFAULT = 0; // 0x0
+    field public static final int PROFILE_NETWORK_PREFERENCE_ENTERPRISE = 1; // 0x1
   }
 
   public final class NetworkAgentConfig implements android.os.Parcelable {
