@@ -225,6 +225,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private static final int ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING = 1 << 19;
     private static final int ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE = 1 << 20;
     private static final int ACTIVITY_STATE_FLAG_HAS_RESUMED = 1 << 21;
+    private static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
     private static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
 
     /**
@@ -479,7 +480,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void setLastActivityFinishTimeIfNeeded(long finishTime) {
-        if (finishTime <= mLastActivityFinishTime || !hasVisibleActivities()) {
+        if (finishTime <= mLastActivityFinishTime || !hasActivityInVisibleTask()) {
             return;
         }
         mLastActivityFinishTime = finishTime;
@@ -516,7 +517,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private boolean areBackgroundActivityStartsAllowed(boolean appSwitchAllowed,
             boolean isCheckingForFgsStart) {
         return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid, mInfo.packageName,
-                appSwitchAllowed, isCheckingForFgsStart, hasVisibleActivities(),
+                appSwitchAllowed, isCheckingForFgsStart, hasActivityInVisibleTask(),
                 mInstrumentingWithBackgroundActivityStartPrivileges,
                 mAtm.getLastStopAppSwitchesTime(),
                 mLastActivityLaunchTime, mLastActivityFinishTime);
@@ -651,6 +652,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean hasVisibleActivities() {
         return (mActivityStateFlags & ACTIVITY_STATE_FLAG_IS_VISIBLE) != 0;
+    }
+
+    boolean hasActivityInVisibleTask() {
+        return (mActivityStateFlags & ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK) != 0;
     }
 
     @HotPath(caller = HotPath.LRU_UPDATE)
@@ -996,11 +1001,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             if (r.isVisible()) {
                 stateFlags |= ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE;
             }
+            final Task task = r.getTask();
+            if (task != null && task.mLayerRank != Task.LAYER_RANK_INVISIBLE) {
+                stateFlags |= ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK;
+            }
             if (r.mVisibleRequested) {
                 if (r.isState(RESUMED)) {
                     stateFlags |= ACTIVITY_STATE_FLAG_HAS_RESUMED;
                 }
-                final Task task = r.getTask();
                 if (task != null && minTaskLayer > 0) {
                     final int layer = task.mLayerRank;
                     if (layer >= 0 && minTaskLayer > layer) {
@@ -1048,7 +1056,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     /** Called when the process has some oom related changes and it is going to update oom-adj. */
     private void prepareOomAdjustment() {
-        mAtm.mRootWindowContainer.rankTaskLayersIfNeeded();
+        mAtm.mRootWindowContainer.rankTaskLayers();
         mAtm.mTaskSupervisor.computeProcessActivityStateBatch();
     }
 
