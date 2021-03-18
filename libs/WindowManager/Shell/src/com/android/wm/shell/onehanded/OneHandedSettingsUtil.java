@@ -67,7 +67,7 @@ public final class OneHandedSettingsUtil {
      * @param observer Observer from caller
      * @return uri key for observing
      */
-    public static Uri registerSettingsKeyObserver(String key, ContentResolver resolver,
+    public Uri registerSettingsKeyObserver(String key, ContentResolver resolver,
             ContentObserver observer) {
         Uri uriKey = null;
         uriKey = Settings.Secure.getUriFor(key);
@@ -83,7 +83,7 @@ public final class OneHandedSettingsUtil {
      * @param resolver ContentResolver of context
      * @param observer preference key change observer
      */
-    public static void unregisterSettingsKeyObserver(ContentResolver resolver,
+    public void unregisterSettingsKeyObserver(ContentResolver resolver,
             ContentObserver observer) {
         if (resolver != null) {
             resolver.unregisterContentObserver(observer);
@@ -95,7 +95,7 @@ public final class OneHandedSettingsUtil {
      *
      * @return enable or disable one handed mode flag.
      */
-    public static boolean getSettingsOneHandedModeEnabled(ContentResolver resolver) {
+    public boolean getSettingsOneHandedModeEnabled(ContentResolver resolver) {
         return Settings.Secure.getInt(resolver,
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, 0 /* Disabled */) == 1;
     }
@@ -105,7 +105,7 @@ public final class OneHandedSettingsUtil {
      *
      * @return enable or disable taps app exit.
      */
-    public static boolean getSettingsTapsAppToExit(ContentResolver resolver) {
+    public boolean getSettingsTapsAppToExit(ContentResolver resolver) {
         return Settings.Secure.getInt(resolver,
                 Settings.Secure.TAPS_APP_TO_EXIT, 0) == 1;
     }
@@ -116,7 +116,7 @@ public final class OneHandedSettingsUtil {
      *
      * @return timeout value in seconds.
      */
-    public static @OneHandedTimeout int getSettingsOneHandedModeTimeout(ContentResolver resolver) {
+    public @OneHandedTimeout int getSettingsOneHandedModeTimeout(ContentResolver resolver) {
         return Settings.Secure.getInt(resolver,
                 Settings.Secure.ONE_HANDED_MODE_TIMEOUT, ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
     }
@@ -124,12 +124,12 @@ public final class OneHandedSettingsUtil {
     /**
      * Returns whether swipe bottom to notification gesture enabled or not.
      */
-    public static boolean getSettingsSwipeToNotificationEnabled(ContentResolver resolver) {
+    public boolean getSettingsSwipeToNotificationEnabled(ContentResolver resolver) {
         return Settings.Secure.getInt(resolver,
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 1) == 1;
     }
 
-    protected static void dump(PrintWriter pw, String prefix, ContentResolver resolver) {
+    void dump(PrintWriter pw, String prefix, ContentResolver resolver) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
         pw.print(innerPrefix + "isOneHandedModeEnable=");
@@ -139,6 +139,6 @@ public final class OneHandedSettingsUtil {
         pw.print(innerPrefix + "tapsAppToExit=");
         pw.println(getSettingsTapsAppToExit(resolver));
     }
-
-    private OneHandedSettingsUtil() {}
+    public OneHandedSettingsUtil() {
+    }
 }
