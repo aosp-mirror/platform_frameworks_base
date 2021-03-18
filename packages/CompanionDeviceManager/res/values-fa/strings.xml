@@ -20,8 +20,8 @@
     <string name="chooser_title" msgid="2262294130493605839">"‏انتخاب <xliff:g id="PROFILE_NAME">%1$s</xliff:g> برای مدیریت کردن با &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>‏&lt;/strong&gt;"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"دستگاه"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ساعت"</string>
-    <string name="confirmation_title" msgid="4751119145078041732">"‏تنظیم &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; برای مدیریت کردن <xliff:g id="PROFILE_NAME">%2$s</xliff:g> - &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>‏&lt;/strong&gt;"</string>
-    <string name="profile_summary" msgid="2009764182871566255">"برای مدیریت کردن <xliff:g id="PROFILE_NAME">%2$s</xliff:g> به <xliff:g id="APP_NAME">%1$s</xliff:g> نیاز دارید. <xliff:g id="PRIVILEGES_DISCPLAIMER">%3$s</xliff:g>"</string>
-    <string name="consent_yes" msgid="4055438216605487056">"بله"</string>
-    <string name="consent_no" msgid="1335543792857823917">"نه متشکرم"</string>
+    <string name="confirmation_title" msgid="814973816731238955">"‏تنظیم &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; برای مدیریت &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_summary" msgid="2059360676631420073">"این برنامه برای مدیریت <xliff:g id="PROFILE_NAME">%1$s</xliff:g> شما لازم است. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"مجاز"</string>
+    <string name="consent_no" msgid="2640796915611404382">"مجاز نیست"</string>
 </resources>
