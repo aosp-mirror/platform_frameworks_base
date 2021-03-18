@@ -1191,12 +1191,14 @@ package android.app.backup {
 
   public class RestoreSet implements android.os.Parcelable {
     ctor public RestoreSet();
-    ctor public RestoreSet(String, String, long);
+    ctor public RestoreSet(@Nullable String, @Nullable String, long);
+    ctor public RestoreSet(@Nullable String, @Nullable String, long, int);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.backup.RestoreSet> CREATOR;
-    field public String device;
-    field public String name;
+    field public final int backupTransportFlags;
+    field @Nullable public String device;
+    field @Nullable public String name;
     field public long token;
   }
 
