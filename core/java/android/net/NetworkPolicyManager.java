@@ -630,9 +630,8 @@ public class NetworkPolicyManager {
      * @param meteredNetwork True if the network is metered.
      * @return true if networking is blocked for the given uid according to current networking
      *         policies.
-     *
-     * @hide
      */
+    @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
     public boolean isUidNetworkingBlocked(int uid, boolean meteredNetwork) {
         try {
             return mService.isUidNetworkingBlocked(uid, meteredNetwork);
@@ -671,9 +670,8 @@ public class NetworkPolicyManager {
      *
      * @param uid The target uid.
      * @return true if the given uid is restricted from doing networking on metered networks.
-     *
-     * @hide
      */
+    @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
     public boolean isUidRestrictedOnMeteredNetworks(int uid) {
         try {
             return mService.isUidRestrictedOnMeteredNetworks(uid);
