@@ -3036,8 +3036,9 @@ public class ConnectivityManager {
      *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
-    public void setGlobalProxy(ProxyInfo p) {
+    public void setGlobalProxy(@Nullable ProxyInfo p) {
         try {
             mService.setGlobalProxy(p);
         } catch (RemoteException e) {
@@ -3052,6 +3053,8 @@ public class ConnectivityManager {
      *        if no global HTTP proxy is set.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @Nullable
     public ProxyInfo getGlobalProxy() {
         try {
             return mService.getGlobalProxy();
@@ -4386,8 +4389,13 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void setAcceptUnvalidated(Network network, boolean accept, boolean always) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD,
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
+    public void setAcceptUnvalidated(@NonNull Network network, boolean accept, boolean always) {
         try {
             mService.setAcceptUnvalidated(network, accept, always);
         } catch (RemoteException e) {
@@ -4409,8 +4417,14 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
-    public void setAcceptPartialConnectivity(Network network, boolean accept, boolean always) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD,
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
+    public void setAcceptPartialConnectivity(@NonNull Network network, boolean accept,
+            boolean always) {
         try {
             mService.setAcceptPartialConnectivity(network, accept, always);
         } catch (RemoteException e) {
@@ -4428,8 +4442,13 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void setAvoidUnvalidated(Network network) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD,
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
+    public void setAvoidUnvalidated(@NonNull Network network) {
         try {
             mService.setAvoidUnvalidated(network);
         } catch (RemoteException e) {
@@ -4559,7 +4578,10 @@ public class ConnectivityManager {
      * Resets all connectivity manager settings back to factory defaults.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
     public void factoryReset() {
         try {
             mService.factoryReset();
