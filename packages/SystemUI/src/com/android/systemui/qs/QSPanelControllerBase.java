@@ -67,6 +67,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private final DumpManager mDumpManager;
     private final FeatureFlags mFeatureFlags;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
+    private boolean mShouldUseSplitNotificationShade;
 
     private int mLastOrientation;
     private String mCachedSpecs = "";
@@ -81,6 +82,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             new QSPanel.OnConfigurationChangedListener() {
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
+                    mShouldUseSplitNotificationShade =
+                            Utils.shouldUseSplitNotificationShade(mFeatureFlags, getResources());
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
                         switchTileLayout(false);
@@ -119,6 +122,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mDumpManager = dumpManager;
         mFeatureFlags = featureFlags;
         mQSLabelFlag = featureFlags.isQSLabelsEnabled();
+        mShouldUseSplitNotificationShade =
+                Utils.shouldUseSplitNotificationShade(mFeatureFlags, getResources());
     }
 
     @Override
@@ -345,7 +350,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     boolean shouldUseHorizontalLayout() {
-        if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, getResources()))  {
+        if (mShouldUseSplitNotificationShade)  {
             return false;
         }
         return mUsingMediaPlayer && mMediaHost.getVisible()
