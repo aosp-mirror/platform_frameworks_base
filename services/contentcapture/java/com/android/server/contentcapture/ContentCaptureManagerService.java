@@ -58,6 +58,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -69,7 +70,6 @@ import android.provider.Settings;
 import android.service.contentcapture.ActivityEvent.ActivityEventType;
 import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.IDataShareReadAdapter;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.Pair;
@@ -173,6 +173,9 @@ public final class ContentCaptureManagerService extends
 
     @GuardedBy("mLock")
     private final Set<String> mPackagesWithShareRequests = new HashSet<>();
+
+    private final RemoteCallbackList<IContentCaptureOptionsCallback> mCallbacks =
+            new RemoteCallbackList<>();
 
     final GlobalContentCaptureOptions mGlobalContentCaptureOptions =
             new GlobalContentCaptureOptions();
@@ -497,16 +500,15 @@ public final class ContentCaptureManagerService extends
     }
 
     void updateOptions(String packageName, ContentCaptureOptions options) {
-        ArraySet<CallbackRecord> records;
-        synchronized (mLock) {
-            records = mContentCaptureManagerServiceStub.mCallbacks.get(packageName);
-            if (records != null) {
-                int N = records.size();
-                for (int i = 0; i < N; i++) {
-                    records.valueAt(i).setContentCaptureOptions(options);
+        mCallbacks.broadcast((callback, pkg) -> {
+            if (pkg.equals(packageName)) {
+                try {
+                    callback.setContentCaptureOptions(options);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to send setContentCaptureOptions(): " + e);
                 }
             }
-        }
+        });
     }
 
     private ActivityManagerInternal getAmInternal() {
@@ -616,8 +618,6 @@ public final class ContentCaptureManagerService extends
     }
 
     final class ContentCaptureManagerServiceStub extends IContentCaptureManager.Stub {
-        @GuardedBy("mLock")
-        private final ArrayMap<String, ArraySet<CallbackRecord>> mCallbacks = new ArrayMap<>();
 
         @Override
         public void startSession(@NonNull IBinder activityToken,
@@ -778,39 +778,19 @@ public final class ContentCaptureManagerService extends
                 IContentCaptureOptionsCallback callback) {
             assertCalledByPackageOwner(packageName);
 
-            CallbackRecord record = new CallbackRecord(callback, packageName);
-            record.registerObserver();
-
-            synchronized (mLock) {
-                ArraySet<CallbackRecord> records = mCallbacks.get(packageName);
-                if (records == null) {
-                    records = new ArraySet<>();
-                }
-                records.add(record);
-                mCallbacks.put(packageName, records);
-            }
+            mCallbacks.register(callback, packageName);
 
             // Set options here in case it was updated before this was registered.
             final int userId = UserHandle.getCallingUserId();
             final ContentCaptureOptions options = mGlobalContentCaptureOptions.getOptions(userId,
                     packageName);
             if (options != null) {
-                record.setContentCaptureOptions(options);
-            }
-        }
-
-        private void unregisterContentCaptureOptionsCallback(CallbackRecord record) {
-            synchronized (mLock) {
-                ArraySet<CallbackRecord> records = mCallbacks.get(record.mPackageName);
-                if (records != null) {
-                    records.remove(record);
-                }
-
-                if (records == null || records.isEmpty()) {
-                    mCallbacks.remove(record.mPackageName);
+                try {
+                    callback.setContentCaptureOptions(options);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to send setContentCaptureOptions(): " + e);
                 }
             }
-            record.unregisterObserver();
         }
 
         @Override
@@ -1275,41 +1255,6 @@ public final class ContentCaptureManagerService extends
             String serviceName = mParentService.mServiceNameResolver.getServiceName(userId);
             ContentCaptureMetricsLogger.writeServiceEvent(eventType, serviceName,
                     mDataShareRequest.getPackageName());
-        }
-    }
-
-    private final class CallbackRecord implements IBinder.DeathRecipient {
-        private final String mPackageName;
-        private final IContentCaptureOptionsCallback mCallback;
-
-        private CallbackRecord(IContentCaptureOptionsCallback callback, String packageName) {
-            mCallback = callback;
-            mPackageName = packageName;
-        }
-
-        private void setContentCaptureOptions(ContentCaptureOptions options) {
-            try {
-                mCallback.setContentCaptureOptions(options);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Unable to send setContentCaptureOptions(): " + e);
-            }
-        }
-
-        private void registerObserver() {
-            try {
-                mCallback.asBinder().linkToDeath(this, 0);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to register callback cleanup " + e);
-            }
-        }
-
-        private void unregisterObserver() {
-            mCallback.asBinder().unlinkToDeath(this, 0);
-        }
-
-        @Override
-        public void binderDied() {
-            mContentCaptureManagerServiceStub.unregisterContentCaptureOptionsCallback(this);
         }
     }
 }
