@@ -11745,6 +11745,7 @@ package android.telephony.ims {
     method @Nullable public android.telephony.ims.RcsContactPresenceTuple getCapabilityTuple(@NonNull String);
     method @NonNull public java.util.List<android.telephony.ims.RcsContactPresenceTuple> getCapabilityTuples();
     method @NonNull public android.net.Uri getContactUri();
+    method @NonNull public java.util.Set<java.lang.String> getFeatureTags();
     method public int getRequestResult();
     method public int getSourceType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -11757,6 +11758,14 @@ package android.telephony.ims {
     field public static final int REQUEST_RESULT_UNKNOWN = 0; // 0x0
     field public static final int SOURCE_TYPE_CACHED = 1; // 0x1
     field public static final int SOURCE_TYPE_NETWORK = 0; // 0x0
+  }
+
+  public static final class RcsContactUceCapability.OptionsBuilder {
+    ctor public RcsContactUceCapability.OptionsBuilder(@NonNull android.net.Uri);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.OptionsBuilder addFeatureTag(@NonNull String);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.OptionsBuilder addFeatureTags(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability build();
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.OptionsBuilder setRequestResult(int);
   }
 
   public static final class RcsContactUceCapability.PresenceBuilder {
@@ -12052,7 +12061,7 @@ package android.telephony.ims.feature {
 package android.telephony.ims.stub {
 
   public interface CapabilityExchangeEventListener {
-    method public void onRemoteCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.List<java.lang.String>, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback) throws android.telephony.ims.ImsException;
+    method public void onRemoteCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.Set<java.lang.String>, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback) throws android.telephony.ims.ImsException;
     method public void onRequestPublishCapabilities(int) throws android.telephony.ims.ImsException;
     method public void onUnpublish() throws android.telephony.ims.ImsException;
   }
@@ -12248,7 +12257,7 @@ package android.telephony.ims.stub {
   public class RcsCapabilityExchangeImplBase {
     ctor public RcsCapabilityExchangeImplBase(@NonNull java.util.concurrent.Executor);
     method public void publishCapabilities(@NonNull String, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.PublishResponseCallback);
-    method public void sendOptionsCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.List<java.lang.String>, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.OptionsResponseCallback);
+    method public void sendOptionsCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.Set<java.lang.String>, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.OptionsResponseCallback);
     method public void subscribeForCapabilities(@NonNull java.util.Collection<android.net.Uri>, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.SubscribeResponseCallback);
     field public static final int COMMAND_CODE_FETCH_ERROR = 3; // 0x3
     field public static final int COMMAND_CODE_GENERIC_FAILURE = 1; // 0x1
