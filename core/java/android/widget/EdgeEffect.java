@@ -69,7 +69,7 @@ public class EdgeEffect {
      * @hide
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.BASE)
     public static final long USE_STRETCH_EDGE_EFFECT_BY_DEFAULT = 171228096L;
 
     /**
