@@ -19,11 +19,11 @@ package android.net.apf;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.content.res.Resources;
+import android.net.ConnectivityResources;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.android.internal.R;
 
 /**
  * APF program support capabilities. APF stands for Android Packet Filtering and it is a flexible
@@ -36,6 +36,8 @@ import com.android.internal.R;
  */
 @SystemApi
 public final class ApfCapabilities implements Parcelable {
+    private static ConnectivityResources sResources;
+
     /**
      * Version of APF instruction set supported for packet filtering. 0 indicates no support for
      * packet filtering using APF programs.
@@ -63,6 +65,14 @@ public final class ApfCapabilities implements Parcelable {
         apfVersionSupported = in.readInt();
         maximumApfProgramSize = in.readInt();
         apfPacketFormat = in.readInt();
+    }
+
+    @NonNull
+    private static synchronized ConnectivityResources getResources(@NonNull Context ctx) {
+        if (sResources == null)  {
+            sResources = new ConnectivityResources(ctx);
+        }
+        return sResources;
     }
 
 
@@ -121,13 +131,43 @@ public final class ApfCapabilities implements Parcelable {
      * @return Whether the APF Filter in the device should filter out IEEE 802.3 Frames.
      */
     public static boolean getApfDrop8023Frames() {
-        return Resources.getSystem().getBoolean(R.bool.config_apfDrop802_3Frames);
+        // TODO(b/183076074): remove reading resources from system resources
+        final Resources systemRes = Resources.getSystem();
+        final int id = systemRes.getIdentifier("config_apfDrop802_3Frames", "bool", "android");
+        return systemRes.getBoolean(id);
+    }
+
+    /**
+     * @return Whether the APF Filter in the device should filter out IEEE 802.3 Frames.
+     * @hide
+     */
+    public static boolean getApfDrop8023Frames(@NonNull Context context) {
+        final ConnectivityResources res = getResources(context);
+        // TODO(b/183076074): use R.bool.config_apfDrop802_3Frames directly
+        final int id = res.get().getIdentifier("config_apfDrop802_3Frames", "bool",
+                res.getResourcesContext().getPackageName());
+        return res.get().getBoolean(id);
     }
 
     /**
      * @return An array of denylisted EtherType, packets with EtherTypes within it will be dropped.
      */
     public static @NonNull int[] getApfEtherTypeBlackList() {
-        return Resources.getSystem().getIntArray(R.array.config_apfEthTypeBlackList);
+        // TODO(b/183076074): remove reading resources from system resources
+        final Resources systemRes = Resources.getSystem();
+        final int id = systemRes.getIdentifier("config_apfEthTypeBlackList", "array", "android");
+        return systemRes.getIntArray(id);
+    }
+
+    /**
+     * @return An array of denylisted EtherType, packets with EtherTypes within it will be dropped.
+     * @hide
+     */
+    public static @NonNull int[] getApfEtherTypeDenyList(@NonNull Context context) {
+        final ConnectivityResources res = getResources(context);
+        // TODO(b/183076074): use R.array.config_apfEthTypeDenyList directly
+        final int id = res.get().getIdentifier("config_apfEthTypeDenyList", "array",
+                res.getResourcesContext().getPackageName());
+        return res.get().getIntArray(id);
     }
 }
