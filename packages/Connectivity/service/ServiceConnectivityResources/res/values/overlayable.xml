@@ -17,10 +17,10 @@
     <overlayable name="ServiceConnectivityResourcesConfig">
         <policy type="product|system|vendor">
             <!-- Configuration values for ConnectivityService -->
+            <item type="array" name="config_legacy_networktype_restore_timers"/>
             <item type="string" name="config_networkCaptivePortalServerUrl"/>
             <item type="integer" name="config_networkTransitionTimeout"/>
             <item type="array" name="config_wakeonlan_supported_interfaces"/>
-
 
         </policy>
     </overlayable>

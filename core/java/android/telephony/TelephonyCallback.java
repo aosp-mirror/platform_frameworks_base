@@ -1353,10 +1353,7 @@ public class TelephonyCallback {
 
     /**
      * Interface for current physical channel configuration listener.
-     *
-     * @hide
      */
-    @SystemApi
     public interface PhysicalChannelConfigListener {
         /**
          * Callback invoked when the current physical channel configuration has changed

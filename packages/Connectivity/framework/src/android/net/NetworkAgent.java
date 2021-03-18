@@ -37,7 +37,6 @@ import android.util.Log;
 import com.android.connectivity.aidl.INetworkAgent;
 import com.android.connectivity.aidl.INetworkAgentRegistry;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Protocol;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -125,7 +124,10 @@ public abstract class NetworkAgent {
      */
     public final int providerId;
 
-    private static final int BASE = Protocol.BASE_NETWORK_AGENT;
+    // ConnectivityService parses message constants from itself and NetworkAgent with MessageUtils
+    // for debugging purposes, and crashes if some messages have the same values.
+    // TODO: have ConnectivityService store message names in different maps and remove this base
+    private static final int BASE = 200;
 
     /**
      * Sent by ConnectivityService to the NetworkAgent to inform it of
