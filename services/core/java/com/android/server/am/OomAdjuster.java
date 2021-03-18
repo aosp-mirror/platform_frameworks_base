@@ -1367,6 +1367,7 @@ public final class OomAdjuster {
         ProcessRecord app;
         int adj;
         boolean foregroundActivities;
+        boolean mHasVisibleActivities;
         int procState;
         int schedGroup;
         int appUid;
@@ -1375,10 +1376,12 @@ public final class OomAdjuster {
         ProcessStateRecord mState;
 
         void initialize(ProcessRecord app, int adj, boolean foregroundActivities,
-                int procState, int schedGroup, int appUid, int logUid, int processStateCurTop) {
+                boolean hasVisibleActivities, int procState, int schedGroup, int appUid,
+                int logUid, int processStateCurTop) {
             this.app = app;
             this.adj = adj;
             this.foregroundActivities = foregroundActivities;
+            this.mHasVisibleActivities = hasVisibleActivities;
             this.procState = procState;
             this.schedGroup = schedGroup;
             this.appUid = appUid;
@@ -1411,6 +1414,7 @@ public final class OomAdjuster {
             mState.setCached(false);
             mState.setEmpty(false);
             foregroundActivities = true;
+            mHasVisibleActivities = true;
         }
 
         @Override
@@ -1436,6 +1440,7 @@ public final class OomAdjuster {
             mState.setCached(false);
             mState.setEmpty(false);
             foregroundActivities = true;
+            mHasVisibleActivities = false;
         }
 
         @Override
@@ -1468,6 +1473,7 @@ public final class OomAdjuster {
             mState.setCached(false);
             mState.setEmpty(false);
             foregroundActivities = true;
+            mHasVisibleActivities = false;
         }
 
         @Override
@@ -1480,6 +1486,7 @@ public final class OomAdjuster {
                             "Raise procstate to cached activity: " + app);
                 }
             }
+            mHasVisibleActivities = false;
         }
     }
 
@@ -1591,12 +1598,14 @@ public final class OomAdjuster {
         int capability = 0;
 
         boolean foregroundActivities = false;
+        boolean hasVisibleActivities = false;
         if (PROCESS_STATE_CUR_TOP == PROCESS_STATE_TOP && app == topApp) {
             // The last app on the list is the foreground app.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
             state.setAdjType("top-activity");
             foregroundActivities = true;
+            hasVisibleActivities = true;
             procState = PROCESS_STATE_CUR_TOP;
             state.bumpAllowStartFgsState(PROCESS_STATE_TOP);
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
@@ -1672,11 +1681,12 @@ public final class OomAdjuster {
         // Examine all activities if not already foreground.
         if (!foregroundActivities && state.getCachedHasActivities()) {
             state.computeOomAdjFromActivitiesIfNecessary(mTmpComputeOomAdjWindowCallback,
-                    adj, foregroundActivities, procState, schedGroup, appUid, logUid,
-                    PROCESS_STATE_CUR_TOP);
+                    adj, foregroundActivities, hasVisibleActivities, procState, schedGroup,
+                    appUid, logUid, PROCESS_STATE_CUR_TOP);
 
             adj = state.getCachedAdj();
             foregroundActivities = state.getCachedForegroundActivities();
+            hasVisibleActivities = state.getCachedHasVisibleActivities();
             procState = state.getCachedProcState();
             schedGroup = state.getCachedSchedGroup();
         }
@@ -2450,6 +2460,7 @@ public final class OomAdjuster {
         state.setCurrentSchedulingGroup(schedGroup);
         state.setCurProcState(procState);
         state.setCurRawProcState(procState);
+        state.updateLastInvisibleTime(hasVisibleActivities);
         state.setHasForegroundActivities(foregroundActivities);
         state.setCompletedAdjSeq(mAdjSeq);
         state.setAllowStartFgs();

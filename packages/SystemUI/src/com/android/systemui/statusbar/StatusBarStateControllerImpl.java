@@ -16,16 +16,23 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_TO_AOD;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
@@ -81,6 +88,8 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     // Record the HISTORY_SIZE most recent states
     private int mHistoryIndex = 0;
     private HistoricalState[] mHistoricalRecords = new HistoricalState[HISTORY_SIZE];
+    // This is used by InteractionJankMonitor to get callback from HWUI.
+    private View mView;
 
     /**
      * If any of the system bars is hidden.
@@ -236,6 +245,11 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
 
     @Override
     public void setDozeAmount(float dozeAmount, boolean animated) {
+        setAndInstrumentDozeAmount(null, dozeAmount, animated);
+    }
+
+    @Override
+    public void setAndInstrumentDozeAmount(View view, float dozeAmount, boolean animated) {
         if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
             if (animated && mDozeAmountTarget == dozeAmount) {
                 return;
@@ -244,6 +258,11 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
             }
         }
 
+        // We don't need a new attached view if we already have one.
+        if ((mView == null || !mView.isAttachedToWindow())
+                && (view != null && view.isAttachedToWindow())) {
+            mView = view;
+        }
         mDozeAmountTarget = dozeAmount;
         if (animated) {
             startDozeAnimation();
@@ -261,6 +280,22 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
         mDarkAnimator = ObjectAnimator.ofFloat(this, SET_DARK_AMOUNT_PROPERTY, mDozeAmountTarget);
         mDarkAnimator.setInterpolator(Interpolators.LINEAR);
         mDarkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
+        mDarkAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                cancelInteractionJankMonitor();
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                endInteractionJankMonitor();
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                beginInteractionJankMonitor();
+            }
+        });
         mDarkAnimator.start();
     }
 
@@ -275,6 +310,24 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
             }
             DejankUtils.stopDetectingBlockingIpcs(tag);
         }
+    }
+
+    private void beginInteractionJankMonitor() {
+        if (mView != null && mView.isAttachedToWindow()) {
+            InteractionJankMonitor.getInstance().begin(mView, getCujType());
+        }
+    }
+
+    private void endInteractionJankMonitor() {
+        InteractionJankMonitor.getInstance().end(getCujType());
+    }
+
+    private void cancelInteractionJankMonitor() {
+        InteractionJankMonitor.getInstance().cancel(getCujType());
+    }
+
+    private int getCujType() {
+        return mIsDozing ? CUJ_LOCKSCREEN_TRANSITION_TO_AOD : CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
     }
 
     @Override

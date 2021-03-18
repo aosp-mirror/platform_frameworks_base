@@ -57,7 +57,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LongSparseArray;
@@ -90,6 +89,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -1207,9 +1207,21 @@ public class AppOpsManager {
      */
     public static final int OP_COARSE_LOCATION_SOURCE = AppProtoEnums.APP_OP_COARSE_LOCATION_SOURCE;
 
+    /**
+     * Allow apps to create the requests to manage the media files without user confirmation.
+     *
+     * @see android.Manifest.permission#MANAGE_MEDIA
+     * @see android.provider.MediaStore#createDeleteRequest(ContentResolver, Collection)
+     * @see android.provider.MediaStore#createTrashRequest(ContentResolver, Collection, boolean)
+     * @see android.provider.MediaStore#createWriteRequest(ContentResolver, Collection)
+     *
+     * @hide
+     */
+    public static final int OP_MANAGE_MEDIA = AppProtoEnums.APP_OP_MANAGE_MEDIA;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 110;
+    public static final int _NUM_OP = 111;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1607,6 +1619,18 @@ public class AppOpsManager {
      */
     public static final String OPSTR_COARSE_LOCATION_SOURCE = "android:coarse_location_source";
 
+    /**
+     * Allow apps to create the requests to manage the media files without user confirmation.
+     *
+     * @see android.Manifest.permission#MANAGE_MEDIA
+     * @see android.provider.MediaStore#createDeleteRequest(ContentResolver, Collection)
+     * @see android.provider.MediaStore#createTrashRequest(ContentResolver, Collection, boolean)
+     * @see android.provider.MediaStore#createWriteRequest(ContentResolver, Collection)
+     *
+     * @hide
+     */
+    public static final String OPSTR_MANAGE_MEDIA = "android:manage_media";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1688,6 +1712,7 @@ public class AppOpsManager {
             OP_MANAGE_ONGOING_CALLS,
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             OP_SCHEDULE_EXACT_ALARM,
+            OP_MANAGE_MEDIA,
     };
 
     /**
@@ -1809,6 +1834,7 @@ public class AppOpsManager {
             OP_SCHEDULE_EXACT_ALARM,            // SCHEDULE_EXACT_ALARM
             OP_FINE_LOCATION,                   // OP_FINE_LOCATION_SOURCE
             OP_COARSE_LOCATION,                 // OP_COARSE_LOCATION_SOURCE
+            OP_MANAGE_MEDIA,                    // MANAGE_MEDIA
     };
 
     /**
@@ -1925,6 +1951,7 @@ public class AppOpsManager {
             OPSTR_SCHEDULE_EXACT_ALARM,
             OPSTR_FINE_LOCATION_SOURCE,
             OPSTR_COARSE_LOCATION_SOURCE,
+            OPSTR_MANAGE_MEDIA,
     };
 
     /**
@@ -2042,6 +2069,7 @@ public class AppOpsManager {
             "SCHEDULE_EXACT_ALARM",
             "FINE_LOCATION_SOURCE",
             "COARSE_LOCATION_SOURCE",
+            "MANAGE_MEDIA",
     };
 
     /**
@@ -2160,6 +2188,7 @@ public class AppOpsManager {
             Manifest.permission.SCHEDULE_EXACT_ALARM,
             null, // no permission for OP_ACCESS_FINE_LOCATION_SOURCE,
             null, // no permission for OP_ACCESS_COARSE_LOCATION_SOURCE,
+            Manifest.permission.MANAGE_MEDIA,
     };
 
     /**
@@ -2278,6 +2307,7 @@ public class AppOpsManager {
             null, // SCHEDULE_EXACT_ALARM
             null, // ACCESS_FINE_LOCATION_SOURCE
             null, // ACCESS_COARSE_LOCATION_SOURCE
+            null, // MANAGE_MEDIA
     };
 
     /**
@@ -2395,6 +2425,7 @@ public class AppOpsManager {
             null, // SCHEDULE_EXACT_ALARM
             null, // ACCESS_FINE_LOCATION_SOURCE
             null, // ACCESS_COARSE_LOCATION_SOURCE
+            null, // MANAGE_MEDIA
     };
 
     /**
@@ -2511,6 +2542,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // SCHEDULE_EXACT_ALARM
             AppOpsManager.MODE_ALLOWED, // ACCESS_FINE_LOCATION_SOURCE
             AppOpsManager.MODE_ALLOWED, // ACCESS_COARSE_LOCATION_SOURCE
+            AppOpsManager.MODE_DEFAULT, // MANAGE_MEDIA
     };
 
     /**
@@ -2631,6 +2663,7 @@ public class AppOpsManager {
             false, // SCHEDULE_EXACT_ALARM
             false, // ACCESS_FINE_LOCATION_SOURCE
             false, // ACCESS_COARSE_LOCATION_SOURCE
+            false, // MANAGE_MEDIA
     };
 
     /**
@@ -8080,8 +8113,8 @@ public class AppOpsManager {
                 } else if (collectionMode == COLLECT_SYNC
                         // Only collect app-ops when the proxy is trusted
                         && (mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
-                        myUid) == PackageManager.PERMISSION_GRANTED || isTrustedVoiceServiceProxy(
-                        mContext, mContext.getOpPackageName(), op, mContext.getUserId()))) {
+                        myUid) == PackageManager.PERMISSION_GRANTED ||
+                        Binder.getCallingUid() == proxiedUid)) {
                     collectNotedOpSync(op, proxiedAttributionTag);
                 }
             }
@@ -8090,28 +8123,6 @@ public class AppOpsManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Checks if the voice recognition service is a trust proxy.
-     *
-     * @return {@code true} if the package is a trust voice recognition service proxy
-     * @hide
-     */
-    public static boolean isTrustedVoiceServiceProxy(Context context, String packageName,
-            int code, int userId) {
-        // This is a workaround for R QPR, new API change is not allowed. We only allow the current
-        // voice recognizer is also the voice interactor to noteproxy op.
-        if (code != OP_RECORD_AUDIO) {
-            return false;
-        }
-        final String voiceRecognitionComponent = Settings.Secure.getStringForUser(
-                context.getContentResolver(), Settings.Secure.VOICE_RECOGNITION_SERVICE, userId);
-
-        final String voiceRecognitionServicePackageName =
-                getComponentPackageNameFromString(voiceRecognitionComponent);
-        return (Objects.equals(packageName, voiceRecognitionServicePackageName))
-                && isPackagePreInstalled(context, packageName, userId);
     }
 
     private static String getComponentPackageNameFromString(String from) {
@@ -8488,8 +8499,7 @@ public class AppOpsManager {
                         // Only collect app-ops when the proxy is trusted
                         && (mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
                         Process.myUid()) == PackageManager.PERMISSION_GRANTED
-                        || isTrustedVoiceServiceProxy(mContext, mContext.getOpPackageName(), opInt,
-                        mContext.getUserId()))) {
+                        || Binder.getCallingUid() == proxiedUid)) {
                     collectNotedOpSync(opInt, proxiedAttributionTag);
                 }
             }
@@ -9138,7 +9148,7 @@ public class AppOpsManager {
                 try {
                     sFullLog = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                             FULL_LOG, false);
-                } catch (SecurityException e) {
+                } catch (Exception e) {
                     // This should not happen, but it may, in rare cases
                     sFullLog = false;
                 }

@@ -15456,8 +15456,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
-        final String currentMode =
-                ConnectivityManager.getPrivateDnsMode(mContext.getContentResolver());
+        final String currentMode = ConnectivityManager.getPrivateDnsMode(mContext);
         switch (currentMode) {
             case ConnectivityManager.PRIVATE_DNS_MODE_OFF:
                 return PRIVATE_DNS_MODE_OFF;

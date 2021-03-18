@@ -95,4 +95,15 @@ public interface FalsingManager {
 
     /** Call to report a ProximityEvent to the FalsingManager. */
     void onProximityEvent(ThresholdSensor.ThresholdSensorEvent proximityEvent);
+
+    /** Adds a {@link FalsingBeliefListener}. */
+    void addFalsingBeliefListener(FalsingBeliefListener listener);
+
+    /** Removes a {@link FalsingBeliefListener}. */
+    void removeFalsingBeliefListener(FalsingBeliefListener listener);
+
+    /** Listener that is alerted when falsing belief level crosses a predfined threshold. */
+    interface FalsingBeliefListener {
+        void onFalse();
+    }
 }

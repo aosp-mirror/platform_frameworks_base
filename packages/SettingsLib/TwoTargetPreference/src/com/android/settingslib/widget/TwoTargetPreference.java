@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.settingslib;
+package com.android.settingslib.widget;
 
-import android.annotation.IntDef;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.annotation.IntDef;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * The Base preference with two target areas divided by a vertical divider
+ */
 public class TwoTargetPreference extends Preference {
 
     @IntDef({ICON_SIZE_DEFAULT, ICON_SIZE_MEDIUM, ICON_SIZE_SMALL})

@@ -104,7 +104,7 @@ public class ActivatableNotificationViewController
 
         @Override
         public boolean onTouch(View v, MotionEvent ev) {
-            boolean result;
+            boolean result = false;
             if (mBlockNextTouch) {
                 mBlockNextTouch = false;
                 return true;
@@ -112,16 +112,20 @@ public class ActivatableNotificationViewController
             if (ev.getAction() == MotionEvent.ACTION_UP) {
                 mView.setLastActionUpTime(SystemClock.uptimeMillis());
             }
-            if (mNeedsDimming && !mAccessibilityManager.isTouchExplorationEnabled()
-                    && mView.isInteractive()) {
+            // With a11y, just do nothing.
+            if (mAccessibilityManager.isTouchExplorationEnabled()) {
+                return false;
+            }
+            if (mNeedsDimming && mView.isInteractive()) {
                 if (mNeedsDimming && !mView.isDimmed()) {
                     // We're actually dimmed, but our content isn't dimmable,
                     // let's ensure we have a ripple
                     return false;
                 }
                 result = mNotificationTapHelper.onTouchEvent(ev, mView.getActualHeight());
-            } else {
-                return false;
+            } else if (ev.getAction() == MotionEvent.ACTION_UP) {
+                // If this is a false tap, capture the even so it doesn't result in a click.
+                return mFalsingManager.isFalseTap(true, 0.1);
             }
             return result;
         }

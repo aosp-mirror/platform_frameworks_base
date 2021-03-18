@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.view.View;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -75,6 +76,15 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
      */
     void setDozeAmount(float dozeAmount, boolean animated);
 
+    /**
+     * Changes the current doze amount, also starts the
+     * {@link com.android.internal.jank.InteractionJankMonitor InteractionJankMonitor} as possible.
+     *
+     * @param view An attached view, which will be used by InteractionJankMonitor.
+     * @param dozeAmount New doze/dark amount.
+     * @param animated If change should be animated or not. This will cancel current animations.
+     */
+    void setAndInstrumentDozeAmount(View view, float dozeAmount, boolean animated);
 
     /**
      * Update the expanded state from {@link StatusBar}'s perspective

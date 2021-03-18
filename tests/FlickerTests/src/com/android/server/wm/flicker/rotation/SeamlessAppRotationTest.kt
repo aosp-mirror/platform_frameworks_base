@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.Presubmit
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -104,12 +103,7 @@ class SeamlessAppRotationTest(
 
         @JvmStatic
         private fun getConfigurations(): List<FlickerTestParameter> {
-            return testFactory.getConfigRotationTests(
-                repetitions = 2,
-                supportedNavigationModes = listOf(
-                    WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                )
-            ).flatMap {
+            return testFactory.getConfigRotationTests(repetitions = 2).flatMap {
                 val defaultRun = it.createConfig(starveUiThread = false)
                 val busyUiRun = it.createConfig(starveUiThread = true)
                 listOf(
