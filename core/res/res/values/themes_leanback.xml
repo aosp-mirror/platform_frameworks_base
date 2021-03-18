@@ -16,6 +16,7 @@
 <resources>
     <style name="Theme.Leanback.Dialog" parent="Theme.Material.BaseDialog">
         <item name="colorBackground">@color/background_leanback_dark</item>
+        <item name="dialogCornerRadius">@dimen/leanback_dialog_corner_radius</item>
         <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
         <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
         <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
@@ -28,6 +29,7 @@
 
     <style name="Theme.Leanback.Settings.Dialog" parent="Theme.Material.Settings.BaseDialog">
         <item name="colorBackground">@color/background_leanback_dark</item>
+        <item name="dialogCornerRadius">@dimen/leanback_dialog_corner_radius</item>
         <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
         <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
         <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
@@ -40,6 +42,7 @@
 
     <style name="Theme.Leanback.Dialog.Alert" parent="Theme.Material.Dialog.BaseAlert">
         <item name="colorBackground">@color/background_leanback_dark</item>
+        <item name="dialogCornerRadius">@dimen/leanback_dialog_corner_radius</item>
         <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
         <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
         <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>
@@ -53,6 +56,7 @@
     <style name="Theme.Leanback.Settings.Dialog.Alert"
            parent="Theme.Material.Settings.Dialog.BaseAlert">
         <item name="colorBackground">@color/background_leanback_dark</item>
+        <item name="dialogCornerRadius">@dimen/leanback_dialog_corner_radius</item>
         <item name="textColorPrimary">@color/primary_text_leanback_dark</item>
         <item name="textColorSecondary">@color/secondary_text_leanback_dark</item>
         <item name="alertDialogStyle">@style/AlertDialog.Leanback</item>

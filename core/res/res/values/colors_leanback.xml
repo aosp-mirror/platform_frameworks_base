@@ -16,7 +16,7 @@
 
 <!-- Colors specific to Leanback themes. -->
 <resources>
-    <color name="background_leanback_dark">#ff324248</color>
+    <color name="background_leanback_dark">#FF1F232B</color>
 
     <color name="primary_text_leanback_dark">#cceeeeee</color>
     <color name="secondary_text_leanback_dark">#99eeeeee</color>
