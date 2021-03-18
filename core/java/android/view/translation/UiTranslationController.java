@@ -100,7 +100,7 @@ public class UiTranslationController {
      * Update the Ui translation state.
      */
     public void updateUiTranslationState(@UiTranslationState int state, TranslationSpec sourceSpec,
-            TranslationSpec destSpec, List<AutofillId> views) {
+            TranslationSpec targetSpec, List<AutofillId> views) {
         if (!mActivity.isResumed() && (state == STATE_UI_TRANSLATION_STARTED
                 || state == STATE_UI_TRANSLATION_RESUMED)) {
             return;
@@ -113,11 +113,11 @@ public class UiTranslationController {
         switch (state) {
             case STATE_UI_TRANSLATION_STARTED:
                 final Pair<TranslationSpec, TranslationSpec> specs =
-                        new Pair<>(sourceSpec, destSpec);
+                        new Pair<>(sourceSpec, targetSpec);
                 if (!mTranslators.containsKey(specs)) {
                     mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
                             UiTranslationController::createTranslatorAndStart,
-                            UiTranslationController.this, sourceSpec, destSpec, views));
+                            UiTranslationController.this, sourceSpec, targetSpec, views));
                 } else {
                     onUiTranslationStarted(mTranslators.get(specs), views);
                 }
@@ -373,12 +373,13 @@ public class UiTranslationController {
      * translation when the Translator is created successfully.
      */
     @WorkerThread
-    private void createTranslatorAndStart(TranslationSpec sourceSpec, TranslationSpec destSpec,
+    private void createTranslatorAndStart(TranslationSpec sourceSpec, TranslationSpec targetSpec,
             List<AutofillId> views) {
-        final Translator translator = createTranslatorIfNeeded(sourceSpec, destSpec);
+        // Create Translator
+        final Translator translator = createTranslatorIfNeeded(sourceSpec, targetSpec);
         if (translator == null) {
-            Log.w(TAG, "Can not create Translator for sourceSpec:" + sourceSpec + " destSpec:"
-                    + destSpec);
+            Log.w(TAG, "Can not create Translator for sourceSpec:" + sourceSpec + " targetSpec:"
+                    + targetSpec);
             return;
         }
         onUiTranslationStarted(translator, views);

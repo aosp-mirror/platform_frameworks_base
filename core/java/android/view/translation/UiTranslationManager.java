@@ -124,7 +124,7 @@ public final class UiTranslationManager {
      * ActivityId)} instead.
      *
      * @param sourceSpec {@link TranslationSpec} for the data to be translated.
-     * @param destSpec {@link TranslationSpec} for the translated data.
+     * @param targetSpec {@link TranslationSpec} for the translated data.
      * @param viewIds A list of the {@link View}'s {@link AutofillId} which needs to be translated
      * @param taskId the Activity Task id which needs ui translation
      * @deprecated Use {@code startTranslation(TranslationSpec, TranslationSpec, List<AutofillId>,
@@ -137,17 +137,17 @@ public final class UiTranslationManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
     @SystemApi
     public void startTranslation(@NonNull TranslationSpec sourceSpec,
-            @NonNull TranslationSpec destSpec, @NonNull List<AutofillId> viewIds,
+            @NonNull TranslationSpec targetSpec, @NonNull List<AutofillId> viewIds,
             int taskId) {
         Objects.requireNonNull(sourceSpec);
-        Objects.requireNonNull(destSpec);
+        Objects.requireNonNull(targetSpec);
         Objects.requireNonNull(viewIds);
         if (viewIds.size() == 0) {
             throw new IllegalArgumentException("Invalid empty views: " + viewIds);
         }
         try {
             mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_STARTED, sourceSpec,
-                    destSpec, viewIds, taskId, mContext.getUserId());
+                    targetSpec, viewIds, taskId, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -157,11 +157,11 @@ public final class UiTranslationManager {
      * Request ui translation for a given Views.
      *
      * @param sourceSpec {@link TranslationSpec} for the data to be translated.
-     * @param destSpec {@link TranslationSpec} for the translated data.
+     * @param targetSpec {@link TranslationSpec} for the translated data.
      * @param viewIds A list of the {@link View}'s {@link AutofillId} which needs to be translated
      * @param activityId the identifier for the Activity which needs ui translation
      * @throws IllegalArgumentException if the no {@link View}'s {@link AutofillId} in the list
-     * @throws NullPointerException the sourceSpec, destSpec, viewIds, activityId or
+     * @throws NullPointerException the sourceSpec, targetSpec, viewIds, activityId or
      *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
      *
      * @hide
@@ -169,11 +169,11 @@ public final class UiTranslationManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
     @SystemApi
     public void startTranslation(@NonNull TranslationSpec sourceSpec,
-            @NonNull TranslationSpec destSpec, @NonNull List<AutofillId> viewIds,
+            @NonNull TranslationSpec targetSpec, @NonNull List<AutofillId> viewIds,
             @NonNull ActivityId activityId) {
         // TODO(b/177789967): Return result code or find a way to notify the status.
         Objects.requireNonNull(sourceSpec);
-        Objects.requireNonNull(destSpec);
+        Objects.requireNonNull(targetSpec);
         Objects.requireNonNull(viewIds);
         Objects.requireNonNull(activityId);
         Objects.requireNonNull(activityId.getToken());
@@ -182,7 +182,7 @@ public final class UiTranslationManager {
         }
         try {
             mService.updateUiTranslationState(STATE_UI_TRANSLATION_STARTED, sourceSpec,
-                    destSpec, viewIds, activityId.getToken(), activityId.getTaskId(),
+                    targetSpec, viewIds, activityId.getToken(), activityId.getTaskId(),
                     mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -208,7 +208,7 @@ public final class UiTranslationManager {
     public void finishTranslation(int taskId) {
         try {
             mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_FINISHED,
-                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */, taskId,
+                    null /* sourceSpec */, null /* targetSpec */, null /* viewIds */, taskId,
                     mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -232,7 +232,7 @@ public final class UiTranslationManager {
             Objects.requireNonNull(activityId);
             Objects.requireNonNull(activityId.getToken());
             mService.updateUiTranslationState(STATE_UI_TRANSLATION_FINISHED,
-                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */,
+                    null /* sourceSpec */, null /* targetSpec */, null /* viewIds */,
                     activityId.getToken(), activityId.getTaskId(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -257,7 +257,7 @@ public final class UiTranslationManager {
     public void pauseTranslation(int taskId) {
         try {
             mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_PAUSED,
-                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */, taskId,
+                    null /* sourceSpec */, null /* targetSpec */, null /* viewIds */, taskId,
                     mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -281,7 +281,7 @@ public final class UiTranslationManager {
             Objects.requireNonNull(activityId);
             Objects.requireNonNull(activityId.getToken());
             mService.updateUiTranslationState(STATE_UI_TRANSLATION_PAUSED,
-                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */,
+                    null /* sourceSpec */, null /* targetSpec */, null /* viewIds */,
                     activityId.getToken(), activityId.getTaskId(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -306,7 +306,7 @@ public final class UiTranslationManager {
     public void resumeTranslation(int taskId) {
         try {
             mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_RESUMED,
-                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */,
+                    null /* sourceSpec */, null /* targetSpec */, null /* viewIds */,
                     taskId, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -330,7 +330,7 @@ public final class UiTranslationManager {
             Objects.requireNonNull(activityId);
             Objects.requireNonNull(activityId.getToken());
             mService.updateUiTranslationState(STATE_UI_TRANSLATION_RESUMED,
-                    null /* sourceSpec */, null /* destSpec*/, null /* viewIds */,
+                    null /* sourceSpec */, null /* targetSpec */, null /* viewIds */,
                     activityId.getToken(), activityId.getTaskId(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

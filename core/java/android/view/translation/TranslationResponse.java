@@ -80,7 +80,7 @@ public final class TranslationResponse implements Parcelable {
         /**
          * Adds {@link TranslationResponseValue} to be translated. The input
          * TranslationResponseValue format should match those provided by the
-         * {@link android.view.translation.Translator}'s destSpec.
+         * {@link android.view.translation.Translator}'s targetSpec.
          *
          * @param value the translated value.
          * @return this Builder.
@@ -102,7 +102,7 @@ public final class TranslationResponse implements Parcelable {
         /**
          * Sets the list of {@link ViewTranslationResponse} to be translated. The input
          * ViewTranslationResponse contains {@link TranslationResponseValue}s whose  format should
-         * match those provided by the {@link android.view.translation.Translator}'s destSpec.
+         * match those provided by the {@link android.view.translation.Translator}'s targetSpec.
          *
          * @param response the translated response.
          * @return this Builder.

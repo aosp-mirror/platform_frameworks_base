@@ -1836,12 +1836,12 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void updateUiTranslationState(IBinder activityToken, int state,
-                TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds) {
+                TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = activityToken;
             args.arg2 = state;
             args.arg3 = sourceSpec;
-            args.arg4 = destSpec;
+            args.arg4 = targetSpec;
             args.arg5 = viewIds;
             sendMessage(H.UPDATE_UI_TRANSLATION_STATE, args);
         }
@@ -4157,13 +4157,13 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void updateUiTranslationState(IBinder activityToken, int state,
-            TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds) {
+            TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds) {
         final ActivityClientRecord r = mActivities.get(activityToken);
         if (r == null) {
             Log.w(TAG, "updateUiTranslationState(): no activity for " + activityToken);
             return;
         }
-        r.activity.updateUiTranslationState(state, sourceSpec, destSpec, viewIds);
+        r.activity.updateUiTranslationState(state, sourceSpec, targetSpec, viewIds);
     }
 
     private static final ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();

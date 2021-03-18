@@ -285,6 +285,5 @@ public abstract class TranslationService extends Service {
                         resultReceiver.send(TranslationManager.STATUS_SYNC_CALL_SUCCESS, bundle);
                     }
                 });
-
     }
 }

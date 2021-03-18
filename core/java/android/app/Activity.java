@@ -8785,11 +8785,11 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     public void updateUiTranslationState(int state, TranslationSpec sourceSpec,
-            TranslationSpec destSpec, List<AutofillId> viewIds) {
+            TranslationSpec targetSpec, List<AutofillId> viewIds) {
         if (mUiTranslationController == null) {
             mUiTranslationController = new UiTranslationController(this, getApplicationContext());
         }
-        mUiTranslationController.updateUiTranslationState(state, sourceSpec, destSpec, viewIds);
+        mUiTranslationController.updateUiTranslationState(state, sourceSpec, targetSpec, viewIds);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {
