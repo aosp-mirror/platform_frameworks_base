@@ -52,13 +52,12 @@ import java.util.concurrent.TimeUnit;
  * Network}s.
  *
  * <p>A VCN connection based on this configuration will be brought up dynamically based on device
- * settings, and filed NetworkRequests. Underlying networks will be selected based on the services
- * required by this configuration (as represented by network capabilities), and must be part of the
- * subscription group under which this configuration is registered (see {@link
+ * settings, and filed NetworkRequests. Underlying Networks must provide INTERNET connectivity, and
+ * must be part of the subscription group under which this configuration is registered (see {@link
  * VcnManager#setVcnConfig}).
  *
- * <p>As an abstraction of a cellular network, services that can be provided by a VCN network, or
- * required for underlying networks are limited to services provided by cellular networks:
+ * <p>As an abstraction of a cellular network, services that can be provided by a VCN network are
+ * limited to services provided by cellular networks:
  *
  * <ul>
  *   <li>{@link NetworkCapabilities#NET_CAPABILITY_MMS}
@@ -214,13 +213,6 @@ public final class VcnGatewayConnectionConfig {
             checkValidCapability(cap);
         }
 
-        Preconditions.checkArgument(
-                mUnderlyingCapabilities != null && !mUnderlyingCapabilities.isEmpty(),
-                "underlyingCapabilities was null or empty");
-        for (Integer cap : getAllUnderlyingCapabilities()) {
-            checkValidCapability(cap);
-        }
-
         Objects.requireNonNull(mRetryIntervalsMs, "retryIntervalsMs was null");
         validateRetryInterval(mRetryIntervalsMs);
 
@@ -295,7 +287,9 @@ public final class VcnGatewayConnectionConfig {
      *
      * @see Builder#addRequiredUnderlyingCapability(int)
      * @see Builder#removeRequiredUnderlyingCapability(int)
+     * @hide
      */
+    // TODO(b/182219992): Remove, and add when per-transport capabilities are supported
     @NonNull
     public int[] getRequiredUnderlyingCapabilities() {
         // Sorted set guarantees ordering
@@ -470,7 +464,9 @@ public final class VcnGatewayConnectionConfig {
          * @return this {@link Builder} instance, for chaining
          * @see VcnGatewayConnectionConfig for a list of capabilities may be required of underlying
          *     networks
+         * @hide
          */
+        // TODO(b/182219992): Remove, and add when per-transport capabilities are supported
         @NonNull
         public Builder addRequiredUnderlyingCapability(
                 @VcnSupportedCapability int underlyingCapability) {
@@ -492,7 +488,9 @@ public final class VcnGatewayConnectionConfig {
          * @return this {@link Builder} instance, for chaining
          * @see VcnGatewayConnectionConfig for a list of capabilities may be required of underlying
          *     networks
+         * @hide
          */
+        // TODO(b/182219992): Remove, and add when per-transport capabilities are supported
         @NonNull
         @SuppressLint("BuilderSetStyle") // For consistency with NetCaps.Builder add/removeCap
         public Builder removeRequiredUnderlyingCapability(
