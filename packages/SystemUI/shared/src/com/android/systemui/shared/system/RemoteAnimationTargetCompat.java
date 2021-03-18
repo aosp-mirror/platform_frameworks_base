@@ -56,6 +56,7 @@ public class RemoteAnimationTargetCompat {
     public final boolean isNotInRecents;
     public final Rect contentInsets;
     public final PictureInPictureParams pictureInPictureParams;
+    public final int rotationChange;
 
     private final SurfaceControl mStartLeash;
 
@@ -74,6 +75,7 @@ public class RemoteAnimationTargetCompat {
         contentInsets = app.contentInsets;
         activityType = app.windowConfiguration.getActivityType();
         pictureInPictureParams = app.pictureInPictureParams;
+        rotationChange = 0;
 
         mStartLeash = app.startLeash;
     }
@@ -102,7 +104,7 @@ public class RemoteAnimationTargetCompat {
         localBounds = new Rect(change.getEndAbsBounds());
         localBounds.offsetTo(change.getEndRelOffset().x, change.getEndRelOffset().y);
         sourceContainerBounds = null;
-        screenSpaceBounds = change.getEndAbsBounds();
+        screenSpaceBounds = new Rect(change.getEndAbsBounds());
         prefixOrderIndex = order;
         // TODO(shell-transitions): I guess we need to send content insets? evaluate how its used.
         contentInsets = new Rect(0, 0, 0, 0);
@@ -115,6 +117,7 @@ public class RemoteAnimationTargetCompat {
         }
         pictureInPictureParams = null;
         mStartLeash = null;
+        rotationChange = change.getEndRotation() - change.getStartRotation();
     }
 
     public static RemoteAnimationTargetCompat[] wrap(RemoteAnimationTarget[] apps) {
