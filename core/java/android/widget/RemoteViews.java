@@ -5339,9 +5339,13 @@ public class RemoteViews implements Parcelable, Filter {
 
     /** @hide */
     public boolean canRecycleView(View v) {
+        Integer previousLayout = (Integer) v.getTag(R.id.widget_frame);
+        if (previousLayout == null) {
+            return false;
+        }
         Integer overrideIdTag = (Integer) v.getTag(R.id.remote_views_override_id);
         int overrideId = overrideIdTag == null ? View.NO_ID : overrideIdTag;
-        return (Integer) v.getTag(R.id.widget_frame) == getLayoutId() && mViewId == overrideId;
+        return previousLayout == getLayoutId() && mViewId == overrideId;
     }
 
     // Note: topLevel should be true only for calls on the topLevel RemoteViews, internal calls
