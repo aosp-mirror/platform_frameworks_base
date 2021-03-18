@@ -61,6 +61,7 @@ package android.content {
 
   public abstract class Context {
     method @NonNull public android.os.UserHandle getUser();
+    field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
