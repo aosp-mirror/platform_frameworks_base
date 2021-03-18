@@ -49,7 +49,6 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.R;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.util.ScreenshotHelper;
-import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
@@ -140,6 +139,7 @@ public class SystemActions extends SystemUI {
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     private final SystemActionsBroadcastReceiver mReceiver;
+    private final Recents mRecents;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
     private final Lazy<StatusBar> mStatusBar;
@@ -150,8 +150,10 @@ public class SystemActions extends SystemUI {
     @Inject
     public SystemActions(Context context,
             NotificationShadeWindowController notificationShadeController,
-            Lazy<StatusBar> statusBar) {
+            Lazy<StatusBar> statusBar,
+            Recents recents) {
         super(context);
+        mRecents = recents;
         mReceiver = new SystemActionsBroadcastReceiver();
         mLocale = mContext.getResources().getConfiguration().getLocales().get(0);
         mA11yManager = (AccessibilityManager) mContext.getSystemService(
@@ -366,15 +368,15 @@ public class SystemActions extends SystemUI {
     }
 
     private void handleRecents() {
-        Dependency.get(Recents.class).toggleRecentApps();
+        mRecents.toggleRecentApps();
     }
 
     private void handleNotifications() {
-        Dependency.get(StatusBar.class).animateExpandNotificationsPanel();
+        mStatusBar.get().animateExpandNotificationsPanel();
     }
 
     private void handleQuickSettings() {
-        Dependency.get(StatusBar.class).animateExpandSettingsPanel(null);
+        mStatusBar.get().animateExpandSettingsPanel(null);
     }
 
     private void handlePowerDialog() {
