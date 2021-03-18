@@ -70,9 +70,10 @@ class BackgroundLaunchProcessController {
     }
 
     boolean areBackgroundActivityStartsAllowed(int pid, int uid, String packageName,
-            boolean appSwitchAllowed, boolean isCheckingForFgsStart, boolean hasVisibleActivities,
-            boolean hasBackgroundActivityStartPrivileges, long lastStopAppSwitchesTime,
-            long lastActivityLaunchTime, long lastActivityFinishTime) {
+            boolean appSwitchAllowed, boolean isCheckingForFgsStart,
+            boolean hasActivityInVisibleTask, boolean hasBackgroundActivityStartPrivileges,
+            long lastStopAppSwitchesTime, long lastActivityLaunchTime,
+            long lastActivityFinishTime) {
         // If app switching is not allowed, we ignore all the start activity grace period
         // exception so apps cannot start itself in onPause() after pressing home button.
         if (appSwitchAllowed) {
@@ -110,7 +111,7 @@ class BackgroundLaunchProcessController {
             return true;
         }
         // Allow if the caller has an activity in any foreground task.
-        if (appSwitchAllowed && hasVisibleActivities) {
+        if (appSwitchAllowed && hasActivityInVisibleTask) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "[Process(" + pid
                         + ")] Activity start allowed: process has activity in foreground task");
