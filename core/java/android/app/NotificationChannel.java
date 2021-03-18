@@ -108,13 +108,13 @@ public final class NotificationChannel implements Parcelable {
      * Extra value for {@link Settings#EXTRA_CHANNEL_FILTER_LIST}. Include to show fields
      * that have to do with editing do not disturb bypass {(@link #setBypassDnd(boolean)}) .
      */
-    public static final String EDIT_ZEN = "dnd";
+    public static final String EDIT_ZEN = "zen";
     /**
      * Extra value for {@link Settings#EXTRA_CHANNEL_FILTER_LIST}. Include to show fields
      * that have to do with editing conversation settings (demoting or restoring a channel to
      * be a Conversation, changing bubble behavior, or setting the priority of a conversation).
      */
-    public static final String EDIT_CONVERSATION = "convo";
+    public static final String EDIT_CONVERSATION = "conversation";
     /**
      * Extra value for {@link Settings#EXTRA_CHANNEL_FILTER_LIST}. Include to show fields
      * that have to do with editing launcher behavior (showing badges)}.
