@@ -2196,7 +2196,7 @@ public class RemoteViews implements Parcelable, Filter {
                 int recycledViewIndex = findViewIndexToRecycle(target, rvToApply);
                 if (recycledViewIndex >= 0) {
                     View child = target.getChildAt(recycledViewIndex);
-                    if (getViewLayoutId(child) == rvToApply.getLayoutId()) {
+                    if (rvToApply.canRecycleView(child)) {
                         if (nextChild < recycledViewIndex) {
                             target.removeViews(nextChild, recycledViewIndex - nextChild);
                         }
@@ -2254,7 +2254,7 @@ public class RemoteViews implements Parcelable, Filter {
                     // application are placed before.
                     ViewTree recycled = target.mChildren.get(recycledViewIndex);
                     // We can only recycle the view if the layout id is the same.
-                    if (getViewLayoutId(recycled.mRoot) == rvToApply.getLayoutId()) {
+                    if (rvToApply.canRecycleView(recycled.mRoot)) {
                         if (recycledViewIndex > nextChild) {
                             target.removeChildren(nextChild, recycledViewIndex - nextChild);
                         }
@@ -3726,7 +3726,8 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * The {@code stableId} will be used to identify a potential view to recycled when the remote
      * view is inflated. Views can be re-used if inserted in the same order, potentially with
-     * some views appearing / disappearing.
+     * some views appearing / disappearing. To be recycled the view must not change the layout
+     * used to inflate it or its view id (see {@link RemoteViews#setViewId}).
      *
      * Note: if a view is re-used, all the actions will be re-applied on it. However, its properties
      * are not reset, so what was applied in previous round will have an effect. As a view may be
@@ -5116,6 +5117,7 @@ public class RemoteViews implements Parcelable, Filter {
         View v = inflater.inflate(rv.getLayoutId(), parent, false);
         if (mViewId != View.NO_ID) {
             v.setId(mViewId);
+            v.setTagInternal(R.id.remote_views_override_id, mViewId);
         }
         v.setTagInternal(R.id.widget_frame, rv.getLayoutId());
         return v;
@@ -5335,6 +5337,13 @@ public class RemoteViews implements Parcelable, Filter {
         reapply(context, v, handler, size, colorResources, true);
     }
 
+    /** @hide */
+    public boolean canRecycleView(View v) {
+        Integer overrideIdTag = (Integer) v.getTag(R.id.remote_views_override_id);
+        int overrideId = overrideIdTag == null ? View.NO_ID : overrideIdTag;
+        return (Integer) v.getTag(R.id.widget_frame) == getLayoutId() && mViewId == overrideId;
+    }
+
     // Note: topLevel should be true only for calls on the topLevel RemoteViews, internal calls
     // should set it to false.
     private void reapply(Context context, View v, InteractionHandler handler, SizeF size,
@@ -5347,7 +5356,7 @@ public class RemoteViews implements Parcelable, Filter {
         // (orientation or size), we throw an exception, since the layouts may be completely
         // unrelated.
         if (hasMultipleLayouts()) {
-            if ((Integer) v.getTag(R.id.widget_frame) != rvToApply.getLayoutId()) {
+            if (!rvToApply.canRecycleView(v)) {
                 throw new RuntimeException("Attempting to re-apply RemoteViews to a view that" +
                         " that does not share the same root layout id.");
             }

@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.Presubmit
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -71,12 +70,7 @@ class ChangeAppRotationTest(
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigRotationTests(
-                    repetitions = 5,
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
-                )
+                .getConfigRotationTests(repetitions = 5)
         }
     }
 }

@@ -95,6 +95,7 @@ final class ActivityManagerConstants extends ContentObserver {
             "process_crash_count_reset_interval";
     static final String KEY_PROCESS_CRASH_COUNT_LIMIT = "process_crash_count_limit";
     static final String KEY_BOOT_TIME_TEMP_ALLOWLIST_DURATION = "boot_time_temp_allowlist_duration";
+    static final String KEY_FG_TO_BG_FGS_GRACE_DURATION = "fg_to_bg_fgs_grace_duration";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -133,6 +134,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final int DEFAULT_PROCESS_CRASH_COUNT_RESET_INTERVAL = 12 * 60 * 60 * 1000;
     private static final int DEFAULT_PROCESS_CRASH_COUNT_LIMIT = 12;
     private static final int DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION = 10 * 1000;
+    private static final long DEFAULT_FG_TO_BG_FGS_GRACE_DURATION = 5 * 1000;
 
 
     // Flag stored in the DeviceConfig API.
@@ -388,6 +390,12 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile long mBootTimeTempAllowlistDuration = DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION;
 
+    /**
+     * The grace period in milliseconds to allow a process to start FGS from background after
+     * switching from foreground to background; currently it's only applicable to its activities.
+     */
+    volatile long mFgToBgFgsGraceDuration = DEFAULT_FG_TO_BG_FGS_GRACE_DURATION;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -574,6 +582,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_BOOT_TIME_TEMP_ALLOWLIST_DURATION:
                                 updateBootTimeTempAllowListDuration();
+                                break;
+                            case KEY_FG_TO_BG_FGS_GRACE_DURATION:
+                                updateFgToBgFgsGraceDuration();
                                 break;
                             default:
                                 break;
@@ -851,6 +862,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION);
     }
 
+    private void updateFgToBgFgsGraceDuration() {
+        mFgToBgFgsGraceDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FG_TO_BG_FGS_GRACE_DURATION,
+                DEFAULT_FG_TO_BG_FGS_GRACE_DURATION);
+    }
+
     private void updateImperceptibleKillExemptions() {
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.clear();
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(mDefaultImperceptibleKillExemptPackages);
@@ -1051,6 +1069,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(MAX_PHANTOM_PROCESSES);
         pw.print("  "); pw.print(KEY_BOOT_TIME_TEMP_ALLOWLIST_DURATION); pw.print("=");
         pw.println(mBootTimeTempAllowlistDuration);
+        pw.print("  "); pw.print(KEY_FG_TO_BG_FGS_GRACE_DURATION); pw.print("=");
+        pw.println(mFgToBgFgsGraceDuration);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

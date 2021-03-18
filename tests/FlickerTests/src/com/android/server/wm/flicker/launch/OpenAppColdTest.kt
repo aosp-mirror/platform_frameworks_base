@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -62,11 +61,7 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
-                )
+                .getConfigNonRotationTests()
         }
     }
 }

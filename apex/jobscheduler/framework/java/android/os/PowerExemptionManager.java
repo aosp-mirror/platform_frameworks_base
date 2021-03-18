@@ -174,6 +174,8 @@ public class PowerExemptionManager {
     public static final int REASON_ALLOWLISTED_PACKAGE = 65;
     /** @hide */
     public static final int REASON_APPOP = 66;
+    /** @hide */
+    public static final int REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD = 67;
 
     /* BG-FGS-launch is allowed by temp-allow-list or system-allow-list.
        Reason code for temp and system allow list starts here.
@@ -334,6 +336,7 @@ public class PowerExemptionManager {
             REASON_EXEMPTED_PACKAGE,
             REASON_ALLOWLISTED_PACKAGE,
             REASON_APPOP,
+            REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD,
             // temp and system allow list reasons.
             REASON_GEOFENCING,
             REASON_PUSH_MESSAGING,
@@ -585,6 +588,8 @@ public class PowerExemptionManager {
                 return "ALLOWLISTED_PACKAGE";
             case REASON_APPOP:
                 return "APPOP";
+            case REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD:
+                return "ACTIVITY_VISIBILITY_GRACE_PERIOD";
             case REASON_GEOFENCING:
                 return "GEOFENCING";
             case REASON_PUSH_MESSAGING:

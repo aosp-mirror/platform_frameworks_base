@@ -2260,6 +2260,8 @@ static void android_media_MediaCodec_native_queueHardwareBuffer(
     c2_status_t c2err = sGrallocAlloc->priorGraphicAllocation(handle, &alloc);
     if (c2err != C2_OK) {
         ALOGW("Failed to wrap AHardwareBuffer into C2GraphicAllocation");
+        native_handle_close(handle);
+        native_handle_delete(handle);
         throwExceptionAsNecessary(env, BAD_VALUE);
         return;
     }

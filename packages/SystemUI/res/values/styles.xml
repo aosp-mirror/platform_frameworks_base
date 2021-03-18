@@ -384,10 +384,6 @@
     <!-- Overridden by values-television/styles.xml with tv-specific settings -->
     <style name="volume_dialog_theme" parent="qs_theme"/>
 
-    <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
-        <item name="android:colorAccent">@color/remote_input_accent</item>
-    </style>
-
     <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
 
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />

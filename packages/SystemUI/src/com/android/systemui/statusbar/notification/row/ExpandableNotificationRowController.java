@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -78,6 +79,7 @@ public class ExpandableNotificationRowController implements NodeController {
     private final ExpandableNotificationRow.CoordinateOnClickListener mOnFeedbackClickListener;
     private final NotificationGutsManager mNotificationGutsManager;
     private final OnUserInteractionCallback mOnUserInteractionCallback;
+    private final FalsingManager mFalsingManager;
     private final FalsingCollector mFalsingCollector;
     private final boolean mAllowLongPress;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
@@ -104,6 +106,7 @@ public class ExpandableNotificationRowController implements NodeController {
             NotificationGutsManager notificationGutsManager,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             OnUserInteractionCallback onUserInteractionCallback,
+            FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             Optional<BubblesManager> bubblesManagerOptional) {
@@ -125,6 +128,7 @@ public class ExpandableNotificationRowController implements NodeController {
         mStatusBarStateController = statusBarStateController;
         mNotificationGutsManager = notificationGutsManager;
         mOnUserInteractionCallback = onUserInteractionCallback;
+        mFalsingManager = falsingManager;
         mOnFeedbackClickListener = mNotificationGutsManager::openGuts;
         mAllowLongPress = allowLongPress;
         mFalsingCollector = falsingCollector;
@@ -150,6 +154,7 @@ public class ExpandableNotificationRowController implements NodeController {
                 mOnExpandClickListener,
                 mMediaManager,
                 mOnFeedbackClickListener,
+                mFalsingManager,
                 mFalsingCollector,
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
