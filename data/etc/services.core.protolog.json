@@ -3307,6 +3307,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/TransitionController.java"
     },
+    "1804245629": {
+      "message": "Attempted to add starting window to token but already cleaned",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "1810019902": {
       "message": "TRANSIT_FLAG_OPEN_BEHIND,  adding %s to mOpeningApps",
       "level": "DEBUG",
