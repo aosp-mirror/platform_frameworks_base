@@ -694,6 +694,7 @@
 
     <!-- Added in S -->
     <protected-broadcast android:name="android.intent.action.REBOOT_READY" />
+    <protected-broadcast android:name="android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
