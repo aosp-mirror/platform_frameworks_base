@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -64,10 +65,12 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
             }
         }
 
+    @Postsubmit
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() =
         super.appWindowReplacesLauncherAsTopWindow()
 
+    @Postsubmit
     @Test
     override fun wallpaperWindowBecomesInvisible() {
         testSpec.wallpaperWindowBecomesInvisible()
@@ -75,58 +78,16 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
 
     @Presubmit
     @Test
-    override fun statusBarLayerIsAlwaysVisible() {
-        Assume.assumeTrue(testSpec.isRotated)
-        super.statusBarLayerIsAlwaysVisible()
-    }
-
-    @Presubmit
-    @Test
-    override fun navBarLayerIsAlwaysVisible() {
-        Assume.assumeTrue(testSpec.isRotated)
-        super.navBarLayerIsAlwaysVisible()
+    override fun navBarLayerRotatesAndScales() {
+        Assume.assumeFalse(testSpec.isRotated)
+        super.navBarLayerRotatesAndScales()
     }
 
     @FlakyTest
     @Test
-    fun statusBarLayerIsAlwaysVisible_Flaky() {
-        Assume.assumeFalse(testSpec.isRotated)
-        super.statusBarLayerIsAlwaysVisible()
-    }
-
-    @FlakyTest
-    @Test
-    fun navBarLayerIsAlwaysVisible_Flaky() {
-        Assume.assumeFalse(testSpec.isRotated)
-        super.navBarLayerIsAlwaysVisible()
-    }
-
-    @Presubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        Assume.assumeFalse(testSpec.isRotated)
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-    }
-
-    @FlakyTest
-    @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry_Flaky() {
+    fun navBarLayerRotatesAndScales_flaky() {
         Assume.assumeTrue(testSpec.isRotated)
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-    }
-
-    @Presubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        Assume.assumeFalse(testSpec.isRotated)
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
-
-    @FlakyTest
-    @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+        super.navBarLayerRotatesAndScales()
     }
 
     companion object {
