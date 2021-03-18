@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -58,6 +59,7 @@ public class AppSearchManagerService extends SystemService {
     private static final String TAG = "AppSearchManagerService";
     private PackageManagerInternal mPackageManagerInternal;
     private ImplInstanceManager mImplInstanceManager;
+    private UserManager mUserManager;
 
     // Cache of unlocked user ids so we don't have to query UserManager service each time. The
     // "locked" suffix refers to the fact that access to the field should be locked; unrelated to
@@ -74,10 +76,11 @@ public class AppSearchManagerService extends SystemService {
         publishBinderService(Context.APP_SEARCH_SERVICE, new Stub());
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mImplInstanceManager = ImplInstanceManager.getInstance(getContext());
+        mUserManager = getContext().getSystemService(UserManager.class);
     }
 
     @Override
-    public void onUserUnlocked(@NonNull TargetUser user) {
+    public void onUserUnlocking(@NonNull TargetUser user) {
         synchronized (mUnlockedUserIdsLocked) {
             mUnlockedUserIdsLocked.add(user.getUserIdentifier());
         }
@@ -509,7 +512,13 @@ public class AppSearchManagerService extends SystemService {
 
         private void verifyUserUnlocked(int callingUserId) {
             synchronized (mUnlockedUserIdsLocked) {
-                if (!mUnlockedUserIdsLocked.contains(callingUserId)) {
+                // First, check the local copy.
+                if (mUnlockedUserIdsLocked.contains(callingUserId)) {
+                    return;
+                }
+                // If the local copy says the user is locked, check with UM for the actual state,
+                // since the user might just have been unlocked.
+                if (!mUserManager.isUserUnlockingOrUnlocked(UserHandle.of(callingUserId))) {
                     throw new IllegalStateException(
                             "User " + callingUserId + " is locked or not running.");
                 }
