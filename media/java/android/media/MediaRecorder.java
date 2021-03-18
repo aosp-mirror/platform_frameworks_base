@@ -29,6 +29,7 @@ import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.Camera;
+import android.media.metrics.LogSessionId;
 import android.media.permission.Identity;
 import android.os.Build;
 import android.os.Handler;
@@ -130,6 +131,8 @@ public class MediaRecorder implements AudioRouting,
 
     private int mChannelCount;
 
+    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
+
     /**
      * Default constructor.
      *
@@ -165,16 +168,28 @@ public class MediaRecorder implements AudioRouting,
     }
 
     /**
-     * Sets the log session ID for MediaRecorder.
+     *
+     * Sets the {@link LogSessionId} for MediaRecorder.
      *
      * <p>The log session ID is a random 32-byte hexadecimal string that is used for monitoring the
      * MediaRecorder performance.</p>
      *
      * @param id the global ID for monitoring the MediaRecorder performance
-     * @hide
      */
-    public void setLogSessionId(@NonNull String id) {
-        setParameter("log-session-id=" + id);
+    public void setLogSessionId(@NonNull LogSessionId id) {
+        Objects.requireNonNull(id);
+        mLogSessionId = id;
+        setParameter("log-session-id=" + id.getStringId());
+    }
+
+    /**
+     * Returns the {@link LogSessionId} for MediaRecorder.
+     *
+     * @return the global ID for monitoring the MediaRecorder performance
+     */
+    @NonNull
+    public LogSessionId getLogSessionId() {
+        return mLogSessionId;
     }
 
     /**
