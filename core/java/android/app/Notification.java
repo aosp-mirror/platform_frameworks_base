@@ -823,6 +823,17 @@ public class Notification implements Parcelable
     public static final int VISIBILITY_SECRET = -1;
 
     /**
+     * @hide
+     */
+    @IntDef(prefix = "VISIBILITY_", value = {
+            VISIBILITY_PUBLIC,
+            VISIBILITY_PRIVATE,
+            VISIBILITY_SECRET,
+            NotificationManager.VISIBILITY_NO_OVERRIDE
+    })
+    public @interface NotificationVisibilityOverride{};
+
+    /**
      * Notification category: incoming call (voice or video) or similar synchronous communication request.
      */
     public static final String CATEGORY_CALL = "call";
