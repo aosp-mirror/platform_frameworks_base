@@ -16,6 +16,8 @@
 package android.net;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_DEFAULT_MODE;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE;
 import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
 import static android.net.NetworkRequest.Type.LISTEN_FOR_BEST;
@@ -23,8 +25,6 @@ import static android.net.NetworkRequest.Type.REQUEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
 import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 import static android.net.QosCallback.QosCallbackRegistrationException;
-import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
-import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
