@@ -33,6 +33,7 @@ import android.media.voice.KeyphraseModelManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
@@ -342,8 +343,8 @@ public class VoiceInteractionService extends Service {
      * @param keyphrase The keyphrase that's being used, for example "Hello Android".
      * @param locale The locale for which the enrollment needs to be performed.
      * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
-     * contents that can be used to communicate with other processes.
+     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
      * @param sharedMemory The unrestricted data blob provided by the
      * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
@@ -358,7 +359,7 @@ public class VoiceInteractionService extends Service {
     public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
             @SuppressLint("MissingNullability") String keyphrase,  // TODO: nullability properly
             @SuppressLint({"MissingNullability", "UseIcu"}) Locale locale,
-            @Nullable Bundle options,
+            @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
             @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
@@ -370,7 +371,7 @@ public class VoiceInteractionService extends Service {
             @SuppressLint("MissingNullability") String keyphrase,  // TODO: nullability properly
             @SuppressLint({"MissingNullability", "UseIcu"}) Locale locale,
             boolean supportHotwordDetectionService,
-            @Nullable Bundle options,
+            @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
             @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
         if (mSystemService == null) {

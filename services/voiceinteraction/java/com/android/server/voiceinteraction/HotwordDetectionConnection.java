@@ -26,8 +26,8 @@ import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioAttributes;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.service.voice.AlwaysOnHotwordDetector;
@@ -77,7 +77,7 @@ final class HotwordDetectionConnection {
     boolean mBound;
 
     HotwordDetectionConnection(Object lock, Context context, ComponentName serviceName,
-            int userId, boolean bindInstantServiceAllowed, @Nullable Bundle options,
+            int userId, boolean bindInstantServiceAllowed, @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
         mLock = lock;
         mContext = context;
@@ -129,7 +129,7 @@ final class HotwordDetectionConnection {
         }
     }
 
-    void setConfigLocked(Bundle options, SharedMemory sharedMemory) {
+    void setConfigLocked(PersistableBundle options, SharedMemory sharedMemory) {
         mRemoteHotwordDetectionService.run(
                 service -> service.setConfig(options, sharedMemory));
     }

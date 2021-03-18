@@ -43,6 +43,7 @@ import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -401,7 +402,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return mInfo.getSupportsLocalInteraction();
     }
 
-    public void setHotwordDetectionServiceConfigLocked(@Nullable Bundle options,
+    public void setHotwordDetectionServiceConfigLocked(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
         if (DEBUG) {
             Slog.d(TAG, "setHotwordDetectionServiceConfigLocked");
@@ -415,7 +416,6 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             throw new IllegalStateException("Hotword detection service not in isolated process");
         }
         // TODO : Need to check related permissions for hotword detection service
-        // TODO : Sanitize for bundle
 
         if (sharedMemory != null && !sharedMemory.setProtect(OsConstants.PROT_READ)) {
             Slog.w(TAG, "Can't set sharedMemory to be read-only");
