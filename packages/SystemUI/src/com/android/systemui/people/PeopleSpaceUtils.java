@@ -59,6 +59,8 @@ import android.icu.util.MeasureUnit;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
@@ -92,7 +94,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -207,92 +208,6 @@ public class PeopleSpaceUtils {
         return tiles;
     }
 
-    /**
-     * Updates {@code appWidgetIds} with their associated conversation stored, handling a
-     * notification being posted or removed.
-     */
-    public static void updateSingleConversationWidgets(Context context, int[] appWidgetIds,
-            AppWidgetManager appWidgetManager, IPeopleManager peopleManager) {
-        Map<Integer, PeopleSpaceTile> widgetIdToTile = new HashMap<>();
-        for (int appWidgetId : appWidgetIds) {
-            PeopleSpaceTile tile = getPeopleSpaceTile(
-                    context, appWidgetId, appWidgetManager, peopleManager);
-            if (tile == null) {
-                if (DEBUG) Log.d(TAG, "Matching conversation not found for shortcut ID");
-                //TODO: Delete app widget id when crash is fixed (b/172932636)
-                continue;
-            }
-            Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
-            updateAppWidgetViews(appWidgetManager, context, appWidgetId, tile, options);
-            widgetIdToTile.put(appWidgetId, tile);
-        }
-        getBirthdaysOnBackgroundThread(context, appWidgetManager, widgetIdToTile, appWidgetIds);
-    }
-
-    /**
-     * Returns a {@link PeopleSpaceTile} based on the {@code appWidgetId}. If the PeopleSpaceTile
-     * isn't cached, store it in AppWidgetOptions.
-     */
-    @Nullable
-    public static PeopleSpaceTile getPeopleSpaceTile(Context context, int appWidgetId,
-            AppWidgetManager appWidgetManager, IPeopleManager peopleManager) {
-        // First, check if tile is cached in AppWidgetOptions.
-        PeopleSpaceTile tile = AppWidgetOptionsHelper.getPeopleTile(appWidgetManager, appWidgetId);
-        if (tile != null) {
-            if (DEBUG) Log.d(TAG, "People Tile is cached for widget: " + appWidgetId);
-            return tile;
-        }
-
-        // If not, we get the PeopleTileKey from SharedPreferences, retrieve the Conversation from
-        // persisted storage, and cache it in AppWidgetOptions.
-        SharedPreferences widgetSp = context.getSharedPreferences(
-                String.valueOf(appWidgetId),
-                Context.MODE_PRIVATE);
-        PeopleTileKey sharedPreferencesKey = new PeopleTileKey(
-                widgetSp.getString(SHORTCUT_ID, EMPTY_STRING),
-                widgetSp.getInt(USER_ID, INVALID_USER_ID),
-                widgetSp.getString(PACKAGE_NAME, EMPTY_STRING));
-
-        if (!sharedPreferencesKey.isValid()) {
-            Log.e(TAG, "Cannot find shortcut info for widgetId: " + appWidgetId);
-            return null;
-        }
-
-        if (DEBUG) Log.d(TAG, "PeopleTile key is present in sharedPreferences: " + appWidgetId);
-        // If tile is null, we need to retrieve from persisted storage.
-        return getPeopleTileFromPersistentStorage(context, sharedPreferencesKey, peopleManager);
-    }
-
-    /**
-     * Returns a {@link PeopleSpaceTile} based on {@link ConversationChannel} returned by
-     * {@link IPeopleManager}.
-     */
-    public static PeopleSpaceTile getPeopleTileFromPersistentStorage(Context context,
-            PeopleTileKey peopleTileKey, IPeopleManager peopleManager) {
-        try {
-            if (DEBUG) Log.d(TAG, "Retrieving Tile from storage: " + peopleTileKey.toString());
-            LauncherApps launcherApps = context.getSystemService(LauncherApps.class);
-            if (launcherApps == null) {
-                Log.d(TAG, "LauncherApps is null");
-                return null;
-            }
-
-            ConversationChannel channel = peopleManager.getConversation(
-                    peopleTileKey.getPackageName(),
-                    peopleTileKey.getUserId(),
-                    peopleTileKey.getShortcutId());
-            if (channel == null) {
-                Log.d(TAG, "Could not retrieve conversation from storage");
-                return null;
-            }
-
-            return new PeopleSpaceTile.Builder(channel, launcherApps).build();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to retrieve conversation for tile: " + e);
-            return null;
-        }
-    }
-
     /** Returns stored widgets for the conversation specified. */
     public static Set<String> getStoredWidgetIds(SharedPreferences sp, PeopleTileKey key) {
         if (!key.isValid()) {
@@ -345,6 +260,14 @@ public class PeopleSpaceUtils {
         widgetEditor.remove(USER_ID);
         widgetEditor.remove(SHORTCUT_ID);
         widgetEditor.apply();
+    }
+
+    /** Augments a single {@link PeopleSpaceTile} with notification content, if one is present. */
+    public static PeopleSpaceTile augmentSingleTileFromVisibleNotifications(Context context,
+            PeopleSpaceTile tile, NotificationEntryManager notificationEntryManager) {
+        List<PeopleSpaceTile> augmentedTile = augmentTilesFromVisibleNotifications(
+                context, Arrays.asList(tile), notificationEntryManager);
+        return augmentedTile.get(0);
     }
 
     static List<PeopleSpaceTile> augmentTilesFromVisibleNotifications(Context context,
@@ -914,7 +837,7 @@ public class PeopleSpaceUtils {
     }
 
     /** Calls to retrieve birthdays on a background thread. */
-    private static void getBirthdaysOnBackgroundThread(Context context,
+    public static void getBirthdaysOnBackgroundThread(Context context,
             AppWidgetManager appWidgetManager,
             Map<Integer, PeopleSpaceTile> peopleSpaceTiles, int[] appWidgetIds) {
         ThreadUtils.postOnBackgroundThread(
@@ -992,7 +915,8 @@ public class PeopleSpaceUtils {
         removeBirthdayStatusIfPresent(appWidgetManager, context, storedTile, appWidgetId);
     }
 
-    private static void updateAppWidgetViews(AppWidgetManager appWidgetManager,
+    /** Updates the current widget view with provided {@link PeopleSpaceTile}. */
+    public static void updateAppWidgetViews(AppWidgetManager appWidgetManager,
             Context context, int appWidgetId, PeopleSpaceTile tile, Bundle options) {
         if (DEBUG) Log.d(TAG, "Widget: " + appWidgetId + ", " + tile.getUserName());
         RemoteViews views = createRemoteViews(context, tile, appWidgetId, options);
@@ -1047,6 +971,43 @@ public class PeopleSpaceUtils {
             }
         }
         return lookupKeysWithBirthdaysToday;
+    }
+
+    /**
+     * Returns a {@link RemoteViews} preview of a Conversation's People Tile. Returns null if one
+     * is not available.
+     */
+    public static RemoteViews getPreview(Context context, IPeopleManager peopleManager,
+            LauncherApps launcherApps, NotificationEntryManager notificationEntryManager,
+            String shortcutId, UserHandle userHandle, String packageName) {
+        peopleManager = (peopleManager != null) ? peopleManager : IPeopleManager.Stub.asInterface(
+                ServiceManager.getService(Context.PEOPLE_SERVICE));
+        launcherApps = (launcherApps != null) ? launcherApps
+                : context.getSystemService(LauncherApps.class);
+        if (peopleManager == null || launcherApps == null) {
+            return null;
+        }
+
+        ConversationChannel channel;
+        try {
+            channel = peopleManager.getConversation(
+                    packageName, userHandle.getIdentifier(), shortcutId);
+        } catch (Exception e) {
+            Log.w(TAG, "Exception getting tiles: " + e);
+            return null;
+        }
+        PeopleSpaceTile tile = PeopleSpaceUtils.getTile(channel, launcherApps);
+
+        if (tile == null) {
+            if (DEBUG) Log.i(TAG, "No tile was returned");
+            return null;
+        }
+        PeopleSpaceTile augmentedTile = augmentSingleTileFromVisibleNotifications(
+                context, tile, notificationEntryManager);
+
+        if (DEBUG) Log.i(TAG, "Returning tile preview for shortcutId: " + shortcutId);
+        Bundle bundle = new Bundle();
+        return PeopleSpaceUtils.createRemoteViews(context, augmentedTile, 0, bundle);
     }
 
     /** Returns the userId associated with a {@link PeopleSpaceTile} */

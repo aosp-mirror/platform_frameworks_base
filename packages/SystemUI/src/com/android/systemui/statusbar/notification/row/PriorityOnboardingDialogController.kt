@@ -22,6 +22,7 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.app.Dialog
 import android.content.Context
+import android.content.pm.ShortcutInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
@@ -31,7 +32,6 @@ import android.text.SpannableStringBuilder
 import android.text.style.BulletSpan
 import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.Window
@@ -44,31 +44,36 @@ import android.widget.TextView
 import com.android.systemui.Interpolators.LINEAR_OUT_SLOW_IN
 import com.android.systemui.Prefs
 import com.android.systemui.R
+import com.android.systemui.people.widget.PeopleSpaceWidgetManager
 import com.android.systemui.statusbar.notification.row.NotificationConversationInfo.OnConversationSettingsClickListener
+import com.android.systemui.statusbar.phone.ShadeController
 import javax.inject.Inject
-
 
 /**
  * Controller to handle presenting the priority conversations onboarding dialog
  */
 class PriorityOnboardingDialogController @Inject constructor(
-        val view: View,
-        val context: Context,
-        private val ignoresDnd: Boolean,
-        private val showsAsBubble: Boolean,
-        val icon : Drawable,
-        private val onConversationSettingsClickListener : OnConversationSettingsClickListener,
-        val badge : Drawable
+    val view: View,
+    val context: Context,
+    private val ignoresDnd: Boolean,
+    private val showsAsBubble: Boolean,
+    val icon: Drawable,
+    private val onConversationSettingsClickListener: OnConversationSettingsClickListener,
+    val badge: Drawable,
+    private val peopleSpaceWidgetManager: PeopleSpaceWidgetManager,
+    private val shadeController: ShadeController
 ) {
 
     private lateinit var dialog: Dialog
+    private lateinit var shortcutInfo: ShortcutInfo
     private val OVERSHOOT: Interpolator = PathInterpolator(0.4f, 0f, 0.2f, 1.4f)
     private val IMPORTANCE_ANIM_DELAY = 150L
     private val IMPORTANCE_ANIM_GROW_DURATION = 250L
     private val IMPORTANCE_ANIM_SHRINK_DURATION = 200L
     private val IMPORTANCE_ANIM_SHRINK_DELAY = 25L
 
-    fun init() {
+    fun init(info: ShortcutInfo) {
+        shortcutInfo = info
         initDialog()
     }
 
@@ -78,13 +83,15 @@ class PriorityOnboardingDialogController @Inject constructor(
 
     private fun done() {
         // Log that the user has seen the onboarding
-        Prefs.putBoolean(context, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, true)
+        Prefs.putBoolean(context, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true)
         dialog.dismiss()
+        shadeController.animateCollapsePanels()
+        peopleSpaceWidgetManager.requestPinAppWidget(shortcutInfo)
     }
 
     private fun settings() {
         // Log that the user has seen the onboarding
-        Prefs.putBoolean(context, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, true)
+        Prefs.putBoolean(context, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true)
         dialog.dismiss()
         onConversationSettingsClickListener?.onClick()
     }
@@ -95,9 +102,11 @@ class PriorityOnboardingDialogController @Inject constructor(
         private var ignoresDnd = false
         private var showAsBubble = false
         private lateinit var icon: Drawable
-        private lateinit var onConversationSettingsClickListener
-                : OnConversationSettingsClickListener
-        private lateinit var badge : Drawable
+        private lateinit var onConversationSettingsClickListener:
+                OnConversationSettingsClickListener
+        private lateinit var badge: Drawable
+        private lateinit var peopleSpaceWidgetManager: PeopleSpaceWidgetManager
+        private lateinit var shadeController: ShadeController
 
         fun setView(v: View): Builder {
             view = v
@@ -119,24 +128,36 @@ class PriorityOnboardingDialogController @Inject constructor(
             return this
         }
 
-        fun setIcon(draw : Drawable) : Builder {
+        fun setIcon(draw: Drawable): Builder {
             icon = draw
             return this
         }
-        fun setBadge(badge : Drawable) : Builder {
+        fun setBadge(badge: Drawable): Builder {
             this.badge = badge
             return this
         }
 
-        fun setOnSettingsClick(onClick : OnConversationSettingsClickListener) : Builder {
+        fun setOnSettingsClick(onClick: OnConversationSettingsClickListener): Builder {
             onConversationSettingsClickListener = onClick
+            return this
+        }
+
+        fun setShadeController(shadeController: ShadeController): Builder {
+            this.shadeController = shadeController
+            return this
+        }
+
+        fun setPeopleSpaceWidgetManager(peopleSpaceWidgetManager: PeopleSpaceWidgetManager):
+                Builder {
+            this.peopleSpaceWidgetManager = peopleSpaceWidgetManager
             return this
         }
 
         fun build(): PriorityOnboardingDialogController {
             val controller = PriorityOnboardingDialogController(
                     view, context, ignoresDnd, showAsBubble, icon,
-                    onConversationSettingsClickListener, badge)
+                    onConversationSettingsClickListener, badge, peopleSpaceWidgetManager,
+                    shadeController)
             return controller
         }
     }
@@ -185,8 +206,8 @@ class PriorityOnboardingDialogController @Inject constructor(
             val bgSize = context.resources.getDimensionPixelSize(
                     com.android.internal.R.dimen.conversation_icon_size_badged)
 
-            val animatorUpdateListener: ValueAnimator.AnimatorUpdateListener
-                    = ValueAnimator.AnimatorUpdateListener { animation ->
+            val animatorUpdateListener: ValueAnimator.AnimatorUpdateListener =
+                    ValueAnimator.AnimatorUpdateListener { animation ->
                 val strokeWidth = animation.animatedValue as Int
                 ring.setStroke(strokeWidth, ringColor)
                 val newSize = baseSize + strokeWidth * 2
@@ -199,8 +220,8 @@ class PriorityOnboardingDialogController @Inject constructor(
             growAnimation.duration = IMPORTANCE_ANIM_GROW_DURATION
             growAnimation.addUpdateListener(animatorUpdateListener)
 
-            val shrinkAnimation: ValueAnimator
-                    = ValueAnimator.ofInt(largeThickness, standardThickness)
+            val shrinkAnimation: ValueAnimator =
+                    ValueAnimator.ofInt(largeThickness, standardThickness)
             shrinkAnimation.duration = IMPORTANCE_ANIM_SHRINK_DURATION
             shrinkAnimation.startDelay = IMPORTANCE_ANIM_SHRINK_DELAY
             shrinkAnimation.interpolator = OVERSHOOT
@@ -208,15 +229,14 @@ class PriorityOnboardingDialogController @Inject constructor(
             shrinkAnimation.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?) {
                     // Shrink the badge bg so that it doesn't peek behind the animation
-                    bg.setSize(baseSize, baseSize);
-                    conversationIconBadgeBg.invalidate();
+                    bg.setSize(baseSize, baseSize)
+                    conversationIconBadgeBg.invalidate()
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
                     // Reset bg back to normal size
-                    bg.setSize(bgSize, bgSize);
-                    conversationIconBadgeBg.invalidate();
-
+                    bg.setSize(bgSize, bgSize)
+                    conversationIconBadgeBg.invalidate()
                 }
             })
 
@@ -228,20 +248,20 @@ class PriorityOnboardingDialogController @Inject constructor(
                     R.dimen.conversation_onboarding_bullet_gap_width)
             val description = SpannableStringBuilder()
             description.append(context.getText(R.string.priority_onboarding_show_at_top_text),
-                    BulletSpan(gapWidth),  /* flags */0)
+                    BulletSpan(gapWidth), /* flags */0)
             description.append(System.lineSeparator())
             description.append(context.getText(R.string.priority_onboarding_show_avatar_text),
-                    BulletSpan(gapWidth),  /* flags */0)
+                    BulletSpan(gapWidth), /* flags */0)
             if (showsAsBubble) {
                 description.append(System.lineSeparator())
                 description.append(context.getText(
                         R.string.priority_onboarding_appear_as_bubble_text),
-                        BulletSpan(gapWidth),  /* flags */0)
+                        BulletSpan(gapWidth), /* flags */0)
             }
             if (ignoresDnd) {
                 description.append(System.lineSeparator())
                 description.append(context.getText(R.string.priority_onboarding_ignores_dnd_text),
-                        BulletSpan(gapWidth),  /* flags */0)
+                        BulletSpan(gapWidth), /* flags */0)
             }
             findViewById<TextView>(R.id.behaviors).setText(description)
 
