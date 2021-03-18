@@ -64,6 +64,8 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     Handler mMockShellMainHandler;
     @Mock
     OneHandedUiEventLogger mMockUiEventLogger;
+    @Mock
+    OneHandedSettingsUtil mMockSettingsUtil;
 
     @Before
     public void setUp() {
@@ -80,6 +82,7 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
                 mMockTouchHandler,
                 mMockTutorialHandler,
                 mMockGestureHandler,
+                mMockSettingsUtil,
                 mTimeoutHandler,
                 mMockUiEventLogger,
                 mMockOverlayManager,
