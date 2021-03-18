@@ -43,6 +43,7 @@ import static com.android.server.wm.WindowManagerService.H.LAYOUT_AND_ASSIGN_WIN
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
@@ -102,7 +103,8 @@ class InsetsSourceProvider {
         mSource = source;
         mDisplayContent = displayContent;
         mStateController = stateController;
-        mFakeControl = new InsetsSourceControl(source.getType(), null /* leash */, new Point());
+        mFakeControl = new InsetsSourceControl(
+                source.getType(), null /* leash */, new Point(), Insets.NONE);
 
         switch (source.getType()) {
             case ITYPE_STATUS_BAR:
@@ -246,8 +248,10 @@ class InsetsSourceProvider {
         setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.isVisibleByPolicy());
         updateSourceFrame();
         if (mControl != null) {
+            boolean changed = false;
             final Point position = getWindowFrameSurfacePosition();
             if (mControl.setSurfacePosition(position.x, position.y) && mControlTarget != null) {
+                changed = true;
                 if (!mWin.getWindowFrames().didFrameSizeChange()) {
                     updateLeashPosition(-1 /* frameNumber */);
                 } else if (mWin.mInRelayout) {
@@ -255,6 +259,14 @@ class InsetsSourceProvider {
                 } else {
                     mWin.mPendingPositionChanged = this;
                 }
+            }
+            final Insets insetsHint = mSource.calculateInsets(
+                    mWin.getBounds(), true /* ignoreVisibility */);
+            if (!insetsHint.equals(mControl.getInsetsHint())) {
+                changed = true;
+                mControl.setInsetsHint(insetsHint);
+            }
+            if (changed) {
                 mStateController.notifyControlChanged(mControlTarget);
             }
         }
@@ -343,7 +355,8 @@ class InsetsSourceProvider {
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         mControlTarget = target;
         updateVisibility();
-        mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition);
+        mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition,
+                mSource.calculateInsets(mWin.getBounds(), true /* ignoreVisibility */));
         ProtoLog.d(WM_DEBUG_IME,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
     }
@@ -418,7 +431,7 @@ class InsetsSourceProvider {
                 // to the client in case that the client applies its transaction sooner than ours
                 // that we could unexpectedly overwrite the surface state.
                 return new InsetsSourceControl(mControl.getType(), null /* leash */,
-                        mControl.getSurfacePosition());
+                        mControl.getSurfacePosition(), mControl.getInsetsHint());
             }
             return mControl;
         }

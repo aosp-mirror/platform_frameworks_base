@@ -400,7 +400,7 @@ public class InsetsState implements Parcelable {
      * Retrieves the side for a certain {@code insets}. It is required that only one field l/t/r/b
      * is set in order that this method returns a meaningful result.
      */
-    private @InternalInsetsSide int getInsetSide(Insets insets) {
+    static @InternalInsetsSide int getInsetSide(Insets insets) {
         if (Insets.NONE.equals(insets)) {
             return ISIDE_FLOATING;
         }

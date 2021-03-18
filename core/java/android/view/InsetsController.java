@@ -837,9 +837,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             PendingControlRequest pendingRequest = mPendingImeControlRequest;
             mPendingImeControlRequest = null;
             mHandler.removeCallbacks(mPendingControlTimeout);
+
+            // We are about to playing the default animation. Passing a null frame indicates the
+            // controlled types should be animated regardless of the frame.
             controlAnimationUnchecked(
                     pendingRequest.types, pendingRequest.cancellationSignal,
-                    pendingRequest.listener, mFrame,
+                    pendingRequest.listener, null /* frame */,
                     true /* fromIme */, pendingRequest.durationMs, pendingRequest.interpolator,
                     pendingRequest.animationType,
                     pendingRequest.layoutInsetsDuringAnimation,
@@ -934,7 +937,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void controlAnimationUnchecked(@InsetsType int types,
             @Nullable CancellationSignal cancellationSignal,
-            WindowInsetsAnimationControlListener listener, Rect frame, boolean fromIme,
+            WindowInsetsAnimationControlListener listener, @Nullable Rect frame, boolean fromIme,
             long durationMs, Interpolator interpolator,
             @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
@@ -1358,10 +1361,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 show, hasAnimationCallbacks, types, skipAnim || mAnimationsDisabled,
                 mHost.dipToPx(InternalAnimationControlListener.FLOATING_IME_BOTTOM_INSET));
 
-        // Show/hide animations always need to be relative to the display frame, in order that shown
-        // and hidden state insets are correct.
+        // We are about to playing the default animation (show/hide). Passing a null frame indicates
+        // the controlled types should be animated regardless of the frame.
         controlAnimationUnchecked(
-                types, null /* cancellationSignal */, listener, mState.getDisplayFrame(), fromIme,
+                types, null /* cancellationSignal */, listener, null /* frame */, fromIme,
                 listener.getDurationMs(), listener.getInterpolator(),
                 show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE,
                 show ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN,
