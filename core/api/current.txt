@@ -39093,7 +39093,7 @@ package android.telecom {
     method public android.telecom.Call getParent();
     method public String getRemainingPostDialSequence();
     method @Nullable public android.telecom.Call.RttCall getRttCall();
-    method public int getState();
+    method @Deprecated public int getState();
     method public android.telecom.InCallService.VideoCall getVideoCall();
     method public void handoverTo(android.telecom.PhoneAccountHandle, int, android.os.Bundle);
     method public void hold();
@@ -39188,6 +39188,7 @@ package android.telecom {
     method public android.net.Uri getHandle();
     method public int getHandlePresentation();
     method public android.os.Bundle getIntentExtras();
+    method public final int getState();
     method public android.telecom.StatusHints getStatusHints();
     method public int getVideoState();
     method public static boolean hasProperty(int, int);
