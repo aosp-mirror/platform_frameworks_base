@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -112,7 +111,7 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipAlwaysVisible() = testSpec.assertWm {
         this.showsAppWindow(pipApp.windowName)
