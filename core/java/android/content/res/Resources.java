@@ -360,7 +360,7 @@ public class Resources {
                 WeakReference<Theme> weakThemeRef = mThemeRefs.get(i);
                 Theme theme = weakThemeRef != null ? weakThemeRef.get() : null;
                 if (theme != null) {
-                    theme.setImpl(mResourcesImpl.newThemeImpl(theme.getKey()));
+                    theme.setNewResourcesImpl(mResourcesImpl);
                 }
             }
         }
@@ -1500,6 +1500,9 @@ public class Resources {
      * retrieve XML attributes with style and theme information applied.
      */
     public final class Theme {
+        private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
         @UnsupportedAppUsage
         private ResourcesImpl.ThemeImpl mThemeImpl;
 
@@ -1507,7 +1510,15 @@ public class Resources {
         }
 
         void setImpl(ResourcesImpl.ThemeImpl impl) {
-            mThemeImpl = impl;
+            synchronized (mLock) {
+                mThemeImpl = impl;
+            }
+        }
+
+        void setNewResourcesImpl(ResourcesImpl resImpl) {
+            synchronized (mLock) {
+                mThemeImpl = resImpl.newThemeImpl(mThemeImpl.getKey());
+            }
         }
 
         /**
@@ -1528,7 +1539,9 @@ public class Resources {
          *              if not already defined in the theme.
          */
         public void applyStyle(int resId, boolean force) {
-            mThemeImpl.applyStyle(resId, force);
+            synchronized (mLock) {
+                mThemeImpl.applyStyle(resId, force);
+            }
         }
 
         /**
@@ -1541,7 +1554,11 @@ public class Resources {
          * @param other The existing Theme to copy from.
          */
         public void setTo(Theme other) {
-            mThemeImpl.setTo(other.mThemeImpl);
+            synchronized (mLock) {
+                synchronized (other.mLock) {
+                    mThemeImpl.setTo(other.mThemeImpl);
+                }
+            }
         }
 
         /**
@@ -1566,7 +1583,9 @@ public class Resources {
          */
         @NonNull
         public TypedArray obtainStyledAttributes(@NonNull @StyleableRes int[] attrs) {
-            return mThemeImpl.obtainStyledAttributes(this, null, attrs, 0, 0);
+            synchronized (mLock) {
+                return mThemeImpl.obtainStyledAttributes(this, null, attrs, 0, 0);
+            }
         }
 
         /**
@@ -1594,7 +1613,9 @@ public class Resources {
         public TypedArray obtainStyledAttributes(@StyleRes int resId,
                 @NonNull @StyleableRes int[] attrs)
                 throws NotFoundException {
-            return mThemeImpl.obtainStyledAttributes(this, null, attrs, 0, resId);
+            synchronized (mLock) {
+                return mThemeImpl.obtainStyledAttributes(this, null, attrs, 0, resId);
+            }
         }
 
         /**
@@ -1650,7 +1671,10 @@ public class Resources {
         public TypedArray obtainStyledAttributes(@Nullable AttributeSet set,
                 @NonNull @StyleableRes int[] attrs, @AttrRes int defStyleAttr,
                 @StyleRes int defStyleRes) {
-            return mThemeImpl.obtainStyledAttributes(this, set, attrs, defStyleAttr, defStyleRes);
+            synchronized (mLock) {
+                return mThemeImpl.obtainStyledAttributes(this, set, attrs, defStyleAttr,
+                        defStyleRes);
+            }
         }
 
         /**
@@ -1671,7 +1695,9 @@ public class Resources {
         @NonNull
         @UnsupportedAppUsage
         public TypedArray resolveAttributes(@NonNull int[] values, @NonNull int[] attrs) {
-            return mThemeImpl.resolveAttributes(this, values, attrs);
+            synchronized (mLock) {
+                return mThemeImpl.resolveAttributes(this, values, attrs);
+            }
         }
 
         /**
@@ -1692,7 +1718,9 @@ public class Resources {
          *         <var>outValue</var> is valid, else false.
          */
         public boolean resolveAttribute(int resid, TypedValue outValue, boolean resolveRefs) {
-            return mThemeImpl.resolveAttribute(resid, outValue, resolveRefs);
+            synchronized (mLock) {
+                return mThemeImpl.resolveAttribute(resid, outValue, resolveRefs);
+            }
         }
 
         /**
@@ -1702,7 +1730,9 @@ public class Resources {
          * @hide
          */
         public int[] getAllAttributes() {
-            return mThemeImpl.getAllAttributes();
+            synchronized (mLock) {
+                return mThemeImpl.getAllAttributes();
+            }
         }
 
         /**
@@ -1738,7 +1768,9 @@ public class Resources {
          * @see ActivityInfo
          */
         public @Config int getChangingConfigurations() {
-            return mThemeImpl.getChangingConfigurations();
+            synchronized (mLock) {
+                return mThemeImpl.getChangingConfigurations();
+            }
         }
 
         /**
@@ -1749,23 +1781,31 @@ public class Resources {
          * @param prefix Text to prefix each line printed.
          */
         public void dump(int priority, String tag, String prefix) {
-            mThemeImpl.dump(priority, tag, prefix);
+            synchronized (mLock) {
+                mThemeImpl.dump(priority, tag, prefix);
+            }
         }
 
         // Needed by layoutlib.
         /*package*/ long getNativeTheme() {
-            return mThemeImpl.getNativeTheme();
+            synchronized (mLock) {
+                return mThemeImpl.getNativeTheme();
+            }
         }
 
         /*package*/ int getAppliedStyleResId() {
-            return mThemeImpl.getAppliedStyleResId();
+            synchronized (mLock) {
+                return mThemeImpl.getAppliedStyleResId();
+            }
         }
 
         /**
          * @hide
          */
         public ThemeKey getKey() {
-            return mThemeImpl.getKey();
+            synchronized (mLock) {
+                return mThemeImpl.getKey();
+            }
         }
 
         private String getResourceNameFromHexString(String hexString) {
@@ -1781,7 +1821,9 @@ public class Resources {
          */
         @ViewDebug.ExportedProperty(category = "theme", hasAdjacentMapping = true)
         public String[] getTheme() {
-            return mThemeImpl.getTheme();
+            synchronized (mLock) {
+                return mThemeImpl.getTheme();
+            }
         }
 
         /** @hide */
@@ -1800,7 +1842,9 @@ public class Resources {
          * {@link #applyStyle(int, boolean)}.
          */
         public void rebase() {
-            mThemeImpl.rebase();
+            synchronized (mLock) {
+                mThemeImpl.rebase();
+            }
         }
 
         /**
@@ -1862,12 +1906,14 @@ public class Resources {
         @NonNull
         public int[] getAttributeResolutionStack(@AttrRes int defStyleAttr,
                 @StyleRes int defStyleRes, @StyleRes int explicitStyleRes) {
-            int[] stack = mThemeImpl.getAttributeResolutionStack(
-                    defStyleAttr, defStyleRes, explicitStyleRes);
-            if (stack == null) {
-                return new int[0];
-            } else {
-                return stack;
+            synchronized (mLock) {
+                int[] stack = mThemeImpl.getAttributeResolutionStack(
+                        defStyleAttr, defStyleRes, explicitStyleRes);
+                if (stack == null) {
+                    return new int[0];
+                } else {
+                    return stack;
+                }
             }
         }
     }
