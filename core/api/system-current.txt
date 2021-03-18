@@ -408,7 +408,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public static void setPersistentVrThread(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public boolean startProfile(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public boolean stopProfile(@NonNull android.os.UserHandle);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean switchUser(@NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean switchUser(@NonNull android.os.UserHandle);
   }
 
   public static interface ActivityManager.OnUidImportanceListener {
