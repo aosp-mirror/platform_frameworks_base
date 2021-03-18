@@ -1621,6 +1621,12 @@
     <!-- Name of the alarm status bar icon. -->
     <string name="status_bar_alarm">Alarm</string>
 
+    <!-- Wallet strings -->
+    <!-- Wallet empty state, title [CHAR LIMIT=32] -->
+    <string name="wallet_title">Wallet</string>
+    <!-- Secondary label of the quick access wallet tile. [CHAR LIMIT=32] -->
+    <string name="wallet_secondary_label">Ready</string>
+
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>
 
