@@ -23,6 +23,7 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -45,8 +46,6 @@ import android.widget.FrameLayout;
 
 import com.android.internal.R;
 import com.android.internal.policy.DecorView;
-
-import java.util.function.Consumer;
 
 /**
  * <p>The view which allows an activity to customize its splash screen exit animation.</p>
@@ -79,8 +78,8 @@ public final class SplashScreenView extends FrameLayout {
 
     private Animatable mAnimatableIcon;
     private ValueAnimator mAnimator;
-    private Runnable mAnimationFinishListener;
-    private Consumer<Canvas> mOnDrawCallback;
+    // The host activity when transfer view to it.
+    private Activity mHostActivity;
     // cache original window and status
     private Window mWindow;
     private boolean mDrawBarBackground;
@@ -334,6 +333,17 @@ public final class SplashScreenView extends FrameLayout {
             restoreSystemUIColors();
             mWindow = null;
         }
+        if (mHostActivity != null) {
+            mHostActivity.detachSplashScreenView();
+        }
+    }
+
+    /**
+     * Called when this view is attached to an activity.
+     * @hide
+     */
+    public void attachHostActivity(Activity activity) {
+        mHostActivity = activity;
     }
 
     /**
