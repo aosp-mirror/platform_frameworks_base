@@ -431,4 +431,14 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
         assertThat(mBouncer.inTransit()).isFalse();
     }
+
+    @Test
+    public void testUpdateResources_delegatesToRootView() {
+        mBouncer.ensureView();
+        mBouncer.updateResources();
+
+        // This is mocked, so won't pick up on the call to updateResources via
+        // mKeyguardViewController.init(), only updateResources above.
+        verify(mKeyguardHostViewController).updateResources();
+    }
 }

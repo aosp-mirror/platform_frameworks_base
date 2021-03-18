@@ -2963,6 +2963,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.updateResources();
         }
+        if (mStatusBarKeyguardViewManager != null) {
+            mStatusBarKeyguardViewManager.updateResources();
+        }
 
         mPowerButtonReveal = new PowerButtonReveal(mContext.getResources().getDimensionPixelSize(
                 R.dimen.global_actions_top_padding));
