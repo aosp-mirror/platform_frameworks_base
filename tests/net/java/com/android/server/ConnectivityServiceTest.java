@@ -11396,7 +11396,6 @@ public class ConnectivityServiceTest {
         mSystemDefaultNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
         mDefaultNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
         mProfileDefaultNetworkCallback.assertNoCallback();
-        waitForIdle();
         inOrder.verify(mMockNetd).networkDestroy(mCellNetworkAgent.getNetwork().netId);
 
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
@@ -11415,7 +11414,6 @@ public class ConnectivityServiceTest {
         assertNoCallbacks(mSystemDefaultNetworkCallback, mDefaultNetworkCallback);
         inOrder.verify(mMockNetd).networkAddUidRanges(mCellNetworkAgent.getNetwork().netId,
                 uidRangeFor(testHandle));
-        waitForIdle();
         inOrder.verify(mMockNetd).networkDestroy(workAgent.getNetwork().netId);
 
         mCellNetworkAgent.disconnect();
@@ -11423,6 +11421,8 @@ public class ConnectivityServiceTest {
         mDefaultNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
         mProfileDefaultNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
 
+        // Waiting for the handler to be idle before checking for networkDestroy is necessary
+        // here because ConnectivityService calls onLost before the network is fully torn down.
         waitForIdle();
         inOrder.verify(mMockNetd).networkDestroy(mCellNetworkAgent.getNetwork().netId);
 
@@ -11452,7 +11452,6 @@ public class ConnectivityServiceTest {
         workAgent2.disconnect();
         mProfileDefaultNetworkCallback.expectCallback(CallbackEntry.LOST, workAgent2);
         assertNoCallbacks(mSystemDefaultNetworkCallback, mDefaultNetworkCallback);
-        waitForIdle();
         inOrder.verify(mMockNetd).networkDestroy(workAgent2.getNetwork().netId);
 
         assertNoCallbacks(mSystemDefaultNetworkCallback, mDefaultNetworkCallback,
