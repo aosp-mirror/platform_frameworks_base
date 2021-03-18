@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.service.notification.StatusBarNotification;
@@ -154,6 +155,11 @@ oneway interface IStatusBar
     void onBiometricError(int modality, int error, int vendorCode);
     // Used to hide the authentication dialog, e.g. when the application cancels authentication
     void hideAuthenticationDialog();
+
+    /**
+     * Sets an instance of IUdfpsHbmListener for UdfpsController.
+     */
+    void setUdfpsHbmListener(in IUdfpsHbmListener listener);
 
     /**
      * Notifies System UI that the display is ready to show system decorations.

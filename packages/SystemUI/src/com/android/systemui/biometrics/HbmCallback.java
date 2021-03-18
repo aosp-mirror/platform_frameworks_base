@@ -16,8 +16,10 @@
 
 package com.android.systemui.biometrics;
 
-import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.view.Surface;
+
+import com.android.systemui.biometrics.HbmTypes.HbmType;
 
 /**
  * Interface for controlling the high-brightness mode (HBM). UdfpsView can use this callback to
@@ -26,16 +28,20 @@ import android.view.Surface;
  */
 public interface HbmCallback {
     /**
-     * UdfpsView will call this to enable the HBM before drawing the illumination dot.
+     * UdfpsView will call this to enable the HBM when the fingerprint illumination is needed.
      *
-     * @param surface A valid surface for which the HBM should be enabled.
+     * @param hbmType The type of HBM that should be enabled. See {@link HbmTypes}.
+     * @param surface The surface for which the HBM is requested, in case the HBM implementation
+     *                needs to set special surface flags to enable the HBM. Can be null.
      */
-    void enableHbm(@NonNull Surface surface);
+    void enableHbm(@HbmType int hbmType, @Nullable Surface surface);
 
     /**
      * UdfpsView will call this to disable the HBM when the illumination is not longer needed.
      *
-     * @param surface A valid surface for which the HBM should be disabled.
+     * @param hbmType The type of HBM that should be disabled. See {@link HbmTypes}.
+     * @param surface The surface for which the HBM is requested, in case the HBM implementation
+     *                needs to unset special surface flags to disable the HBM. Can be null.
      */
-    void disableHbm(@NonNull Surface surface);
+    void disableHbm(@HbmType int hbmType, @Nullable Surface surface);
 }
