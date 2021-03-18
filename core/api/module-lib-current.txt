@@ -90,7 +90,7 @@ package android.hardware.usb {
 
   public class UsbManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getGadgetHalVersion();
-    method public int getUsbBandwidth();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getUsbBandwidthMbps();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getUsbHalVersion();
     field public static final int GADGET_HAL_NOT_SUPPORTED = -1; // 0xffffffff
     field public static final int GADGET_HAL_V1_0 = 10; // 0xa

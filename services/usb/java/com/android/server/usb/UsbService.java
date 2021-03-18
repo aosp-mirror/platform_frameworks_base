@@ -639,6 +639,7 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public int getCurrentUsbSpeed() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");
 
         final long ident = Binder.clearCallingIdentity();

@@ -1093,7 +1093,8 @@ public class UsbManager {
      * {@hide}
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public int getUsbBandwidth() {
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public int getUsbBandwidthMbps() {
         int usbSpeed;
 
         try {
