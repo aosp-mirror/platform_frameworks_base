@@ -22,10 +22,7 @@
     <string name="profile_name_watch" msgid="576290739483672360">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‏‎‏‎‏‏‏‏‏‏‏‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎watch‎‏‎‎‏‎"</string>
     <!-- no translation found for confirmation_title (814973816731238955) -->
     <skip />
-    <!-- no translation found for profile_summary (2059360676631420073) -->
-    <skip />
-    <!-- no translation found for consent_yes (8344487259618762872) -->
-    <skip />
-    <!-- no translation found for consent_no (2640796915611404382) -->
-    <skip />
+    <string name="profile_summary" msgid="2059360676631420073">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‏‎‎‏‎‏‎‎‎‏‎‏‎‎‎‏‏‎‎‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‎‏‏‎‎‎‎‏‏‏‎‎‏‎‏‎‏‎‎‏‎This app is needed to manage your ‎‏‎‎‏‏‎<xliff:g id="PROFILE_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎. ‎‏‎‎‏‏‎<xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‎‏‏‎‏‏‎‎‏‎‎‏‎‏‏‏‏‎‎‏‏‏‎‎‏‏‏‏‎‎‏‎‏‏‎‎‏‎‏‏‎‎‎‎‎‎‏‏‏‏‎‎‎‎Allow‎‏‎‎‏‎"</string>
+    <string name="consent_no" msgid="2640796915611404382">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‎‏‎‎‏‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‏‎‎‏‏‏‏‎‏‏‏‏‎‏‏‏‎‎‎‎‏‎‎‎‎‏‎‏‏‏‏‎‎Don’t allow‎‏‎‎‏‎"</string>
 </resources>
