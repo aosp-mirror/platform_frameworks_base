@@ -52315,7 +52315,7 @@ package android.view.textservice {
     method @NonNull public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckerInfos();
     method public boolean isSpellCheckerEnabled();
     method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
-    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean, int);
+    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable java.util.Locale, boolean, int, @Nullable android.os.Bundle, @NonNull java.util.concurrent.Executor, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener);
   }
 
 }

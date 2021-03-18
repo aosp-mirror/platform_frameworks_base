@@ -16,6 +16,7 @@
 
 package android.view.textservice;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -25,6 +26,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -40,6 +43,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * System API to the overall text services, which arbitrates interaction between applications
@@ -161,10 +166,12 @@ public final class TextServicesManager {
      * {@link SuggestionsInfo#RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS} will be passed to the spell
      * checker as supported attributes.
      *
-     * @see #newSpellCheckerSession(Bundle, Locale, SpellCheckerSessionListener, boolean, int)
+     * @see #newSpellCheckerSession(Locale, boolean, int, Bundle, Executor,
+     *      SpellCheckerSessionListener)
      * @param bundle A bundle to pass to the spell checker.
      * @param locale The locale for the spell checker.
      * @param listener A spell checker session lister for getting results from the spell checker.
+     *                 The listener will be called on the calling thread.
      * @param referToSpellCheckerLanguageSettings If true, the session for one of enabled
      *                                            languages in settings will be used.
      * @return A spell checker session from the spell checker.
@@ -174,10 +181,15 @@ public final class TextServicesManager {
             @Nullable Locale locale,
             @NonNull SpellCheckerSessionListener listener,
             boolean referToSpellCheckerLanguageSettings) {
-        return newSpellCheckerSession(bundle, locale, listener, referToSpellCheckerLanguageSettings,
-                SuggestionsInfo.RESULT_ATTR_IN_THE_DICTIONARY
-                        | SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO
-                        | SuggestionsInfo.RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS);
+        // Attributes existed before {@link #newSpellCheckerSession(Locale, boolean, int, Bundle,
+        // Executor, SpellCheckerSessionListener)} was introduced.
+        int supportedAttributes = SuggestionsInfo.RESULT_ATTR_IN_THE_DICTIONARY
+                | SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO
+                | SuggestionsInfo.RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS;
+        // Using the implicit looper to preserve the old behavior.
+        Executor executor = new HandlerExecutor(new Handler());
+        return newSpellCheckerSession(locale, referToSpellCheckerLanguageSettings,
+                supportedAttributes, bundle, executor, listener);
     }
 
     /**
@@ -191,25 +203,28 @@ public final class TextServicesManager {
      * language only (e.g. "en"), the specified locale in Settings (e.g. "en_US") will be
      * selected.
      *
-     * @param bundle A bundle to pass to the spell checker.
      * @param locale The locale for the spell checker.
-     * @param listener A spell checker session lister for getting results from a spell checker.
      * @param referToSpellCheckerLanguageSettings If true, the session for one of enabled
      *                                            languages in settings will be used.
      * @param supportedAttributes A union of {@link SuggestionsInfo} attributes that the spell
      *                            checker can set in the spell checking results.
+     * @param bundle A bundle for passing implementation-specific extra parameters for the spell
+     *               checker. You can check the current spell checker package by
+     *               {@link #getCurrentSpellCheckerInfo()}.
+     * @param executor An executor to call the listener on.
+     * @param listener A spell checker session lister for getting results from a spell checker.
      * @return The spell checker session of the spell checker.
      */
     @Nullable
     public SpellCheckerSession newSpellCheckerSession(
-            @SuppressLint("NullableCollection") @Nullable Bundle bundle,
             @SuppressLint("UseIcu") @Nullable Locale locale,
-            @NonNull SpellCheckerSessionListener listener,
-            @SuppressLint("ListenerLast") boolean referToSpellCheckerLanguageSettings,
-            @SuppressLint("ListenerLast") @SuggestionsInfo.ResultAttrs int supportedAttributes) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
+            boolean referToSpellCheckerLanguageSettings,
+            @SuggestionsInfo.ResultAttrs int supportedAttributes,
+            @Nullable Bundle bundle,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SpellCheckerSessionListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
         if (!referToSpellCheckerLanguageSettings && locale == null) {
             throw new IllegalArgumentException("Locale should not be null if you don't refer"
                     + " settings.");
@@ -259,7 +274,7 @@ public final class TextServicesManager {
         if (subtypeInUse == null) {
             return null;
         }
-        final SpellCheckerSession session = new SpellCheckerSession(sci, this, listener);
+        final SpellCheckerSession session = new SpellCheckerSession(sci, this, listener, executor);
         try {
             mService.getSpellCheckerService(mUserId, sci.getId(), subtypeInUse.getLocale(),
                     session.getTextServicesSessionListener(),
