@@ -75,6 +75,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -109,8 +110,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A service that collects, aggregates, and persists application usage data.
@@ -165,6 +168,11 @@ public class UsageStatsService extends SystemService implements
     private final CopyOnWriteArraySet<Integer> mUserUnlockedStates = new CopyOnWriteArraySet<>();
     private final SparseIntArray mUidToKernelCounter = new SparseIntArray();
     int mUsageSource;
+
+    private long mRealTimeSnapshot;
+    private long mSystemTimeSnapshot;
+    // A map storing last time global usage of packages, measured in milliseconds since the epoch.
+    private final Map<String, Long> mLastTimeComponentUsedGlobal = new ArrayMap<>();
 
     /** Manages the standby state of apps. */
     AppStandbyInternal mAppStandby;
@@ -278,6 +286,9 @@ public class UsageStatsService extends SystemService implements
         filter.addAction(Intent.ACTION_USER_STARTED);
         getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
                 null, mHandler);
+
+        mRealTimeSnapshot = SystemClock.elapsedRealtime();
+        mSystemTimeSnapshot = System.currentTimeMillis();
 
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishLocalService(AppStandbyInternal.class, mAppStandby);
@@ -804,6 +815,28 @@ public class UsageStatsService extends SystemService implements
     }
 
     /**
+     * Assuming the event's timestamp is measured in milliseconds since boot,
+     * convert it to a system wall time. System and real time snapshots are updated before
+     * conversion.
+     */
+    private void convertToSystemTimeLocked(Event event) {
+        final long actualSystemTime = System.currentTimeMillis();
+        if (ENABLE_TIME_CHANGE_CORRECTION) {
+            final long actualRealtime = SystemClock.elapsedRealtime();
+            final long expectedSystemTime =
+                    (actualRealtime - mRealTimeSnapshot) + mSystemTimeSnapshot;
+            final long diffSystemTime = actualSystemTime - expectedSystemTime;
+            if (Math.abs(diffSystemTime) > TIME_CHANGE_THRESHOLD_MILLIS) {
+                // The time has changed.
+                Slog.i(TAG, "Time changed in by " + (diffSystemTime / 1000) + " seconds");
+                mRealTimeSnapshot = actualRealtime;
+                mSystemTimeSnapshot = actualSystemTime;
+            }
+        }
+        event.mTimeStamp = Math.max(0, event.mTimeStamp - mRealTimeSnapshot) + mSystemTimeSnapshot;
+    }
+
+    /**
      * Called by the Binder stub.
      */
     void reportEvent(Event event, int userId) {
@@ -939,6 +972,12 @@ public class UsageStatsService extends SystemService implements
                     } catch (IllegalArgumentException iae) {
                         Slog.w(TAG, "Failed to note usage stop", iae);
                     }
+                    break;
+                case Event.USER_INTERACTION:
+                    // Fall through
+                case Event.APP_COMPONENT_USED:
+                    convertToSystemTimeLocked(event);
+                    mLastTimeComponentUsedGlobal.put(event.mPackage, event.mTimeStamp);
                     break;
             }
 
@@ -2093,6 +2132,16 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void forceUsageSourceSettingRead() {
             readUsageSourceSetting();
+        }
+
+        @Override
+        public long getLastTimeAnyComponentUsed(String packageName) {
+            synchronized (mLock) {
+                // Truncate the returned milliseconds to the boundary of the last day before exact
+                // time for privacy reasons.
+                return mLastTimeComponentUsedGlobal.getOrDefault(packageName, 0L)
+                        / TimeUnit.DAYS.toMillis(1) * TimeUnit.DAYS.toMillis(1);
+            }
         }
     }
 

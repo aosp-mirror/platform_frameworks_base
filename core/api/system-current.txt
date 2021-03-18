@@ -1835,6 +1835,7 @@ package android.app.usage {
   public final class UsageStatsManager {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getAppStandbyBucket(String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.Map<java.lang.String,java.lang.Integer> getAppStandbyBuckets();
+    method @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long getLastTimeAnyComponentUsed(@NonNull String);
     method public int getUsageSource();
     method @RequiresPermission(android.Manifest.permission.BIND_CARRIER_SERVICES) public void onCarrierPrivilegedAppsChanged();
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void registerAppUsageLimitObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @Nullable android.app.PendingIntent);
