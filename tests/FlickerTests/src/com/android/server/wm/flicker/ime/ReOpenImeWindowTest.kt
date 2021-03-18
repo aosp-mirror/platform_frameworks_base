@@ -30,7 +30,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -38,7 +37,6 @@ import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
 import com.android.server.wm.flicker.appLayerReplacesWallpaperLayer
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
@@ -68,11 +66,8 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
             setup {
                 test {
-                    device.wakeUpAndGoToHomeScreen()
                     testApp.launchViaIntent(wmHelper)
                     testApp.openIME(device, wmHelper)
                 }
@@ -89,7 +84,6 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
             }
             teardown {
                 test {
-                    this.setRotation(Surface.ROTATION_0)
                     testApp.exit()
                 }
             }
@@ -192,6 +186,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                 .getConfigNonRotationTests(
                     repetitions = 1,
                     supportedNavigationModes = listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
                         WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                     )
                 )

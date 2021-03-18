@@ -18,8 +18,7 @@ package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -28,16 +27,14 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppHelper
-import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import org.junit.Assume
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -60,13 +57,9 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
             setup {
                 test {
-                    device.wakeUpAndGoToHomeScreen()
                     testApp.launchViaIntent()
-                    this.setRotation(testSpec.config.startRotation)
                 }
                 eachRun {
                     testApp.openIME(device, wmHelper)
@@ -74,8 +67,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
             }
             teardown {
                 test {
-                    testApp.exit()
-                    this.setRotation(Surface.ROTATION_0)
+                    testApp.exit(wmHelper)
                 }
             }
             transitions {
@@ -120,13 +112,31 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun navBarLayerRotatesAndScales() =
+    fun navBarLayerRotatesAndScales() {
+        Assume.assumeFalse(testSpec.isRotated)
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
+    }
+
+    @FlakyTest
+    @Test
+    fun navBarLayerRotatesAndScales_Flaky() {
+        Assume.assumeTrue(testSpec.isRotated)
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
+    }
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() =
+    fun statusBarLayerRotatesScales() {
+        Assume.assumeFalse(testSpec.isRotated)
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)
+    }
+
+    @FlakyTest
+    @Test
+    fun statusBarLayerRotatesScales_Flaky() {
+        Assume.assumeTrue(testSpec.isRotated)
+        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)
+    }
 
     @Presubmit
     @Test
@@ -149,12 +159,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    repetitions = 5,
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
-                )
+                .getConfigNonRotationTests(repetitions = 5)
         }
     }
 }
