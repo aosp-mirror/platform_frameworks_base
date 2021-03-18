@@ -15844,6 +15844,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String BLOCK_UNTRUSTED_TOUCHES_MODE = "block_untrusted_touches";
 
         /**
@@ -15869,6 +15870,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH =
                 "maximum_obscuring_opacity_for_touch";
 
