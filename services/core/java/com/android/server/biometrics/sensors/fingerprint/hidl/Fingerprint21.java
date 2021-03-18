@@ -527,7 +527,9 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         // Fingerprint2.1 keeps track of lockout in the framework. Let's just do it on the handler
         // thread.
         mHandler.post(() -> {
-            mLockoutTracker.resetFailedAttemptsForUser(true /* clearAttemptCounter */, userId);
+            final FingerprintResetLockoutClient client = new FingerprintResetLockoutClient(mContext,
+                    userId, mContext.getOpPackageName(), sensorId, mLockoutTracker);
+            mScheduler.scheduleClientMonitor(client);
         });
     }
 
