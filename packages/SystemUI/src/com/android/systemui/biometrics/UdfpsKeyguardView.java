@@ -73,6 +73,16 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     }
 
     @Override
+    void onIlluminationStarting() {
+        setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    void onIlluminationStopped() {
+        setVisibility(View.VISIBLE);
+    }
+
+    @Override
     public boolean dozeTimeTick() {
         // TODO: burnin
         mFingerprintDrawable.dozeTimeTick();
