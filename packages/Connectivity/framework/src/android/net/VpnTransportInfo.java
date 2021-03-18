@@ -22,9 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.SparseArray;
-
-import com.android.internal.util.MessageUtils;
 
 import java.util.Objects;
 
@@ -38,9 +35,6 @@ import java.util.Objects;
  */
 @SystemApi(client = MODULE_LIBRARIES)
 public final class VpnTransportInfo implements TransportInfo, Parcelable {
-    private static final SparseArray<String> sTypeToString =
-            MessageUtils.findMessageNames(new Class[]{VpnManager.class}, new String[]{"TYPE_VPN_"});
-
     /** Type of this VPN. */
     public final int type;
 
@@ -63,8 +57,7 @@ public final class VpnTransportInfo implements TransportInfo, Parcelable {
 
     @Override
     public String toString() {
-        final String typeString = sTypeToString.get(type, "VPN_TYPE_???");
-        return String.format("VpnTransportInfo{%s}", typeString);
+        return String.format("VpnTransportInfo{type=%d}", type);
     }
 
     @Override

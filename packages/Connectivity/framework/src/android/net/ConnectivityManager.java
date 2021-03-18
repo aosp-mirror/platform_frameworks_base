@@ -64,6 +64,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -76,7 +77,6 @@ import android.util.SparseIntArray;
 import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.Protocol;
 
 import libcore.net.event.NetworkEventDispatcher;
 
@@ -968,6 +968,33 @@ public class ConnectivityManager {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Preference for {@link #setNetworkPreferenceForUser(UserHandle, int, Executor, Runnable)}.
+     * Specify that the traffic for this user should by follow the default rules.
+     * @hide
+     */
+    @SystemApi
+    public static final int PROFILE_NETWORK_PREFERENCE_DEFAULT = 0;
+
+    /**
+     * Preference for {@link #setNetworkPreferenceForUser(UserHandle, int, Executor, Runnable)}.
+     * Specify that the traffic for this user should by default go on a network with
+     * {@link NetworkCapabilities#NET_CAPABILITY_ENTERPRISE}, and on the system default network
+     * if no such network is available.
+     * @hide
+     */
+    @SystemApi
+    public static final int PROFILE_NETWORK_PREFERENCE_ENTERPRISE = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            PROFILE_NETWORK_PREFERENCE_DEFAULT,
+            PROFILE_NETWORK_PREFERENCE_ENTERPRISE
+    })
+    public @interface ProfileNetworkPreference {
     }
 
     /**
@@ -3523,29 +3550,28 @@ public class ConnectivityManager {
         }
     }
 
-    private static final int BASE = Protocol.BASE_CONNECTIVITY_MANAGER;
     /** @hide */
-    public static final int CALLBACK_PRECHECK            = BASE + 1;
+    public static final int CALLBACK_PRECHECK            = 1;
     /** @hide */
-    public static final int CALLBACK_AVAILABLE           = BASE + 2;
+    public static final int CALLBACK_AVAILABLE           = 2;
     /** @hide arg1 = TTL */
-    public static final int CALLBACK_LOSING              = BASE + 3;
+    public static final int CALLBACK_LOSING              = 3;
     /** @hide */
-    public static final int CALLBACK_LOST                = BASE + 4;
+    public static final int CALLBACK_LOST                = 4;
     /** @hide */
-    public static final int CALLBACK_UNAVAIL             = BASE + 5;
+    public static final int CALLBACK_UNAVAIL             = 5;
     /** @hide */
-    public static final int CALLBACK_CAP_CHANGED         = BASE + 6;
+    public static final int CALLBACK_CAP_CHANGED         = 6;
     /** @hide */
-    public static final int CALLBACK_IP_CHANGED          = BASE + 7;
+    public static final int CALLBACK_IP_CHANGED          = 7;
     /** @hide obj = NetworkCapabilities, arg1 = seq number */
-    private static final int EXPIRE_LEGACY_REQUEST       = BASE + 8;
+    private static final int EXPIRE_LEGACY_REQUEST       = 8;
     /** @hide */
-    public static final int CALLBACK_SUSPENDED           = BASE + 9;
+    public static final int CALLBACK_SUSPENDED           = 9;
     /** @hide */
-    public static final int CALLBACK_RESUMED             = BASE + 10;
+    public static final int CALLBACK_RESUMED             = 10;
     /** @hide */
-    public static final int CALLBACK_BLK_CHANGED         = BASE + 11;
+    public static final int CALLBACK_BLK_CHANGED         = 11;
 
     /** @hide */
     public static String getCallbackName(int whichCallback) {
@@ -4241,9 +4267,27 @@ public class ConnectivityManager {
     }
 
     /**
-     * @hide
+     * Registers to receive notifications about the best matching network which satisfy the given
+     * {@link NetworkRequest}.  The callbacks will continue to be called until
+     * either the application exits or {@link #unregisterNetworkCallback(NetworkCallback)} is
+     * called.
+     *
+     * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
+     * number of outstanding requests to 100 per app (identified by their UID), shared with
+     * {@link #registerNetworkCallback} and its variants and {@link #requestNetwork} as well as
+     * {@link ConnectivityDiagnosticsManager#registerConnectivityDiagnosticsCallback}.
+     * Requesting a network with this method will count toward this limit. If this limit is
+     * exceeded, an exception will be thrown. To avoid hitting this issue and to conserve resources,
+     * make sure to unregister the callbacks with
+     * {@link #unregisterNetworkCallback(NetworkCallback)}.
+     *
+     *
+     * @param request {@link NetworkRequest} describing this request.
+     * @param networkCallback The {@link NetworkCallback} that the system will call as suitable
+     *                        networks change state.
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     * @throws RuntimeException if the app already has too many callbacks registered.
      */
-    // TODO: Make it public api.
     @SuppressLint("ExecutorRegistration")
     public void registerBestMatchingNetworkCallback(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
@@ -5049,19 +5093,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Listener for {@link #setOemNetworkPreference(OemNetworkPreferences, Executor,
-     * OnSetOemNetworkPreferenceListener)}.
-     * @hide
-     */
-    @SystemApi
-    public interface OnSetOemNetworkPreferenceListener {
-        /**
-         * Called when setOemNetworkPreference() successfully completes.
-         */
-        void onComplete();
-    }
-
-    /**
      * Used by automotive devices to set the network preferences used to direct traffic at an
      * application level as per the given OemNetworkPreferences. An example use-case would be an
      * automotive OEM wanting to provide connectivity for applications critical to the usage of a
@@ -5083,16 +5114,16 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE)
     public void setOemNetworkPreference(@NonNull final OemNetworkPreferences preference,
             @Nullable @CallbackExecutor final Executor executor,
-            @Nullable final OnSetOemNetworkPreferenceListener listener) {
+            @Nullable final Runnable listener) {
         Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
         if (null != listener) {
             Objects.requireNonNull(executor, "Executor must be non-null");
         }
-        final IOnSetOemNetworkPreferenceListener listenerInternal = listener == null ? null :
-                new IOnSetOemNetworkPreferenceListener.Stub() {
+        final IOnCompleteListener listenerInternal = listener == null ? null :
+                new IOnCompleteListener.Stub() {
                     @Override
                     public void onComplete() {
-                        executor.execute(listener::onComplete);
+                        executor.execute(listener::run);
                     }
         };
 
@@ -5100,6 +5131,52 @@ public class ConnectivityManager {
             mService.setOemNetworkPreference(preference, listenerInternal);
         } catch (RemoteException e) {
             Log.e(TAG, "setOemNetworkPreference() failed for preference: " + preference.toString());
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request that a user profile is put by default on a network matching a given preference.
+     *
+     * See the documentation for the individual preferences for a description of the supported
+     * behaviors.
+     *
+     * @param profile the profile concerned.
+     * @param preference the preference for this profile.
+     * @param executor an executor to execute the listener on. Optional if listener is null.
+     * @param listener an optional listener to listen for completion of the operation.
+     * @throws IllegalArgumentException if {@code profile} is not a valid user profile.
+     * @throws SecurityException if missing the appropriate permissions.
+     * @hide
+     */
+    // This function is for establishing per-profile default networking and can only be called by
+    // the device policy manager, running as the system server. It would make no sense to call it
+    // on a context for a user because it does not establish a setting on behalf of a user, rather
+    // it establishes a setting for a user on behalf of the DPM.
+    @SuppressLint({"UserHandle"})
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+    public void setProfileNetworkPreference(@NonNull final UserHandle profile,
+            @ProfileNetworkPreference final int preference,
+            @Nullable @CallbackExecutor final Executor executor,
+            @Nullable final Runnable listener) {
+        if (null != listener) {
+            Objects.requireNonNull(executor, "Pass a non-null executor, or a null listener");
+        }
+        final IOnCompleteListener proxy;
+        if (null == listener) {
+            proxy = null;
+        } else {
+            proxy = new IOnCompleteListener.Stub() {
+                @Override
+                public void onComplete() {
+                    executor.execute(listener::run);
+                }
+            };
+        }
+        try {
+            mService.setProfileNetworkPreference(profile, preference, proxy);
+        } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
@@ -5124,8 +5201,7 @@ public class ConnectivityManager {
     /**
      * Get private DNS mode from settings.
      *
-     * @param context The Context to get its ContentResolver to query the private DNS mode from
-     *                settings.
+     * @param context The Context to query the private DNS mode from settings.
      * @return A string of private DNS mode as one of the PRIVATE_DNS_MODE_* constants.
      *
      * @hide

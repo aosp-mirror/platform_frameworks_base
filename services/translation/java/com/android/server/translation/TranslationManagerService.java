@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -200,6 +201,28 @@ public final class TranslationManagerService
                     service.updateUiTranslationStateLocked(state, sourceSpec, destSpec, viewIds,
                             token, taskId);
                 }
+            }
+        }
+
+        @Override
+        public void registerUiTranslationStateCallback(IRemoteCallback callback, int userId) {
+            TranslationManagerServiceImpl service;
+            synchronized (mLock) {
+                service = getServiceForUserLocked(userId);
+            }
+            if (service != null) {
+                service.registerUiTranslationStateCallback(callback, Binder.getCallingUid());
+            }
+        }
+
+        @Override
+        public void unregisterUiTranslationStateCallback(IRemoteCallback callback, int userId) {
+            TranslationManagerServiceImpl service;
+            synchronized (mLock) {
+                service = getServiceForUserLocked(userId);
+            }
+            if (service != null) {
+                service.unregisterUiTranslationStateCallback(callback);
             }
         }
 

@@ -17,6 +17,7 @@
 package android.view.translation;
 
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.view.autofill.AutofillId;
 import android.view.translation.TranslationSpec;
 import com.android.internal.os.IResultReceiver;
@@ -40,4 +41,7 @@ oneway interface ITranslationManager {
     void updateUiTranslationStateByTaskId(int state, in TranslationSpec sourceSpec,
          in TranslationSpec destSpec, in List<AutofillId> viewIds, int taskId,
          int userId);
+
+    void registerUiTranslationStateCallback(in IRemoteCallback callback, int userId);
+    void unregisterUiTranslationStateCallback(in IRemoteCallback callback, int userId);
 }
