@@ -1694,6 +1694,13 @@ package android.app.smartspace {
 
 package android.app.time {
 
+  public final class Capabilities {
+    field public static final int CAPABILITY_NOT_ALLOWED = 20; // 0x14
+    field public static final int CAPABILITY_NOT_APPLICABLE = 30; // 0x1e
+    field public static final int CAPABILITY_NOT_SUPPORTED = 10; // 0xa
+    field public static final int CAPABILITY_POSSESSED = 40; // 0x28
+  }
+
   public final class TimeManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public void addTimeZoneDetectorListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.time.TimeManager.TimeZoneDetectorListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public android.app.time.TimeZoneCapabilitiesAndConfig getTimeZoneCapabilitiesAndConfig();
@@ -1710,10 +1717,6 @@ package android.app.time {
     method public int getConfigureAutoDetectionEnabledCapability();
     method public int getConfigureGeoDetectionEnabledCapability();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int CAPABILITY_NOT_ALLOWED = 20; // 0x14
-    field public static final int CAPABILITY_NOT_APPLICABLE = 30; // 0x1e
-    field public static final int CAPABILITY_NOT_SUPPORTED = 10; // 0xa
-    field public static final int CAPABILITY_POSSESSED = 40; // 0x28
     field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeZoneCapabilities> CREATOR;
   }
 

@@ -21,6 +21,7 @@ import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_TELEPH
 import static com.android.server.timedetector.TimeDetectorStrategy.stringToOrigin;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -28,6 +29,8 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
 
@@ -71,6 +74,7 @@ public final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environme
     @NonNull private final ContentResolver mContentResolver;
     @NonNull private final PowerManager.WakeLock mWakeLock;
     @NonNull private final AlarmManager mAlarmManager;
+    @NonNull private final UserManager mUserManager;
     @NonNull private final int[] mOriginPriorities;
 
     public EnvironmentImpl(@NonNull Context context) {
@@ -82,6 +86,8 @@ public final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environme
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG));
 
         mAlarmManager = Objects.requireNonNull(context.getSystemService(AlarmManager.class));
+
+        mUserManager = Objects.requireNonNull(context.getSystemService(UserManager.class));
 
         mSystemClockUpdateThresholdMillis =
                 SystemProperties.getInt("ro.sys.time_detector_update_diff",
@@ -112,6 +118,14 @@ public final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environme
     @Override
     public int[] autoOriginPriorities() {
         return mOriginPriorities;
+    }
+
+    @Override
+    public ConfigurationInternal configurationInternal(@UserIdInt int userId) {
+        return new ConfigurationInternal.Builder(userId)
+                .setUserConfigAllowed(isUserConfigAllowed(userId))
+                .setAutoDetectionEnabled(isAutoTimeDetectionEnabled())
+                .build();
     }
 
     @Override
@@ -148,6 +162,11 @@ public final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environme
         if (!mWakeLock.isHeld()) {
             Slog.wtf(TAG, "WakeLock " + mWakeLock + " not held");
         }
+    }
+
+    private boolean isUserConfigAllowed(@UserIdInt int userId) {
+        UserHandle userHandle = UserHandle.of(userId);
+        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_DATE_TIME, userHandle);
     }
 
     private static int[] getOriginPriorities(@NonNull Context context) {
