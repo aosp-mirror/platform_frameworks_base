@@ -20,7 +20,6 @@ import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -39,7 +38,6 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -119,32 +117,16 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() {
-        Assume.assumeFalse(testSpec.isRotated)
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
-    }
-
-    @FlakyTest
-    @Test
-    fun navBarLayerRotatesAndScales_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
     }
 
     @Presubmit
     @Test
     fun statusBarLayerRotatesScales() {
-        Assume.assumeFalse(testSpec.isRotated)
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)
     }
 
-    @FlakyTest
-    @Test
-    fun statusBarLayerRotatesScales_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
-        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)
-    }
-
-    @FlakyTest
+    @Presubmit
     @Test
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
@@ -152,7 +134,7 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         }
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
