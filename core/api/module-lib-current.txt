@@ -258,6 +258,7 @@ package android.net {
   public class VpnManager {
     field @Deprecated public static final int TYPE_VPN_LEGACY = 3; // 0x3
     field public static final int TYPE_VPN_NONE = -1; // 0xffffffff
+    field public static final int TYPE_VPN_OEM = 4; // 0x4
     field public static final int TYPE_VPN_PLATFORM = 2; // 0x2
     field public static final int TYPE_VPN_SERVICE = 1; // 0x1
   }
