@@ -16,11 +16,6 @@
 
 package com.android.wm.shell.onehanded;
 
-import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_LONG_IN_SECONDS;
-import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
-import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER;
-import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.ContentResolver;
@@ -77,33 +72,5 @@ public class OneHandedSettingsUtilTest extends OneHandedTestCase {
                 Settings.Secure.TAPS_APP_TO_EXIT, 0);
 
         assertThat(mOnChanged).isFalse();
-    }
-
-    @Test
-    public void testGetSettingsIsOneHandedModeEnabled() {
-        assertThat(OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
-                mContentResolver)).isAnyOf(true, false);
-    }
-
-    @Test
-    public void testGetSettingsTapsAppToExit() {
-        assertThat(OneHandedSettingsUtil.getSettingsTapsAppToExit(
-                mContentResolver)).isAnyOf(true, false);
-    }
-
-    @Test
-    public void testGetSettingsOneHandedModeTimeout() {
-        assertThat(OneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
-                mContentResolver)).isAnyOf(
-                ONE_HANDED_TIMEOUT_NEVER,
-                ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS,
-                ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS,
-                ONE_HANDED_TIMEOUT_LONG_IN_SECONDS);
-    }
-
-    @Test
-    public void testGetSettingsSwipeToNotificationEnabled() {
-        assertThat(OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
-                mContentResolver)).isAnyOf(true, false);
     }
 }
