@@ -2860,7 +2860,7 @@ void IncrementalService::DataLoaderStub::onDump(int fd) {
     dprintf(fd, "        lastPendingReads: \n");
     const auto control = mService.mIncFs->openMount(mHealthPath);
     for (auto&& pendingRead : mLastPendingReads) {
-        dprintf(fd, "          fileId: %s\n", mService.mIncFs->toString(pendingRead.id).c_str());
+        dprintf(fd, "          fileId: %s\n", IncFsWrapper::toString(pendingRead.id).c_str());
         const auto metadata = mService.mIncFs->getMetadata(control, pendingRead.id);
         dprintf(fd, "          metadataHex: %s\n", toHexString(metadata).c_str());
         dprintf(fd, "          blockIndex: %d\n", pendingRead.block);
