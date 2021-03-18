@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
+import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 
 /**
@@ -43,11 +44,10 @@ interface IRecentsAnimationController {
      * accordingly. This should be called before `finish`
      * @param taskId for which the leash should be updated
      * @param destinationBounds bounds of the final PiP window
-     * @param windowCrop bounds to crop as part of final transform.
-     * @param float9 An array of 9 floats to be used as matrix transform.
+     * @param finishTransaction leash operations for the final transform.
      */
-     void setFinishTaskBounds(int taskId, in Rect destinationBounds, in Rect windowCrop,
-             in float[] float9);
+     void setFinishTaskBounds(int taskId, in Rect destinationBounds,
+             in PictureInPictureSurfaceTransaction finishTransaction);
 
     /**
      * Notifies to the system that the animation into Recents should end, and all leashes associated
