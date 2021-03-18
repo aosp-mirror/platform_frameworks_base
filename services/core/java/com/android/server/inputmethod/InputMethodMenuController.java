@@ -200,6 +200,7 @@ public class InputMethodMenuController {
             final Window w = mSwitchingDialog.getWindow();
             final WindowManager.LayoutParams attrs = w.getAttributes();
             w.setType(WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
+            w.setHideOverlayWindows(true);
             // Use an alternate token for the dialog for that window manager can group the token
             // with other IME windows based on type vs. grouping based on whichever token happens
             // to get selected by the system later on.
