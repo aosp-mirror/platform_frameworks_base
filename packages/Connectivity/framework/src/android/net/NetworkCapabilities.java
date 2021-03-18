@@ -22,7 +22,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.ConnectivityManager.NetworkCallback;
@@ -33,7 +32,6 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.Range;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -155,7 +153,7 @@ public final class NetworkCapabilities implements Parcelable {
             setTransportInfo(null);
         }
         mSignalStrength = nc.mSignalStrength;
-        mUids = (nc.mUids == null) ? null : new ArraySet<>(nc.mUids);
+        setUids(nc.mUids); // Will make the defensive copy
         setAdministratorUids(nc.getAdministratorUids());
         mOwnerUid = nc.mOwnerUid;
         mUnwantedNetworkCapabilities = nc.mUnwantedNetworkCapabilities;
@@ -1460,8 +1458,9 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public @NonNull NetworkCapabilities setSingleUid(int uid) {
-        mUids = new ArraySet<>(1);
-        mUids.add(new UidRange(uid, uid));
+        final ArraySet<UidRange> identity = new ArraySet<>(1);
+        identity.add(new UidRange(uid, uid));
+        setUids(identity);
         return this;
     }
 
@@ -1470,34 +1469,22 @@ public final class NetworkCapabilities implements Parcelable {
      * This makes a copy of the set so that callers can't modify it after the call.
      * @hide
      */
-    public @NonNull NetworkCapabilities setUids(@Nullable Set<Range<Integer>> uids) {
-        mUids = UidRange.fromIntRanges(uids);
+    public @NonNull NetworkCapabilities setUids(Set<UidRange> uids) {
+        if (null == uids) {
+            mUids = null;
+        } else {
+            mUids = new ArraySet<>(uids);
+        }
         return this;
     }
 
     /**
      * Get the list of UIDs this network applies to.
      * This returns a copy of the set so that callers can't modify the original object.
-     *
-     * @return the list of UIDs this network applies to. If {@code null}, then the network applies
-     *         to all UIDs.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @SuppressLint("NullableCollection")
-    public @Nullable Set<Range<Integer>> getUids() {
-        return UidRange.toIntRanges(mUids);
-    }
-
-    /**
-     * Get the list of UIDs this network applies to.
-     * This returns a copy of the set so that callers can't modify the original object.
-     * @hide
-     */
-    public @Nullable Set<UidRange> getUidRanges() {
-        if (mUids == null) return null;
-
-        return new ArraySet<>(mUids);
+    public @Nullable Set<UidRange> getUids() {
+        return null == mUids ? null : new ArraySet<>(mUids);
     }
 
     /**
@@ -2664,21 +2651,6 @@ public final class NetworkCapabilities implements Parcelable {
         @NonNull
         public Builder setSubIds(@NonNull final Set<Integer> subIds) {
             mCaps.setSubIds(subIds);
-            return this;
-        }
-
-        /**
-         * Set the list of UIDs this network applies to.
-         *
-         * @param uids the list of UIDs this network applies to, or {@code null} if this network
-         *             applies to all UIDs.
-         * @return this builder
-         * @hide
-         */
-        @NonNull
-        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-        public Builder setUids(@Nullable Set<Range<Integer>> uids) {
-            mCaps.setUids(uids);
             return this;
         }
 
