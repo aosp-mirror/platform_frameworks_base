@@ -70,7 +70,10 @@ cc_library_shared {
         "libz",
     ],
 
-    static_libs: ["libnativehelper_lazy", "libziparchive_for_incfs", ],
+    static_libs: [
+        "libnativehelper_lazy",
+        "libziparchive_for_incfs",
+    ],
 
     export_include_dirs: [
         ".",
@@ -121,6 +124,7 @@ cc_library_shared {
                 "android_view_Surface.cpp",
                 "android_view_SurfaceControl.cpp",
                 "android_view_SurfaceControlFpsListener.cpp",
+                "android_view_SurfaceControlHdrLayerInfoListener.cpp",
                 "android_graphics_BLASTBufferQueue.cpp",
                 "android_view_SurfaceSession.cpp",
                 "android_view_TextureView.cpp",
