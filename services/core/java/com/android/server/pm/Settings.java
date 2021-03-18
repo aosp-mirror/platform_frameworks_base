@@ -476,10 +476,6 @@ public final class Settings {
         return mRenamedPackages.put(pkgName, origPkgName);
     }
 
-    void removeRenamedPackageLPw(String pkgName) {
-        mRenamedPackages.remove(pkgName);
-    }
-
     public boolean canPropagatePermissionToInstantApp(String permName) {
         return mPermissions.canPropagatePermissionToInstantApp(permName);
     }
