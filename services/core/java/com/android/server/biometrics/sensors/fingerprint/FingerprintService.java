@@ -315,7 +315,8 @@ public class FingerprintService extends SystemService implements BiometricServic
                                     Slog.e(TAG, "Remote exception in negative button onClick()", e);
                                 }
                             })
-                    .setSensorId(props.sensorId)
+                    .setAllowedSensorIds(new ArrayList<>(
+                            Collections.singletonList(props.sensorId)))
                     .build();
 
             final BiometricPrompt.AuthenticationCallback promptCallback =

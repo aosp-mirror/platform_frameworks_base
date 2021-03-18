@@ -214,6 +214,13 @@ public class AuthService extends SystemService {
                 return;
             }
 
+            if (promptInfo.containsTestConfigurations()) {
+                if (getContext().checkCallingOrSelfPermission(TEST_BIOMETRIC)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    checkInternalPermission();
+                }
+            }
+
             // Only allow internal clients to enable non-public options.
             if (promptInfo.containsPrivateApiConfigurations()) {
                 checkInternalPermission();
