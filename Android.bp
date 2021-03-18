@@ -679,6 +679,8 @@ java_defaults {
     ],
     sdk_version: "core_platform",
     static_libs: [
+        // TODO(b/184162091)
+        "android.hardware.soundtrigger3-V1-java",
         "bouncycastle-repackaged-unbundled",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed

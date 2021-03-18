@@ -215,9 +215,11 @@ class ConversionUtil {
     }
 
     static @NonNull android.hardware.soundtrigger.V2_3.RecognitionConfig aidl2hidlRecognitionConfig(
-            @NonNull RecognitionConfig aidlConfig) {
+            @NonNull RecognitionConfig aidlConfig, int deviceHandle, int ioHandle) {
         android.hardware.soundtrigger.V2_3.RecognitionConfig hidlConfig =
                 new android.hardware.soundtrigger.V2_3.RecognitionConfig();
+        hidlConfig.base.header.captureDevice = deviceHandle;
+        hidlConfig.base.header.captureHandle = ioHandle;
         hidlConfig.base.header.captureRequested = aidlConfig.captureRequested;
         for (PhraseRecognitionExtra aidlPhraseExtra : aidlConfig.phraseRecognitionExtras) {
             hidlConfig.base.header.phrases.add(aidl2hidlPhraseRecognitionExtra(aidlPhraseExtra));

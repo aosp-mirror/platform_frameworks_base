@@ -29,7 +29,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback;
 import android.media.soundtrigger.ModelParameter;
 import android.media.soundtrigger.ModelParameterRange;
 import android.media.soundtrigger.PhraseRecognitionEvent;
@@ -57,12 +56,10 @@ import org.mockito.Mockito;
 
 @RunWith(JUnit4.class)
 public class SoundTriggerMiddlewareImplTest {
-    @Mock
-    public ISoundTriggerHal mHalDriver = mock(ISoundTriggerHal.class);
+    @Mock public ISoundTriggerHal mHalDriver = mock(ISoundTriggerHal.class);
 
-    @Mock
-    private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider = mock(
-            SoundTriggerMiddlewareImpl.AudioSessionProvider.class);
+    @Mock private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider =
+            mock(SoundTriggerMiddlewareImpl.AudioSessionProvider.class);
 
     private SoundTriggerMiddlewareImpl mService;
 
@@ -73,32 +70,28 @@ public class SoundTriggerMiddlewareImplTest {
     private Pair<Integer, SoundTriggerHwCallback> loadGenericModel(ISoundTriggerModule module,
             int hwHandle) throws RemoteException {
         SoundModel model = TestUtil.createGenericSoundModel();
-        ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel> modelCaptor =
-                ArgumentCaptor.forClass(
-                        android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel.class);
-        ArgumentCaptor<ISoundTriggerHal.ModelCallback> callbackCaptor =
-                ArgumentCaptor.forClass(ISoundTriggerHal.ModelCallback.class);
+        ArgumentCaptor<SoundModel> modelCaptor = ArgumentCaptor.forClass(SoundModel.class);
+        ArgumentCaptor<ISoundTriggerHal.ModelCallback> callbackCaptor = ArgumentCaptor.forClass(
+                ISoundTriggerHal.ModelCallback.class);
 
-        when(mHalDriver.loadSoundModel(any(), any())).thenReturn(
-                hwHandle);
+        when(mHalDriver.loadSoundModel(any(), any())).thenReturn(hwHandle);
         when(mAudioSessionProvider.acquireSession()).thenReturn(
                 new SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession(101, 102, 103));
 
         int handle = module.loadModel(model);
         verify(mHalDriver).loadSoundModel(modelCaptor.capture(), callbackCaptor.capture());
         verify(mAudioSessionProvider).acquireSession();
-        TestUtil.validateGenericSoundModel_2_1(modelCaptor.getValue());
+        assertEquals(model, modelCaptor.getValue());
         return new Pair<>(handle, new SoundTriggerHwCallback(callbackCaptor.getValue()));
     }
 
-    private Pair<Integer, SoundTriggerHwCallback> loadPhraseModel(
-            ISoundTriggerModule module, int hwHandle) throws RemoteException {
+    private Pair<Integer, SoundTriggerHwCallback> loadPhraseModel(ISoundTriggerModule module,
+            int hwHandle) throws RemoteException {
         PhraseSoundModel model = TestUtil.createPhraseSoundModel();
-        ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel>
-                modelCaptor = ArgumentCaptor.forClass(
-                android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel.class);
-        ArgumentCaptor<ISoundTriggerHal.ModelCallback> callbackCaptor =
-                ArgumentCaptor.forClass(ISoundTriggerHal.ModelCallback.class);
+        ArgumentCaptor<PhraseSoundModel> modelCaptor = ArgumentCaptor.forClass(
+                PhraseSoundModel.class);
+        ArgumentCaptor<ISoundTriggerHal.ModelCallback> callbackCaptor = ArgumentCaptor.forClass(
+                ISoundTriggerHal.ModelCallback.class);
 
         when(mHalDriver.loadPhraseSoundModel(any(), any())).thenReturn(hwHandle);
         when(mAudioSessionProvider.acquireSession()).thenReturn(
@@ -107,7 +100,7 @@ public class SoundTriggerMiddlewareImplTest {
         int handle = module.loadPhraseModel(model);
         verify(mHalDriver).loadPhraseSoundModel(modelCaptor.capture(), callbackCaptor.capture());
         verify(mAudioSessionProvider).acquireSession();
-        TestUtil.validatePhraseSoundModel_2_1(modelCaptor.getValue());
+        assertEquals(model, modelCaptor.getValue());
         return new Pair<>(handle, new SoundTriggerHwCallback(callbackCaptor.getValue()));
     }
 
@@ -118,17 +111,16 @@ public class SoundTriggerMiddlewareImplTest {
         verify(mAudioSessionProvider).releaseSession(101);
     }
 
-    private void startRecognition(ISoundTriggerModule module, int handle,
-            int hwHandle) throws RemoteException {
-        ArgumentCaptor<android.hardware.soundtrigger.V2_3.RecognitionConfig>
-                configCaptor = ArgumentCaptor.forClass(
-                android.hardware.soundtrigger.V2_3.RecognitionConfig.class);
+    private void startRecognition(ISoundTriggerModule module, int handle, int hwHandle)
+            throws RemoteException {
+        ArgumentCaptor<RecognitionConfig> configCaptor = ArgumentCaptor.forClass(
+                RecognitionConfig.class);
 
         RecognitionConfig config = TestUtil.createRecognitionConfig();
 
         module.startRecognition(handle, config);
-        verify(mHalDriver).startRecognition(eq(hwHandle), configCaptor.capture());
-        TestUtil.validateRecognitionConfig_2_3(configCaptor.getValue(), 102, 103);
+        verify(mHalDriver).startRecognition(eq(hwHandle), eq(103), eq(102), configCaptor.capture());
+        assertEquals(config, configCaptor.getValue());
     }
 
     private void stopRecognition(ISoundTriggerModule module, int handle, int hwHandle)
@@ -141,8 +133,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void setUp() throws Exception {
         clearInvocations(mHalDriver);
         clearInvocations(mAudioSessionProvider);
-        when(mHalDriver.getProperties()).thenReturn(
-                TestUtil.createDefaultProperties_2_3(false));
+        when(mHalDriver.getProperties()).thenReturn(TestUtil.createDefaultProperties(false));
         mService = new SoundTriggerMiddlewareImpl(() -> mHalDriver, mAudioSessionProvider);
     }
 
@@ -164,8 +155,7 @@ public class SoundTriggerMiddlewareImplTest {
         assertEquals(1, allDescriptors.length);
 
         Properties properties = allDescriptors[0].properties;
-
-        TestUtil.validateDefaultProperties(properties, false);
+        assertEquals(TestUtil.createDefaultProperties(false), properties);
     }
 
     @Test
@@ -249,7 +239,7 @@ public class SoundTriggerMiddlewareImplTest {
 
         // Start the model.
         doThrow(new RecoverableException(Status.RESOURCE_CONTENTION)).when(
-                mHalDriver).startRecognition(eq(7), any());
+                mHalDriver).startRecognition(eq(7), eq(103), eq(102), any());
 
         try {
             RecognitionConfig config = TestUtil.createRecognitionConfig();
@@ -259,7 +249,7 @@ public class SoundTriggerMiddlewareImplTest {
             assertEquals(Status.RESOURCE_CONTENTION, e.errorCode);
         }
 
-        verify(mHalDriver).startRecognition(eq(7), any());
+        verify(mHalDriver).startRecognition(eq(7), eq(103), eq(102), any());
     }
 
     @Test
@@ -297,15 +287,15 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Signal a capture from the driver.
-        hwCallback.sendRecognitionEvent(hwHandle,
-                android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionStatus.SUCCESS);
+        RecognitionEvent event = hwCallback.sendRecognitionEvent(hwHandle,
+                RecognitionStatus.SUCCESS);
 
         ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
                 RecognitionEvent.class);
         verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
-        TestUtil.validateRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.SUCCESS);
+        assertEquals(event, eventCaptor.getValue());
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);
@@ -327,15 +317,15 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Signal a capture from the driver.
-        hwCallback.sendPhraseRecognitionEvent(hwHandle,
-                android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionStatus.SUCCESS);
+        PhraseRecognitionEvent event = hwCallback.sendPhraseRecognitionEvent(hwHandle,
+                RecognitionStatus.SUCCESS);
 
         ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
                 PhraseRecognitionEvent.class);
         verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
-        TestUtil.validatePhraseRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.SUCCESS);
+        assertEquals(event, eventCaptor.getValue());
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);
@@ -358,18 +348,18 @@ public class SoundTriggerMiddlewareImplTest {
 
         // Force a trigger.
         module.forceRecognitionEvent(handle);
-        verify(mHalDriver).getModelState(hwHandle);
+        verify(mHalDriver).forceRecognitionEvent(hwHandle);
 
         // Signal a capture from the driver.
-        // '3' means 'forced', there's no constant for that in the HAL.
-        hwCallback.sendRecognitionEvent(hwHandle, 3);
+        RecognitionEvent event = hwCallback.sendRecognitionEvent(hwHandle,
+                RecognitionStatus.FORCED);
 
         ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
                 RecognitionEvent.class);
         verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
-        TestUtil.validateRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.FORCED);
+        assertEquals(event, eventCaptor.getValue());
 
         // Stop the recognition.
         stopRecognition(module, handle, hwHandle);
@@ -394,7 +384,7 @@ public class SoundTriggerMiddlewareImplTest {
 
         // Force a trigger.
         doThrow(new RecoverableException(Status.OPERATION_NOT_SUPPORTED)).when(
-                mHalDriver).getModelState(hwHandle);
+                mHalDriver).forceRecognitionEvent(hwHandle);
         try {
             module.forceRecognitionEvent(handle);
             fail("Expected an exception");
@@ -426,18 +416,18 @@ public class SoundTriggerMiddlewareImplTest {
 
         // Force a trigger.
         module.forceRecognitionEvent(handle);
-        verify(mHalDriver).getModelState(hwHandle);
+        verify(mHalDriver).forceRecognitionEvent(hwHandle);
 
         // Signal a capture from the driver.
-        // '3' means 'forced', there's no constant for that in the HAL.
-        hwCallback.sendPhraseRecognitionEvent(hwHandle, 3);
+        PhraseRecognitionEvent event = hwCallback.sendPhraseRecognitionEvent(hwHandle,
+                RecognitionStatus.FORCED);
 
         ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
                 PhraseRecognitionEvent.class);
         verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
-        TestUtil.validatePhraseRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.FORCED);
+        assertEquals(event, eventCaptor.getValue());
 
         // Stop the recognition.
         stopRecognition(module, handle, hwHandle);
@@ -462,7 +452,7 @@ public class SoundTriggerMiddlewareImplTest {
 
         // Force a trigger.
         doThrow(new RecoverableException(Status.OPERATION_NOT_SUPPORTED)).when(
-                mHalDriver).getModelState(hwHandle);
+                mHalDriver).forceRecognitionEvent(hwHandle);
         try {
             module.forceRecognitionEvent(handle);
             fail("Expected an exception");
@@ -494,7 +484,7 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Abort.
-        hwCallback.sendRecognitionEvent(hwHandle, ISoundTriggerHwCallback.RecognitionStatus.ABORT);
+        hwCallback.sendRecognitionEvent(hwHandle, RecognitionStatus.ABORTED);
 
         ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
                 RecognitionEvent.class);
@@ -524,8 +514,7 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Abort.
-        hwCallback.sendPhraseRecognitionEvent(hwHandle,
-                ISoundTriggerHwCallback.RecognitionStatus.ABORT);
+        hwCallback.sendPhraseRecognitionEvent(hwHandle, RecognitionStatus.ABORTED);
 
         ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
                 PhraseRecognitionEvent.class);
@@ -546,23 +535,19 @@ public class SoundTriggerMiddlewareImplTest {
         final int hwHandle = 12;
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
-        android.hardware.soundtrigger.V2_3.ModelParameterRange halRange =
-                new android.hardware.soundtrigger.V2_3.ModelParameterRange();
-        halRange.start = 23;
-        halRange.end = 45;
+        ModelParameterRange halRange = new ModelParameterRange();
+        halRange.minInclusive = 23;
+        halRange.maxInclusive = 45;
 
         when(mHalDriver.queryParameter(eq(hwHandle),
-                eq(android.hardware.soundtrigger.V2_3.ModelParameter.THRESHOLD_FACTOR))).thenReturn(
-                halRange);
+                eq(ModelParameter.THRESHOLD_FACTOR))).thenReturn(halRange);
 
         ModelParameterRange range = module.queryModelParameterSupport(modelHandle,
                 ModelParameter.THRESHOLD_FACTOR);
 
-        verify(mHalDriver).queryParameter(eq(hwHandle),
-                eq(android.hardware.soundtrigger.V2_3.ModelParameter.THRESHOLD_FACTOR));
+        verify(mHalDriver).queryParameter(eq(hwHandle), eq(ModelParameter.THRESHOLD_FACTOR));
 
-        assertEquals(23, range.minInclusive);
-        assertEquals(45, range.maxInclusive);
+        assertEquals(halRange, range);
     }
 
     @Test
@@ -573,14 +558,12 @@ public class SoundTriggerMiddlewareImplTest {
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
         when(mHalDriver.queryParameter(eq(hwHandle),
-                eq(android.hardware.soundtrigger.V2_3.ModelParameter.THRESHOLD_FACTOR))).thenReturn(
-                null);
+                eq(ModelParameter.THRESHOLD_FACTOR))).thenReturn(null);
 
         ModelParameterRange range = module.queryModelParameterSupport(modelHandle,
                 ModelParameter.THRESHOLD_FACTOR);
 
-        verify(mHalDriver).queryParameter(eq(hwHandle),
-                eq(android.hardware.soundtrigger.V2_3.ModelParameter.THRESHOLD_FACTOR));
+        verify(mHalDriver).queryParameter(eq(hwHandle), eq(ModelParameter.THRESHOLD_FACTOR));
 
         assertNull(range);
     }
@@ -592,14 +575,12 @@ public class SoundTriggerMiddlewareImplTest {
         final int hwHandle = 14;
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
-        when(mHalDriver.getModelParameter(hwHandle,
-                android.hardware.soundtrigger.V2_3.ModelParameter.THRESHOLD_FACTOR)).thenReturn(
+        when(mHalDriver.getModelParameter(hwHandle, ModelParameter.THRESHOLD_FACTOR)).thenReturn(
                 234);
 
         int value = module.getModelParameter(modelHandle, ModelParameter.THRESHOLD_FACTOR);
 
-        verify(mHalDriver).getModelParameter(hwHandle,
-                android.hardware.soundtrigger.V2_3.ModelParameter.THRESHOLD_FACTOR);
+        verify(mHalDriver).getModelParameter(hwHandle, ModelParameter.THRESHOLD_FACTOR);
 
         assertEquals(234, value);
     }
@@ -613,8 +594,7 @@ public class SoundTriggerMiddlewareImplTest {
 
         module.setModelParameter(modelHandle, ModelParameter.THRESHOLD_FACTOR, 456);
 
-        verify(mHalDriver).setModelParameter(hwHandle,
-                android.hardware.soundtrigger.V2_3.ModelParameter.THRESHOLD_FACTOR, 456);
+        verify(mHalDriver).setModelParameter(hwHandle, ModelParameter.THRESHOLD_FACTOR, 456);
     }
 
     private static class SoundTriggerHwCallback {
@@ -624,14 +604,17 @@ public class SoundTriggerMiddlewareImplTest {
             mCallback = callback;
         }
 
-        private void sendRecognitionEvent(int hwHandle, int status) {
-            mCallback.recognitionCallback(
-                    TestUtil.createRecognitionEvent_2_1(hwHandle, status));
+        private RecognitionEvent sendRecognitionEvent(int hwHandle, @RecognitionStatus int status) {
+            RecognitionEvent event = TestUtil.createRecognitionEvent(status);
+            mCallback.recognitionCallback(hwHandle, event);
+            return event;
         }
 
-        private void sendPhraseRecognitionEvent(int hwHandle, int status) {
-            mCallback.phraseRecognitionCallback(
-                    TestUtil.createPhraseRecognitionEvent_2_1(hwHandle, status));
+        private PhraseRecognitionEvent sendPhraseRecognitionEvent(int hwHandle,
+                @RecognitionStatus int status) {
+            PhraseRecognitionEvent event = TestUtil.createPhraseRecognitionEvent(status);
+            mCallback.phraseRecognitionCallback(hwHandle, event);
+            return event;
         }
 
         private void sendUnloadEvent(int hwHandle) {

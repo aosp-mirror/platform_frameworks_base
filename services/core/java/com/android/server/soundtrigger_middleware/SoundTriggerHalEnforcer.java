@@ -16,16 +16,17 @@
 
 package com.android.server.soundtrigger_middleware;
 
-import android.hardware.soundtrigger.V2_1.ISoundTriggerHw;
-import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
-import android.hardware.soundtrigger.V2_3.ModelParameterRange;
-import android.hardware.soundtrigger.V2_3.Properties;
-import android.hardware.soundtrigger.V2_3.RecognitionConfig;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionStatus;
+import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
 import android.os.DeadObjectException;
-import android.os.IHwBinder;
-import android.os.RemoteException;
+import android.os.IBinder;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -78,7 +79,7 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
     }
 
     @Override
-    public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, ModelCallback callback) {
+    public int loadSoundModel(SoundModel soundModel, ModelCallback callback) {
         try {
             synchronized (mModelStates) {
                 int handle = mUnderlying.loadSoundModel(soundModel,
@@ -92,8 +93,7 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
     }
 
     @Override
-    public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel,
-            ModelCallback callback) {
+    public int loadPhraseSoundModel(PhraseSoundModel soundModel, ModelCallback callback) {
         try {
             synchronized (mModelStates) {
                 int handle = mUnderlying.loadPhraseSoundModel(soundModel,
@@ -144,10 +144,11 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
     }
 
     @Override
-    public void startRecognition(int modelHandle, RecognitionConfig config) {
+    public void startRecognition(int modelHandle, int deviceHandle, int ioHandle,
+            RecognitionConfig config) {
         try {
             synchronized (mModelStates) {
-                mUnderlying.startRecognition(modelHandle, config);
+                mUnderlying.startRecognition(modelHandle, deviceHandle, ioHandle, config);
                 mModelStates.replace(modelHandle, ModelState.ACTIVE);
             }
         } catch (RuntimeException e) {
@@ -156,9 +157,9 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
     }
 
     @Override
-    public void getModelState(int modelHandle) {
+    public void forceRecognitionEvent(int modelHandle) {
         try {
-            mUnderlying.getModelState(modelHandle);
+            mUnderlying.forceRecognitionEvent(modelHandle);
         } catch (RuntimeException e) {
             throw handleException(e);
         }
@@ -192,17 +193,17 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
     }
 
     @Override
-    public boolean linkToDeath(IHwBinder.DeathRecipient recipient, long cookie) {
-        return mUnderlying.linkToDeath(recipient, cookie);
+    public void linkToDeath(IBinder.DeathRecipient recipient) {
+        mUnderlying.linkToDeath(recipient);
     }
 
     @Override
-    public boolean unlinkToDeath(IHwBinder.DeathRecipient recipient) {
-        return mUnderlying.unlinkToDeath(recipient);
+    public void unlinkToDeath(IBinder.DeathRecipient recipient) {
+        mUnderlying.unlinkToDeath(recipient);
     }
 
     @Override
-    public String interfaceDescriptor() throws RemoteException {
+    public String interfaceDescriptor() {
         return mUnderlying.interfaceDescriptor();
     }
 
@@ -244,9 +245,8 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
         }
 
         @Override
-        public void recognitionCallback(ISoundTriggerHwCallback.RecognitionEvent event) {
-            int model = event.header.model;
-            int status = event.header.status;
+        public void recognitionCallback(int model, RecognitionEvent event) {
+            int status = event.status;
 
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(model);
@@ -260,14 +260,12 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
                 }
             }
             // Always invoke the delegate from outside the critical section.
-            mUnderlying.recognitionCallback(event);
+            mUnderlying.recognitionCallback(model, event);
         }
 
         @Override
-        public void phraseRecognitionCallback(
-                ISoundTriggerHwCallback.PhraseRecognitionEvent event) {
-            int model = event.common.header.model;
-            int status = event.common.header.status;
+        public void phraseRecognitionCallback(int model, PhraseRecognitionEvent event) {
+            int status = event.common.status;
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(model);
                 if (state == null || state == ModelState.INACTIVE) {
@@ -280,7 +278,7 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
                 }
             }
             // Always invoke the delegate from outside the critical section.
-            mUnderlying.phraseRecognitionCallback(event);
+            mUnderlying.phraseRecognitionCallback(model, event);
         }
 
         @Override

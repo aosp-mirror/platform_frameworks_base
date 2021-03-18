@@ -17,17 +17,18 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
-import android.hardware.soundtrigger.V2_1.ISoundTriggerHw;
-import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
-import android.hardware.soundtrigger.V2_3.ModelParameterRange;
-import android.hardware.soundtrigger.V2_3.Properties;
-import android.hardware.soundtrigger.V2_3.RecognitionConfig;
 import android.media.permission.SafeCloseable;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionStatus;
+import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.SoundModelType;
 import android.media.soundtrigger.Status;
-import android.os.IHwBinder;
-import android.os.RemoteException;
+import android.os.IBinder;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -106,7 +107,7 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
      * Since we're wrapping the death recipient, we need to keep a translation map for unlinking.
      * Key is the client recipient, value is the wrapper.
      */
-    private final @NonNull Map<IHwBinder.DeathRecipient, IHwBinder.DeathRecipient>
+    private final @NonNull Map<IBinder.DeathRecipient, IBinder.DeathRecipient>
             mDeathRecipientMap = new ConcurrentHashMap<>();
 
     private final @NonNull CallbackThread mCallbackThread = new CallbackThread();
@@ -120,12 +121,13 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     }
 
     @Override
-    public void startRecognition(int modelHandle, RecognitionConfig config) {
+    public void startRecognition(int modelHandle, int deviceHandle, int ioHandle,
+            RecognitionConfig config) {
         synchronized (mActiveModels) {
             if (mCaptureState) {
                 throw new RecoverableException(Status.RESOURCE_CONTENTION);
             }
-            mDelegate.startRecognition(modelHandle, config);
+            mDelegate.startRecognition(modelHandle, deviceHandle, ioHandle, config);
             mActiveModels.add(modelHandle);
         }
     }
@@ -165,14 +167,14 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     }
 
     @Override
-    public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, ModelCallback callback) {
+    public int loadSoundModel(SoundModel soundModel, ModelCallback callback) {
         int handle = mDelegate.loadSoundModel(soundModel, new CallbackWrapper(callback));
         mLoadedModels.put(handle, new LoadedModel(SoundModelType.GENERIC, callback));
         return handle;
     }
 
     @Override
-    public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel,
+    public int loadPhraseSoundModel(PhraseSoundModel soundModel,
             ModelCallback callback) {
         int handle = mDelegate.loadPhraseSoundModel(soundModel, new CallbackWrapper(callback));
         mLoadedModels.put(handle, new LoadedModel(SoundModelType.KEYPHRASE, callback));
@@ -197,23 +199,20 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     }
 
     @Override
-    public boolean linkToDeath(IHwBinder.DeathRecipient recipient, long cookie) {
-        IHwBinder.DeathRecipient wrapper = new IHwBinder.DeathRecipient() {
+    public void linkToDeath(IBinder.DeathRecipient recipient) {
+        IBinder.DeathRecipient wrapper = new IBinder.DeathRecipient() {
             @Override
-            public void serviceDied(long cookieBack) {
-                mCallbackThread.push(() -> recipient.serviceDied(cookieBack));
+            public void binderDied() {
+                mCallbackThread.push(() -> recipient.binderDied());
             }
         };
-        if (mDelegate.linkToDeath(wrapper, cookie)) {
-            mDeathRecipientMap.put(recipient, wrapper);
-            return true;
-        }
-        return false;
+        mDelegate.linkToDeath(wrapper);
+        mDeathRecipientMap.put(recipient, wrapper);
     }
 
     @Override
-    public boolean unlinkToDeath(IHwBinder.DeathRecipient recipient) {
-        return mDelegate.unlinkToDeath(mDeathRecipientMap.remove(recipient));
+    public void unlinkToDeath(IBinder.DeathRecipient recipient) {
+        mDelegate.unlinkToDeath(mDeathRecipientMap.remove(recipient));
     }
 
     private class CallbackWrapper implements ISoundTriggerHal.ModelCallback {
@@ -224,22 +223,21 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
         }
 
         @Override
-        public void recognitionCallback(ISoundTriggerHwCallback.RecognitionEvent event) {
+        public void recognitionCallback(int modelHandle, RecognitionEvent event) {
             // A recognition event must be the last one for its model, unless it is a forced one
             // (those leave the model active).
-            mCallbackThread.pushWithDedupe(event.header.model,
-                    event.header.status != RecognitionStatus.FORCED,
-                    () -> mDelegateCallback.recognitionCallback(event));
+            mCallbackThread.pushWithDedupe(modelHandle,
+                    event.status != RecognitionStatus.FORCED,
+                    () -> mDelegateCallback.recognitionCallback(modelHandle, event));
         }
 
         @Override
-        public void phraseRecognitionCallback(
-                ISoundTriggerHwCallback.PhraseRecognitionEvent event) {
+        public void phraseRecognitionCallback(int modelHandle, PhraseRecognitionEvent event) {
             // A recognition event must be the last one for its model, unless it is a forced one
             // (those leave the model active).
-            mCallbackThread.pushWithDedupe(event.common.header.model,
-                    event.common.header.status != RecognitionStatus.FORCED,
-                    () -> mDelegateCallback.phraseRecognitionCallback(event));
+            mCallbackThread.pushWithDedupe(modelHandle,
+                    event.common.status != RecognitionStatus.FORCED,
+                    () -> mDelegateCallback.phraseRecognitionCallback(modelHandle, event));
         }
 
         @Override
@@ -396,25 +394,18 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     private static void notifyAbort(int modelHandle, LoadedModel model) {
         switch (model.type) {
             case SoundModelType.GENERIC: {
-                ISoundTriggerHwCallback.RecognitionEvent event =
-                        new ISoundTriggerHwCallback.RecognitionEvent();
-                event.header.model = modelHandle;
-                event.header.status =
-                        android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionStatus.ABORT;
-                event.header.type = android.hardware.soundtrigger.V2_0.SoundModelType.GENERIC;
-                model.callback.recognitionCallback(event);
+                RecognitionEvent event = new RecognitionEvent();
+                event.status = RecognitionStatus.ABORTED;
+                event.type = SoundModelType.GENERIC;
+                model.callback.recognitionCallback(modelHandle, event);
             }
             break;
 
             case SoundModelType.KEYPHRASE: {
-                ISoundTriggerHwCallback.PhraseRecognitionEvent event =
-                        new ISoundTriggerHwCallback.PhraseRecognitionEvent();
-                event.common.header.model = modelHandle;
-                event.common.header.status =
-                        android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionStatus.ABORT;
-                event.common.header.type =
-                        android.hardware.soundtrigger.V2_0.SoundModelType.KEYPHRASE;
-                model.callback.phraseRecognitionCallback(event);
+                PhraseRecognitionEvent event = new PhraseRecognitionEvent();
+                event.common.status = RecognitionStatus.ABORTED;
+                event.common.type = SoundModelType.KEYPHRASE;
+                model.callback.phraseRecognitionCallback(modelHandle, event);
             }
             break;
         }
@@ -439,8 +430,8 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     }
 
     @Override
-    public void getModelState(int modelHandle) {
-        mDelegate.getModelState(modelHandle);
+    public void forceRecognitionEvent(int modelHandle) {
+        mDelegate.forceRecognitionEvent(modelHandle);
     }
 
     @Override
@@ -459,7 +450,7 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
     }
 
     @Override
-    public String interfaceDescriptor() throws RemoteException {
+    public String interfaceDescriptor() {
         return mDelegate.interfaceDescriptor();
     }
 }

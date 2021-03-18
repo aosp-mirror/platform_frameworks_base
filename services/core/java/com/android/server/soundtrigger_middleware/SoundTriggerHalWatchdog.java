@@ -17,12 +17,12 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
-import android.hardware.soundtrigger.V2_1.ISoundTriggerHw;
-import android.hardware.soundtrigger.V2_3.ModelParameterRange;
-import android.hardware.soundtrigger.V2_3.Properties;
-import android.hardware.soundtrigger.V2_3.RecognitionConfig;
-import android.os.IHwBinder;
-import android.os.RemoteException;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.SoundModel;
+import android.os.IBinder;
 import android.util.Log;
 
 import java.util.Objects;
@@ -60,14 +60,14 @@ public class SoundTriggerHalWatchdog implements ISoundTriggerHal {
     }
 
     @Override
-    public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, ModelCallback callback) {
+    public int loadSoundModel(SoundModel soundModel, ModelCallback callback) {
         try (Watchdog ignore = new Watchdog()) {
             return mUnderlying.loadSoundModel(soundModel, callback);
         }
     }
 
     @Override
-    public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel,
+    public int loadPhraseSoundModel(PhraseSoundModel soundModel,
             ModelCallback callback) {
         try (Watchdog ignore = new Watchdog()) {
             return mUnderlying.loadPhraseSoundModel(soundModel, callback);
@@ -89,16 +89,17 @@ public class SoundTriggerHalWatchdog implements ISoundTriggerHal {
     }
 
     @Override
-    public void startRecognition(int modelHandle, RecognitionConfig config) {
+    public void startRecognition(int modelHandle, int deviceHandle, int ioHandle,
+            RecognitionConfig config) {
         try (Watchdog ignore = new Watchdog()) {
-            mUnderlying.startRecognition(modelHandle, config);
+            mUnderlying.startRecognition(modelHandle, deviceHandle, ioHandle, config);
         }
     }
 
     @Override
-    public void getModelState(int modelHandle) {
+    public void forceRecognitionEvent(int modelHandle) {
         try (Watchdog ignore = new Watchdog()) {
-            mUnderlying.getModelState(modelHandle);
+            mUnderlying.forceRecognitionEvent(modelHandle);
         }
     }
 
@@ -124,17 +125,17 @@ public class SoundTriggerHalWatchdog implements ISoundTriggerHal {
     }
 
     @Override
-    public boolean linkToDeath(IHwBinder.DeathRecipient recipient, long cookie) {
-        return mUnderlying.linkToDeath(recipient, cookie);
+    public void linkToDeath(IBinder.DeathRecipient recipient) {
+        mUnderlying.linkToDeath(recipient);
     }
 
     @Override
-    public boolean unlinkToDeath(IHwBinder.DeathRecipient recipient) {
-        return mUnderlying.unlinkToDeath(recipient);
+    public void unlinkToDeath(IBinder.DeathRecipient recipient) {
+        mUnderlying.unlinkToDeath(recipient);
     }
 
     @Override
-    public String interfaceDescriptor() throws RemoteException {
+    public String interfaceDescriptor() {
         return mUnderlying.interfaceDescriptor();
     }
 

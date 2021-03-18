@@ -17,13 +17,13 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
-import android.hardware.soundtrigger.V2_1.ISoundTriggerHw;
-import android.hardware.soundtrigger.V2_3.ModelParameterRange;
-import android.hardware.soundtrigger.V2_3.Properties;
-import android.hardware.soundtrigger.V2_3.RecognitionConfig;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
-import android.os.IHwBinder;
-import android.os.RemoteException;
+import android.os.IBinder;
 
 /**
  * This is a decorator around ISoundTriggerHal, which implements enforcement of the maximum number
@@ -70,7 +70,7 @@ public class SoundTriggerHalMaxModelLimiter implements ISoundTriggerHal {
     }
 
     @Override
-    public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, ModelCallback callback) {
+    public int loadSoundModel(SoundModel soundModel, ModelCallback callback) {
         synchronized (this) {
             if (mNumLoadedModels == mMaxModels) {
                 throw new RecoverableException(Status.RESOURCE_CONTENTION);
@@ -82,7 +82,7 @@ public class SoundTriggerHalMaxModelLimiter implements ISoundTriggerHal {
     }
 
     @Override
-    public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel,
+    public int loadPhraseSoundModel(PhraseSoundModel soundModel,
             ModelCallback callback) {
         synchronized (this) {
             if (mNumLoadedModels == mMaxModels) {
@@ -121,13 +121,14 @@ public class SoundTriggerHalMaxModelLimiter implements ISoundTriggerHal {
     }
 
     @Override
-    public void startRecognition(int modelHandle, RecognitionConfig config) {
-        mDelegate.startRecognition(modelHandle, config);
+    public void startRecognition(int modelHandle, int deviceHandle, int ioHandle,
+            RecognitionConfig config) {
+        mDelegate.startRecognition(modelHandle, deviceHandle, ioHandle, config);
     }
 
     @Override
-    public void getModelState(int modelHandle) {
-        mDelegate.getModelState(modelHandle);
+    public void forceRecognitionEvent(int modelHandle) {
+        mDelegate.forceRecognitionEvent(modelHandle);
     }
 
     @Override
@@ -146,17 +147,17 @@ public class SoundTriggerHalMaxModelLimiter implements ISoundTriggerHal {
     }
 
     @Override
-    public boolean linkToDeath(IHwBinder.DeathRecipient recipient, long cookie) {
-        return mDelegate.linkToDeath(recipient, cookie);
+    public void linkToDeath(IBinder.DeathRecipient recipient) {
+        mDelegate.linkToDeath(recipient);
     }
 
     @Override
-    public boolean unlinkToDeath(IHwBinder.DeathRecipient recipient) {
-        return mDelegate.unlinkToDeath(recipient);
+    public void unlinkToDeath(IBinder.DeathRecipient recipient) {
+        mDelegate.unlinkToDeath(recipient);
     }
 
     @Override
-    public String interfaceDescriptor() throws RemoteException {
+    public String interfaceDescriptor() {
         return mDelegate.interfaceDescriptor();
     }
 
