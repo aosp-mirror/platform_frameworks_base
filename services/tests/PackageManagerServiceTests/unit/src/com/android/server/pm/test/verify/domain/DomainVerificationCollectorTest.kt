@@ -25,8 +25,8 @@ import android.os.PatternMatcher
 import android.util.ArraySet
 import com.android.server.SystemConfig
 import com.android.server.compat.PlatformCompat
-import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.verify.domain.DomainVerificationCollector
+import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat

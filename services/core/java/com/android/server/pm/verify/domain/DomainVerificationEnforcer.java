@@ -141,12 +141,6 @@ public class DomainVerificationEnforcer {
                     "Caller is not allowed to edit other users");
         }
 
-        if (!mCallback.doesUserExist(callingUserId)) {
-            throw new SecurityException("User " + callingUserId + " does not exist");
-        } else if (!mCallback.doesUserExist(targetUserId)) {
-            throw new SecurityException("User " + targetUserId + " does not exist");
-        }
-
         return !mCallback.filterAppAccess(packageName, callingUid, targetUserId);
     }
 
@@ -166,12 +160,6 @@ public class DomainVerificationEnforcer {
                 android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION,
                 Binder.getCallingPid(), callingUid,
                 "Caller is not allowed to edit user selections");
-
-        if (!mCallback.doesUserExist(callingUserId)) {
-            throw new SecurityException("User " + callingUserId + " does not exist");
-        } else if (!mCallback.doesUserExist(targetUserId)) {
-            throw new SecurityException("User " + targetUserId + " does not exist");
-        }
 
         if (packageName == null) {
             return true;
@@ -196,12 +184,6 @@ public class DomainVerificationEnforcer {
             }
         }
 
-        if (!mCallback.doesUserExist(callingUserId)) {
-            throw new SecurityException("User " + callingUserId + " does not exist");
-        } else if (!mCallback.doesUserExist(targetUserId)) {
-            throw new SecurityException("User " + targetUserId + " does not exist");
-        }
-
         return !mCallback.filterAppAccess(packageName, callingUid, targetUserId);
     }
 
@@ -213,12 +195,6 @@ public class DomainVerificationEnforcer {
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     Binder.getCallingPid(), callingUid,
                     "Caller is not allowed to edit other users");
-        }
-
-        if (!mCallback.doesUserExist(callingUserId)) {
-            throw new SecurityException("User " + callingUserId + " does not exist");
-        } else if (!mCallback.doesUserExist(targetUserId)) {
-            throw new SecurityException("User " + targetUserId + " does not exist");
         }
 
         return !mCallback.filterAppAccess(packageName, callingUid, targetUserId);
@@ -245,12 +221,6 @@ public class DomainVerificationEnforcer {
         mContext.enforcePermission(
                 android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION,
                 callingPid, callingUid, "Caller is not allowed to query user selections");
-
-        if (!mCallback.doesUserExist(callingUserId)) {
-            throw new SecurityException("User " + callingUserId + " does not exist");
-        } else if (!mCallback.doesUserExist(targetUserId)) {
-            throw new SecurityException("User " + targetUserId + " does not exist");
-        }
     }
 
     public interface Callback {
@@ -259,7 +229,5 @@ public class DomainVerificationEnforcer {
          * if the package was not installed
          */
         boolean filterAppAccess(@NonNull String packageName, int callingUid, @UserIdInt int userId);
-
-        boolean doesUserExist(@UserIdInt int userId);
     }
 }

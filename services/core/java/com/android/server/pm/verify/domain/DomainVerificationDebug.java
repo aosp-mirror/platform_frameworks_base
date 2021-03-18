@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
+import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationState;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -150,7 +151,7 @@ public class DomainVerificationDebug {
                 Integer state = reusedMap.valueAt(stateIndex);
                 writer.print(domain);
                 writer.print(": ");
-                writer.println(DomainVerificationState.stateToDebugString(state));
+                writer.println(DomainVerificationManager.stateToDebugString(state));
             }
             writer.decreaseIndent();
             writer.decreaseIndent();

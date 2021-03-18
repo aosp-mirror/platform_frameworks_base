@@ -189,7 +189,7 @@ public class ArtStatsLogUtils {
 
     private static int getDexMetadataType(String dexMetadataPath) {
         if (dexMetadataPath == null) {
-            return ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_NONE;
+            return ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__NONE_DEX_METADATA;
         }
         StrictJarFile jarFile = null;
         try {
@@ -199,21 +199,17 @@ public class ArtStatsLogUtils {
             boolean hasProfile = findFileName(jarFile, PROFILE_DEX_METADATA);
             boolean hasVdex = findFileName(jarFile, VDEX_DEX_METADATA);
             if (hasProfile && hasVdex) {
-                return ArtStatsLog.
-                    ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_PROFILE_AND_VDEX;
+                return ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__PROFILE_AND_VDEX;
             } else if (hasProfile) {
-                return ArtStatsLog.
-                    ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_PROFILE;
+                return ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__PROFILE;
             } else if (hasVdex) {
-                return ArtStatsLog.
-                    ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_VDEX;
+                return ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__VDEX;
             } else {
-                return ArtStatsLog.
-                    ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_UNKNOWN;
+                return ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__UNKNOWN_DEX_METADATA;
             }
         } catch (IOException ignore) {
             Slog.e(TAG, "Error when parsing dex metadata " + dexMetadataPath);
-            return ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_ERROR;
+            return ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__ERROR_DEX_METADATA;
         } finally {
             try {
                 if (jarFile != null) {

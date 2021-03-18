@@ -363,10 +363,10 @@ public final class GnssNavigationMessage implements Parcelable {
      * <p>The bytes (or words) specified using big endian format (MSB first).
      *
      * <ul>
-     * <li>For GPS L1 C/A, IRNSS L5 C/A, Beidou D1 &amp; Beidou D2, each subframe contains 10
-     * 30-bit words. Each word (30 bits) should be fit into the last 30 bits in a 4-byte word (skip
-     * B31 and B32), with MSB first, for a total of 40 bytes, covering a time period of 6, 6, and
-     * 0.6 seconds, respectively.</li>
+     * <li>For GPS L1 C/A, Beidou D1 &amp; Beidou D2, each subframe contains 10 30-bit words. Each
+     * word (30 bits) should be fit into the last 30 bits in a 4-byte word (skip B31 and B32), with
+     * MSB first, for a total of 40 bytes, covering a time period of 6, 6, and 0.6 seconds,
+     * respectively.</li>
      * <li>For Glonass L1 C/A, each string contains 85 data bits, including the checksum.  These
      * bits should be fit into 11 bytes, with MSB first (skip B86-B88), covering a time period of 2
      * seconds.</li>

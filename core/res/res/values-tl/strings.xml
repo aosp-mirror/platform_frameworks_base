@@ -204,7 +204,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"Serbisyo ng Twilight"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detector ng Time Zone (Walang koneksyon)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Serbisyo sa Pag-update ng Oras ng GNSS"</string>
-    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Serbisyo ng Music Recognition Manager"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Buburahin ang iyong device"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Hindi magamit ang admin app. Mabubura na ang iyong device.\n\nKung mayroon kang mga tanong, makipag-ugnayan sa admin ng iyong organisasyon."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Na-disable ng <xliff:g id="OWNER_APP">%s</xliff:g> ang pag-print."</string>
@@ -555,7 +556,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Gumamit ng biometrics o lock ng screen"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"I-verify na ikaw ito"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Gamitin ang iyong biometric para magpatuloy"</string>
-    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Gamitin ang iyong biometric o lock ng screen para magpatuloy"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Walang biometric hardware"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Nakansela ang pag-authenticate"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Hindi nakilala"</string>
@@ -589,7 +589,6 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Gumamit ng fingerprint"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Gumamit ng fingerprint o lock ng screen"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Gamitin ang iyong fingerprint para magpatuloy"</string>
-    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Gamitin ang iyong fingerprint o lock ng screen para magpatuloy"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icon ng fingerprint"</string>
@@ -637,7 +636,6 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Gumamit ng face unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gumamit ng mukha o lock ng screen"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Gumamit ng face unlock para magpatuloy"</string>
-    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gamitin ang iyong mukha o lock ng screen para magpatuloy"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Face icon"</string>
@@ -1001,8 +999,6 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Wala kang pahintulot na buksan ang pahinang ito."</string>
     <string name="text_copied" msgid="2531420577879738860">"Nakopya ang teksto sa clipboard."</string>
     <string name="copied" msgid="4675902854553014676">"Nakopya"</string>
-    <string name="pasted_from_app" msgid="5627698450808256545">"Na-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> mula sa <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Na-paste ang <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> mula sa clipboard"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Higit pa"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1376,14 +1372,11 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"I-off"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Sinusuri ang <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Sinusuri ang kasalukuyang content"</string>
-    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Sinusuri ang storage ng media"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Bagong <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"Hindi gumagana ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Mag-tap para i-set up"</string>
-    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Piliin para i-set up"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Baka kailanganin mong i-reformat ang device. I-tap para i-eject."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Para sa paglilipat ng mga larawan at media"</string>
-    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Mag-browse ng mga media file"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Isyu sa <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"Hindi gumagana ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Mag-tap para ayusin"</string>
@@ -1392,7 +1385,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Hindi sinusuportahang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"Hindi gumagana ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Hindi sinusuportahan ng device na ito ang <xliff:g id="NAME">%s</xliff:g> na ito. I-tap upang i-set up sa isang sinusuportahang format."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Piliin para i-set up ang <xliff:g id="NAME">%s</xliff:g> sa isang sinusuportahang format."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Hindi sinusuportahan ng device na ito ang <xliff:g id="NAME">%s</xliff:g> na ito. Piliin upang i-set up sa isang sinusuportahang format."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Baka kailanganin mong i-reformat ang device"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Hindi inaasahang naalis ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"I-eject ang media bago tanggalin para maiwasan ang pagkawala ng content"</string>

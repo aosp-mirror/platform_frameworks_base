@@ -47,11 +47,9 @@ import android.util.proto.ProtoOutputStream;
 import com.android.server.location.ClientBrokerProto;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -207,19 +205,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * allowed to communicate over that channel. A channel is defined to have been opened if the
      * client has sent or received messages from the particular nanoapp.
      */
-    private final Map<Long, Integer> mMessageChannelNanoappIdMap = new ConcurrentHashMap<>();
-
-    /**
-     * Set containing all nanoapps that have been forcefully transitioned to the denied
-     * authorization state (via CLI) to ensure they don't transition back to the granted state
-     * later if, for example, a permission check is performed due to another nanoapp
-     */
-    private final Set<Long> mForceDeniedNapps = new HashSet<>();
+    private final Map<Long, Integer> mMessageChannelNanoappIdMap =
+            new ConcurrentHashMap<Long, Integer>();
 
     /**
      * Map containing all nanoapps that have active auth state denial timers.
      */
-    private final Map<Long, AuthStateDenialTimer> mNappToAuthTimerMap = new ConcurrentHashMap<>();
+    private final Map<Long, AuthStateDenialTimer> mNappToAuthTimerMap =
+            new ConcurrentHashMap<Long, AuthStateDenialTimer>();
 
     /**
      * Callback used to obtain the latest set of nanoapp permissions and verify this client has
@@ -644,8 +637,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private int updateNanoAppAuthState(
             long nanoAppId, List<String> nanoappPermissions, boolean gracePeriodExpired) {
         return updateNanoAppAuthState(
-                nanoAppId, nanoappPermissions, gracePeriodExpired,
-                mForceDeniedNapps.contains(nanoAppId) /* forceDenied */);
+                nanoAppId, nanoappPermissions, gracePeriodExpired, false /* forceDenied */);
     }
 
     /**
@@ -687,7 +679,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             // any state -> DENIED if "forceDenied" is true
             if (forceDenied) {
                 newAuthState = AUTHORIZATION_DENIED;
-                mForceDeniedNapps.add(nanoAppId);
             } else if (gracePeriodExpired) {
                 if (curAuthState == AUTHORIZATION_DENIED_GRACE_PERIOD) {
                     newAuthState = AUTHORIZATION_DENIED;

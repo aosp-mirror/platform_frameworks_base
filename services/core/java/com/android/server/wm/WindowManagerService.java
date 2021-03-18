@@ -7718,7 +7718,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setDismissImeOnBackKeyPressed(boolean dismissImeOnBackKeyPressed) {
+        public void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
+                boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed) {
             mPolicy.setDismissImeOnBackKeyPressed(dismissImeOnBackKeyPressed);
         }
 

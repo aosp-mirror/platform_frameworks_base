@@ -19,9 +19,9 @@ package com.android.server.pm.test.verify.domain
 import android.content.pm.IntentFilterVerificationInfo
 import android.content.pm.PackageManager
 import android.util.ArraySet
+import com.android.server.pm.verify.domain.DomainVerificationLegacySettings
 import com.android.server.pm.test.verify.domain.DomainVerificationPersistenceTest.Companion.readXml
 import com.android.server.pm.test.verify.domain.DomainVerificationPersistenceTest.Companion.writeXml
-import com.android.server.pm.verify.domain.DomainVerificationLegacySettings
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Rule
 import org.junit.Test

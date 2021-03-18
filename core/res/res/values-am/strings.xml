@@ -204,7 +204,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"የውጋገን አገልግሎት"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"የሰዓት ሰቅ አንባቢ (ግንኙነት የለም)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"የGNSS ጊዜ ዝመኔ አገልግሎት"</string>
-    <string name="music_recognition_manager_service" msgid="7481956037950276359">"የሙዚቃ ለይቶ ማወቅ አስተዳዳሪ አገልግሎት"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"የእርስዎ መሣሪያ ይደመሰሳል"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"የአስተዳዳሪ መተግበሪያ ስራ ላይ ሊውል አይችልም። የእርስዎን መሣሪያ አሁን ይደመሰሳል።\n\nጥያቄዎች ካለዎት የድርጅትዎን አስተዳዳሪ ያነጋግሩ።"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ማተም በ<xliff:g id="OWNER_APP">%s</xliff:g> ተሰናክሏል።"</string>
@@ -555,7 +556,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"ባዮሜትሪክስ ወይም ማያ ገጽ መቆለፊያን ይጠቀሙ"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"እርስዎን መሆንዎን ያረጋግጡ"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"ለመቀጠል ባዮሜትሪክዎን ይጠቀሙ"</string>
-    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"ለመቀጠል የባዮሜትሪክ ወይም የማያ ገጽ ቁልፍዎን ይጠቀሙ"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ባዮሜትራዊ ሃርድዌር አይገኝም"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ማረጋገጥ ተሰርዟል"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"አልታወቀም"</string>
@@ -589,7 +589,6 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"የጣት አሻራ ይጠቀሙ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"የጣት አሻራ ወይም የማያ ገጽ መቆለፊያ ይጠቀሙ"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ለመቀጠል የእርስዎን የጣት አሻራ ይጠቀሙ"</string>
-    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"ለመቀጠል የጣት አሻራዎን ወይም የማያ ገጽ ቁልፍዎን ይጠቀሙ"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"የጣት አሻራ አዶ"</string>
@@ -637,7 +636,6 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"በመልክ መክፈትን ይጠቀሙ"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"የመልክ ወይም የማያ ገጽ መቆለፊያን ይጠቀሙ"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"ለመቀጠል በመልክ መክፈትን ይጠቀሙ"</string>
-    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ለመቀጠል መልክዎን ወይም የማያ ገጽዎን መቆለፊያ ይጠቀሙ"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"የፊት አዶ"</string>
@@ -1001,8 +999,6 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"ይህን ገጽ  ለመክፈት ፈቃድ የለህም።"</string>
     <string name="text_copied" msgid="2531420577879738860">"ፅሁፍ ወደ ቅንጥብ ሰሌዳ ተገልብጧል።"</string>
     <string name="copied" msgid="4675902854553014676">"ተቀድቷል"</string>
-    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከ <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ተለጥፏል"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከቅንጣብ ሰሌዳ ተለጥፏል"</string>
     <string name="more_item_label" msgid="7419249600215749115">"ተጨማሪ"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"ምናሌ+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1376,14 +1372,11 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"አጥፋ"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g>ን በመፈተሽ ላይ…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"አሁን ያለ ይዘትን በመገምገም ላይ"</string>
-    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"የሚዲያ ማከማቻን በመተንተን ላይ"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"አዲስ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> እየሠራ አይደለም"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"ለማዋቀር መታ ያድርጉ"</string>
-    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"ለማቀናበር ይምረጡ"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"መሣሪያውን ዳግም ቅርጸት መሥራት ሳያስፈልገዎት አይቀርም። ለማስወጣት መታ ያድርጉ።"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ፎቶዎችን እና ማህደረመረጃን ለማስተላለፍ"</string>
-    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"የሚዲያ ፋይሎችን ያስሱ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"ከ<xliff:g id="NAME">%s</xliff:g> ጋር ችግር"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> እየሠራ አይደለም"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ለማስተካከል መታ ያድርጉ"</string>
@@ -1392,7 +1385,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"ያልተደገፈ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> እየሠራ አይደለም"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ይህ መሣሪያ ይህን <xliff:g id="NAME">%s</xliff:g> አይደግፍም። በሚደገፍ ቅርጸት ለማዘጋጀት መታ ያድርጉ።"</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g>ን በሚደገፍ ቅርጸት ለማዋቀር ይምረጡ።"</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"ይህ መሣሪያ ይህን <xliff:g id="NAME">%s</xliff:g> አይደግፍም። በሚደገፍ ቅርጸት ለማዘጋጀት ይምረጡ።"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"መሣሪያውን ዳግም ቅርጸት መሥራት ሳያስፈልገዎት አይቀርም"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> ሳይታሰብ ተወግዷል"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"ይዘት መጥፋትን ለማስቅረት ከማስወገድ በፊት ማህደረ መረጃን ያስወጡ"</string>

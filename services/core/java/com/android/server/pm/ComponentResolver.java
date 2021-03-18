@@ -1492,7 +1492,7 @@ public class ComponentResolver {
                 }
                 return null;
             }
-            final ResolveInfo res = new ResolveInfo(info.hasCategory(Intent.CATEGORY_BROWSABLE));
+            final ResolveInfo res = new ResolveInfo();
             res.activityInfo = ai;
             if ((mFlags & PackageManager.GET_RESOLVED_FILTER) != 0) {
                 res.filter = info;

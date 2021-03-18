@@ -74,7 +74,7 @@ import android.telephony.TelephonyManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.net.module.util.LocationPermissionChecker;
+import com.android.internal.util.LocationPermissionChecker;
 import com.android.server.VcnManagementService.VcnCallback;
 import com.android.server.VcnManagementService.VcnStatusCallbackInfo;
 import com.android.server.vcn.TelephonySubscriptionTracker;

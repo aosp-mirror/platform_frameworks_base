@@ -963,22 +963,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
     }
 
-    @Override
-    void migrateToNewSurfaceControl(SurfaceControl.Transaction t) {
-        super.migrateToNewSurfaceControl(t);
-        if (mAppAnimationLayer == null) {
-            return;
-        }
-
-        // As TaskDisplayArea is getting a new surface, reparent and reorder the child surfaces.
-        t.reparent(mAppAnimationLayer, mSurfaceControl);
-        t.reparent(mBoostedAppAnimationLayer, mSurfaceControl);
-        t.reparent(mHomeAppAnimationLayer, mSurfaceControl);
-        t.reparent(mSplitScreenDividerAnchor, mSurfaceControl);
-        reassignLayer(t);
-        scheduleAnimation();
-    }
-
     void onRootTaskRemoved(Task rootTask) {
         if (ActivityTaskManagerDebugConfig.DEBUG_ROOT_TASK) {
             Slog.v(TAG_ROOT_TASK, "onRootTaskRemoved: detaching " + rootTask + " from displayId="

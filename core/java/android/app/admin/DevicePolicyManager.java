@@ -2987,7 +2987,7 @@ public class DevicePolicyManager {
     /**
      * Checks if it's safe to run operations that can be affected by the given {@code reason}.
      *
-     * <p><b>Note:</b> notice that the operation safety state might change between the time this
+     * <p><b>Note:/b> notice that the operation safety state might change between the time this
      * method returns and the operation's method is called, so calls to the latter could still throw
      * a {@link UnsafeStateException} even when this method returns {@code true}.
      *

@@ -256,16 +256,16 @@ class DomainVerificationSettings {
     }
 
     @Nullable
-    public DomainVerificationPkgState removePendingState(@NonNull String pkgName) {
+    public DomainVerificationPkgState getPendingState(@NonNull String pkgName) {
         synchronized (mLock) {
-            return mPendingPkgStates.remove(pkgName);
+            return mPendingPkgStates.get(pkgName);
         }
     }
 
     @Nullable
-    public DomainVerificationPkgState removeRestoredState(@NonNull String pkgName) {
+    public DomainVerificationPkgState getRestoredState(@NonNull String pkgName) {
         synchronized (mLock) {
-            return mRestoredPkgStates.remove(pkgName);
+            return mRestoredPkgStates.get(pkgName);
         }
     }
 }

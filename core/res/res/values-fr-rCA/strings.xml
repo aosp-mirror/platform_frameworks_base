@@ -204,7 +204,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"Service de crépuscule"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Détecteur de fuseau horaire (aucune connectivité)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Service d\'actualisation de l\'heure GNSS"</string>
-    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Service de gestion de la reconnaissance musicale"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Le contenu de votre appareil sera effacé"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Impossible d\'utiliser l\'application d\'administration. Les données de votre appareil vont maintenant être effacées.\n\nSi vous avez des questions, communiquez avec l\'administrateur de votre organisation."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Impression désactivée par <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -555,7 +556,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Utiliser les données biométriques ou le verrouillage de l\'écran"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Confirmez que c\'est vous"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Utilisez votre méthode d\'authentification biométrique pour continuer"</string>
-    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Utilisez vos données biométriques ou le verrouillage de l\'écran pour continuer"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Matériel biométrique indisponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Authentification annulée"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Données biométriques non reconnues"</string>
@@ -589,7 +589,6 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utiliser l\'empreinte digitale"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Utiliser l\'empreinte digitale ou le verrouillage de l\'écran"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utilisez votre empreinte digitale pour continuer"</string>
-    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Utilisez votre empreinte digitale ou le verrouillage de l\'écran pour continuer"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icône d\'empreinte digitale"</string>
@@ -637,7 +636,6 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Utiliser le déverrouillage par reconnaissance faciale"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Utiliser la reconnaissance faciale ou le verrouillage de l\'écran"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Utilisez le déverrouillage par reconnaissance faciale pour continuer"</string>
-    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Utilisez votre visage ou le verrouillage de l\'écran pour continuer"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Icône visage"</string>
@@ -1001,8 +999,6 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Vous n\'êtes pas autorisé à ouvrir cette page."</string>
     <string name="text_copied" msgid="2531420577879738860">"Le texte a été copié dans le presse-papiers."</string>
     <string name="copied" msgid="4675902854553014676">"Copié"</string>
-    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> collé à partir de <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> collé à partir du presse-papiers"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Plus"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Méta+"</string>
@@ -1376,14 +1372,11 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Désactiver"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Vérification de <xliff:g id="NAME">%s</xliff:g> en cours…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Vérification du contenu actuel"</string>
-    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Analyse de l\'espace de stockage sur le support en cours…"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nouveau périphérique <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ne fonctionne pas"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Toucher pour configurer"</string>
-    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Sélectionnez pour configurer"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Vous devrez peut-être reformater l\'appareil. Touchez pour l\'éjecter."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Pour transférer des photos et d\'autres fichiers"</string>
-    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Parcourir les fichiers multimédias"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Il y a un problème avec <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ne fonctionne pas"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Touchez la notification pour corriger la situation"</string>
@@ -1392,7 +1385,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> non compatible"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ne fonctionne pas"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Cet appareil n\'est pas compatible avec la mémoire de stockage « <xliff:g id="NAME">%s</xliff:g> ». Touchez pour la configurer dans un format compatible."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Sélectionner pour configurer <xliff:g id="NAME">%s</xliff:g> dans un format pris en charge."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Cet appareil ne prend pas en charge ce média « <xliff:g id="NAME">%s</xliff:g> ». Sélectionnez-le pour le configurer dans un format compatible."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Vous devrez peut-être reformater l\'appareil"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Retrait inattendu de la mémoire « <xliff:g id="NAME">%s</xliff:g> »"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Éjectez les périphériques avant de les retirer pour éviter toute perte de données."</string>
@@ -1698,7 +1691,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec trois doigts et maintenez-les-y."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zoom"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Changement d\'utilisateur (<xliff:g id="NAME">%1$s</xliff:g>) en cours…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g> en cours..."</string>
     <string name="owner_name" msgid="8713560351570795743">"Propriétaire"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Erreur"</string>

@@ -204,7 +204,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"Isevisi Yangovivi"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Isitholi Sezoni Yesikhathi (Akukho ukuxhumana)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Isevisi Ebuyekeziwe Yesikhathi se-GNSS"</string>
-    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Isevisi Yomphathi Wokuthola Umculo"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Idivayisi yakho izosulwa"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Uhlelo lokusebenza lomlawuli alikwazi ukusetshenziswa. Idivayisi yakho manje izosuswa.\n\nUma unemibuzo, xhumana nomlawuli wezinhlangano zakho."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Ukuphrinta kukhutshazwe nge-<xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -555,7 +556,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Sebenzisa i-biometrics noma ukukhiya isikrini"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Qinisekisa ukuthi nguwe"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Sebenzisa i-biometric yakho ukuze uqhubeke"</string>
-    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Sebenzisa i-biometric noma ukukhiya isikrini ukuze uqhubeke"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"I-Biometric hardware ayitholakali"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Ukufakazela ubuqiniso kukhanseliwe"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Akwaziwa"</string>
@@ -589,7 +589,6 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Sebenzisa izigxivizo zeminwe"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Sebenzisa izigxivizo zeminwe noma ukukhiya isikrini"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Sebenzisa izigxivizo zakho zeminwe ukuze uqhubeke"</string>
-    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Sebenzisa izigxivizo zakho zomunwe noma ukukhiya isikrini ukuze uqhubeke"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Isithonjana sezigxivizo zeminwe"</string>
@@ -637,7 +636,6 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Sebenzisa i-face unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Sebenzisa i-face lock noma ukukhiya isikrini"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Sebenzisa i-face unlock ukuze uqhubeke"</string>
-    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Sebenzisa ubuso bakho noma ukukhiya isikrini ukuze uqhubeke"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Isithonjana sobuso"</string>
@@ -1001,8 +999,6 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Awunayo imvume yokuvula leli khasi."</string>
     <string name="text_copied" msgid="2531420577879738860">"Umbhalo ukopishwe ebhodini lokunamathisela."</string>
     <string name="copied" msgid="4675902854553014676">"Kukopishiwe"</string>
-    <string name="pasted_from_app" msgid="5627698450808256545">"I-<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> inamathiselwe kusuka ku-<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"I-<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> inamathiselwe kusuka ebhodini yokunamathisela"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Okuningi"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Imenyu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1376,14 +1372,11 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Vala"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Iyahlola <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Ukubuyekeza okuqukethwe kwamanje"</string>
-    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Ihlaziya isitoreji semidiya"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Okusha <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"I-<xliff:g id="NAME">%s</xliff:g> ayisebenzi"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Thepha ukuze usethe"</string>
-    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Khetha ukuze usethe"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Kungase kudingeke ukuthi ufomethe kabusha idivayisi. Thepha ukuze ukhiphe."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Ukuze kudluliselwe izithombe nemidiya"</string>
-    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Phequlula amafayela wemidiya"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Inkinga ngo-<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"I-<xliff:g id="NAME">%s</xliff:g> ayisebenzi"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Thepha ukuze ulungise"</string>
@@ -1392,7 +1385,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Akusekelwe <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"I-<xliff:g id="NAME">%s</xliff:g> ayisebenzi"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Le divayisi ayisekeli le <xliff:g id="NAME">%s</xliff:g>. Thepha ukuze usethe ngefomethi esekelwayo."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Khetha ukusetha i-<xliff:g id="NAME">%s</xliff:g> ngefomethi esekelwayo."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Le divayisi ayisekeli le <xliff:g id="NAME">%s</xliff:g>. Khetha ukuze usethe ngefomethi esekelwayo."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Kungase kudingeke ukuthi ufomethe kabusha idivayisi"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"I-<xliff:g id="NAME">%s</xliff:g> isuswe ngokungalindelekile"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Khipha imidiya ngaphambi kokususa ukuze ugweme ukulahlekelwa okuqukethwe"</string>

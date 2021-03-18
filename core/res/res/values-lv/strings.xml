@@ -206,7 +206,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"Krēslas noteikšanas pakalpojums"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Laika joslas noteikšanas rīks (nav savienojuma)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS laika atjaunināšanas pakalpojums"</string>
-    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Mūzikas atpazīšanas pārziņa pakalpojums"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Jūsu ierīces dati tiks dzēsti"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administratora lietotni nevar izmantot. Ierīcē saglabātie dati tiks dzēsti.\n\nJa jums ir kādi jautājumi, sazinieties ar savas organizācijas administratoru."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drukāšanu atspējoja <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -558,7 +559,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Biometrijas vai ekrāna bloķēšanas izmantošana"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Apstipriniet, ka tas esat jūs"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Lai turpinātu, izmantojiet biometriju"</string>
-    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Izmantojiet biometrijas datus vai ekrāna bloķēšanas opciju, lai turpinātu"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisko datu aparatūra nav pieejama"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentifikācija ir atcelta"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Dati nav atpazīti"</string>
@@ -592,7 +592,6 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Pirksta nospieduma izmantošana"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Pirksta nospieduma vai ekrāna bloķēšanas metodes izmantošana"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Lai turpinātu, izmantojiet pirksta nospiedumu"</string>
-    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Izmantojiet pirksta nospiedumu vai ekrāna bloķēšanas opciju, lai turpinātu"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Pirksta nospieduma ikona"</string>
@@ -640,7 +639,6 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Autorizācija pēc sejas"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Autorizācijas pēc sejas vai ekrāna bloķēšanas metodes izmantošana"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Lai turpinātu, izmantojiet autorizāciju pēc sejas"</string>
-    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Izmantojiet autorizāciju pēc sejas vai ekrāna bloķēšanas opciju, lai turpinātu"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Sejas ikona"</string>
@@ -1004,8 +1002,6 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Jums nav atļaujas atvērt šo lapu."</string>
     <string name="text_copied" msgid="2531420577879738860">"Teksts ir kopēts uz starpliktuvi."</string>
     <string name="copied" msgid="4675902854553014676">"Nokopēts"</string>
-    <string name="pasted_from_app" msgid="5627698450808256545">"Lietotnē <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> tika ielīmēti dati no lietotnes <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>."</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Lietotnē <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> tika ielīmēti dati no starpliktuves."</string>
     <string name="more_item_label" msgid="7419249600215749115">"Vairāk"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Izvēlne+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta taustiņš +"</string>
@@ -1396,14 +1392,11 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Izslēgt"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Notiek ierīces <xliff:g id="NAME">%s</xliff:g> pārbaude…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Notiek pašreizējā satura pārskatīšana."</string>
-    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Notiek multivides krātuves analīze…"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Jauna ierīce: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> nedarbojas."</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Pieskarieties, lai iestatītu."</string>
-    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Atlasiet, lai iestatītu."</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Iespējams, jums būs atkārtoti jāformatē ierīce. Pieskarieties, lai izņemtu."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Fotoattēlu un satura pārsūtīšanai."</string>
-    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Pārlūkojiet multivides failus."</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problēma saistībā ar <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> nedarbojas."</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Pieskarieties, lai novērstu problēmu."</string>
@@ -1412,7 +1405,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Neatbalstīts datu nesējs (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> nedarbojas."</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Šī ierīce neatbalsta datu nesēju <xliff:g id="NAME">%s</xliff:g>. Pieskarieties, lai iestatītu to atbalstītā formātā."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Atlasiet, lai iestatītu atbalstītu formātu multivides krātuvei (<xliff:g id="NAME">%s</xliff:g>)."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Šajā ierīcē netiek atbalstīta šī <xliff:g id="NAME">%s</xliff:g>. Atlasiet, lai iestatītu atbalstītu formātu."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Iespējams, jums būs atkārtoti jāformatē ierīce."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> tika negaidīti izņemta"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Lai nezaudētu saturu, pirms izņemšanas izstumiet datu nesēju."</string>

@@ -16,7 +16,7 @@
 
 package com.android.server.pm.test.verify.domain
 
-import android.content.pm.verify.domain.DomainVerificationState
+import android.content.pm.verify.domain.DomainVerificationManager
 import android.util.ArrayMap
 import android.util.TypedXmlPullParser
 import android.util.TypedXmlSerializer
@@ -117,11 +117,11 @@ class DomainVerificationPersistenceTest {
     @Test
     fun readMalformed() {
         val stateZero = mockEmptyPkgState(0).apply {
-            stateMap["example.com"] = DomainVerificationState.STATE_SUCCESS
-            stateMap["example.org"] = DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED
+            stateMap["example.com"] = DomainVerificationManager.STATE_SUCCESS
+            stateMap["example.org"] = DomainVerificationManager.STATE_FIRST_VERIFIER_DEFINED
 
             // A domain without a written state falls back to default
-            stateMap["missing-state.com"] = DomainVerificationState.STATE_NO_RESPONSE
+            stateMap["missing-state.com"] = DomainVerificationManager.STATE_NO_RESPONSE
 
             userStates[1] = DomainVerificationInternalUserState(1).apply {
                 addHosts(setOf("example-user1.com", "example-user1.org"))
@@ -159,9 +159,9 @@ class DomainVerificationPersistenceTest {
                         >
                         <state>
                             <domain name="example.com" state="${
-                                DomainVerificationState.STATE_SUCCESS}"/>
+                                DomainVerificationManager.STATE_SUCCESS}"/>
                             <domain name="example.org" state="${
-                                DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED}"/>
+                                DomainVerificationManager.STATE_FIRST_VERIFIER_DEFINED}"/>
                             <not-domain name="not-domain.com" state="1"/>
                             <domain name="missing-state.com"/>
                         </state>

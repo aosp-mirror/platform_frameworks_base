@@ -204,7 +204,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"Twilight 服務"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"時區偵測器 (不必連上網路)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 時間更新服務"</string>
-    <string name="music_recognition_manager_service" msgid="7481956037950276359">"音樂辨識管理員服務"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"你的裝置資料將遭到清除"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"無法使用管理應用程式，系統現在將清除你裝置中的資料。\n\n如有任何問題，請與貴機構的管理員聯絡。"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」已停用列印功能。"</string>
@@ -555,7 +556,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"使用生物特徵辨識或螢幕鎖定功能"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"驗證你的身分"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"如要繼續操作，請使用生物特徵辨識功能驗證身分"</string>
-    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"請使用生物特徵辨識或螢幕鎖定功能驗證身分，才能繼續操作"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"無法使用生物特徵辨識硬體"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"已取消驗證"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"無法辨識"</string>
@@ -589,7 +589,6 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"使用指紋"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"使用指紋或螢幕鎖定功能"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"使用指紋完成驗證才能繼續操作"</string>
-    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"請使用指紋解鎖或螢幕鎖定功能驗證身分，才能繼續操作"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"指紋圖示"</string>
@@ -637,7 +636,6 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"使用人臉解鎖功能"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"使用人臉解鎖或螢幕鎖定功能"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"如要繼續操作，請使用人臉解鎖功能驗證身分"</string>
-    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"請使用人臉解鎖或螢幕鎖定功能驗證身分，才能繼續操作"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"臉孔圖示"</string>
@@ -1001,8 +999,6 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"你沒有開啟這個頁面的權限。"</string>
     <string name="text_copied" msgid="2531420577879738860">"文字已複製到剪貼簿。"</string>
     <string name="copied" msgid="4675902854553014676">"已複製"</string>
-    <string name="pasted_from_app" msgid="5627698450808256545">"「<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>」已貼上從「<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>」複製的資料"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"「<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>」已貼上剪貼簿中的資料"</string>
     <string name="more_item_label" msgid="7419249600215749115">"更多"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"[Menu] +"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta +"</string>
@@ -1376,14 +1372,11 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"關閉"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"正在檢查 <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"正在檢查目前的內容"</string>
-    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"正在分析媒體儲存空間"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"新的 <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"「<xliff:g id="NAME">%s</xliff:g>」無法運作"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"輕觸即可進行設定"</string>
-    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"選取即可設定"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"你可能要將裝置重新格式化。輕觸即可退出裝置。"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"可用於傳輸相片和媒體"</string>
-    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"瀏覽媒體檔案"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>發生問題"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"「<xliff:g id="NAME">%s</xliff:g>」無法運作"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"輕觸即可修正問題"</string>
@@ -1392,7 +1385,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"不支援的「<xliff:g id="NAME">%s</xliff:g>」"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"「<xliff:g id="NAME">%s</xliff:g>」無法運作"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"此裝置不支援這個 <xliff:g id="NAME">%s</xliff:g>。輕觸即可使用支援的格式進行設定。"</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"選取即可使用支援的格式設定「<xliff:g id="NAME">%s</xliff:g>」。"</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"此裝置不支援這個 <xliff:g id="NAME">%s</xliff:g>。選取即可使用支援的格式進行設定。"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"你可能要將裝置重新格式化"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"意外移除「<xliff:g id="NAME">%s</xliff:g>」"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"請先退出媒體，再將其移除，以免內容遺失"</string>

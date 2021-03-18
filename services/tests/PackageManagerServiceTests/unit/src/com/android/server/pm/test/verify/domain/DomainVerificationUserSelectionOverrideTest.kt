@@ -21,7 +21,6 @@ import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.verify.domain.DomainVerificationManager
-import android.content.pm.verify.domain.DomainVerificationState
 import android.content.pm.verify.domain.DomainVerificationUserState
 import android.os.Build
 import android.os.PatternMatcher
@@ -75,8 +74,6 @@ class DomainVerificationUserStateOverrideTest {
         }).apply {
             setConnection(mockThrowOnUnmocked {
                 whenever(filterAppAccess(anyString(), anyInt(), anyInt())) { false }
-                whenever(doesUserExist(0)) { true }
-                whenever(doesUserExist(1)) { true }
                 whenever(scheduleWriteSettings())
 
                 // Need to provide an internal UID so some permission checks are ignored
@@ -157,20 +154,19 @@ class DomainVerificationUserStateOverrideTest {
             .containsExactly(PKG_TWO)
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException::class)
     fun anotherPackageTakeoverFailure() {
         val service = makeService()
 
         // Verify 1 to give it a higher approval level
         service.setDomainVerificationStatus(UUID_ONE, setOf(DOMAIN_ONE),
-            DomainVerificationState.STATE_SUCCESS)
+            DomainVerificationManager.STATE_SUCCESS)
         assertThat(service.stateFor(PKG_ONE, DOMAIN_ONE)).isEqualTo(STATE_VERIFIED)
         assertThat(service.getOwnersForDomain(DOMAIN_ONE, USER_ID).map { it.packageName })
             .containsExactly(PKG_ONE)
 
         // Attempt override by package 2
-        assertThat(service.setDomainVerificationUserSelection(UUID_TWO, setOf(DOMAIN_ONE), true,
-                USER_ID)).isEqualTo(DomainVerificationManager.ERROR_UNABLE_TO_APPROVE)
+        service.setDomainVerificationUserSelection(UUID_TWO, setOf(DOMAIN_ONE), true, USER_ID)
     }
 
     private fun DomainVerificationService.stateFor(pkgName: String, host: String) =

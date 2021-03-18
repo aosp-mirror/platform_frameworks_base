@@ -24,6 +24,7 @@ import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainSet;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
+import android.content.pm.verify.domain.DomainVerificationManager.InvalidDomainSetException;
 import android.content.pm.verify.domain.DomainVerificationUserState;
 import android.content.pm.verify.domain.IDomainVerificationManager;
 import android.os.ServiceSpecificException;
@@ -60,12 +61,11 @@ public class DomainVerificationManagerStub extends IDomainVerificationManager.St
         }
     }
 
-    @DomainVerificationManager.Error
     @Override
-    public int setDomainVerificationStatus(String domainSetId, @NonNull DomainSet domainSet,
+    public void setDomainVerificationStatus(String domainSetId, @NonNull DomainSet domainSet,
             int state) {
         try {
-            return mService.setDomainVerificationStatus(UUID.fromString(domainSetId),
+            mService.setDomainVerificationStatus(UUID.fromString(domainSetId),
                     domainSet.getDomains(), state);
         } catch (Exception e) {
             throw rethrow(e);
@@ -82,12 +82,11 @@ public class DomainVerificationManagerStub extends IDomainVerificationManager.St
         }
     }
 
-    @DomainVerificationManager.Error
     @Override
-    public int setDomainVerificationUserSelection(String domainSetId, @NonNull DomainSet domainSet,
+    public void setDomainVerificationUserSelection(String domainSetId, @NonNull DomainSet domainSet,
             boolean enabled, @UserIdInt int userId) {
         try {
-            return mService.setDomainVerificationUserSelection(UUID.fromString(domainSetId),
+            mService.setDomainVerificationUserSelection(UUID.fromString(domainSetId),
                     domainSet.getDomains(), enabled, userId);
         } catch (Exception e) {
             throw rethrow(e);
@@ -117,9 +116,14 @@ public class DomainVerificationManagerStub extends IDomainVerificationManager.St
     }
 
     private RuntimeException rethrow(Exception exception) throws RuntimeException {
-        if (exception instanceof NameNotFoundException) {
+        if (exception instanceof InvalidDomainSetException) {
+            int packedErrorCode = DomainVerificationManager.ERROR_INVALID_DOMAIN_SET;
+            packedErrorCode |= ((InvalidDomainSetException) exception).getReason() << 16;
+            return new ServiceSpecificException(packedErrorCode,
+                    ((InvalidDomainSetException) exception).getPackageName());
+        } else if (exception instanceof NameNotFoundException) {
             return new ServiceSpecificException(
-                    DomainVerificationManager.INTERNAL_ERROR_NAME_NOT_FOUND);
+                    DomainVerificationManager.ERROR_NAME_NOT_FOUND);
         } else if (exception instanceof RuntimeException) {
             return (RuntimeException) exception;
         } else {

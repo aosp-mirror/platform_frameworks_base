@@ -208,7 +208,8 @@
     <string name="twilight_service" msgid="8964898045693187224">"Paslauga „Twilight“"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Laiko juostos aptikimo priemonė (nėra ryšio)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS laiko atnaujinimo paslauga"</string>
-    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Muzikos atpažinimo tvarkyklės paslauga"</string>
+    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Įrenginys bus ištrintas"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administratoriaus programos negalima naudoti. Dabar įrenginio duomenys bus ištrinti.\n\nJei turite klausimų, susisiekite su organizacijos administratoriumi."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Neleidžiama spausdinti (<xliff:g id="OWNER_APP">%s</xliff:g>)."</string>
@@ -561,7 +562,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Naudoti biometrinius duomenis arba ekrano užraktą"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Patvirtinkite, kad tai jūs"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Norėdami tęsti, naudokite biometrinius duomenis"</string>
-    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Jei norite tęsti, naudokite biometrinius duomenis arba ekrano užraktą"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrinė aparatinė įranga nepasiekiama"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentifikavimas atšauktas"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Neatpažinta"</string>
@@ -595,7 +595,6 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Naudoti kontrolinį kodą"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Naudoti kontrolinį kodą arba ekrano užraktą"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Naudokite kontrolinį kodą, kad galėtumėte tęsti"</string>
-    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Jei norite tęsti, naudokite kontrolinį kodą arba ekrano užraktą"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Piršto antspaudo piktograma"</string>
@@ -643,7 +642,6 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Naudoti atrakinimą pagal veidą"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Naudoti atrakinimą pagal veidą arba ekrano užraktą"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Norėdami tęsti, naudokite atrakinimą pagal veidą"</string>
-    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Jei norite tęsti, naudokite veido atpažinimo funkciją arba ekrano užraktą"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Veido pkt."</string>
@@ -1007,8 +1005,6 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Neturite leidimo atidaryti šį puslapį."</string>
     <string name="text_copied" msgid="2531420577879738860">"Tekstas nukopijuotas į iškarpinę."</string>
     <string name="copied" msgid="4675902854553014676">"Nukopijuota"</string>
-    <string name="pasted_from_app" msgid="5627698450808256545">"„<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>“ įklijuota iš „<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>“"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"„<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>“ įklijuota iš iškarpinės"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Daugiau"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Meniu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"„Meta“ +"</string>
@@ -1416,14 +1412,11 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Išjungti"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Tikrinama išorinė laikmena (<xliff:g id="NAME">%s</xliff:g>)…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Peržiūrimas dabartinis turinys"</string>
-    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Analizuojama medijos saugykla"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nauja laikmena (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> neveikia"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Palieskite, kad nustatytumėte"</string>
-    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Pasirinkite, kad nustatytumėte"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Jums gali reikėti suformatuoti įrenginį iš naujo. Palieskite, kad pašalintumėte."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Norint perkelti nuotraukas ir mediją"</string>
-    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Naršykite medijos failus"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Kilo problema dėl laikmenos (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> neveikia"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Palieskite ir ištaisykite tai"</string>
@@ -1432,7 +1425,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Nepalaikoma saugykla (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> neveikia"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Šis įrenginys nepalaiko šios <xliff:g id="NAME">%s</xliff:g>. Palieskite, kad nustatytumėte palaikomu formatu."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Pasirinkite, kad nustatytumėte <xliff:g id="NAME">%s</xliff:g> palaikomu formatu."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Šis įrenginys nepalaiko šios <xliff:g id="NAME">%s</xliff:g>. Pasirinkite ir nustatykite palaikomu formatu."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Jums gali reikėti suformatuoti įrenginį iš naujo"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> netikėtai pašalinta"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Prieš šalindami išimkite laikmeną, kad neprarastumėte turinio"</string>

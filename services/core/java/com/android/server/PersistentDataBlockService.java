@@ -23,7 +23,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -105,9 +104,6 @@ import java.util.concurrent.TimeUnit;
 public class PersistentDataBlockService extends SystemService {
     private static final String TAG = PersistentDataBlockService.class.getSimpleName();
 
-    private static final String GSI_SANDBOX = "/data/gsi_persistent_data";
-    private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
-
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
     private static final int HEADER_SIZE = 8;
     // Magic number to mark block device as adhering to the format consumed by this service
@@ -132,13 +128,12 @@ public class PersistentDataBlockService extends SystemService {
     private static final String FLASH_LOCK_UNLOCKED = "0";
 
     private final Context mContext;
-    private final boolean mIsRunningDSU;
+    private final String mDataBlockFile;
     private final Object mLock = new Object();
     private final CountDownLatch mInitDoneSignal = new CountDownLatch(1);
 
     private int mAllowedUid = -1;
     private long mBlockDeviceSize;
-    private String mDataBlockFile;
 
     @GuardedBy("mLock")
     private boolean mIsWritable = true;
@@ -147,7 +142,6 @@ public class PersistentDataBlockService extends SystemService {
         super(context);
         mContext = context;
         mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
-        mIsRunningDSU = SystemProperties.getBoolean(GSI_RUNNING_PROP, false);
         mBlockDeviceSize = -1; // Load lazily
     }
 
@@ -292,28 +286,14 @@ public class PersistentDataBlockService extends SystemService {
         return true;
     }
 
-    private FileOutputStream getBlockOutputStream() throws IOException {
-        if (!mIsRunningDSU) {
-            return new FileOutputStream(new File(mDataBlockFile));
-        } else {
-            File sandbox = new File(GSI_SANDBOX);
-            File realpdb = new File(SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP));
-            if (!sandbox.exists()) {
-                FileUtils.copy(realpdb, sandbox);
-                mDataBlockFile = GSI_SANDBOX;
-            }
-            Slog.i(TAG, "PersistentDataBlock copy-on-write");
-            return new FileOutputStream(sandbox);
-        }
-    }
-
     private boolean computeAndWriteDigestLocked() {
         byte[] digest = computeDigestLocked(null);
         if (digest != null) {
             DataOutputStream outputStream;
             try {
-                outputStream = new DataOutputStream(getBlockOutputStream());
-            } catch (IOException e) {
+                outputStream = new DataOutputStream(
+                        new FileOutputStream(new File(mDataBlockFile)));
+            } catch (FileNotFoundException e) {
                 Slog.e(TAG, "partition not available?", e);
                 return false;
             }
@@ -378,8 +358,8 @@ public class PersistentDataBlockService extends SystemService {
     private void formatPartitionLocked(boolean setOemUnlockEnabled) {
         DataOutputStream outputStream;
         try {
-            outputStream = new DataOutputStream(getBlockOutputStream());
-        } catch (IOException e) {
+            outputStream = new DataOutputStream(new FileOutputStream(new File(mDataBlockFile)));
+        } catch (FileNotFoundException e) {
             Slog.e(TAG, "partition not available?", e);
             return;
         }
@@ -404,8 +384,8 @@ public class PersistentDataBlockService extends SystemService {
     private void doSetOemUnlockEnabledLocked(boolean enabled) {
         FileOutputStream outputStream;
         try {
-            outputStream = getBlockOutputStream();
-        } catch (IOException e) {
+            outputStream = new FileOutputStream(new File(mDataBlockFile));
+        } catch (FileNotFoundException e) {
             Slog.e(TAG, "partition not available", e);
             return;
         }
@@ -481,8 +461,8 @@ public class PersistentDataBlockService extends SystemService {
 
             DataOutputStream outputStream;
             try {
-                outputStream = new DataOutputStream(getBlockOutputStream());
-            } catch (IOException e) {
+                outputStream = new DataOutputStream(new FileOutputStream(new File(mDataBlockFile)));
+            } catch (FileNotFoundException e) {
                 Slog.e(TAG, "partition not available?", e);
                 return -1;
             }
@@ -567,17 +547,6 @@ public class PersistentDataBlockService extends SystemService {
         public void wipe() {
             enforceOemUnlockWritePermission();
 
-            if (mIsRunningDSU) {
-                File sandbox = new File(GSI_SANDBOX);
-                if (sandbox.exists()) {
-                    if (sandbox.delete()) {
-                        mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
-                    } else {
-                        Slog.e(TAG, "Failed to wipe sandbox persistent data block");
-                    }
-                }
-                return;
-            }
             synchronized (mLock) {
                 int ret = nativeWipe(mDataBlockFile);
 
@@ -737,8 +706,8 @@ public class PersistentDataBlockService extends SystemService {
         private void writeDataBuffer(long offset, ByteBuffer dataBuffer) {
             FileOutputStream outputStream;
             try {
-                outputStream = getBlockOutputStream();
-            } catch (IOException e) {
+                outputStream = new FileOutputStream(new File(mDataBlockFile));
+            } catch (FileNotFoundException e) {
                 Slog.e(TAG, "partition not available", e);
                 return;
             }

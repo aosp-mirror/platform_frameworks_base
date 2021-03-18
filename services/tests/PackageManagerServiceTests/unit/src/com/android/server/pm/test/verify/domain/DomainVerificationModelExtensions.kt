@@ -16,8 +16,8 @@
 
 package com.android.server.pm.test.verify.domain
 
-import android.content.pm.verify.domain.DomainVerificationInfo
 import android.content.pm.verify.domain.DomainVerificationRequest
+import android.content.pm.verify.domain.DomainVerificationInfo
 import android.content.pm.verify.domain.DomainVerificationUserState
 import com.android.server.pm.verify.domain.DomainVerificationPersistence
 

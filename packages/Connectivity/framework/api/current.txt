@@ -87,7 +87,6 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public boolean isActiveNetworkMetered();
     method public boolean isDefaultNetworkActive();
     method @Deprecated public static boolean isNetworkTypeValid(int);
-    method public void registerBestMatchingNetworkCallback(@NonNull android.net.NetworkRequest, @NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public void registerDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public void registerDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public void registerNetworkCallback(@NonNull android.net.NetworkRequest, @NonNull android.net.ConnectivityManager.NetworkCallback);

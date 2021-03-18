@@ -19,7 +19,6 @@ package com.android.server.pm.test.verify.domain
 import android.content.pm.verify.domain.DomainSet
 import android.content.pm.verify.domain.DomainVerificationInfo
 import android.content.pm.verify.domain.DomainVerificationRequest
-import android.content.pm.verify.domain.DomainVerificationState
 import android.content.pm.verify.domain.DomainVerificationUserState
 import android.os.Parcel
 import android.os.Parcelable
@@ -75,9 +74,7 @@ class DomainVerificationCoreApiTest {
                     DomainVerificationInfo(
                         UUID.fromString("703f6d34-6241-4cfd-8176-2e1d23355811"),
                         "com.test.pkg",
-                        massiveSet.withIndex().associate {
-                            it.value to DomainVerificationState.convertToInfoState(it.index)
-                        }
+                        massiveSet.withIndex().associate { it.value to it.index }
                     )
                 },
                 unparcel = { DomainVerificationInfo.CREATOR.createFromParcel(it) },

@@ -50,23 +50,27 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- Android 12 introduces Compatible media transcoding feature.  See
- <a href="https://developer.android.com/about/versions/12/features#compatible_media_transcoding">
- Compatible media transcoding</a>. MediaTranscodeManager provides an interface to the system's media
- transcoding service and can be used to transcode media files, e.g. transcoding a video from HEVC to
- AVC.
+ MediaTranscodeManager provides an interface to the system's media transcoding service and can be
+ used to transcode media files, e.g. transcoding a video from HEVC to AVC.
 
  <h3>Transcoding Types</h3>
  <h4>Video Transcoding</h4>
- When transcoding a video file, the video track will be transcoded based on the desired track format
- and the audio track will be pass through without any modification.
+ When transcoding a video file, the video file could be of any of the following types:
+ <ul>
+ <li> Video file with single video track. </li>
+ <li> Video file with multiple video track. </li>
+ <li> Video file with multiple video tracks and audio tracks. </li>
+ <li> Video file with video/audio tracks and metadata track. Note that metadata track will be passed
+ through only if it could be recognized by {@link MediaExtractor}.
+ TODO(hkuang): Finalize the metadata track behavior. </li>
+ </ul>
  <p class=note>
- Note that currently only support transcoding video file in mp4 format and with single video track.
+ Note that currently only support transcoding video file in mp4 format.
 
  <h3>Transcoding Request</h3>
  <p>
  To transcode a media file, first create a {@link TranscodingRequest} through its builder class
- {@link VideoTranscodingRequest.Builder}. Transcode requests are then enqueue to the manager through
+ {@link TranscodingRequest.Builder}. Transcode requests are then enqueue to the manager through
  {@link MediaTranscodeManager#enqueueRequest(
          TranscodingRequest, Executor, OnTranscodingFinishedListener)}
  TranscodeRequest are processed based on client process's priority and request priority. When a
@@ -78,9 +82,23 @@ import java.util.concurrent.Executors;
  Here is an example where <code>Builder</code> is used to specify all parameters
 
  <pre class=prettyprint>
- VideoTranscodingRequest request =
-    new VideoTranscodingRequest.Builder(srcUri, dstUri, videoFormat).build();
+ TranscodingRequest request =
+    new TranscodingRequest.Builder()
+        .setSourceUri(srcUri)
+        .setDestinationUri(dstUri)
+        .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
+        .setPriority(REALTIME)
+        .setVideoTrackFormat(videoFormat)
+        .build();
  }</pre>
+
+ TODO(hkuang): Add architecture diagram showing the transcoding service and api.
+ TODO(hkuang): Add sample code when API is settled.
+ TODO(hkuang): Clarify whether multiple video tracks is supported or not.
+ TODO(hkuang): Clarify whether image/audio transcoding is supported or not.
+ TODO(hkuang): Clarify what will happen if there is unrecognized track in the source.
+ TODO(hkuang): Clarify whether supports scaling.
+ TODO(hkuang): Clarify whether supports framerate conversion.
  @hide
  */
 @MinSdk(Build.VERSION_CODES.S)
@@ -96,6 +114,68 @@ public final class MediaTranscodeManager {
 
     /** Default bpp(bits-per-pixel) to use for calculating default bitrate. */
     private static final float BPP = 0.25f;
+
+    /**
+     * Default transcoding type.
+     * @hide
+     */
+    public static final int TRANSCODING_TYPE_UNKNOWN = 0;
+
+    /**
+     * TRANSCODING_TYPE_VIDEO indicates that client wants to perform transcoding on a video file.
+     * <p>Note that currently only support transcoding video file in mp4 format.
+     */
+    public static final int TRANSCODING_TYPE_VIDEO = 1;
+
+    /**
+     * TRANSCODING_TYPE_IMAGE indicates that client wants to perform transcoding on an image file.
+     * @hide
+     */
+    public static final int TRANSCODING_TYPE_IMAGE = 2;
+
+    /** @hide */
+    @IntDef(prefix = {"TRANSCODING_TYPE_"}, value = {
+            TRANSCODING_TYPE_UNKNOWN,
+            TRANSCODING_TYPE_VIDEO,
+            TRANSCODING_TYPE_IMAGE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TranscodingType {}
+
+    /**
+     * Default value.
+     * @hide
+     */
+    public static final int PRIORITY_UNKNOWN = 0;
+    /**
+     * PRIORITY_REALTIME indicates that the transcoding request is time-critical and that the
+     * client wants the transcoding result as soon as possible.
+     * <p> Set PRIORITY_REALTIME only if the transcoding is time-critical as it will involve
+     * performance penalty due to resource reallocation to prioritize the sessions with higher
+     * priority.
+     * TODO(hkuang): Add more description of this when priority is finalized.
+     */
+    public static final int PRIORITY_REALTIME = 1;
+
+    /**
+     * PRIORITY_OFFLINE indicates the transcoding is not time-critical and the client does not need
+     * the transcoding result as soon as possible.
+     * <p>Sessions with PRIORITY_OFFLINE will be scheduled behind PRIORITY_REALTIME. Always set to
+     * PRIORITY_OFFLINE if client does not need the result as soon as possible and could accept
+     * delay of the transcoding result.
+     * @hide
+     * TODO(hkuang): Add more description of this when priority is finalized.
+     */
+    public static final int PRIORITY_OFFLINE = 2;
+
+    /** @hide */
+    @IntDef(prefix = {"PRIORITY_"}, value = {
+            PRIORITY_UNKNOWN,
+            PRIORITY_REALTIME,
+            PRIORITY_OFFLINE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TranscodingPriority {}
 
     /**
      * Listener that gets notified when a transcoding operation has finished.
@@ -423,79 +503,7 @@ public final class MediaTranscodeManager {
         }
     }
 
-    /**
-     * Abstract base class for all the TranscodingRequest.
-     * <p> TranscodingRequest encapsulates the desired configuration for the transcoding.
-     */
-    public abstract static class TranscodingRequest {
-        /**
-         *
-         * Default transcoding type.
-         * @hide
-         */
-        public static final int TRANSCODING_TYPE_UNKNOWN = 0;
-
-        /**
-         * TRANSCODING_TYPE_VIDEO indicates that client wants to perform transcoding on a video.
-         * <p>Note that currently only support transcoding video file in mp4 format.
-         * @hide
-         */
-        public static final int TRANSCODING_TYPE_VIDEO = 1;
-
-        /**
-         * TRANSCODING_TYPE_IMAGE indicates that client wants to perform transcoding on an image.
-         * @hide
-         */
-        public static final int TRANSCODING_TYPE_IMAGE = 2;
-
-        /** @hide */
-        @IntDef(prefix = {"TRANSCODING_TYPE_"}, value = {
-                TRANSCODING_TYPE_UNKNOWN,
-                TRANSCODING_TYPE_VIDEO,
-                TRANSCODING_TYPE_IMAGE,
-        })
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface TranscodingType {}
-
-        /**
-         * Default value.
-         *
-         * @hide
-         */
-        public static final int PRIORITY_UNKNOWN = 0;
-        /**
-         * PRIORITY_REALTIME indicates that the transcoding request is time-critical and that the
-         * client wants the transcoding result as soon as possible.
-         * <p> Set PRIORITY_REALTIME only if the transcoding is time-critical as it will involve
-         * performance penalty due to resource reallocation to prioritize the sessions with higher
-         * priority.
-         *
-         * @hide
-         */
-        public static final int PRIORITY_REALTIME = 1;
-
-        /**
-         * PRIORITY_OFFLINE indicates the transcoding is not time-critical and the client does not
-         * need the transcoding result as soon as possible.
-         * <p>Sessions with PRIORITY_OFFLINE will be scheduled behind PRIORITY_REALTIME. Always set
-         * to
-         * PRIORITY_OFFLINE if client does not need the result as soon as possible and could accept
-         * delay of the transcoding result.
-         *
-         * @hide
-         *
-         */
-        public static final int PRIORITY_OFFLINE = 2;
-
-        /** @hide */
-        @IntDef(prefix = {"PRIORITY_"}, value = {
-                PRIORITY_UNKNOWN,
-                PRIORITY_REALTIME,
-                PRIORITY_OFFLINE,
-        })
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface TranscodingPriority {}
-
+    public static final class TranscodingRequest {
         /** Uri of the source media file. */
         private @NonNull Uri mSourceUri;
 
@@ -529,6 +537,22 @@ public final class MediaTranscodeManager {
         private @TranscodingPriority int mPriority = PRIORITY_UNKNOWN;
 
         /**
+         * Desired output video format of the destination file.
+         * <p> If this is null, source file's video track will be passed through and copied to the
+         * destination file.
+         * <p>
+         */
+        private @Nullable MediaFormat mVideoTrackFormat = null;
+
+        /**
+         * Desired output audio format of the destination file.
+         * <p> If this is null, source file's audio track will be passed through and copied to the
+         * destination file.
+         * @hide
+         */
+        private @Nullable MediaFormat mAudioTrackFormat = null;
+
+        /**
          * Desired image format for the destination file.
          * <p> If this is null, source file's image track will be passed through and copied to the
          * destination file.
@@ -539,12 +563,6 @@ public final class MediaTranscodeManager {
         @VisibleForTesting
         private TranscodingTestConfig mTestConfig = null;
 
-        /**
-         * Prevent public constructor access.
-         */
-        /* package private */ TranscodingRequest() {
-        }
-
         private TranscodingRequest(Builder b) {
             mSourceUri = b.mSourceUri;
             mSourceFileDescriptor = b.mSourceFileDescriptor;
@@ -554,13 +572,13 @@ public final class MediaTranscodeManager {
             mClientPid = b.mClientPid;
             mPriority = b.mPriority;
             mType = b.mType;
+            mVideoTrackFormat = b.mVideoTrackFormat;
+            mAudioTrackFormat = b.mAudioTrackFormat;
+            mImageFormat = b.mImageFormat;
             mTestConfig = b.mTestConfig;
         }
 
-        /**
-         * Return the type of the transcoding.
-         * @hide
-         */
+        /** Return the type of the transcoding. */
         @TranscodingType
         public int getType() {
             return mType;
@@ -606,13 +624,19 @@ public final class MediaTranscodeManager {
             return mDestinationFileDescriptor;
         }
 
-        /**
-         * Return priority of the transcoding.
-         * @hide
-         */
+        /** Return priority of the transcoding. */
         @TranscodingPriority
         public int getPriority() {
             return mPriority;
+        }
+
+        /**
+         * Return the video track format of the transcoding.
+         * This will be null is the transcoding is not for video transcoding.
+         */
+        @Nullable
+        public MediaFormat getVideoTrackFormat() {
+            return mVideoTrackFormat;
         }
 
         /**
@@ -623,8 +647,6 @@ public final class MediaTranscodeManager {
         public TranscodingTestConfig getTestConfig() {
             return mTestConfig;
         }
-
-        abstract void writeFormatToParcel(TranscodingRequestParcel parcel);
 
         /* Writes the TranscodingRequest to a parcel. */
         private TranscodingRequestParcel writeToParcel(@NonNull Context context) {
@@ -649,7 +671,7 @@ public final class MediaTranscodeManager {
                 }
                 parcel.clientPackageName = packageName;
             }
-            writeFormatToParcel(parcel);
+            parcel.requestedVideoTrackFormat = convertToVideoTrackFormat(mVideoTrackFormat);
             if (mTestConfig != null) {
                 parcel.isForTesting = true;
                 parcel.testConfig = mTestConfig;
@@ -657,12 +679,71 @@ public final class MediaTranscodeManager {
             return parcel;
         }
 
+        /* Converts the MediaFormat to TranscodingVideoTrackFormat. */
+        private static TranscodingVideoTrackFormat convertToVideoTrackFormat(MediaFormat format) {
+            if (format == null) {
+                throw new IllegalArgumentException("Invalid MediaFormat");
+            }
+
+            TranscodingVideoTrackFormat trackFormat = new TranscodingVideoTrackFormat();
+
+            if (format.containsKey(MediaFormat.KEY_MIME)) {
+                String mime = format.getString(MediaFormat.KEY_MIME);
+                if (MediaFormat.MIMETYPE_VIDEO_AVC.equals(mime)) {
+                    trackFormat.codecType = TranscodingVideoCodecType.kAvc;
+                } else if (MediaFormat.MIMETYPE_VIDEO_HEVC.equals(mime)) {
+                    trackFormat.codecType = TranscodingVideoCodecType.kHevc;
+                } else {
+                    throw new UnsupportedOperationException("Only support transcode to avc/hevc");
+                }
+            }
+
+            if (format.containsKey(MediaFormat.KEY_BIT_RATE)) {
+                int bitrateBps = format.getInteger(MediaFormat.KEY_BIT_RATE);
+                if (bitrateBps <= 0) {
+                    throw new IllegalArgumentException("Bitrate must be larger than 0");
+                }
+                trackFormat.bitrateBps = bitrateBps;
+            }
+
+            if (format.containsKey(MediaFormat.KEY_WIDTH) && format.containsKey(
+                    MediaFormat.KEY_HEIGHT)) {
+                int width = format.getInteger(MediaFormat.KEY_WIDTH);
+                int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+                if (width <= 0 || height <= 0) {
+                    throw new IllegalArgumentException("Width and height must be larger than 0");
+                }
+                // TODO(hkuang): Validate the aspect ratio after adding scaling.
+                trackFormat.width = width;
+                trackFormat.height = height;
+            }
+
+            if (format.containsKey(MediaFormat.KEY_PROFILE)) {
+                int profile = format.getInteger(MediaFormat.KEY_PROFILE);
+                if (profile <= 0) {
+                    throw new IllegalArgumentException("Invalid codec profile");
+                }
+                // TODO(hkuang): Validate the profile according to codec type.
+                trackFormat.profile = profile;
+            }
+
+            if (format.containsKey(MediaFormat.KEY_LEVEL)) {
+                int level = format.getInteger(MediaFormat.KEY_LEVEL);
+                if (level <= 0) {
+                    throw new IllegalArgumentException("Invalid codec level");
+                }
+                // TODO(hkuang): Validate the level according to codec type.
+                trackFormat.level = level;
+            }
+
+            return trackFormat;
+        }
+
         /**
-         * Builder to build a {@link TranscodingRequest} object.
-         *
-         * @param <T> The subclass to be built.
+         * Builder class for {@link TranscodingRequest} objects.
+         * Use this class to configure and create a <code>TranscodingRequest</code> instance.
          */
-        abstract static class Builder<T extends Builder<T>> {
+        public static final class Builder {
             private @NonNull Uri mSourceUri;
             private @NonNull Uri mDestinationUri;
             private @Nullable ParcelFileDescriptor mSourceFileDescriptor = null;
@@ -671,68 +752,80 @@ public final class MediaTranscodeManager {
             private int mClientPid = -1;
             private @TranscodingType int mType = TRANSCODING_TYPE_UNKNOWN;
             private @TranscodingPriority int mPriority = PRIORITY_UNKNOWN;
+            private @Nullable MediaFormat mVideoTrackFormat;
+            private @Nullable MediaFormat mAudioTrackFormat;
+            private @Nullable MediaFormat mImageFormat;
             private TranscodingTestConfig mTestConfig;
 
-            abstract T self();
-
             /**
-             * Creates a builder for building {@link TranscodingRequest}s.
+             * Specifies the uri of source media file.
              *
              * Client must set the source Uri. If client also provides the source fileDescriptor
              * through is provided by {@link #setSourceFileDescriptor(ParcelFileDescriptor)},
              * TranscodingSession will use the fd instead of calling back to the client to open the
              * sourceUri.
-             *
-             *
-             * @param type The transcoding type.
              * @param sourceUri Content uri for the source media file.
-             * @param destinationUri Content uri for the destination media file.
-             *
+             * @return The same builder instance.
+             * @throws IllegalArgumentException if Uri is null or empty.
              */
-            private Builder(@TranscodingType int type, @NonNull Uri sourceUri,
-                    @NonNull Uri destinationUri) {
-                mType = type;
-
+            @NonNull
+            public Builder setSourceUri(@NonNull Uri sourceUri) {
                 if (sourceUri == null || Uri.EMPTY.equals(sourceUri)) {
                     throw new IllegalArgumentException(
                             "You must specify a non-empty source Uri.");
                 }
                 mSourceUri = sourceUri;
-
-                if (destinationUri == null || Uri.EMPTY.equals(destinationUri)) {
-                    throw new IllegalArgumentException(
-                            "You must specify a non-empty destination Uri.");
-                }
-                mDestinationUri = destinationUri;
+                return this;
             }
 
             /**
              * Specifies the fileDescriptor opened from the source media file.
              *
              * This call is optional. If the source fileDescriptor is provided, TranscodingSession
-             * will use it directly instead of opening the uri from {@link #Builder(int, Uri, Uri)}.
-             * It is client's responsibility to make sure the fileDescriptor is opened from the
-             * source uri.
+             * will use it directly instead of opening the uri from {@link #setSourceUri(Uri)}. It
+             * is client's responsibility to make sure the fileDescriptor is opened from the source
+             * uri.
              * @param fileDescriptor a {@link ParcelFileDescriptor} opened from source media file.
              * @return The same builder instance.
              * @throws IllegalArgumentException if fileDescriptor is invalid.
              */
             @NonNull
-            public T setSourceFileDescriptor(@NonNull ParcelFileDescriptor fileDescriptor) {
+            public Builder setSourceFileDescriptor(@NonNull ParcelFileDescriptor fileDescriptor) {
                 if (fileDescriptor == null || fileDescriptor.getFd() < 0) {
                     throw new IllegalArgumentException(
                             "Invalid source descriptor.");
                 }
                 mSourceFileDescriptor = fileDescriptor;
-                return self();
+                return this;
+            }
+
+            /**
+             * Specifies the uri of the destination media file.
+             *
+             * Client must set the destination Uri. If client also provides the destination
+             * fileDescriptor through {@link #setDestinationFileDescriptor(ParcelFileDescriptor)},
+             * TranscodingSession will use the fd instead of calling back to the client to open the
+             * destinationUri.
+             * @param destinationUri Content uri for the destination media file.
+             * @return The same builder instance.
+             * @throws IllegalArgumentException if Uri is null or empty.
+             */
+            @NonNull
+            public Builder setDestinationUri(@NonNull Uri destinationUri) {
+                if (destinationUri == null || Uri.EMPTY.equals(destinationUri)) {
+                    throw new IllegalArgumentException(
+                            "You must specify a non-empty destination Uri.");
+                }
+                mDestinationUri = destinationUri;
+                return this;
             }
 
             /**
              * Specifies the fileDescriptor opened from the destination media file.
              *
              * This call is optional. If the destination fileDescriptor is provided,
-             * TranscodingSession will use it directly instead of opening the source uri from
-             * {@link #Builder(int, Uri, Uri)} upon transcoding starts. It is client's
+             * TranscodingSession will use it directly instead of opening the uri from
+             * {@link #setDestinationUri(Uri)} upon transcoding starts. It is client's
              * responsibility to make sure the fileDescriptor is opened from the destination uri.
              * @param fileDescriptor a {@link ParcelFileDescriptor} opened from destination media
              *                       file.
@@ -740,54 +833,46 @@ public final class MediaTranscodeManager {
              * @throws IllegalArgumentException if fileDescriptor is invalid.
              */
             @NonNull
-            public T setDestinationFileDescriptor(
+            public Builder setDestinationFileDescriptor(
                     @NonNull ParcelFileDescriptor fileDescriptor) {
                 if (fileDescriptor == null || fileDescriptor.getFd() < 0) {
                     throw new IllegalArgumentException(
                             "Invalid destination descriptor.");
                 }
                 mDestinationFileDescriptor = fileDescriptor;
-                return self();
+                return this;
             }
 
             /**
              * Specify the UID of the client that this request is for.
-             * <p>
-             * Only privilege caller with android.permission.WRITE_MEDIA_STORAGE could forward the
-             * pid. Note that the permission check happens on the service side upon starting the
-             * transcoding. If the client does not have the permission, the transcoding will fail.
-             *
              * @param uid client Uid.
              * @return The same builder instance.
              * @throws IllegalArgumentException if uid is invalid.
+             * TODO(hkuang): Check the permission if it is allowed.
              */
             @NonNull
-            public T setClientUid(int uid) {
+            public Builder setClientUid(int uid) {
                 if (uid < 0) {
                     throw new IllegalArgumentException("Invalid Uid");
                 }
                 mClientUid = uid;
-                return self();
+                return this;
             }
 
             /**
-             * Specify the pid of the client that this request is for.
-             * <p>
-             * Only privilege caller with android.permission.WRITE_MEDIA_STORAGE could forward the
-             * pid. Note that the permission check happens on the service side upon starting the
-             * transcoding. If the client does not have the permission, the transcoding will fail.
-             *
+             * Specify the PID of the client that this request is for.
              * @param pid client Pid.
              * @return The same builder instance.
              * @throws IllegalArgumentException if pid is invalid.
+             * TODO(hkuang): Check the permission if it is allowed.
              */
             @NonNull
-            public T setClientPid(int pid) {
+            public Builder setClientPid(int pid) {
                 if (pid < 0) {
                     throw new IllegalArgumentException("Invalid pid");
                 }
                 mClientPid = pid;
-                return self();
+                return this;
             }
 
             /**
@@ -796,15 +881,64 @@ public final class MediaTranscodeManager {
              * @param priority Must be one of the {@code PRIORITY_*}
              * @return The same builder instance.
              * @throws IllegalArgumentException if flags is invalid.
-             * @hide
              */
             @NonNull
-            public T setPriority(@TranscodingPriority int priority) {
+            public Builder setPriority(@TranscodingPriority int priority) {
                 if (priority != PRIORITY_OFFLINE && priority != PRIORITY_REALTIME) {
                     throw new IllegalArgumentException("Invalid priority: " + priority);
                 }
                 mPriority = priority;
-                return self();
+                return this;
+            }
+
+            /**
+             * Specifies the type of transcoding.
+             * <p> Clients must provide the source and destination that corresponds to the
+             * transcoding type.
+             *
+             * @param type Must be one of the {@code TRANSCODING_TYPE_*}
+             * @return The same builder instance.
+             * @throws IllegalArgumentException if flags is invalid.
+             */
+            @NonNull
+            public Builder setType(@TranscodingType int type) {
+                if (type != TRANSCODING_TYPE_VIDEO && type != TRANSCODING_TYPE_IMAGE) {
+                    throw new IllegalArgumentException("Invalid transcoding type");
+                }
+                mType = type;
+                return this;
+            }
+
+            /**
+             * Specifies the desired video track format in the destination media file.
+             * <p>Client could only specify the settings that matters to them, e.g. codec format or
+             * bitrate. And by default, transcoding will preserve the original video's
+             * settings(bitrate, framerate, resolution) if not provided.
+             * <p>Note that some settings may silently fail to apply if the device does not
+             * support them.
+             * TODO(hkuang): Add MediaTranscodeUtil to help client generate transcoding setting.
+             * TODO(hkuang): Add MediaTranscodeUtil to check if the setting is valid.
+             *
+             * @param videoFormat MediaFormat containing the settings that client wants override in
+             *                    the original video's video track.
+             * @return The same builder instance.
+             * @throws IllegalArgumentException if videoFormat is invalid.
+             */
+            @NonNull
+            public Builder setVideoTrackFormat(@NonNull MediaFormat videoFormat) {
+                if (videoFormat == null) {
+                    throw new IllegalArgumentException("videoFormat must not be null");
+                }
+
+                // Check if the MediaFormat is for video by looking at the MIME type.
+                String mime = videoFormat.containsKey(MediaFormat.KEY_MIME)
+                        ? videoFormat.getString(MediaFormat.KEY_MIME) : null;
+                if (mime == null || !mime.startsWith("video/")) {
+                    throw new IllegalArgumentException("Invalid video format: wrong mime type");
+                }
+
+                mVideoTrackFormat = videoFormat;
+                return this;
             }
 
             /**
@@ -815,9 +949,44 @@ public final class MediaTranscodeManager {
              */
             @VisibleForTesting
             @NonNull
-            public T setTestConfig(@NonNull TranscodingTestConfig config) {
+            public Builder setTestConfig(@NonNull TranscodingTestConfig config) {
                 mTestConfig = config;
-                return self();
+                return this;
+            }
+
+            /**
+             * @return a new {@link TranscodingRequest} instance successfully initialized with all
+             *     the parameters set on this <code>Builder</code>.
+             * @throws UnsupportedOperationException if the parameters set on the
+             *         <code>Builder</code> were incompatible, or if they are not supported by the
+             *         device.
+             */
+            @NonNull
+            public TranscodingRequest build() {
+                if (mSourceUri == null) {
+                    throw new UnsupportedOperationException("Source URI must not be null");
+                }
+
+                if (mDestinationUri == null) {
+                    throw new UnsupportedOperationException("Destination URI must not be null");
+                }
+
+                if (mPriority == PRIORITY_UNKNOWN) {
+                    throw new UnsupportedOperationException("Must specify transcoding priority");
+                }
+
+                // Only support video transcoding now.
+                if (mType != TRANSCODING_TYPE_VIDEO) {
+                    throw new UnsupportedOperationException("Only supports video transcoding now");
+                }
+
+                // Must provide video track format for video transcoding.
+                if (mType == TRANSCODING_TYPE_VIDEO && mVideoTrackFormat == null) {
+                    throw new UnsupportedOperationException(
+                            "Must provide video track format for video transcoding");
+                }
+
+                return new TranscodingRequest(this);
             }
         }
 
@@ -1027,206 +1196,6 @@ public final class MediaTranscodeManager {
                 }
                 // Audio transcoding is not supported yet, always return null.
                 return null;
-            }
-        }
-    }
-
-    /**
-     * VideoTranscodingRequest encapsulates the configuration for transcoding a video.
-     */
-    public static final class VideoTranscodingRequest extends TranscodingRequest {
-        /**
-         * Desired output video format of the destination file.
-         * <p> If this is null, source file's video track will be passed through and copied to the
-         * destination file.
-         */
-        private @Nullable MediaFormat mVideoTrackFormat = null;
-
-        /**
-         * Desired output audio format of the destination file.
-         * <p> If this is null, source file's audio track will be passed through and copied to the
-         * destination file.
-         */
-        private @Nullable MediaFormat mAudioTrackFormat = null;
-
-        private VideoTranscodingRequest(VideoTranscodingRequest.Builder builder) {
-            super(builder);
-            mVideoTrackFormat = builder.mVideoTrackFormat;
-            mAudioTrackFormat = builder.mAudioTrackFormat;
-        }
-
-        /**
-         * Return the video track format of the transcoding.
-         * This will be null if client has not specified the video track format.
-         */
-        @NonNull
-        public MediaFormat getVideoTrackFormat() {
-            return mVideoTrackFormat;
-        }
-
-        @Override
-        void writeFormatToParcel(TranscodingRequestParcel parcel) {
-            parcel.requestedVideoTrackFormat = convertToVideoTrackFormat(mVideoTrackFormat);
-        }
-
-        /* Converts the MediaFormat to TranscodingVideoTrackFormat. */
-        private static TranscodingVideoTrackFormat convertToVideoTrackFormat(MediaFormat format) {
-            if (format == null) {
-                throw new IllegalArgumentException("Invalid MediaFormat");
-            }
-
-            TranscodingVideoTrackFormat trackFormat = new TranscodingVideoTrackFormat();
-
-            if (format.containsKey(MediaFormat.KEY_MIME)) {
-                String mime = format.getString(MediaFormat.KEY_MIME);
-                if (MediaFormat.MIMETYPE_VIDEO_AVC.equals(mime)) {
-                    trackFormat.codecType = TranscodingVideoCodecType.kAvc;
-                } else if (MediaFormat.MIMETYPE_VIDEO_HEVC.equals(mime)) {
-                    trackFormat.codecType = TranscodingVideoCodecType.kHevc;
-                } else {
-                    throw new UnsupportedOperationException("Only support transcode to avc/hevc");
-                }
-            }
-
-            if (format.containsKey(MediaFormat.KEY_BIT_RATE)) {
-                int bitrateBps = format.getInteger(MediaFormat.KEY_BIT_RATE);
-                if (bitrateBps <= 0) {
-                    throw new IllegalArgumentException("Bitrate must be larger than 0");
-                }
-                trackFormat.bitrateBps = bitrateBps;
-            }
-
-            if (format.containsKey(MediaFormat.KEY_WIDTH) && format.containsKey(
-                    MediaFormat.KEY_HEIGHT)) {
-                int width = format.getInteger(MediaFormat.KEY_WIDTH);
-                int height = format.getInteger(MediaFormat.KEY_HEIGHT);
-                if (width <= 0 || height <= 0) {
-                    throw new IllegalArgumentException("Width and height must be larger than 0");
-                }
-                // TODO: Validate the aspect ratio after adding scaling.
-                trackFormat.width = width;
-                trackFormat.height = height;
-            }
-
-            if (format.containsKey(MediaFormat.KEY_PROFILE)) {
-                int profile = format.getInteger(MediaFormat.KEY_PROFILE);
-                if (profile <= 0) {
-                    throw new IllegalArgumentException("Invalid codec profile");
-                }
-                // TODO: Validate the profile according to codec type.
-                trackFormat.profile = profile;
-            }
-
-            if (format.containsKey(MediaFormat.KEY_LEVEL)) {
-                int level = format.getInteger(MediaFormat.KEY_LEVEL);
-                if (level <= 0) {
-                    throw new IllegalArgumentException("Invalid codec level");
-                }
-                // TODO: Validate the level according to codec type.
-                trackFormat.level = level;
-            }
-
-            return trackFormat;
-        }
-
-        /**
-         * Builder class for {@link VideoTranscodingRequest}.
-         */
-        public static final class Builder extends
-                TranscodingRequest.Builder<VideoTranscodingRequest.Builder> {
-            /**
-             * Desired output video format of the destination file.
-             * <p> If this is null, source file's video track will be passed through and
-             * copied to the destination file.
-             */
-            private @Nullable MediaFormat mVideoTrackFormat = null;
-
-            /**
-             * Desired output audio format of the destination file.
-             * <p> If this is null, source file's audio track will be passed through and copied
-             * to the destination file.
-             */
-            private @Nullable MediaFormat mAudioTrackFormat = null;
-
-            /**
-             * Creates a builder for building {@link VideoTranscodingRequest}s.
-             *
-             * <p> Client could only specify the settings that matters to them, e.g. codec format or
-             * bitrate. And by default, transcoding will preserve the original video's settings
-             * (bitrate, framerate, resolution) if not provided.
-             * <p>Note that some settings may silently fail to apply if the device does not support
-             * them.
-             * @param sourceUri Content uri for the source media file.
-             * @param destinationUri Content uri for the destination media file.
-             * @param videoFormat MediaFormat containing the settings that client wants override in
-             *                    the original video's video track.
-             * @throws IllegalArgumentException if videoFormat is invalid.
-             */
-            public Builder(@NonNull Uri sourceUri, @NonNull Uri destinationUri,
-                    @NonNull MediaFormat videoFormat) {
-                super(TRANSCODING_TYPE_VIDEO, sourceUri, destinationUri);
-                setVideoTrackFormat(videoFormat);
-            }
-
-            @Override
-            @NonNull
-            public Builder setClientUid(int uid) {
-                super.setClientUid(uid);
-                return self();
-            }
-
-            @Override
-            @NonNull
-            public Builder setClientPid(int pid) {
-                super.setClientPid(pid);
-                return self();
-            }
-
-            @Override
-            @NonNull
-            public Builder setSourceFileDescriptor(ParcelFileDescriptor fd) {
-                super.setSourceFileDescriptor(fd);
-                return self();
-            }
-
-            @Override
-            @NonNull
-            public Builder setDestinationFileDescriptor(ParcelFileDescriptor fd) {
-                super.setDestinationFileDescriptor(fd);
-                return self();
-            }
-
-            private void setVideoTrackFormat(@NonNull MediaFormat videoFormat) {
-                if (videoFormat == null) {
-                    throw new IllegalArgumentException("videoFormat must not be null");
-                }
-
-                // Check if the MediaFormat is for video by looking at the MIME type.
-                String mime = videoFormat.containsKey(MediaFormat.KEY_MIME)
-                        ? videoFormat.getString(MediaFormat.KEY_MIME) : null;
-                if (mime == null || !mime.startsWith("video/")) {
-                    throw new IllegalArgumentException("Invalid video format: wrong mime type");
-                }
-
-                mVideoTrackFormat = videoFormat;
-            }
-
-            /**
-             * @return a new {@link TranscodingRequest} instance successfully initialized
-             * with all the parameters set on this <code>Builder</code>.
-             * @throws UnsupportedOperationException if the parameters set on the
-             *                                       <code>Builder</code> were incompatible, or
-             *                                       if they are not supported by the
-             *                                       device.
-             */
-            @NonNull
-            public VideoTranscodingRequest build() {
-                return new VideoTranscodingRequest(this);
-            }
-
-            @Override
-            VideoTranscodingRequest.Builder self() {
-                return this;
             }
         }
     }

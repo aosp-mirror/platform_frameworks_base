@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.function.Function;
 
 public class DomainVerificationShell {
 
@@ -228,19 +226,22 @@ public class DomainVerificationShell {
 
         userId = translateUserId(userId, "runSetAppLinksUserState");
 
-        String enabledArg = commandHandler.getNextArg();
-        if (TextUtils.isEmpty(enabledArg)) {
-            commandHandler.getErrPrintWriter().println("Error: enabled param not specified");
-            return false;
-        }
+        String enabledString = commandHandler.getNextArgRequired();
 
+        // Manually ensure that "true" and "false" are the only options, to ensure a domain isn't
+        // accidentally parsed as a boolean
         boolean enabled;
-        try {
-            enabled = parseEnabled(enabledArg);
-        } catch (IllegalArgumentException e) {
-            commandHandler.getErrPrintWriter()
-                    .println("Error: invalid enabled param: " + e.getMessage());
-            return false;
+        switch (enabledString) {
+            case "true":
+                enabled = true;
+                break;
+            case "false":
+                enabled = false;
+                break;
+            default:
+                commandHandler.getErrPrintWriter().println(
+                        "Invalid enabled param: " + enabledString);
+                return false;
         }
 
         ArraySet<String> domains = new ArraySet<>(getRemainingArgs(commandHandler));
@@ -254,8 +255,8 @@ public class DomainVerificationShell {
         }
 
         try {
-            mCallback.setDomainVerificationUserSelectionInternal(userId, packageName, enabled,
-                    domains);
+            mCallback.setDomainVerificationUserSelectionInternal(userId,
+                    packageName, enabled, domains);
         } catch (NameNotFoundException e) {
             commandHandler.getErrPrintWriter().println("Package not found: " + packageName);
             return false;
@@ -361,12 +362,15 @@ public class DomainVerificationShell {
     private boolean runSetAppLinksAllowed(@NonNull BasicShellCommandHandler commandHandler) {
         String packageName = null;
         Integer userId = null;
+        Boolean allowed = null;
         String option;
         while ((option = commandHandler.getNextOption()) != null) {
             if (option.equals("--package")) {
-                packageName = commandHandler.getNextArg();
-            } else if (option.equals("--user")) {
+                packageName = commandHandler.getNextArgRequired();
+            } if (option.equals("--user")) {
                 userId = UserHandle.parseUserArg(commandHandler.getNextArgRequired());
+            } else if (allowed == null) {
+                allowed = Boolean.valueOf(option);
             } else {
                 commandHandler.getErrPrintWriter().println("Error: unexpected option: " + option);
                 return false;
@@ -385,18 +389,8 @@ public class DomainVerificationShell {
             return false;
         }
 
-        String allowedArg = commandHandler.getNextArg();
-        if (TextUtils.isEmpty(allowedArg)) {
+        if (allowed == null) {
             commandHandler.getErrPrintWriter().println("Error: allowed setting not specified");
-            return false;
-        }
-
-        boolean allowed;
-        try {
-            allowed = parseEnabled(allowedArg);
-        } catch (IllegalArgumentException e) {
-            commandHandler.getErrPrintWriter()
-                    .println("Error: invalid allowed setting: " + e.getMessage());
             return false;
         }
 
@@ -425,22 +419,6 @@ public class DomainVerificationShell {
     private int translateUserId(@UserIdInt int userId, @NonNull String logContext) {
         return ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, true, true, logContext, "pm command");
-    }
-
-    /**
-     * Manually ensure that "true" and "false" are the only options, to ensure a domain isn't
-     * accidentally parsed as a boolean.
-     */
-    @NonNull
-    private boolean parseEnabled(@NonNull String arg) throws IllegalArgumentException {
-        switch (arg.toLowerCase(Locale.US)) {
-            case "true":
-                return true;
-            case "false":
-                return false;
-            default:
-                throw new IllegalArgumentException(arg + " is not a valid boolean");
-        }
     }
 
     /**
@@ -520,8 +498,7 @@ public class DomainVerificationShell {
         void verifyPackages(@Nullable List<String> packageNames, boolean reVerify);
 
         /**
-         * @see DomainVerificationManagerInternal#printState(IndentingPrintWriter, String, Integer,
-         * Function)
+         * @see DomainVerificationManagerInternal#printState(IndentingPrintWriter, String, Integer)
          */
         void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
                 @Nullable @UserIdInt Integer userId) throws NameNotFoundException;

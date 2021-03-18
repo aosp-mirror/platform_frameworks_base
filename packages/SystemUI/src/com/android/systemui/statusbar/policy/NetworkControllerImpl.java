@@ -31,7 +31,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
-import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkScoreManager;
@@ -308,8 +307,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mWifiManager.registerScanResultsCallback(mReceiverHandler::post, scanResultsCallback);
         }
 
-        NetworkCallback callback =
-                new NetworkCallback(NetworkCallback.FLAG_INCLUDE_LOCATION_INFO){
+        ConnectivityManager.NetworkCallback callback = new ConnectivityManager.NetworkCallback(){
             private Network mLastNetwork;
             private NetworkCapabilities mLastNetworkCapabilities;
 

@@ -460,7 +460,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * This is used to revoke control of the SurfaceControl from a client process that was
      * previously organizing this WindowContainer.
      */
-    void migrateToNewSurfaceControl(SurfaceControl.Transaction t) {
+    void migrateToNewSurfaceControl() {
+        SurfaceControl.Transaction t = getPendingTransaction();
         t.remove(mSurfaceControl);
         // Clear the last position so the new SurfaceControl will get correct position
         mLastSurfacePosition.set(0, 0);

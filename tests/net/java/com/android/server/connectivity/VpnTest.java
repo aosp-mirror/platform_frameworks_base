@@ -1026,11 +1026,7 @@ public class VpnTest {
             .thenReturn(new Network[] { new Network(101) });
 
         when(mConnectivityManager.registerNetworkAgent(any(), any(), any(), any(),
-                any(), any(), anyInt())).thenAnswer(invocation -> {
-                    // The runner has registered an agent and is now ready.
-                    legacyRunnerReady.open();
-                    return new Network(102);
-                });
+                anyInt(), any(), anyInt())).thenReturn(new Network(102));
         final Vpn vpn = startLegacyVpn(createVpn(primaryUser.id), profile);
         final TestDeps deps = (TestDeps) vpn.mDeps;
         try {
@@ -1052,7 +1048,7 @@ public class VpnTest {
             ArgumentCaptor<NetworkCapabilities> ncCaptor =
                     ArgumentCaptor.forClass(NetworkCapabilities.class);
             verify(mConnectivityManager, timeout(10_000)).registerNetworkAgent(any(), any(),
-                    lpCaptor.capture(), ncCaptor.capture(), any(), any(), anyInt());
+                    lpCaptor.capture(), ncCaptor.capture(), anyInt(), any(), anyInt());
 
             // In this test the expected address is always v4 so /32.
             // Note that the interface needs to be specified because RouteInfo objects stored in

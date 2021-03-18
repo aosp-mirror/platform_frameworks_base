@@ -30,10 +30,10 @@ import android.system.OsConstants;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.okhttp.internalandroidapi.Dns;
+import com.android.okhttp.internalandroidapi.HttpURLConnectionFactory;
 
 import libcore.io.IoUtils;
-import libcore.net.http.Dns;
-import libcore.net.http.HttpURLConnectionFactory;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -299,7 +299,7 @@ public class Network implements Parcelable {
         // Set configuration on the HttpURLConnectionFactory that will be good for all
         // connections created by this Network. Configuration that might vary is left
         // until openConnection() and passed as arguments.
-        HttpURLConnectionFactory urlConnectionFactory = HttpURLConnectionFactory.createInstance();
+        HttpURLConnectionFactory urlConnectionFactory = new HttpURLConnectionFactory();
         urlConnectionFactory.setDns(dnsLookup); // Let traffic go via dnsLookup
         // A private connection pool just for this Network.
         urlConnectionFactory.setNewConnectionPool(httpMaxConnections,

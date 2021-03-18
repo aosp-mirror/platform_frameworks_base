@@ -15454,9 +15454,7 @@ public class TelephonyManager {
     public static final int PREPARE_UNATTENDED_REBOOT_PIN_REQUIRED = 1;
 
     /**
-     * The unattended reboot was not prepared due to a non-recoverable error. After this error,
-     * the client that manages the unattended reboot should not try to invoke the API again
-     * until the next power cycle.
+     * The unattended reboot was not prepared due to generic error.
      * @hide
      */
     @SystemApi

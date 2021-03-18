@@ -17,13 +17,15 @@
 package android.content.pm.verify.domain;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 
 /**
  * @hide
  */
 public interface DomainVerificationState {
 
+    /**
+     * @hide
+     */
     @IntDef({
             STATE_NO_RESPONSE,
             STATE_SUCCESS,
@@ -40,12 +42,12 @@ public interface DomainVerificationState {
 
     // TODO(b/159952358): Document all the places that states need to be updated when one is added
     /**
-     * @see DomainVerificationInfo#STATE_NO_RESPONSE
+     * @see DomainVerificationManager#STATE_NO_RESPONSE
      */
     int STATE_NO_RESPONSE = 0;
 
     /**
-     * @see DomainVerificationInfo#STATE_SUCCESS
+     * @see DomainVerificationManager#STATE_SUCCESS
      */
     int STATE_SUCCESS = 1;
 
@@ -92,132 +94,7 @@ public interface DomainVerificationState {
     int STATE_SYS_CONFIG = 7;
 
     /**
-     * @see DomainVerificationInfo#STATE_FIRST_VERIFIER_DEFINED
+     * @see DomainVerificationManager#STATE_FIRST_VERIFIER_DEFINED
      */
     int STATE_FIRST_VERIFIER_DEFINED = 0b10000000000;
-
-    @NonNull
-    static String stateToDebugString(@DomainVerificationState.State int state) {
-        switch (state) {
-            case DomainVerificationState.STATE_NO_RESPONSE:
-                return "none";
-            case DomainVerificationState.STATE_SUCCESS:
-                return "verified";
-            case DomainVerificationState.STATE_APPROVED:
-                return "approved";
-            case DomainVerificationState.STATE_DENIED:
-                return "denied";
-            case DomainVerificationState.STATE_MIGRATED:
-                return "migrated";
-            case DomainVerificationState.STATE_RESTORED:
-                return "restored";
-            case DomainVerificationState.STATE_LEGACY_FAILURE:
-                return "legacy_failure";
-            case DomainVerificationState.STATE_SYS_CONFIG:
-                return "system_configured";
-            default:
-                return String.valueOf(state);
-        }
-    }
-
-    /**
-     * For determining re-verify policy. This is hidden from the domain verification agent so that
-     * no behavior is made based on the result.
-     */
-    static boolean isDefault(@State int state) {
-        switch (state) {
-            case STATE_NO_RESPONSE:
-            case STATE_MIGRATED:
-            case STATE_RESTORED:
-                return true;
-            case STATE_SUCCESS:
-            case STATE_APPROVED:
-            case STATE_DENIED:
-            case STATE_LEGACY_FAILURE:
-            case STATE_SYS_CONFIG:
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * Checks if a state considers the corresponding domain to be successfully verified. The domain
-     * verification agent may use this to determine whether or not to re-verify a domain.
-     */
-    static boolean isVerified(@DomainVerificationState.State int state) {
-        switch (state) {
-            case DomainVerificationState.STATE_SUCCESS:
-            case DomainVerificationState.STATE_APPROVED:
-            case DomainVerificationState.STATE_MIGRATED:
-            case DomainVerificationState.STATE_RESTORED:
-            case DomainVerificationState.STATE_SYS_CONFIG:
-                return true;
-            case DomainVerificationState.STATE_NO_RESPONSE:
-            case DomainVerificationState.STATE_DENIED:
-            case DomainVerificationState.STATE_LEGACY_FAILURE:
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * Checks if a state is modifiable by the domain verification agent. This is useful as the
-     * platform may add new state codes in newer versions, and older verification agents can use
-     * this method to determine if a state can be changed without having to be aware of what the new
-     * state means.
-     */
-    static boolean isModifiable(@DomainVerificationState.State int state) {
-        switch (state) {
-            case DomainVerificationState.STATE_NO_RESPONSE:
-            case DomainVerificationState.STATE_SUCCESS:
-            case DomainVerificationState.STATE_MIGRATED:
-            case DomainVerificationState.STATE_RESTORED:
-            case DomainVerificationState.STATE_LEGACY_FAILURE:
-                return true;
-            case DomainVerificationState.STATE_APPROVED:
-            case DomainVerificationState.STATE_DENIED:
-            case DomainVerificationState.STATE_SYS_CONFIG:
-                return false;
-            default:
-                return state >= DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED;
-        }
-    }
-
-    /**
-     * Whether the state is migrated when updating a package. Generally this is only for states
-     * that maintain verification state or were set by an explicit user or developer action.
-     */
-    static boolean shouldMigrate(@State int state) {
-        switch (state) {
-            case STATE_SUCCESS:
-            case STATE_MIGRATED:
-            case STATE_RESTORED:
-            case STATE_APPROVED:
-            case STATE_DENIED:
-                return true;
-            case STATE_NO_RESPONSE:
-            case STATE_LEGACY_FAILURE:
-            case STATE_SYS_CONFIG:
-            case STATE_FIRST_VERIFIER_DEFINED:
-            default:
-                return false;
-        }
-    }
-
-    @DomainVerificationInfo.State
-    static int convertToInfoState(@State int internalState) {
-        if (internalState >= STATE_FIRST_VERIFIER_DEFINED) {
-            return internalState;
-        } else if (internalState == STATE_NO_RESPONSE) {
-            return DomainVerificationInfo.STATE_NO_RESPONSE;
-        } else if (internalState == STATE_SUCCESS) {
-            return DomainVerificationInfo.STATE_SUCCESS;
-        } else if (!isModifiable(internalState)) {
-            return DomainVerificationInfo.STATE_UNMODIFIABLE;
-        } else if (isVerified(internalState)) {
-            return DomainVerificationInfo.STATE_MODIFIABLE_VERIFIED;
-        } else {
-            return DomainVerificationInfo.STATE_MODIFIABLE_UNVERIFIED;
-        }
-    }
 }

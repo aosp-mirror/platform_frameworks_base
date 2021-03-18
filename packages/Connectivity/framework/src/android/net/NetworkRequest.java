@@ -140,7 +140,7 @@ public class NetworkRequest implements Parcelable {
         REQUEST,
         BACKGROUND_REQUEST,
         TRACK_SYSTEM_DEFAULT,
-        LISTEN_FOR_BEST,
+        TRACK_BEST,
     };
 
     /**
@@ -511,15 +511,6 @@ public class NetworkRequest implements Parcelable {
      */
     public boolean isListen() {
         return type == Type.LISTEN;
-    }
-
-    /**
-     * Returns true iff. this NetworkRequest is of type LISTEN_FOR_BEST.
-     *
-     * @hide
-     */
-    public boolean isListenForBest() {
-        return type == Type.LISTEN_FOR_BEST;
     }
 
     /**

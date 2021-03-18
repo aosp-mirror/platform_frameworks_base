@@ -451,15 +451,24 @@ public abstract class WindowManagerInternal {
     public abstract int getInputMethodWindowVisibleHeight(int displayId);
 
     /**
-     * Notifies WindowManagerService that the expected back-button behavior might have changed.
+     * Notifies WindowManagerService that the current IME window status is being changed.
      *
      * <p>Only {@link com.android.server.inputmethod.InputMethodManagerService} is the expected and
      * tested caller of this method.</p>
      *
+     * @param imeToken token to track the active input method. Corresponding IME windows can be
+     *                 identified by checking {@link android.view.WindowManager.LayoutParams#token}.
+     *                 Note that there is no guarantee that the corresponding window is already
+     *                 created
+     * @param imeWindowVisible whether the active IME thinks that its window should be visible or
+     *                         hidden, no matter how WindowManagerService will react / has reacted
+     *                         to corresponding API calls.  Note that this state is not guaranteed
+     *                         to be synchronized with state in WindowManagerService.
      * @param dismissImeOnBackKeyPressed {@code true} if the software keyboard is shown and the back
      *                                   key is expected to dismiss the software keyboard.
      */
-    public abstract void setDismissImeOnBackKeyPressed(boolean dismissImeOnBackKeyPressed);
+    public abstract void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
+            boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed);
 
     /**
      * Notifies WindowManagerService that the current IME window status is being changed.

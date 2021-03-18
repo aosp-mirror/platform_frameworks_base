@@ -75,8 +75,7 @@ public class WifiStatusTracker {
             .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).build();
-    private final NetworkCallback mNetworkCallback =
-            new NetworkCallback(NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
+    private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
         public void onAvailable(
                 Network network, NetworkCapabilities networkCapabilities,
@@ -132,8 +131,7 @@ public class WifiStatusTracker {
             }
         }
     };
-    private final NetworkCallback mDefaultNetworkCallback =
-            new NetworkCallback(NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
+    private final NetworkCallback mDefaultNetworkCallback = new NetworkCallback() {
         @Override
         public void onCapabilitiesChanged(Network network, NetworkCapabilities nc) {
             // network is now the default network, and its capabilities are nc.

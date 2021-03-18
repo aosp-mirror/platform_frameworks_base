@@ -2923,7 +2923,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 dismissImeOnBackKeyPressed = ((vis & InputMethodService.IME_VISIBLE) != 0);
                 break;
         }
-        mWindowManagerInternal.setDismissImeOnBackKeyPressed(dismissImeOnBackKeyPressed);
+        mWindowManagerInternal.updateInputMethodWindowStatus(token,
+                (vis & InputMethodService.IME_VISIBLE) != 0, dismissImeOnBackKeyPressed);
     }
 
     @BinderThread

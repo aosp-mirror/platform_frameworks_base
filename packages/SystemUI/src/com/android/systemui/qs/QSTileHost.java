@@ -445,6 +445,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         final ArrayList<String> tiles = new ArrayList<String>();
         boolean addedDefault = false;
         Set<String> addedSpecs = new ArraySet<>();
+        // TODO(b/174753536): Move it into the config file.
+        if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+            tiles.add("internet");
+            addedSpecs.add("internet");
+        }
         for (String tile : tileList.split(",")) {
             tile = tile.trim();
             if (tile.isEmpty()) continue;
@@ -452,6 +457,17 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 if (!addedDefault) {
                     List<String> defaultSpecs = getDefaultSpecs(context);
                     for (String spec : defaultSpecs) {
+                        // TODO(b/174753536): Move it into the config file.
+                        if (FeatureFlagUtils.isEnabled(
+                                context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+                            if (spec.equals("wifi") || spec.equals("cell")) {
+                                continue;
+                            }
+                        } else {
+                            if (spec.equals("internet")) {
+                                continue;
+                            }
+                        }
                         if (!addedSpecs.contains(spec)) {
                             tiles.add(spec);
                             addedSpecs.add(spec);
@@ -460,37 +476,15 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                     addedDefault = true;
                 }
             } else {
+                // TODO(b/174753536): Move it into the config file.
+                if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+                    if (tile.equals("wifi") || tile.equals("cell")) {
+                        continue;
+                    }
+                }
                 if (!addedSpecs.contains(tile)) {
                     tiles.add(tile);
                     addedSpecs.add(tile);
-                }
-            }
-        }
-        // TODO(b/174753536): Move it into the config file.
-        // Only do the below hacking when at least one of the below tiles exist
-        //   --InternetTile
-        //   --WiFiTile
-        //   --CellularTIle
-        if (tiles.contains("internet") || tiles.contains("wifi") || tiles.contains("cell")) {
-            if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
-                if (!tiles.contains("internet")) {
-                    tiles.add("internet");
-                }
-                if (tiles.contains("wifi")) {
-                    tiles.remove("wifi");
-                }
-                if (tiles.contains("cell")) {
-                    tiles.remove("cell");
-                }
-            } else {
-                if (tiles.contains("internet")) {
-                    tiles.remove("internet");
-                }
-                if (!tiles.contains("wifi")) {
-                    tiles.add("wifi");
-                }
-                if (!tiles.contains("cell")) {
-                    tiles.add("cell");
                 }
             }
         }

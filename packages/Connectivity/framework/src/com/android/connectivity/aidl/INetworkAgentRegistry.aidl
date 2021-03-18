@@ -19,12 +19,11 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkScore;
 import android.net.QosSession;
 import android.telephony.data.EpsBearerQosSessionAttributes;
 
 /**
- * Interface for NetworkAgents to send network properties.
+ * Interface for NetworkAgents to send network network properties.
  * @hide
  */
 oneway interface INetworkAgentRegistry {
@@ -32,7 +31,7 @@ oneway interface INetworkAgentRegistry {
     void sendLinkProperties(in LinkProperties lp);
     // TODO: consider replacing this by "markConnected()" and removing
     void sendNetworkInfo(in NetworkInfo info);
-    void sendScore(in NetworkScore score);
+    void sendScore(int score);
     void sendExplicitlySelected(boolean explicitlySelected, boolean acceptPartial);
     void sendSocketKeepaliveEvent(int slot, int reason);
     void sendUnderlyingNetworks(in @nullable List<Network> networks);

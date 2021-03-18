@@ -17,7 +17,6 @@
 package android.net;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 
 /**
  * Thrown when parsing failed.
@@ -26,16 +25,12 @@ import android.annotation.SystemApi;
 public class ParseException extends RuntimeException {
     public String response;
 
-    /** @hide */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public ParseException(@NonNull String response) {
+    ParseException(@NonNull String response) {
         super(response);
         this.response = response;
     }
 
-    /** @hide */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public ParseException(@NonNull String response, @NonNull Throwable cause) {
+    ParseException(@NonNull String response, @NonNull Throwable cause) {
         super(response, cause);
         this.response = response;
     }

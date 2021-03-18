@@ -520,7 +520,9 @@ public class AppWidgetHostView extends FrameLayout {
                 return;
             }
             int layoutId = rvToApply.getLayoutId();
-            if (rvToApply.canRecycleView(mView)) {
+            // If our stale view has been prepared to match active, and the new
+            // layout matches, try recycling it
+            if (content == null && layoutId == mLayoutId) {
                 try {
                     rvToApply.reapply(mContext, mView, mInteractionHandler, mCurrentSize,
                             mColorResources);

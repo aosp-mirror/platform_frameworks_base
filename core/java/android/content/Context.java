@@ -3876,7 +3876,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
-    public static final String POWER_STATS_SERVICE = "powerstats";
+    public static final String POWER_STATS_SERVICE = "power_stats";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
