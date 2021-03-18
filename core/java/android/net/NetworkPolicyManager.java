@@ -529,6 +529,26 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * Determines if an UID is subject to metered network restrictions while running in background.
+     *
+     * @param uid The UID whose status needs to be checked.
+     * @return {@link ConnectivityManager#RESTRICT_BACKGROUND_STATUS_DISABLED},
+     *         {@link ConnectivityManager##RESTRICT_BACKGROUND_STATUS_ENABLED},
+     *         or {@link ConnectivityManager##RESTRICT_BACKGROUND_STATUS_WHITELISTED} to denote
+     *         the current status of the UID.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    public int getRestrictBackgroundStatus(int uid) {
+        try {
+            return mService.getRestrictBackgroundStatus(uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Override connections to be temporarily marked as either unmetered or congested,
      * along with automatic timeouts if desired.
      *
@@ -663,11 +683,15 @@ public class NetworkPolicyManager {
     }
 
     /**
-     * Get multipath preference for the given network.
+     * Gets a hint on whether it is desirable to use multipath data transfer on the given network.
+     *
+     * @return One of the ConnectivityManager.MULTIPATH_PREFERENCE_* constants.
      *
      * @hide
      */
-    public int getMultipathPreference(Network network) {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    public int getMultipathPreference(@NonNull Network network) {
         try {
             return mService.getMultipathPreference(network);
         } catch (RemoteException e) {

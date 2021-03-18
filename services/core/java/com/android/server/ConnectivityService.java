@@ -106,6 +106,7 @@ import android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
 import android.net.ConnectivityDiagnosticsManager.DataStallReport;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.ConnectivityManager.RestrictBackgroundStatus;
 import android.net.ConnectivitySettingsManager;
 import android.net.DataStallReportParcelable;
 import android.net.DnsResolverServiceManager;
@@ -1994,6 +1995,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void restrictBackgroundRequestForCaller(NetworkCapabilities nc) {
         if (!mPermissionMonitor.hasUseBackgroundNetworksPermission(mDeps.getCallingUid())) {
             nc.addCapability(NET_CAPABILITY_FOREGROUND);
+        }
+    }
+
+    @Override
+    public @RestrictBackgroundStatus int getRestrictBackgroundStatusByCaller() {
+        enforceAccessPermission();
+        final int callerUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return mPolicyManager.getRestrictBackgroundStatus(callerUid);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -4402,7 +4415,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkPolicyManager netPolicyManager =
                  mContext.getSystemService(NetworkPolicyManager.class);
 
-        final int networkPreference = netPolicyManager.getMultipathPreference(network);
+        final long token = Binder.clearCallingIdentity();
+        final int networkPreference;
+        try {
+            networkPreference = netPolicyManager.getMultipathPreference(network);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
         if (networkPreference != 0) {
             return networkPreference;
         }
