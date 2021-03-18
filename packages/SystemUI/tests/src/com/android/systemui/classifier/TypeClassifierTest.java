@@ -25,8 +25,8 @@ import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
@@ -56,248 +56,225 @@ public class TypeClassifierTest extends ClassifierTest {
 
     @Test
     public void testPass_QuickSettings() {
-        when(mDataProvider.getInteractionType()).thenReturn(QUICK_SETTINGS);
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(false);
 
         when(mDataProvider.isRight()).thenReturn(false);  // right should cause no effect.
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(QUICK_SETTINGS, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(QUICK_SETTINGS, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testFalse_QuickSettings() {
-        when(mDataProvider.getInteractionType()).thenReturn(QUICK_SETTINGS);
-
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(QUICK_SETTINGS, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(QUICK_SETTINGS, 0.5, 0).isFalse()).isTrue();
     }
 
     @Test
     public void testPass_PulseExpand() {
-        when(mDataProvider.getInteractionType()).thenReturn(PULSE_EXPAND);
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(false);
 
         when(mDataProvider.isRight()).thenReturn(false);  // right should cause no effect.
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(PULSE_EXPAND, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(PULSE_EXPAND, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testFalse_PulseExpand() {
-        when(mDataProvider.getInteractionType()).thenReturn(PULSE_EXPAND);
-
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(PULSE_EXPAND, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(PULSE_EXPAND, 0.5, 0).isFalse()).isTrue();
     }
 
     @Test
     public void testPass_NotificationDragDown() {
-        when(mDataProvider.getInteractionType()).thenReturn(NOTIFICATION_DRAG_DOWN);
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(false);
 
         when(mDataProvider.isRight()).thenReturn(false);  // right should cause no effect.
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DRAG_DOWN, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DRAG_DOWN, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testFalse_NotificationDragDown() {
-        when(mDataProvider.getInteractionType()).thenReturn(NOTIFICATION_DRAG_DOWN);
-
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DRAG_DOWN, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DRAG_DOWN, 0.5, 0).isFalse()).isTrue();
     }
 
     @Test
     public void testPass_NotificationDismiss() {
-        when(mDataProvider.getInteractionType()).thenReturn(NOTIFICATION_DISMISS);
         when(mDataProvider.isVertical()).thenReturn(false);
 
         when(mDataProvider.isUp()).thenReturn(false);  // up and right should cause no effect.
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DISMISS, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DISMISS, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DISMISS, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DISMISS, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testFalse_NotificationDismiss() {
-        when(mDataProvider.getInteractionType()).thenReturn(NOTIFICATION_DISMISS);
         when(mDataProvider.isVertical()).thenReturn(true);
 
         when(mDataProvider.isUp()).thenReturn(false);  // up and right should cause no effect.
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DISMISS, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DISMISS, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DISMISS, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(NOTIFICATION_DISMISS, 0.5, 0).isFalse()).isTrue();
     }
 
 
     @Test
     public void testPass_Unlock() {
-        when(mDataProvider.getInteractionType()).thenReturn(UNLOCK);
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(true);
 
 
         when(mDataProvider.isRight()).thenReturn(false);  // right should cause no effect.
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(UNLOCK, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(UNLOCK, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testFalse_Unlock() {
-        when(mDataProvider.getInteractionType()).thenReturn(UNLOCK);
-
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(UNLOCK, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(UNLOCK, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(UNLOCK, 0.5, 0).isFalse()).isTrue();
     }
 
     @Test
     public void testPass_BouncerUnlock() {
-        when(mDataProvider.getInteractionType()).thenReturn(BOUNCER_UNLOCK);
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(true);
 
 
         when(mDataProvider.isRight()).thenReturn(false);  // right should cause no effect.
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(BOUNCER_UNLOCK, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(BOUNCER_UNLOCK, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testFalse_BouncerUnlock() {
-        when(mDataProvider.getInteractionType()).thenReturn(BOUNCER_UNLOCK);
-
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(BOUNCER_UNLOCK, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(BOUNCER_UNLOCK, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(BOUNCER_UNLOCK, 0.5, 0).isFalse()).isTrue();
     }
 
     @Test
     public void testPass_LeftAffordance() {
-        when(mDataProvider.getInteractionType()).thenReturn(LEFT_AFFORDANCE);
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(true);
 
 
         when(mDataProvider.isVertical()).thenReturn(false);  // vertical should cause no effect.
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(LEFT_AFFORDANCE, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isVertical()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(LEFT_AFFORDANCE, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testFalse_LeftAffordance() {
-        when(mDataProvider.getInteractionType()).thenReturn(LEFT_AFFORDANCE);
-
         when(mDataProvider.isRight()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(LEFT_AFFORDANCE, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isRight()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(LEFT_AFFORDANCE, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isRight()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(LEFT_AFFORDANCE, 0.5, 0).isFalse()).isTrue();
     }
 
     @Test
     public void testPass_RightAffordance() {
-        when(mDataProvider.getInteractionType()).thenReturn(RIGHT_AFFORDANCE);
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(false);
 
 
         when(mDataProvider.isVertical()).thenReturn(false);  // vertical should cause no effect.
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(RIGHT_AFFORDANCE, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isVertical()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(RIGHT_AFFORDANCE, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
     public void testFalse_RightAffordance() {
-        when(mDataProvider.getInteractionType()).thenReturn(RIGHT_AFFORDANCE);
-
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(RIGHT_AFFORDANCE, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(RIGHT_AFFORDANCE, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(RIGHT_AFFORDANCE, 0.5, 0).isFalse()).isTrue();
     }
 }

@@ -46,18 +46,20 @@ public class DoubleTapClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
+    Result calculateFalsingResult(
+            @Classifier.InteractionType int interactionType,
+            double historyBelief, double historyConfidence) {
         List<MotionEvent> secondTapEvents = getRecentMotionEvents();
         List<MotionEvent> firstTapEvents = getPriorMotionEvents();
 
         StringBuilder reason = new StringBuilder();
 
         if (firstTapEvents == null) {
-            return Result.falsed(0, "Only one gesture recorded");
+            return falsed(0, "Only one gesture recorded");
         }
 
         return !isDoubleTap(firstTapEvents, secondTapEvents, reason)
-                ? Result.falsed(0.5, reason.toString()) : Result.passed(0.5);
+                ? falsed(0.5, reason.toString()) : Result.passed(0.5);
     }
 
     /** Returns true if the two supplied lists of {@link MotionEvent}s look like a double-tap. */

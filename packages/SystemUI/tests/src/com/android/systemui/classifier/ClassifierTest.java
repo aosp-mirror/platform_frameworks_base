@@ -16,8 +16,6 @@
 
 package com.android.systemui.classifier;
 
-import static com.android.systemui.classifier.Classifier.UNLOCK;
-
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 
@@ -45,7 +43,6 @@ public class ClassifierTest extends LeakCheckedTest {
         displayMetrics.heightPixels = 1000;
         mFakeBatteryController = new FakeBatteryController(getLeakCheck());
         mDataProvider = new FalsingDataProvider(displayMetrics, mFakeBatteryController);
-        mDataProvider.setInteractionType(UNLOCK);
     }
 
     @After
