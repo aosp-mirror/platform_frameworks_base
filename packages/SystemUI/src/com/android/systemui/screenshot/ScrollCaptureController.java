@@ -18,19 +18,16 @@ package com.android.systemui.screenshot;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.HardwareRenderer;
-import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
-import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.IWindowManager;
 import android.view.ScrollCaptureResponse;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.concurrent.futures.CallbackToFutureAdapter.Completer;
 
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.screenshot.ScrollCaptureClient.CaptureResult;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
 
@@ -38,6 +35,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 /**
  * Interaction controller between the UI and ScrollCaptureClient.
@@ -131,11 +130,13 @@ public class ScrollCaptureController {
         }
     }
 
-    ScrollCaptureController(Context context, Executor bgExecutor, IWindowManager wms) {
+    @Inject
+    ScrollCaptureController(Context context, @Background Executor bgExecutor,
+            ScrollCaptureClient client, ImageTileSet imageTileSet) {
         mContext = context;
         mBgExecutor = bgExecutor;
-        mImageTileSet = new ImageTileSet(context.getMainThreadHandler());
-        mClient = new ScrollCaptureClient(mContext, wms);
+        mClient = client;
+        mImageTileSet = imageTileSet;
     }
 
     /**
@@ -252,8 +253,10 @@ public class ScrollCaptureController {
             return;
         }
 
-        int nextTop = (mScrollingUp)
-                ? result.captured.top - mSession.getTileHeight() : result.captured.bottom;
+        // Partial or empty results caused the direction the flip, so we can reliably use the
+        // requested edges to determine the next top.
+        int nextTop = (mScrollingUp) ? result.requested.top - mSession.getTileHeight()
+                : result.requested.bottom;
         requestNextTile(nextTop);
     }
 
