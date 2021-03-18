@@ -39,6 +39,17 @@ public abstract class StorageManagerInternal {
     public abstract int getExternalStorageMountMode(int uid, String packageName);
 
     /**
+     * Checks whether the {@code packageName} with {@code uid} has full external storage access via
+     * the {@link MANAGE_EXTERNAL_STORAGE} permission.
+     *
+     * @param uid the UID for which to check access.
+     * @param packageName the package in the UID for making the call.
+     * @return whether the {@code packageName} has full external storage access.
+     * Returns {@code true} if it has access, {@code false} otherwise.
+     */
+    public abstract boolean hasExternalStorageAccess(int uid, String packageName);
+
+    /**
      * A listener for reset events in the StorageManagerService.
      */
     public interface ResetListener {
