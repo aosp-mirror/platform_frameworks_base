@@ -174,7 +174,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (mode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
             final int startEndPadding = (int) TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP,
-                    12,
+                    32,
                     getResources().getDisplayMetrics());
             setPaddingRelative(startEndPadding, 0, startEndPadding, 0);
             mSmallClockFrame.setVisibility(GONE);
