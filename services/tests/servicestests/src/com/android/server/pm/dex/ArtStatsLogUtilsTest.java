@@ -106,7 +106,8 @@ public final class ArtStatsLogUtilsTest {
                     RESULT_CODE);
 
             // Assert
-            verifyWrites(ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__PROFILE_AND_VDEX);
+            verifyWrites(ArtStatsLog.
+                ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_PROFILE_AND_VDEX);
         } finally {
             deleteSliently(dexMetadataPath);
             deleteSliently(apk);
@@ -135,7 +136,8 @@ public final class ArtStatsLogUtilsTest {
                     RESULT_CODE);
 
             // Assert
-            verifyWrites(ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__PROFILE);
+            verifyWrites(ArtStatsLog.
+                ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_PROFILE);
         } finally {
             deleteSliently(dexMetadataPath);
             deleteSliently(apk);
@@ -164,7 +166,8 @@ public final class ArtStatsLogUtilsTest {
                     RESULT_CODE);
 
             // Assert
-            verifyWrites(ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__VDEX);
+            verifyWrites(ArtStatsLog.
+                ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_VDEX);
         } finally {
             deleteSliently(dexMetadataPath);
             deleteSliently(apk);
@@ -191,7 +194,8 @@ public final class ArtStatsLogUtilsTest {
                     RESULT_CODE);
 
             // Assert
-            verifyWrites(ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__NONE_DEX_METADATA);
+            verifyWrites(ArtStatsLog.
+                ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_NONE);
         } finally {
             deleteSliently(apk);
         }
@@ -219,7 +223,8 @@ public final class ArtStatsLogUtilsTest {
                     RESULT_CODE);
 
             // Assert
-            verifyWrites(ArtStatsLog.ART_DATUM_REPORTED__DEX_METADATA_TYPE__UNKNOWN_DEX_METADATA);
+            verifyWrites(ArtStatsLog.
+                ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_UNKNOWN);
         } finally {
             deleteSliently(dexMetadataPath);
             deleteSliently(apk);
