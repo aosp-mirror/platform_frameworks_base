@@ -29,6 +29,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -180,6 +181,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     /** Initialize the Controller. */
     public void onInit() {
         mKeyguardSecurityContainerController.init();
+        updateResources();
     }
 
     @Override
@@ -467,5 +469,23 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
         mSecurityCallback.finish(strongAuth, currentUser);
     }
 
+    /**
+     * Apply keyguard configuration from the currently active resources. This can be called when the
+     * device configuration changes, to re-apply some resources that are qualified on the device
+     * configuration.
+     */
+    public void updateResources() {
+        int gravity = mView.getResources().getInteger(R.integer.keyguard_host_view_gravity);
 
+        // Android SysUI uses a FrameLayout as the top-level, but Auto uses RelativeLayout.
+        // We're just changing the gravity here though (which can't be applied to RelativeLayout),
+        // so only attempt the update if mView is inside a FrameLayout.
+        if (mView.getLayoutParams() instanceof FrameLayout.LayoutParams) {
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mView.getLayoutParams();
+            if (lp.gravity != gravity) {
+                lp.gravity = gravity;
+                mView.setLayoutParams(lp);
+            }
+        }
+    }
 }

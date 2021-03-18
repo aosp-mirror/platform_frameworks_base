@@ -884,6 +884,13 @@ public class StatusBarTest extends SysuiTestCase {
         verify(mDozeServiceHost).setDozeSuppressed(false);
     }
 
+    @Test
+    public void testUpdateResources_updatesBouncer() {
+        mStatusBar.updateResources();
+
+        verify(mStatusBarKeyguardViewManager).updateResources();
+    }
+
     public static class TestableNotificationInterruptStateProviderImpl extends
             NotificationInterruptStateProviderImpl {
 

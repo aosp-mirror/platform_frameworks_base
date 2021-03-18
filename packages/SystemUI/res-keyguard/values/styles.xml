@@ -100,10 +100,6 @@
         <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 
-    <style name="BouncerSecurityContainer">
-        <item name="android:layout_gravity">center_horizontal|bottom</item>
-    </style>
-
     <style name="PasswordTheme" parent="Theme.SystemUI">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:colorControlNormal">?android:attr/textColorPrimary</item>
