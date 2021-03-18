@@ -263,6 +263,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
+import com.android.net.module.util.PermissionUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -3109,8 +3110,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @Override
     public int getRestrictBackgroundByCaller() {
         mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
-        final int uid = Binder.getCallingUid();
+        return getRestrictBackgroundStatusInternal(Binder.getCallingUid());
+    }
 
+    @Override
+    public int getRestrictBackgroundStatus(int uid) {
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        return getRestrictBackgroundStatusInternal(uid);
+    }
+
+    private int getRestrictBackgroundStatusInternal(int uid) {
         synchronized (mUidRulesFirstLock) {
             // Must clear identity because getUidPolicy() is restricted to system.
             final long token = Binder.clearCallingIdentity();
@@ -3579,6 +3588,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Get multipath preference value for the given network.
      */
     public int getMultipathPreference(Network network) {
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         final Integer preference = mMultipathPolicyTracker.getMultipathPreference(network);
         if (preference != null) {
             return preference;
