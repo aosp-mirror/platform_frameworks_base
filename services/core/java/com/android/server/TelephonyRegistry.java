@@ -60,6 +60,7 @@ import android.telephony.CellSignalStrengthNr;
 import android.telephony.CellSignalStrengthTdscdma;
 import android.telephony.CellSignalStrengthWcdma;
 import android.telephony.DisconnectCause;
+import android.telephony.LinkCapacityEstimate;
 import android.telephony.LocationAccessPolicy;
 import android.telephony.PhoneCapability;
 import android.telephony.PhoneStateListener;
@@ -320,6 +321,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private Map<Integer, Long> mAllowedNetworkTypesList;
 
+    private List<List<LinkCapacityEstimate>> mLinkCapacityEstimateLists;
+
     /**
      * Per-phone map of precise data connection state. The key of the map is the pair of transport
      * type and APN setting. This is the cache to prevent redundant callbacks to the listeners.
@@ -350,6 +353,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 TelephonyCallback.EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED);
         REQUIRE_PRECISE_PHONE_STATE_PERMISSION.add(
                 TelephonyCallback.EVENT_DATA_ENABLED_CHANGED);
+        REQUIRE_PRECISE_PHONE_STATE_PERMISSION.add(
+                TelephonyCallback.EVENT_LINK_CAPACITY_ESTIMATE_CHANGED);
     }
 
     private boolean isLocationPermissionRequired(Set<Integer> events) {
@@ -535,6 +540,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             cutListToSize(mPreciseDataConnectionStates, mNumPhones);
             cutListToSize(mBarringInfo, mNumPhones);
             cutListToSize(mPhysicalChannelConfigs, mNumPhones);
+            cutListToSize(mLinkCapacityEstimateLists, mNumPhones);
             return;
         }
 
@@ -571,6 +577,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
             mIsDataEnabled[i] = false;
             mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
+            mLinkCapacityEstimateLists.add(i, new ArrayList<>());
         }
     }
 
@@ -633,6 +640,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mIsDataEnabled = new boolean[numPhones];
         mDataEnabledReason = new int[numPhones];
         mAllowedNetworkTypesList = new HashMap<>();
+        mLinkCapacityEstimateLists = new ArrayList<>();
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -665,6 +673,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
             mIsDataEnabled[i] = false;
             mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
+            mLinkCapacityEstimateLists.add(i, new ArrayList<>());
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -1169,6 +1178,17 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         TelephonyCallback.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED)) {
                     try {
                         r.callback.onAllowedNetworkTypesChanged(mAllowedNetworkTypesList);
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
+                if (events.contains(
+                        TelephonyCallback.EVENT_LINK_CAPACITY_ESTIMATE_CHANGED)) {
+                    try {
+                        if (mLinkCapacityEstimateLists.get(phoneId) != null) {
+                            r.callback.onLinkCapacityEstimateChanged(mLinkCapacityEstimateLists
+                                    .get(phoneId));
+                        }
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -2456,6 +2476,42 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    /**
+     * Notify that the link capacity estimate has changed.
+     * @param phoneId the phone id.
+     * @param subId the subscription id.
+     * @param linkCapacityEstimateList a list of {@link LinkCapacityEstimate}
+     */
+    public void notifyLinkCapacityEstimateChanged(int phoneId, int subId,
+            List<LinkCapacityEstimate> linkCapacityEstimateList) {
+        if (!checkNotifyPermission("notifyLinkCapacityEstimateChanged()")) {
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyLinkCapacityEstimateChanged: linkCapacityEstimateList ="
+                    + linkCapacityEstimateList);
+        }
+
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                mLinkCapacityEstimateLists.set(phoneId, linkCapacityEstimateList);
+                for (Record r : mRecords) {
+                    if (r.matchTelephonyCallbackEvent(
+                            TelephonyCallback.EVENT_LINK_CAPACITY_ESTIMATE_CHANGED)
+                            && idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            r.callback.onLinkCapacityEstimateChanged(linkCapacityEstimateList);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -2500,6 +2556,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mTelephonyDisplayInfo=" + mTelephonyDisplayInfos[i]);
                 pw.println("mIsDataEnabled=" + mIsDataEnabled);
                 pw.println("mDataEnabledReason=" + mDataEnabledReason);
+                pw.println("mLinkCapacityEstimateList=" + mLinkCapacityEstimateLists.get(i));
                 pw.decreaseIndent();
             }
             pw.println("mCarrierNetworkChangeState=" + mCarrierNetworkChangeState);

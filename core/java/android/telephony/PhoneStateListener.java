@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
@@ -1265,6 +1264,8 @@ public class PhoneStateListener {
         // default implementation empty
     }
 
+
+
     /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
@@ -1577,6 +1578,11 @@ public class PhoneStateListener {
         }
 
         public void onAllowedNetworkTypesChanged(Map allowedNetworkTypesList) {
+            // default implementation empty
+        }
+
+        public void onLinkCapacityEstimateChanged(
+                List<LinkCapacityEstimate> linkCapacityEstimateList) {
             // default implementation empty
         }
     }
