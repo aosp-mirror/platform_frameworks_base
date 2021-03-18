@@ -25,6 +25,7 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_SCROLL;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_UI;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW;
 import static com.android.systemui.screenshot.LogConfig.logTag;
@@ -90,6 +91,7 @@ import com.android.systemui.util.DeviceConfigProxy;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -570,6 +572,15 @@ public class ScreenshotController {
                 mLastScrollCaptureResponse.close();
             }
             mLastScrollCaptureResponse = responseFuture.get();
+            if (!mLastScrollCaptureResponse.isConnected()) {
+                // No connection means that the target window wasn't found
+                // or that it cannot support scroll capture.
+                Log.d(TAG, "ScrollCapture: " + mLastScrollCaptureResponse.getDescription() + " ["
+                 + mLastScrollCaptureResponse.getWindowTitle() + "]");
+                return;
+            }
+            Log.d(TAG, "ScrollCapture: connected to window ["
+                    + mLastScrollCaptureResponse.getWindowTitle() + "]");
             final Intent intent = new Intent(mContext, LongScreenshotActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra(LongScreenshotActivity.EXTRA_CAPTURE_RESPONSE,
@@ -580,6 +591,8 @@ public class ScreenshotController {
                 mContext.startActivity(intent);
                 dismissScreenshot(false);
             });
+        } catch (CancellationException e) {
+            // Ignore
         } catch (InterruptedException | ExecutionException e) {
             Log.e(TAG, "requestScrollCapture failed", e);
         }
