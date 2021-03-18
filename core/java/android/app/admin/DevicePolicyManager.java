@@ -1766,6 +1766,16 @@ public class DevicePolicyManager {
             "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
 
     /**
+     * Broadcast action: notify that a value of {@link Settings.Global#DEVICE_POLICY_CONSTANTS}
+     * has been changed.
+     * @hide
+     */
+    @TestApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DEVICE_POLICY_CONSTANTS_CHANGED =
+            "android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED";
+
+    /**
      * Permission policy to prompt user for new permission requests for runtime permissions.
      * Already granted or denied permissions are not affected by this.
      */
