@@ -1988,7 +1988,7 @@ public class AudioManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public boolean setPreferredDeviceForCapturePreset(int capturePreset,
+    public boolean setPreferredDeviceForCapturePreset(@MediaRecorder.SystemSource int capturePreset,
                                                       @NonNull AudioDeviceAttributes device) {
         return setPreferredDevicesForCapturePreset(capturePreset, Arrays.asList(device));
     }
@@ -2002,7 +2002,8 @@ public class AudioManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public boolean clearPreferredDevicesForCapturePreset(int capturePreset) {
+    public boolean clearPreferredDevicesForCapturePreset(
+            @MediaRecorder.SystemSource int capturePreset) {
         if (!MediaRecorder.isValidAudioSource(capturePreset)) {
             return false;
         }
@@ -2024,7 +2025,8 @@ public class AudioManager {
     @NonNull
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public List<AudioDeviceAttributes> getPreferredDevicesForCapturePreset(int capturePreset) {
+    public List<AudioDeviceAttributes> getPreferredDevicesForCapturePreset(
+            @MediaRecorder.SystemSource int capturePreset) {
         if (!MediaRecorder.isValidAudioSource(capturePreset)) {
             return new ArrayList<AudioDeviceAttributes>();
         }
@@ -2036,7 +2038,8 @@ public class AudioManager {
     }
 
     private boolean setPreferredDevicesForCapturePreset(
-            int capturePreset, @NonNull List<AudioDeviceAttributes> devices) {
+            @MediaRecorder.SystemSource int capturePreset,
+            @NonNull List<AudioDeviceAttributes> devices) {
         Objects.requireNonNull(devices);
         if (!MediaRecorder.isValidAudioSource(capturePreset)) {
             return false;
@@ -2081,7 +2084,8 @@ public class AudioManager {
          * @param devices a list of newly set preferred audio devices
          */
         void onPreferredDevicesForCapturePresetChanged(
-                int capturePreset, @NonNull List<AudioDeviceAttributes> devices);
+                @MediaRecorder.SystemSource int capturePreset,
+                @NonNull List<AudioDeviceAttributes> devices);
     }
 
     /**
