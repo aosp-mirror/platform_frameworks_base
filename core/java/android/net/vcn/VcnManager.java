@@ -448,7 +448,7 @@ public class VcnManager {
          * @param networkCapabilities an array of NetworkCapabilities.NET_CAPABILITY_* capabilities
          *     for the Gateway Connection that encountered the error, for identification purposes.
          *     These will be a sorted list with no duplicates and will match {@link
-         *     VcnGatewayConnectionConfig#getRequiredUnderlyingCapabilities()} for one of the {@link
+         *     VcnGatewayConnectionConfig#getExposedCapabilities()} for one of the {@link
          *     VcnGatewayConnectionConfig}s set in the {@link VcnConfig} for this subscription
          *     group.
          * @param errorCode the code to indicate the error that occurred

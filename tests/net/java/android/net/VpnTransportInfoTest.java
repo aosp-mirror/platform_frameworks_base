@@ -42,7 +42,13 @@ public class VpnTransportInfoTest {
         VpnTransportInfo v1 = new VpnTransportInfo(VpnManager.TYPE_VPN_PLATFORM);
         VpnTransportInfo v2 = new VpnTransportInfo(VpnManager.TYPE_VPN_SERVICE);
         VpnTransportInfo v3 = new VpnTransportInfo(VpnManager.TYPE_VPN_PLATFORM);
+        VpnTransportInfo v4 = new VpnTransportInfo(VpnManager.TYPE_VPN_LEGACY);
+        VpnTransportInfo v5 = new VpnTransportInfo(VpnManager.TYPE_VPN_OEM);
+
         assertNotEquals(v1, v2);
+        assertNotEquals(v3, v4);
+        assertNotEquals(v4, v5);
+
         assertEquals(v1, v3);
         assertEquals(v1.hashCode(), v3.hashCode());
     }
