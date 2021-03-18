@@ -8003,13 +8003,14 @@ package android.app.people {
     method public long getStartTimeMillis();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int ACTIVITY_ANNIVERSARY = 2; // 0x2
+    field public static final int ACTIVITY_AUDIO = 4; // 0x4
     field public static final int ACTIVITY_BIRTHDAY = 1; // 0x1
-    field public static final int ACTIVITY_GAME = 5; // 0x5
-    field public static final int ACTIVITY_LOCATION = 6; // 0x6
-    field public static final int ACTIVITY_MEDIA = 4; // 0x4
+    field public static final int ACTIVITY_GAME = 6; // 0x6
+    field public static final int ACTIVITY_LOCATION = 7; // 0x7
     field public static final int ACTIVITY_NEW_STORY = 3; // 0x3
     field public static final int ACTIVITY_OTHER = 0; // 0x0
-    field public static final int ACTIVITY_UPCOMING_BIRTHDAY = 7; // 0x7
+    field public static final int ACTIVITY_UPCOMING_BIRTHDAY = 8; // 0x8
+    field public static final int ACTIVITY_VIDEO = 5; // 0x5
     field public static final int AVAILABILITY_AVAILABLE = 0; // 0x0
     field public static final int AVAILABILITY_BUSY = 1; // 0x1
     field public static final int AVAILABILITY_OFFLINE = 2; // 0x2

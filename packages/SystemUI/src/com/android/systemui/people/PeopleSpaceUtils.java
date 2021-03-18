@@ -19,12 +19,13 @@ package com.android.systemui.people;
 import static android.app.Notification.CATEGORY_MISSED_CALL;
 import static android.app.Notification.EXTRA_MESSAGES;
 import static android.app.people.ConversationStatus.ACTIVITY_ANNIVERSARY;
+import static android.app.people.ConversationStatus.ACTIVITY_AUDIO;
 import static android.app.people.ConversationStatus.ACTIVITY_BIRTHDAY;
 import static android.app.people.ConversationStatus.ACTIVITY_GAME;
 import static android.app.people.ConversationStatus.ACTIVITY_LOCATION;
-import static android.app.people.ConversationStatus.ACTIVITY_MEDIA;
 import static android.app.people.ConversationStatus.ACTIVITY_NEW_STORY;
 import static android.app.people.ConversationStatus.ACTIVITY_UPCOMING_BIRTHDAY;
+import static android.app.people.ConversationStatus.ACTIVITY_VIDEO;
 import static android.app.people.ConversationStatus.AVAILABILITY_AVAILABLE;
 
 import android.annotation.Nullable;
@@ -509,8 +510,10 @@ public class PeopleSpaceUtils {
                 return context.getString(R.string.location_status);
             case ACTIVITY_NEW_STORY:
                 return context.getString(R.string.new_story_status);
-            case ACTIVITY_MEDIA:
+            case ACTIVITY_VIDEO:
                 return context.getString(R.string.video_status);
+            case ACTIVITY_AUDIO:
+                return context.getString(R.string.audio_status);
             case ACTIVITY_GAME:
                 return context.getString(R.string.game_status);
             default:
