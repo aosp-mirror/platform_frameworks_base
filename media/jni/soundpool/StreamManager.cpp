@@ -358,14 +358,14 @@ void StreamManager::addToActiveQueue_l(Stream *stream) {
 void StreamManager::run(int32_t id)
 {
     ALOGV("%s(%d) entering", __func__, id);
-    int64_t waitTimeNs = kWaitTimeBeforeCloseNs;
+    int64_t waitTimeNs = 0;  // on thread start, mRestartStreams can be non-empty.
     std::unique_lock lock(mStreamManagerLock);
     while (!mQuit) {
-        if (mRestartStreams.empty()) { // on thread start, mRestartStreams can be non-empty.
+        if (waitTimeNs > 0) {
             mStreamManagerCondition.wait_for(
                     lock, std::chrono::duration<int64_t, std::nano>(waitTimeNs));
         }
-        ALOGV("%s(%d) awake", __func__, id);
+        ALOGV("%s(%d) awake lock waitTimeNs:%lld", __func__, id, (long long)waitTimeNs);
 
         sanityCheckQueue_l();
 

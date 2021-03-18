@@ -3127,7 +3127,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         final float dozeAmount = dozing ? 1 : 0;
-        mStatusBarStateController.setDozeAmount(dozeAmount, animate);
+        mStatusBarStateController.setAndInstrumentDozeAmount(mView, dozeAmount, animate);
     }
 
     public void setPulsing(boolean pulsing) {

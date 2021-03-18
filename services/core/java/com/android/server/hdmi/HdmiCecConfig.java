@@ -35,6 +35,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.ArrayMap;
+import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -193,6 +194,7 @@ public class HdmiCecConfig {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
+            Slog.i(TAG, "SettingsObserver.onChange");
             String setting = uri.getLastPathSegment();
             HdmiCecConfig.this.notifyGlobalSettingChanged(setting);
         }
@@ -619,6 +621,7 @@ public class HdmiCecConfig {
     }
 
     private void notifySettingChanged(@NonNull @CecSettingName String name) {
+        Slog.i(TAG, "notifySettingChanged");
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -654,6 +657,7 @@ public class HdmiCecConfig {
         Handler handler = new Handler(looper);
         mSettingsObserver = new SettingsObserver(handler);
         ContentResolver resolver = mContext.getContentResolver();
+        Slog.i(TAG, "registerGlobalSettingsObserver");
         String[] settings = new String[] {
                 Global.HDMI_CONTROL_ENABLED,
                 Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,

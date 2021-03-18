@@ -77,6 +77,9 @@ public final class CorrelationVector implements Parcelable {
      * be encoded as signed 16 bit integer where 1 is represented by 32767 and -1 is represented
      * by -32768.
      *
+     * <p>The values are quantized using a 16bit integer to save on the data size since the array
+     * contains real data and it might grow.
+     *
      */
     @NonNull
     public int[] getMagnitude() {

@@ -3963,6 +3963,7 @@
   <java-symbol type="layout" name="chooser_action_button" />
   <java-symbol type="dimen" name="chooser_action_button_icon_size" />
   <java-symbol type="string" name="config_defaultNearbySharingComponent" />
+  <java-symbol type="bool" name="config_disable_all_cb_messages" />
   <java-symbol type="drawable" name="ic_close" />
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
@@ -4322,4 +4323,5 @@
 
   <java-symbol type="id" name="remote_views_next_child" />
   <java-symbol type="id" name="remote_views_stable_id" />
+  <java-symbol type="id" name="remote_views_override_id" />
 </resources>

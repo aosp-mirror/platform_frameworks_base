@@ -552,12 +552,11 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਟੋ ਸੰਗ੍ਰਹਿ ਨੂੰ ਸੋਧਣ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ਤੁਹਾਡੇ ਮੀਡੀਆ ਸੰਗ੍ਰਹਿ ਦੇ ਟਿਕਾਣਿਆਂ ਨੂੰ ਪੜ੍ਹਨਾ"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਮੀਡੀਆ ਸੰਗ੍ਰਹਿ ਦੇ ਟਿਕਾਣਿਆਂ ਨੂੰ ਪੜ੍ਹਨ ਦਿੰਦੀ ਹੈ।"</string>
-    <!-- no translation found for biometric_app_setting_name (3339209978734534457) -->
-    <skip />
-    <!-- no translation found for biometric_or_screen_lock_app_setting_name (5348462421758257752) -->
-    <skip />
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"ਬਾਇਓਮੈਟ੍ਰਿਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"ਬਾਇਓਮੈਟ੍ਰਿਕ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"ਆਪਣੀ ਪਛਾਣ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
-    <!-- no translation found for biometric_dialog_default_subtitle (8457232339298571992) -->
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣੇ ਬਾਇਓਮੈਟ੍ਰਿਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <!-- no translation found for biometric_or_screen_lock_dialog_default_subtitle (159539678371552009) -->
     <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ਪ੍ਰਮਾਣੀਕਰਨ ਰੱਦ ਕੀਤਾ ਗਿਆ"</string>
@@ -565,10 +564,8 @@
     <string name="biometric_error_canceled" msgid="8266582404844179778">"ਪ੍ਰਮਾਣੀਕਰਨ ਰੱਦ ਕੀਤਾ ਗਿਆ"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"ਕੋਈ ਪਿੰਨ, ਪੈਟਰਨ ਜਾਂ ਪਾਸਵਰਡ ਸੈੱਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"ਗੜਬੜ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <!-- no translation found for screen_lock_app_setting_name (6054944352976789228) -->
-    <skip />
-    <!-- no translation found for screen_lock_dialog_default_subtitle (8638638125397857315) -->
-    <skip />
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣੇ ਡੀਵਾਈਸ ਦੇ ਕ੍ਰੀਡੈਂਸ਼ੀਅਲ ਨੂੰ ਦਾਖਲ ਕਰੋ"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"ਅਧੂਰਾ ਫਿੰਗਰਪ੍ਰਿਟ ਮਿਲਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ਫਿੰਗਰਪ੍ਰਿੰਟ \'ਤੇ ਪ੍ਰਕਿਰਿਆ ਨਹੀਂ ਹੋ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਗੰਦਾ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਇਸਨੂੰ ਸਾਫ਼ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
@@ -591,11 +588,11 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨਹੀਂ ਹੈ।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ਸੈਂਸਰ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ਉਂਗਲ <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <!-- no translation found for fingerprint_app_setting_name (4253767877095495844) -->
-    <skip />
-    <!-- no translation found for fingerprint_or_screen_lock_app_setting_name (3501743523487644907) -->
-    <skip />
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣਾ ਫਿੰਗਰਪ੍ਰਿੰਟ ਵਰਤੋ"</string>
+    <!-- no translation found for fingerprint_or_screen_lock_dialog_default_subtitle (5195808203117992200) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਪ੍ਰਤੀਕ"</string>
@@ -640,11 +637,10 @@
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਚਿਹਰਾ ਅਣਲਾਕ ਦੀ ਸੁਵਿਧਾ ਨਹੀਂ ਹੈ।"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"ਸੈਂਸਰ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="face_name_template" msgid="3877037340223318119">"ਚਿਹਰਾ <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <!-- no translation found for face_app_setting_name (8130135875458467243) -->
-    <skip />
-    <!-- no translation found for face_or_screen_lock_app_setting_name (1603149075605709106) -->
-    <skip />
-    <!-- no translation found for face_dialog_default_subtitle (4979205739418564856) -->
+    <string name="face_app_setting_name" msgid="8130135875458467243">"ਚਿਹਰਾ ਅਣਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ਚਿਹਰਾ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਚਿਹਰਾ ਅਣਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <!-- no translation found for face_or_screen_lock_dialog_default_subtitle (5006381531158341844) -->
     <skip />
   <string-array name="face_error_vendor">
   </string-array>
@@ -1009,6 +1005,10 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"ਤੁਹਾਨੂੰ ਇਸ ਸਫ਼ੇ ਨੂੰ ਖੋਲ੍ਹਣ ਦੀ ਅਨੁਮਤੀ ਨਹੀਂ ਹੈ।"</string>
     <string name="text_copied" msgid="2531420577879738860">"ਟੈਕਸਟ ਕਲਿਪਬੋਰਡ ਤੇ ਕਾਪੀ ਕੀਤਾ।"</string>
     <string name="copied" msgid="4675902854553014676">"ਕਾਪੀ ਕੀਤੀ ਗਈ"</string>
+    <!-- no translation found for pasted_from_app (5627698450808256545) -->
+    <skip />
+    <!-- no translation found for pasted_from_clipboard (6295556725844421812) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"ਹੋਰ"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"ਮੀਨੂ+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1382,11 +1382,17 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"ਬੰਦ ਕਰੋ"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> ਦੀ ਜਾਂਚ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"ਵਰਤਮਾਨ ਸਮੱਗਰੀ ਦੀ ਸਮੀਖਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
+    <!-- no translation found for ext_media_checking_notification_message (7986154434946021415) -->
+    <skip />
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"ਨਵਾਂ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ਕੰਮ ਨਹੀਂ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"ਸੈੱਟਅੱਪ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <!-- no translation found for ext_media_new_notification_message (216863352100263668) -->
+    <skip />
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ਤੁਹਾਨੂੰ ਡੀਵਾਈਸ ਨੂੰ ਮੁੜ-ਫਾਰਮੈਟ ਕਰਨ ਦੀ ਲੋੜ ਪੈ ਸਕਦੀ ਹੈ। ਕੱਢਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ਫ਼ੋਟੋਆਂ ਅਤੇ ਮੀਡੀਆ ਨੂੰ ਟ੍ਰਾਂਸਫ਼ਰ ਕਰਨ ਲਈ"</string>
+    <!-- no translation found for ext_media_ready_notification_message (8847134811163165935) -->
+    <skip />
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> ਵਿੱਚ ਸਮੱਸਿਆ ਆਈ"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ਕੰਮ ਨਹੀਂ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ਠੀਕ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
@@ -1395,7 +1401,8 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"ਅਸਮਰਥਿਤ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ਕੰਮ ਨਹੀਂ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ਇਹ ਡੀਵਾਈਸ ਇਸ <xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਕਿਸੇ ਸਮਰਥਿਤ ਫਾਰਮੈਟ ਵਿੱਚ ਸਥਾਪਤ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"ਇਹ ਡੀਵਾਈਸ ਇਸ <xliff:g id="NAME">%s</xliff:g> ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਕਿਸੇ ਸਮਰਥਿਤ ਫਾਰਮੈਟ ਵਿੱਚ ਸਥਾਪਤ ਕਰਨ ਲਈ ਚੁਣੋ।"</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (1595482802187036532) -->
+    <skip />
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ਤੁਹਾਨੂੰ ਡੀਵਾਈਸ ਨੂੰ ਮੁੜ-ਫਾਰਮੈਟ ਕਰਨ ਦੀ ਲੋੜ ਪੈ ਸਕਦੀ ਹੈ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਅਚਨਚੇਤ ਹਟਾਇਆ ਗਿਆ"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"ਸਮੱਗਰੀ ਗੁਆਉਣ ਤੋਂ ਬਚਣ ਲਈ ਹਟਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਮੀਡੀਆ ਕੱਢੋ"</string>
@@ -1701,7 +1708,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ਨੂੰ ਲਾਗ-ਆਉਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ …"</string>
     <string name="owner_name" msgid="8713560351570795743">"ਮਾਲਕ"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ਅਸ਼ੁੱਧੀ"</string>
@@ -1968,8 +1975,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"ਖਬਰਾਂ ਅਤੇ ਰਸਾਲੇ"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"ਨਕਸ਼ੇ ਅਤੇ ਆਵਾਗੌਣ"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ਉਤਪਾਦਕਤਾ"</string>
-    <!-- no translation found for app_category_accessibility (6643521607848547683) -->
-    <skip />
+    <string name="app_category_accessibility" msgid="6643521607848547683">"ਪਹੁੰਚਯੋਗਤਾ"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ਡੀਵਾਈਸ ਸਟੋਰੇਜ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB ਡੀਬੱਗਿੰਗ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ਘੰਟਾ"</string>

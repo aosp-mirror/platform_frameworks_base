@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.settingslib;
+package com.android.settingslib.widget;
 
-import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_DEFAULT;
-import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_MEDIUM;
-import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_SMALL;
+import static com.android.settingslib.widget.TwoTargetPreference.ICON_SIZE_DEFAULT;
+import static com.android.settingslib.widget.TwoTargetPreference.ICON_SIZE_MEDIUM;
+import static com.android.settingslib.widget.TwoTargetPreference.ICON_SIZE_SMALL;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -31,6 +31,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import androidx.preference.PreferenceViewHolder;
+
+import com.android.settingslib.R;
 
 import org.junit.Before;
 import org.junit.Test;

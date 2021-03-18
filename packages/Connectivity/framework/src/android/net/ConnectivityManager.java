@@ -18,8 +18,8 @@ package android.net;
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
+import static android.net.NetworkRequest.Type.LISTEN_FOR_BEST;
 import static android.net.NetworkRequest.Type.REQUEST;
-import static android.net.NetworkRequest.Type.TRACK_BEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
 import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 import static android.net.QosCallback.QosCallbackRegistrationException;
@@ -3213,10 +3213,6 @@ public class ConnectivityManager {
         }
     }
 
-    // TODO : remove this method. It is a stopgap measure to help sheperding a number
-    // of dependent changes that would conflict throughout the automerger graph. Having this
-    // temporarily helps with the process of going through with all these dependent changes across
-    // the entire tree.
     /**
      * @hide
      * Register a NetworkAgent with ConnectivityService.
@@ -3226,20 +3222,8 @@ public class ConnectivityManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_FACTORY})
     public Network registerNetworkAgent(INetworkAgent na, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score, NetworkAgentConfig config) {
-        return registerNetworkAgent(na, ni, lp, nc, score, config, NetworkProvider.ID_NONE);
-    }
-
-    /**
-     * @hide
-     * Register a NetworkAgent with ConnectivityService.
-     * @return Network corresponding to NetworkAgent.
-     */
-    @RequiresPermission(anyOf = {
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_FACTORY})
-    public Network registerNetworkAgent(INetworkAgent na, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score, NetworkAgentConfig config, int providerId) {
+            NetworkCapabilities nc, @NonNull NetworkScore score, NetworkAgentConfig config,
+            int providerId) {
         try {
             return mService.registerNetworkAgent(na, ni, lp, nc, score, config, providerId);
         } catch (RemoteException e) {
@@ -4257,15 +4241,33 @@ public class ConnectivityManager {
     }
 
     /**
-     * @hide
+     * Registers to receive notifications about the best matching network which satisfy the given
+     * {@link NetworkRequest}.  The callbacks will continue to be called until
+     * either the application exits or {@link #unregisterNetworkCallback(NetworkCallback)} is
+     * called.
+     *
+     * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
+     * number of outstanding requests to 100 per app (identified by their UID), shared with
+     * {@link #registerNetworkCallback} and its variants and {@link #requestNetwork} as well as
+     * {@link ConnectivityDiagnosticsManager#registerConnectivityDiagnosticsCallback}.
+     * Requesting a network with this method will count toward this limit. If this limit is
+     * exceeded, an exception will be thrown. To avoid hitting this issue and to conserve resources,
+     * make sure to unregister the callbacks with
+     * {@link #unregisterNetworkCallback(NetworkCallback)}.
+     *
+     *
+     * @param request {@link NetworkRequest} describing this request.
+     * @param networkCallback The {@link NetworkCallback} that the system will call as suitable
+     *                        networks change state.
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     * @throws RuntimeException if the app already has too many callbacks registered.
      */
-    // TODO: Make it public api.
     @SuppressLint("ExecutorRegistration")
     public void registerBestMatchingNetworkCallback(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
         final NetworkCapabilities nc = request.networkCapabilities;
         final CallbackHandler cbHandler = new CallbackHandler(handler);
-        sendRequestForNetwork(nc, networkCallback, 0, TRACK_BEST, TYPE_NONE, cbHandler);
+        sendRequestForNetwork(nc, networkCallback, 0, LISTEN_FOR_BEST, TYPE_NONE, cbHandler);
     }
 
     /**
@@ -5121,9 +5123,9 @@ public class ConnectivityManager {
     }
 
     // The first network ID of IPSec tunnel interface.
-    private static final int TUN_INTF_NETID_START = 0xFC00;
+    private static final int TUN_INTF_NETID_START = 0xFC00; // 0xFC00 = 64512
     // The network ID range of IPSec tunnel interface.
-    private static final int TUN_INTF_NETID_RANGE = 0x0400;
+    private static final int TUN_INTF_NETID_RANGE = 0x0400; // 0x0400 = 1024
 
     /**
      * Get the network ID range reserved for IPSec tunnel interfaces.
@@ -5140,7 +5142,8 @@ public class ConnectivityManager {
     /**
      * Get private DNS mode from settings.
      *
-     * @param cr The ContentResolver to query private DNS mode from settings.
+     * @param context The Context to get its ContentResolver to query the private DNS mode from
+     *                settings.
      * @return A string of private DNS mode as one of the PRIVATE_DNS_MODE_* constants.
      *
      * @hide
@@ -5148,7 +5151,8 @@ public class ConnectivityManager {
     @SystemApi(client = MODULE_LIBRARIES)
     @NonNull
     @PrivateDnsMode
-    public static String getPrivateDnsMode(@NonNull ContentResolver cr) {
+    public static String getPrivateDnsMode(@NonNull Context context) {
+        final ContentResolver cr = context.getContentResolver();
         String mode = Settings.Global.getString(cr, PRIVATE_DNS_MODE);
         if (TextUtils.isEmpty(mode)) mode = Settings.Global.getString(cr, PRIVATE_DNS_DEFAULT_MODE);
         // If both PRIVATE_DNS_MODE and PRIVATE_DNS_DEFAULT_MODE are not set, choose

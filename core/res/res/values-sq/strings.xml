@@ -204,8 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"Shërbimi i muzgut"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Zbuluesi i brezit orar (nuk nevojitet lidhja)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Shërbimi i përditësimit të kohës GNSS"</string>
-    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
-    <skip />
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Shërbimi i menaxherit të njohjes së muzikës"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Pajisja do të spastrohet"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Aplikacioni i administratorit nuk mund të përdoret. Pajisja jote tani do të fshihet.\n\nNëse ke pyetje, kontakto me administratorin e organizatës."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Printimi është çaktivizuar nga <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -556,6 +555,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Përdor sistemet biometrike ose kyçjen e ekranit"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifiko që je ti"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Përdor sistemet e tua biometrike për të vazhduar"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Përdor sistemet e tua biometrike ose kyçjen e ekranit për të vazhduar"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Nuk ofrohet harduer biometrik"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Vërtetimi u anulua"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nuk njihet"</string>
@@ -589,6 +589,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Përdor gjurmën e gishtit"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Përdor gjurmën e gishtit ose kyçjen e ekranit"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Përdor gjurmën e gishtit për të vazhduar"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Përdor gjurmën tënde të gishtit ose kyçjen e ekranit për të vazhduar"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona e gjurmës së gishtit"</string>
@@ -636,6 +637,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Përdor shkyçjen me fytyrë"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Përdor kyçjen me fytyrë ose kyçjen e ekranit"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Përdor shkyçjen me fytyrë për të vazhduar"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Përdor fytyrën tënde ose kyçjen e ekranit për të vazhduar"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikona e fytyrës"</string>
@@ -999,6 +1001,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Nuk ke leje për ta hapur këtë faqe."</string>
     <string name="text_copied" msgid="2531420577879738860">"Teksti u kopjua në kujtesën e fragmenteve."</string>
     <string name="copied" msgid="4675902854553014676">"U kopjua"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> u ngjit nga <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> u ngjit nga kujtesa e fragmenteve"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Më shumë"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menyja+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1372,11 +1376,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Çaktivizo"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> po kontrollohet…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Përmbajtja aktuale po rishikohet"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Po analizon magazinën ruajtëse të medias"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> e re"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> nuk punon"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Trokit për ta konfiguruar"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Zgjidhe për ta konfiguruar"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Mund të jetë nevoja ta riformatosh pajisjen. Trokit për ta nxjerrë."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Për transferimin e fotografive dhe skedarëve të tjerë"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Shfleto skedarët e medias"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem me <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> nuk punon"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Trokit për ta rregulluar"</string>
@@ -1385,7 +1392,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> nuk mbështetet"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> nuk punon"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Kjo pajisje nuk e mbështet këtë <xliff:g id="NAME">%s</xliff:g>. Trokit për ta konfiguruar në një format të mbështetur."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Kjo pajisje nuk e mbështet këtë <xliff:g id="NAME">%s</xliff:g>. Përzgjidhe për ta konfiguruar në një format të mbështetur."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Zgjidh të konfigurosh <xliff:g id="NAME">%s</xliff:g> në një format të mbështetur."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Mund të jetë nevoja ta riformatosh pajisjen"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> u hoq papritur"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Nxirr median para se ta heqësh për të shmangur humbjen e përmbajtjes"</string>
@@ -1691,7 +1698,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Për të kaluar mes veçorive, rrëshqit shpejt lart me tre gishta dhe mbaje prekur."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zmadhimi"</string>
     <string name="user_switched" msgid="7249833311585228097">"Emri i përdoruesit aktual: <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Po kalon në <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Po kalon në \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> po del…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Zotëruesi"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Gabim"</string>

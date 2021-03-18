@@ -33,6 +33,8 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
+import android.telephony.gba.TlsParams;
+import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.ImsSsData;
@@ -2972,6 +2974,18 @@ public class CarrierConfigManager {
     public static final String KEY_RTT_SUPPORTED_FOR_VT_BOOL = "rtt_supported_for_vt_bool";
 
     /**
+     * Indicates if the carrier supports upgrading a call that was previously an RTT call to VT.
+     */
+    public static final String KEY_VT_UPGRADE_SUPPORTED_FOR_DOWNGRADED_RTT_CALL_BOOL =
+            "vt_upgrade_supported_for_downgraded_rtt_call";
+
+    /**
+     * Indicates if the carrier supports upgrading a call that was previously a VT call to RTT.
+     */
+    public static final String KEY_RTT_UPGRADE_SUPPORTED_FOR_DOWNGRADED_VT_CALL_BOOL =
+            "rtt_upgrade_supported_for_downgraded_vt_call";
+
+    /**
      * Indicates if the carrier supports upgrading a voice call to an RTT call during the call.
      */
     public static final String KEY_RTT_UPGRADE_SUPPORTED_BOOL = "rtt_upgrade_supported_bool";
@@ -3696,6 +3710,70 @@ public class CarrierConfigManager {
      */
     public static final String ENABLE_EAP_METHOD_PREFIX_BOOL = "enable_eap_method_prefix_bool";
 
+    /**
+     * Indicates that GBA_ME should be used for GBA authentication, as defined in 3GPP TS 33.220.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_ME = 1;
+
+    /**
+     * Indicates that GBA_U should be used for GBA authentication, as defined in 3GPP TS 33.220.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_U = 2;
+
+    /**
+     * Indicates that GBA_Digest should be used for GBA authentication, as defined
+     * in 3GPP TS 33.220.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_DIGEST = 3;
+
+    /**
+     * An integer representing the GBA mode to use for requesting credentials
+     * via {@link TelephonyManager#bootstrapAuthenticationRequest}.
+     *
+     * One of {@link #GBA_ME}, {@link #GBA_U}, or {@link #GBA_DIGEST}.
+     * @hide
+     */
+    @SystemApi
+    public static final String KEY_GBA_MODE_INT = "gba_mode_int";
+
+    /**
+     * An integer representing the organization code to be used when building the
+     * {@link UaSecurityProtocolIdentifier} used when requesting GBA authentication.
+     *
+     * See the {@code ORG_} constants in {@link UaSecurityProtocolIdentifier}.
+     * @hide
+     */
+    @SystemApi
+    public static final String KEY_GBA_UA_SECURITY_ORGANIZATION_INT =
+            "gba_ua_security_organization_int";
+
+    /**
+     * An integer representing the security protocol to be used when building the
+     * {@link UaSecurityProtocolIdentifier} used when requesting GBA authentication.
+     *
+     * See the {@code UA_SECURITY_PROTOCOL_} constants in {@link UaSecurityProtocolIdentifier}.
+     * @hide
+     */
+    @SystemApi
+    public static final String KEY_GBA_UA_SECURITY_PROTOCOL_INT =
+            "gba_ua_security_protocol_int";
+
+    /**
+     * An integer representing the cipher suite to be used when building the
+     * {@link UaSecurityProtocolIdentifier} used when requesting GBA authentication.
+     *
+     * See the {@code TLS_} constants in {@link android.telephony.gba.TlsParams}.
+     * @hide
+     */
+    @SystemApi
+    public static final String KEY_GBA_UA_TLS_CIPHER_SUITE_INT =
+            "gba_ua_tls_cipher_suite_int";
 
     /**
      * Configs used by ImsServiceEntitlement.
@@ -5090,6 +5168,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_TTY_HCO_VCO_WITH_RTT_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_UPGRADE_SUPPORTED_FOR_DOWNGRADED_VT_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_VT_UPGRADE_SUPPORTED_FOR_DOWNGRADED_RTT_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_NO_REPLY_TIMER_FOR_CFNRY_BOOL, true);
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
@@ -5265,6 +5345,13 @@ public class CarrierConfigManager {
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
+        sDefaults.putInt(KEY_GBA_MODE_INT, GBA_ME);
+        sDefaults.putInt(KEY_GBA_UA_SECURITY_ORGANIZATION_INT,
+                UaSecurityProtocolIdentifier.ORG_3GPP);
+        sDefaults.putInt(KEY_GBA_UA_SECURITY_PROTOCOL_INT,
+                UaSecurityProtocolIdentifier.UA_SECURITY_PROTOCOL_3GPP_TLS_DEFAULT);
+        sDefaults.putInt(KEY_GBA_UA_TLS_CIPHER_SUITE_INT, TlsParams.TLS_NULL_WITH_NULL_NULL);
+
         sDefaults.putBoolean(KEY_SHOW_FORWARDED_NUMBER_BOOL, false);
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
