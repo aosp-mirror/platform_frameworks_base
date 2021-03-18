@@ -76,6 +76,7 @@ import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -140,6 +141,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     private BubblesManager mBubblesManager;
     @Mock
     private LauncherApps mLauncherApps;
+    @Mock
+    private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
     @Mock
     private ShortcutManager mShortcutManager;
     @Mock
@@ -236,6 +239,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 .thenReturn(mock(NotificationManager.Policy.class));
 
         when(mBuilder.build()).thenReturn(mock(PriorityOnboardingDialogController.class));
+
+        when(mPeopleSpaceWidgetManager.requestPinAppWidget(any())).thenReturn(true);
     }
 
     @Test
@@ -244,6 +249,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -257,7 +263,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         final ImageView view = mNotificationInfo.findViewById(R.id.conversation_icon);
         assertEquals(mIconDrawable, view.getDrawable());
     }
@@ -269,6 +276,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -282,7 +290,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         final TextView textView = mNotificationInfo.findViewById(R.id.pkg_name);
         assertTrue(textView.getText().toString().contains("App Name"));
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
@@ -322,6 +331,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -335,7 +345,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
         assertTrue(textView.getText().toString().contains(group.getName()));
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
@@ -348,6 +359,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -361,7 +373,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
         assertEquals(GONE, textView.getVisibility());
@@ -373,6 +386,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -386,7 +400,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(GONE, nameView.getVisibility());
     }
@@ -409,6 +424,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -422,7 +438,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(VISIBLE, nameView.getVisibility());
         assertTrue(nameView.getText().toString().contains("Proxied"));
@@ -435,6 +452,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -451,7 +469,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         settingsButton.performClick();
@@ -465,6 +484,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -478,7 +498,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertTrue(settingsButton.getVisibility() != View.VISIBLE);
     }
@@ -490,6 +511,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -506,7 +528,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 false,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertTrue(settingsButton.getVisibility() != View.VISIBLE);
     }
@@ -519,6 +542,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -532,7 +556,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         View view = mNotificationInfo.findViewById(R.id.silence);
         assertThat(view.isSelected()).isTrue();
     }
@@ -548,6 +573,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -561,7 +587,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         View view = mNotificationInfo.findViewById(R.id.default_behavior);
         assertThat(view.isSelected()).isTrue();
         assertThat(((TextView) view.findViewById(R.id.default_summary)).getText()).isEqualTo(
@@ -580,6 +607,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -593,7 +621,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
         View view = mNotificationInfo.findViewById(R.id.default_behavior);
         assertThat(view.isSelected()).isTrue();
         assertThat(((TextView) view.findViewById(R.id.default_summary)).getText()).isEqualTo(
@@ -611,6 +640,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -624,7 +654,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         View fave = mNotificationInfo.findViewById(R.id.priority);
         fave.performClick();
@@ -656,6 +687,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -669,7 +701,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
         mTestableLooper.processAllMessages();
@@ -700,6 +733,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -713,7 +747,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         View silence = mNotificationInfo.findViewById(R.id.silence);
 
@@ -745,6 +780,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -758,7 +794,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         View fave = mNotificationInfo.findViewById(R.id.priority);
         fave.performClick();
@@ -783,6 +820,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -796,7 +834,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         View fave = mNotificationInfo.findViewById(R.id.priority);
         fave.performClick();
@@ -820,6 +859,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -833,7 +873,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         View fave = mNotificationInfo.findViewById(R.id.priority);
         fave.performClick();
@@ -861,6 +902,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1, // no action selected by default
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -874,7 +916,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         // THEN the selected action is -1, so the selected option is "Default" priority
         assertEquals(mNotificationInfo.getSelectedAction(), -1);
@@ -892,6 +935,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 NotificationConversationInfo.ACTION_FAVORITE, // "Favorite" selected by default
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -905,7 +949,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         // THEN the selected action is "Favorite", so the selected option is "priority" priority
         assertEquals(mNotificationInfo.getSelectedAction(),
@@ -922,6 +967,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -935,7 +981,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -959,6 +1006,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -972,7 +1020,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -996,6 +1045,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -1009,7 +1059,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -1032,6 +1083,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -1045,7 +1097,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         View silence = mNotificationInfo.findViewById(R.id.silence);
         silence.performClick();
@@ -1067,6 +1120,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -1080,7 +1134,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         verify(mMockINotificationManager, times(1)).createConversationNotificationChannelForPackage(
                 anyString(), anyInt(), any(), eq(CONVERSATION_ID));
@@ -1093,6 +1148,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -1106,7 +1162,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mBuilderProvider,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         verify(mMockINotificationManager, never()).createConversationNotificationChannelForPackage(
                 anyString(), anyInt(), any(), eq(CONVERSATION_ID));
@@ -1115,7 +1172,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     @Test
     public void testSelectPriorityPresentsOnboarding_firstTime() {
         // GIVEN pref is false
-        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, false);
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, false);
 
         // GIVEN the priority onboarding screen is present
         PriorityOnboardingDialogController.Builder b =
@@ -1129,6 +1186,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -1142,7 +1200,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 () -> b,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         // WHEN user clicks "priority"
         mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
@@ -1158,7 +1217,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     @Test
     public void testSelectPriorityDoesNotShowOnboarding_secondTime() {
         //WHEN pref is true
-        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, true);
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true);
 
         PriorityOnboardingDialogController.Builder b =
                 mock(PriorityOnboardingDialogController.Builder.class, Answers.RETURNS_SELF);
@@ -1170,6 +1229,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 -1,
                 mShortcutManager,
                 mMockPackageManager,
+                mPeopleSpaceWidgetManager,
                 mMockINotificationManager,
                 mOnUserInteractionCallback,
                 TEST_PACKAGE_NAME,
@@ -1183,12 +1243,128 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 () -> b,
                 true,
                 mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager));
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
+
+        // WHEN user clicks "priority"
+        mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
+        verify(controller, never()).show();
+
+        // and then done
+        mNotificationInfo.findViewById(R.id.done).performClick();
+
+        // THEN the user is presented with the priority onboarding screen
+        verify(controller, never()).show();
+    }
+
+    @Test
+    public void testSelectPriorityRequestsPinPeopleTile() {
+        //WHEN pref is true and channel is default importance
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true);
+        mNotificationChannel.setImportantConversation(false);
+        mNotificationInfo.bindNotification(
+                -1,
+                mShortcutManager,
+                mMockPackageManager,
+                mPeopleSpaceWidgetManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                mBubbleMetadata,
+                null,
+                null,
+                mIconFactory,
+                mContext,
+                mBuilderProvider,
+                true,
+                mTestHandler,
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
 
         // WHEN user clicks "priority"
         mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
 
-        // THEN the user is presented with the priority onboarding screen
-        verify(controller, never()).show();
+        // and then done
+        mNotificationInfo.findViewById(R.id.done).performClick();
+
+        // THEN the user is presented with the People Tile pinning request
+        verify(mPeopleSpaceWidgetManager, times(1)).requestPinAppWidget(any());
+    }
+
+    @Test
+    public void testSelectDefaultDoesNotRequestPinPeopleTile() {
+        //WHEN pref is true
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true);
+
+        mNotificationInfo.bindNotification(
+                -1,
+                mShortcutManager,
+                mMockPackageManager,
+                mPeopleSpaceWidgetManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                mBubbleMetadata,
+                null,
+                null,
+                mIconFactory,
+                mContext,
+                mBuilderProvider,
+                true,
+                mTestHandler,
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
+
+        // WHEN user clicks "default"
+        mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_DEFAULT);
+
+        // and then done
+        mNotificationInfo.findViewById(R.id.done).performClick();
+
+        // THEN the user is not presented with the People Tile pinning request
+        verify(mPeopleSpaceWidgetManager, never()).requestPinAppWidget(mShortcutInfo);
+    }
+
+    @Test
+    public void testSelectPriority_AlreadyPriority_DoesNotRequestPinPeopleTile() {
+        //WHEN pref is true and channel is priority
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true);
+        mConversationChannel.setOriginalImportance(IMPORTANCE_HIGH);
+        mConversationChannel.setImportance(IMPORTANCE_HIGH);
+        mConversationChannel.setImportantConversation(true);
+
+        mNotificationInfo.bindNotification(
+                -1,
+                mShortcutManager,
+                mMockPackageManager,
+                mPeopleSpaceWidgetManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                mBubbleMetadata,
+                null,
+                null,
+                mIconFactory,
+                mContext,
+                mBuilderProvider,
+                true,
+                mTestHandler,
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
+
+        // WHEN user clicks "priority"
+        mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
+
+        // and then done
+        mNotificationInfo.findViewById(R.id.done).performClick();
+
+        // THEN the user is not presented with the People Tile pinning request
+        verify(mPeopleSpaceWidgetManager, never()).requestPinAppWidget(mShortcutInfo);
     }
 }

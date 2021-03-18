@@ -69,9 +69,11 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.wmshell.BubblesManager;
 
 import java.lang.annotation.Retention;
@@ -86,15 +88,16 @@ public class NotificationConversationInfo extends LinearLayout implements
         NotificationGuts.GutsContent {
     private static final String TAG = "ConversationGuts";
 
-
     private INotificationManager mINotificationManager;
     private ShortcutManager mShortcutManager;
     private PackageManager mPm;
+    private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
     private ConversationIconFactory mIconFactory;
     private OnUserInteractionCallback mOnUserInteractionCallback;
     private Handler mMainHandler;
     private Handler mBgHandler;
     private Optional<BubblesManager> mBubblesManagerOptional;
+    private ShadeController mShadeController;
     private String mPackageName;
     private String mAppName;
     private int mAppUid;
@@ -169,9 +172,16 @@ public class NotificationConversationInfo extends LinearLayout implements
 
     private OnClickListener mOnDone = v -> {
         mPressedApply = true;
-        // If the user selected Priority, maybe show the priority onboarding
+
+        // If the user selected Priority, maybe show the priority onboarding.
+        // If the user selected Priority and the previous selection was not priority, show a
+        // People Tile add request. If showing the priority onboarding, however, delay the request
+        // to when the onboarding dialog closes.
         if (mSelectedAction == ACTION_FAVORITE && shouldShowPriorityOnboarding()) {
             showPriorityOnboarding();
+        } else if (mSelectedAction == ACTION_FAVORITE && getPriority() != mSelectedAction) {
+            mShadeController.animateCollapsePanels();
+            mPeopleSpaceWidgetManager.requestPinAppWidget(mShortcutInfo);
         }
         mGutsContainer.closeControls(v, true);
     };
@@ -209,6 +219,7 @@ public class NotificationConversationInfo extends LinearLayout implements
             @Action int selectedAction,
             ShortcutManager shortcutManager,
             PackageManager pm,
+            PeopleSpaceWidgetManager peopleSpaceWidgetManager,
             INotificationManager iNotificationManager,
             OnUserInteractionCallback onUserInteractionCallback,
             String pkg,
@@ -224,10 +235,12 @@ public class NotificationConversationInfo extends LinearLayout implements
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             OnConversationSettingsClickListener onConversationSettingsClickListener,
-            Optional<BubblesManager> bubblesManagerOptional) {
+            Optional<BubblesManager> bubblesManagerOptional,
+            ShadeController shadeController) {
         mPressedApply = false;
         mSelectedAction = selectedAction;
         mINotificationManager = iNotificationManager;
+        mPeopleSpaceWidgetManager = peopleSpaceWidgetManager;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mPackageName = pkg;
         mEntry = entry;
@@ -245,6 +258,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         mUserContext = userContext;
         mBubbleMetadata = bubbleMetadata;
         mBubblesManagerOptional = bubblesManagerOptional;
+        mShadeController = shadeController;
         mBuilderProvider = builderProvider;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
@@ -527,7 +541,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     }
 
     private boolean shouldShowPriorityOnboarding() {
-        return !Prefs.getBoolean(mUserContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, false);
+        return !Prefs.getBoolean(mUserContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, false);
     }
 
     private void showPriorityOnboarding() {
@@ -566,9 +580,11 @@ public class NotificationConversationInfo extends LinearLayout implements
                 .setBadge(mIconFactory.getAppBadge(
                         mPackageName, UserHandle.getUserId(mSbn.getUid())))
                 .setOnSettingsClick(mOnConversationSettingsClickListener)
+                .setPeopleSpaceWidgetManager(mPeopleSpaceWidgetManager)
+                .setShadeController(mShadeController)
                 .build();
 
-        controller.init();
+        controller.init(mShortcutInfo);
         controller.show();
     }
 

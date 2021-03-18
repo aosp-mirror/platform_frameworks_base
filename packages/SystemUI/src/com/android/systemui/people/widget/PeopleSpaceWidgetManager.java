@@ -22,11 +22,13 @@ import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
 import static com.android.systemui.people.PeopleSpaceUtils.SHORTCUT_ID;
 import static com.android.systemui.people.PeopleSpaceUtils.USER_ID;
 import static com.android.systemui.people.PeopleSpaceUtils.augmentTileFromNotification;
-import static com.android.systemui.people.PeopleSpaceUtils.getPeopleSpaceTile;
 import static com.android.systemui.people.PeopleSpaceUtils.getStoredWidgetIds;
 import static com.android.systemui.people.PeopleSpaceUtils.updateAppWidgetOptionsAndView;
+import static com.android.systemui.people.PeopleSpaceUtils.updateAppWidgetViews;
 
+import android.annotation.Nullable;
 import android.app.NotificationChannel;
+import android.app.PendingIntent;
 import android.app.Person;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
@@ -47,14 +49,17 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
+import com.android.systemui.Dependency;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,6 +83,7 @@ public class PeopleSpaceWidgetManager {
     private IPeopleManager mIPeopleManager;
     private SharedPreferences mSharedPrefs;
     private PeopleManager mPeopleManager;
+    private NotificationEntryManager mNotificationEntryManager;
     public UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
     @GuardedBy("mLock")
     public static Map<PeopleTileKey, PeopleSpaceWidgetProvider.TileConversationListener>
@@ -93,6 +99,7 @@ public class PeopleSpaceWidgetManager {
         mLauncherApps = context.getSystemService(LauncherApps.class);
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         mPeopleManager = mContext.getSystemService(PeopleManager.class);
+        mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
     }
 
     /**
@@ -101,11 +108,13 @@ public class PeopleSpaceWidgetManager {
     @VisibleForTesting
     protected void setAppWidgetManager(
             AppWidgetManager appWidgetManager, IPeopleManager iPeopleManager,
-            PeopleManager peopleManager, LauncherApps launcherApps) {
+            PeopleManager peopleManager, LauncherApps launcherApps,
+            NotificationEntryManager notificationEntryManager) {
         mAppWidgetManager = appWidgetManager;
         mIPeopleManager = iPeopleManager;
         mPeopleManager = peopleManager;
         mLauncherApps = launcherApps;
+        mNotificationEntryManager = notificationEntryManager;
     }
 
     /**
@@ -124,12 +133,90 @@ public class PeopleSpaceWidgetManager {
                     Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
             if (showSingleConversation) {
                 synchronized (mLock) {
-                    PeopleSpaceUtils.updateSingleConversationWidgets(
-                            mContext, widgetIds, mAppWidgetManager, mIPeopleManager);
+                    updateSingleConversationWidgets(widgetIds);
                 }
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e);
+        }
+    }
+
+    /**
+     * Updates {@code appWidgetIds} with their associated conversation stored, handling a
+     * notification being posted or removed.
+     */
+    public void updateSingleConversationWidgets(int[] appWidgetIds) {
+        Map<Integer, PeopleSpaceTile> widgetIdToTile = new HashMap<>();
+        for (int appWidgetId : appWidgetIds) {
+            PeopleSpaceTile tile = getTileForExistingWidget(appWidgetId);
+            if (tile == null) {
+                if (DEBUG) Log.d(TAG, "Matching conversation not found for shortcut ID");
+                //TODO: Delete app widget id when crash is fixed (b/172932636)
+                continue;
+            }
+            Bundle options = mAppWidgetManager.getAppWidgetOptions(appWidgetId);
+            updateAppWidgetViews(mAppWidgetManager, mContext, appWidgetId, tile, options);
+            widgetIdToTile.put(appWidgetId, tile);
+        }
+        PeopleSpaceUtils.getBirthdaysOnBackgroundThread(
+                mContext, mAppWidgetManager, widgetIdToTile, appWidgetIds);
+    }
+
+    /**
+     * Returns a {@link PeopleSpaceTile} based on the {@code appWidgetId}.
+     * Widget already exists, so fetch {@link PeopleTileKey} from {@link SharedPreferences}.
+     */
+    @Nullable
+    public PeopleSpaceTile getTileForExistingWidget(int appWidgetId) {
+        // First, check if tile is cached in AppWidgetOptions.
+        PeopleSpaceTile tile = AppWidgetOptionsHelper.getPeopleTile(mAppWidgetManager, appWidgetId);
+        if (tile != null) {
+            if (DEBUG) Log.d(TAG, "People Tile is cached for widget: " + appWidgetId);
+            return tile;
+        }
+
+        // If tile is null, we need to retrieve from persistent storage.
+        if (DEBUG) Log.d(TAG, "Fetching key from sharedPreferences: " + appWidgetId);
+        SharedPreferences widgetSp = mContext.getSharedPreferences(
+                String.valueOf(appWidgetId),
+                Context.MODE_PRIVATE);
+        PeopleTileKey key = new PeopleTileKey(
+                widgetSp.getString(SHORTCUT_ID, EMPTY_STRING),
+                widgetSp.getInt(USER_ID, INVALID_USER_ID),
+                widgetSp.getString(PACKAGE_NAME, EMPTY_STRING));
+
+        return getTileFromPersistentStorage(key);
+    }
+
+    /**
+     * Returns a {@link PeopleSpaceTile} based on the {@code appWidgetId}.
+     * If a {@link PeopleTileKey} is not provided, fetch one from {@link SharedPreferences}.
+     */
+    @Nullable
+    public PeopleSpaceTile getTileFromPersistentStorage(PeopleTileKey key) {
+        if (!key.isValid()) {
+            Log.e(TAG, "PeopleTileKey invalid: " + key);
+            return null;
+        }
+
+        if (mIPeopleManager == null || mLauncherApps == null) {
+            Log.d(TAG, "System services are null");
+            return null;
+        }
+
+        try {
+            if (DEBUG) Log.d(TAG, "Retrieving Tile from storage: " + key.toString());
+            ConversationChannel channel = mIPeopleManager.getConversation(
+                    key.getPackageName(), key.getUserId(), key.getShortcutId());
+            if (channel == null) {
+                Log.d(TAG, "Could not retrieve conversation from storage");
+                return null;
+            }
+
+            return new PeopleSpaceTile.Builder(channel, mLauncherApps).build();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to retrieve conversation for tile: " + e);
+            return null;
         }
     }
 
@@ -201,8 +288,7 @@ public class PeopleSpaceWidgetManager {
      */
     private void updateStorageAndViewWithConversationData(ConversationChannel conversation,
             int appWidgetId) {
-        PeopleSpaceTile storedTile = getPeopleSpaceTile(
-                mContext, appWidgetId, mAppWidgetManager, mIPeopleManager);
+        PeopleSpaceTile storedTile = getTileForExistingWidget(appWidgetId);
         if (storedTile == null) {
             if (DEBUG) Log.d(TAG, "Could not find stored tile to add conversation to");
             return;
@@ -234,8 +320,7 @@ public class PeopleSpaceWidgetManager {
             StatusBarNotification sbn,
             PeopleSpaceUtils.NotificationAction notificationAction,
             int appWidgetId) {
-        PeopleSpaceTile storedTile = getPeopleSpaceTile(
-                mContext, appWidgetId, mAppWidgetManager, mIPeopleManager);
+        PeopleSpaceTile storedTile = getTileForExistingWidget(appWidgetId);
         if (storedTile == null) {
             if (DEBUG) Log.d(TAG, "Could not find stored tile to add notification to");
             return;
@@ -332,28 +417,51 @@ public class PeopleSpaceWidgetManager {
                 Log.d(TAG, "PeopleTileKey was present in Options, shortcutId: "
                         + optionsKey.getShortcutId());
             }
-            addNewWidget(appWidgetId, optionsKey);
             AppWidgetOptionsHelper.removePeopleTileKey(mAppWidgetManager, appWidgetId);
+            addNewWidget(appWidgetId, optionsKey);
         }
         // Update views for new widget dimensions.
         updateWidgets(new int[]{appWidgetId});
     }
 
-    /** Adds{@code tile} mapped to {@code appWidgetId}. */
+    /** Adds a widget based on {@code key} mapped to {@code appWidgetId}. */
     public void addNewWidget(int appWidgetId, PeopleTileKey key) {
+        if (DEBUG) Log.d(TAG, "addNewWidget called with key for appWidgetId: " + appWidgetId);
+        PeopleSpaceTile tile = getTileFromPersistentStorage(key);
+        tile = PeopleSpaceUtils.augmentSingleTileFromVisibleNotifications(
+                mContext, tile, mNotificationEntryManager);
+        if (tile != null) {
+            addNewWidget(appWidgetId, tile);
+        }
+    }
+
+    /**
+     * Adds a widget based on {@code tile} mapped to {@code appWidgetId}.
+     * The tile provided should already be augmented.
+     */
+    public void addNewWidget(int appWidgetId, PeopleSpaceTile tile) {
+        if (DEBUG) Log.d(TAG, "addNewWidget called for appWidgetId: " + appWidgetId);
+        if (tile == null) {
+            return;
+        }
+
         mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_ADDED);
         synchronized (mLock) {
-            if (DEBUG) Log.d(TAG, "Add storage for : " + key.getShortcutId());
+            if (DEBUG) Log.d(TAG, "Add storage for : " + tile.getId());
+            PeopleTileKey key = new PeopleTileKey(tile);
             PeopleSpaceUtils.setSharedPreferencesStorageForTile(mContext, key, appWidgetId);
         }
         try {
-            if (DEBUG) Log.d(TAG, "Caching shortcut for PeopleTile: " + key.getShortcutId());
-            mLauncherApps.cacheShortcuts(key.getPackageName(),
-                    Collections.singletonList(key.getShortcutId()),
-                    UserHandle.of(key.getUserId()), LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
+            if (DEBUG) Log.d(TAG, "Caching shortcut for PeopleTile: " + tile.getId());
+            mLauncherApps.cacheShortcuts(tile.getPackageName(),
+                    Collections.singletonList(tile.getId()),
+                    tile.getUserHandle(), LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
         } catch (Exception e) {
             Log.w(TAG, "Exception caching shortcut:" + e);
         }
+
+        PeopleSpaceUtils.updateAppWidgetOptionsAndView(
+                mAppWidgetManager, mContext, appWidgetId, tile);
         PeopleSpaceWidgetProvider provider = new PeopleSpaceWidgetProvider();
         provider.onUpdate(mContext, mAppWidgetManager, new int[]{appWidgetId});
     }
@@ -451,5 +559,29 @@ public class PeopleSpaceWidgetManager {
         } catch (Exception e) {
             Log.d(TAG, "Exception uncaching shortcut:" + e);
         }
+    }
+
+    /**
+     * Builds a request to pin a People Tile app widget, with a preview and storing necessary
+     * information as the callback.
+     */
+    public boolean requestPinAppWidget(ShortcutInfo shortcutInfo) {
+        if (DEBUG) Log.d(TAG, "Requesting pin widget, shortcutId: " + shortcutInfo.getId());
+
+        RemoteViews widgetPreview = PeopleSpaceUtils.getPreview(mContext, mIPeopleManager,
+                mLauncherApps, mNotificationEntryManager, shortcutInfo.getId(),
+                shortcutInfo.getUserHandle(), shortcutInfo.getPackage());
+        if (widgetPreview == null) {
+            Log.w(TAG, "Skipping pinning widget: no tile for shortcutId: " + shortcutInfo.getId());
+            return false;
+        }
+        Bundle extras = new Bundle();
+        extras.putParcelable(AppWidgetManager.EXTRA_APPWIDGET_PREVIEW, widgetPreview);
+
+        PendingIntent successCallback =
+                PeopleSpaceWidgetPinnedReceiver.getPendingIntent(mContext, shortcutInfo);
+
+        ComponentName componentName = new ComponentName(mContext, PeopleSpaceWidgetProvider.class);
+        return mAppWidgetManager.requestPinAppWidget(componentName, extras, successCallback);
     }
 }
