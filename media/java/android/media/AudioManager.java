@@ -5287,7 +5287,10 @@ public class AudioManager {
      *   otherwise (typically one device, except for duplicated paths).
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE
+    })
     public @NonNull List<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
         Objects.requireNonNull(attributes);
@@ -5426,7 +5429,10 @@ public class AudioManager {
      * @return the volume behavior for the device
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE
+    })
     public @DeviceVolumeBehavior
     int getDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device) {
         // verify arguments (validity of device type is enforced in server)
@@ -5438,6 +5444,28 @@ public class AudioManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @hide
+     * Returns {@code true} if the volume device behavior is {@link #DEVICE_VOLUME_BEHAVIOR_FULL}.
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE
+    })
+    public boolean isFullVolumeDevice() {
+        final AudioAttributes attributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .build();
+        final List<AudioDeviceAttributes> devices = getDevicesForAttributes(attributes);
+        for (AudioDeviceAttributes device : devices) {
+            if (getDeviceVolumeBehavior(device) == DEVICE_VOLUME_BEHAVIOR_FULL) {
+                return true;
+            }
+        }
+        return false;
     }
 
      /**
