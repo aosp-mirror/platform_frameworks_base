@@ -495,6 +495,15 @@ public class Sensor {
         Slog.w(mTag, "setTestHalEnabled: " + enabled);
         if (enabled != mTestHalEnabled) {
             // The framework should retrieve a new session from the HAL.
+            try {
+                if (mCurrentSession != null && mCurrentSession.mSession != null) {
+                    // TODO(181984005): This should be scheduled instead of directly invoked
+                    Slog.d(mTag, "Closing old session");
+                    mCurrentSession.mSession.close(888 /* cookie */);
+                }
+            } catch (RemoteException e) {
+                Slog.e(mTag, "RemoteException", e);
+            }
             mCurrentSession = null;
         }
         mTestHalEnabled = enabled;
@@ -518,6 +527,11 @@ public class Sensor {
                             .getBiometricsForUser(mContext, userId).size());
             proto.end(userToken);
         }
+
+        proto.write(SensorStateProto.RESET_LOCKOUT_REQUIRES_HARDWARE_AUTH_TOKEN,
+                mSensorProperties.resetLockoutRequiresHardwareAuthToken);
+        proto.write(SensorStateProto.RESET_LOCKOUT_REQUIRES_CHALLENGE,
+                mSensorProperties.resetLockoutRequiresChallenge);
 
         proto.end(sensorToken);
     }

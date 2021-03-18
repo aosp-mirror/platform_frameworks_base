@@ -754,7 +754,7 @@ public class BiometricService extends SystemService {
             }
         }
 
-        @Override
+        @Override // Binder call
         public void invalidateAuthenticatorIds(int userId, int fromSensorId,
                 IInvalidationCallback callback) {
             checkInternalPermission();
@@ -787,6 +787,45 @@ public class BiometricService extends SystemService {
                 result[i] = ids.get(i);
             }
             return result;
+        }
+
+        @Override // Binder call
+        public void resetLockoutTimeBound(IBinder token, String opPackageName, int fromSensorId,
+                int userId, byte[] hardwareAuthToken) {
+            checkInternalPermission();
+
+            // Check originating strength
+            if (!Utils.isAtLeastStrength(getSensorForId(fromSensorId).getCurrentStrength(),
+                    Authenticators.BIOMETRIC_STRONG)) {
+                Slog.w(TAG, "Sensor: " + fromSensorId + " is does not meet the required strength to"
+                        + " request resetLockout");
+                return;
+            }
+
+            // Request resetLockout for applicable sensors
+            for (BiometricSensor sensor : mSensors) {
+                if (sensor.id == fromSensorId) {
+                    continue;
+                }
+                try {
+                    final SensorPropertiesInternal props = sensor.impl
+                            .getSensorProperties(getContext().getOpPackageName());
+                    final boolean supportsChallengelessHat =
+                            props.resetLockoutRequiresHardwareAuthToken
+                            && !props.resetLockoutRequiresChallenge;
+                    final boolean doesNotRequireHat = !props.resetLockoutRequiresHardwareAuthToken;
+
+                    if (supportsChallengelessHat || doesNotRequireHat) {
+                        Slog.d(TAG, "resetLockout from: " + fromSensorId
+                                + ", for: " + sensor.id
+                                + ", userId: " + userId);
+                        sensor.impl.resetLockout(token, opPackageName, userId,
+                                hardwareAuthToken);
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception", e);
+                }
+            }
         }
 
         @Override // Binder call
@@ -1292,6 +1331,16 @@ public class BiometricService extends SystemService {
             Slog.d(TAG, "handleCancelAuthentication: AuthSession finished");
             mCurrentAuthSession = null;
         }
+    }
+
+    @Nullable
+    private BiometricSensor getSensorForId(int sensorId) {
+        for (BiometricSensor sensor : mSensors) {
+            if (sensor.id == sensorId) {
+                return sensor;
+            }
+        }
+        return null;
     }
 
     private void dumpInternal(PrintWriter pw) {

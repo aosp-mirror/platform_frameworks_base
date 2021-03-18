@@ -176,7 +176,8 @@ public class Utils {
      * @param requestedStrength the strength that it must meet
      * @return true only if the sensor is at least as strong as the requested strength
      */
-    public static boolean isAtLeastStrength(int sensorStrength, int requestedStrength) {
+    public static boolean isAtLeastStrength(@Authenticators.Types int sensorStrength,
+            @Authenticators.Types int requestedStrength) {
         // Clear out any bits that are not reserved for biometric
         sensorStrength &= Authenticators.BIOMETRIC_MIN_STRENGTH;
 
