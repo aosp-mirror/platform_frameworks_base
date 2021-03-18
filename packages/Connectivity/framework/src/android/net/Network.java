@@ -142,7 +142,7 @@ public class Network implements Parcelable {
      * @throws UnknownHostException if the address lookup fails.
      */
     public InetAddress[] getAllByName(String host) throws UnknownHostException {
-        return InetAddress.getAllByNameOnNet(host, getNetIdForResolv());
+        return InetAddressCompat.getAllByNameOnNet(host, getNetIdForResolv());
     }
 
     /**
@@ -155,7 +155,7 @@ public class Network implements Parcelable {
      *             if the address lookup fails.
      */
     public InetAddress getByName(String host) throws UnknownHostException {
-        return InetAddress.getByNameOnNet(host, getNetIdForResolv());
+        return InetAddressCompat.getByNameOnNet(host, getNetIdForResolv());
     }
 
     /**
