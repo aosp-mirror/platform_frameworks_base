@@ -395,7 +395,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
             int contextHubId = mAttachedContextHubInfo.getId();
             try {
-                result = mContextHubProxy.sendMessageToHub(contextHubId, messageToNanoApp);
+                result = mContextHubProxy.getHub().sendMessageToHub(contextHubId, messageToNanoApp);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in sendMessageToNanoApp (target hub ID = "
                         + contextHubId + ")", e);
