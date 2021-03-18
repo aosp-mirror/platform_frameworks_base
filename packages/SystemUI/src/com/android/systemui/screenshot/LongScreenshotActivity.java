@@ -29,11 +29,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.IScrollCaptureConnection;
 import android.view.IWindowManager;
 import android.view.ScrollCaptureResponse;
 import android.view.View;
@@ -101,12 +99,12 @@ public class LongScreenshotActivity extends Activity {
     @Inject
     public LongScreenshotActivity(UiEventLogger uiEventLogger, ImageExporter imageExporter,
             @Main Executor mainExecutor, @Background Executor bgExecutor, IWindowManager wms,
-            Context context) {
+            Context context, ScrollCaptureController scrollCaptureController) {
         mUiEventLogger = uiEventLogger;
         mUiExecutor = mainExecutor;
         mBackgroundExecutor = bgExecutor;
         mImageExporter = imageExporter;
-        mScrollCaptureController = new ScrollCaptureController(context, bgExecutor, wms);
+        mScrollCaptureController = scrollCaptureController;
     }
 
 
