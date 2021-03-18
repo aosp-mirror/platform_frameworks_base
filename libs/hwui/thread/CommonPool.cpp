@@ -29,14 +29,23 @@ CommonPool::CommonPool() {
     ATRACE_CALL();
 
     CommonPool* pool = this;
+    std::mutex mLock;
+    std::vector<int> tids(THREAD_COUNT);
+    std::vector<std::condition_variable> tidConditionVars(THREAD_COUNT);
+
     // Create 2 workers
     for (int i = 0; i < THREAD_COUNT; i++) {
-        std::thread worker([pool, i] {
+        std::thread worker([pool, i, &mLock, &tids, &tidConditionVars] {
             {
                 std::array<char, 20> name{"hwuiTask"};
                 snprintf(name.data(), name.size(), "hwuiTask%d", i);
                 auto self = pthread_self();
                 pthread_setname_np(self, name.data());
+                {
+                    std::unique_lock lock(mLock);
+                    tids[i] = pthread_gettid_np(self);
+                    tidConditionVars[i].notify_one();
+                }
                 setpriority(PRIO_PROCESS, 0, PRIORITY_FOREGROUND);
                 auto startHook = renderthread::RenderThread::getOnStartHook();
                 if (startHook) {
@@ -47,6 +56,15 @@ CommonPool::CommonPool() {
         });
         worker.detach();
     }
+    {
+        std::unique_lock lock(mLock);
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            while (!tids[i]) {
+                tidConditionVars[i].wait(lock);
+            }
+        }
+    }
+    mWorkerThreadIds = std::move(tids);
 }
 
 CommonPool& CommonPool::instance() {
@@ -56,6 +74,10 @@ CommonPool& CommonPool::instance() {
 
 void CommonPool::post(Task&& task) {
     instance().enqueue(std::move(task));
+}
+
+std::vector<int> CommonPool::getThreadIds() {
+    return instance().mWorkerThreadIds;
 }
 
 void CommonPool::enqueue(Task&& task) {
