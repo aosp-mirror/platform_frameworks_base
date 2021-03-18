@@ -34,10 +34,6 @@ public class SyncExecutor implements ShellExecutor {
     }
 
     @Override
-    public void removeAllCallbacks() {
-    }
-
-    @Override
     public void removeCallbacks(Runnable runnable) {
     }
 
