@@ -16,10 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -64,6 +66,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
@@ -364,29 +367,29 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     /**
-     * This tests stack movement between displays and proper stack's, task's and app token's display
-     * container references updates.
+     * This tests root task movement between displays and proper root task's, task's and app token's
+     * display container references updates.
      */
     @Test
-    public void testMoveStackBetweenDisplays() {
+    public void testMoveRootTaskBetweenDisplays() {
         // Create a second display.
         final DisplayContent dc = createNewDisplay();
 
-        // Add stack with activity.
-        final Task stack = createTaskStackOnDisplay(dc);
-        assertEquals(dc.getDisplayId(), stack.getDisplayContent().getDisplayId());
-        assertEquals(dc, stack.getDisplayContent());
+        // Add root task with activity.
+        final Task rootTask = createTaskStackOnDisplay(dc);
+        assertEquals(dc.getDisplayId(), rootTask.getDisplayContent().getDisplayId());
+        assertEquals(dc, rootTask.getDisplayContent());
 
-        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final Task task = createTaskInStack(rootTask, 0 /* userId */);
         final ActivityRecord activity = createNonAttachedActivityRecord(dc);
         task.addChild(activity, 0);
         assertEquals(dc, task.getDisplayContent());
         assertEquals(dc, activity.getDisplayContent());
 
-        // Move stack to first display.
-        stack.reparent(mDisplayContent.getDefaultTaskDisplayArea(), true /* onTop */);
-        assertEquals(mDisplayContent.getDisplayId(), stack.getDisplayContent().getDisplayId());
-        assertEquals(mDisplayContent, stack.getDisplayContent());
+        // Move root task to first display.
+        rootTask.reparent(mDisplayContent.getDefaultTaskDisplayArea(), true /* onTop */);
+        assertEquals(mDisplayContent.getDisplayId(), rootTask.getDisplayContent().getDisplayId());
+        assertEquals(mDisplayContent, rootTask.getDisplayContent());
         assertEquals(mDisplayContent, task.getDisplayContent());
         assertEquals(mDisplayContent, activity.getDisplayContent());
     }
@@ -438,7 +441,7 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     /**
-     * Tests tapping on a stack in different display results in window gaining focus.
+     * Tests tapping on a root task in different display results in window gaining focus.
      */
     @Test
     public void testInputEventBringsCorrectDisplayInFocus() {
@@ -446,16 +449,16 @@ public class DisplayContentTests extends WindowTestsBase {
         // Create a second display
         final DisplayContent dc1 = createNewDisplay();
 
-        // Add stack with activity.
-        final Task stack0 = createTaskStackOnDisplay(dc0);
-        final Task task0 = createTaskInStack(stack0, 0 /* userId */);
+        // Add root task with activity.
+        final Task rootTask0 = createTaskStackOnDisplay(dc0);
+        final Task task0 = createTaskInStack(rootTask0, 0 /* userId */);
         final ActivityRecord activity = createNonAttachedActivityRecord(dc0);
         task0.addChild(activity, 0);
         dc0.configureDisplayPolicy();
         assertNotNull(dc0.mTapDetector);
 
-        final Task stack1 = createTaskStackOnDisplay(dc1);
-        final Task task1 = createTaskInStack(stack1, 0 /* userId */);
+        final Task rootTask1 = createTaskStackOnDisplay(dc1);
+        final Task task1 = createTaskInStack(rootTask1, 0 /* userId */);
         final ActivityRecord activity1 = createNonAttachedActivityRecord(dc0);
         task1.addChild(activity1, 0);
         dc1.configureDisplayPolicy();
@@ -903,13 +906,13 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent newDisplay = createNewDisplay();
 
         final WindowState appWin = createWindow(null, TYPE_APPLICATION, mDisplayContent, "appWin");
-        final Task stack = mDisplayContent.getTopRootTask();
-        final ActivityRecord activity = stack.topRunningActivity();
+        final Task rootTask = mDisplayContent.getTopRootTask();
+        final ActivityRecord activity = rootTask.topRunningActivity();
         doReturn(true).when(activity).shouldBeVisibleUnchecked();
 
         final WindowState appWin1 = createWindow(null, TYPE_APPLICATION, newDisplay, "appWin1");
-        final Task stack1 = newDisplay.getTopRootTask();
-        final ActivityRecord activity1 = stack1.topRunningActivity();
+        final Task rootTask1 = newDisplay.getTopRootTask();
+        final ActivityRecord activity1 = rootTask1.topRunningActivity();
         doReturn(true).when(activity1).shouldBeVisibleUnchecked();
         appWin.setHasSurface(true);
         appWin1.setHasSurface(true);
@@ -948,28 +951,28 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
 
-        final Task stack = new TaskBuilder(mSupervisor)
+        final Task rootTask = new TaskBuilder(mSupervisor)
                 .setDisplay(dc)
                 .setCreateActivity(true)
                 .build();
-        doReturn(true).when(stack).isVisible();
+        doReturn(true).when(rootTask).isVisible();
 
-        final Task freeformStack = new TaskBuilder(mSupervisor)
+        final Task freeformRootTask = new TaskBuilder(mSupervisor)
                 .setDisplay(dc)
                 .setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM)
                 .build();
-        doReturn(true).when(freeformStack).isVisible();
-        freeformStack.getTopChild().setBounds(100, 100, 300, 400);
+        doReturn(true).when(freeformRootTask).isVisible();
+        freeformRootTask.getTopChild().setBounds(100, 100, 300, 400);
 
         assertTrue(dc.getDefaultTaskDisplayArea().isRootTaskVisible(WINDOWING_MODE_FREEFORM));
 
-        freeformStack.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-        stack.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        freeformRootTask.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        rootTask.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, dc.getOrientation());
 
-        stack.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-        freeformStack.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        rootTask.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        freeformRootTask.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
     }
 
@@ -1660,66 +1663,6 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetOrCreateRootHomeTask_defaultDisplay() {
-        TaskDisplayArea defaultTaskDisplayArea = mWm.mRoot.getDefaultTaskDisplayArea();
-
-        // Remove the current home stack if it exists so a new one can be created below.
-        Task homeTask = defaultTaskDisplayArea.getRootHomeTask();
-        if (homeTask != null) {
-            defaultTaskDisplayArea.removeChild(homeTask);
-        }
-        assertNull(defaultTaskDisplayArea.getRootHomeTask());
-
-        assertNotNull(defaultTaskDisplayArea.getOrCreateRootHomeTask());
-    }
-
-    @Test
-    public void testGetOrCreateRootHomeTask_supportedSecondaryDisplay() {
-        DisplayContent display = createNewDisplay();
-        doReturn(true).when(display).supportsSystemDecorations();
-
-        // Remove the current home stack if it exists so a new one can be created below.
-        TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
-        Task homeTask = taskDisplayArea.getRootHomeTask();
-        if (homeTask != null) {
-            taskDisplayArea.removeChild(homeTask);
-        }
-        assertNull(taskDisplayArea.getRootHomeTask());
-
-        assertNotNull(taskDisplayArea.getOrCreateRootHomeTask());
-    }
-
-    @Test
-    public void testGetOrCreateRootHomeTask_unsupportedSystemDecorations() {
-        DisplayContent display = createNewDisplay();
-        TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
-        doReturn(false).when(display).supportsSystemDecorations();
-
-        assertNull(taskDisplayArea.getRootHomeTask());
-        assertNull(taskDisplayArea.getOrCreateRootHomeTask());
-    }
-
-    @Test
-    public void testGetOrCreateRootHomeTask_untrustedDisplay() {
-        DisplayContent display = createNewDisplay();
-        TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
-        doReturn(false).when(display).isTrusted();
-
-        assertNull(taskDisplayArea.getRootHomeTask());
-        assertNull(taskDisplayArea.getOrCreateRootHomeTask());
-    }
-
-    @Test
-    public void testGetOrCreateRootHomeTask_dontMoveToTop() {
-        DisplayContent display = createNewDisplay();
-        display.mDontMoveToTop = true;
-        TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
-
-        assertNull(taskDisplayArea.getRootHomeTask());
-        assertNull(taskDisplayArea.getOrCreateRootHomeTask());
-    }
-
-    @Test
     public void testValidWindowingLayer() {
         final SurfaceControl windowingLayer = mDisplayContent.getWindowingLayer();
         assertNotNull(windowingLayer);
@@ -1738,8 +1681,8 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFindScrollCaptureTargetWindow_behindWindow() {
         DisplayContent display = createNewDisplay();
-        Task stack = createTaskStackOnDisplay(display);
-        Task task = createTaskInStack(stack, 0 /* userId */);
+        Task rootTask = createTaskStackOnDisplay(display);
+        Task task = createTaskInStack(rootTask, 0 /* userId */);
         WindowState activityWindow = createAppWindow(task, TYPE_APPLICATION, "App Window");
         WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
 
@@ -1751,8 +1694,8 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFindScrollCaptureTargetWindow_cantReceiveKeys() {
         DisplayContent display = createNewDisplay();
-        Task stack = createTaskStackOnDisplay(display);
-        Task task = createTaskInStack(stack, 0 /* userId */);
+        Task rootTask = createTaskStackOnDisplay(display);
+        Task task = createTaskInStack(rootTask, 0 /* userId */);
         WindowState activityWindow = createAppWindow(task, TYPE_APPLICATION, "App Window");
         WindowState invisible = createWindow(null, TYPE_APPLICATION, "invisible");
         invisible.mViewVisibility = View.INVISIBLE;  // make canReceiveKeys return false
@@ -1765,8 +1708,8 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFindScrollCaptureTargetWindow_taskId() {
         DisplayContent display = createNewDisplay();
-        Task stack = createTaskStackOnDisplay(display);
-        Task task = createTaskInStack(stack, 0 /* userId */);
+        Task rootTask = createTaskStackOnDisplay(display);
+        Task task = createTaskInStack(rootTask, 0 /* userId */);
         WindowState window = createAppWindow(task, TYPE_APPLICATION, "App Window");
         WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
 
@@ -1777,8 +1720,8 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFindScrollCaptureTargetWindow_taskIdCantReceiveKeys() {
         DisplayContent display = createNewDisplay();
-        Task stack = createTaskStackOnDisplay(display);
-        Task task = createTaskInStack(stack, 0 /* userId */);
+        Task rootTask = createTaskStackOnDisplay(display);
+        Task task = createTaskInStack(rootTask, 0 /* userId */);
         WindowState window = createAppWindow(task, TYPE_APPLICATION, "App Window");
         window.mViewVisibility = View.INVISIBLE;  // make canReceiveKeys return false
         WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
@@ -1805,7 +1748,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testSetWindowingModeAtomicallyUpdatesWindoingModeAndDisplayWindowingMode() {
         final DisplayContent dc = createNewDisplay();
-        final Task stack = new TaskBuilder(mSupervisor)
+        final Task rootTask = new TaskBuilder(mSupervisor)
                 .setDisplay(dc)
                 .build();
         doAnswer(invocation -> {
@@ -1814,7 +1757,7 @@ public class DisplayContentTests extends WindowTestsBase {
             assertEquals(config.windowConfiguration.getWindowingMode(),
                     config.windowConfiguration.getDisplayWindowingMode());
             return null;
-        }).when(stack).onConfigurationChanged(any());
+        }).when(rootTask).onConfigurationChanged(any());
         dc.setWindowingMode(WINDOWING_MODE_FREEFORM);
         dc.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
     }
@@ -2047,6 +1990,130 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(ignoreOrientationRequests, testDisplayContent.mIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio, mWm.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
+    }
+
+    /**
+     * Verifies {@link DisplayContent#remove} should not resume home root task on the removing
+     * display.
+     */
+    @Test
+    public void testNotResumeHomeRootTaskOnRemovingDisplay() {
+        // Create a display which supports system decoration and allows reparenting root tasks to
+        // another display when the display is removed.
+        final DisplayContent display = new TestDisplayContent.Builder(
+                mAtm, 1000, 1500).setSystemDecorations(true).build();
+        doReturn(false).when(display).shouldDestroyContentOnRemove();
+
+        // Put home root task on the display.
+        final Task homeRootTask = new TaskBuilder(mSupervisor)
+                .setDisplay(display).setActivityType(ACTIVITY_TYPE_HOME).build();
+
+        // Put a finishing standard activity which will be reparented.
+        final Task rootTask = createTaskWithActivity(display.getDefaultTaskDisplayArea(),
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, ON_TOP, true /* twoLevelTask */);
+        rootTask.topRunningActivity().makeFinishingLocked();
+
+        clearInvocations(homeRootTask);
+        display.remove();
+
+        // The removed display should have no focused root task and its home root task should never
+        // resume.
+        assertNull(display.getFocusedRootTask());
+        verify(homeRootTask, never()).resumeTopActivityUncheckedLocked(any(), any());
+    }
+
+    /**
+     * Verifies the correct activity is returned when querying the top running activity.
+     */
+    @Test
+    public void testTopRunningActivity() {
+        final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
+        final KeyguardController keyguard = mSupervisor.getKeyguardController();
+        final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = rootTask.getTopNonFinishingActivity();
+
+        // Create empty root task on top.
+        final Task emptyRootTask = new TaskBuilder(mSupervisor).build();
+
+        // Make sure the top running activity is not affected when keyguard is not locked.
+        assertTopRunningActivity(activity, display);
+
+        // Check to make sure activity not reported when it cannot show on lock and lock is on.
+        doReturn(true).when(keyguard).isKeyguardLocked();
+        assertEquals(activity, display.topRunningActivity());
+        assertNull(display.topRunningActivity(true /* considerKeyguardState */));
+
+        // Move root task with activity to top.
+        rootTask.moveToFront("testRootTaskToFront");
+        assertEquals(rootTask, display.getFocusedRootTask());
+        assertEquals(activity, display.topRunningActivity());
+        assertNull(display.topRunningActivity(true /* considerKeyguardState */));
+
+        // Add activity that should be shown on the keyguard.
+        final ActivityRecord showWhenLockedActivity = new ActivityBuilder(mAtm)
+                .setTask(rootTask)
+                .setActivityFlags(FLAG_SHOW_WHEN_LOCKED)
+                .build();
+
+        // Ensure the show when locked activity is returned.
+        assertTopRunningActivity(showWhenLockedActivity, display);
+
+        // Move empty root task to front. The running activity in focusable root task which below
+        // the empty root task should be returned.
+        emptyRootTask.moveToFront("emptyRootTaskToFront");
+        assertEquals(rootTask, display.getFocusedRootTask());
+        assertTopRunningActivity(showWhenLockedActivity, display);
+    }
+
+    private static void assertTopRunningActivity(ActivityRecord top, DisplayContent display) {
+        assertEquals(top, display.topRunningActivity());
+        assertEquals(top, display.topRunningActivity(true /* considerKeyguardState */));
+    }
+
+    @Test
+    public void testRemoveRootTaskInWindowingModes() {
+        removeRootTaskTests(() -> mRootWindowContainer.removeRootTasksInWindowingModes(
+                WINDOWING_MODE_FULLSCREEN));
+    }
+
+    @Test
+    public void testRemoveRootTaskWithActivityTypes() {
+        removeRootTaskTests(() -> mRootWindowContainer.removeRootTasksWithActivityTypes(
+                ACTIVITY_TYPE_STANDARD));
+    }
+
+    private void removeRootTaskTests(Runnable runnable) {
+        final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
+        final Task rootTask1 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, ON_TOP);
+        final Task rootTask2 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, ON_TOP);
+        final Task rootTask3 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, ON_TOP);
+        final Task rootTask4 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, ON_TOP);
+        final Task task1 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(rootTask1).build();
+        final Task task2 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(rootTask2).build();
+        final Task task3 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(rootTask3).build();
+        final Task task4 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(rootTask4).build();
+
+        // Reordering root tasks while removing root tasks.
+        doAnswer(invocation -> {
+            taskDisplayArea.positionChildAt(POSITION_TOP, rootTask3, false /*includingParents*/);
+            return true;
+        }).when(mSupervisor).removeTask(eq(task4), anyBoolean(), anyBoolean(), any());
+
+        // Removing root tasks from the display while removing root tasks.
+        doAnswer(invocation -> {
+            taskDisplayArea.removeRootTask(rootTask2);
+            return true;
+        }).when(mSupervisor).removeTask(eq(task2), anyBoolean(), anyBoolean(), any());
+
+        runnable.run();
+        verify(mSupervisor).removeTask(eq(task4), anyBoolean(), anyBoolean(), any());
+        verify(mSupervisor).removeTask(eq(task3), anyBoolean(), anyBoolean(), any());
+        verify(mSupervisor).removeTask(eq(task2), anyBoolean(), anyBoolean(), any());
+        verify(mSupervisor).removeTask(eq(task1), anyBoolean(), anyBoolean(), any());
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

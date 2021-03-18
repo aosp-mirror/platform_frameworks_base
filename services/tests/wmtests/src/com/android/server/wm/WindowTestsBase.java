@@ -462,6 +462,24 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return task;
     }
 
+    Task createTaskWithActivity(TaskDisplayArea taskDisplayArea,
+            int windowingMode, int activityType, boolean onTop, boolean twoLevelTask) {
+        final TaskBuilder builder = new TaskBuilder(mSupervisor)
+                .setTaskDisplayArea(taskDisplayArea)
+                .setWindowingMode(windowingMode)
+                .setActivityType(activityType)
+                .setOnTop(onTop)
+                .setCreateActivity(true);
+        if (twoLevelTask) {
+            return builder
+                    .setCreateParentTask(true)
+                    .build()
+                    .getRootTask();
+        } else {
+            return builder.build();
+        }
+    }
+
     /** Creates an {@link ActivityRecord}. */
     static ActivityRecord createNonAttachedActivityRecord(DisplayContent dc) {
         final ActivityRecord activity = new ActivityBuilder(dc.mWmService.mAtmService)
