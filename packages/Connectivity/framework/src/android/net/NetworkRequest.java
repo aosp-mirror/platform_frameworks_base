@@ -45,7 +45,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.text.TextUtils;
-import android.util.Range;
 import android.util.proto.ProtoOutputStream;
 
 import java.util.Arrays;
@@ -278,11 +277,11 @@ public class NetworkRequest implements Parcelable {
          * Set the watched UIDs for this request. This will be reset and wiped out unless
          * the calling app holds the CHANGE_NETWORK_STATE permission.
          *
-         * @param uids The watched UIDs as a set of {@code Range<Integer>}, or null for everything.
+         * @param uids The watched UIDs as a set of UidRanges, or null for everything.
          * @return The builder to facilitate chaining.
          * @hide
          */
-        public Builder setUids(@Nullable Set<Range<Integer>> uids) {
+        public Builder setUids(Set<UidRange> uids) {
             mNetworkCapabilities.setUids(uids);
             return this;
         }
