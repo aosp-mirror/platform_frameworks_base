@@ -454,6 +454,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 if (mHandler.hasMessages(MESSAGE_INIT_FLAGS_CHANGED)
                         && state == BluetoothProfile.STATE_DISCONNECTED
                         && !mBluetoothModeChangeHelper.isA2dpOrHearingAidConnected()) {
+                    Slog.i(TAG, "Device disconnected, reactivating pending flag changes");
                     onInitFlagsChanged();
                 }
             }
@@ -818,6 +819,35 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
 
         return enabledProfiles;
+    }
+
+    private boolean isDeviceProvisioned() {
+        return Settings.Global.getInt(mContentResolver, Settings.Global.DEVICE_PROVISIONED,
+                0) != 0;
+    }
+
+    // Monitor change of BLE scan only mode settings.
+    private void registerForProvisioningStateChange() {
+        ContentObserver contentObserver = new ContentObserver(null) {
+            @Override
+            public void onChange(boolean selfChange) {
+                if (!isDeviceProvisioned()) {
+                    if (DBG) {
+                        Slog.d(TAG, "DEVICE_PROVISIONED setting changed, but device is not "
+                                + "provisioned");
+                    }
+                    return;
+                }
+                if (mHandler.hasMessages(MESSAGE_INIT_FLAGS_CHANGED)) {
+                    Slog.i(TAG, "Device provisioned, reactivating pending flag changes");
+                    onInitFlagsChanged();
+                }
+            }
+        };
+
+        mContentResolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), false,
+                contentObserver);
     }
 
     // Monitor change of BLE scan only mode settings.
@@ -1385,7 +1415,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (mBluetoothAirplaneModeListener != null) {
             mBluetoothAirplaneModeListener.start(mBluetoothModeChangeHelper);
         }
-        mBluetoothDeviceConfigListener = new BluetoothDeviceConfigListener(this);
+        registerForProvisioningStateChange();
+        mBluetoothDeviceConfigListener = new BluetoothDeviceConfigListener(this, DBG);
     }
 
     /**
@@ -2229,12 +2260,25 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     }
                     mHandler.removeMessages(MESSAGE_INIT_FLAGS_CHANGED);
                     if (mBluetoothModeChangeHelper.isA2dpOrHearingAidConnected()) {
+                        Slog.i(TAG, "Delaying MESSAGE_INIT_FLAGS_CHANGED by "
+                                + DELAY_FOR_RETRY_INIT_FLAG_CHECK_MS
+                                + " ms due to existing connections");
+                        mHandler.sendEmptyMessageDelayed(
+                                MESSAGE_INIT_FLAGS_CHANGED,
+                                DELAY_FOR_RETRY_INIT_FLAG_CHECK_MS);
+                        break;
+                    }
+                    if (!isDeviceProvisioned()) {
+                        Slog.i(TAG, "Delaying MESSAGE_INIT_FLAGS_CHANGED by "
+                                + DELAY_FOR_RETRY_INIT_FLAG_CHECK_MS
+                                +  "ms because device is not provisioned");
                         mHandler.sendEmptyMessageDelayed(
                                 MESSAGE_INIT_FLAGS_CHANGED,
                                 DELAY_FOR_RETRY_INIT_FLAG_CHECK_MS);
                         break;
                     }
                     if (mBluetooth != null && isEnabled()) {
+                        Slog.i(TAG, "Restarting Bluetooth due to init flag change");
                         restartForReason(
                                 BluetoothProtoEnums.ENABLE_DISABLE_REASON_INIT_FLAGS_CHANGED);
                     }

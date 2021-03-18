@@ -209,6 +209,10 @@ public:
     ErrorCode writeBlocks(std::span<const incfs::DataBlock> blocks) const final {
         return incfs::writeBlocks({blocks.data(), size_t(blocks.size())});
     }
+    ErrorCode reserveSpace(const Control& control, std::string_view path,
+                           IncFsSize size) const final {
+        return incfs::reserveSpace(control, path, size);
+    }
     WaitResult waitForPendingReads(const Control& control, std::chrono::milliseconds timeout,
                                    std::vector<incfs::ReadInfo>* pendingReadsBuffer) const final {
         return incfs::waitForPendingReads(control, timeout, pendingReadsBuffer);

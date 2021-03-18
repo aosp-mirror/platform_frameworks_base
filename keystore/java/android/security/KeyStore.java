@@ -207,7 +207,7 @@ public class KeyStore {
                     case UserState.LSKF_LOCKED:
                         return KeyStore.State.LOCKED;
                     default:
-                        throw new AssertionError(KeyStore.VALUE_CORRUPTED);
+                        throw new AssertionError(userState);
                 }
             }
             ret = mBinder.getState(userId);

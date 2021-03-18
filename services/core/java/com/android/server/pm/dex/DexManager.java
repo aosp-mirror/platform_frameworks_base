@@ -986,7 +986,7 @@ public class DexManager {
      * Fetches the battery manager object and caches it if it hasn't been fetched already.
      */
     private BatteryManager getBatteryManager() {
-        if (mBatteryManager == null) {
+        if (mBatteryManager == null && mContext != null) {
             mBatteryManager = mContext.getSystemService(BatteryManager.class);
         }
 
@@ -1007,10 +1007,6 @@ public class DexManager {
                 || (mPowerManager != null
                     && mPowerManager.getCurrentThermalStatus()
                         >= PowerManager.THERMAL_STATUS_SEVERE);
-
-        if (DEBUG) {
-            Log.d(TAG, "Battery, thermal, or memory are critical: " + isBtmCritical);
-        }
 
         return isBtmCritical;
     }
