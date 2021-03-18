@@ -103,11 +103,12 @@ public abstract class BiometricSensor {
 
     void goToStateWaitingForCookie(boolean requireConfirmation, IBinder token, long sessionId,
             int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-            int cookie)
+            int cookie, boolean allowBackgroundAuthentication)
             throws RemoteException {
         mCookie = cookie;
         impl.prepareForAuthentication(requireConfirmation, token,
-                sessionId, userId, sensorReceiver, opPackageName, mCookie);
+                sessionId, userId, sensorReceiver, opPackageName, mCookie,
+                allowBackgroundAuthentication);
         mSensorState = STATE_WAITING_FOR_COOKIE;
     }
 

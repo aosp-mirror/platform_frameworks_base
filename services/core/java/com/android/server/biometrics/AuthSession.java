@@ -195,7 +195,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
             final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
             final boolean requireConfirmation = isConfirmationRequired(sensor);
             sensor.goToStateWaitingForCookie(requireConfirmation, mToken, mOperationId,
-                    mUserId, mSensorReceiver, mOpPackageName, cookie);
+                    mUserId, mSensorReceiver, mOpPackageName, cookie,
+                    mPromptInfo.isAllowBackgroundAuthentication());
         }
     }
 

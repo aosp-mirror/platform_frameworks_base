@@ -433,7 +433,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean isKeyguard) {
+            boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
             final IFace daemon = getHalInstance();
             if (daemon == null) {
@@ -454,7 +454,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         mContext, mSensors.get(sensorId).getLazySession(), token, callback, userId,
                         operationId, restricted, opPackageName, cookie,
                         false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
-                        mUsageStats, mSensors.get(sensorId).getLockoutCache(), isKeyguard);
+                        mUsageStats, mSensors.get(sensorId).getLockoutCache(),
+                        allowBackgroundAuthentication);
                 mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling authenticate", e);

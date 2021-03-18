@@ -306,7 +306,8 @@ public class FaceService extends SystemService implements BiometricServiceCallba
         @Override // Binder call
         public void prepareForAuthentication(int sensorId, boolean requireConfirmation,
                 IBinder token, long operationId, int userId,
-                IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie) {
+                IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie,
+                boolean allowBackgroundAuthentication) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -318,7 +319,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
             final boolean restricted = true; // BiometricPrompt is always restricted
             provider.scheduleAuthenticate(sensorId, token, operationId, userId, cookie,
                     new ClientMonitorCallbackConverter(sensorReceiver), opPackageName, restricted,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, false /* isKeyguard */);
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, allowBackgroundAuthentication);
         }
 
         @Override // Binder call

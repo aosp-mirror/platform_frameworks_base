@@ -609,7 +609,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter listener,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean isKeyguard) {
+            boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -618,7 +618,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     mContext, mLazyDaemon, token, listener, userId, operationId, restricted,
                     opPackageName, cookie, false /* requireConfirmation */,
                     mSensorProperties.sensorId, isStrongBiometric, statsClient,
-                    mTaskStackListener, mLockoutTracker, mUdfpsOverlayController, isKeyguard);
+                    mTaskStackListener, mLockoutTracker, mUdfpsOverlayController,
+                    allowBackgroundAuthentication);
             mScheduler.scheduleClientMonitor(client);
         });
     }
