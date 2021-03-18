@@ -242,10 +242,18 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mMediaHost.getVisible()).thenReturn(true);
 
         when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(false);
+        mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
+                mQSCustomizerController, mMediaHost,
+                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager, mFeatureFlags);
+
         assertThat(mController.shouldUseHorizontalLayout()).isTrue();
 
         when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
+        mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
+                mQSCustomizerController, mMediaHost,
+                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager, mFeatureFlags);
+
         assertThat(mController.shouldUseHorizontalLayout()).isFalse();
     }
 }
