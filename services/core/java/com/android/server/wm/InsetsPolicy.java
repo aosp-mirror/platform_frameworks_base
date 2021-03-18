@@ -492,8 +492,11 @@ class InsetsPolicy {
                 mAnimatingShown = show;
 
                 final InsetsState state = getInsetsForWindow(mFocusedWin);
+
+                // We are about to playing the default animation. Passing a null frame indicates
+                // the controlled types should be animated regardless of the frame.
                 mAnimationControl = new InsetsAnimationControlImpl(controls,
-                        state.getDisplayFrame(), state, mListener, typesReady, this,
+                        null /* frame */, state, mListener, typesReady, this,
                         mListener.getDurationMs(), InsetsController.SYSTEM_BARS_INTERPOLATOR,
                         show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE, null /* translator */);
                 SurfaceAnimationThread.getHandler().post(
