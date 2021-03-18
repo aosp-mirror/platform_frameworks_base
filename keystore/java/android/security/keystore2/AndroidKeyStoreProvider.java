@@ -145,23 +145,15 @@ public class AndroidKeyStoreProvider extends Provider {
         sInstalled = true;
 
         Security.addProvider(new AndroidKeyStoreProvider());
-        Security.addProvider(
-                new android.security.keystore.AndroidKeyStoreProvider(
-                        "AndroidKeyStoreLegacy"));
         Provider workaroundProvider = new AndroidKeyStoreBCWorkaroundProvider();
-        Provider legacyWorkaroundProvider =
-                new android.security.keystore.AndroidKeyStoreBCWorkaroundProvider(
-                        "AndroidKeyStoreBCWorkaroundLegacy");
         if (bcProviderIndex != -1) {
             // Bouncy Castle provider found -- install the workaround provider above it.
             // insertProviderAt uses 1-based positions.
-            Security.insertProviderAt(legacyWorkaroundProvider, bcProviderIndex + 1);
             Security.insertProviderAt(workaroundProvider, bcProviderIndex + 1);
         } else {
             // Bouncy Castle provider not found -- install the workaround provider at lowest
             // priority.
             Security.addProvider(workaroundProvider);
-            Security.addProvider(legacyWorkaroundProvider);
         }
     }
 

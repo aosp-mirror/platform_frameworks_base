@@ -16,10 +16,10 @@
 
 package com.android.server.connectivity;
 
-import static android.provider.Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST;
-import static android.provider.Settings.Global.GLOBAL_HTTP_PROXY_HOST;
-import static android.provider.Settings.Global.GLOBAL_HTTP_PROXY_PAC;
-import static android.provider.Settings.Global.GLOBAL_HTTP_PROXY_PORT;
+import static android.net.ConnectivitySettingsManager.GLOBAL_HTTP_PROXY_EXCLUSION_LIST;
+import static android.net.ConnectivitySettingsManager.GLOBAL_HTTP_PROXY_HOST;
+import static android.net.ConnectivitySettingsManager.GLOBAL_HTTP_PROXY_PAC;
+import static android.net.ConnectivitySettingsManager.GLOBAL_HTTP_PROXY_PORT;
 import static android.provider.Settings.Global.HTTP_PROXY;
 
 import android.annotation.NonNull;
