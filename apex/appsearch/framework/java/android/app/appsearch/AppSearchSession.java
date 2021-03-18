@@ -114,8 +114,6 @@ public final class AppSearchSession implements Closeable {
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive errors resulting from setting the schema. If the
      *                 operation succeeds, the callback will be invoked with {@code null}.
-     * @see android.app.appsearch.AppSearchSchema.Migrator
-     * @see android.app.appsearch.AppSearchMigrationHelper.Transformer
      */
     // TODO(b/169883602): Change @code references to @link when setPlatformSurfaceable APIs are
     //  exposed.
