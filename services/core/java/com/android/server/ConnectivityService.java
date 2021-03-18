@@ -286,7 +286,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /**
      * Default URL to use for {@link #getCaptivePortalServerUrl()}. This should not be changed
      * by OEMs for configuration purposes, as this value is overridden by
-     * Settings.Global.CAPTIVE_PORTAL_HTTP_URL.
+     * ConnectivitySettingsManager.CAPTIVE_PORTAL_HTTP_URL.
      * R.string.config_networkCaptivePortalServerUrl should be overridden instead for this purpose
      * (preferably via runtime resource overlays).
      */
@@ -319,7 +319,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     protected int mNascentDelayMs;
 
     // How long to delay to removal of a pending intent based request.
-    // See Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS
+    // See ConnectivitySettingsManager.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS
     private final int mReleasePendingIntentDelayMs;
 
     private MockableSystemProperties mSystemProperties;
@@ -1230,7 +1230,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 new ConnectivityDiagnosticsHandler(mHandlerThread.getLooper());
 
         mReleasePendingIntentDelayMs = Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS, 5_000);
+                ConnectivitySettingsManager.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS, 5_000);
 
         mLingerDelayMs = mSystemProperties.getInt(LINGER_DELAY_PROPERTY, DEFAULT_LINGER_DELAY_MS);
         // TODO: Consider making the timer customizable.
@@ -1302,10 +1302,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mQosCallbackTracker = new QosCallbackTracker(mHandler, mNetworkRequestCounter);
 
         final int dailyLimit = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT,
+                ConnectivitySettingsManager.NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT,
                 LingerMonitor.DEFAULT_NOTIFICATION_DAILY_LIMIT);
         final long rateLimit = Settings.Global.getLong(mContext.getContentResolver(),
-                Settings.Global.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS,
+                ConnectivitySettingsManager.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS,
                 LingerMonitor.DEFAULT_NOTIFICATION_RATE_LIMIT_MILLIS);
         mLingerMonitor = new LingerMonitor(mContext, mNotifier, dailyLimit, rateLimit);
 
@@ -1423,10 +1423,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void handleConfigureAlwaysOnNetworks() {
-        handleAlwaysOnNetworkRequest(
-                mDefaultMobileDataRequest, Settings.Global.MOBILE_DATA_ALWAYS_ON, true);
-        handleAlwaysOnNetworkRequest(mDefaultWifiRequest, Settings.Global.WIFI_ALWAYS_REQUESTED,
-                false);
+        handleAlwaysOnNetworkRequest(mDefaultMobileDataRequest,
+                ConnectivitySettingsManager.MOBILE_DATA_ALWAYS_ON, true /* defaultValue */);
+        handleAlwaysOnNetworkRequest(mDefaultWifiRequest,
+                ConnectivitySettingsManager.WIFI_ALWAYS_REQUESTED, false /* defaultValue */);
         handleAlwaysOnNetworkRequest(mDefaultVehicleRequest,
                 com.android.internal.R.bool.config_vehicleInternalNetworkAlwaysRequested);
     }
@@ -1439,12 +1439,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // Watch for whether or not to keep mobile data always on.
         mSettingsObserver.observe(
-                Settings.Global.getUriFor(Settings.Global.MOBILE_DATA_ALWAYS_ON),
+                Settings.Global.getUriFor(ConnectivitySettingsManager.MOBILE_DATA_ALWAYS_ON),
                 EVENT_CONFIGURE_ALWAYS_ON_NETWORKS);
 
         // Watch for whether or not to keep wifi always on.
         mSettingsObserver.observe(
-                Settings.Global.getUriFor(Settings.Global.WIFI_ALWAYS_REQUESTED),
+                Settings.Global.getUriFor(ConnectivitySettingsManager.WIFI_ALWAYS_REQUESTED),
                 EVENT_CONFIGURE_ALWAYS_ON_NETWORKS);
     }
 
@@ -3079,7 +3079,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         nai.lastCaptivePortalDetected = visible;
                         nai.everCaptivePortalDetected |= visible;
                         if (nai.lastCaptivePortalDetected &&
-                            Settings.Global.CAPTIVE_PORTAL_MODE_AVOID == getCaptivePortalMode()) {
+                                ConnectivitySettingsManager.CAPTIVE_PORTAL_MODE_AVOID
+                                        == getCaptivePortalMode()) {
                             if (DBG) log("Avoiding captive portal network: " + nai.toShortString());
                             nai.onPreventAutomaticReconnect();
                             teardownUnneededNetwork(nai);
@@ -3190,8 +3191,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         private int getCaptivePortalMode() {
             return Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.CAPTIVE_PORTAL_MODE,
-                    Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT);
+                    ConnectivitySettingsManager.CAPTIVE_PORTAL_MODE,
+                    ConnectivitySettingsManager.CAPTIVE_PORTAL_MODE_PROMPT);
         }
 
         private boolean maybeHandleNetworkAgentInfoMessage(Message msg) {
@@ -8131,7 +8132,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         settingUrl = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.CAPTIVE_PORTAL_HTTP_URL);
+                ConnectivitySettingsManager.CAPTIVE_PORTAL_HTTP_URL);
         if (!TextUtils.isEmpty(settingUrl)) {
             return settingUrl;
         }
@@ -8213,7 +8214,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // restore private DNS settings to default mode (opportunistic)
         if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_PRIVATE_DNS)) {
             Settings.Global.putString(mContext.getContentResolver(),
-                    Settings.Global.PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_OPPORTUNISTIC);
+                    ConnectivitySettingsManager.PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_OPPORTUNISTIC);
         }
 
         Settings.Global.putString(mContext.getContentResolver(),
@@ -8969,13 +8970,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (networkAgent.networkCapabilities.hasTransport(
                     NetworkCapabilities.TRANSPORT_CELLULAR)) {
                 timeout = Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
+                        ConnectivitySettingsManager.DATA_ACTIVITY_TIMEOUT_MOBILE,
                         10);
                 type = NetworkCapabilities.TRANSPORT_CELLULAR;
             } else if (networkAgent.networkCapabilities.hasTransport(
                     NetworkCapabilities.TRANSPORT_WIFI)) {
                 timeout = Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
+                        ConnectivitySettingsManager.DATA_ACTIVITY_TIMEOUT_WIFI,
                         15);
                 type = NetworkCapabilities.TRANSPORT_WIFI;
             } else {
