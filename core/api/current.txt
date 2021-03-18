@@ -6135,13 +6135,13 @@ package android.app {
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.NotificationChannel> CREATOR;
     field public static final String DEFAULT_CHANNEL_ID = "miscellaneous";
-    field public static final String EDIT_CONVERSATION = "convo";
+    field public static final String EDIT_CONVERSATION = "conversation";
     field public static final String EDIT_IMPORTANCE = "importance";
     field public static final String EDIT_LAUNCHER = "launcher";
     field public static final String EDIT_LOCKED_DEVICE = "locked";
     field public static final String EDIT_SOUND = "sound";
     field public static final String EDIT_VIBRATION = "vibration";
-    field public static final String EDIT_ZEN = "dnd";
+    field public static final String EDIT_ZEN = "zen";
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
