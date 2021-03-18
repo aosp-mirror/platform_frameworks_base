@@ -2382,11 +2382,11 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    void migrateToNewSurfaceControl() {
-        super.migrateToNewSurfaceControl();
+    void migrateToNewSurfaceControl(SurfaceControl.Transaction t) {
+        super.migrateToNewSurfaceControl(t);
         mLastSurfaceSize.x = 0;
         mLastSurfaceSize.y = 0;
-        updateSurfaceSize(getPendingTransaction());
+        updateSurfaceSize(t);
     }
 
     void updateSurfaceSize(SurfaceControl.Transaction transaction) {

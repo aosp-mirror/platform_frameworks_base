@@ -19,7 +19,6 @@
 <!-- LinearLayout -->
 <com.android.systemui.statusbar.policy.RemoteInputView
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:theme="@style/systemui_theme_remote_input"
         android:id="@+id/remote_input"
         android:layout_height="match_parent"
         android:layout_width="match_parent">
@@ -33,6 +32,10 @@
             android:paddingBottom="4dp"
             android:paddingStart="16dp"
             android:paddingEnd="12dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="20dp"
             android:gravity="start|center_vertical"
             android:textAppearance="?android:attr/textAppearance"
             android:textColor="@color/remote_input_text"
@@ -53,6 +56,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:paddingBottom="20dp"
                 android:paddingStart="12dp"
                 android:paddingEnd="24dp"
                 android:id="@+id/remote_input_send"
@@ -66,6 +70,7 @@
                 android:id="@+id/remote_input_progress"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:layout_marginBottom="10dp"
                 android:layout_marginEnd="6dp"
                 android:layout_gravity="center"
                 android:visibility="invisible"

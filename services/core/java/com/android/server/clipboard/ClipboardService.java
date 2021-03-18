@@ -80,6 +80,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -95,21 +96,20 @@ class HostClipboardMonitor implements Runnable {
     private static final String PIPE_NAME = "pipe:clipboard";
     private static final String PIPE_DEVICE = "/dev/qemu_pipe";
 
+    private static byte[] createOpenHandshake() {
+        // String.getBytes doesn't include the null terminator,
+        // but the QEMU pipe device requires the pipe service name
+        // to be null-terminated.
+
+        final byte[] bits = Arrays.copyOf(PIPE_NAME.getBytes(), PIPE_NAME.length() + 1);
+        bits[PIPE_NAME.length()] = 0;
+        return bits;
+    }
+
     private void openPipe() {
         try {
-            // String.getBytes doesn't include the null terminator,
-            // but the QEMU pipe device requires the pipe service name
-            // to be null-terminated.
-            byte[] b = new byte[PIPE_NAME.length() + 1];
-            b[PIPE_NAME.length()] = 0;
-            System.arraycopy(
-                PIPE_NAME.getBytes(),
-                0,
-                b,
-                0,
-                PIPE_NAME.length());
             mPipe = new RandomAccessFile(PIPE_DEVICE, "rw");
-            mPipe.write(b);
+            mPipe.write(createOpenHandshake());
         } catch (IOException e) {
             try {
                 if (mPipe != null) mPipe.close();
@@ -173,7 +173,7 @@ public class ClipboardService extends SystemService {
 
     private static final String TAG = "ClipboardService";
     private static final boolean IS_EMULATOR =
-        SystemProperties.getBoolean("ro.kernel.qemu", false);
+            SystemProperties.getBoolean("ro.boot.qemu", false);
 
     // DeviceConfig properties
     private static final String PROPERTY_SHOW_ACCESS_NOTIFICATIONS = "show_access_notifications";

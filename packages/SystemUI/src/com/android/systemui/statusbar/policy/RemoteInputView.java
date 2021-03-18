@@ -31,8 +31,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ServiceManager;
@@ -70,6 +77,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -137,12 +145,40 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
+    /**
+     * The remote view needs to adapt to colorized notifications when set
+     * @param color colorized notification color
+     */
+    public void overrideBackgroundTintColor(int color) {
+        mEditText.setBackgroundTintColor(color);
+        final boolean dark = !ContrastColorUtil.isColorLight(color);
+        int[][] states = new int[][] {
+                new int[] {android.R.attr.state_enabled},
+                new int[] {},
+        };
+
+        final int finalColor = dark
+                ? Color.WHITE
+                : Color.BLACK;
+
+        int[] colors = new int[] {
+                finalColor,
+                finalColor & 0x4DFFFFFF // %30 opacity
+        };
+
+        final ColorStateList tint = new ColorStateList(states, colors);
+        mSendButton.setImageTintList(tint);
+        mProgressBar.setProgressTintList(tint);
+        mProgressBar.setIndeterminateTintList(tint);
+        mProgressBar.setSecondaryProgressTintList(tint);
+        mEditText.setForegroundColor(finalColor);
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
         mProgressBar = findViewById(R.id.remote_input_progress);
-
         mSendButton = findViewById(R.id.remote_input_send);
         mSendButton.setOnClickListener(this);
 
@@ -360,6 +396,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (editedSuggestionInfo != null) {
             mEntry.remoteInputText = editedSuggestionInfo.originalText;
         }
+    }
+
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        mEditText.updateCornerRadius(heightMeasureSpec / 2);
     }
 
     /** Populates the text field of the remote input with the given content. */
@@ -651,17 +693,47 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         private final OnReceiveContentListener mOnReceiveContentListener = this::onReceiveContent;
 
-        private final Drawable mBackground;
         private RemoteInputView mRemoteInputView;
+        private GradientDrawable mTextBackground;
+        private ColorDrawable mBackgroundColor;
+        private LayerDrawable mBackground;
         boolean mShowImeOnInputConnection;
         private LightBarController mLightBarController;
         private InputMethodManager mInputMethodManager;
+        private int mColor = Notification.COLOR_DEFAULT;
         UserHandle mUser;
+        private int mStokeWidth;
 
         public RemoteEditText(Context context, AttributeSet attrs) {
             super(context, attrs);
-            mBackground = getBackground();
             mLightBarController = Dependency.get(LightBarController.class);
+            mTextBackground = createBackground(context, attrs);
+            mBackgroundColor = new ColorDrawable();
+            mBackground = new LayerDrawable(new Drawable[] {mBackgroundColor, mTextBackground});
+            float density = context.getResources().getDisplayMetrics().density;
+            mStokeWidth = (int) (2 * density);
+            setDefaultColors();
+        }
+
+        private void setDefaultColors() {
+            Resources.Theme theme = getContext().getTheme();
+            TypedArray ta = theme.obtainStyledAttributes(
+                    new int[]{android.R.attr.colorAccent,
+                            com.android.internal.R.attr.colorBackgroundFloating});
+            mTextBackground.setStroke(mStokeWidth,
+                    ta.getColor(0, Notification.COLOR_DEFAULT));
+            mColor = ta.getColor(1, Notification.COLOR_DEFAULT);
+            mTextBackground.setColor(mColor);
+        }
+
+        private GradientDrawable createBackground(Context context, AttributeSet attrs) {
+            float density = context.getResources().getDisplayMetrics().density;
+            int padding = (int) (12 * density);
+            GradientDrawable d = new GradientDrawable();
+            d.setShape(GradientDrawable.RECTANGLE);
+            d.setPadding(padding, padding, padding, padding);
+            d.setCornerRadius(padding);
+            return d;
         }
 
         void setSupportedMimeTypes(@Nullable Collection<String> mimeTypes) {
@@ -722,6 +794,19 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             if (mRemoteInputView != null && !mRemoteInputView.mRemoved) {
                 mLightBarController.setDirectReplying(focused);
             }
+        }
+
+        protected void setBackgroundTintColor(int color) {
+            mBackgroundColor.setColor(color);
+            mTextBackground.setColor(color);
+        }
+
+        protected void setForegroundColor(int color) {
+            mTextBackground.setStroke(mStokeWidth, color);
+            setTextColor(color);
+            // %60
+            setHintTextColor(color & 0x99FFFFFF);
+            setTextCursorDrawable(null);
         }
 
         @Override
@@ -809,6 +894,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             clearComposingText();
             setText(text.getText());
             setSelection(getText().length());
+        }
+
+        void updateCornerRadius(float radius) {
+            mTextBackground.setCornerRadius(radius);
         }
 
         void setInnerFocusable(boolean focusable) {

@@ -662,6 +662,16 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mNotificationsController.requestNotificationUpdate("onStrongAuthStateChanged");
                 }
             };
+
+
+    private final FalsingManager.FalsingBeliefListener mFalsingBeliefListener =
+            new FalsingManager.FalsingBeliefListener() {
+                @Override
+                public void onFalse() {
+                    mStatusBarKeyguardViewManager.reset(true);
+                }
+            };
+
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
 
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
@@ -999,6 +1009,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         int disabledFlags2 = result.mDisabledFlags2;
         mInitController.addPostInitTask(
                 () -> setUpDisableFlags(disabledFlags1, disabledFlags2));
+
+        mFalsingManager.addFalsingBeliefListener(mFalsingBeliefListener);
 
         mPluginManager.addPluginListener(
                 new PluginListener<OverlayPlugin>() {

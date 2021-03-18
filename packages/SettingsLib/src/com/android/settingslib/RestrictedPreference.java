@@ -27,6 +27,8 @@ import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.TwoTargetPreference;
+
 /**
  * Preference class that supports being disabled by a user restriction
  * set by a device admin.

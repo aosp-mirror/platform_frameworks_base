@@ -46,6 +46,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         initTimersAndCounters();
 
         setExternalStatsSyncLocked(new DummyExternalStatsSync());
+        informThatAllExternalStatsAreFlushed();
 
         final boolean[] supportedStandardBuckets =
                 new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];

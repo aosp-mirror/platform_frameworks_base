@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.classifier.FalsingDataProvider.SessionListener;
+import com.android.systemui.classifier.HistoryTracker.BeliefListener;
 import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -62,6 +63,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     private static final int RECENT_INFO_LOG_SIZE = 40;
     private static final int RECENT_SWIPE_LOG_SIZE = 20;
     private static final double TAP_CONFIDENCE_THRESHOLD = 0.7;
+    private static final double FALSE_BELIEF_THRESHOLD = 0.9;
 
     private final FalsingDataProvider mDataProvider;
     private final DockManager mDockManager;
@@ -78,6 +80,7 @@ public class BrightLineFalsingManager implements FalsingManager {
             new ArrayDeque<>(RECENT_SWIPE_LOG_SIZE + 1);
 
     private final Collection<FalsingClassifier> mClassifiers;
+    private final List<FalsingBeliefListener> mFalsingBeliefListeners = new ArrayList<>();
 
     private final SessionListener mSessionListener = new SessionListener() {
         @Override
@@ -91,22 +94,28 @@ public class BrightLineFalsingManager implements FalsingManager {
         }
     };
 
+    private final BeliefListener mBeliefListener = belief -> {
+        if (belief > FALSE_BELIEF_THRESHOLD) {
+            mFalsingBeliefListeners.forEach(FalsingBeliefListener::onFalse);
+        }
+    };
+
     private final FalsingDataProvider.GestureCompleteListener mGestureCompleteListener =
             new FalsingDataProvider.GestureCompleteListener() {
                 @Override
-        public void onGestureComplete(long completionTimeMs) {
-            if (mPriorResults != null) {
-                mHistoryTracker.addResults(mPriorResults, completionTimeMs);
-                mPriorResults = null;
-            } else {
-                // Gestures that were not classified get treated as a false.
-                mHistoryTracker.addResults(
-                        Collections.singleton(
-                                FalsingClassifier.Result.falsed(.8, "unclassified")),
-                        completionTimeMs);
-            }
-        }
-    };
+                public void onGestureComplete(long completionTimeMs) {
+                    if (mPriorResults != null) {
+                        mHistoryTracker.addResults(mPriorResults, completionTimeMs);
+                        mPriorResults = null;
+                    } else {
+                        // Gestures that were not classified get treated as a false.
+                        mHistoryTracker.addResults(
+                                Collections.singleton(
+                                        FalsingClassifier.Result.falsed(.8, "unclassified")),
+                                completionTimeMs);
+                    }
+                }
+            };
 
     private Collection<FalsingClassifier.Result> mPriorResults;
 
@@ -129,6 +138,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
         mDataProvider.addSessionListener(mSessionListener);
         mDataProvider.addGestureCompleteListener(mGestureCompleteListener);
+        mHistoryTracker.addBeliefListener(mBeliefListener);
     }
 
     @Override
@@ -302,6 +312,16 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
+    public void addFalsingBeliefListener(FalsingBeliefListener listener) {
+        mFalsingBeliefListeners.add(listener);
+    }
+
+    @Override
+    public void removeFalsingBeliefListener(FalsingBeliefListener listener) {
+        mFalsingBeliefListeners.remove(listener);
+    }
+
+    @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println("BRIGHTLINE FALSING MANAGER");
@@ -341,6 +361,8 @@ public class BrightLineFalsingManager implements FalsingManager {
         mDataProvider.removeSessionListener(mSessionListener);
         mDataProvider.removeGestureCompleteListener(mGestureCompleteListener);
         mClassifiers.forEach(FalsingClassifier::cleanup);
+        mFalsingBeliefListeners.clear();
+        mHistoryTracker.removeBeliefListener(mBeliefListener);
     }
 
     static void logDebug(String msg) {

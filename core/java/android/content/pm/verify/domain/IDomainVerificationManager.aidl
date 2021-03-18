@@ -40,10 +40,10 @@ interface IDomainVerificationManager {
     @nullable
     List<DomainOwner> getOwnersForDomain(String domain, int userId);
 
-    void setDomainVerificationStatus(String domainSetId, in DomainSet domains, int state);
+    int setDomainVerificationStatus(String domainSetId, in DomainSet domains, int state);
 
     void setDomainVerificationLinkHandlingAllowed(String packageName, boolean allowed, int userId);
 
-    void setDomainVerificationUserSelection(String domainSetId, in DomainSet domains,
+    int setDomainVerificationUserSelection(String domainSetId, in DomainSet domains,
             boolean enabled, int userId);
 }

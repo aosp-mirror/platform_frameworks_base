@@ -947,7 +947,7 @@ public abstract class Connection extends Conferenceable {
      * {@link CallDiagnosticService} implementation which is active.
      * <p>
      * Likewise, if a {@link CallDiagnosticService} sends a message using
-     * {@link DiagnosticCall#sendDeviceToDeviceMessage(int, int)}, it will be routed to telephony
+     * {@link CallDiagnostics#sendDeviceToDeviceMessage(int, int)}, it will be routed to telephony
      * via {@link Connection#onCallEvent(String, Bundle)}.  The telephony stack will relay the
      * message to the other device.
      * @hide
@@ -960,7 +960,7 @@ public abstract class Connection extends Conferenceable {
      * Sent along with {@link #EVENT_DEVICE_TO_DEVICE_MESSAGE} to indicate the device to device
      * message type.
      *
-     * See {@link DiagnosticCall} for more information.
+     * See {@link CallDiagnostics} for more information.
      * @hide
      */
     @SystemApi
@@ -971,7 +971,7 @@ public abstract class Connection extends Conferenceable {
      * Sent along with {@link #EVENT_DEVICE_TO_DEVICE_MESSAGE} to indicate the device to device
      * message value.
      * <p>
-     * See {@link DiagnosticCall} for more information.
+     * See {@link CallDiagnostics} for more information.
      * @hide
      */
     @SystemApi

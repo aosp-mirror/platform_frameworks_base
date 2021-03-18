@@ -41,6 +41,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
@@ -50,12 +51,14 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.Immutable;
 import com.android.internal.util.CollectionUtils;
 
@@ -81,6 +84,8 @@ public final class PermissionManager {
     /** @hide */
     public static final String KILL_APP_REASON_GIDS_CHANGED =
             "permission grant or revoke changed gids";
+
+    private static final String SYSTEM_PKG = "android";
 
     /**
      * Refuse to install package if groups of permissions are bad
@@ -856,6 +861,23 @@ public final class PermissionManager {
         return mUsageHelper.getOpUsageData(new AudioManager().isMicrophoneMute());
     }
 
+    /**
+     * Check if this package/op combination is exempted from indicators
+     * @return
+     * @hide
+     */
+    public static boolean isSpecialCaseShownIndicator(@NonNull Context context,
+            @NonNull String packageName) {
+
+        if (packageName.equals(SYSTEM_PKG)) {
+            return false;
+        }
+
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY, "permissions_hub_2_enabled",
+                false)
+                || packageName.equals(context.getString(R.string.config_systemSpeechRecognizer))
+                || context.getSystemService(LocationManager.class).isProviderPackage(packageName);
+    }
     /**
      * Gets the list of packages that have permissions that specified
      * {@code requestDontAutoRevokePermissions=true} in their
