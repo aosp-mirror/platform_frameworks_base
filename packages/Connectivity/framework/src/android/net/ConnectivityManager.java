@@ -973,7 +973,7 @@ public class ConnectivityManager {
      * Specify that the traffic for this user should by follow the default rules.
      * @hide
      */
-    @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int PROFILE_NETWORK_PREFERENCE_DEFAULT = 0;
 
     /**
@@ -983,7 +983,7 @@ public class ConnectivityManager {
      * if no such network is available.
      * @hide
      */
-    @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int PROFILE_NETWORK_PREFERENCE_ENTERPRISE = 1;
 
     /** @hide */
