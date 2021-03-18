@@ -758,10 +758,14 @@ class WindowToken extends WindowContainer<WindowState> {
 
     /** @see WindowState#freezeInsetsState() */
     void setInsetsFrozen(boolean freeze) {
-        if (freeze) {
-            forAllWindows(WindowState::freezeInsetsState, true /* traverseTopToBottom */);
-        } else {
-            forAllWindows(WindowState::clearFrozenInsetsState, true /* traverseTopToBottom */);
-        }
+        forAllWindows(w -> {
+            if (w.mToken == this) {
+                if (freeze) {
+                    w.freezeInsetsState();
+                } else {
+                    w.clearFrozenInsetsState();
+                }
+            }
+        },  true /* traverseTopToBottom */);
     }
 }
