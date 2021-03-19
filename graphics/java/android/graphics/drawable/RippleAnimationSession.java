@@ -26,8 +26,8 @@ import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.animation.RenderNodeAnimator;
-import android.util.ArraySet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 
@@ -41,8 +41,8 @@ public final class RippleAnimationSession {
     private static final int ENTER_ANIM_DURATION = 450;
     private static final int EXIT_ANIM_DURATION = 300;
     private static final TimeInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
-    private static final TimeInterpolator PATH_INTERPOLATOR =
-            new PathInterpolator(.2f, 0, 0, 1f);
+    private static final Interpolator FAST_OUT_LINEAR_IN =
+            new PathInterpolator(0.4f, 0f, 1f, 1f);
     private Consumer<RippleAnimationSession> mOnSessionEnd;
     private final AnimationProperties<Float, Paint> mProperties;
     private AnimationProperties<CanvasProperty<Float>, CanvasProperty<Paint>> mCanvasProperties;
@@ -59,7 +59,7 @@ public final class RippleAnimationSession {
         mSparkle.addUpdateListener(anim -> {
             final long now = AnimationUtils.currentAnimationTimeMillis();
             final long elapsed = now - mStartTime - ENTER_ANIM_DURATION;
-            final float phase = (float) elapsed / 30000f;
+            final float phase = (float) elapsed / 800;
             mProperties.getShader().setNoisePhase(phase);
             notifyUpdate();
         });
@@ -174,7 +174,7 @@ public final class RippleAnimationSession {
     private void startAnimation(Animator expand) {
         expand.setDuration(ENTER_ANIM_DURATION);
         expand.addListener(new AnimatorListener(this));
-        expand.setInterpolator(LINEAR_INTERPOLATOR);
+        expand.setInterpolator(FAST_OUT_LINEAR_IN);
         expand.start();
         if (!mSparkle.isRunning()) {
             mSparkle.start();
