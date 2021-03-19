@@ -22,6 +22,10 @@ package android.app.usage {
 
 package android.content {
 
+  public abstract class Context {
+    field public static final String TEST_NETWORK_SERVICE = "test_network";
+  }
+
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
     field public static final String ACTION_CLEAR_DNS_CACHE = "android.intent.action.CLEAR_DNS_CACHE";
   }
