@@ -56,6 +56,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.IVoiceInteractionSessionService;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionSession;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.IWindowManager;
 
@@ -190,7 +191,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     }
 
     public boolean showLocked(Bundle args, int flags, int disabledContext,
-            IVoiceInteractionSessionShowCallback showCallback, List<IBinder> topActivities) {
+            IVoiceInteractionSessionShowCallback showCallback,
+            List<Pair<IBinder, Integer>> topActivities) {
         if (mBound) {
             if (!mFullyBound) {
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
@@ -205,17 +207,29 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             mShowFlags = flags;
 
             disabledContext |= getUserDisabledShowContextLocked();
-            mAssistDataRequester.requestAssistData(topActivities,
-                    (flags & VoiceInteractionSession.SHOW_WITH_ASSIST) != 0,
-                    (flags & VoiceInteractionSession.SHOW_WITH_SCREENSHOT) != 0,
-                    (disabledContext & VoiceInteractionSession.SHOW_WITH_ASSIST) == 0,
-                    (disabledContext & VoiceInteractionSession.SHOW_WITH_SCREENSHOT) == 0,
-                    mCallingUid, mSessionComponentName.getPackageName());
 
-            boolean needDisclosure = mAssistDataRequester.getPendingDataCount() > 0
-                    || mAssistDataRequester.getPendingScreenshotCount() > 0;
-            if (needDisclosure && AssistUtils.shouldDisclose(mContext, mSessionComponentName)) {
-                mHandler.post(mShowAssistDisclosureRunnable);
+            boolean fetchData = (flags & VoiceInteractionSession.SHOW_WITH_ASSIST) != 0;
+            boolean fetchScreenshot = (flags & VoiceInteractionSession.SHOW_WITH_SCREENSHOT) != 0;
+            boolean assistDataRequestNeeded = fetchData || fetchScreenshot;
+
+            if (assistDataRequestNeeded) {
+                int topActivitiesCount = topActivities.size();
+                final ArrayList<IBinder> topActivitiesToken = new ArrayList<>(topActivitiesCount);
+                for (int i = 0; i < topActivitiesCount; i++) {
+                    topActivitiesToken.add(topActivities.get(i).first);
+                }
+                mAssistDataRequester.requestAssistData(topActivitiesToken,
+                        fetchData,
+                        fetchScreenshot,
+                        (disabledContext & VoiceInteractionSession.SHOW_WITH_ASSIST) == 0,
+                        (disabledContext & VoiceInteractionSession.SHOW_WITH_SCREENSHOT) == 0,
+                        mCallingUid, mSessionComponentName.getPackageName());
+
+                boolean needDisclosure = mAssistDataRequester.getPendingDataCount() > 0
+                        || mAssistDataRequester.getPendingScreenshotCount() > 0;
+                if (needDisclosure && AssistUtils.shouldDisclose(mContext, mSessionComponentName)) {
+                    mHandler.post(mShowAssistDisclosureRunnable);
+                }
             }
             if (mSession != null) {
                 try {
@@ -224,7 +238,11 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                     mShowFlags = 0;
                 } catch (RemoteException e) {
                 }
-                mAssistDataRequester.processPendingAssistData();
+                if (assistDataRequestNeeded) {
+                    mAssistDataRequester.processPendingAssistData();
+                } else {
+                    doHandleAssistWithoutData(topActivities);
+                }
             } else if (showCallback != null) {
                 mPendingShowCallbacks.add(showCallback);
             }
@@ -238,6 +256,28 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             }
         }
         return false;
+    }
+
+    private void doHandleAssistWithoutData(List<Pair<IBinder, Integer>> topActivities) {
+        final int activityCount = topActivities.size();
+        for (int i = 0; i < activityCount; i++) {
+            final Pair<IBinder, Integer> topActivity = topActivities.get(i);
+            final IBinder activityId = topActivity.first;
+            final int taskId = topActivity.second;
+            final int activityIndex = i;
+            try {
+                mSession.handleAssist(
+                        taskId,
+                        activityId,
+                        /* assistData = */ null,
+                        /* assistStructure = */ null,
+                        /* assistContent = */ null,
+                        activityIndex,
+                        activityCount);
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        }
     }
 
     @Override
