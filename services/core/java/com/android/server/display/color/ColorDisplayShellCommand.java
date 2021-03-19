@@ -28,7 +28,7 @@ class ColorDisplayShellCommand extends ShellCommand {
             + "      Shows this message.\n"
             + "    set-saturation LEVEL\n"
             + "      Sets the device saturation to the given LEVEL, 0-100 inclusive.\n"
-            + "    set-layer-saturation CALLER_PACKAGE TARGET_PACKAGE LEVEL\n"
+            + "    set-layer-saturation LEVEL CALLER_PACKAGE TARGET_PACKAGE\n"
             + "      Sets the saturation LEVEL for all layers of the TARGET_PACKAGE, attributed\n"
             + "      to the CALLER_PACKAGE. The lowest LEVEL from any CALLER_PACKAGE is applied.\n";
 
