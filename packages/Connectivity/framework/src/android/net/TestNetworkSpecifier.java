@@ -23,8 +23,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Objects;
 
 /**
@@ -43,7 +41,9 @@ public final class TestNetworkSpecifier extends NetworkSpecifier implements Parc
     private final String mInterfaceName;
 
     public TestNetworkSpecifier(@NonNull String interfaceName) {
-        Preconditions.checkStringNotEmpty(interfaceName);
+        if (TextUtils.isEmpty(interfaceName)) {
+            throw new IllegalArgumentException("Empty interfaceName");
+        }
         mInterfaceName = interfaceName;
     }
 
