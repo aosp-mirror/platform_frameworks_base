@@ -93,8 +93,8 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
 
         captor.value.onBatteryLevelChanged(
                 unusedBatteryLevel,
-                true /* plugged in */,
-                false /* charging */)
+                false /* plugged in */,
+                true /* charging */)
         verify(rippleView).startRipple()
     }
 

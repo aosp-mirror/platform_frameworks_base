@@ -25,10 +25,8 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
-import kotlin.math.max
 
-private const val RIPPLE_ANIMATION_DURATION: Long = 1500
-private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
+private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
 
 /**
  * Expanding ripple effect that shows when charging begins.
@@ -39,17 +37,18 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
     private val defaultColor: Int = 0xffffffff.toInt()
     private val ripplePaint = Paint()
 
+    var radius: Float = 0.0f
+        set(value) { rippleShader.radius = value }
+    var origin: PointF = PointF()
+        set(value) { rippleShader.origin = value }
+    var duration: Long = 1500
+
     init {
         rippleShader.color = defaultColor
         rippleShader.progress = 0f
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
         ripplePaint.shader = rippleShader
-    }
-
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        rippleShader.origin = PointF(measuredWidth / 2f, measuredHeight.toFloat())
-        rippleShader.radius = max(measuredWidth, measuredHeight).toFloat()
-        super.onLayout(changed, left, top, right, bottom)
+        visibility = View.GONE
     }
 
     fun startRipple() {
@@ -57,7 +56,7 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
             return // Ignore if ripple effect is already playing
         }
         val animator = ValueAnimator.ofFloat(0f, 1f)
-        animator.duration = RIPPLE_ANIMATION_DURATION
+        animator.duration = duration
         animator.addUpdateListener { animator ->
             val now = animator.currentPlayTime
             val phase = now / 30000f
