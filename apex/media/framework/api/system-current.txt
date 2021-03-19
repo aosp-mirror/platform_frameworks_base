@@ -18,11 +18,9 @@ package android.media {
     method @NonNull public android.net.Uri getSourceUri();
   }
 
-  public static class MediaTranscodeManager.TranscodingRequest.MediaFormatResolver {
-    ctor public MediaTranscodeManager.TranscodingRequest.MediaFormatResolver();
+  public static class MediaTranscodeManager.TranscodingRequest.VideoFormatResolver {
+    ctor public MediaTranscodeManager.TranscodingRequest.VideoFormatResolver(@NonNull android.media.ApplicationMediaCapabilities, @NonNull android.media.MediaFormat);
     method @Nullable public android.media.MediaFormat resolveVideoFormat();
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.MediaFormatResolver setClientCapabilities(@NonNull android.media.ApplicationMediaCapabilities);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.MediaFormatResolver setSourceVideoFormatHint(@NonNull android.media.MediaFormat);
     method public boolean shouldTranscode();
   }
 
@@ -34,7 +32,6 @@ package android.media {
     method public int getSessionId();
     method public int getStatus();
     method public void setOnProgressUpdateListener(@NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener);
-    method public void setOnProgressUpdateListener(int, @NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener);
     field public static final int ERROR_DROPPED_BY_SERVICE = 1; // 0x1
     field public static final int ERROR_NONE = 0; // 0x0
     field public static final int ERROR_SERVICE_DIED = 2; // 0x2
