@@ -62,7 +62,8 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
         mBgProtection = findViewById(R.id.udfps_keyguard_fp_bg);
 
-        mWallpaperTexColor = Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor);
+        mWallpaperTexColor = Utils.getColorAttrDefaultColor(mContext,
+                R.attr.wallpaperTextColorAccent);
         mTextColorPrimary = Utils.getColorAttrDefaultColor(mContext,
                 android.R.attr.textColorPrimary);
     }
