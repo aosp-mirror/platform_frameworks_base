@@ -247,8 +247,10 @@ TEST(ProguardRulesTest, IncludedLayoutRulesAreConditional) {
 
   ResourceTable table;
   StdErrDiagnostics errDiagnostics;
-  table.AddResource(bar_layout->file.name, ConfigDescription::DefaultConfig(), "",
-                    util::make_unique<FileReference>(), &errDiagnostics);
+  table.AddResource(NewResourceBuilder(bar_layout->file.name)
+                        .SetValue(util::make_unique<FileReference>())
+                        .Build(),
+                    &errDiagnostics);
 
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder()
