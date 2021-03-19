@@ -58,9 +58,12 @@ import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
-import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+
+import static com.android.server.notification.NotificationManagerService.ACTION_DISABLE_NAS;
+import static com.android.server.notification.NotificationManagerService.ACTION_ENABLE_NAS;
+import static com.android.server.notification.NotificationManagerService.ACTION_LEARNMORE_NAS;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -313,6 +316,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     MultiRateLimiter mToastRateLimiter;
     BroadcastReceiver mPackageIntentReceiver;
+    BroadcastReceiver mNASIntentReceiver;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
@@ -526,6 +530,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(mContext, atLeastOnce()).registerReceiverAsUser(broadcastReceiverCaptor.capture(),
                 any(), intentFilterCaptor.capture(), any(), any());
+        verify(mContext, atLeastOnce()).registerReceiver(broadcastReceiverCaptor.capture(),
+                intentFilterCaptor.capture());
         List<BroadcastReceiver> broadcastReceivers = broadcastReceiverCaptor.getAllValues();
         List<IntentFilter> intentFilters = intentFilterCaptor.getAllValues();
 
@@ -535,10 +541,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     && filter.hasAction(Intent.ACTION_PACKAGES_UNSUSPENDED)
                     && filter.hasAction(Intent.ACTION_PACKAGES_SUSPENDED)) {
                 mPackageIntentReceiver = broadcastReceivers.get(i);
-                break;
+            } else if (filter.hasAction(ACTION_ENABLE_NAS)
+                    && filter.hasAction(ACTION_DISABLE_NAS)
+                    && filter.hasAction(ACTION_LEARNMORE_NAS)) {
+                mNASIntentReceiver = broadcastReceivers.get(i);
             }
         }
         assertNotNull("package intent receiver should exist", mPackageIntentReceiver);
+        assertNotNull("nas intent receiver should exist", mNASIntentReceiver);
 
         // Pretend the shortcut exists
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
@@ -630,6 +640,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         intent.putExtras(extras);
 
         mPackageIntentReceiver.onReceive(getContext(), intent);
+    }
+
+    private void simulateNASUpgradeBroadcast(String action, int uid) {
+        final Bundle extras = new Bundle();
+        extras.putInt(Intent.EXTRA_USER_ID, uid);
+
+        final Intent intent = new Intent(action);
+        intent.putExtras(extras);
+
+        mNASIntentReceiver.onReceive(getContext(), intent);
     }
 
     private ArrayMap<Boolean, ArrayList<ComponentName>> generateResetComponentValues() {
@@ -5727,6 +5747,223 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                         eq(0), eq(true), eq(false));
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 eq("device"), eq(0), eq(false), eq(true));
+    }
+
+    @Test
+    public void testNASSettingUpgrade_userSetNull_showOnBoarding() throws RemoteException {
+        ComponentName newDefaultComponent = ComponentName.unflattenFromString("package/Component1");
+        TestableNotificationManagerService service = spy(mService);
+        int userId = 11;
+        setUsers(new int[]{userId});
+        setNASMigrationDone(false, userId);
+        when(mAssistants.getDefaultFromConfig())
+                .thenReturn(newDefaultComponent);
+        when(mAssistants.getAllowedComponents(anyInt()))
+                .thenReturn(new ArrayList<>());
+        when(mAssistants.hasUserSet(userId)).thenReturn(true);
+
+        service.migrateDefaultNASShowNotificationIfNecessary();
+        assertFalse(service.isNASMigrationDone(userId));
+        verify(service, times(1)).createNASUpgradeNotification(eq(userId));
+        verify(mAssistants, times(0)).resetDefaultFromConfig();
+
+        //Test user clear data before enable/disable from onboarding notification
+        ArrayMap<Boolean, ArrayList<ComponentName>> changedListeners =
+                generateResetComponentValues();
+        when(mListeners.resetComponents(anyString(), anyInt())).thenReturn(changedListeners);
+        ArrayMap<Boolean, ArrayList<ComponentName>> changes = new ArrayMap<>();
+        changes.put(true, new ArrayList(Arrays.asList(newDefaultComponent)));
+        changes.put(false, new ArrayList());
+        when(mAssistants.resetComponents(anyString(), anyInt())).thenReturn(changes);
+
+        //Clear data
+        service.getBinderService().clearData("package", userId, false);
+        //Test migrate flow again
+        service.migrateDefaultNASShowNotificationIfNecessary();
+
+        //The notification should be still there
+        assertFalse(service.isNASMigrationDone(userId));
+        verify(service, times(2)).createNASUpgradeNotification(eq(userId));
+        verify(mAssistants, times(0)).resetDefaultFromConfig();
+        assertEquals(null, service.getApprovedAssistant(userId));
+    }
+
+    @Test
+    public void testNASSettingUpgrade_userSetDifferentDefault_showOnboarding()
+            throws RemoteException {
+        ComponentName oldDefaultComponent = ComponentName.unflattenFromString("package/Component1");
+        ComponentName newDefaultComponent = ComponentName.unflattenFromString("package/Component2");
+        TestableNotificationManagerService service = spy(mService);
+        int userId = 11;
+        setUsers(new int[]{userId});
+        setNASMigrationDone(false, userId);
+        when(mAssistants.getDefaultComponents())
+                .thenReturn(new ArraySet<>(Arrays.asList(oldDefaultComponent)));
+        when(mAssistants.getDefaultFromConfig())
+                .thenReturn(newDefaultComponent);
+        when(mAssistants.getAllowedComponents(anyInt()))
+                .thenReturn(Arrays.asList(oldDefaultComponent));
+        when(mAssistants.hasUserSet(userId)).thenReturn(true);
+
+        service.migrateDefaultNASShowNotificationIfNecessary();
+        assertFalse(service.isNASMigrationDone(userId));
+        verify(service, times(1)).createNASUpgradeNotification(eq(userId));
+        verify(mAssistants, times(0)).resetDefaultFromConfig();
+
+        //Test user clear data before enable/disable from onboarding notification
+        ArrayMap<Boolean, ArrayList<ComponentName>> changedListeners =
+                generateResetComponentValues();
+        when(mListeners.resetComponents(anyString(), anyInt())).thenReturn(changedListeners);
+        ArrayMap<Boolean, ArrayList<ComponentName>> changes = new ArrayMap<>();
+        changes.put(true, new ArrayList(Arrays.asList(newDefaultComponent)));
+        changes.put(false, new ArrayList());
+        when(mAssistants.resetComponents(anyString(), anyInt())).thenReturn(changes);
+
+        //Clear data
+        service.getBinderService().clearData("package", userId, false);
+        //Test migrate flow again
+        service.migrateDefaultNASShowNotificationIfNecessary();
+
+        //The notification should be still there
+        assertFalse(service.isNASMigrationDone(userId));
+        verify(service, times(2)).createNASUpgradeNotification(eq(userId));
+        verify(mAssistants, times(0)).resetDefaultFromConfig();
+        assertEquals(oldDefaultComponent, service.getApprovedAssistant(userId));
+    }
+
+    @Test
+    public void testNASSettingUpgrade_multiUser() throws RemoteException {
+        ComponentName oldDefaultComponent = ComponentName.unflattenFromString("package/Component1");
+        ComponentName newDefaultComponent = ComponentName.unflattenFromString("package/Component2");
+        TestableNotificationManagerService service = spy(mService);
+        int userId1 = 11;
+        int userId2 = 12;
+        setUsers(new int[]{userId1, userId2});
+        setNASMigrationDone(false, userId1);
+        setNASMigrationDone(false, userId2);
+        when(mAssistants.getDefaultComponents())
+                .thenReturn(new ArraySet<>(Arrays.asList(oldDefaultComponent)));
+        when(mAssistants.getDefaultFromConfig())
+                .thenReturn(newDefaultComponent);
+        //User1: need onboarding
+        when(mAssistants.getAllowedComponents(userId1))
+                .thenReturn(Arrays.asList(oldDefaultComponent));
+        //User2: no onboarding
+        when(mAssistants.getAllowedComponents(userId2))
+                .thenReturn(Arrays.asList(newDefaultComponent));
+
+        when(mAssistants.hasUserSet(userId1)).thenReturn(true);
+        when(mAssistants.hasUserSet(userId2)).thenReturn(true);
+
+        service.migrateDefaultNASShowNotificationIfNecessary();
+        assertFalse(service.isNASMigrationDone(userId1));
+        assertTrue(service.isNASMigrationDone(userId2));
+
+        verify(service, times(1)).createNASUpgradeNotification(any(Integer.class));
+        // only user2's default get updated
+        verify(mAssistants, times(1)).resetDefaultFromConfig();
+    }
+
+    @Test
+    public void testNASSettingUpgrade_clearDataAfterMigrationIsDone() throws RemoteException {
+        ComponentName defaultComponent = ComponentName.unflattenFromString("package/Component");
+        TestableNotificationManagerService service = spy(mService);
+        int userId = 12;
+        setUsers(new int[]{userId});
+        when(mAssistants.getDefaultComponents())
+                .thenReturn(new ArraySet<>(Arrays.asList(defaultComponent)));
+        when(mAssistants.hasUserSet(userId)).thenReturn(true);
+        setNASMigrationDone(true, userId);
+
+        //Test User clear data
+        ArrayMap<Boolean, ArrayList<ComponentName>> changedListeners =
+                generateResetComponentValues();
+        when(mListeners.resetComponents(anyString(), anyInt())).thenReturn(changedListeners);
+        ArrayMap<Boolean, ArrayList<ComponentName>> changes = new ArrayMap<>();
+        changes.put(true, new ArrayList(Arrays.asList(defaultComponent)));
+        changes.put(false, new ArrayList());
+        when(mAssistants.resetComponents(anyString(), anyInt())).thenReturn(changes);
+
+        //Clear data
+        service.getBinderService().clearData("package", userId, false);
+        //Test migrate flow again
+        service.migrateDefaultNASShowNotificationIfNecessary();
+
+        //The notification should not appear again
+        verify(service, times(0)).createNASUpgradeNotification(eq(userId));
+        verify(mAssistants, times(0)).resetDefaultFromConfig();
+    }
+
+    @Test
+    public void testNASUpgradeNotificationDisableBroadcast() {
+        int userId = 11;
+        setUsers(new int[]{userId});
+        TestableNotificationManagerService service = spy(mService);
+        setNASMigrationDone(false, userId);
+
+        simulateNASUpgradeBroadcast(ACTION_DISABLE_NAS, userId);
+
+        assertTrue(service.isNASMigrationDone(userId));
+        // User disabled the NAS from notification, the default stored in xml should be null
+        // rather than the new default
+        verify(mAssistants, times(1)).clearDefaults();
+        verify(mAssistants, times(0)).resetDefaultFromConfig();
+
+        //No more notification after disabled
+        service.migrateDefaultNASShowNotificationIfNecessary();
+        verify(service, times(0)).createNASUpgradeNotification(eq(userId));
+    }
+
+    @Test
+    public void testNASUpgradeNotificationEnableBroadcast_multiUser() {
+        int userId1 = 11;
+        int userId2 = 12;
+        setUsers(new int[]{userId1, userId2});
+        TestableNotificationManagerService service = spy(mService);
+        setNASMigrationDone(false, userId1);
+        setNASMigrationDone(false, userId2);
+
+        simulateNASUpgradeBroadcast(ACTION_ENABLE_NAS, userId1);
+
+        assertTrue(service.isNASMigrationDone(userId1));
+        assertFalse(service.isNASMigrationDone(userId2));
+        verify(mAssistants, times(1)).resetDefaultFromConfig();
+
+        service.migrateDefaultNASShowNotificationIfNecessary();
+        verify(service, times(0)).createNASUpgradeNotification(eq(userId1));
+    }
+
+    @Test
+    public void testNASUpgradeNotificationLearnMoreBroadcast() {
+        int userId = 11;
+        setUsers(new int[]{userId});
+        TestableNotificationManagerService service = spy(mService);
+        setNASMigrationDone(false, userId);
+        doNothing().when(mContext).startActivity(any());
+
+        simulateNASUpgradeBroadcast(ACTION_LEARNMORE_NAS, userId);
+
+        verify(mContext, times(1)).startActivity(any(Intent.class));
+        assertFalse(service.isNASMigrationDone(userId));
+        verify(service, times(0)).createNASUpgradeNotification(eq(userId));
+        verify(mAssistants, times(0)).resetDefaultFromConfig();
+    }
+
+
+    private void setNASMigrationDone(boolean done, int userId) {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.NAS_SETTINGS_UPDATED, done ? 1 : 0, userId);
+    }
+
+    private void setUsers(int[] userIds) {
+        List<UserInfo> users = new ArrayList<>();
+        for (int id: userIds) {
+            users.add(new UserInfo(id, String.valueOf(id), 0));
+        }
+        for (UserInfo user : users) {
+            when(mUm.getUserInfo(eq(user.id))).thenReturn(user);
+        }
+        when(mUm.getUsers()).thenReturn(users);
     }
 
     @Test

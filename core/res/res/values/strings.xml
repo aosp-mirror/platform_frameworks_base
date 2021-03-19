@@ -5513,6 +5513,21 @@
     <!-- Content description of the demoted feedback icon in the notification. [CHAR LIMIT=NONE] -->
     <string name="notification_feedback_indicator_demoted">This notification was ranked lower. Tap to provide feedback.</string>
 
+    <!-- Notification Intelligence -->
+    <!-- Title of notification indicating notification intelligence settings have changed when upgrading to S [CHAR LIMIT=30] -->
+    <string name="nas_upgrade_notification_title">Try enhanced notifications</string>
+    <!-- Content of notification indicating users need to update the settings [CHAR LIMIT=NONE] -->
+    <string name="nas_upgrade_notification_content">To keep getting suggested actions, replies, and more, turn on enhanced notifications. Android Adaptive Notifications are no longer supported.</string>
+    <!-- Label of notification action button to turn on the notification intelligence [CHAR LIMIT=20] -->
+    <string name="nas_upgrade_notification_enable_action">Turn on</string>
+    <!-- Label of notification action button to turn off the notification intelligence [CHAR LIMIT=20] -->
+    <string name="nas_upgrade_notification_disable_action">Not now</string>
+    <!-- Label of notification action button to learn more about the notification intelligence settings [CHAR LIMIT=20] -->
+    <string name="nas_upgrade_notification_learn_more_action">Learn more</string>
+    <!-- Content of notification learn more dialog about the notification intelligence settings [CHAR LIMIT=NONE] -->
+    <string name="nas_upgrade_notification_learn_more_content">Enhanced notifications can read all notification content, including personal information like contact names and messages. This feature can also dismiss notifications or take actions on buttons in notifications, such as answering phone calls.\n\nThis feature can also turn Priority mode on or off and change related settings.</string>
+
+
     <!-- Dynamic mode battery saver strings -->
     <!-- The user visible name of the notification channel for the routine mode battery saver fyi notification [CHAR_LIMIT=80]-->
     <string name="dynamic_mode_notification_channel_name">Routine Mode info notification</string>

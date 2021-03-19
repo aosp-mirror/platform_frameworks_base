@@ -9925,6 +9925,14 @@ public final class Settings {
                 "clipboard_show_access_notifications";
 
         /**
+         * If nonzero, nas has not been updated to reflect new changes.
+         * @hide
+         */
+        @Readable
+        public static final String NAS_SETTINGS_UPDATED = "nas_settings_updated";
+
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */

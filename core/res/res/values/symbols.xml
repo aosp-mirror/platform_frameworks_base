@@ -2263,6 +2263,12 @@
   <java-symbol type="style" name="Animation.RecentApplications" />
   <java-symbol type="integer" name="dock_enter_exit_duration" />
   <java-symbol type="bool" name="config_battery_percentage_setting_available" />
+  <java-symbol type="string" name="nas_upgrade_notification_title" />
+  <java-symbol type="string" name="nas_upgrade_notification_content" />
+  <java-symbol type="string" name="nas_upgrade_notification_enable_action" />
+  <java-symbol type="string" name="nas_upgrade_notification_disable_action" />
+  <java-symbol type="string" name="nas_upgrade_notification_learn_more_action" />
+  <java-symbol type="string" name="nas_upgrade_notification_learn_more_content" />
 
   <!-- ImfTest -->
   <java-symbol type="layout" name="auto_complete_list" />
