@@ -192,6 +192,7 @@ class DomainVerificationSettingsMutationTest {
         fun mockPkg() = mockThrowOnUnmocked<AndroidPackage> {
             whenever(packageName) { TEST_PKG }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
+            whenever(isEnabled) { true }
             whenever(activities) {
                 listOf(
                     ParsedActivity().apply {
@@ -233,11 +234,8 @@ class DomainVerificationSettingsMutationTest {
             whenever(getName()) { TEST_PKG }
             whenever(getPkg()) { mockPkg() }
             whenever(domainSetId) { TEST_UUID }
-            whenever(userState) {
-                SparseArray<PackageUserState>().apply {
-                    this[0] = PackageUserState()
-                }
-            }
+            whenever(readUserState(0)) { PackageUserState() }
+            whenever(readUserState(10)) { PackageUserState() }
             whenever(getInstantApp(anyInt())) { false }
         }
     }

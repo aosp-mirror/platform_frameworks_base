@@ -21759,6 +21759,7 @@ public class PackageManagerService extends IPackageManager.Stub
             clearPackagePreferredActivities(ps.name, nextUserId);
             mPermissionManager.onPackageUninstalled(ps.name, ps.appId, pkg, sharedUserPkgs,
                     nextUserId);
+            mDomainVerificationManager.clearPackageForUser(ps.name, nextUserId);
         }
 
         if (outInfo != null) {

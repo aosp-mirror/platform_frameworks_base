@@ -228,6 +228,11 @@ public interface DomainVerificationManagerInternal {
     void clearPackage(@NonNull String packageName);
 
     /**
+     * Remove all state for the given package for the given user.
+     */
+    void clearPackageForUser(@NonNull String packageName, @UserIdInt int userId);
+
+    /**
      * Delete all the state for a user. This can be because the user has been removed from the
      * device, or simply that the state for a user should be deleted.
      */

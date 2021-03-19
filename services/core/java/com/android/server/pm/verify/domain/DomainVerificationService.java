@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageUserState;
 import android.content.pm.ResolveInfo;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.verify.domain.DomainOwner;
@@ -1042,6 +1043,21 @@ public class DomainVerificationService extends SystemService
     public void clearPackage(@NonNull String packageName) {
         synchronized (mLock) {
             mAttachedPkgStates.remove(packageName);
+            mSettings.removePackage(packageName);
+        }
+
+        mConnection.scheduleWriteSettings();
+    }
+
+    @Override
+    public void clearPackageForUser(@NonNull String packageName, @UserIdInt int userId) {
+        synchronized (mLock) {
+            final DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
+            if (pkgState != null) {
+                pkgState.removeUser(userId);
+            }
+
+            mSettings.removePackageForUser(packageName, userId);
         }
 
         mConnection.scheduleWriteSettings();
@@ -1543,6 +1559,22 @@ public class DomainVerificationService extends SystemService
             @UserIdInt int userId, @NonNull Object debugObject) {
         String packageName = pkgSetting.getName();
         final AndroidPackage pkg = pkgSetting.getPkg();
+
+        final PackageUserState pkgUserState = pkgSetting.readUserState(userId);
+        if (pkgUserState == null) {
+            if (DEBUG_APPROVAL) {
+                debugApproval(packageName, debugObject, userId, false,
+                        "PackageUserState unavailable");
+            }
+            return APPROVAL_LEVEL_NONE;
+        }
+
+        if (!pkgUserState.installed || !pkgUserState.isPackageEnabled(pkg)) {
+            if (DEBUG_APPROVAL) {
+                debugApproval(packageName, debugObject, userId, false, "package not enabled");
+            }
+            return APPROVAL_LEVEL_NONE;
+        }
 
         // Should never be null, but if it is, skip this and assume that v2 is enabled
         if (pkg != null && !DomainVerificationUtils.isChangeEnabled(mPlatformCompat, pkg,

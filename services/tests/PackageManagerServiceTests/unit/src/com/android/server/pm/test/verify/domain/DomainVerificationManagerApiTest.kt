@@ -19,6 +19,7 @@ package com.android.server.pm.test.verify.domain
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageUserState
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.verify.domain.DomainVerificationInfo
@@ -41,6 +42,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.assertFailsWith
 
 class DomainVerificationManagerApiTest {
@@ -267,7 +269,16 @@ class DomainVerificationManagerApiTest {
 
     @Test
     fun getOwnersForDomain() {
-        val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkg1User0Enabled = AtomicBoolean(true)
+
+        val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2), pkgUserState0 = {
+            mockThrowOnUnmocked {
+                whenever(isPackageEnabled(any())) {
+                    pkg1User0Enabled.get()
+                }
+                installed = true
+            }
+        })
         val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, listOf(DOMAIN_1, DOMAIN_2))
 
         val service = makeService(pkg1, pkg2).apply {
@@ -276,9 +287,20 @@ class DomainVerificationManagerApiTest {
 
         assertThat(service.getOwnersForDomain(DOMAIN_1, 0)).isEmpty()
 
-        service.setStatus(pkg1.domainSetId, setOf(DOMAIN_1), DomainVerificationInfo.STATE_SUCCESS)
-
-        service.setStatus(pkg2.domainSetId, setOf(DOMAIN_1), DomainVerificationInfo.STATE_SUCCESS)
+        assertThat(
+            service.setStatus(
+                pkg1.domainSetId,
+                setOf(DOMAIN_1),
+                DomainVerificationInfo.STATE_SUCCESS
+            )
+        ).isEqualTo(DomainVerificationManager.STATUS_OK)
+        assertThat(
+            service.setStatus(
+                pkg2.domainSetId,
+                setOf(DOMAIN_1),
+                DomainVerificationInfo.STATE_SUCCESS
+            )
+        ).isEqualTo(DomainVerificationManager.STATUS_OK)
 
         service.setUserSelection(pkg1.domainSetId, setOf(DOMAIN_2), true, 0)
 
@@ -295,15 +317,65 @@ class DomainVerificationManagerApiTest {
             assertThat(it.single().packageName).isEqualTo(pkg1.getName())
             assertThat(it.single().isOverrideable).isEqualTo(true)
         }
-        assertThat(service.getOwnersForDomain(DOMAIN_2, 1)).isEmpty()
 
+        assertThat(service.getOwnersForDomain(DOMAIN_2, 1)).isEmpty()
+        service.setUserSelection(pkg1.domainSetId, setOf(DOMAIN_2), true, 1)
+        service.getOwnersForDomain(DOMAIN_2, 1).let {
+            assertThat(it).hasSize(1)
+            assertThat(it.single().packageName).isEqualTo(pkg1.getName())
+            assertThat(it.single().isOverrideable).isEqualTo(true)
+        }
+
+        // "Uninstall" the package from user 0 and ensure it's stripped from the results
+        pkg1User0Enabled.set(false)
+        service.clearPackageForUser(pkg1.getName(), 0)
+
+        service.getOwnersForDomain(DOMAIN_1, 0).let {
+            assertThat(it).hasSize(1)
+            assertThat(it.single().packageName).isEqualTo(pkg2.getName())
+            assertThat(it.single().isOverrideable).isEqualTo(false)
+        }
+
+        // Domain 2 user selection gone for user 0
+        assertThat(service.getOwnersForDomain(DOMAIN_2, 0)).isEmpty()
+
+        // Domain 2 user selection still around for user 1
+        service.getOwnersForDomain(DOMAIN_2, 1).let {
+            assertThat(it).hasSize(1)
+            assertThat(it.single().packageName).isEqualTo(pkg1.getName())
+            assertThat(it.single().isOverrideable).isEqualTo(true)
+        }
+
+        // Now assert for user 1 that it was unaffected by the change to user 0
+        service.getOwnersForDomain(DOMAIN_1, 1).let {
+            assertThat(it).hasSize(2)
+            assertThat(it[0].packageName).isEqualTo(pkg1.getName())
+            assertThat(it[0].isOverrideable).isEqualTo(false)
+            assertThat(it[1].packageName).isEqualTo(pkg2.getName())
+            assertThat(it[1].isOverrideable).isEqualTo(false)
+        }
+
+        service.setUserSelection(pkg1.domainSetId, setOf(DOMAIN_2), true, 0)
+
+        service.getOwnersForDomain(DOMAIN_2, 1).let {
+            assertThat(it).hasSize(1)
+            assertThat(it.single().packageName).isEqualTo(pkg1.getName())
+            assertThat(it.single().isOverrideable).isEqualTo(true)
+        }
+
+        // "Reinstall" the package to user 0
+        pkg1User0Enabled.set(false)
+
+        // This state should have been cleared when the package was uninstalled
+        assertThat(service.getOwnersForDomain(DOMAIN_2, 0)).isEmpty()
+
+        // Other package unaffected
         service.setUserSelection(pkg2.domainSetId, setOf(DOMAIN_2), true, 0)
         service.getOwnersForDomain(DOMAIN_2, 0).let {
             assertThat(it).hasSize(1)
             assertThat(it.single().packageName).isEqualTo(pkg2.getName())
             assertThat(it.single().isOverrideable).isEqualTo(true)
         }
-        assertThat(service.getOwnersForDomain(DOMAIN_2, 1)).isEmpty()
     }
 
     @Test
@@ -382,12 +454,17 @@ class DomainVerificationManagerApiTest {
                 })
             }
 
-    private fun mockPkgSetting(pkgName: String, domainSetId: UUID, domains: List<String> = listOf(
-            DOMAIN_1, DOMAIN_2
-    )) = mockThrowOnUnmocked<PackageSetting> {
+    private fun mockPkgSetting(
+        pkgName: String,
+        domainSetId: UUID,
+        domains: List<String> = listOf(DOMAIN_1, DOMAIN_2),
+        pkgUserState0: PackageSetting.() -> PackageUserState = { PackageUserState() },
+        pkgUserState1: PackageSetting.() -> PackageUserState = { PackageUserState() }
+    ) = mockThrowOnUnmocked<PackageSetting> {
         val pkg = mockThrowOnUnmocked<AndroidPackage> {
             whenever(packageName) { pkgName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
+            whenever(isEnabled) { true }
 
             val activityList = listOf(
                     ParsedActivity().apply {
@@ -416,6 +493,8 @@ class DomainVerificationManagerApiTest {
         whenever(this.domainSetId) { domainSetId }
         whenever(getInstantApp(anyInt())) { false }
         whenever(firstInstallTime) { 0L }
+        whenever(readUserState(0)) { pkgUserState0() }
+        whenever(readUserState(1)) { pkgUserState1() }
     }
 
     fun DomainVerificationService.addPackages(vararg pkgSettings: PackageSetting) =

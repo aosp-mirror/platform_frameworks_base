@@ -241,17 +241,41 @@ class DomainVerificationSettings {
         }
     }
 
-    public void removeUser(@UserIdInt int userId) {
-        int pendingSize = mPendingPkgStates.size();
-        for (int index = 0; index < pendingSize; index++) {
-            mPendingPkgStates.valueAt(index).removeUser(userId);
+    public void removePackage(@NonNull String packageName) {
+        synchronized (mLock) {
+            mPendingPkgStates.remove(packageName);
+            mRestoredPkgStates.remove(packageName);
         }
+    }
 
-        // TODO(b/170746586): Restored assumes user IDs match, which is probably not the case
-        //  on a new device
-        int restoredSize = mRestoredPkgStates.size();
-        for (int index = 0; index < restoredSize; index++) {
-            mRestoredPkgStates.valueAt(index).removeUser(userId);
+    public void removePackageForUser(@NonNull String packageName, @UserIdInt int userId) {
+        synchronized (mLock) {
+            final DomainVerificationPkgState pendingPkgState = mPendingPkgStates.get(packageName);
+            if (pendingPkgState != null) {
+                pendingPkgState.removeUser(userId);
+            }
+            // TODO(b/170746586): Restored assumes user IDs match, which is probably not the case
+            //  on a new device
+            final DomainVerificationPkgState restoredPkgState = mRestoredPkgStates.get(packageName);
+            if (restoredPkgState != null) {
+                restoredPkgState.removeUser(userId);
+            }
+        }
+    }
+
+    public void removeUser(@UserIdInt int userId) {
+        synchronized (mLock) {
+            int pendingSize = mPendingPkgStates.size();
+            for (int index = 0; index < pendingSize; index++) {
+                mPendingPkgStates.valueAt(index).removeUser(userId);
+            }
+
+            // TODO(b/170746586): Restored assumes user IDs match, which is probably not the case
+            //  on a new device
+            int restoredSize = mRestoredPkgStates.size();
+            for (int index = 0; index < restoredSize; index++) {
+                mRestoredPkgStates.valueAt(index).removeUser(userId);
+            }
         }
     }
 

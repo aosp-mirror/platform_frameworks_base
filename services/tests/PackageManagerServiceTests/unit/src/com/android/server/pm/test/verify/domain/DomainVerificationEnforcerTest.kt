@@ -290,6 +290,7 @@ class DomainVerificationEnforcerTest {
         fun mockPkg(packageName: String) = mockThrowOnUnmocked<AndroidPackage> {
             whenever(this.packageName) { packageName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
+            whenever(isEnabled) { true }
             whenever(activities) {
                 listOf(
                     ParsedActivity().apply {
@@ -330,11 +331,8 @@ class DomainVerificationEnforcerTest {
             whenever(getName()) { packageName }
             whenever(getPkg()) { mockPkg(packageName) }
             whenever(this.domainSetId) { domainSetId }
-            whenever(userState) {
-                SparseArray<PackageUserState>().apply {
-                    this[0] = PackageUserState()
-                }
-            }
+            whenever(readUserState(0)) { PackageUserState() }
+            whenever(readUserState(1)) { PackageUserState() }
             whenever(getInstantApp(anyInt())) { false }
         }
     }

@@ -18,6 +18,7 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageUserState
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.verify.domain.DomainVerificationManager
@@ -100,6 +101,7 @@ class DomainVerificationUserStateOverrideTest {
         val pkg = mockThrowOnUnmocked<AndroidPackage> {
             whenever(packageName) { pkgName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
+            whenever(isEnabled) { true }
 
             val activityList = listOf(
                 ParsedActivity().apply {
@@ -137,6 +139,8 @@ class DomainVerificationUserStateOverrideTest {
         whenever(this.domainSetId) { domainSetId }
         whenever(getInstantApp(anyInt())) { false }
         whenever(firstInstallTime) { 0L }
+        whenever(readUserState(0)) { PackageUserState() }
+        whenever(readUserState(1)) { PackageUserState() }
     }
 
     @Test
