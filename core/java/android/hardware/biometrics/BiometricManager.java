@@ -29,6 +29,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.security.keystore.KeyProperties;
 import android.util.Slog;
@@ -45,13 +46,6 @@ import java.util.List;
 public class BiometricManager {
 
     private static final String TAG = "BiometricManager";
-
-    /**
-     * An ID that should match any biometric sensor on the device.
-     *
-     * @hide
-     */
-    public static final int SENSOR_ID_ANY = -1;
 
     /**
      * No error detected.
@@ -406,6 +400,36 @@ public class BiometricManager {
         } else {
             Slog.w(TAG, "getAuthenticatorIds(): Service not connected");
             return new long[0];
+        }
+    }
+
+    /**
+     * Requests all other biometric sensors to resetLockout. Note that this is a "time bound"
+     * See the {@link android.hardware.biometrics.fingerprint.ISession#resetLockout(int,
+     * HardwareAuthToken)} and {@link android.hardware.biometrics.face.ISession#resetLockout(int,
+     * HardwareAuthToken)} documentation for complete details.
+     *
+     * @param token A binder from the caller, for the service to linkToDeath
+     * @param opPackageName Caller's package name
+     * @param fromSensorId The originating sensor that just authenticated. Note that this MUST
+     *                     be a sensor that meets {@link Authenticators#BIOMETRIC_STRONG} strength.
+     *                     The strength will also be enforced on the BiometricService side.
+     * @param userId The user that authentication succeeded for, and also the user that resetLockout
+     *               should be applied to.
+     * @param hardwareAuthToken A valid HAT generated upon successful biometric authentication. Note
+     *                          that it is not necessary for the HAT to contain a challenge.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void resetLockoutTimeBound(IBinder token, String opPackageName, int fromSensorId,
+            int userId, byte[] hardwareAuthToken) {
+        if (mService != null) {
+            try {
+                mService.resetLockoutTimeBound(token, opPackageName, fromSensorId, userId,
+                        hardwareAuthToken);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 

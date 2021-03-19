@@ -21,6 +21,9 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Contains the information set/requested by the caller of the {@link BiometricPrompt}
  * @hide
@@ -40,7 +43,7 @@ public class PromptInfo implements Parcelable {
     private @BiometricManager.Authenticators.Types int mAuthenticators;
     private boolean mDisallowBiometricsIfPolicyExists;
     private boolean mReceiveSystemEvents;
-    private int mSensorId = -1;
+    @NonNull private List<Integer> mAllowedSensorIds = new ArrayList<>();
 
     public PromptInfo() {
 
@@ -60,7 +63,7 @@ public class PromptInfo implements Parcelable {
         mAuthenticators = in.readInt();
         mDisallowBiometricsIfPolicyExists = in.readBoolean();
         mReceiveSystemEvents = in.readBoolean();
-        mSensorId = in.readInt();
+        mAllowedSensorIds = in.readArrayList(Integer.class.getClassLoader());
     }
 
     public static final Creator<PromptInfo> CREATOR = new Creator<PromptInfo>() {
@@ -95,7 +98,14 @@ public class PromptInfo implements Parcelable {
         dest.writeInt(mAuthenticators);
         dest.writeBoolean(mDisallowBiometricsIfPolicyExists);
         dest.writeBoolean(mReceiveSystemEvents);
-        dest.writeInt(mSensorId);
+        dest.writeList(mAllowedSensorIds);
+    }
+
+    public boolean containsTestConfigurations() {
+        if (!mAllowedSensorIds.isEmpty()) {
+            return true;
+        }
+        return false;
     }
 
     public boolean containsPrivateApiConfigurations() {
@@ -169,8 +179,8 @@ public class PromptInfo implements Parcelable {
         mReceiveSystemEvents = receiveSystemEvents;
     }
 
-    public void setSensorId(int sensorId) {
-        mSensorId = sensorId;
+    public void setAllowedSensorIds(@NonNull List<Integer> sensorIds) {
+        mAllowedSensorIds = sensorIds;
     }
 
     // Getters
@@ -234,7 +244,8 @@ public class PromptInfo implements Parcelable {
         return mReceiveSystemEvents;
     }
 
-    public int getSensorId() {
-        return mSensorId;
+    @NonNull
+    public List<Integer> getAllowedSensorIds() {
+        return mAllowedSensorIds;
     }
 }

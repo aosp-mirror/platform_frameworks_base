@@ -96,6 +96,10 @@ static const Constants& constants() {
     return c;
 }
 
+static bool isPageAligned(IncFsSize s) {
+    return (s & (Constants::blockSize - 1)) == 0;
+}
+
 template <base::LogSeverity level = base::ERROR>
 bool mkdirOrLog(std::string_view name, int mode = 0770, bool allowExisting = true) {
     auto cstr = path::c_str(name);
@@ -1001,25 +1005,53 @@ std::string IncrementalService::normalizePathToStorage(const IncFsMount& ifs, St
 
 int IncrementalService::makeFile(StorageId storage, std::string_view path, int mode, FileId id,
                                  incfs::NewFileParams params, std::span<const uint8_t> data) {
-    if (auto ifs = getIfs(storage)) {
-        std::string normPath = normalizePathToStorage(*ifs, storage, path);
-        if (normPath.empty()) {
-            LOG(ERROR) << "Internal error: storageId " << storage
-                       << " failed to normalize: " << path;
+    const auto ifs = getIfs(storage);
+    if (!ifs) {
+        return -EINVAL;
+    }
+    if (data.size() > params.size) {
+        LOG(ERROR) << "Bad data size - bigger than file size";
+        return -EINVAL;
+    }
+    if (!data.empty() && data.size() != params.size) {
+        // Writing a page is an irreversible operation, and it can't be updated with additional
+        // data later. Check that the last written page is complete, or we may break the file.
+        if (!isPageAligned(data.size())) {
+            LOG(ERROR) << "Bad data size - tried to write half a page?";
             return -EINVAL;
         }
-        if (auto err = mIncFs->makeFile(ifs->control, normPath, mode, id, params); err) {
-            LOG(ERROR) << "Internal error: storageId " << storage << " failed to makeFile: " << err;
-            return err;
+    }
+    const std::string normPath = normalizePathToStorage(*ifs, storage, path);
+    if (normPath.empty()) {
+        LOG(ERROR) << "Internal error: storageId " << storage << " failed to normalize: " << path;
+        return -EINVAL;
+    }
+    if (auto err = mIncFs->makeFile(ifs->control, normPath, mode, id, params); err) {
+        LOG(ERROR) << "Internal error: storageId " << storage << " failed to makeFile: " << err;
+        return err;
+    }
+    if (params.size > 0) {
+        // Only v2+ incfs supports automatically trimming file over-reserved sizes
+        if (mIncFs->features() & incfs::Features::v2) {
+            if (auto err = mIncFs->reserveSpace(ifs->control, normPath, params.size)) {
+                if (err != -EOPNOTSUPP) {
+                    LOG(ERROR) << "Failed to reserve space for a new file: " << err;
+                    (void)mIncFs->unlink(ifs->control, normPath);
+                    return err;
+                } else {
+                    LOG(WARNING) << "Reserving space for backing file isn't supported, "
+                                    "may run out of disk later";
+                }
+            }
         }
         if (!data.empty()) {
             if (auto err = setFileContent(ifs, id, path, data); err) {
+                (void)mIncFs->unlink(ifs->control, normPath);
                 return err;
             }
         }
-        return 0;
     }
-    return -EINVAL;
+    return 0;
 }
 
 int IncrementalService::makeDir(StorageId storageId, std::string_view path, int mode) {
@@ -1708,7 +1740,7 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
         }
 
         const auto entryUncompressed = entry.method == kCompressStored;
-        const auto entryPageAligned = (entry.offset & (constants().blockSize - 1)) == 0;
+        const auto entryPageAligned = isPageAligned(entry.offset);
 
         if (!extractNativeLibs) {
             // ensure the file is properly aligned and unpacked

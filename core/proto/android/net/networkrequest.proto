@@ -20,8 +20,8 @@ package android.net;
 
 option java_multiple_files = true;
 
+import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
-import "frameworks/proto_logging/stats/enums/net/networkcapabilities.proto";
 
 /**
  * An android.net.NetworkRequest object.

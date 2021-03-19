@@ -23,6 +23,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.TransitionOldType;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import android.os.RemoteException;
 import android.util.Log;
@@ -34,6 +35,8 @@ import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.TransitionInfo;
+
+import java.util.ArrayList;
 
 /**
  * @see RemoteAnimationAdapter
@@ -100,6 +103,52 @@ public class RemoteAnimationAdapterCompat {
         };
     }
 
+    private static class CounterRotator {
+        SurfaceControl mSurface = null;
+        ArrayList<SurfaceControl> mRotateChildren = null;
+
+        void setup(SurfaceControl.Transaction t, SurfaceControl parent, int rotateDelta,
+                float displayW, float displayH) {
+            if (rotateDelta == 0) return;
+            mRotateChildren = new ArrayList<>();
+            // We want to counter-rotate, so subtract from 4
+            rotateDelta = 4 - (rotateDelta + 4) % 4;
+            mSurface = new SurfaceControl.Builder()
+                    .setName("Transition Unrotate")
+                    .setContainerLayer()
+                    .setParent(parent)
+                    .build();
+            // column-major
+            if (rotateDelta == 1) {
+                t.setMatrix(mSurface, 0, 1, -1, 0);
+                t.setPosition(mSurface, displayW, 0);
+            } else if (rotateDelta == 2) {
+                t.setMatrix(mSurface, -1, 0, 0, -1);
+                t.setPosition(mSurface, displayW, displayH);
+            } else if (rotateDelta == 3) {
+                t.setMatrix(mSurface, 0, -1, 1, 0);
+                t.setPosition(mSurface, 0, displayH);
+            }
+            t.show(mSurface);
+        }
+
+        void addChild(SurfaceControl.Transaction t, SurfaceControl child) {
+            if (mSurface == null) return;
+            t.reparent(child, mSurface);
+            mRotateChildren.add(child);
+        }
+
+        void cleanUp(SurfaceControl rootLeash) {
+            if (mSurface == null) return;
+            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            for (int i = mRotateChildren.size() - 1; i >= 0; --i) {
+                t.reparent(mRotateChildren.get(i), rootLeash);
+            }
+            t.remove(mSurface);
+            t.apply();
+        }
+    }
+
     private static IRemoteTransition.Stub wrapRemoteTransition(
             final RemoteAnimationRunnerCompat remoteAnimationAdapter) {
         return new IRemoteTransition.Stub() {
@@ -116,17 +165,46 @@ public class RemoteAnimationAdapterCompat {
 
                 // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
                 boolean isReturnToHome = false;
+                TransitionInfo.Change launcherTask = null;
+                TransitionInfo.Change wallpaper = null;
+                int launcherLayer = 0;
+                int rotateDelta = 0;
+                float displayW = 0;
+                float displayH = 0;
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change change = info.getChanges().get(i);
                     if (change.getTaskInfo() != null
                             && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME) {
                         isReturnToHome = change.getMode() == TRANSIT_OPEN
                                 || change.getMode() == TRANSIT_TO_FRONT;
-                        break;
+                        launcherTask = change;
+                        launcherLayer = info.getChanges().size() - i;
+                    } else if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+                        wallpaper = change;
+                    }
+                    if (change.getParent() == null && change.getEndRotation() >= 0
+                            && change.getEndRotation() != change.getStartRotation()) {
+                        rotateDelta = change.getEndRotation() - change.getStartRotation();
+                        displayW = change.getEndAbsBounds().width();
+                        displayH = change.getEndAbsBounds().height();
+                    }
+                }
+
+                // Prepare for rotation if there is one
+                final CounterRotator counterLauncher = new CounterRotator();
+                final CounterRotator counterWallpaper = new CounterRotator();
+                if (launcherTask != null && rotateDelta != 0 && launcherTask.getParent() != null) {
+                    counterLauncher.setup(t, info.getChange(launcherTask.getParent()).getLeash(),
+                            rotateDelta, displayW, displayH);
+                    if (counterLauncher.mSurface != null) {
+                        t.setLayer(counterLauncher.mSurface, launcherLayer);
                     }
                 }
 
                 if (isReturnToHome) {
+                    if (counterLauncher.mSurface != null) {
+                        t.setLayer(counterLauncher.mSurface, info.getChanges().size() * 3);
+                    }
                     // Need to "boost" the closing things since that's what launcher expects.
                     for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                         final TransitionInfo.Change change = info.getChanges().get(i);
@@ -136,12 +214,25 @@ public class RemoteAnimationAdapterCompat {
                         if (!TransitionInfo.isIndependent(change, info)) continue;
                         if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
                             t.setLayer(leash, info.getChanges().size() * 3 - i);
+                            counterLauncher.addChild(t, leash);
                         }
                     }
                     // Make wallpaper visible immediately since launcher apparently won't do this.
                     for (int i = wallpapersCompat.length - 1; i >= 0; --i) {
                         t.show(wallpapersCompat[i].leash.getSurfaceControl());
                         t.setAlpha(wallpapersCompat[i].leash.getSurfaceControl(), 1.f);
+                    }
+                } else {
+                    if (launcherTask != null) {
+                        counterLauncher.addChild(t, launcherTask.getLeash());
+                    }
+                    if (wallpaper != null && rotateDelta != 0 && wallpaper.getParent() != null) {
+                        counterWallpaper.setup(t, info.getChange(wallpaper.getParent()).getLeash(),
+                                rotateDelta, displayW, displayH);
+                        if (counterWallpaper.mSurface != null) {
+                            t.setLayer(counterWallpaper.mSurface, -1);
+                            counterWallpaper.addChild(t, wallpaper.getLeash());
+                        }
                     }
                 }
                 t.apply();
@@ -150,6 +241,8 @@ public class RemoteAnimationAdapterCompat {
                     @Override
                     public void run() {
                         try {
+                            counterLauncher.cleanUp(info.getRootLeash());
+                            counterWallpaper.cleanUp(info.getRootLeash());
                             finishCallback.onTransitionFinished(null /* wct */);
                         } catch (RemoteException e) {
                             Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"

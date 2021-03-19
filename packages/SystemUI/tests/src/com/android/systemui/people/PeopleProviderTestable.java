@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.content.pm.ProviderInfo;
 
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+
 public class PeopleProviderTestable extends PeopleProvider {
 
     public void initializeForTesting(Context context, String authority) {
@@ -36,5 +38,9 @@ public class PeopleProviderTestable extends PeopleProvider {
 
     void setPeopleManager(IPeopleManager peopleManager) {
         mPeopleManager = peopleManager;
+    }
+
+    void setNotificationEntryManager(NotificationEntryManager notificationEntryManager) {
+        mNotificationEntryManager = notificationEntryManager;
     }
 }

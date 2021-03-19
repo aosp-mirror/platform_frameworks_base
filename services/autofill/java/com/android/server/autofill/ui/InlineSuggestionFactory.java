@@ -16,10 +16,13 @@
 
 package com.android.server.autofill.ui;
 
+import static android.view.inputmethod.InlineSuggestionInfo.TYPE_SUGGESTION;
+
 import static com.android.server.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.IntentSender;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.service.autofill.InlinePresentation;
@@ -49,6 +52,9 @@ final class InlineSuggestionFactory {
                 InlineSuggestionInfo.TYPE_ACTION, () -> uiCallback.authenticate(requestId,
                         AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED),
                 mergedInlinePresentation(inlineFillUiInfo.mInlineRequest, 0, inlineAuthentication),
+                createInlineSuggestionTooltip(inlineFillUiInfo.mInlineRequest,
+                        inlineFillUiInfo, InlineSuggestionInfo.SOURCE_AUTOFILL,
+                        response.getInlineTooltipPresentation()),
                 uiCallback);
     }
 
@@ -66,6 +72,8 @@ final class InlineSuggestionFactory {
 
         final InlineSuggestionsRequest request = inlineFillUiInfo.mInlineRequest;
         SparseArray<Pair<Dataset, InlineSuggestion>> response = new SparseArray<>(datasets.size());
+
+        boolean hasTooltip = false;
         for (int datasetIndex = 0; datasetIndex < datasets.size(); datasetIndex++) {
             final Dataset dataset = datasets.get(datasetIndex);
             final int fieldIndex = dataset.getFieldIds().indexOf(inlineFillUiInfo.mFocusedId);
@@ -82,14 +90,25 @@ final class InlineSuggestionFactory {
             }
 
             final String suggestionType =
-                    dataset.getAuthentication() == null ? InlineSuggestionInfo.TYPE_SUGGESTION
+                    dataset.getAuthentication() == null ? TYPE_SUGGESTION
                             : InlineSuggestionInfo.TYPE_ACTION;
             final int index = datasetIndex;
 
+            InlineSuggestion inlineSuggestionTooltip = null;
+            if (!hasTooltip) {
+                // Only available for first one inline suggestion tooltip.
+                inlineSuggestionTooltip = createInlineSuggestionTooltip(request,
+                        inlineFillUiInfo, suggestionSource,
+                        dataset.getFieldInlineTooltipPresentation(fieldIndex));
+                if (inlineSuggestionTooltip != null) {
+                    hasTooltip = true;
+                }
+            }
             InlineSuggestion inlineSuggestion = createInlineSuggestion(
                     inlineFillUiInfo, suggestionSource, suggestionType,
                     () -> uiCallback.autofill(dataset, index),
                     mergedInlinePresentation(request, datasetIndex, inlinePresentation),
+                    inlineSuggestionTooltip,
                     uiCallback);
             response.append(datasetIndex, Pair.create(dataset, inlineSuggestion));
         }
@@ -103,11 +122,13 @@ final class InlineSuggestionFactory {
             @NonNull @InlineSuggestionInfo.Type String suggestionType,
             @NonNull Runnable onClickAction,
             @NonNull InlinePresentation inlinePresentation,
+            @Nullable InlineSuggestion tooltip,
             @NonNull InlineFillUi.InlineSuggestionUiCallback uiCallback) {
+
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(), suggestionSource,
                 inlinePresentation.getAutofillHints(), suggestionType,
-                inlinePresentation.isPinned());
+                inlinePresentation.isPinned(), tooltip);
 
         return new InlineSuggestion(inlineSuggestionInfo,
                 createInlineContentProvider(inlineFillUiInfo, inlinePresentation,
@@ -133,6 +154,60 @@ final class InlineSuggestionFactory {
 
         return new InlinePresentation(inlinePresentation.getSlice(), mergedInlinePresentation,
                 inlinePresentation.isPinned());
+    }
+
+    // TODO(182306770): creates new class instead of the InlineSuggestion.
+    private static InlineSuggestion createInlineSuggestionTooltip(
+            @NonNull InlineSuggestionsRequest request,
+            @NonNull InlineFillUi.InlineFillUiInfo inlineFillUiInfo,
+            String suggestionSource,
+            @NonNull InlinePresentation tooltipPresentation) {
+        if (tooltipPresentation == null) {
+            return null;
+        }
+
+        final InlinePresentationSpec spec = request.getInlineTooltipPresentationSpec();
+        InlinePresentationSpec mergedSpec;
+        if (spec == null) {
+            mergedSpec = tooltipPresentation.getInlinePresentationSpec();
+        } else {
+            mergedSpec = new InlinePresentationSpec.Builder(
+                    tooltipPresentation.getInlinePresentationSpec().getMinSize(),
+                    tooltipPresentation.getInlinePresentationSpec().getMaxSize()).setStyle(
+                    spec.getStyle()).build();
+        }
+
+        InlineFillUi.InlineSuggestionUiCallback uiCallback =
+                new InlineFillUi.InlineSuggestionUiCallback() {
+                    @Override
+                    public void autofill(Dataset dataset, int datasetIndex) {
+                        /* nothing */
+                    }
+
+                    @Override
+                    public void authenticate(int requestId, int datasetIndex) {
+                        /* nothing */
+                    }
+
+                    @Override
+                    public void startIntentSender(IntentSender intentSender) {
+                        /* nothing */
+                    }
+
+                    @Override
+                    public void onError() {
+                        Slog.w(TAG, "An error happened on the tooltip");
+                    }
+                };
+
+        InlinePresentation tooltipInline = new InlinePresentation(tooltipPresentation.getSlice(),
+                mergedSpec, false);
+        IInlineContentProvider tooltipContentProvider = createInlineContentProvider(
+                inlineFillUiInfo, tooltipInline, () -> { /* no operation */ }, uiCallback);
+        final InlineSuggestionInfo tooltipInlineSuggestionInfo = new InlineSuggestionInfo(
+                mergedSpec, suggestionSource, /* autofillHints */ null, TYPE_SUGGESTION,
+                        /* pinned */ false, /* tooltip */ null);
+        return new InlineSuggestion(tooltipInlineSuggestionInfo, tooltipContentProvider);
     }
 
     private static IInlineContentProvider createInlineContentProvider(

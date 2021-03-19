@@ -3541,6 +3541,7 @@
   <java-symbol type="string" name="notification_channel_system_changes" />
   <java-symbol type="string" name="notification_channel_do_not_disturb" />
   <java-symbol type="string" name="notification_channel_accessibility_magnification" />
+  <java-symbol type="string" name="notification_channel_accessibility_security_policy" />
   <java-symbol type="string" name="config_defaultAutofillService" />
   <java-symbol type="string" name="config_defaultOnDeviceSpeechRecognitionService" />
   <java-symbol type="string" name="config_defaultTextClassifierPackage" />
@@ -3963,6 +3964,7 @@
   <java-symbol type="layout" name="chooser_action_button" />
   <java-symbol type="dimen" name="chooser_action_button_icon_size" />
   <java-symbol type="string" name="config_defaultNearbySharingComponent" />
+  <java-symbol type="bool" name="config_disable_all_cb_messages" />
   <java-symbol type="drawable" name="ic_close" />
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
@@ -4322,4 +4324,10 @@
 
   <java-symbol type="id" name="remote_views_next_child" />
   <java-symbol type="id" name="remote_views_stable_id" />
+  <java-symbol type="id" name="remote_views_override_id" />
+
+  <!-- View and control prompt -->
+  <java-symbol type="drawable" name="ic_accessibility_24dp" />
+  <java-symbol type="string" name="view_and_control_notification_title" />
+  <java-symbol type="string" name="view_and_control_notification_content" />
 </resources>

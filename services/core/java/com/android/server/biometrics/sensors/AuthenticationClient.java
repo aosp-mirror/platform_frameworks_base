@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -50,6 +51,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     private final boolean mIsStrongBiometric;
     private final boolean mRequireConfirmation;
     private final ActivityTaskManager mActivityTaskManager;
+    private final BiometricManager mBiometricManager;
     @Nullable private final TaskStackListener mTaskStackListener;
     private final LockoutTracker mLockoutTracker;
     private final boolean mIsRestricted;
@@ -73,6 +75,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
         mActivityTaskManager = ActivityTaskManager.getInstance();
+        mBiometricManager = context.getSystemService(BiometricManager.class);
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
         mIsRestricted = restricted;
@@ -207,6 +210,13 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 for (int i = 0; i < hardwareAuthToken.size(); i++) {
                     byteToken[i] = hardwareAuthToken.get(i);
                 }
+
+                if (mIsStrongBiometric) {
+                    mBiometricManager.resetLockoutTimeBound(getToken(),
+                            getContext().getOpPackageName(),
+                            getSensorId(), getTargetUserId(), byteToken);
+                }
+
                 if (isBiometricPrompt() && listener != null) {
                     // BiometricService will add the token to keystore
                     listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,

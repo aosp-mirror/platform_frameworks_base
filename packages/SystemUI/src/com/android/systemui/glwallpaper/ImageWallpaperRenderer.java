@@ -46,6 +46,7 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer {
     private final ImageGLWallpaper mWallpaper;
     private final Rect mSurfaceSize = new Rect();
     private final WallpaperTexture mTexture;
+    private float mExposureValue;
 
     public ImageWallpaperRenderer(Context context) {
         final WallpaperManager wpm = context.getSystemService(WallpaperManager.class);
@@ -64,6 +65,13 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer {
      */
     public void useBitmap(Consumer<Bitmap> c) {
         mTexture.use(c);
+    }
+
+    /**
+     * @hide
+     */
+    public void setExposureValue(float exposureValue) {
+        mExposureValue = exposureValue;
     }
 
     @Override
@@ -94,6 +102,7 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer {
     public void onDrawFrame() {
         glClear(GL_COLOR_BUFFER_BIT);
         glViewport(0, 0, mSurfaceSize.width(), mSurfaceSize.height());
+        mWallpaper.setExposureValue(mExposureValue);
         mWallpaper.useTexture();
         mWallpaper.draw();
     }

@@ -193,7 +193,7 @@ public class AppSearchManagerService extends SystemService {
                     try {
                         // TODO(b/173451571): reduce burden of binder thread by enqueue request onto
                         // a separate thread.
-                        impl.putDocument(packageName, databaseName, document);
+                        impl.putDocument(packageName, databaseName, document, /*logger=*/ null);
                         resultBuilder.setSuccess(document.getUri(), /*result=*/ null);
                     } catch (Throwable t) {
                         resultBuilder.setResult(document.getUri(), throwableToFailedResult(t));

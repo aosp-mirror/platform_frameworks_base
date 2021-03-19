@@ -16,10 +16,8 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -64,7 +62,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipWindowBecomesVisible() {
         testSpec.assertWm {
@@ -73,22 +71,6 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
                 .invoke("pipWindowIsVisible") { it.wmState.hasPipWindow() }
         }
     }
-
-    @FlakyTest(bugId = 140855415)
-    @Test
-    override fun navBarLayerIsAlwaysVisible() = super.navBarLayerIsAlwaysVisible()
-
-    @FlakyTest(bugId = 140855415)
-    @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
-
-    @FlakyTest(bugId = 140855415)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
-    @FlakyTest(bugId = 140855415)
-    @Test
-    override fun noUncoveredRegions() = super.noUncoveredRegions()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

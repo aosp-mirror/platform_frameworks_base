@@ -69,9 +69,6 @@ public class StartingSurfaceDrawer {
     private final ShellExecutor mSplashScreenExecutor;
     private final SplashscreenContentDrawer mSplashscreenContentDrawer;
 
-    // TODO(b/131727939) remove this when clearing ActivityRecord
-    private static final int REMOVE_WHEN_TIMEOUT = 2000;
-
     public StartingSurfaceDrawer(Context context, ShellExecutor splashScreenExecutor,
             TransactionPool pool) {
         mContext = context;
@@ -295,12 +292,8 @@ public class StartingSurfaceDrawer {
             TaskSnapshot snapshot) {
         final int taskId = startingWindowInfo.taskInfo.taskId;
         final TaskSnapshotWindow surface = TaskSnapshotWindow.create(startingWindowInfo, appToken,
-                snapshot, mSplashScreenExecutor,
-                () -> removeWindowNoAnimate(taskId));
-        mSplashScreenExecutor.executeDelayed(() -> removeWindowNoAnimate(taskId),
-                REMOVE_WHEN_TIMEOUT);
-        final StartingWindowRecord tView =
-                new StartingWindowRecord(null/* decorView */, surface);
+                snapshot, mSplashScreenExecutor, () -> removeWindowNoAnimate(taskId));
+        final StartingWindowRecord tView = new StartingWindowRecord(null/* decorView */, surface);
         mStartingWindowRecords.put(taskId, tView);
     }
 
@@ -354,8 +347,6 @@ public class StartingSurfaceDrawer {
         }
         if (shouldSaveView) {
             removeWindowNoAnimate(taskId);
-            mSplashScreenExecutor.executeDelayed(
-                    () -> removeWindowNoAnimate(taskId), REMOVE_WHEN_TIMEOUT);
             saveSplashScreenRecord(taskId, view);
         }
         return shouldSaveView;
@@ -392,7 +383,6 @@ public class StartingSurfaceDrawer {
                     if (leash != null || playRevealAnimation) {
                         mSplashscreenContentDrawer.applyExitAnimation(record.mContentView,
                                 leash, frame, record.isEarlyExit(), exitFinish);
-                        mSplashScreenExecutor.executeDelayed(exitFinish, REMOVE_WHEN_TIMEOUT);
                     } else {
                         // the SplashScreenView has been copied to client, skip default exit
                         // animation

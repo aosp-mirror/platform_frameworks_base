@@ -161,6 +161,10 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_EAC3_JOC = "audio/eac3-joc";
     public static final String MIMETYPE_AUDIO_AC4 = "audio/ac4";
     public static final String MIMETYPE_AUDIO_SCRAMBLED = "audio/scrambled";
+    /** MIME type for MPEG-H Audio single stream */
+    public static final String MIMETYPE_AUDIO_MPEGH_MHA1 = "audio/mha1";
+    /** MIME type for MPEG-H Audio single stream, encapsulated in MHAS */
+    public static final String MIMETYPE_AUDIO_MPEGH_MHM1 = "audio/mhm1";
 
     /**
      * MIME type for HEIF still image data encoded in HEVC.

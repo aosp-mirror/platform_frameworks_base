@@ -109,16 +109,6 @@ public class VcnGatewayConnectionConfigTest {
     }
 
     @Test
-    public void testBuilderRequiresNonEmptyUnderlyingCaps() {
-        try {
-            newBuilder().addExposedCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
-
-            fail("Expected exception due to invalid required underlying capabilities");
-        } catch (IllegalArgumentException e) {
-        }
-    }
-
-    @Test
     public void testBuilderRequiresNonNullRetryInterval() {
         try {
             newBuilder().setRetryInterval(null);

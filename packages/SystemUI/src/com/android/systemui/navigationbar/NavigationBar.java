@@ -276,7 +276,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     /** Only for default display */
     @Nullable
-    private AssistHandleViewController mAssistHandlerViewController;
+    AssistHandleViewController mAssistHandlerViewController;
 
 
     private final AutoHideUiElement mAutoHideUiElement = new AutoHideUiElement() {
@@ -1394,7 +1394,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         return true;
     }
 
-    private void updateAccessibilityServicesState(AccessibilityManager accessibilityManager) {
+    void updateAccessibilityServicesState(AccessibilityManager accessibilityManager) {
         if (mNavigationBarView == null) {
             return;
         }

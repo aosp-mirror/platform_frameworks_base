@@ -1600,11 +1600,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     ProtoLog.w(WM_ERROR, "Attempted to add window with exiting application token "
                             + ".%s Aborting.", token);
                     return WindowManagerGlobal.ADD_APP_EXITING;
-                } else if (type == TYPE_APPLICATION_STARTING && activity.mStartingWindow != null) {
-                    ProtoLog.w(WM_ERROR,
-                            "Attempted to add starting window to token with already existing"
-                                    + " starting window");
-                    return WindowManagerGlobal.ADD_DUPLICATE_ADD;
+                } else if (type == TYPE_APPLICATION_STARTING) {
+                    if (activity.mStartingWindow != null) {
+                        ProtoLog.w(WM_ERROR, "Attempted to add starting window to "
+                                + "token with already existing starting window");
+                        return WindowManagerGlobal.ADD_DUPLICATE_ADD;
+                    }
+                    if (activity.mStartingData == null) {
+                        ProtoLog.w(WM_ERROR, "Attempted to add starting window to "
+                                + "token but already cleaned");
+                        return WindowManagerGlobal.ADD_DUPLICATE_ADD;
+                    }
                 }
             } else if (rootType == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
@@ -4142,12 +4148,19 @@ public class WindowManagerService extends IWindowManager.Stub
                                 .notifyOnActivityRotation(displayContent.mDisplayId);
                     }
 
-                    if (!rotationChanged || forceRelayout) {
-                        displayContent.setLayoutNeeded();
-                        layoutNeeded = true;
-                    }
-                    if (rotationChanged || alwaysSendConfiguration) {
-                        displayContent.sendNewConfiguration();
+                    final boolean pendingRemoteRotation = rotationChanged
+                            && (displayContent.getDisplayRotation().isWaitingForRemoteRotation()
+                            || mAtmService.getTransitionController().isCollecting());
+                    // Even if alwaysSend, we are waiting for a transition or remote to provide
+                    // rotated configuration, so we can't update configuration yet.
+                    if (!pendingRemoteRotation) {
+                        if (!rotationChanged || forceRelayout) {
+                            displayContent.setLayoutNeeded();
+                            layoutNeeded = true;
+                        }
+                        if (rotationChanged || alwaysSendConfiguration) {
+                            displayContent.sendNewConfiguration();
+                        }
                     }
                 }
 
@@ -7718,8 +7731,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
-                boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed) {
+        public void setDismissImeOnBackKeyPressed(boolean dismissImeOnBackKeyPressed) {
             mPolicy.setDismissImeOnBackKeyPressed(dismissImeOnBackKeyPressed);
         }
 

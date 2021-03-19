@@ -16,6 +16,7 @@
   -->
 <permissions>
     <privapp-permissions package="com.android.car.messenger">
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.car.permission.ACCESS_CAR_PROJECTION_STATUS"/>
     </privapp-permissions>
 </permissions>

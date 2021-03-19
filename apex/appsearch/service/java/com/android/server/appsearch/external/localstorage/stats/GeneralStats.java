@@ -82,18 +82,18 @@ public final class GeneralStats {
     public static class Builder {
         @NonNull final String mPackageName;
         @NonNull final String mDatabase;
-        @AppSearchResult.ResultCode int mStatusCode;
+        @AppSearchResult.ResultCode int mStatusCode = AppSearchResult.RESULT_UNKNOWN_ERROR;
         int mTotalLatencyMillis;
 
         /**
          * Constructor
          *
          * @param packageName name of the package logging stats
-         * @param dataBase name of the database logging stats
+         * @param database name of the database logging stats
          */
-        public Builder(@NonNull String packageName, @NonNull String dataBase) {
+        public Builder(@NonNull String packageName, @NonNull String database) {
             mPackageName = Preconditions.checkNotNull(packageName);
-            mDatabase = Preconditions.checkNotNull(dataBase);
+            mDatabase = Preconditions.checkNotNull(database);
         }
 
         /** Sets status code returned from {@link AppSearchResult#getResultCode()} */

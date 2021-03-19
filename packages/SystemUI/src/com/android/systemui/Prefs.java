@@ -74,7 +74,7 @@ public final class Prefs {
             Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP,
             Key.HAS_SEEN_REVERSE_BOTTOM_SHEET,
             Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT,
-            Key.HAS_SEEN_PRIORITY_ONBOARDING
+            Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S
     })
     // TODO: annotate these with their types so {@link PrefsCommandLine} can know how to set them
     public @interface Key {
@@ -124,7 +124,7 @@ public final class Prefs {
         String HAS_SEEN_REVERSE_BOTTOM_SHEET = "HasSeenReverseBottomSheet";
         String CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT = "ControlsStructureSwipeTooltipCount";
         /** Tracks whether the user has seen the onboarding screen for priority conversations */
-        String HAS_SEEN_PRIORITY_ONBOARDING = "HasUserSeenPriorityOnboarding";
+        String HAS_SEEN_PRIORITY_ONBOARDING_IN_S = "HasUserSeenPriorityOnboardingInS";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

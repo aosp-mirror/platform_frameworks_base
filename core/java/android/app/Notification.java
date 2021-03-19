@@ -823,6 +823,17 @@ public class Notification implements Parcelable
     public static final int VISIBILITY_SECRET = -1;
 
     /**
+     * @hide
+     */
+    @IntDef(prefix = "VISIBILITY_", value = {
+            VISIBILITY_PUBLIC,
+            VISIBILITY_PRIVATE,
+            VISIBILITY_SECRET,
+            NotificationManager.VISIBILITY_NO_OVERRIDE
+    })
+    public @interface NotificationVisibilityOverride{};
+
+    /**
      * Notification category: incoming call (voice or video) or similar synchronous communication request.
      */
     public static final String CATEGORY_CALL = "call";
@@ -2673,7 +2684,17 @@ public class Notification implements Parcelable
         if (headsUpContentView != null) headsUpContentView.visitUris(visitor);
 
         if (extras != null) {
-            visitor.accept(extras.getParcelable(EXTRA_AUDIO_CONTENTS_URI));
+            // NOTE: The documentation of EXTRA_AUDIO_CONTENTS_URI explicitly says that it is a
+            // String representation of a Uri, but the previous implementation (and unit test) of
+            // this method has always treated it as a Uri object. Given the inconsistency,
+            // supporting both going forward is the safest choice.
+            Object audioContentsUri = extras.get(EXTRA_AUDIO_CONTENTS_URI);
+            if (audioContentsUri instanceof Uri) {
+                visitor.accept((Uri) audioContentsUri);
+            } else if (audioContentsUri instanceof String) {
+                visitor.accept(Uri.parse((String) audioContentsUri));
+            }
+
             if (extras.containsKey(EXTRA_BACKGROUND_IMAGE_URI)) {
                 visitor.accept(Uri.parse(extras.getString(EXTRA_BACKGROUND_IMAGE_URI)));
             }

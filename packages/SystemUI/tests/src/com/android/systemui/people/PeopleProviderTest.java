@@ -37,6 +37,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.system.PeopleProviderUtils;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 import junit.framework.Assert;
 
@@ -73,6 +74,8 @@ public class PeopleProviderTest extends SysuiTestCase {
     private PackageManager mPackageManager;
     @Mock
     private IPeopleManager mPeopleManager;
+    @Mock
+    private NotificationEntryManager mNotificationEntryManager;
 
     @Before
     public void setUp() throws Exception {
@@ -84,6 +87,7 @@ public class PeopleProviderTest extends SysuiTestCase {
                 mContext, PeopleProviderUtils.PEOPLE_PROVIDER_AUTHORITY);
         provider.setLauncherApps(mLauncherApps);
         provider.setPeopleManager(mPeopleManager);
+        provider.setNotificationEntryManager(mNotificationEntryManager);
         mContext.getContentResolver().addProvider(
                 PeopleProviderUtils.PEOPLE_PROVIDER_AUTHORITY, provider);
 

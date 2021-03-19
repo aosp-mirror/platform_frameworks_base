@@ -29,6 +29,7 @@ import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
+import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
@@ -389,12 +390,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mParent.onChildAdded(this);
         }
         if (!mReparenting) {
+            onSyncReparent(oldParent, mParent);
             if (mParent != null && mParent.mDisplayContent != null
                     && mDisplayContent != mParent.mDisplayContent) {
                 onDisplayChanged(mParent.mDisplayContent);
             }
             onParentChanged(mParent, oldParent);
-            onSyncReparent(oldParent, mParent);
         }
     }
 
@@ -460,8 +461,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * This is used to revoke control of the SurfaceControl from a client process that was
      * previously organizing this WindowContainer.
      */
-    void migrateToNewSurfaceControl() {
-        SurfaceControl.Transaction t = getPendingTransaction();
+    void migrateToNewSurfaceControl(SurfaceControl.Transaction t) {
         t.remove(mSurfaceControl);
         // Clear the last position so the new SurfaceControl will get correct position
         mLastSurfacePosition.set(0, 0);
@@ -3084,6 +3084,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return null;
     }
 
+    /** Cheap way of doing cast and instanceof. */
+    DisplayContent asDisplayContent() {
+        return null;
+    }
+
     /**
      * @return {@code true} if window container is manage by a
      *          {@link android.window.WindowOrganizer}
@@ -3308,5 +3313,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void unregisterWindowContainerListener(WindowContainerListener listener) {
         mListeners.remove(listener);
         unregisterConfigurationChangeListener(listener);
+    }
+
+    /**
+     * Returns the {@link WindowManager.LayoutParams.WindowType}.
+     */
+    @WindowManager.LayoutParams.WindowType int getWindowType() {
+        return INVALID_WINDOW_TYPE;
     }
 }

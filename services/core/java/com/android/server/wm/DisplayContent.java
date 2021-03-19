@@ -1428,7 +1428,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             computeScreenConfiguration(config);
         } else if (currentConfig != null
                 // If waiting for a remote rotation, don't prematurely update configuration.
-                && !mDisplayRotation.isWaitingForRemoteRotation()) {
+                && !(mDisplayRotation.isWaitingForRemoteRotation()
+                        || mAtmService.getTransitionController().isCollecting(this))) {
             // No obvious action we need to take, but if our current state mismatches the
             // activity manager's, update it, disregarding font scale, which should remain set
             // to the value of the previous configuration.
@@ -1468,6 +1469,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
         return mDisplayRotation.updateOrientation(orientation, forceUpdate);
+    }
+
+    @Override
+    boolean isSyncFinished() {
+        if (mDisplayRotation.isWaitingForRemoteRotation()) return false;
+        return super.isSyncFinished();
     }
 
     /**
@@ -1763,7 +1770,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Update rotation of the display.
      *
      * @return {@code true} if the rotation has been changed.  In this case YOU MUST CALL
-     *         {@link #sendNewConfiguration} TO UNFREEZE THE SCREEN.
+     *         {@link #sendNewConfiguration} TO UNFREEZE THE SCREEN unless using Shell transitions.
      */
     boolean updateRotationUnchecked() {
         return mDisplayRotation.updateRotationUnchecked(false /* forceUpdate */);
@@ -1778,8 +1785,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private void applyRotation(final int oldRotation, final int rotation) {
         mDisplayRotation.applyCurrentRotation(rotation);
-        final boolean rotateSeamlessly = mDisplayRotation.isRotatingSeamlessly();
-        final Transaction transaction = getPendingTransaction();
+        final boolean shellTransitions =
+                mWmService.mAtmService.getTransitionController().getTransitionPlayer() != null;
+        final boolean rotateSeamlessly =
+                mDisplayRotation.isRotatingSeamlessly() && !shellTransitions;
+        final Transaction transaction =
+                shellTransitions ? getSyncTransaction() : getPendingTransaction();
         ScreenRotationAnimation screenRotationAnimation = rotateSeamlessly
                 ? null : getRotationAnimation();
         // We need to update our screen size information to match the new rotation. If the rotation
@@ -1795,9 +1806,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             screenRotationAnimation.setRotation(transaction, rotation);
         }
 
-        forAllWindows(w -> {
-            w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
-        }, true /* traverseTopToBottom */);
+        if (!shellTransitions) {
+            forAllWindows(w -> {
+                w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
+            }, true /* traverseTopToBottom */);
+        }
 
         mWmService.mDisplayManagerInternal.performTraversal(transaction);
         scheduleAnimation();
@@ -3428,7 +3441,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Updates the layer assignment of windows on this display. */
     void assignWindowLayers(boolean setLayoutNeeded) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "assignWindowLayers");
-        assignChildLayers(getPendingTransaction());
+        assignChildLayers(getSyncTransaction());
         if (setLayoutNeeded) {
             setLayoutNeeded();
         }
@@ -4571,6 +4584,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     SurfaceControl.Builder makeOverlay() {
         return mWmService.makeSurfaceBuilder(mSession).setParent(getOverlayLayer());
+    }
+
+    @Override
+    public SurfaceControl.Builder makeAnimationLeash() {
+        return mWmService.makeSurfaceBuilder(mSession).setParent(mSurfaceControl)
+                .setContainerLayer();
     }
 
     /**
@@ -5918,5 +5937,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         return mDisplayAreaPolicy.getDisplayAreaForWindowToken(windowType, options,
                 ownerCanManageAppToken, roundedCornerOverlay);
+    }
+
+    @Override
+    DisplayContent asDisplayContent() {
+        return this;
     }
 }

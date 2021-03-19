@@ -214,6 +214,13 @@ public class AuthService extends SystemService {
                 return;
             }
 
+            if (promptInfo.containsTestConfigurations()) {
+                if (getContext().checkCallingOrSelfPermission(TEST_BIOMETRIC)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    checkInternalPermission();
+                }
+            }
+
             // Only allow internal clients to enable non-public options.
             if (promptInfo.containsPrivateApiConfigurations()) {
                 checkInternalPermission();
@@ -334,6 +341,20 @@ public class AuthService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 return mBiometricService.getAuthenticatorIds(callingUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void resetLockoutTimeBound(IBinder token, String opPackageName, int fromSensorId,
+                int userId, byte[] hardwareAuthToken) throws RemoteException {
+            checkInternalPermission();
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mBiometricService.resetLockoutTimeBound(token, opPackageName, fromSensorId, userId,
+                        hardwareAuthToken);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

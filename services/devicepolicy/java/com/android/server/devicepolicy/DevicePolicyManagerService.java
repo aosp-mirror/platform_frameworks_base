@@ -5492,7 +5492,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean hasKeyPair(String callerPackage, String alias) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        Preconditions.checkCallAuthorization(canManageCertificates(caller));
+        Preconditions.checkCallAuthorization(canManageCertificates(caller)
+                || isCredentialManagementApp(caller, alias));
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
             try (KeyChainConnection keyChainConnection =
@@ -8809,11 +8810,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final ComponentName doComponent = mOwners.getDeviceOwnerComponent();
             final ComponentName poComponent =
                     mOwners.getProfileOwnerComponent(userHandle.getIdentifier());
-            // Return test only admin by default.
-            if (isAdminTestOnlyLocked(doComponent, userHandle.getIdentifier())) {
-                return doComponent;
-            } else if (isAdminTestOnlyLocked(poComponent, userHandle.getIdentifier())) {
-                return poComponent;
+            // Return test only admin if configured to do so.
+            // TODO(b/182994391): Replace with more generic solution to override the supervision
+            // component.
+            if (mConstants.USE_TEST_ADMIN_AS_SUPERVISION_COMPONENT) {
+                if (isAdminTestOnlyLocked(doComponent, userHandle.getIdentifier())) {
+                    return doComponent;
+                } else if (isAdminTestOnlyLocked(poComponent, userHandle.getIdentifier())) {
+                    return poComponent;
+                }
             }
             final String supervisor = mContext.getResources().getString(
                     com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
@@ -12131,6 +12136,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
             mConstants = loadConstants();
+
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                final Intent intent = new Intent(
+                        DevicePolicyManager.ACTION_DEVICE_POLICY_CONSTANTS_CHANGED);
+                intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                final List<UserInfo> users = mUserManager.getAliveUsers();
+                for (int i = 0; i < users.size(); i++) {
+                    mContext.sendBroadcastAsUser(intent, UserHandle.of(users.get(i).id));
+                }
+            });
         }
     }
 

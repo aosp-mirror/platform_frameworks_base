@@ -60,6 +60,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -90,7 +91,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.window.ITaskOrganizer;
+import android.window.ITransitionPlayer;
 import android.window.StartingWindowInfo;
+import android.window.TransitionInfo;
+import android.window.TransitionRequestInfo;
 
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.ArrayUtils;
@@ -1357,6 +1361,50 @@ class WindowTestsBase extends SystemServiceTestsBase {
             super.updateResizingWindowIfNeeded();
 
             mHasSurface = hadSurface;
+        }
+    }
+
+    class TestTransitionPlayer extends ITransitionPlayer.Stub {
+        final TransitionController mController;
+        final WindowOrganizerController mOrganizer;
+        Transition mLastTransit = null;
+        TransitionRequestInfo mLastRequest = null;
+        TransitionInfo mLastReady = null;
+
+        TestTransitionPlayer(@NonNull TransitionController controller,
+                @NonNull WindowOrganizerController organizer) {
+            mController = controller;
+            mOrganizer = organizer;
+        }
+
+        void clear() {
+            mLastTransit = null;
+            mLastReady = null;
+            mLastRequest = null;
+        }
+
+        @Override
+        public void onTransitionReady(IBinder transitToken, TransitionInfo transitionInfo,
+                SurfaceControl.Transaction transaction) throws RemoteException {
+            mLastTransit = Transition.fromBinder(transitToken);
+            mLastReady = transitionInfo;
+        }
+
+        @Override
+        public void requestStartTransition(IBinder transitToken,
+                TransitionRequestInfo request) throws RemoteException {
+            mLastTransit = Transition.fromBinder(transitToken);
+            mLastRequest = request;
+        }
+
+        public void start() {
+            mOrganizer.startTransition(mLastRequest.getType(), mLastTransit, null);
+            mLastTransit.onTransactionReady(mLastTransit.getSyncId(),
+                    mock(SurfaceControl.Transaction.class));
+        }
+
+        public void finish() {
+            mController.finishTransition(mLastTransit);
         }
     }
 }

@@ -28,6 +28,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
@@ -3771,6 +3772,7 @@ public class Intent implements Parcelable, Cloneable {
      * has just been stopped (which is no longer running).
      * @hide
      */
+    @TestApi
     public static final String ACTION_USER_STOPPED =
             "android.intent.action.USER_STOPPED";
 

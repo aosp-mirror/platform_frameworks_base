@@ -16,6 +16,8 @@
 
 package android.view.textservice;
 
+import android.annotation.BinderThread;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
@@ -27,6 +29,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.textservice.ISpellCheckerSession;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesSessionListener;
@@ -35,6 +38,7 @@ import dalvik.system.CloseGuard;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.Executor;
 
 /**
  * The SpellCheckerSession interface provides the per client functionality of SpellCheckerService.
@@ -102,38 +106,26 @@ public class SpellCheckerSession {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final SpellCheckerSessionListener mSpellCheckerSessionListener;
     private final SpellCheckerSessionListenerImpl mSpellCheckerSessionListenerImpl;
+    private final Executor mExecutor;
 
     private final CloseGuard mGuard = CloseGuard.get();
-
-    /** Handler that will execute the main tasks */
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_ON_GET_SUGGESTION_MULTIPLE:
-                    handleOnGetSuggestionsMultiple((SuggestionsInfo[]) msg.obj);
-                    break;
-                case MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE:
-                    handleOnGetSentenceSuggestionsMultiple((SentenceSuggestionsInfo[]) msg.obj);
-                    break;
-            }
-        }
-    };
 
     /**
      * Constructor
      * @hide
      */
     public SpellCheckerSession(
-            SpellCheckerInfo info, TextServicesManager tsm, SpellCheckerSessionListener listener) {
+            SpellCheckerInfo info, TextServicesManager tsm, SpellCheckerSessionListener listener,
+            Executor executor) {
         if (info == null || listener == null || tsm == null) {
             throw new NullPointerException();
         }
         mSpellCheckerInfo = info;
-        mSpellCheckerSessionListenerImpl = new SpellCheckerSessionListenerImpl(mHandler);
+        mSpellCheckerSessionListenerImpl = new SpellCheckerSessionListenerImpl(this);
         mInternalListener = new InternalListener(mSpellCheckerSessionListenerImpl);
         mTextServicesManager = tsm;
         mSpellCheckerSessionListener = listener;
+        mExecutor = executor;
 
         mGuard.open("finishSession");
     }
@@ -219,12 +211,13 @@ public class SpellCheckerSession {
                 textInfos, suggestionsLimit, sequentialWords);
     }
 
-    private void handleOnGetSuggestionsMultiple(SuggestionsInfo[] suggestionInfos) {
-        mSpellCheckerSessionListener.onGetSuggestions(suggestionInfos);
+    void handleOnGetSuggestionsMultiple(SuggestionsInfo[] suggestionsInfos) {
+        mExecutor.execute(() -> mSpellCheckerSessionListener.onGetSuggestions(suggestionsInfos));
     }
 
-    private void handleOnGetSentenceSuggestionsMultiple(SentenceSuggestionsInfo[] suggestionInfos) {
-        mSpellCheckerSessionListener.onGetSentenceSuggestions(suggestionInfos);
+    void handleOnGetSentenceSuggestionsMultiple(SentenceSuggestionsInfo[] suggestionsInfos) {
+        mExecutor.execute(() ->
+                mSpellCheckerSessionListener.onGetSentenceSuggestions(suggestionsInfos));
     }
 
     private static final class SpellCheckerSessionListenerImpl
@@ -249,7 +242,8 @@ public class SpellCheckerSession {
         }
 
         private final Queue<SpellCheckerParams> mPendingTasks = new LinkedList<>();
-        private Handler mHandler;
+        @GuardedBy("SpellCheckerSessionListenerImpl.this")
+        private SpellCheckerSession mSpellCheckerSession;
 
         private static final int STATE_WAIT_CONNECTION = 0;
         private static final int STATE_CONNECTED = 1;
@@ -270,8 +264,8 @@ public class SpellCheckerSession {
         private HandlerThread mThread;
         private Handler mAsyncHandler;
 
-        public SpellCheckerSessionListenerImpl(Handler handler) {
-            mHandler = handler;
+        SpellCheckerSessionListenerImpl(SpellCheckerSession spellCheckerSession) {
+            mSpellCheckerSession = spellCheckerSession;
         }
 
         private static class SpellCheckerParams {
@@ -349,6 +343,7 @@ public class SpellCheckerSession {
             }
         }
 
+        @GuardedBy("SpellCheckerSessionListenerImpl.this")
         private void processCloseLocked() {
             if (DBG) Log.d(TAG, "entering processCloseLocked:"
                     + " session" + (mISpellCheckerSession != null ? ".hashCode()=#"
@@ -358,7 +353,7 @@ public class SpellCheckerSession {
             if (mThread != null) {
                 mThread.quit();
             }
-            mHandler = null;
+            mSpellCheckerSession = null;
             mPendingTasks.clear();
             mThread = null;
             mAsyncHandler = null;
@@ -502,23 +497,30 @@ public class SpellCheckerSession {
             processTask(session, scp, false);
         }
 
+        @BinderThread
         @Override
         public void onGetSuggestions(SuggestionsInfo[] results) {
-            synchronized (this) {
-                if (mHandler != null) {
-                    mHandler.sendMessage(Message.obtain(mHandler,
-                            MSG_ON_GET_SUGGESTION_MULTIPLE, results));
-                }
+            SpellCheckerSession session = getSpellCheckerSession();
+            if (session != null) {
+                // Lock should not be held when calling callback, in order to avoid deadlock.
+                session.handleOnGetSuggestionsMultiple(results);
             }
         }
 
+        @BinderThread
         @Override
         public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results) {
-            synchronized (this) {
-                if (mHandler != null) {
-                    mHandler.sendMessage(Message.obtain(mHandler,
-                            MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE, results));
-                }
+            SpellCheckerSession session = getSpellCheckerSession();
+            if (session != null) {
+                // Lock should not be held when calling callback, in order to avoid deadlock.
+                session.handleOnGetSentenceSuggestionsMultiple(results);
+            }
+        }
+
+        @Nullable
+        private SpellCheckerSession getSpellCheckerSession() {
+            synchronized (SpellCheckerSessionListenerImpl.this) {
+                return mSpellCheckerSession;
             }
         }
     }

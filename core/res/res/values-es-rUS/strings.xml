@@ -556,6 +556,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Usar datos biométricos o bloqueo de pantalla"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Comprueba que eres tú"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Usa tus datos biométricos para continuar"</string>
+    <!-- no translation found for biometric_or_screen_lock_dialog_default_subtitle (159539678371552009) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"No hay hardware biométrico disponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Se canceló la autenticación"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No se reconoció"</string>
@@ -589,6 +591,8 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella digital"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar bloqueo de huella dactilar o pantalla"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utiliza tu huella dactilar para continuar"</string>
+    <!-- no translation found for fingerprint_or_screen_lock_dialog_default_subtitle (5195808203117992200) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícono de huella dactilar"</string>
@@ -636,6 +640,8 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Usar desbloqueo facial"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar bloqueo facial o de pantalla"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Usa el desbloqueo facial para continuar"</string>
+    <!-- no translation found for face_or_screen_lock_dialog_default_subtitle (5006381531158341844) -->
+    <skip />
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ícono cara"</string>
@@ -999,6 +1005,10 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"No tienes permiso para abrir esta página."</string>
     <string name="text_copied" msgid="2531420577879738860">"Texto copiado en el portapapeles."</string>
     <string name="copied" msgid="4675902854553014676">"Copiado"</string>
+    <!-- no translation found for pasted_from_app (5627698450808256545) -->
+    <skip />
+    <!-- no translation found for pasted_from_clipboard (6295556725844421812) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"Más"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menú+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1372,11 +1382,17 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desactivar"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Revisando <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Revisando el contenido actual"</string>
+    <!-- no translation found for ext_media_checking_notification_message (7986154434946021415) -->
+    <skip />
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nuevo dispositivo: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g>: no funciona"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Presiona para configurar"</string>
+    <!-- no translation found for ext_media_new_notification_message (216863352100263668) -->
+    <skip />
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Es posible que debas reformatear el dispositivo. Presiona para expulsar."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Para transferir fotos y contenido multimedia"</string>
+    <!-- no translation found for ext_media_ready_notification_message (8847134811163165935) -->
+    <skip />
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problema con <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>: no funciona"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Presiona para solucionar el problema"</string>
@@ -1385,7 +1401,8 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> no es compatible"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>: no funciona"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"El dispositivo no es compatible con <xliff:g id="NAME">%s</xliff:g>. Presiona la pantalla para configurarlo en un formato compatible."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Este dispositivo no es compatible con: <xliff:g id="NAME">%s</xliff:g>. Selecciona para configurar el medio en un formato compatible."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (1595482802187036532) -->
+    <skip />
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Es posible que debas reformatear el dispositivo"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Se extrajo <xliff:g id="NAME">%s</xliff:g> de forma inesperada."</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Expulsa los dispositivos multimedia antes de extraerlos para evitar la pérdida de contenido"</string>

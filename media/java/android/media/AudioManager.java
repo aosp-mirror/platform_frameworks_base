@@ -1988,7 +1988,7 @@ public class AudioManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public boolean setPreferredDeviceForCapturePreset(int capturePreset,
+    public boolean setPreferredDeviceForCapturePreset(@MediaRecorder.SystemSource int capturePreset,
                                                       @NonNull AudioDeviceAttributes device) {
         return setPreferredDevicesForCapturePreset(capturePreset, Arrays.asList(device));
     }
@@ -2002,7 +2002,8 @@ public class AudioManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public boolean clearPreferredDevicesForCapturePreset(int capturePreset) {
+    public boolean clearPreferredDevicesForCapturePreset(
+            @MediaRecorder.SystemSource int capturePreset) {
         if (!MediaRecorder.isValidAudioSource(capturePreset)) {
             return false;
         }
@@ -2024,7 +2025,8 @@ public class AudioManager {
     @NonNull
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public List<AudioDeviceAttributes> getPreferredDevicesForCapturePreset(int capturePreset) {
+    public List<AudioDeviceAttributes> getPreferredDevicesForCapturePreset(
+            @MediaRecorder.SystemSource int capturePreset) {
         if (!MediaRecorder.isValidAudioSource(capturePreset)) {
             return new ArrayList<AudioDeviceAttributes>();
         }
@@ -2036,7 +2038,8 @@ public class AudioManager {
     }
 
     private boolean setPreferredDevicesForCapturePreset(
-            int capturePreset, @NonNull List<AudioDeviceAttributes> devices) {
+            @MediaRecorder.SystemSource int capturePreset,
+            @NonNull List<AudioDeviceAttributes> devices) {
         Objects.requireNonNull(devices);
         if (!MediaRecorder.isValidAudioSource(capturePreset)) {
             return false;
@@ -2081,7 +2084,8 @@ public class AudioManager {
          * @param devices a list of newly set preferred audio devices
          */
         void onPreferredDevicesForCapturePresetChanged(
-                int capturePreset, @NonNull List<AudioDeviceAttributes> devices);
+                @MediaRecorder.SystemSource int capturePreset,
+                @NonNull List<AudioDeviceAttributes> devices);
     }
 
     /**
@@ -5287,7 +5291,10 @@ public class AudioManager {
      *   otherwise (typically one device, except for duplicated paths).
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE
+    })
     public @NonNull List<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
         Objects.requireNonNull(attributes);
@@ -5426,7 +5433,10 @@ public class AudioManager {
      * @return the volume behavior for the device
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE
+    })
     public @DeviceVolumeBehavior
     int getDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device) {
         // verify arguments (validity of device type is enforced in server)
@@ -5438,6 +5448,28 @@ public class AudioManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @hide
+     * Returns {@code true} if the volume device behavior is {@link #DEVICE_VOLUME_BEHAVIOR_FULL}.
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE
+    })
+    public boolean isFullVolumeDevice() {
+        final AudioAttributes attributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .build();
+        final List<AudioDeviceAttributes> devices = getDevicesForAttributes(attributes);
+        for (AudioDeviceAttributes device : devices) {
+            if (getDeviceVolumeBehavior(device) == DEVICE_VOLUME_BEHAVIOR_FULL) {
+                return true;
+            }
+        }
+        return false;
     }
 
      /**

@@ -16,17 +16,11 @@
 
 package com.android.wm.shell.onehanded;
 
-import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_LONG_IN_SECONDS;
-import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
-import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER;
-import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS;
-
-import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 import android.content.ContentResolver;
 import android.database.ContentObserver;
-import android.net.Uri;
-import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -34,76 +28,30 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedSettingsUtilTest extends OneHandedTestCase {
-    ContentResolver mContentResolver;
-    ContentObserver mContentObserver;
-    boolean mOnChanged;
+    OneHandedSettingsUtil mSettingsUtil;
+
+    @Mock
+    ContentResolver mMockContentResolver;
+    @Mock
+    ContentObserver mMockContentObserver;
 
     @Before
     public void setUp() {
-        mContentResolver = mContext.getContentResolver();
-        mContentObserver = new ContentObserver(mContext.getMainThreadHandler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                super.onChange(selfChange);
-                mOnChanged = true;
-            }
-        };
-    }
+        MockitoAnnotations.initMocks(this);
 
-    @Test
-    public void testRegisterSecureKeyObserver() {
-        final Uri result = OneHandedSettingsUtil.registerSettingsKeyObserver(
-                Settings.Secure.TAPS_APP_TO_EXIT, mContentResolver, mContentObserver);
-
-        assertThat(result).isNotNull();
-
-        OneHandedSettingsUtil.registerSettingsKeyObserver(
-                Settings.Secure.TAPS_APP_TO_EXIT, mContentResolver, mContentObserver);
+        mSettingsUtil = new OneHandedSettingsUtil();
     }
 
     @Test
     public void testUnregisterSecureKeyObserver() {
-        OneHandedSettingsUtil.registerSettingsKeyObserver(
-                Settings.Secure.TAPS_APP_TO_EXIT, mContentResolver, mContentObserver);
-        OneHandedSettingsUtil.unregisterSettingsKeyObserver(mContentResolver, mContentObserver);
+        mSettingsUtil.unregisterSettingsKeyObserver(mMockContentResolver, mMockContentObserver);
 
-        assertThat(mOnChanged).isFalse();
-
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.TAPS_APP_TO_EXIT, 0);
-
-        assertThat(mOnChanged).isFalse();
-    }
-
-    @Test
-    public void testGetSettingsIsOneHandedModeEnabled() {
-        assertThat(OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
-                mContentResolver)).isAnyOf(true, false);
-    }
-
-    @Test
-    public void testGetSettingsTapsAppToExit() {
-        assertThat(OneHandedSettingsUtil.getSettingsTapsAppToExit(
-                mContentResolver)).isAnyOf(true, false);
-    }
-
-    @Test
-    public void testGetSettingsOneHandedModeTimeout() {
-        assertThat(OneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
-                mContentResolver)).isAnyOf(
-                ONE_HANDED_TIMEOUT_NEVER,
-                ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS,
-                ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS,
-                ONE_HANDED_TIMEOUT_LONG_IN_SECONDS);
-    }
-
-    @Test
-    public void testGetSettingsSwipeToNotificationEnabled() {
-        assertThat(OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
-                mContentResolver)).isAnyOf(true, false);
+        verify(mMockContentResolver).unregisterContentObserver(any());
     }
 }

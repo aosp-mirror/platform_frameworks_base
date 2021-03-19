@@ -70,4 +70,8 @@ interface IBiometricAuthenticator {
 
     // Gets the authenticator ID representing the current set of enrolled templates
     long getAuthenticatorId(int callingUserId);
+
+    // Requests the sensor to reset its lockout state
+    void resetLockout(IBinder token, String opPackageName, int userId,
+            in byte[] hardwareAuthToken);
 }

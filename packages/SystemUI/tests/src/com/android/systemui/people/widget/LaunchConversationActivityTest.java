@@ -20,11 +20,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.testing.AndroidTestingRunner;
@@ -37,6 +40,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.wmshell.BubblesManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +49,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -55,7 +61,7 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
     private static final String NOTIF_KEY = "notifKey";
     private static final String NOTIF_KEY_NO_ENTRY = "notifKeyNoEntry";
     private static final String NOTIF_KEY_NO_RANKING = "notifKeyNoRanking";
-
+    private static final String NOTIF_KEY_CAN_BUBBLE = "notifKeyCanBubble";
 
     private static final UserHandle USER_HANDLE = UserHandle.of(0);
     private static final int NOTIF_COUNT = 10;
@@ -72,16 +78,27 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
     @Mock
     private NotificationEntry mNotifEntryNoRanking;
     @Mock
+    private NotificationEntry mNotifEntryCanBubble;
+    @Mock
+    private BubblesManager mBubblesManager;
+    @Mock
     private NotificationListenerService.Ranking mRanking;
 
     @Captor
     private ArgumentCaptor<NotificationVisibility> mNotificationVisibilityCaptor;
 
+    private Intent mIntent;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mActivity = new LaunchConversationActivity(mNotificationEntryManager);
+        mActivity = new LaunchConversationActivity(mNotificationEntryManager,
+                Optional.of(mBubblesManager));
+        mActivity.setIsForTesting(true, mIStatusBarService);
+        mIntent = new Intent();
+        mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, "tile ID");
+        mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, PACKAGE_NAME);
+        mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_USER_HANDLE, USER_HANDLE);
 
         when(mNotificationEntryManager.getActiveNotificationsCount()).thenReturn(NOTIF_COUNT);
         when(mNotificationEntryManager.getPendingOrActiveNotif(NOTIF_KEY)).thenReturn(mNotifEntry);
@@ -89,15 +106,21 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
                 .thenReturn(null);
         when(mNotificationEntryManager.getPendingOrActiveNotif(NOTIF_KEY_NO_RANKING))
                 .thenReturn(mNotifEntryNoRanking);
+        when(mNotificationEntryManager.getPendingOrActiveNotif(NOTIF_KEY_CAN_BUBBLE))
+                .thenReturn(mNotifEntryCanBubble);
         when(mNotifEntry.getRanking()).thenReturn(mRanking);
+        when(mNotifEntryCanBubble.getRanking()).thenReturn(mRanking);
+        when(mNotifEntryCanBubble.canBubble()).thenReturn(true);
         when(mNotifEntryNoRanking.getRanking()).thenReturn(null);
         when(mRanking.getRank()).thenReturn(NOTIF_RANK);
     }
 
     @Test
     public void testDoNotClearNotificationIfNoKey() throws Exception {
-        mActivity.clearNotificationIfPresent(mIStatusBarService,
-                EMPTY_STRING, PACKAGE_NAME, USER_HANDLE);
+        mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY,
+                EMPTY_STRING);
+        mActivity.setIntent(mIntent);
+        mActivity.onCreate(new Bundle());
 
         verify(mIStatusBarService, never()).onNotificationClear(
                 any(), anyInt(), any(), anyInt(), anyInt(), any());
@@ -105,8 +128,10 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
 
     @Test
     public void testDoNotClearNotificationIfNoNotificationEntry() throws Exception {
-        mActivity.clearNotificationIfPresent(mIStatusBarService,
-                NOTIF_KEY_NO_ENTRY, PACKAGE_NAME, USER_HANDLE);
+        mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY,
+                NOTIF_KEY_NO_ENTRY);
+        mActivity.setIntent(mIntent);
+        mActivity.onCreate(new Bundle());
 
         verify(mIStatusBarService, never()).onNotificationClear(
                 any(), anyInt(), any(), anyInt(), anyInt(), any());
@@ -114,24 +139,41 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
 
     @Test
     public void testDoNotClearNotificationIfNoRanking() throws Exception {
-        mActivity.clearNotificationIfPresent(mIStatusBarService,
-                NOTIF_KEY_NO_RANKING, PACKAGE_NAME, USER_HANDLE);
+        mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY,
+                NOTIF_KEY_NO_RANKING);
+        mActivity.setIntent(mIntent);
+        mActivity.onCreate(new Bundle());
 
         verify(mIStatusBarService, never()).onNotificationClear(
                 any(), anyInt(), any(), anyInt(), anyInt(), any());
     }
 
     @Test
-    public void testClearNotification() throws Exception {
-        mActivity.clearNotificationIfPresent(mIStatusBarService,
-                NOTIF_KEY, PACKAGE_NAME, USER_HANDLE);
+    public void testEntryClearsNotificationAndDoesNotOpenBubble() throws Exception {
+        mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY,
+                NOTIF_KEY);
+        mActivity.setIntent(mIntent);
+        mActivity.onCreate(new Bundle());
 
         verify(mIStatusBarService, times(1)).onNotificationClear(any(),
                 anyInt(), any(), anyInt(), anyInt(), mNotificationVisibilityCaptor.capture());
+        verify(mBubblesManager, never()).expandStackAndSelectBubble(any());
 
         NotificationVisibility nv = mNotificationVisibilityCaptor.getValue();
         assertThat(nv.count).isEqualTo(NOTIF_COUNT);
         assertThat(nv.rank).isEqualTo(NOTIF_RANK);
     }
 
+    @Test
+    public void testBubbleEntryOpensBubbleAndDoesNotClearNotification() throws Exception {
+        mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY,
+                NOTIF_KEY_CAN_BUBBLE);
+        mActivity.setIntent(mIntent);
+        mActivity.onCreate(new Bundle());
+
+        // Don't clear the notification for bubbles.
+        verify(mIStatusBarService, never()).onNotificationClear(any(),
+                anyInt(), any(), anyInt(), anyInt(), any());
+        verify(mBubblesManager, times(1)).expandStackAndSelectBubble(eq(mNotifEntryCanBubble));
+    }
 }

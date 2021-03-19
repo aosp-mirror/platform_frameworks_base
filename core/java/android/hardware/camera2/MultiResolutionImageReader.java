@@ -131,18 +131,10 @@ public class MultiResolutionImageReader implements AutoCloseable {
      * @see
      * android.hardware.camera2.params.MultiResolutionStreamConfigurationMap
      */
-    public static @NonNull MultiResolutionImageReader newInstance(
+    public MultiResolutionImageReader(
             @NonNull Collection<MultiResolutionStreamInfo> streams,
             @Format             int format,
             @IntRange(from = 1) int maxImages) {
-        return new MultiResolutionImageReader(streams, format, maxImages);
-    }
-
-    /**
-     * @hide
-     */
-    protected MultiResolutionImageReader(Collection<MultiResolutionStreamInfo> streams,
-            int format, int maxImages) {
         mFormat = format;
         mMaxImages = maxImages;
 

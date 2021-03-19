@@ -252,6 +252,7 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
@@ -1768,6 +1769,11 @@ public class PackageManagerService extends IPackageManager.Stub
         public int[] getAllUserIds() {
             return mUserManager.getUserIds();
         }
+
+        @Override
+        public boolean doesUserExist(@UserIdInt int userId) {
+            return mUserManager.exists(userId);
+        }
     }
 
     /**
@@ -2639,8 +2645,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // We'll want to include browser possibilities in a few cases
             boolean includeBrowser = false;
 
-            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, candidates,
-                            matchFlags)) {
+            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, matchFlags)) {
                 result.addAll(undefinedList);
                 // Maybe add one for the other profile.
                 if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
@@ -25693,6 +25698,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!convertedFromPreCreated || !readPermissionStateForUser(userId)) {
             mPermissionManager.onUserCreated(userId);
             mLegacyPermissionManager.grantDefaultPermissions(userId);
+            mDomainVerificationManager.clearUser(userId);
         }
     }
 
@@ -27316,6 +27322,28 @@ public class PackageManagerService extends IPackageManager.Stub
                 int callingUid, int userId) {
             return PackageManagerService.this.getPackageStartability(
                     packageName, callingUid, userId) == PACKAGE_STARTABILITY_FROZEN;
+        }
+
+        @Override
+        public boolean isPackageUsesPermissionNeverForLocation(@NonNull String packageName,
+                @NonNull String permissionName) {
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(permissionName);
+            final AndroidPackage pkg;
+            synchronized (mLock) {
+                pkg = mPackages.get(packageName);
+            }
+            if (pkg == null) return false;
+            final List<ParsedUsesPermission> usesPermissions = pkg.getUsesPermissions();
+            final int size = usesPermissions.size();
+            for (int i = 0; i < size; i++) {
+                final ParsedUsesPermission usesPermission = usesPermissions.get(i);
+                if (Objects.equals(usesPermission.name, permissionName)) {
+                    return (usesPermission.usesPermissionFlags
+                            & ParsedUsesPermission.FLAG_NEVER_FOR_LOCATION) != 0;
+                }
+            }
+            return false;
         }
     }
 

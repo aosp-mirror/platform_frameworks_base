@@ -372,6 +372,8 @@ public:
     MOCK_CONST_METHOD2(unlink, ErrorCode(const Control& control, std::string_view path));
     MOCK_CONST_METHOD2(openForSpecialOps, UniqueFd(const Control& control, FileId id));
     MOCK_CONST_METHOD1(writeBlocks, ErrorCode(std::span<const DataBlock> blocks));
+    MOCK_CONST_METHOD3(reserveSpace,
+                       ErrorCode(const Control& control, std::string_view path, IncFsSize size));
     MOCK_CONST_METHOD3(waitForPendingReads,
                        WaitResult(const Control& control, std::chrono::milliseconds timeout,
                                   std::vector<incfs::ReadInfo>* pendingReadsBuffer));
@@ -379,7 +381,10 @@ public:
                        ErrorCode(const Control& control,
                                  const std::vector<PerUidReadTimeouts>& perUidReadTimeouts));
 
-    MockIncFs() { ON_CALL(*this, listExistingMounts(_)).WillByDefault(Return()); }
+    MockIncFs() {
+        ON_CALL(*this, listExistingMounts(_)).WillByDefault(Return());
+        ON_CALL(*this, reserveSpace(_, _, _)).WillByDefault(Return(0));
+    }
 
     void makeFileFails() { ON_CALL(*this, makeFile(_, _, _, _, _)).WillByDefault(Return(-1)); }
     void makeFileSuccess() { ON_CALL(*this, makeFile(_, _, _, _, _)).WillByDefault(Return(0)); }

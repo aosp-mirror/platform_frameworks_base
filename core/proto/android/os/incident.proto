@@ -55,13 +55,13 @@ import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
 import "frameworks/base/core/proto/android/service/restricted_image.proto";
 import "frameworks/base/core/proto/android/service/sensor_service.proto";
+import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
 import "frameworks/base/core/proto/android/util/textdump.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
 import "frameworks/base/proto/src/ipconnectivity.proto";
-import "frameworks/proto_logging/stats/enums/service/usb.proto";
 import "packages/modules/Permission/service/proto/com/android/role/roleservice.proto";
 
 package android.os;
@@ -513,17 +513,17 @@ message IncidentProto {
 
     optional com.android.server.powerstats.PowerStatsServiceMeterProto powerstats_meter = 3054 [
         (section).type = SECTION_DUMPSYS,
-        (section).args = "power_stats --proto meter"
+        (section).args = "powerstats --proto meter"
     ];
 
     optional com.android.server.powerstats.PowerStatsServiceModelProto powerstats_model = 3055 [
         (section).type = SECTION_DUMPSYS,
-        (section).args = "power_stats --proto model"
+        (section).args = "powerstats --proto model"
     ];
 
     optional com.android.server.powerstats.PowerStatsServiceResidencyProto powerstats_residency = 3056 [
         (section).type = SECTION_DUMPSYS,
-        (section).args = "power_stats --proto residency"
+        (section).args = "powerstats --proto residency"
     ];
 
     // Dumps in text format (on userdebug and eng builds only): 4000 ~ 4999

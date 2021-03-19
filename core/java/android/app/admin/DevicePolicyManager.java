@@ -1766,6 +1766,16 @@ public class DevicePolicyManager {
             "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
 
     /**
+     * Broadcast action: notify that a value of {@link Settings.Global#DEVICE_POLICY_CONSTANTS}
+     * has been changed.
+     * @hide
+     */
+    @TestApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DEVICE_POLICY_CONSTANTS_CHANGED =
+            "android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED";
+
+    /**
      * Permission policy to prompt user for new permission requests for runtime permissions.
      * Already granted or denied permissions are not affected by this.
      */
@@ -2426,7 +2436,7 @@ public class DevicePolicyManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = {"PRIVATE_DNS_MODE_"}, value = {
+    @IntDef(prefix = {"PRIVATE_DNS_MODE_"}, value = {
             PRIVATE_DNS_MODE_UNKNOWN,
             PRIVATE_DNS_MODE_OFF,
             PRIVATE_DNS_MODE_OPPORTUNISTIC,
@@ -2987,7 +2997,7 @@ public class DevicePolicyManager {
     /**
      * Checks if it's safe to run operations that can be affected by the given {@code reason}.
      *
-     * <p><b>Note:/b> notice that the operation safety state might change between the time this
+     * <p><b>Note:</b> notice that the operation safety state might change between the time this
      * method returns and the operation's method is called, so calls to the latter could still throw
      * a {@link UnsafeStateException} even when this method returns {@code true}.
      *
@@ -6159,13 +6169,22 @@ public class DevicePolicyManager {
 
     // STOPSHIP(b/174298501): clarify the expected return value following generateKeyPair call.
     /**
-     * Called by a device or profile owner, or delegated certificate installer, to query whether a
-     * certificate and private key are installed under a given alias.
+     * This API can be called by the following to query whether a certificate and private key are
+     * installed under a given alias:
+     * <ul>
+     *    <li>Device owner</li>
+     *    <li>Profile owner</li>
+     *    <li>Delegated certificate installer</li>
+     *    <li>Credential management app</li>
+     * </ul>
+     *
+     * If called by the credential management app, the alias must exist in the credential
+     * management app's {@link android.security.AppUriAuthenticationPolicy}.
      *
      * @param alias The alias under which the key pair is installed.
      * @return {@code true} if a key pair with this alias exists, {@code false} otherwise.
-     * @throws SecurityException if the caller is not a device or profile owner or a delegated
-     *         certificate installer.
+     * @throws SecurityException if the caller is not a device or profile owner, a delegated
+     *         certificate installer or the credential management app.
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
