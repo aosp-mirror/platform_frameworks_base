@@ -1176,11 +1176,13 @@ public class Vpn {
 
         if (!allowIPv4) {
             lp.addRoute(new RouteInfo(new IpPrefix(
-                    NetworkStackConstants.IPV4_ADDR_ANY, 0), RTN_UNREACHABLE));
+                    NetworkStackConstants.IPV4_ADDR_ANY, 0), null /*gateway*/,
+                    null /*iface*/, RTN_UNREACHABLE));
         }
         if (!allowIPv6) {
             lp.addRoute(new RouteInfo(new IpPrefix(
-                    NetworkStackConstants.IPV6_ADDR_ANY, 0), RTN_UNREACHABLE));
+                    NetworkStackConstants.IPV6_ADDR_ANY, 0), null /*gateway*/,
+                    null /*iface*/, RTN_UNREACHABLE));
         }
 
         // Concatenate search domains into a string.
@@ -2698,7 +2700,8 @@ public class Vpn {
 
                     mConfig.routes.clear();
                     for (final RouteInfo route : oldRoutes) {
-                        mConfig.routes.add(new RouteInfo(route.getDestination(), RTN_UNREACHABLE));
+                        mConfig.routes.add(new RouteInfo(route.getDestination(), null /*gateway*/,
+                                null /*iface*/, RTN_UNREACHABLE));
                     }
                     if (mNetworkAgent != null) {
                         mNetworkAgent.sendLinkProperties(makeLinkProperties());
@@ -3037,10 +3040,12 @@ public class Vpn {
                 // Add a throw route for the VPN server endpoint, if one was specified.
                 if (endpointAddress instanceof Inet4Address) {
                     mConfig.routes.add(new RouteInfo(
-                            new IpPrefix(endpointAddress, 32), RTN_THROW));
+                            new IpPrefix(endpointAddress, 32), null /*gateway*/,
+                            null /*iface*/, RTN_THROW));
                 } else if (endpointAddress instanceof Inet6Address) {
                     mConfig.routes.add(new RouteInfo(
-                            new IpPrefix(endpointAddress, 128), RTN_THROW));
+                            new IpPrefix(endpointAddress, 128), null /*gateway*/,
+                            null /*iface*/, RTN_THROW));
                 } else {
                     Log.e(TAG, "Unknown IP address family for VPN endpoint: "
                             + endpointAddress);
