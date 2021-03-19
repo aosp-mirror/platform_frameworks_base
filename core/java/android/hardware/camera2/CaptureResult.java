@@ -4635,7 +4635,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>A control for selecting whether optical stabilization (OIS) position
      * information is included in output result metadata.</p>
      * <p>Since optical image stabilization generally involves motion much faster than the duration
-     * of individualq image exposure, multiple OIS samples can be included for a single capture
+     * of individual image exposure, multiple OIS samples can be included for a single capture
      * result. For example, if the OIS reporting operates at 200 Hz, a typical camera operating
      * at 30fps may have 6-7 OIS samples per capture result. This information can be combined
      * with the rolling shutter skew to account for lens motion during image exposure in
