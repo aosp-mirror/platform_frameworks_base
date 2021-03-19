@@ -45,6 +45,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -71,6 +72,7 @@ import android.view.autofill.AutofillManagerInternal;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextClassifierEvent;
 import android.view.textclassifier.TextLinks;
 import android.widget.Toast;
 
@@ -344,8 +346,17 @@ public class ClipboardService extends SystemService {
         /** Uids that have already triggered a toast notification for {@link #primaryClip} */
         final SparseBooleanArray mNotifiedUids = new SparseBooleanArray();
 
+        /**
+         * Uids that have already triggered a notification to text classifier for
+         * {@link #primaryClip}.
+         */
+        final SparseBooleanArray mNotifiedTextClassifierUids = new SparseBooleanArray();
+
         final HashSet<String> activePermissionOwners
                 = new HashSet<String>();
+
+        /** The text classifier session that is used to annotate the text in the primary clip. */
+        TextClassifier mTextClassifier;
 
         PerUserClipboard(int userId) {
             this.userId = userId;
@@ -504,6 +515,7 @@ public class ClipboardService extends SystemService {
                 addActiveOwnerLocked(intendingUid, pkg);
                 PerUserClipboard clipboard = getClipboardLocked(intendingUserId);
                 showAccessNotificationLocked(pkg, intendingUid, intendingUserId, clipboard);
+                notifyTextClassifierLocked(clipboard, pkg, intendingUid);
                 return clipboard.primaryClip;
             }
         }
@@ -724,6 +736,7 @@ public class ClipboardService extends SystemService {
         }
         clipboard.primaryClip = clip;
         clipboard.mNotifiedUids.clear();
+        clipboard.mNotifiedTextClassifierUids.clear();
         if (clip != null) {
             clipboard.primaryClipUid = uid;
             clipboard.mPrimaryClipPackage = sourcePackage;
@@ -763,6 +776,11 @@ public class ClipboardService extends SystemService {
 
     @GuardedBy("mLock")
     private void startClassificationLocked(@NonNull ClipData clip, @UserIdInt int userId) {
+        if (clip.getItemCount() == 0) {
+            clip.getDescription().setClassificationStatus(
+                    ClipDescription.CLASSIFICATION_NOT_PERFORMED);
+            return;
+        }
         TextClassifier classifier;
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -771,16 +789,10 @@ public class ClipboardService extends SystemService {
                             new TextClassificationContext.Builder(
                                     getContext().getPackageName(),
                                     TextClassifier.WIDGET_TYPE_CLIPBOARD
-                    ).build()
-            );
+                            ).build()
+                    );
         } finally {
             Binder.restoreCallingIdentity(ident);
-        }
-
-        if (clip.getItemCount() == 0) {
-            clip.getDescription().setClassificationStatus(
-                    ClipDescription.CLASSIFICATION_NOT_PERFORMED);
-            return;
         }
         CharSequence text = clip.getItemAt(0).getText();
         if (TextUtils.isEmpty(text) || text.length() > mMaxClassificationLength
@@ -789,7 +801,7 @@ public class ClipboardService extends SystemService {
                     ClipDescription.CLASSIFICATION_NOT_PERFORMED);
             return;
         }
-
+        getClipboardLocked(userId).mTextClassifier = classifier;
         mWorkerHandler.post(() -> doClassification(text, clip, classifier));
     }
 
@@ -797,12 +809,7 @@ public class ClipboardService extends SystemService {
     private void doClassification(
             CharSequence text, ClipData clip, TextClassifier classifier) {
         TextLinks.Request request = new TextLinks.Request.Builder(text).build();
-        TextLinks links;
-        try {
-            links = classifier.generateLinks(request);
-        } finally {
-            classifier.destroy();
-        }
+        TextLinks links = classifier.generateLinks(request);
 
         // Find the highest confidence for each entity in the text.
         ArrayMap<String, Float> confidences = new ArrayMap<>();
@@ -1121,6 +1128,48 @@ public class ClipboardService extends SystemService {
 
         return !TextUtils.isEmpty(item.getText()) && item.getUri() == null
                 && item.getIntent() == null;
+    }
+
+    /** Potentially notifies the text classifier that an app is accessing a text clip. */
+    @GuardedBy("mLock")
+    private void notifyTextClassifierLocked(
+            PerUserClipboard clipboard, String callingPackage, int callingUid) {
+        if (clipboard.primaryClip == null) {
+            return;
+        }
+        ClipData.Item item = clipboard.primaryClip.getItemAt(0);
+        if (item == null) {
+            return;
+        }
+        if (!isText(clipboard.primaryClip)) {
+            return;
+        }
+        TextClassifier textClassifier = clipboard.mTextClassifier;
+        // Don't notify text classifier if we haven't used it to annotate the text in the clip.
+        if (textClassifier == null) {
+            return;
+        }
+        // Don't notify text classifier if the app reading the clipboard does not have the focus.
+        if (!mWm.isUidFocused(callingUid)) {
+            return;
+        }
+        // Don't notify text classifier again if already notified for this uid and clip.
+        if (clipboard.mNotifiedTextClassifierUids.get(callingUid)) {
+            return;
+        }
+        clipboard.mNotifiedTextClassifierUids.put(callingUid, true);
+        Binder.withCleanCallingIdentity(() -> {
+            TextClassifierEvent.TextLinkifyEvent pasteEvent =
+                    new TextClassifierEvent.TextLinkifyEvent.Builder(
+                            TextClassifierEvent.TYPE_READ_CLIPBOARD)
+                            .setEventContext(new TextClassificationContext.Builder(
+                                    callingPackage, TextClassifier.WIDGET_TYPE_CLIPBOARD)
+                                    .build())
+                            .setExtras(
+                                    Bundle.forPair("source_package", clipboard.mPrimaryClipPackage))
+                            .build();
+            textClassifier.onTextClassifierEvent(pasteEvent);
+        });
     }
 
     private TextClassificationManager createTextClassificationManagerAsUser(@UserIdInt int userId) {
