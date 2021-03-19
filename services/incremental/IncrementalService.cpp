@@ -1980,35 +1980,30 @@ int IncrementalService::setFileContent(const IfsMountPtr& ifs, const incfs::File
     return 0;
 }
 
-int IncrementalService::isFileFullyLoaded(StorageId storage, std::string_view filePath) const {
+incfs::LoadingState IncrementalService::isFileFullyLoaded(StorageId storage,
+                                                          std::string_view filePath) const {
     std::unique_lock l(mLock);
     const auto ifs = getIfsLocked(storage);
     if (!ifs) {
         LOG(ERROR) << "isFileFullyLoaded failed, invalid storageId: " << storage;
-        return -EINVAL;
+        return incfs::LoadingState(-EINVAL);
     }
     const auto storageInfo = ifs->storages.find(storage);
     if (storageInfo == ifs->storages.end()) {
         LOG(ERROR) << "isFileFullyLoaded failed, no storage: " << storage;
-        return -EINVAL;
+        return incfs::LoadingState(-EINVAL);
     }
     l.unlock();
-    return isFileFullyLoadedFromPath(*ifs, filePath);
+    return mIncFs->isFileFullyLoaded(ifs->control, filePath);
 }
 
-int IncrementalService::isFileFullyLoadedFromPath(const IncFsMount& ifs,
-                                                  std::string_view filePath) const {
-    const auto [filledBlocks, totalBlocks] = mIncFs->countFilledBlocks(ifs.control, filePath);
-    if (filledBlocks < 0) {
-        LOG(ERROR) << "isFileFullyLoadedFromPath failed to get filled blocks count for: "
-                   << filePath << " errno: " << filledBlocks;
-        return filledBlocks;
+incfs::LoadingState IncrementalService::isMountFullyLoaded(StorageId storage) const {
+    const auto ifs = getIfs(storage);
+    if (!ifs) {
+        LOG(ERROR) << "isMountFullyLoaded failed, invalid storageId: " << storage;
+        return incfs::LoadingState(-EINVAL);
     }
-    if (totalBlocks < filledBlocks) {
-        LOG(ERROR) << "isFileFullyLoadedFromPath failed to get total num of blocks";
-        return -EINVAL;
-    }
-    return totalBlocks - filledBlocks;
+    return mIncFs->isEverythingFullyLoaded(ifs->control);
 }
 
 IncrementalService::LoadingProgress IncrementalService::getLoadingProgress(
