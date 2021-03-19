@@ -474,9 +474,9 @@ auto IncrementalService::getStorageSlotLocked() -> MountMap::iterator {
     }
 }
 
-StorageId IncrementalService::createStorage(
-        std::string_view mountPoint, const content::pm::DataLoaderParamsParcel& dataLoaderParams,
-        CreateOptions options) {
+StorageId IncrementalService::createStorage(std::string_view mountPoint,
+                                            content::pm::DataLoaderParamsParcel dataLoaderParams,
+                                            CreateOptions options) {
     LOG(INFO) << "createStorage: " << mountPoint << " | " << int(options);
     if (!path::isAbsolute(mountPoint)) {
         LOG(ERROR) << "path is not absolute: " << mountPoint;
@@ -584,9 +584,9 @@ StorageId IncrementalService::createStorage(
         metadata::Mount m;
         m.mutable_storage()->set_id(ifs->mountId);
         m.mutable_loader()->set_type((int)dataLoaderParams.type);
-        m.mutable_loader()->set_package_name(dataLoaderParams.packageName);
-        m.mutable_loader()->set_class_name(dataLoaderParams.className);
-        m.mutable_loader()->set_arguments(dataLoaderParams.arguments);
+        m.mutable_loader()->set_package_name(std::move(dataLoaderParams.packageName));
+        m.mutable_loader()->set_class_name(std::move(dataLoaderParams.className));
+        m.mutable_loader()->set_arguments(std::move(dataLoaderParams.arguments));
         const auto metadata = m.SerializeAsString();
         if (auto err =
                     mIncFs->makeFile(ifs->control,
@@ -661,14 +661,14 @@ StorageId IncrementalService::createLinkedStorage(std::string_view mountPoint,
 }
 
 bool IncrementalService::startLoading(StorageId storageId,
-                                      content::pm::DataLoaderParamsParcel&& dataLoaderParams,
-                                      const DataLoaderStatusListener& statusListener,
-                                      StorageHealthCheckParams&& healthCheckParams,
-                                      const StorageHealthListener& healthListener,
-                                      const std::vector<PerUidReadTimeouts>& perUidReadTimeouts) {
+                                      content::pm::DataLoaderParamsParcel dataLoaderParams,
+                                      DataLoaderStatusListener statusListener,
+                                      const StorageHealthCheckParams& healthCheckParams,
+                                      StorageHealthListener healthListener,
+                                      std::vector<PerUidReadTimeouts> perUidReadTimeouts) {
     // Per Uid timeouts.
     if (!perUidReadTimeouts.empty()) {
-        setUidReadTimeouts(storageId, perUidReadTimeouts);
+        setUidReadTimeouts(storageId, std::move(perUidReadTimeouts));
     }
 
     // Re-initialize DataLoader.
@@ -684,8 +684,9 @@ bool IncrementalService::startLoading(StorageId storageId,
     l.unlock();
 
     // DataLoader.
-    auto dataLoaderStub = prepareDataLoader(*ifs, std::move(dataLoaderParams), &statusListener,
-                                            std::move(healthCheckParams), &healthListener);
+    auto dataLoaderStub =
+            prepareDataLoader(*ifs, std::move(dataLoaderParams), std::move(statusListener),
+                              healthCheckParams, std::move(healthListener));
     CHECK(dataLoaderStub);
 
     if (dataLoaderStub->isSystemDataLoader()) {
@@ -1196,8 +1197,8 @@ RawMetadata IncrementalService::getMetadata(StorageId storage, FileId node) cons
     return mIncFs->getMetadata(ifs->control, node);
 }
 
-void IncrementalService::setUidReadTimeouts(
-        StorageId storage, const std::vector<PerUidReadTimeouts>& perUidReadTimeouts) {
+void IncrementalService::setUidReadTimeouts(StorageId storage,
+                                            std::vector<PerUidReadTimeouts>&& perUidReadTimeouts) {
     using microseconds = std::chrono::microseconds;
     using milliseconds = std::chrono::milliseconds;
 
@@ -1615,19 +1616,18 @@ void IncrementalService::runCmdLooper() {
 }
 
 IncrementalService::DataLoaderStubPtr IncrementalService::prepareDataLoader(
-        IncFsMount& ifs, DataLoaderParamsParcel&& params,
-        const DataLoaderStatusListener* statusListener,
-        StorageHealthCheckParams&& healthCheckParams, const StorageHealthListener* healthListener) {
+        IncFsMount& ifs, DataLoaderParamsParcel&& params, DataLoaderStatusListener&& statusListener,
+        const StorageHealthCheckParams& healthCheckParams, StorageHealthListener&& healthListener) {
     std::unique_lock l(ifs.lock);
-    prepareDataLoaderLocked(ifs, std::move(params), statusListener, std::move(healthCheckParams),
-                            healthListener);
+    prepareDataLoaderLocked(ifs, std::move(params), std::move(statusListener), healthCheckParams,
+                            std::move(healthListener));
     return ifs.dataLoaderStub;
 }
 
 void IncrementalService::prepareDataLoaderLocked(IncFsMount& ifs, DataLoaderParamsParcel&& params,
-                                                 const DataLoaderStatusListener* statusListener,
-                                                 StorageHealthCheckParams&& healthCheckParams,
-                                                 const StorageHealthListener* healthListener) {
+                                                 DataLoaderStatusListener&& statusListener,
+                                                 const StorageHealthCheckParams& healthCheckParams,
+                                                 StorageHealthListener&& healthListener) {
     if (ifs.dataLoaderStub) {
         LOG(INFO) << "Skipped data loader preparation because it already exists";
         return;
@@ -1645,8 +1645,8 @@ void IncrementalService::prepareDataLoaderLocked(IncFsMount& ifs, DataLoaderPara
 
     ifs.dataLoaderStub =
             new DataLoaderStub(*this, ifs.mountId, std::move(params), std::move(fsControlParcel),
-                               statusListener, std::move(healthCheckParams), healthListener,
-                               path::join(ifs.root, constants().mount));
+                               std::move(statusListener), healthCheckParams,
+                               std::move(healthListener), path::join(ifs.root, constants().mount));
 }
 
 template <class Duration>
@@ -2036,8 +2036,8 @@ IncrementalService::LoadingProgress IncrementalService::getLoadingProgressFromPa
     return error ? LoadingProgress{error, error} : LoadingProgress{filledBlocks, totalBlocks};
 }
 
-bool IncrementalService::updateLoadingProgress(
-        StorageId storage, const StorageLoadingProgressListener& progressListener) {
+bool IncrementalService::updateLoadingProgress(StorageId storage,
+                                               StorageLoadingProgressListener&& progressListener) {
     const auto progress = getLoadingProgress(storage);
     if (progress.isError()) {
         // Failed to get progress from incfs, abort.
@@ -2050,15 +2050,15 @@ bool IncrementalService::updateLoadingProgress(
     }
     addTimedJob(*mProgressUpdateJobQueue, storage,
                 Constants::progressUpdateInterval /* repeat after 1s */,
-                [storage, progressListener, this]() {
-                    updateLoadingProgress(storage, progressListener);
+                [storage, progressListener = std::move(progressListener), this]() mutable {
+                    updateLoadingProgress(storage, std::move(progressListener));
                 });
     return true;
 }
 
 bool IncrementalService::registerLoadingProgressListener(
-        StorageId storage, const StorageLoadingProgressListener& progressListener) {
-    return updateLoadingProgress(storage, progressListener);
+        StorageId storage, StorageLoadingProgressListener progressListener) {
+    return updateLoadingProgress(storage, std::move(progressListener));
 }
 
 bool IncrementalService::unregisterLoadingProgressListener(StorageId storage) {
@@ -2066,8 +2066,8 @@ bool IncrementalService::unregisterLoadingProgressListener(StorageId storage) {
 }
 
 bool IncrementalService::registerStorageHealthListener(
-        StorageId storage, StorageHealthCheckParams&& healthCheckParams,
-        const StorageHealthListener& healthListener) {
+        StorageId storage, const StorageHealthCheckParams& healthCheckParams,
+        StorageHealthListener healthListener) {
     DataLoaderStubPtr dataLoaderStub;
     {
         std::unique_lock l(mLock);
@@ -2080,14 +2080,12 @@ bool IncrementalService::registerStorageHealthListener(
             return false;
         }
     }
-    dataLoaderStub->setHealthListener(std::move(healthCheckParams), &healthListener);
+    dataLoaderStub->setHealthListener(healthCheckParams, std::move(healthListener));
     return true;
 }
 
 void IncrementalService::unregisterStorageHealthListener(StorageId storage) {
-    StorageHealthCheckParams invalidCheckParams;
-    invalidCheckParams.blockedTimeoutMs = -1;
-    registerStorageHealthListener(storage, std::move(invalidCheckParams), {});
+    registerStorageHealthListener(storage, {}, {});
 }
 
 bool IncrementalService::perfLoggingEnabled() {
@@ -2212,26 +2210,23 @@ long IncrementalService::getMillsSinceOldestPendingRead(StorageId storageId) {
     return ifs->dataLoaderStub->elapsedMsSinceOldestPendingRead();
 }
 
-IncrementalService::DataLoaderStub::DataLoaderStub(IncrementalService& service, MountId id,
-                                                   DataLoaderParamsParcel&& params,
-                                                   FileSystemControlParcel&& control,
-                                                   const DataLoaderStatusListener* statusListener,
-                                                   StorageHealthCheckParams&& healthCheckParams,
-                                                   const StorageHealthListener* healthListener,
-                                                   std::string&& healthPath)
+IncrementalService::DataLoaderStub::DataLoaderStub(
+        IncrementalService& service, MountId id, DataLoaderParamsParcel&& params,
+        FileSystemControlParcel&& control, DataLoaderStatusListener&& statusListener,
+        const StorageHealthCheckParams& healthCheckParams, StorageHealthListener&& healthListener,
+        std::string&& healthPath)
       : mService(service),
         mId(id),
         mParams(std::move(params)),
         mControl(std::move(control)),
-        mStatusListener(statusListener ? *statusListener : DataLoaderStatusListener()),
-        mHealthListener(healthListener ? *healthListener : StorageHealthListener()),
+        mStatusListener(std::move(statusListener)),
+        mHealthListener(std::move(healthListener)),
         mHealthPath(std::move(healthPath)),
-        mHealthCheckParams(std::move(healthCheckParams)) {
-    if (mHealthListener) {
-        if (!isHealthParamsValid()) {
-            mHealthListener = {};
-        }
-    } else {
+        mHealthCheckParams(healthCheckParams) {
+    if (mHealthListener && !isHealthParamsValid()) {
+        mHealthListener = {};
+    }
+    if (!mHealthListener) {
         // Disable advanced health check statuses.
         mHealthCheckParams.blockedTimeoutMs = -1;
     }
@@ -2800,14 +2795,12 @@ void IncrementalService::DataLoaderStub::unregisterFromPendingReads() {
 }
 
 void IncrementalService::DataLoaderStub::setHealthListener(
-        StorageHealthCheckParams&& healthCheckParams, const StorageHealthListener* healthListener) {
+        const StorageHealthCheckParams& healthCheckParams, StorageHealthListener&& healthListener) {
     std::lock_guard lock(mMutex);
-    mHealthCheckParams = std::move(healthCheckParams);
-    if (healthListener == nullptr) {
-        // reset listener and params
-        mHealthListener = {};
-    } else {
-        mHealthListener = *healthListener;
+    mHealthCheckParams = healthCheckParams;
+    mHealthListener = std::move(healthListener);
+    if (!mHealthListener) {
+        mHealthCheckParams.blockedTimeoutMs = -1;
     }
 }
 
