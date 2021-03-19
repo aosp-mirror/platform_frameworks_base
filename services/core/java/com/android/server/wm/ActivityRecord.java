@@ -2114,6 +2114,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (snapshot == null) {
             return false;
         }
+        if (!snapshot.getTopActivityComponent().equals(mActivityComponent)) {
+            // Obsoleted snapshot.
+            return false;
+        }
         final int rotation = mDisplayContent.rotationForActivityInDifferentOrientation(this);
         final int targetRotation = rotation != ROTATION_UNDEFINED
                 // The display may rotate according to the orientation of this activity.
