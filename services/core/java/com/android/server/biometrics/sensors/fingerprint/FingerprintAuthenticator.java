@@ -62,10 +62,10 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
     @Override
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
             long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
-            String opPackageName, int cookie)
+            String opPackageName, int cookie, boolean allowBackgroundAuthentication)
             throws RemoteException {
         mFingerprintService.prepareForAuthentication(mSensorId, token, operationId, userId,
-                sensorReceiver, opPackageName, cookie);
+                sensorReceiver, opPackageName, cookie, allowBackgroundAuthentication);
     }
 
     @Override

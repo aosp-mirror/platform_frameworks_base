@@ -62,11 +62,11 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsClient, @NonNull LockoutTracker lockoutTracker,
-            @NonNull UsageStats usageStats, boolean isKeyguard) {
+            @NonNull UsageStats usageStats, boolean allowBackgroundAuthentication) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
-                lockoutTracker, isKeyguard);
+                lockoutTracker, allowBackgroundAuthentication);
         mUsageStats = usageStats;
 
         final Resources resources = getContext().getResources();

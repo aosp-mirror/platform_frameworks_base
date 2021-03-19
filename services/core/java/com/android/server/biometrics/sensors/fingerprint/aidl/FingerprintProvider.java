@@ -469,7 +469,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean isKeyguard) {
+            boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
             final IFingerprint daemon = getHalInstance();
             if (daemon == null) {
@@ -491,7 +491,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         operationId, restricted, opPackageName, cookie,
                         false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
                         mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
-                        mUdfpsOverlayController, isKeyguard);
+                        mUdfpsOverlayController, allowBackgroundAuthentication);
                 mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling authenticate", e);

@@ -151,7 +151,8 @@ public class AuthSessionTest {
                     eq(userId),
                     eq(mSensorReceiver),
                     eq(TEST_PACKAGE),
-                    eq(sensor.getCookie()));
+                    eq(sensor.getCookie()),
+                    anyBoolean() /* allowBackgroundAuthentication */);
         }
 
         final int cookie1 = session.mPreAuthInfo.eligibleSensors.get(0).getCookie();
