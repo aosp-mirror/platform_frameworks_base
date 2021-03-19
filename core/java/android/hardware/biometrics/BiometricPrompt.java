@@ -16,6 +16,7 @@
 
 package android.hardware.biometrics;
 
+import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
@@ -25,6 +26,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.hardware.face.FaceManager;
@@ -45,6 +47,7 @@ import com.android.internal.R;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.Signature;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.crypto.Cipher;
@@ -339,6 +342,32 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * If non-empty, requests authentication to be performed only if the sensor is contained
+         * within the list. Note that the actual sensor presented to the user/test will meet all
+         * constraints specified within this builder. For example, on a device with the below
+         * configuration:
+         *
+         * SensorId: 1, Strength: BIOMETRIC_STRONG
+         * SensorId: 2, Strength: BIOMETRIC_WEAK
+         *
+         * If authentication is invoked with setAllowedAuthenticators(BIOMETRIC_STRONG) and
+         * setAllowedSensorIds(2), then no sensor will be eligible for authentication.
+         *
+         * @see {@link BiometricManager#getSensorProperties()}
+         *
+         * @param sensorIds Sensor IDs to constrain this authentication to.
+         * @return This builder
+         * @hide
+         */
+        @TestApi
+        @NonNull
+        @RequiresPermission(anyOf = {TEST_BIOMETRIC, USE_BIOMETRIC_INTERNAL})
+        public Builder setAllowedSensorIds(@NonNull List<Integer> sensorIds) {
+            mPromptInfo.setAllowedSensorIds(sensorIds);
+            return this;
+        }
+
+        /**
          * If set check the Device Policy Manager for disabled biometrics.
          *
          * @param checkDevicePolicyManager
@@ -360,21 +389,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @NonNull
         public Builder setReceiveSystemEvents(boolean set) {
             mPromptInfo.setReceiveSystemEvents(set);
-            return this;
-        }
-
-        /**
-         * If set, authenticate using the biometric sensor with the given ID.
-         *
-         * @param sensorId The ID of a biometric sensor, or -1 to allow any sensor (default).
-         * @return This builder.
-         *
-         * @hide
-         */
-        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-        @NonNull
-        public Builder setSensorId(int sensorId) {
-            mPromptInfo.setSensorId(sensorId);
             return this;
         }
 
@@ -593,6 +607,16 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     @Nullable
     public int getAllowedAuthenticators() {
         return mPromptInfo.getAuthenticators();
+    }
+
+    /**
+     * @return The values set by {@link Builder#setAllowedSensorIds(List)}
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public List<Integer> getAllowedSensorIds() {
+        return mPromptInfo.getAllowedSensorIds();
     }
 
     /**

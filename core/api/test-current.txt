@@ -1033,6 +1033,14 @@ package android.hardware.biometrics {
     method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public String getUiPackage();
   }
 
+  public class BiometricPrompt {
+    method @NonNull public java.util.List<java.lang.Integer> getAllowedSensorIds();
+  }
+
+  public static class BiometricPrompt.Builder {
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowedSensorIds(@NonNull java.util.List<java.lang.Integer>);
+  }
+
   public class BiometricTestSession implements java.lang.AutoCloseable {
     method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void acceptAuthentication(int);
     method @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public void cleanupInternalState(int);
