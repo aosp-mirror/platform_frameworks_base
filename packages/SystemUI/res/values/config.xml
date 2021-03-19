@@ -599,4 +599,7 @@
     <!-- Whether a transition of ACTIVITY_TYPE_ASSISTANT to the home app should play a home sound
          effect -->
     <bool name="config_playHomeSoundAfterAssistant">false</bool>
+
+    <!-- Whether to use window background blur for the volume dialog. -->
+    <bool name="config_volumeDialogUseBackgroundBlur">false</bool>
 </resources>

@@ -243,6 +243,10 @@
     <color name="magnification_border_color">#FF9900</color>
     <color name="magnification_switch_button_color">#7F000000</color>
 
+    <!-- Volume dialog colors -->
+    <color name="volume_dialog_background_color">@android:color/transparent</color>
+    <color name="volume_dialog_background_color_above_blur">@android:color/transparent</color>
+
     <!-- media -->
     <color name="media_disabled">#80ffffff</color>
     <color name="media_seamless_border">?android:attr/colorAccent</color>
