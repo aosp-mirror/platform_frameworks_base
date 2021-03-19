@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +42,7 @@ import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
@@ -123,10 +123,20 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mDialog2.isAllowDeviceCredentials()).thenReturn(false);
 
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
+
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */, "" /* softwareVersion */));
+        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */));
+
         FingerprintSensorPropertiesInternal prop = new FingerprintSensorPropertiesInternal(
                 1 /* sensorId */,
                 SensorProperties.STRENGTH_STRONG,
                 1 /* maxEnrollmentsPerUser */,
+                componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                 true /* resetLockoutRequireHardwareAuthToken */);
         List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
