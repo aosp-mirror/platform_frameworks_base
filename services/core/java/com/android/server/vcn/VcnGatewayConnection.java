@@ -1444,7 +1444,7 @@ public class VcnGatewayConnection extends StateMachine {
                             new NetworkAgentConfig.Builder().build(),
                             mVcnContext.getVcnNetworkProvider()) {
                         @Override
-                        public void unwanted() {
+                        public void onNetworkUnwanted() {
                             Slog.d(TAG, "NetworkAgent was unwanted");
                             teardownAsynchronously();
                         }
