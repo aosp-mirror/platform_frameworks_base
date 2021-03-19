@@ -167,7 +167,7 @@ public:
     incfs::LoadingState isFileFullyLoaded(StorageId storage, std::string_view filePath) const;
     incfs::LoadingState isMountFullyLoaded(StorageId storage) const;
 
-    LoadingProgress getLoadingProgress(StorageId storage, bool stopOnFirstIncomplete) const;
+    LoadingProgress getLoadingProgress(StorageId storage) const;
 
     bool registerLoadingProgressListener(StorageId storage,
                                          const StorageLoadingProgressListener& progressListener);
@@ -255,7 +255,7 @@ private:
 
         bool fsmStep();
 
-        void onHealthStatus(StorageHealthListener healthListener, int healthStatus);
+        void onHealthStatus(const StorageHealthListener& healthListener, int healthStatus);
         void updateHealthStatus(bool baseline = false);
 
         bool isValid() const { return id() != kInvalidStorageId; }
@@ -413,8 +413,7 @@ private:
     int setStorageParams(IncFsMount& ifs, StorageId storageId, bool enableReadLogs);
     binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
 
-    LoadingProgress getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path,
-                                               bool stopOnFirstIncomplete) const;
+    LoadingProgress getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path) const;
 
     int setFileContent(const IfsMountPtr& ifs, const incfs::FileId& fileId,
                        std::string_view debugFilePath, std::span<const uint8_t> data) const;
