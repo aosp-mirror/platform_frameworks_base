@@ -353,7 +353,7 @@ public final class Settings implements Watchable, Snappable {
     private static final String ATTR_DATABASE_VERSION = "databaseVersion";
     private static final String ATTR_VALUE = "value";
 
-    private final Object mLock;
+    private final PackageManagerTracedLock mLock;
 
     private final RuntimePermissionPersistence mRuntimePermissionsPersistence;
 
@@ -525,7 +525,7 @@ public final class Settings implements Watchable, Snappable {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public Settings(Map<String, PackageSetting> pkgSettings) {
-        mLock = new Object();
+        mLock = new PackageManagerTracedLock();
         mPackages.putAll(pkgSettings);
         mAppIds = new WatchedArrayList<>();
         mOtherAppIds = new WatchedSparseArray<>();
@@ -562,7 +562,7 @@ public final class Settings implements Watchable, Snappable {
     Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
             LegacyPermissionDataProvider permissionDataProvider,
             @NonNull DomainVerificationManagerInternal domainVerificationManager,
-            @NonNull Object lock)  {
+            @NonNull PackageManagerTracedLock lock)  {
         mLock = lock;
         mAppIds = new WatchedArrayList<>();
         mOtherAppIds = new WatchedSparseArray<>();

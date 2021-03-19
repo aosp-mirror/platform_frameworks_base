@@ -59,10 +59,10 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.LocalServices;
-import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.utils.WatchableTester;
 
 import com.google.common.truth.Truth;
@@ -1197,7 +1197,7 @@ public class PackageManagerSettingsTests {
     private Settings makeSettings() {
         return new Settings(InstrumentationRegistry.getContext().getFilesDir(),
                 mRuntimePermissionsPersistence, mPermissionDataProvider,
-                mDomainVerificationManager, new Object());
+                mDomainVerificationManager, new PackageManagerTracedLock());
     }
 
     private void verifyKeySetMetaData(Settings settings)
