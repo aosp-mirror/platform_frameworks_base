@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
@@ -120,9 +121,19 @@ public class UdfpsControllerTest extends SysuiTestCase {
         setUpResources();
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false)).thenReturn(mUdfpsView);
         final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
+
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */, "" /* softwareVersion */));
+        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */));
+
         props.add(new FingerprintSensorPropertiesInternal(TEST_UDFPS_SENSOR_ID,
                 SensorProperties.STRENGTH_STRONG,
                 5 /* maxEnrollmentsPerUser */,
+                componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                 true /* resetLockoutRequiresHardwareAuthToken */));
         when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(props);

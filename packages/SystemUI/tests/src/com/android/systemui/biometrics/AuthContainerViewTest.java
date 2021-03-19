@@ -34,8 +34,8 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
@@ -248,9 +248,19 @@ public class AuthContainerViewTest extends SysuiTestCase {
         config.mPromptInfo = promptInfo;
 
         final List<FingerprintSensorPropertiesInternal> fpProps = new ArrayList<>();
+
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */, "" /* softwareVersion */));
+        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */));
+
         fpProps.add(new FingerprintSensorPropertiesInternal(0,
                 SensorProperties.STRENGTH_STRONG,
                 5 /* maxEnrollmentsPerUser */,
+                componentInfo,
                 FingerprintSensorProperties.TYPE_REAR,
                 false /* resetLockoutRequiresHardwareAuthToken */));
         mAuthContainer = new TestableAuthContainer(config, fpProps, null /* faceProps */);

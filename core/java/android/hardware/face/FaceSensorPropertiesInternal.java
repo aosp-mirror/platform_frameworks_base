@@ -16,15 +16,23 @@
 
 package android.hardware.face;
 
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.Parcel;
+
+import java.util.List;
 
 /**
  * Container for face sensor properties.
  * @hide
  */
 public class FaceSensorPropertiesInternal extends SensorPropertiesInternal {
+    /**
+     * See {@link FaceSensorProperties.SensorType}.
+     */
+    public final @FaceSensorProperties.SensorType int sensorType;
+
     /**
      * True if the sensor is able to perform generic face detection, without running the
      * matching algorithm, and without affecting the lockout counter.
@@ -40,18 +48,21 @@ public class FaceSensorPropertiesInternal extends SensorPropertiesInternal {
      * Initializes SensorProperties with specified values
      */
     public FaceSensorPropertiesInternal(int sensorId, @SensorProperties.Strength int strength,
-            int maxEnrollmentsPerUser, boolean supportsFaceDetection,
+            int maxEnrollmentsPerUser, List<ComponentInfoInternal> componentInfo,
+            @FaceSensorProperties.SensorType int sensorType, boolean supportsFaceDetection,
             boolean supportsSelfIllumination, boolean resetLockoutRequiresChallenge) {
         // resetLockout is managed by the HAL and requires a HardwareAuthToken for all face
         // HAL interfaces (IBiometricsFace@1.0 HIDL and IFace@1.0 AIDL).
-        super(sensorId, strength, maxEnrollmentsPerUser,
-                true /* resetLockoutRequiresHardwareAuthToken */, resetLockoutRequiresChallenge);
+        super(sensorId, strength, maxEnrollmentsPerUser, componentInfo,
+            true /* resetLockoutRequiresHardwareAuthToken */, resetLockoutRequiresChallenge);
+        this.sensorType = sensorType;
         this.supportsFaceDetection = supportsFaceDetection;
         this.supportsSelfIllumination = supportsSelfIllumination;
     }
 
     protected FaceSensorPropertiesInternal(Parcel in) {
         super(in);
+        sensorType = in.readInt();
         supportsFaceDetection = in.readBoolean();
         supportsSelfIllumination = in.readBoolean();
     }
@@ -77,12 +88,13 @@ public class FaceSensorPropertiesInternal extends SensorPropertiesInternal {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
+        dest.writeInt(sensorType);
         dest.writeBoolean(supportsFaceDetection);
         dest.writeBoolean(supportsSelfIllumination);
     }
 
     @Override
     public String toString() {
-        return "ID: " + sensorId + ", Strength: " + sensorStrength;
+        return "ID: " + sensorId + ", Strength: " + sensorStrength + ", Type: " + sensorType;
     }
 }
