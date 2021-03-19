@@ -28,6 +28,7 @@ import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -42,7 +43,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManagerInternal;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.Handler;
@@ -117,6 +120,10 @@ public final class QuotaController extends StateController {
 
     private static final String ALARM_TAG_CLEANUP = "*job.cleanup*";
     private static final String ALARM_TAG_QUOTA_CHECK = "*job.quota_check*";
+
+    private static final int SYSTEM_APP_CHECK_FLAGS =
+            PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                    | PackageManager.GET_PERMISSIONS | PackageManager.MATCH_KNOWN_PACKAGES;
 
     /**
      * Standardize the output of userId-packageName combo.
@@ -526,7 +533,9 @@ public final class QuotaController extends StateController {
             QcConstants.DEFAULT_EJ_LIMIT_RESTRICTED_MS
     };
 
-    private long mEjLimitSpecialAdditionMs = QcConstants.DEFAULT_EJ_LIMIT_SPECIAL_ADDITION_MS;
+    private long mEjLimitAdditionInstallerMs = QcConstants.DEFAULT_EJ_LIMIT_ADDITION_INSTALLER_MS;
+
+    private long mEjLimitAdditionSpecialMs = QcConstants.DEFAULT_EJ_LIMIT_ADDITION_SPECIAL_MS;
 
     /**
      * The period of time used to calculate expedited job sessions. Apps can only have expedited job
@@ -560,9 +569,11 @@ public final class QuotaController extends StateController {
 
     private long mEJGracePeriodTopAppMs = QcConstants.DEFAULT_EJ_GRACE_PERIOD_TOP_APP_MS;
 
-    /** The package verifier app. */
-    @Nullable
-    private String mPackageVerifier;
+    /**
+     * List of system apps with the {@link android.Manifest.permission#INSTALL_PACKAGES} permission
+     * granted for each user.
+     */
+    private final SparseSetArray<String> mSystemInstallers = new SparseSetArray<>();
 
     /** An app has reached its quota. The message should contain a {@link Package} object. */
     @VisibleForTesting
@@ -627,11 +638,8 @@ public final class QuotaController extends StateController {
 
     @Override
     public void onSystemServicesReady() {
-        String[] pkgNames = LocalServices.getService(PackageManagerInternal.class)
-                .getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM);
         synchronized (mLock) {
-            mPackageVerifier = ArrayUtils.firstOrNull(pkgNames);
+            cacheInstallerPackagesLocked(UserHandle.USER_SYSTEM);
         }
     }
 
@@ -731,6 +739,11 @@ public final class QuotaController extends StateController {
     }
 
     @Override
+    public void onUserAddedLocked(int userId) {
+        cacheInstallerPackagesLocked(userId);
+    }
+
+    @Override
     public void onUserRemovedLocked(int userId) {
         mTrackedJobs.delete(userId);
         mPkgTimers.delete(userId);
@@ -741,6 +754,7 @@ public final class QuotaController extends StateController {
         mExecutionStatsCache.delete(userId);
         mEJStats.delete(userId);
         mUidToPackageCache.clear();
+        mSystemInstallers.remove(userId);
     }
 
     /** Drop all historical stats and stop tracking any active sessions for the specified app. */
@@ -765,6 +779,22 @@ public final class QuotaController extends StateController {
         mInQuotaAlarmListener.removeAlarmLocked(userId, packageName);
         mExecutionStatsCache.delete(userId, packageName);
         mEJStats.delete(userId, packageName);
+    }
+
+    private void cacheInstallerPackagesLocked(int userId) {
+        final List<PackageInfo> packages = mContext.getPackageManager()
+                .getInstalledPackagesAsUser(SYSTEM_APP_CHECK_FLAGS, userId);
+        for (int i = packages.size() - 1; i >= 0; --i) {
+            final PackageInfo pi = packages.get(i);
+            final ApplicationInfo ai = pi.applicationInfo;
+            final int idx = ArrayUtils.indexOf(
+                    pi.requestedPermissions, Manifest.permission.INSTALL_PACKAGES);
+
+            if (idx >= 0 && ai != null && PackageManager.PERMISSION_GRANTED
+                    == mContext.checkPermission(Manifest.permission.INSTALL_PACKAGES, -1, ai.uid)) {
+                mSystemInstallers.add(UserHandle.getUserId(ai.uid), pi.packageName);
+            }
+        }
     }
 
     private boolean isUidInForeground(int uid) {
@@ -962,7 +992,8 @@ public final class QuotaController extends StateController {
         if (quota.getStandbyBucketLocked() == NEVER_INDEX) {
             return 0;
         }
-        final long limitMs = getEJLimitMsLocked(packageName, quota.getStandbyBucketLocked());
+        final long limitMs =
+                getEJLimitMsLocked(userId, packageName, quota.getStandbyBucketLocked());
         long remainingMs = limitMs - quota.getTallyLocked();
 
         // Stale sessions may still be factored into tally. Make sure they're removed.
@@ -1000,10 +1031,11 @@ public final class QuotaController extends StateController {
         return remainingMs - timer.getCurrentDuration(sElapsedRealtimeClock.millis());
     }
 
-    private long getEJLimitMsLocked(@NonNull final String packageName, final int standbyBucket) {
+    private long getEJLimitMsLocked(final int userId, @NonNull final String packageName,
+            final int standbyBucket) {
         final long baseLimitMs = mEJLimitsMs[standbyBucket];
-        if (packageName.equals(mPackageVerifier)) {
-            return baseLimitMs + mEjLimitSpecialAdditionMs;
+        if (mSystemInstallers.contains(userId, packageName)) {
+            return baseLimitMs + mEjLimitAdditionInstallerMs;
         }
         return baseLimitMs;
     }
@@ -1116,7 +1148,8 @@ public final class QuotaController extends StateController {
 
         final long nowElapsed = sElapsedRealtimeClock.millis();
         ShrinkableDebits quota = getEJDebitsLocked(userId, packageName);
-        final long limitMs = getEJLimitMsLocked(packageName, quota.getStandbyBucketLocked());
+        final long limitMs =
+                getEJLimitMsLocked(userId, packageName, quota.getStandbyBucketLocked());
         final long startWindowElapsed = Math.max(0, nowElapsed - mEJLimitWindowSizeMs);
         long remainingDeadSpaceMs = remainingExecutionTimeMs;
         // Total time looked at where a session wouldn't be phasing out.
@@ -1743,7 +1776,8 @@ public final class QuotaController extends StateController {
             inRegularQuotaTimeElapsed = inQuotaTimeElapsed;
         }
         if (remainingEJQuota <= 0) {
-            final long limitMs = getEJLimitMsLocked(packageName, standbyBucket) - mQuotaBufferMs;
+            final long limitMs =
+                    getEJLimitMsLocked(userId, packageName, standbyBucket) - mQuotaBufferMs;
             long sumMs = 0;
             final Timer ejTimer = mEJPkgTimers.get(userId, packageName);
             if (ejTimer != null && ejTimer.isActive()) {
@@ -3029,8 +3063,11 @@ public final class QuotaController extends StateController {
         static final String KEY_EJ_LIMIT_RESTRICTED_MS =
                 QC_CONSTANT_PREFIX + "ej_limit_restricted_ms";
         @VisibleForTesting
-        static final String KEY_EJ_LIMIT_SPECIAL_ADDITION_MS =
-                QC_CONSTANT_PREFIX + "ej_limit_special_addition_ms";
+        static final String KEY_EJ_LIMIT_ADDITION_SPECIAL_MS =
+                QC_CONSTANT_PREFIX + "ej_limit_addition_special_ms";
+        @VisibleForTesting
+        static final String KEY_EJ_LIMIT_ADDITION_INSTALLER_MS =
+                QC_CONSTANT_PREFIX + "ej_limit_addition_installer_ms";
         @VisibleForTesting
         static final String KEY_EJ_WINDOW_SIZE_MS =
                 QC_CONSTANT_PREFIX + "ej_window_size_ms";
@@ -3098,7 +3135,8 @@ public final class QuotaController extends StateController {
         private static final long DEFAULT_EJ_LIMIT_FREQUENT_MS = 10 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_RARE_MS = DEFAULT_EJ_LIMIT_FREQUENT_MS;
         private static final long DEFAULT_EJ_LIMIT_RESTRICTED_MS = 5 * MINUTE_IN_MILLIS;
-        private static final long DEFAULT_EJ_LIMIT_SPECIAL_ADDITION_MS = 30 * MINUTE_IN_MILLIS;
+        private static final long DEFAULT_EJ_LIMIT_ADDITION_SPECIAL_MS = 15 * MINUTE_IN_MILLIS;
+        private static final long DEFAULT_EJ_LIMIT_ADDITION_INSTALLER_MS = 30 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_WINDOW_SIZE_MS = 24 * HOUR_IN_MILLIS;
         private static final long DEFAULT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS = 30 * SECOND_IN_MILLIS;
         private static final long DEFAULT_EJ_REWARD_TOP_APP_MS = 10 * SECOND_IN_MILLIS;
@@ -3303,7 +3341,13 @@ public final class QuotaController extends StateController {
         /**
          * How much additional EJ quota special, critical apps should get.
          */
-        public long EJ_LIMIT_SPECIAL_ADDITION_MS = DEFAULT_EJ_LIMIT_SPECIAL_ADDITION_MS;
+        public long EJ_LIMIT_ADDITION_SPECIAL_MS = DEFAULT_EJ_LIMIT_ADDITION_SPECIAL_MS;
+
+        /**
+         * How much additional EJ quota system installers (with the INSTALL_PACKAGES permission)
+         * should get.
+         */
+        public long EJ_LIMIT_ADDITION_INSTALLER_MS = DEFAULT_EJ_LIMIT_ADDITION_INSTALLER_MS;
 
         /**
          * The period of time used to calculate expedited job sessions. Apps can only have expedited
@@ -3369,7 +3413,8 @@ public final class QuotaController extends StateController {
                 case KEY_EJ_LIMIT_FREQUENT_MS:
                 case KEY_EJ_LIMIT_RARE_MS:
                 case KEY_EJ_LIMIT_RESTRICTED_MS:
-                case KEY_EJ_LIMIT_SPECIAL_ADDITION_MS:
+                case KEY_EJ_LIMIT_ADDITION_SPECIAL_MS:
+                case KEY_EJ_LIMIT_ADDITION_INSTALLER_MS:
                 case KEY_EJ_WINDOW_SIZE_MS:
                     updateEJLimitConstantsLocked();
                     break;
@@ -3704,7 +3749,8 @@ public final class QuotaController extends StateController {
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_EJ_LIMIT_ACTIVE_MS, KEY_EJ_LIMIT_WORKING_MS,
                     KEY_EJ_LIMIT_FREQUENT_MS, KEY_EJ_LIMIT_RARE_MS,
-                    KEY_EJ_LIMIT_RESTRICTED_MS, KEY_EJ_LIMIT_SPECIAL_ADDITION_MS,
+                    KEY_EJ_LIMIT_RESTRICTED_MS, KEY_EJ_LIMIT_ADDITION_SPECIAL_MS,
+                    KEY_EJ_LIMIT_ADDITION_INSTALLER_MS,
                     KEY_EJ_WINDOW_SIZE_MS);
             EJ_LIMIT_ACTIVE_MS = properties.getLong(
                     KEY_EJ_LIMIT_ACTIVE_MS, DEFAULT_EJ_LIMIT_ACTIVE_MS);
@@ -3716,8 +3762,10 @@ public final class QuotaController extends StateController {
                     KEY_EJ_LIMIT_RARE_MS, DEFAULT_EJ_LIMIT_RARE_MS);
             EJ_LIMIT_RESTRICTED_MS = properties.getLong(
                     KEY_EJ_LIMIT_RESTRICTED_MS, DEFAULT_EJ_LIMIT_RESTRICTED_MS);
-            EJ_LIMIT_SPECIAL_ADDITION_MS = properties.getLong(
-                    KEY_EJ_LIMIT_SPECIAL_ADDITION_MS, DEFAULT_EJ_LIMIT_SPECIAL_ADDITION_MS);
+            EJ_LIMIT_ADDITION_INSTALLER_MS = properties.getLong(
+                    KEY_EJ_LIMIT_ADDITION_INSTALLER_MS, DEFAULT_EJ_LIMIT_ADDITION_INSTALLER_MS);
+            EJ_LIMIT_ADDITION_SPECIAL_MS = properties.getLong(
+                    KEY_EJ_LIMIT_ADDITION_SPECIAL_MS, DEFAULT_EJ_LIMIT_ADDITION_SPECIAL_MS);
             EJ_WINDOW_SIZE_MS = properties.getLong(
                     KEY_EJ_WINDOW_SIZE_MS, DEFAULT_EJ_WINDOW_SIZE_MS);
 
@@ -3763,11 +3811,17 @@ public final class QuotaController extends StateController {
                 mEJLimitsMs[RESTRICTED_INDEX] = newRestrictedLimitMs;
                 mShouldReevaluateConstraints = true;
             }
-            // The addition must be in the range [0 minutes, window size - active limit].
-            long newSpecialAdditionMs = Math.max(0,
-                    Math.min(newWindowSizeMs - newActiveLimitMs, EJ_LIMIT_SPECIAL_ADDITION_MS));
-            if (mEjLimitSpecialAdditionMs != newSpecialAdditionMs) {
-                mEjLimitSpecialAdditionMs = newSpecialAdditionMs;
+            // The additions must be in the range [0 minutes, window size - active limit].
+            long newAdditionInstallerMs = Math.max(0,
+                    Math.min(newWindowSizeMs - newActiveLimitMs, EJ_LIMIT_ADDITION_INSTALLER_MS));
+            if (mEjLimitAdditionInstallerMs != newAdditionInstallerMs) {
+                mEjLimitAdditionInstallerMs = newAdditionInstallerMs;
+                mShouldReevaluateConstraints = true;
+            }
+            long newAdditionSpecialMs = Math.max(0,
+                    Math.min(newWindowSizeMs - newActiveLimitMs, EJ_LIMIT_ADDITION_SPECIAL_MS));
+            if (mEjLimitAdditionSpecialMs != newAdditionSpecialMs) {
+                mEjLimitAdditionSpecialMs = newAdditionSpecialMs;
                 mShouldReevaluateConstraints = true;
             }
         }
@@ -3808,7 +3862,8 @@ public final class QuotaController extends StateController {
             pw.print(KEY_EJ_LIMIT_FREQUENT_MS, EJ_LIMIT_FREQUENT_MS).println();
             pw.print(KEY_EJ_LIMIT_RARE_MS, EJ_LIMIT_RARE_MS).println();
             pw.print(KEY_EJ_LIMIT_RESTRICTED_MS, EJ_LIMIT_RESTRICTED_MS).println();
-            pw.print(KEY_EJ_LIMIT_SPECIAL_ADDITION_MS, EJ_LIMIT_SPECIAL_ADDITION_MS).println();
+            pw.print(KEY_EJ_LIMIT_ADDITION_INSTALLER_MS, EJ_LIMIT_ADDITION_INSTALLER_MS).println();
+            pw.print(KEY_EJ_LIMIT_ADDITION_SPECIAL_MS, EJ_LIMIT_ADDITION_SPECIAL_MS).println();
             pw.print(KEY_EJ_WINDOW_SIZE_MS, EJ_WINDOW_SIZE_MS).println();
             pw.print(KEY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS, EJ_TOP_APP_TIME_CHUNK_SIZE_MS).println();
             pw.print(KEY_EJ_REWARD_TOP_APP_MS, EJ_REWARD_TOP_APP_MS).println();
@@ -3945,8 +4000,13 @@ public final class QuotaController extends StateController {
     }
 
     @VisibleForTesting
-    long getEjLimitSpecialAdditionMs() {
-        return mEjLimitSpecialAdditionMs;
+    long getEjLimitAdditionInstallerMs() {
+        return mEjLimitAdditionInstallerMs;
+    }
+
+    @VisibleForTesting
+    long getEjLimitAdditionSpecialMs() {
+        return mEjLimitAdditionSpecialMs;
     }
 
     @VisibleForTesting
@@ -4067,6 +4127,12 @@ public final class QuotaController extends StateController {
         pw.decreaseIndent();
         pw.println();
 
+        pw.println("Special apps:");
+        pw.increaseIndent();
+        pw.print("System installers", mSystemInstallers.toString());
+        pw.decreaseIndent();
+
+        pw.println();
         mTrackedJobs.forEach((jobs) -> {
             for (int j = 0; j < jobs.size(); j++) {
                 final JobStatus js = jobs.valueAt(j);
