@@ -5623,8 +5623,8 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
-            if (mAm.checkPermission(SYSTEM_ALERT_WINDOW, callingPid,
-                    callingUid) == PERMISSION_GRANTED) {
+            if (mAm.mAtmInternal.hasSystemAlertWindowPermission(callingUid, callingPid,
+                    callingPackage)) {
                 ret = REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
             }
         }

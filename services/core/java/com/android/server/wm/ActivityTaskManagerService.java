@@ -932,7 +932,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return getUserManager().hasUserRestriction(restriction, userId);
     }
 
-    boolean hasSystemAlertWindowPermission(int callingUid, int callingPid, String callingPackage) {
+    boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
+            String callingPackage) {
         final int mode = getAppOpsManager().noteOpNoThrow(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
                 callingUid, callingPackage, /* featureId */ null, "");
         if (mode == AppOpsManager.MODE_DEFAULT) {
@@ -6368,6 +6369,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 return new PackageConfigurationUpdaterImpl(Binder.getCallingPid());
             }
+        }
+
+        @Override
+        public boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
+                String callingPackage) {
+            return ActivityTaskManagerService.this.hasSystemAlertWindowPermission(callingUid,
+                    callingPid, callingPackage);
         }
     }
 

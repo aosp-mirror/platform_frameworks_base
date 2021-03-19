@@ -606,4 +606,10 @@ public abstract class ActivityTaskManagerInternal {
          */
         void commit() throws RemoteException;
     }
+
+    /**
+     * A utility method to check AppOps and PackageManager for SYSTEM_ALERT_WINDOW permission.
+     */
+    public abstract boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
+            String callingPackage);
 }
