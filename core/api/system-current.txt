@@ -136,6 +136,7 @@ package android {
     field public static final String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
+    field public static final String MANAGE_HOTWORD_DETECTION = "android.permission.MANAGE_HOTWORD_DETECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final String MANAGE_MUSIC_RECOGNITION = "android.permission.MANAGE_MUSIC_RECOGNITION";
     field public static final String MANAGE_NOTIFICATION_LISTENERS = "android.permission.MANAGE_NOTIFICATION_LISTENERS";
@@ -201,7 +202,6 @@ package android {
     field public static final String READ_DEVICE_CONFIG = "android.permission.READ_DEVICE_CONFIG";
     field public static final String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
     field public static final String READ_INSTALL_SESSIONS = "android.permission.READ_INSTALL_SESSIONS";
-    field public static final String READ_NETWORK_DEVICE_CONFIG = "android.permission.READ_NETWORK_DEVICE_CONFIG";
     field public static final String READ_NETWORK_USAGE_HISTORY = "android.permission.READ_NETWORK_USAGE_HISTORY";
     field public static final String READ_OEM_UNLOCK_STATE = "android.permission.READ_OEM_UNLOCK_STATE";
     field public static final String READ_PEOPLE_DATA = "android.permission.READ_PEOPLE_DATA";
@@ -407,7 +407,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public static void setPersistentVrThread(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public boolean startProfile(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public boolean stopProfile(@NonNull android.os.UserHandle);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean switchUser(@NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean switchUser(@NonNull android.os.UserHandle);
   }
 
   public static interface ActivityManager.OnUidImportanceListener {
@@ -910,7 +910,6 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isDeviceProvisioned();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isDeviceProvisioningConfigApplied();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isManagedKiosk();
-    method public boolean isNetworkSlicingEnabledForUser(@NonNull android.os.UserHandle);
     method public boolean isSecondaryLockscreenEnabled(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isUnattendedManagedKiosk();
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long);
@@ -1695,6 +1694,13 @@ package android.app.smartspace {
 
 package android.app.time {
 
+  public final class Capabilities {
+    field public static final int CAPABILITY_NOT_ALLOWED = 20; // 0x14
+    field public static final int CAPABILITY_NOT_APPLICABLE = 30; // 0x1e
+    field public static final int CAPABILITY_NOT_SUPPORTED = 10; // 0xa
+    field public static final int CAPABILITY_POSSESSED = 40; // 0x28
+  }
+
   public final class TimeManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public void addTimeZoneDetectorListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.time.TimeManager.TimeZoneDetectorListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public android.app.time.TimeZoneCapabilitiesAndConfig getTimeZoneCapabilitiesAndConfig();
@@ -1711,10 +1717,6 @@ package android.app.time {
     method public int getConfigureAutoDetectionEnabledCapability();
     method public int getConfigureGeoDetectionEnabledCapability();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int CAPABILITY_NOT_ALLOWED = 20; // 0x14
-    field public static final int CAPABILITY_NOT_APPLICABLE = 30; // 0x1e
-    field public static final int CAPABILITY_NOT_SUPPORTED = 10; // 0xa
-    field public static final int CAPABILITY_POSSESSED = 40; // 0x28
     field @NonNull public static final android.os.Parcelable.Creator<android.app.time.TimeZoneCapabilities> CREATOR;
   }
 
@@ -3656,7 +3658,6 @@ package android.hardware.location {
     field public static final int RESULT_FAILED_BAD_PARAMS = 2; // 0x2
     field public static final int RESULT_FAILED_BUSY = 4; // 0x4
     field public static final int RESULT_FAILED_HAL_UNAVAILABLE = 8; // 0x8
-    field public static final int RESULT_FAILED_PERMISSION_DENIED = 9; // 0x9
     field public static final int RESULT_FAILED_SERVICE_INTERNAL_FAILURE = 7; // 0x7
     field public static final int RESULT_FAILED_TIMEOUT = 6; // 0x6
     field public static final int RESULT_FAILED_UNINITIALIZED = 3; // 0x3
@@ -5058,8 +5059,8 @@ package android.media {
     method @IntRange(from=0) public long getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioProductStrategy> getAudioProductStrategies();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioVolumeGroup> getAudioVolumeGroups();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getDeviceVolumeBehavior(@NonNull android.media.AudioDeviceAttributes);
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE"}) public int getDeviceVolumeBehavior(@NonNull android.media.AudioDeviceAttributes);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE"}) public java.util.List<android.media.AudioDeviceAttributes> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) public long getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
@@ -10355,7 +10356,7 @@ package android.service.voice {
 
   public class VoiceInteractionService extends android.app.Service {
     method @NonNull public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, android.service.voice.AlwaysOnHotwordDetector.Callback);
-    method @NonNull public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, @Nullable android.os.Bundle, @Nullable android.os.SharedMemory, android.service.voice.AlwaysOnHotwordDetector.Callback);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, @Nullable android.os.Bundle, @Nullable android.os.SharedMemory, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
   }
 
@@ -12041,7 +12042,7 @@ package android.telephony.data {
     method public int getPduSessionId();
     method public int getProtocolType();
     method public long getRetryDurationMillis();
-    method @Nullable public android.telephony.data.SliceInfo getSliceInfo();
+    method @Nullable public android.telephony.data.NetworkSliceInfo getSliceInfo();
     method @Deprecated public int getSuggestedRetryTime();
     method @NonNull public java.util.List<android.telephony.data.TrafficDescriptor> getTrafficDescriptors();
     method public void writeToParcel(android.os.Parcel, int);
@@ -12077,7 +12078,7 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setPduSessionId(@IntRange(from=android.telephony.data.DataCallResponse.PDU_SESSION_ID_NOT_SET, to=15) int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setProtocolType(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setRetryDurationMillis(long);
-    method @NonNull public android.telephony.data.DataCallResponse.Builder setSliceInfo(@Nullable android.telephony.data.SliceInfo);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setSliceInfo(@Nullable android.telephony.data.NetworkSliceInfo);
     method @Deprecated @NonNull public android.telephony.data.DataCallResponse.Builder setSuggestedRetryTime(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setTrafficDescriptors(@NonNull java.util.List<android.telephony.data.TrafficDescriptor>);
   }
@@ -12150,7 +12151,7 @@ package android.telephony.data {
     method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @NonNull android.telephony.data.DataServiceCallback);
-    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.SliceInfo, @Nullable android.telephony.data.TrafficDescriptor, boolean, @NonNull android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.NetworkSliceInfo, @Nullable android.telephony.data.TrafficDescriptor, boolean, @NonNull android.telephony.data.DataServiceCallback);
   }
 
   public class DataServiceCallback {
@@ -12180,6 +12181,32 @@ package android.telephony.data {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.EpsBearerQosSessionAttributes> CREATOR;
   }
 
+  public final class NetworkSliceInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getMappedHplmnSliceDifferentiator();
+    method public int getMappedHplmnSliceServiceType();
+    method @IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getSliceDifferentiator();
+    method public int getSliceServiceType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.NetworkSliceInfo> CREATOR;
+    field public static final int MAX_SLICE_DIFFERENTIATOR = 16777214; // 0xfffffe
+    field public static final int MIN_SLICE_DIFFERENTIATOR = -1; // 0xffffffff
+    field public static final int SLICE_DIFFERENTIATOR_NO_SLICE = -1; // 0xffffffff
+    field public static final int SLICE_SERVICE_TYPE_EMBB = 1; // 0x1
+    field public static final int SLICE_SERVICE_TYPE_MIOT = 3; // 0x3
+    field public static final int SLICE_SERVICE_TYPE_NONE = 0; // 0x0
+    field public static final int SLICE_SERVICE_TYPE_URLLC = 2; // 0x2
+  }
+
+  public static final class NetworkSliceInfo.Builder {
+    ctor public NetworkSliceInfo.Builder();
+    method @NonNull public android.telephony.data.NetworkSliceInfo build();
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setMappedHplmnSliceDifferentiator(@IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setMappedHplmnSliceServiceType(int);
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setSliceDifferentiator(@IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setSliceServiceType(int);
+  }
+
   public abstract class QualifiedNetworksService extends android.app.Service {
     ctor public QualifiedNetworksService();
     method @NonNull public abstract android.telephony.data.QualifiedNetworksService.NetworkAvailabilityProvider onCreateNetworkAvailabilityProvider(int);
@@ -12192,32 +12219,6 @@ package android.telephony.data {
     method public final int getSlotIndex();
     method public void reportThrottleStatusChanged(@NonNull java.util.List<android.telephony.data.ThrottleStatus>);
     method public final void updateQualifiedNetworkTypes(int, @NonNull java.util.List<java.lang.Integer>);
-  }
-
-  public final class SliceInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method @IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getMappedHplmnSliceDifferentiator();
-    method public int getMappedHplmnSliceServiceType();
-    method @IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getSliceDifferentiator();
-    method public int getSliceServiceType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.SliceInfo> CREATOR;
-    field public static final int MAX_SLICE_DIFFERENTIATOR = 16777214; // 0xfffffe
-    field public static final int MIN_SLICE_DIFFERENTIATOR = -1; // 0xffffffff
-    field public static final int SLICE_DIFFERENTIATOR_NO_SLICE = -1; // 0xffffffff
-    field public static final int SLICE_SERVICE_TYPE_EMBB = 1; // 0x1
-    field public static final int SLICE_SERVICE_TYPE_MIOT = 3; // 0x3
-    field public static final int SLICE_SERVICE_TYPE_NONE = 0; // 0x0
-    field public static final int SLICE_SERVICE_TYPE_URLLC = 2; // 0x2
-  }
-
-  public static final class SliceInfo.Builder {
-    ctor public SliceInfo.Builder();
-    method @NonNull public android.telephony.data.SliceInfo build();
-    method @NonNull public android.telephony.data.SliceInfo.Builder setMappedHplmnSliceDifferentiator(@IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
-    method @NonNull public android.telephony.data.SliceInfo.Builder setMappedHplmnSliceServiceType(int);
-    method @NonNull public android.telephony.data.SliceInfo.Builder setSliceDifferentiator(@IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
-    method @NonNull public android.telephony.data.SliceInfo.Builder setSliceServiceType(int);
   }
 
   public final class ThrottleStatus implements android.os.Parcelable {

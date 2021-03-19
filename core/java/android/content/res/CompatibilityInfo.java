@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Canvas;
+import android.graphics.Insets;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -28,6 +29,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.WindowManager;
@@ -423,10 +425,35 @@ public class CompatibilityInfo implements Parcelable {
         }
 
         /**
-         * Translate an InsetsState in screen coordinates into the app window's coordinates.
+         * Translate an {@link InsetsState} in screen coordinates into the app window's coordinates.
          */
         public void translateInsetsStateInScreenToAppWindow(InsetsState state) {
             state.scale(applicationInvertedScale);
+        }
+
+        /**
+         * Translate {@link InsetsSourceControl}s in screen coordinates into the app window's
+         * coordinates.
+         */
+        public void translateSourceControlsInScreenToAppWindow(InsetsSourceControl[] controls) {
+            if (controls == null) {
+                return;
+            }
+            final float scale = applicationInvertedScale;
+            if (scale == 1f) {
+                return;
+            }
+            for (InsetsSourceControl control : controls) {
+                if (control == null) {
+                    continue;
+                }
+                final Insets hint = control.getInsetsHint();
+                control.setInsetsHint(
+                        (int) (scale * hint.left),
+                        (int) (scale * hint.top),
+                        (int) (scale * hint.right),
+                        (int) (scale * hint.bottom));
+            }
         }
 
         /**

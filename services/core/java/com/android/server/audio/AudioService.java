@@ -248,7 +248,7 @@ public class AudioService extends IAudioService.Stub
     // indicates whether the system maps all streams to a single stream.
     private final boolean mIsSingleVolume;
 
-    private boolean isPlatformVoice() {
+    /*package*/ boolean isPlatformVoice() {
         return mPlatformType == AudioSystem.PLATFORM_VOICE;
     }
 
@@ -2258,7 +2258,7 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#getDevicesForAttributes(AudioAttributes) */
     public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
-        enforceModifyAudioRoutingPermission();
+        enforceQueryStateOrModifyRoutingPermission();
         return getDevicesForAttributesInt(attributes);
     }
 
@@ -2897,6 +2897,16 @@ public class AudioService extends IAudioService.Stub
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Missing MODIFY_AUDIO_ROUTING permission");
+        }
+    }
+
+    private void enforceQueryStateOrModifyRoutingPermission() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+                != PackageManager.PERMISSION_GRANTED
+                && mContext.checkCallingOrSelfPermission(Manifest.permission.QUERY_AUDIO_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    "Missing MODIFY_AUDIO_ROUTING or QUERY_AUDIO_STATE permissions");
         }
     }
 
@@ -5814,7 +5824,7 @@ public class AudioService extends IAudioService.Stub
     public @AudioManager.DeviceVolumeBehavior
     int getDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device) {
         // verify permissions
-        enforceModifyAudioRoutingPermission();
+        enforceQueryStateOrModifyRoutingPermission();
 
         // translate Java device type to native device type (for the devices masks for full / fixed)
         final int audioSystemDeviceOut = AudioDeviceInfo.convertDeviceTypeToInternalDevice(

@@ -32,7 +32,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
@@ -348,12 +347,20 @@ public final class QuotaController extends StateController {
     private final SparseBooleanArray mTempAllowlistCache = new SparseBooleanArray();
 
     /**
-     * Mapping of app IDs to the when their temp allowlist grace period ends (in the elapsed
+     * Mapping of UIDs to the when their temp allowlist grace period ends (in the elapsed
      * realtime timebase).
      */
     private final SparseLongArray mTempAllowlistGraceCache = new SparseLongArray();
 
-    private final ActivityManagerInternal mActivityManagerInternal;
+    /** Current set of UIDs in the {@link ActivityManager#PROCESS_STATE_TOP} state. */
+    private final SparseBooleanArray mTopAppCache = new SparseBooleanArray();
+
+    /**
+     * Mapping of UIDs to the when their top app grace period ends (in the elapsed realtime
+     * timebase).
+     */
+    private final SparseLongArray mTopAppGraceCache = new SparseLongArray();
+
     private final AlarmManager mAlarmManager;
     private final ChargingTracker mChargeTracker;
     private final QcHandler mHandler;
@@ -412,7 +419,7 @@ public final class QuotaController extends StateController {
                 }
             };
 
-    private final IUidObserver mUidObserver = new IUidObserver.Stub() {
+    private class QcUidObserver extends IUidObserver.Stub {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.obtainMessage(MSG_UID_PROCESS_STATE_CHANGED, uid, procState).sendToTarget();
@@ -433,7 +440,7 @@ public final class QuotaController extends StateController {
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
         }
-    };
+    }
 
     private final BroadcastReceiver mPackageAddedReceiver = new BroadcastReceiver() {
         @Override
@@ -548,8 +555,10 @@ public final class QuotaController extends StateController {
      */
     private long mEJRewardNotificationSeenMs = QcConstants.DEFAULT_EJ_REWARD_NOTIFICATION_SEEN_MS;
 
-    private long mEJTempAllowlistGracePeriodMs =
-            QcConstants.DEFAULT_EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS;
+    private long mEJGracePeriodTempAllowlistMs =
+            QcConstants.DEFAULT_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS;
+
+    private long mEJGracePeriodTopAppMs = QcConstants.DEFAULT_EJ_GRACE_PERIOD_TOP_APP_MS;
 
     /** The package verifier app. */
     @Nullable
@@ -586,7 +595,6 @@ public final class QuotaController extends StateController {
         mHandler = new QcHandler(mContext.getMainLooper());
         mChargeTracker = new ChargingTracker();
         mChargeTracker.startTracking();
-        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mQcConstants = new QcConstants();
         mBackgroundJobsController = backgroundJobsController;
@@ -606,9 +614,12 @@ public final class QuotaController extends StateController {
         pai.registerTempAllowlistChangeListener(new TempAllowlistTracker());
 
         try {
-            ActivityManager.getService().registerUidObserver(mUidObserver,
+            ActivityManager.getService().registerUidObserver(new QcUidObserver(),
                     ActivityManager.UID_OBSERVER_PROCSTATE,
                     ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, null);
+            ActivityManager.getService().registerUidObserver(new QcUidObserver(),
+                    ActivityManager.UID_OBSERVER_PROCSTATE,
+                    ActivityManager.PROCESS_STATE_TOP, null);
         } catch (RemoteException e) {
             // ignored; both services live in system_server
         }
@@ -658,7 +669,7 @@ public final class QuotaController extends StateController {
         }
 
         final int uid = jobStatus.getSourceUid();
-        if (mActivityManagerInternal.getUidProcessState(uid) <= ActivityManager.PROCESS_STATE_TOP) {
+        if (mTopAppCache.get(uid)) {
             if (DEBUG) {
                 Slog.d(TAG, jobStatus.toShortString() + " is top started job");
             }
@@ -715,6 +726,8 @@ public final class QuotaController extends StateController {
         mUidToPackageCache.remove(uid);
         mTempAllowlistCache.delete(uid);
         mTempAllowlistGraceCache.delete(uid);
+        mTopAppCache.delete(uid);
+        mTopAppGraceCache.delete(uid);
     }
 
     @Override
@@ -770,14 +783,10 @@ public final class QuotaController extends StateController {
 
     /** Returns the maximum amount of time this job could run for. */
     public long getMaxJobExecutionTimeMsLocked(@NonNull final JobStatus jobStatus) {
-        // Need to look at current proc state as well in the case where the job hasn't started yet.
-        final boolean isTop = mActivityManagerInternal
-                .getUidProcessState(jobStatus.getSourceUid()) <= ActivityManager.PROCESS_STATE_TOP;
-
         if (!jobStatus.shouldTreatAsExpeditedJob()) {
             // If quota is currently "free", then the job can run for the full amount of time.
             if (mChargeTracker.isCharging()
-                    || isTop
+                    || mTopAppCache.get(jobStatus.getSourceUid())
                     || isTopStartedJobLocked(jobStatus)
                     || isUidInForeground(jobStatus.getSourceUid())) {
                 return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
@@ -790,7 +799,7 @@ public final class QuotaController extends StateController {
         if (mChargeTracker.isCharging()) {
             return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
         }
-        if (isTop || isTopStartedJobLocked(jobStatus)) {
+        if (mTopAppCache.get(jobStatus.getSourceUid()) || isTopStartedJobLocked(jobStatus)) {
             return Math.max(mEJLimitsMs[ACTIVE_INDEX] / 2,
                     getTimeUntilEJQuotaConsumedLocked(
                             jobStatus.getSourceUserId(), jobStatus.getSourcePackageName()));
@@ -817,11 +826,20 @@ public final class QuotaController extends StateController {
         if (isTopStartedJobLocked(jobStatus) || isUidInForeground(jobStatus.getSourceUid())) {
             return true;
         }
+
+        final long nowElapsed = sElapsedRealtimeClock.millis();
         final long tempAllowlistGracePeriodEndElapsed =
                 mTempAllowlistGraceCache.get(jobStatus.getSourceUid());
         final boolean hasTempAllowlistExemption = mTempAllowlistCache.get(jobStatus.getSourceUid())
-                || sElapsedRealtimeClock.millis() < tempAllowlistGracePeriodEndElapsed;
+                || nowElapsed < tempAllowlistGracePeriodEndElapsed;
         if (hasTempAllowlistExemption) {
+            return true;
+        }
+
+        final long topAppGracePeriodEndElapsed = mTopAppGraceCache.get(jobStatus.getSourceUid());
+        final boolean hasTopAppExemption = mTopAppCache.get(jobStatus.getSourceUid())
+                || nowElapsed < topAppGracePeriodEndElapsed;
+        if (hasTopAppExemption) {
             return true;
         }
 
@@ -2101,8 +2119,12 @@ public final class QuotaController extends StateController {
             final boolean hasTempAllowlistExemption = !mRegularJobTimer
                     && (mTempAllowlistCache.get(mUid)
                     || nowElapsed < tempAllowlistGracePeriodEndElapsed);
+            final long topAppGracePeriodEndElapsed = mTopAppGraceCache.get(mUid);
+            final boolean hasTopAppExemption = !mRegularJobTimer
+                    && (mTopAppCache.get(mUid) || nowElapsed < topAppGracePeriodEndElapsed);
             return (standbyBucket == RESTRICTED_INDEX || !mChargeTracker.isCharging())
-                    && !mForegroundUids.get(mUid) && !hasTempAllowlistExemption;
+                    && !mForegroundUids.get(mUid) && !hasTempAllowlistExemption
+                    && !hasTopAppExemption;
         }
 
         void onStateChangedLocked(long nowElapsed, boolean isQuotaFree) {
@@ -2421,11 +2443,11 @@ public final class QuotaController extends StateController {
         public void onAppRemoved(int uid) {
             synchronized (mLock) {
                 final long nowElapsed = sElapsedRealtimeClock.millis();
-                final long endElapsed = nowElapsed + mEJTempAllowlistGracePeriodMs;
+                final long endElapsed = nowElapsed + mEJGracePeriodTempAllowlistMs;
                 mTempAllowlistCache.delete(uid);
                 mTempAllowlistGraceCache.put(uid, endElapsed);
                 Message msg = mHandler.obtainMessage(MSG_END_GRACE_PERIOD, uid, 0);
-                mHandler.sendMessageDelayed(msg, mEJTempAllowlistGracePeriodMs);
+                mHandler.sendMessageDelayed(msg, mEJGracePeriodTempAllowlistMs);
             }
         }
     }
@@ -2571,12 +2593,37 @@ public final class QuotaController extends StateController {
 
                         synchronized (mLock) {
                             boolean isQuotaFree;
-                            if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+                            if (procState <= ActivityManager.PROCESS_STATE_TOP) {
+                                mTopAppCache.put(uid, true);
+                                mTopAppGraceCache.delete(uid);
+                                if (mForegroundUids.get(uid)) {
+                                    // Went from FGS to TOP. We don't need to reprocess timers or
+                                    // jobs.
+                                    break;
+                                }
                                 mForegroundUids.put(uid, true);
                                 isQuotaFree = true;
                             } else {
-                                mForegroundUids.delete(uid);
-                                isQuotaFree = false;
+                                final boolean reprocess;
+                                if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+                                    reprocess = !mForegroundUids.get(uid);
+                                    mForegroundUids.put(uid, true);
+                                    isQuotaFree = true;
+                                } else {
+                                    reprocess = true;
+                                    mForegroundUids.delete(uid);
+                                    isQuotaFree = false;
+                                }
+                                if (mTopAppCache.get(uid)) {
+                                    final long endElapsed = nowElapsed + mEJGracePeriodTopAppMs;
+                                    mTopAppCache.delete(uid);
+                                    mTopAppGraceCache.put(uid, endElapsed);
+                                    sendMessageDelayed(obtainMessage(MSG_END_GRACE_PERIOD, uid, 0),
+                                            mEJGracePeriodTopAppMs);
+                                }
+                                if (!reprocess) {
+                                    break;
+                                }
                             }
                             // Update Timers first.
                             if (mPkgTimers.indexOfKey(userId) >= 0
@@ -2644,20 +2691,31 @@ public final class QuotaController extends StateController {
                     case MSG_END_GRACE_PERIOD: {
                         final int uid = msg.arg1;
                         synchronized (mLock) {
-                            if (mTempAllowlistCache.get(uid)) {
-                                // App added back to the temp allowlist during the grace period.
+                            if (mTempAllowlistCache.get(uid) || mTopAppCache.get(uid)) {
+                                // App added back to the temp allowlist or became top again
+                                // during the grace period.
                                 if (DEBUG) {
                                     Slog.d(TAG, uid + " is still allowed");
+                                }
+                                break;
+                            }
+                            final long nowElapsed = sElapsedRealtimeClock.millis();
+                            if (nowElapsed < mTempAllowlistGraceCache.get(uid)
+                                    || nowElapsed < mTopAppGraceCache.get(uid)) {
+                                // One of the grace periods is still in effect.
+                                if (DEBUG) {
+                                    Slog.d(TAG, uid + " is still in grace period");
                                 }
                                 break;
                             }
                             if (DEBUG) {
                                 Slog.d(TAG, uid + " is now out of grace period");
                             }
+                            mTempAllowlistGraceCache.delete(uid);
+                            mTopAppGraceCache.delete(uid);
                             final ArraySet<String> packages = getPackagesForUidLocked(uid);
                             if (packages != null) {
                                 final int userId = UserHandle.getUserId(uid);
-                                final long nowElapsed = sElapsedRealtimeClock.millis();
                                 for (int i = packages.size() - 1; i >= 0; --i) {
                                     Timer t = mEJPkgTimers.get(userId, packages.valueAt(i));
                                     if (t != null) {
@@ -2989,8 +3047,11 @@ public final class QuotaController extends StateController {
         static final String KEY_EJ_REWARD_NOTIFICATION_SEEN_MS =
                 QC_CONSTANT_PREFIX + "ej_reward_notification_seen_ms";
         @VisibleForTesting
-        static final String KEY_EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS =
-                QC_CONSTANT_PREFIX + "ej_temp_allowlist_grace_period_ms";
+        static final String KEY_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS =
+                QC_CONSTANT_PREFIX + "ej_grace_period_temp_allowlist_ms";
+        @VisibleForTesting
+        static final String KEY_EJ_GRACE_PERIOD_TOP_APP_MS =
+                QC_CONSTANT_PREFIX + "ej_grace_period_top_app_ms";
 
         private static final long DEFAULT_ALLOWED_TIME_PER_PERIOD_MS =
                 10 * 60 * 1000L; // 10 minutes
@@ -3043,7 +3104,8 @@ public final class QuotaController extends StateController {
         private static final long DEFAULT_EJ_REWARD_TOP_APP_MS = 10 * SECOND_IN_MILLIS;
         private static final long DEFAULT_EJ_REWARD_INTERACTION_MS = 15 * SECOND_IN_MILLIS;
         private static final long DEFAULT_EJ_REWARD_NOTIFICATION_SEEN_MS = 0;
-        private static final long DEFAULT_EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS = 3 * MINUTE_IN_MILLIS;
+        private static final long DEFAULT_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS = 3 * MINUTE_IN_MILLIS;
+        private static final long DEFAULT_EJ_GRACE_PERIOD_TOP_APP_MS = 1 * MINUTE_IN_MILLIS;
 
         /** How much time each app will have to run jobs within their standby bucket window. */
         public long ALLOWED_TIME_PER_PERIOD_MS = DEFAULT_ALLOWED_TIME_PER_PERIOD_MS;
@@ -3275,7 +3337,12 @@ public final class QuotaController extends StateController {
          * How much additional grace period to add to the end of an app's temp allowlist
          * duration.
          */
-        public long EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS = DEFAULT_EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS;
+        public long EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS = DEFAULT_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS;
+
+        /**
+         * How much additional grace period to give an app when it leaves the TOP state.
+         */
+        public long EJ_GRACE_PERIOD_TOP_APP_MS = DEFAULT_EJ_GRACE_PERIOD_TOP_APP_MS;
 
         public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
                 @NonNull String key) {
@@ -3470,13 +3537,21 @@ public final class QuotaController extends StateController {
                     mEJRewardNotificationSeenMs = Math.min(5 * MINUTE_IN_MILLIS,
                             Math.max(0, EJ_REWARD_NOTIFICATION_SEEN_MS));
                     break;
-                case KEY_EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS:
+                case KEY_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS:
                     // We don't need to re-evaluate execution stats or constraint status for this.
-                    EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS =
-                            properties.getLong(key, DEFAULT_EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS);
+                    EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS =
+                            properties.getLong(key, DEFAULT_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS);
                     // Limit grace period to be in the range [0 minutes, 1 hour].
-                    mEJTempAllowlistGracePeriodMs = Math.min(HOUR_IN_MILLIS,
-                            Math.max(0, EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS));
+                    mEJGracePeriodTempAllowlistMs = Math.min(HOUR_IN_MILLIS,
+                            Math.max(0, EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS));
+                    break;
+                case KEY_EJ_GRACE_PERIOD_TOP_APP_MS:
+                    // We don't need to re-evaluate execution stats or constraint status for this.
+                    EJ_GRACE_PERIOD_TOP_APP_MS =
+                            properties.getLong(key, DEFAULT_EJ_GRACE_PERIOD_TOP_APP_MS);
+                    // Limit grace period to be in the range [0 minutes, 1 hour].
+                    mEJGracePeriodTopAppMs = Math.min(HOUR_IN_MILLIS,
+                            Math.max(0, EJ_GRACE_PERIOD_TOP_APP_MS));
                     break;
             }
         }
@@ -3739,8 +3814,9 @@ public final class QuotaController extends StateController {
             pw.print(KEY_EJ_REWARD_TOP_APP_MS, EJ_REWARD_TOP_APP_MS).println();
             pw.print(KEY_EJ_REWARD_INTERACTION_MS, EJ_REWARD_INTERACTION_MS).println();
             pw.print(KEY_EJ_REWARD_NOTIFICATION_SEEN_MS, EJ_REWARD_NOTIFICATION_SEEN_MS).println();
-            pw.print(KEY_EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS,
-                    EJ_TEMP_ALLOWLIST_GRACE_PERIOD_MS).println();
+            pw.print(KEY_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS,
+                    EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS).println();
+            pw.print(KEY_EJ_GRACE_PERIOD_TOP_APP_MS, EJ_GRACE_PERIOD_TOP_APP_MS).println();
 
             pw.decreaseIndent();
         }
@@ -3853,6 +3929,16 @@ public final class QuotaController extends StateController {
     }
 
     @VisibleForTesting
+    long getEJGracePeriodTempAllowlistMs() {
+        return mEJGracePeriodTempAllowlistMs;
+    }
+
+    @VisibleForTesting
+    long getEJGracePeriodTopAppMs() {
+        return mEJGracePeriodTopAppMs;
+    }
+
+    @VisibleForTesting
     @NonNull
     long[] getEJLimitsMs() {
         return mEJLimitsMs;
@@ -3885,11 +3971,6 @@ public final class QuotaController extends StateController {
     @NonNull
     long getEJRewardTopAppMs() {
         return mEJRewardTopAppMs;
-    }
-
-    @VisibleForTesting
-    long getEJTempAllowlistGracePeriodMs() {
-        return mEJTempAllowlistGracePeriodMs;
     }
 
     @VisibleForTesting
@@ -3964,6 +4045,17 @@ public final class QuotaController extends StateController {
         pw.println(mForegroundUids.toString());
         pw.println();
 
+        pw.print("Cached top apps: ");
+        pw.println(mTopAppCache.toString());
+        pw.print("Cached top app grace period: ");
+        pw.println(mTopAppGraceCache.toString());
+
+        pw.print("Cached temp allowlist: ");
+        pw.println(mTempAllowlistCache.toString());
+        pw.print("Cached temp allowlist grace period: ");
+        pw.println(mTempAllowlistGraceCache.toString());
+        pw.println();
+
         pw.println("Cached UID->package map:");
         pw.increaseIndent();
         for (int i = 0; i < mUidToPackageCache.size(); ++i) {
@@ -3975,12 +4067,6 @@ public final class QuotaController extends StateController {
         pw.decreaseIndent();
         pw.println();
 
-        pw.print("Cached temp allowlist: ");
-        pw.println(mTempAllowlistCache.toString());
-        pw.print("Cached temp allowlist grace period: ");
-        pw.println(mTempAllowlistGraceCache.toString());
-
-        pw.println();
         mTrackedJobs.forEach((jobs) -> {
             for (int j = 0; j < jobs.size(); j++) {
                 final JobStatus js = jobs.valueAt(j);

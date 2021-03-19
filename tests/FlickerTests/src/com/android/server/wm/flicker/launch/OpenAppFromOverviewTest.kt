@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,69 +63,21 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
             }
         }
 
+    @Postsubmit
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() =
         super.appWindowReplacesLauncherAsTopWindow()
 
+    @Postsubmit
     @Test
     override fun wallpaperWindowBecomesInvisible() {
         testSpec.wallpaperWindowBecomesInvisible()
     }
 
-    @Presubmit
-    @Test
-    override fun statusBarLayerIsAlwaysVisible() {
-        Assume.assumeTrue(testSpec.isRotated)
-        super.statusBarLayerIsAlwaysVisible()
-    }
-
-    @Presubmit
-    @Test
-    override fun navBarLayerIsAlwaysVisible() {
-        Assume.assumeTrue(testSpec.isRotated)
-        super.navBarLayerIsAlwaysVisible()
-    }
-
     @FlakyTest
     @Test
-    fun statusBarLayerIsAlwaysVisible_Flaky() {
-        Assume.assumeFalse(testSpec.isRotated)
-        super.statusBarLayerIsAlwaysVisible()
-    }
-
-    @FlakyTest
-    @Test
-    fun navBarLayerIsAlwaysVisible_Flaky() {
-        Assume.assumeFalse(testSpec.isRotated)
-        super.navBarLayerIsAlwaysVisible()
-    }
-
-    @Presubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        Assume.assumeFalse(testSpec.isRotated)
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-    }
-
-    @FlakyTest
-    @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-    }
-
-    @Presubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        Assume.assumeFalse(testSpec.isRotated)
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
-
-    @FlakyTest
-    @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    override fun navBarLayerRotatesAndScales() {
+        super.navBarLayerRotatesAndScales()
     }
 
     companion object {

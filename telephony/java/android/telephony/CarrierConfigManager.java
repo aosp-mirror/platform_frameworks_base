@@ -4077,6 +4077,22 @@ public class CarrierConfigManager {
             "is_opportunistic_subscription_bool";
 
     /**
+     * The flatten string {@link android.content.ComponentName componentName} of carrier
+     * provisioning app receiver.
+     *
+     * <p>
+     * The RadioInfo activity(*#*#INFO#*#*) will broadcast an intent to this receiver when the
+     * "Carrier Provisioning Info" or "Trigger Carrier Provisioning" button clicked.
+     *
+     * <p>
+     * e.g, com.google.android.carrierPackageName/.CarrierReceiverName
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_PROVISIONING_APP_STRING =
+            "carrier_provisioning_app_string";
+
+    /**
      * Configs used by the IMS stack.
      */
     public static final class Ims {
@@ -5374,6 +5390,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
                 new String[]{"ia", "default", "ims", "mms", "dun", "emergency"});
         sDefaults.putBoolean(KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL, false);
+        sDefaults.putString(KEY_CARRIER_PROVISIONING_APP_STRING, "");
     }
 
     /**

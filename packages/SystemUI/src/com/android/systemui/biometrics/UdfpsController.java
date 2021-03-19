@@ -19,6 +19,8 @@ package com.android.systemui.biometrics;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -42,11 +44,9 @@ import android.view.Surface;
 import android.view.VelocityTracker;
 import android.view.WindowManager;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.biometrics.HbmTypes.HbmType;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
@@ -95,7 +95,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     // Tracks the velocity of a touch to help filter out the touches that move too fast.
     @Nullable private VelocityTracker mVelocityTracker;
     // The ID of the pointer for which ACTION_DOWN has occurred. -1 means no pointer is active.
-    private int mActivePointerId;
+    private int mActivePointerId = -1;
     // The timestamp of the most recent touch log.
     private long mTouchLogTime;
 
@@ -580,13 +580,13 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     }
 
     @Override
-    public void enableHbm(@NonNull Surface surface) {
+    public void enableHbm(@HbmType int hbmType, @Nullable Surface surface) {
         // Do nothing. This method can be implemented for devices that require the high-brightness
         // mode for fingerprint illumination.
     }
 
     @Override
-    public void disableHbm(@NonNull Surface surface) {
+    public void disableHbm(@HbmType int hbmType, @Nullable Surface surface) {
         // Do nothing. This method can be implemented for devices that require the high-brightness
         // mode for fingerprint illumination.
     }

@@ -430,6 +430,9 @@
     <!-- Permission required for CTS test - FontManagerTest -->
     <uses-permission android:name="android.permission.UPDATE_FONTS" />
 
+    <!-- Permission required for hotword detection service CTS tests -->
+    <uses-permission android:name="android.permission.MANAGE_HOTWORD_DETECTION" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

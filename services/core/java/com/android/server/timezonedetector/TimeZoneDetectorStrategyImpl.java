@@ -15,7 +15,7 @@
  */
 package com.android.server.timezonedetector;
 
-import static android.app.time.TimeZoneCapabilities.CAPABILITY_POSSESSED;
+import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYPE_EMULATOR_ZONE_ID;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYPE_TEST_NETWORK_OFFSET_ONLY;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS;

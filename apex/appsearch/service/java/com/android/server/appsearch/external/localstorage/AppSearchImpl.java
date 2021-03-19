@@ -17,6 +17,7 @@
 package com.android.server.appsearch.external.localstorage;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
@@ -29,6 +30,7 @@ import android.app.appsearch.SetSchemaResponse;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -43,6 +45,7 @@ import com.android.server.appsearch.external.localstorage.converter.SearchResult
 import com.android.server.appsearch.external.localstorage.converter.SearchSpecToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.SetSchemaResponseToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.TypePropertyPathToProtoConverter;
+import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 
 import com.google.android.icing.IcingSearchEngine;
 import com.google.android.icing.proto.DeleteByQueryResultProto;
@@ -449,23 +452,65 @@ public final class AppSearchImpl implements Closeable {
     public void putDocument(
             @NonNull String packageName,
             @NonNull String databaseName,
-            @NonNull GenericDocument document)
+            @NonNull GenericDocument document,
+            @Nullable AppSearchLogger logger)
             throws AppSearchException {
+        PutDocumentStats.Builder pStatsBuilder = null;
+        if (logger != null) {
+            pStatsBuilder = new PutDocumentStats.Builder(packageName, databaseName);
+        }
+        long totalStartTimeMillis = SystemClock.elapsedRealtime();
+
         mReadWriteLock.writeLock().lock();
         try {
             throwIfClosedLocked();
 
+            // Generate Document Proto
+            long generateDocumentProtoStartTimeMillis = SystemClock.elapsedRealtime();
             DocumentProto.Builder documentBuilder =
                     GenericDocumentToProtoConverter.toDocumentProto(document).toBuilder();
+            long generateDocumentProtoEndTimeMillis = SystemClock.elapsedRealtime();
+
+            // Rewrite Document Type
+            long rewriteDocumentTypeStartTimeMillis = SystemClock.elapsedRealtime();
             String prefix = createPrefix(packageName, databaseName);
             addPrefixToDocument(documentBuilder, prefix);
+            long rewriteDocumentTypeEndTimeMillis = SystemClock.elapsedRealtime();
 
             PutResultProto putResultProto = mIcingSearchEngineLocked.put(documentBuilder.build());
             addToMap(mNamespaceMapLocked, prefix, documentBuilder.getNamespace());
 
+            // Logging stats
+            if (logger != null) {
+                pStatsBuilder
+                        .getGeneralStatsBuilder()
+                        .setStatusCode(
+                                statusProtoToAppSearchException(putResultProto.getStatus())
+                                        .getResultCode());
+                pStatsBuilder
+                        .setGenerateDocumentProtoLatencyMillis(
+                                (int)
+                                        (generateDocumentProtoEndTimeMillis
+                                                - generateDocumentProtoStartTimeMillis))
+                        .setRewriteDocumentTypesLatencyMillis(
+                                (int)
+                                        (rewriteDocumentTypeEndTimeMillis
+                                                - rewriteDocumentTypeStartTimeMillis));
+                AppSearchLoggerHelper.copyNativeStats(
+                        putResultProto.getPutDocumentStats(), pStatsBuilder);
+            }
+
             checkSuccess(putResultProto.getStatus());
         } finally {
             mReadWriteLock.writeLock().unlock();
+
+            if (logger != null) {
+                long totalEndTimeMillis = SystemClock.elapsedRealtime();
+                pStatsBuilder
+                        .getGeneralStatsBuilder()
+                        .setTotalLatencyMillis((int) (totalEndTimeMillis - totalStartTimeMillis));
+                logger.logStats(pStatsBuilder.build());
+            }
         }
     }
 

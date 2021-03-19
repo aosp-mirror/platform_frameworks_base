@@ -16,6 +16,8 @@
 package android.net;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_DEFAULT_MODE;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE;
 import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
 import static android.net.NetworkRequest.Type.LISTEN_FOR_BEST;
@@ -23,8 +25,6 @@ import static android.net.NetworkRequest.Type.REQUEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
 import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 import static android.net.QosCallback.QosCallbackRegistrationException;
-import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
-import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -62,7 +62,6 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -842,7 +841,6 @@ public class ConnectivityManager {
 
     private final Context mContext;
 
-    private INetworkPolicyManager mNPManager;
     private final TetheringManager mTetheringManager;
 
     /**
@@ -915,8 +913,8 @@ public class ConnectivityManager {
 
     /**
      * @hide
-     * TODO: Expose for SystemServer when becomes a module.
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public void systemReady() {
         try {
             mService.systemReady();
@@ -975,7 +973,7 @@ public class ConnectivityManager {
      * Specify that the traffic for this user should by follow the default rules.
      * @hide
      */
-    @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int PROFILE_NETWORK_PREFERENCE_DEFAULT = 0;
 
     /**
@@ -985,7 +983,7 @@ public class ConnectivityManager {
      * if no such network is available.
      * @hide
      */
-    @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int PROFILE_NETWORK_PREFERENCE_ENTERPRISE = 1;
 
     /** @hide */
@@ -3038,8 +3036,9 @@ public class ConnectivityManager {
      *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
-    public void setGlobalProxy(ProxyInfo p) {
+    public void setGlobalProxy(@Nullable ProxyInfo p) {
         try {
             mService.setGlobalProxy(p);
         } catch (RemoteException e) {
@@ -3054,6 +3053,8 @@ public class ConnectivityManager {
      *        if no global HTTP proxy is set.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @Nullable
     public ProxyInfo getGlobalProxy() {
         try {
             return mService.getGlobalProxy();
@@ -4388,8 +4389,13 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void setAcceptUnvalidated(Network network, boolean accept, boolean always) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD,
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
+    public void setAcceptUnvalidated(@NonNull Network network, boolean accept, boolean always) {
         try {
             mService.setAcceptUnvalidated(network, accept, always);
         } catch (RemoteException e) {
@@ -4411,8 +4417,14 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
-    public void setAcceptPartialConnectivity(Network network, boolean accept, boolean always) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD,
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
+    public void setAcceptPartialConnectivity(@NonNull Network network, boolean accept,
+            boolean always) {
         try {
             mService.setAcceptPartialConnectivity(network, accept, always);
         } catch (RemoteException e) {
@@ -4430,8 +4442,13 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void setAvoidUnvalidated(Network network) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD,
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
+    public void setAvoidUnvalidated(@NonNull Network network) {
         try {
             mService.setAvoidUnvalidated(network);
         } catch (RemoteException e) {
@@ -4561,7 +4578,10 @@ public class ConnectivityManager {
      * Resets all connectivity manager settings back to factory defaults.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
     public void factoryReset() {
         try {
             mService.factoryReset();
@@ -4764,17 +4784,6 @@ public class ConnectivityManager {
     public @interface RestrictBackgroundStatus {
     }
 
-    private INetworkPolicyManager getNetworkPolicyManager() {
-        synchronized (this) {
-            if (mNPManager != null) {
-                return mNPManager;
-            }
-            mNPManager = INetworkPolicyManager.Stub.asInterface(ServiceManager
-                    .getService(Context.NETWORK_POLICY_SERVICE));
-            return mNPManager;
-        }
-    }
-
     /**
      * Determines if the calling application is subject to metered network restrictions while
      * running on background.
@@ -4785,7 +4794,7 @@ public class ConnectivityManager {
      */
     public @RestrictBackgroundStatus int getRestrictBackgroundStatus() {
         try {
-            return getNetworkPolicyManager().getRestrictBackgroundByCaller();
+            return mService.getRestrictBackgroundStatusByCaller();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

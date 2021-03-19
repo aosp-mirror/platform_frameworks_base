@@ -25,7 +25,6 @@ import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
 
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
 import static com.android.systemui.people.PeopleSpaceUtils.REQUIRED_WIDTH_FOR_MEDIUM;
-import static com.android.systemui.people.PeopleSpaceUtils.getPeopleTileFromPersistentStorage;
 import static com.android.systemui.people.widget.AppWidgetOptionsHelper.OPTIONS_PEOPLE_TILE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -71,11 +70,12 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.systemui.R;
@@ -98,8 +98,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@SmallTest
 @RunWith(AndroidTestingRunner.class)
+@SmallTest
 public class PeopleSpaceUtilsTest extends SysuiTestCase {
 
     private static final int WIDGET_ID_WITH_SHORTCUT = 1;
@@ -578,6 +578,25 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     }
 
     @Test
+    public void testAugmentSingleTileFromVisibleNotificationsSingleTile() {
+        PeopleSpaceTile tile =
+                new PeopleSpaceTile
+                        .Builder(SHORTCUT_ID_1, "userName", ICON, new Intent())
+                        .setPackageName(PACKAGE_NAME)
+                        .setUserHandle(new UserHandle(0))
+                        .build();
+        PeopleSpaceTile augmentedTile = PeopleSpaceUtils
+                .augmentSingleTileFromVisibleNotifications(
+                        mContext, tile, mNotificationEntryManager);
+
+        assertThat(augmentedTile).isNotNull();
+        assertThat(augmentedTile.getNotificationContent().toString())
+                .isEqualTo(NOTIFICATION_TEXT_2);
+
+        verify(mNotificationEntryManager, times(1)).getVisibleNotifications();
+    }
+
+    @Test
     public void testDoNotUpdateSingleConversationAppWidgetWhenNotBirthday() {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT};
         when(mMockCursor.moveToNext()).thenReturn(true, false);
@@ -888,23 +907,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         // Has person icon.
         assertEquals(View.VISIBLE,
                 smallResult.findViewById(R.id.person_icon).getVisibility());
-    }
-
-    @Test
-    public void testGetPeopleTileFromPersistentStorageExistingConversation()
-            throws Exception {
-        when(mPeopleManager.getConversation(PACKAGE_NAME, 0, SHORTCUT_ID_1)).thenReturn(
-                getConversationChannelWithoutTimestamp(SHORTCUT_ID_1));
-        PeopleTileKey key = new PeopleTileKey(SHORTCUT_ID_1, 0, PACKAGE_NAME);
-        PeopleSpaceTile tile = getPeopleTileFromPersistentStorage(mContext, key, mPeopleManager);
-        assertThat(tile.getId()).isEqualTo(key.getShortcutId());
-    }
-
-    @Test
-    public void testGetPeopleTileFromPersistentStorageNoConversation() {
-        PeopleTileKey key = new PeopleTileKey(SHORTCUT_ID_2, 0, PACKAGE_NAME);
-        PeopleSpaceTile tile = getPeopleTileFromPersistentStorage(mContext, key, mPeopleManager);
-        assertThat(tile).isNull();
     }
 
     private ConversationChannelWrapper getConversationChannelWrapper(String shortcutId,

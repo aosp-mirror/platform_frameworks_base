@@ -24,6 +24,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UiContext;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
@@ -134,7 +135,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     @Nullable
     private MirrorWindowControl mMirrorWindowControl;
 
-    WindowMagnificationController(Context context, @NonNull Handler handler,
+    WindowMagnificationController(@UiContext Context context, @NonNull Handler handler,
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
             MirrorWindowControl mirrorWindowControl, SurfaceControl.Transaction transaction,
             @NonNull WindowMagnifierCallback callback) {
@@ -147,7 +148,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mDisplayId = mContext.getDisplayId();
         mRotation = display.getRotation();
 
-        mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mWm = context.getSystemService(WindowManager.class);
 
         mResources = mContext.getResources();
         mScale = mResources.getInteger(R.integer.magnification_default_scale);

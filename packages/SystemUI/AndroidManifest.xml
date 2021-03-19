@@ -602,6 +602,9 @@
                 android:resource="@xml/people_space_widget_info" />
         </receiver>
 
+        <receiver android:name=".people.widget.PeopleSpaceWidgetPinnedReceiver"
+            android:enabled="true"/>
+
         <!-- Widget service -->
         <service android:name=".people.widget.PeopleSpaceWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS"

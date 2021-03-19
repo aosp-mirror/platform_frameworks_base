@@ -1598,7 +1598,8 @@ public final class ProcessList {
         }
     }
 
-    private int[] computeGidsForProcess(int mountExternal, int uid, int[] permGids) {
+    private int[] computeGidsForProcess(int mountExternal, int uid, int[] permGids,
+            boolean externalStorageAccess) {
         ArrayList<Integer> gidList = new ArrayList<>(permGids.length + 5);
 
         final int sharedAppGid = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
@@ -1643,6 +1644,11 @@ public final class ProcessList {
             // EmulatedVolumes: /data/media and /mnt/expand/<volume>/data/media
             // PublicVolumes: /mnt/media_rw/<volume>
             gidList.add(Process.MEDIA_RW_GID);
+        }
+        if (externalStorageAccess) {
+            // Apps with MANAGE_EXTERNAL_STORAGE PERMISSION need the external_storage gid to access
+            // USB OTG (unreliable) volumes on /mnt/media_rw/<vol name>
+            gidList.add(Process.EXTERNAL_STORAGE_GID);
         }
 
         int[] gidArray = new int[gidList.size()];
@@ -1805,6 +1811,7 @@ public final class ProcessList {
             int uid = app.uid;
             int[] gids = null;
             int mountExternal = Zygote.MOUNT_EXTERNAL_NONE;
+            boolean externalStorageAccess = false;
             if (!app.isolated) {
                 int[] permGids = null;
                 try {
@@ -1815,6 +1822,8 @@ public final class ProcessList {
                     StorageManagerInternal storageManagerInternal = LocalServices.getService(
                             StorageManagerInternal.class);
                     mountExternal = storageManagerInternal.getExternalStorageMountMode(uid,
+                            app.info.packageName);
+                    externalStorageAccess = storageManagerInternal.hasExternalStorageAccess(uid,
                             app.info.packageName);
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
@@ -1835,7 +1844,7 @@ public final class ProcessList {
                     }
                 }
 
-                gids = computeGidsForProcess(mountExternal, uid, permGids);
+                gids = computeGidsForProcess(mountExternal, uid, permGids, externalStorageAccess);
             }
             app.setMountMode(mountExternal);
             checkSlow(startTime, "startProcess: building args");

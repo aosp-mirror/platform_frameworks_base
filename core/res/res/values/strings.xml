@@ -743,6 +743,10 @@
          magnification. [CHAR_LIMIT=NONE]-->
     <string name="notification_channel_accessibility_magnification">Magnification</string>
 
+    <!-- Text shown when viewing channel settings for notifications related to accessibility
+         security policy. [CHAR_LIMIT=NONE]-->
+    <string name="notification_channel_accessibility_security_policy">Accessibility security policy</string>
+
     <!-- Label for foreground service notification when one app is running.
     [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6826789589341671842] -->
     <string name="foreground_service_app_in_background"><xliff:g id="app_name">%1$s</xliff:g> is
@@ -5910,4 +5914,9 @@ ul.</string>
     <string name="splash_screen_view_icon_description">Application icon</string>
     <!-- Content description for the branding image on the splash screen. [CHAR LIMIT=50] -->
     <string name="splash_screen_view_branding_description">Application branding image</string>
+
+    <!-- Notification title to prompt the user that some accessibility service has view and control access. [CHAR LIMIT=50] -->
+    <string name="view_and_control_notification_title">Check access settings</string>
+    <!-- Notification content to prompt the user that some accessibility service has view and control access. [CHAR LIMIT=none] -->
+    <string name="view_and_control_notification_content"><xliff:g id="service_name" example="TalkBack">%s</xliff:g> can view and control your screen. Tap to review.</string>
 </resources>

@@ -18,8 +18,10 @@ package com.android.systemui.classifier;
 
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.testing.AndroidTestingRunner;
 import android.view.MotionEvent;
@@ -50,13 +52,15 @@ public class PointerCountClassifierTest extends ClassifierTest {
 
     @Test
     public void testPass_noPointer() {
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(anyInt(), anyDouble(), anyDouble()).isFalse())
+                .isFalse();
     }
 
     @Test
     public void testPass_singlePointer() {
         mClassifier.onTouchEvent(appendDownEvent(1, 1));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(anyInt(), anyDouble(), anyDouble()).isFalse())
+                .isFalse();
     }
 
     @Test
@@ -72,7 +76,8 @@ public class PointerCountClassifierTest extends ClassifierTest {
                 0, 0);
         mClassifier.onTouchEvent(motionEvent);
         motionEvent.recycle();
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(Classifier.GENERIC, 0.5, 1).isFalse())
+                .isTrue();
     }
 
     @Test
@@ -88,7 +93,6 @@ public class PointerCountClassifierTest extends ClassifierTest {
                 0, 0);
         mClassifier.onTouchEvent(motionEvent);
         motionEvent.recycle();
-        getDataProvider().setInteractionType(QUICK_SETTINGS);
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(QUICK_SETTINGS, 0.5, 0).isFalse()).isFalse();
     }
 }

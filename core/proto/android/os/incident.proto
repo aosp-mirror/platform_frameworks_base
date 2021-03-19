@@ -55,13 +55,13 @@ import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
 import "frameworks/base/core/proto/android/service/restricted_image.proto";
 import "frameworks/base/core/proto/android/service/sensor_service.proto";
+import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
 import "frameworks/base/core/proto/android/util/textdump.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
 import "frameworks/base/proto/src/ipconnectivity.proto";
-import "frameworks/proto_logging/stats/enums/service/usb.proto";
 import "packages/modules/Permission/service/proto/com/android/role/roleservice.proto";
 
 package android.os;

@@ -113,7 +113,7 @@ public final class TimeZoneCapabilitiesAndConfig implements Parcelable {
 
     @Override
     public String toString() {
-        return "TimeZoneDetectorCapabilitiesAndConfig{"
+        return "TimeZoneCapabilitiesAndConfig{"
                 + "mCapabilities=" + mCapabilities
                 + ", mConfiguration=" + mConfiguration
                 + '}';

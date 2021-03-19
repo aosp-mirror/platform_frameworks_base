@@ -1078,6 +1078,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         Date lastSeen = mDevicesLastNearby.get(address);
         if (isDeviceDisappeared(lastSeen)) {
             onDeviceDisappeared(address);
+            unscheduleTriggerDeviceDisappearedRunnable(address);
         }
     }
 
@@ -1213,7 +1214,18 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         @Override
         public void run() {
             Slog.d(LOG_TAG, "TriggerDeviceDisappearedRunnable.run(address = " + mAddress + ")");
-            onDeviceDisappeared(mAddress);
+            if (!mCurrentlyConnectedDevices.contains(mAddress)) {
+                onDeviceDisappeared(mAddress);
+            }
+        }
+    }
+
+    private void unscheduleTriggerDeviceDisappearedRunnable(String address) {
+        Runnable r = mTriggerDeviceDisappearedRunnables.get(address);
+        if (r != null) {
+            Slog.d(LOG_TAG,
+                    "unscheduling TriggerDeviceDisappearedRunnable(address = " + address + ")");
+            mMainHandler.removeCallbacks(r);
         }
     }
 

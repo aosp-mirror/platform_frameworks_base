@@ -1356,11 +1356,15 @@
     <dimen name="people_space_image_radius">20dp</dimen>
     <dimen name="people_space_widget_background_padding">6dp</dimen>
 
-    <dimen name="rounded_slider_height">48dp</dimen>
+    <dimen name="rounded_slider_height">44dp</dimen>
     <!-- rounded_slider_height / 2 -->
-    <dimen name="rounded_slider_corner_radius">24dp</dimen>
-    <!-- rounded_slider_height / 2 -->
-    <dimen name="rounded_slider_icon_size">24dp</dimen>
-    <!-- rounded_slider_icon_size / 2 -->
+    <dimen name="rounded_slider_corner_radius">22dp</dimen>
+    <dimen name="rounded_slider_icon_size">20dp</dimen>
+    <!-- (rounded_slider_height - rounded_slider_icon_size) / 2 -->
     <dimen name="rounded_slider_icon_inset">12dp</dimen>
+    <!-- rounded_slider_corner_radius - rounded_slider_track_corner_radius -->
+    <dimen name="rounded_slider_track_inset">18dp</dimen>
+    <dimen name="rounded_slider_track_width">8dp</dimen>
+    <!-- rounded_slider_track_width / 2 -->
+    <dimen name="rounded_slider_track_corner_radius">4dp</dimen>
 </resources>

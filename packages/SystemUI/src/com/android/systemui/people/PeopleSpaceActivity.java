@@ -35,7 +35,6 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
-import com.android.systemui.people.widget.PeopleTileKey;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 import java.util.List;
@@ -62,9 +61,12 @@ public class PeopleSpaceActivity extends Activity {
     private boolean mShowSingleConversation;
 
     @Inject
-    public PeopleSpaceActivity(NotificationEntryManager notificationEntryManager) {
+    public PeopleSpaceActivity(NotificationEntryManager notificationEntryManager,
+            PeopleSpaceWidgetManager peopleSpaceWidgetManager) {
         super();
         mNotificationEntryManager = notificationEntryManager;
+        mPeopleSpaceWidgetManager = peopleSpaceWidgetManager;
+
     }
 
     @Override
@@ -78,7 +80,6 @@ public class PeopleSpaceActivity extends Activity {
         mPackageManager = getPackageManager();
         mPeopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
-        mPeopleSpaceWidgetManager = new PeopleSpaceWidgetManager(mContext);
         mLauncherApps = mContext.getSystemService(LauncherApps.class);
         setTileViewsWithPriorityConversations();
         mAppWidgetId = getIntent().getIntExtra(EXTRA_APPWIDGET_ID,
@@ -139,9 +140,7 @@ public class PeopleSpaceActivity extends Activity {
                         + mAppWidgetId);
             }
         }
-        PeopleTileKey key = new PeopleTileKey(
-                tile.getId(), tile.getUserHandle().getIdentifier(), tile.getPackageName());
-        mPeopleSpaceWidgetManager.addNewWidget(mAppWidgetId, key);
+        mPeopleSpaceWidgetManager.addNewWidget(mAppWidgetId, tile);
         finishActivity();
     }
 
