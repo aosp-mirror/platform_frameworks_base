@@ -16,9 +16,13 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE;
+import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
+import static com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuView.ShapeType;
+import static com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuView.SizeType;
 
 import android.content.Context;
 import android.database.ContentObserver;
@@ -44,6 +48,22 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
                 }
             };
 
+    private final ContentObserver mSizeContentObserver =
+            new ContentObserver(new Handler(Looper.getMainLooper())) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    mMenuView.setSizeType(getSizeType(mContext));
+                }
+            };
+
+    private final ContentObserver mShapeContentObserver =
+            new ContentObserver(new Handler(Looper.getMainLooper())) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    mMenuView.setShapeType(getShapeType(mContext));
+                }
+            };
+
     public AccessibilityFloatingMenu(Context context) {
         mContext = context;
         mMenuView = new AccessibilityFloatingMenuView(context);
@@ -66,13 +86,12 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
             return;
         }
 
-        mMenuView.onTargetsChanged(getTargets(mContext, ACCESSIBILITY_BUTTON));
         mMenuView.show();
+        mMenuView.onTargetsChanged(getTargets(mContext, ACCESSIBILITY_BUTTON));
+        mMenuView.setSizeType(getSizeType(mContext));
+        mMenuView.setShapeType(getShapeType(mContext));
 
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
-                /* notifyForDescendants */ false, mContentObserver,
-                UserHandle.USER_CURRENT);
+        registerContentObservers();
     }
 
     @Override
@@ -83,6 +102,38 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
 
         mMenuView.hide();
 
+        unregisterContentObservers();
+    }
+
+    private static int getSizeType(Context context) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_SIZE, SizeType.SMALL);
+    }
+
+    private static int getShapeType(Context context) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
+                ShapeType.CIRCLE);
+    }
+
+    private void registerContentObservers() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
+                /* notifyForDescendants */ false, mContentObserver,
+                UserHandle.USER_CURRENT);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE),
+                /* notifyForDescendants */ false, mSizeContentObserver,
+                UserHandle.USER_CURRENT);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE),
+                /* notifyForDescendants */ false, mShapeContentObserver,
+                UserHandle.USER_CURRENT);
+    }
+
+    private void unregisterContentObservers() {
         mContext.getContentResolver().unregisterContentObserver(mContentObserver);
+        mContext.getContentResolver().unregisterContentObserver(mSizeContentObserver);
+        mContext.getContentResolver().unregisterContentObserver(mShapeContentObserver);
     }
 }
