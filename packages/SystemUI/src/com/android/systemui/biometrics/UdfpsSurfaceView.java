@@ -23,9 +23,15 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
+import android.os.Build;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import com.android.systemui.biometrics.HbmTypes.HbmType;
 
 /**
  * Under-display fingerprint sensor Surface View. The surface should be used for HBM-specific things
@@ -33,6 +39,9 @@ import android.view.SurfaceView;
  */
 public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
     private static final String TAG = "UdfpsSurfaceView";
+    private static final String SETTING_HBM_TYPE =
+            "com.android.systemui.biometrics.UdfpsSurfaceView.hbmType";
+    private static final @HbmType int DEFAULT_HBM_TYPE = HbmTypes.GLOBAL_HBM;
 
     /**
      * This is used instead of {@link android.graphics.drawable.Drawable}, because the latter has
@@ -45,6 +54,7 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
     @NonNull private final SurfaceHolder mHolder;
     @NonNull private final Paint mSensorPaint;
     @NonNull private final SimpleDrawable mIlluminationDotDrawable;
+    private final @HbmType int mHbmType;
 
     @NonNull private RectF mSensorRect;
     @Nullable private HbmCallback mHbmCallback;
@@ -70,6 +80,13 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
         mIlluminationDotDrawable = canvas -> {
             canvas.drawOval(mSensorRect, mSensorPaint);
         };
+
+        if (Build.IS_ENG || Build.IS_USERDEBUG) {
+            mHbmType = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    SETTING_HBM_TYPE, DEFAULT_HBM_TYPE, UserHandle.USER_CURRENT);
+        } else {
+            mHbmType = DEFAULT_HBM_TYPE;
+        }
     }
 
     @Override
@@ -79,10 +96,15 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
 
     @Override
     public void startIllumination(@Nullable Runnable onIlluminatedRunnable) {
-        if (mHbmCallback != null && mHolder.getSurface().isValid()) {
-            mHbmCallback.enableHbm(mHolder.getSurface());
+        if (mHbmCallback != null) {
+            mHbmCallback.enableHbm(mHbmType, mHolder.getSurface());
+        } else {
+            Log.e(TAG, "startIllumination | mHbmCallback is null");
         }
-        drawImmediately(mIlluminationDotDrawable);
+
+        if (mHbmType == HbmTypes.GLOBAL_HBM) {
+            drawImmediately(mIlluminationDotDrawable);
+        }
 
         if (onIlluminatedRunnable != null) {
             // No framework API can reliably tell when a frame reaches the panel. A timeout is the
@@ -94,8 +116,10 @@ public class UdfpsSurfaceView extends SurfaceView implements UdfpsIlluminator {
 
     @Override
     public void stopIllumination() {
-        if (mHbmCallback != null && mHolder.getSurface().isValid()) {
-            mHbmCallback.disableHbm(mHolder.getSurface());
+        if (mHbmCallback != null) {
+            mHbmCallback.disableHbm(mHbmType, mHolder.getSurface());
+        } else {
+            Log.e(TAG, "stopIllumination | mHbmCallback is null");
         }
 
         invalidate();

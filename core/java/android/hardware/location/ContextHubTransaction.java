@@ -81,8 +81,7 @@ public class ContextHubTransaction<T> {
             RESULT_FAILED_AT_HUB,
             RESULT_FAILED_TIMEOUT,
             RESULT_FAILED_SERVICE_INTERNAL_FAILURE,
-            RESULT_FAILED_HAL_UNAVAILABLE,
-            RESULT_FAILED_PERMISSION_DENIED
+            RESULT_FAILED_HAL_UNAVAILABLE
     })
     public @interface Result {}
     public static final int RESULT_SUCCESS = 0;
@@ -118,11 +117,6 @@ public class ContextHubTransaction<T> {
      * Failure mode when the Context Hub HAL was not available.
      */
     public static final int RESULT_FAILED_HAL_UNAVAILABLE = 8;
-    /**
-     * Failure mode when the user of the API doesn't have the required permissions to perform the
-     * operation.
-     */
-    public static final int RESULT_FAILED_PERMISSION_DENIED = 9;
 
     /**
      * A class describing the response for a ContextHubTransaction.

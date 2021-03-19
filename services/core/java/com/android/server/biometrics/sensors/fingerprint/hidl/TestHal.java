@@ -93,8 +93,11 @@ public class TestHal extends IBiometricsFingerprint.Stub {
     }
 
     @Override
-    public int remove(int gid, int fid) {
+    public int remove(int gid, int fid) throws RemoteException {
         Slog.w(TAG, "Remove");
+        if (mCallback != null) {
+            mCallback.onRemoved(0 /* deviceId */, fid, gid, 0 /* remaining */);
+        }
         return 0;
     }
 

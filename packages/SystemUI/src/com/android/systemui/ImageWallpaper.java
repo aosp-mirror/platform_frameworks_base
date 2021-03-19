@@ -29,6 +29,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Size;
+import android.view.Choreographer;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
@@ -37,6 +38,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.glwallpaper.EglHelper;
 import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -53,10 +55,11 @@ public class ImageWallpaper extends WallpaperService {
     private static final String TAG = ImageWallpaper.class.getSimpleName();
     // We delayed destroy render context that subsequent render requests have chance to cancel it.
     // This is to avoid destroying then recreating render context in a very short time.
-    private static final int DELAY_FINISH_RENDERING = 1000;
+    private static final int DELAY_FINISH_RENDERING = 3000;
     private static final @android.annotation.NonNull RectF LOCAL_COLOR_BOUNDS =
             new RectF(0, 0, 1, 1);
     private static final boolean DEBUG = false;
+    private final StatusBarStateController mStatusBarStateController;
     private final ArrayList<RectF> mLocalColorsToAdd = new ArrayList<>();
     private final ArraySet<RectF> mColorAreas = new ArraySet<>();
     private float mShift;
@@ -66,8 +69,9 @@ public class ImageWallpaper extends WallpaperService {
     private Bitmap mMiniBitmap;
 
     @Inject
-    public ImageWallpaper() {
+    public ImageWallpaper(StatusBarStateController statusBarStateController) {
         super();
+        mStatusBarStateController = statusBarStateController;
     }
 
     @Override
@@ -90,7 +94,9 @@ public class ImageWallpaper extends WallpaperService {
         mMiniBitmap = null;
     }
 
-    class GLEngine extends Engine {
+
+    class GLEngine extends Engine implements StatusBarStateController.StateListener,
+            Choreographer.FrameCallback {
         // Surface is rejected if size below a threshold on some devices (ie. 8px on elfin)
         // set min to 64 px (CTS covers this), please refer to ag/4867989 for detail.
         @VisibleForTesting
@@ -101,11 +107,12 @@ public class ImageWallpaper extends WallpaperService {
         private ImageWallpaperRenderer mRenderer;
         private EglHelper mEglHelper;
         private final Runnable mFinishRenderingTask = this::finishRendering;
-        private boolean mNeedRedraw;
         private int mWidth = 1;
         private int mHeight = 1;
         private int mImgWidth = 1;
         private int mImgHeight = 1;
+        private volatile float mDozeAmount;
+        private volatile boolean mNewDozeValue = false;
 
         GLEngine() {
         }
@@ -130,8 +137,14 @@ public class ImageWallpaper extends WallpaperService {
             mWidth = window.width();
             mMiniBitmap = null;
             if (mWorker != null && mWorker.getThreadHandler() != null) {
-                mWorker.getThreadHandler().post(this::updateMiniBitmap);
+                mWorker.getThreadHandler().post(() -> {
+                    updateMiniBitmap();
+                    Choreographer.getInstance().postFrameCallback(GLEngine.this);
+                });
             }
+
+            mDozeAmount = mStatusBarStateController.getDozeAmount();
+            mStatusBarStateController.addCallback(this);
         }
 
         EglHelper getEglHelperInstance() {
@@ -210,11 +223,14 @@ public class ImageWallpaper extends WallpaperService {
         public void onDestroy() {
             mMiniBitmap = null;
             mWorker.getThreadHandler().post(() -> {
+                Choreographer.getInstance().removeFrameCallback(this);
                 mRenderer.finish();
                 mRenderer = null;
                 mEglHelper.finish();
                 mEglHelper = null;
             });
+
+            mStatusBarStateController.removeCallback(this);
         }
 
         @Override
@@ -323,7 +339,14 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             if (mWorker == null) return;
+            mDozeAmount = mStatusBarStateController.getDozeAmount();
             mWorker.getThreadHandler().post(this::drawFrame);
+        }
+
+        @Override
+        public void onDozeAmountChanged(float linear, float eased) {
+            mDozeAmount = linear;
+            mNewDozeValue = true;
         }
 
         private void drawFrame() {
@@ -381,6 +404,7 @@ public class ImageWallpaper extends WallpaperService {
                     && frame.width() > 0 && frame.height() > 0;
 
             if (readyToRender) {
+                mRenderer.setExposureValue(1 - mDozeAmount);
                 mRenderer.onDrawFrame();
                 if (!mEglHelper.swapBuffer()) {
                     Log.e(TAG, "drawFrame failed!");
@@ -437,6 +461,15 @@ public class ImageWallpaper extends WallpaperService {
 
             mEglHelper.dump(prefix, fd, out, args);
             mRenderer.dump(prefix, fd, out, args);
+        }
+
+        @Override
+        public void doFrame(long frameTimeNanos) {
+            if (mNewDozeValue) {
+                drawFrame();
+                mNewDozeValue = false;
+            }
+            Choreographer.getInstance().postFrameCallback(this);
         }
     }
 }

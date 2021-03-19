@@ -395,6 +395,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
                                 AudioSystem.STREAM_VOICE_CALL);
                 List<AudioDeviceAttributes> devices = AudioSystem.getDevicesForAttributes(attr);
                 if (devices.isEmpty()) {
+                    if (mAudioService.isPlatformVoice()) {
+                        Log.w(TAG, "getCommunicationDevice(): no device for phone strategy");
+                    }
                     return null;
                 }
                 device = devices.get(0);
@@ -746,7 +749,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
     @GuardedBy("mDeviceStateLock")
     private void dispatchCommunicationDevice() {
         AudioDeviceInfo device = getCommunicationDevice();
-        int portId = (getCommunicationDevice() == null) ? 0 : device.getId();
+        int portId = (device == null) ? 0 : device.getId();
         if (portId == mCurCommunicationPortId) {
             return;
         }
@@ -1022,9 +1025,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
         pw.println("\n" + prefix + "mPreferredCommunicationDevice: "
                 +  mPreferredCommunicationDevice);
 
+        AudioDeviceInfo device = getCommunicationDevice();
         pw.println(prefix + "Selected Communication Device: "
-                +  ((getCommunicationDevice() == null) ? "None"
-                        : new AudioDeviceAttributes(getCommunicationDevice())));
+                +  ((device == null) ? "None" : new AudioDeviceAttributes(device)));
 
         pw.println(prefix + "mCommunicationStrategyId: "
                 +  mCommunicationStrategyId);

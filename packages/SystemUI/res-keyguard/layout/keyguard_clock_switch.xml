@@ -77,8 +77,9 @@
             android:fontFamily="@font/clock"
             android:typeface="monospace"
             android:elegantTextHeight="false"
+            android:singleLine="true"
             dozeWeight="200"
-            lockScreenWeight="300"
+            lockScreenWeight="400"
         />
     </FrameLayout>
     <FrameLayout
@@ -109,8 +110,6 @@
 
     <com.android.systemui.statusbar.phone.NotificationIconContainer
         android:id="@+id/left_aligned_notification_icon_container"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_shelf_height"
         android:layout_marginTop="@dimen/widget_vertical_padding"

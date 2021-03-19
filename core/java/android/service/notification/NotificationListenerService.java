@@ -1786,7 +1786,8 @@ public abstract class NotificationListenerService extends Service {
          * {@link NotificationListenerService.Ranking#VISIBILITY_NO_OVERRIDE} if
          * no such preference has been expressed.
          */
-        public int getLockscreenVisibilityOverride() {
+        public @Notification.NotificationVisibilityOverride
+        int getLockscreenVisibilityOverride() {
             return mVisibilityOverride;
         }
 

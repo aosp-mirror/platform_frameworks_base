@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -43,6 +44,7 @@ import com.android.systemui.plugins.ToastPlugin;
  * directly. Instead, use {@link ToastFactory#createToast}.
  */
 public class SystemUIToast implements ToastPlugin.Toast {
+    static final String TAG = "SystemUIToast";
     final Context mContext;
     final CharSequence mText;
     final ToastPlugin.Toast mPluginToast;
@@ -225,8 +227,12 @@ public class SystemUIToast implements ToastPlugin.Toast {
             int userId) {
         final ApplicationsState appState =
                 ApplicationsState.getInstance((Application) context.getApplicationContext());
+        if (!appState.isUserAdded(userId)) {
+            Log.d(TAG, "user hasn't been fully initialized, not showing an app icon for "
+                    + "packageName=" + packageName);
+            return null;
+        }
         final AppEntry appEntry = appState.getEntry(packageName, userId);
-
         if (!ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(appEntry)) {
             return null;
         }
@@ -237,6 +243,5 @@ public class SystemUIToast implements ToastPlugin.Toast {
         Bitmap iconBmp = iconFactory.createBadgedIconBitmap(
                 appInfo.loadUnbadgedIcon(context.getPackageManager()), user, true).icon;
         return new BitmapDrawable(context.getResources(), iconBmp);
-
     }
 }

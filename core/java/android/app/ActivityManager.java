@@ -31,6 +31,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -4048,7 +4049,8 @@ public class ActivityManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS})
     public boolean switchUser(@NonNull UserHandle user) {
         if (user == null) {
             throw new IllegalArgumentException("UserHandle cannot be null.");
@@ -4141,6 +4143,25 @@ public class ActivityManager {
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
+        }
+    }
+
+    /**
+     * Stops the given {@code userId}.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    public boolean stopUser(@UserIdInt int userId, boolean force) {
+        if (userId == UserHandle.USER_SYSTEM) {
+            return false;
+        }
+        try {
+            return USER_OP_SUCCESS == getService().stopUser(
+                    userId, force, /* callback= */ null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -4807,6 +4828,21 @@ public class ActivityManager {
             getService().holdLock(token, durationMs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Blocks until all broadcast queues become idle.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public void waitForBroadcastIdle() {
+        try {
+            getService().waitForBroadcastIdle();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 

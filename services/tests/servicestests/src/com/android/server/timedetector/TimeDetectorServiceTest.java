@@ -328,6 +328,11 @@ public class TimeDetectorServiceTest {
         }
 
         @Override
+        public ConfigurationInternal getConfigurationInternal(int userId) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public void handleAutoTimeConfigChanged() {
             mHandleAutoTimeDetectionChangedCalled = true;
         }

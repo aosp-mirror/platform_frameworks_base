@@ -19,6 +19,7 @@ package android.view;
 import static android.view.InsetsController.DEBUG;
 import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
 
+import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.content.res.CompatibilityInfo;
 import android.graphics.Rect;
@@ -100,8 +101,8 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     };
 
     @UiThread
-    public InsetsAnimationThreadControlRunner(SparseArray<InsetsSourceControl> controls, Rect frame,
-            InsetsState state, WindowInsetsAnimationControlListener listener,
+    public InsetsAnimationThreadControlRunner(SparseArray<InsetsSourceControl> controls,
+            @Nullable Rect frame, InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types,
             InsetsAnimationControlCallbacks controller, long durationMs, Interpolator interpolator,
             @AnimationType int animationType, CompatibilityInfo.Translator translator,

@@ -63,24 +63,33 @@ import java.util.Set;
  * android.app.appsearch.exceptions.AppSearchException}, with a message describing the
  * incompatibility. As a result, the previously set schema will remain unchanged.
  *
- * <p>Backward incompatible changes can be made by setting {@link
- * SetSchemaRequest.Builder#setForceOverride} method to {@code true}. This deletes all documents
- * that are incompatible with the new schema. The new schema is then saved and persisted to disk.
+ * <p>Backward incompatible changes can be made by :
+ *
+ * <ul>
+ *   <li>setting {@link SetSchemaRequest.Builder#setForceOverride} method to {@code true}. This
+ *       deletes all documents that are incompatible with the new schema. The new schema is then
+ *       saved and persisted to disk.
+ *   <li>Add a {@link Migrator} for each incompatible type and make no deletion. The migrator will
+ *       migrate documents from it's old schema version to the new version. Migrated types will be
+ *       set into both {@link SetSchemaResponse#getIncompatibleTypes()} and {@link
+ *       SetSchemaResponse#getMigratedTypes()}. See the migration section below.
+ * </ul>
  *
  * @see AppSearchSession#setSchema
+ * @see Migrator
  */
 public final class SetSchemaRequest {
     private final Set<AppSearchSchema> mSchemas;
     private final Set<String> mSchemasNotDisplayedBySystem;
     private final Map<String, Set<PackageIdentifier>> mSchemasVisibleToPackages;
-    private final Map<String, AppSearchSchema.Migrator> mMigrators;
+    private final Map<String, Migrator> mMigrators;
     private final boolean mForceOverride;
 
     SetSchemaRequest(
             @NonNull Set<AppSearchSchema> schemas,
             @NonNull Set<String> schemasNotDisplayedBySystem,
             @NonNull Map<String, Set<PackageIdentifier>> schemasVisibleToPackages,
-            @NonNull Map<String, AppSearchSchema.Migrator> migrators,
+            @NonNull Map<String, Migrator> migrators,
             boolean forceOverride) {
         mSchemas = Preconditions.checkNotNull(schemas);
         mSchemasNotDisplayedBySystem = Preconditions.checkNotNull(schemasNotDisplayedBySystem);
@@ -129,9 +138,12 @@ public final class SetSchemaRequest {
         return copy;
     }
 
-    /** Returns the map of {@link android.app.appsearch.AppSearchSchema.Migrator}. */
+    /**
+     * Returns the map of {@link Migrator}, the key will be the schema type of the {@link Migrator}
+     * associated with.
+     */
     @NonNull
-    public Map<String, AppSearchSchema.Migrator> getMigrators() {
+    public Map<String, Migrator> getMigrators() {
         return Collections.unmodifiableMap(mMigrators);
     }
 
@@ -164,7 +176,7 @@ public final class SetSchemaRequest {
         private final Set<String> mSchemasNotDisplayedBySystem = new ArraySet<>();
         private final Map<String, Set<PackageIdentifier>> mSchemasVisibleToPackages =
                 new ArrayMap<>();
-        private final Map<String, AppSearchSchema.Migrator> mMigrators = new ArrayMap<>();
+        private final Map<String, Migrator> mMigrators = new ArrayMap<>();
         private boolean mForceOverride = false;
         private boolean mBuilt = false;
 
@@ -295,7 +307,7 @@ public final class SetSchemaRequest {
         }
 
         /**
-         * Sets the {@link android.app.appsearch.AppSearchSchema.Migrator}.
+         * Sets the {@link Migrator}.
          *
          * @param schemaType The schema type to set migrator on.
          * @param migrator The migrator translate a document from it's old version to a new
@@ -303,8 +315,7 @@ public final class SetSchemaRequest {
          */
         @NonNull
         @SuppressLint("MissingGetterMatchingBuilder") // Getter return plural objects.
-        public Builder setMigrator(
-                @NonNull String schemaType, @NonNull AppSearchSchema.Migrator migrator) {
+        public Builder setMigrator(@NonNull String schemaType, @NonNull Migrator migrator) {
             Preconditions.checkNotNull(schemaType);
             Preconditions.checkNotNull(migrator);
             mMigrators.put(schemaType, migrator);

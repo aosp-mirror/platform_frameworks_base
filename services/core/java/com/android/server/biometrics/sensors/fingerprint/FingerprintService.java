@@ -506,13 +506,13 @@ public class FingerprintService extends SystemService implements BiometricServic
                 final IFingerprintServiceReceiver receiver, final String opPackageName) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
-            if (provider == null) {
-                Slog.w(TAG, "Null provider for removeAll");
-                return;
+            for (ServiceProvider provider : mServiceProviders) {
+                List<FingerprintSensorPropertiesInternal> props = provider.getSensorProperties();
+                for (FingerprintSensorPropertiesInternal prop : props) {
+                    provider.scheduleRemoveAll(prop.sensorId, token, receiver, userId,
+                            opPackageName);
+                }
             }
-            provider.second.scheduleRemoveAll(provider.first, token, receiver, userId,
-                    opPackageName);
         }
 
         @Override // Binder call

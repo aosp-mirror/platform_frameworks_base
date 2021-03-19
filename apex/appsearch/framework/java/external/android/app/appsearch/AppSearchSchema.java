@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.app.appsearch.exceptions.IllegalSchemaException;
 import android.app.appsearch.util.BundleUtil;
 import android.os.Bundle;
@@ -179,7 +178,7 @@ public final class AppSearchSchema {
          * @throws IllegalStateException if the version is negative or the builder has already been
          *     used.
          * @see AppSearchSession#setSchema
-         * @see AppSearchSchema.Migrator
+         * @see Migrator
          * @see SetSchemaRequest.Builder#setMigrator
          */
         @NonNull
@@ -860,44 +859,5 @@ public final class AppSearchSchema {
                 return new DocumentPropertyConfig(mBundle);
             }
         }
-    }
-
-    /**
-     * A migrator class to translate {@link GenericDocument} from different version of {@link
-     * AppSearchSchema}
-     */
-    public interface Migrator {
-
-        /**
-         * Migrates {@link GenericDocument} to a newer version of {@link AppSearchSchema}.
-         *
-         * <p>This methods will be invoked only if the {@link SetSchemaRequest} is setting a higher
-         * version number than the current {@link AppSearchSchema} saved in AppSearch.
-         *
-         * @param currentVersion The current version of the document's schema.
-         * @param targetVersion The final version that documents need to be migrated to.
-         * @param helper The helper class could help to query all documents need to be migrated.
-         */
-        // This method will be overridden by users, allow them to throw any customer Exceptions.
-        @SuppressLint("GenericException")
-        default void onUpgrade(
-                int currentVersion, int targetVersion, @NonNull AppSearchMigrationHelper helper)
-                throws Exception {}
-
-        /**
-         * Migrates {@link GenericDocument} to an older version of {@link AppSearchSchema}.
-         *
-         * <p>The methods will be invoked only if the {@link SetSchemaRequest} is setting a higher
-         * version number than the current {@link AppSearchSchema} saved in AppSearch.
-         *
-         * @param currentVersion The current version of the document's schema.
-         * @param targetVersion The final version that documents need to be migrated to.
-         * @param helper The helper class could help to query all documents need to be migrated.
-         */
-        // This method will be overridden by users, allow them to throw any customer Exceptions.
-        @SuppressLint("GenericException")
-        default void onDowngrade(
-                int currentVersion, int targetVersion, @NonNull AppSearchMigrationHelper helper)
-                throws Exception {}
     }
 }

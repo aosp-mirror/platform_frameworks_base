@@ -456,6 +456,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private long mNumHeadsUp;
     private NotificationStackScrollLayoutController.TouchHandler mTouchHandler;
     private final FeatureFlags mFeatureFlags;
+    private boolean mShouldUseSplitNotificationShade;
 
     private final ExpandableView.OnHeightChangedListener mOnChildHeightChangedListener =
             new ExpandableView.OnHeightChangedListener() {
@@ -500,7 +501,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         super(context, attrs, 0, 0);
         Resources res = getResources();
         mSectionsManager = notificationSectionsManager;
-
+        mFeatureFlags = featureFlags;
+        mShouldUseSplitNotificationShade = shouldUseSplitNotificationShade(mFeatureFlags, res);
         mSectionsManager.initialize(this, LayoutInflater.from(context));
         mSections = mSectionsManager.createSectionsForBuckets();
 
@@ -533,7 +535,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mGroupMembershipManager = groupMembershipManager;
         mGroupExpansionManager = groupExpansionManager;
         mStatusbarStateController = statusbarStateController;
-        mFeatureFlags = featureFlags;
     }
 
     void initializeForegroundServiceSection(ForegroundServiceDungeonView fgsSectionView) {
@@ -1164,7 +1165,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (stackStartPosition <= stackEndPosition) {
                     stackHeight = stackEndPosition;
                 } else {
-                    if (shouldUseSplitNotificationShade(mFeatureFlags, getResources())) {
+                    if (mShouldUseSplitNotificationShade) {
                         // This prevents notifications from being collapsed when QS is expanded.
                         stackHeight = (int) height;
                     } else {
@@ -1552,8 +1553,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mStatusBarHeight = getResources().getDimensionPixelOffset(R.dimen.status_bar_height);
-        float densityScale = getResources().getDisplayMetrics().density;
+        Resources res = getResources();
+        mShouldUseSplitNotificationShade = shouldUseSplitNotificationShade(mFeatureFlags, res);
+        mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
+        float densityScale = res.getDisplayMetrics().density;
         mSwipeHelper.setDensityScale(densityScale);
         float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
         mSwipeHelper.setPagingTouchSlop(pagingTouchSlop);

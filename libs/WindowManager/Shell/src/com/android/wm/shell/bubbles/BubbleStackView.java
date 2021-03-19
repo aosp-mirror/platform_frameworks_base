@@ -151,6 +151,7 @@ public class BubbleStackView extends FrameLayout
      * starting a new animation.
      */
     private final ShellExecutor mDelayedAnimationExecutor;
+    private Runnable mDelayedAnimation;
 
     /**
      * Interface to synchronize {@link View} state and the screen.
@@ -1865,7 +1866,7 @@ public class BubbleStackView extends FrameLayout
             mExpandedBubble.getExpandedView().setAlphaAnimating(true);
         }
 
-        mDelayedAnimationExecutor.executeDelayed(() -> {
+        mDelayedAnimation = () -> {
             mExpandedViewAlphaAnimator.start();
 
             PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
@@ -1898,7 +1899,8 @@ public class BubbleStackView extends FrameLayout
                         }
                     })
                     .start();
-        }, startDelay);
+        };
+        mDelayedAnimationExecutor.executeDelayed(mDelayedAnimation, startDelay);
     }
 
     private void animateCollapse() {
@@ -2097,7 +2099,7 @@ public class BubbleStackView extends FrameLayout
      * animating flags for those animations.
      */
     private void cancelDelayedExpandCollapseSwitchAnimations() {
-        mDelayedAnimationExecutor.removeAllCallbacks();
+        mDelayedAnimationExecutor.removeCallbacks(mDelayedAnimation);
 
         mIsExpansionAnimating = false;
         mIsBubbleSwitchAnimating = false;

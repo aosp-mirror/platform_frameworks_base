@@ -24,14 +24,6 @@ package android.app.appsearch {
     method @Deprecated @NonNull public android.app.appsearch.AppSearchManager.SearchContext.Builder setDatabaseName(@NonNull String);
   }
 
-  public interface AppSearchMigrationHelper {
-    method public void queryAndTransform(@NonNull String, @NonNull android.app.appsearch.AppSearchMigrationHelper.Transformer) throws java.lang.Exception;
-  }
-
-  public static interface AppSearchMigrationHelper.Transformer {
-    method @NonNull public android.app.appsearch.GenericDocument transform(int, int, @NonNull android.app.appsearch.GenericDocument) throws java.lang.Exception;
-  }
-
   public final class AppSearchResult<ValueType> {
     method @Nullable public String getErrorMessage();
     method public int getResultCode();
@@ -107,11 +99,6 @@ package android.app.appsearch {
     ctor public AppSearchSchema.Int64PropertyConfig.Builder(@NonNull String);
     method @NonNull public android.app.appsearch.AppSearchSchema.Int64PropertyConfig build();
     method @NonNull public android.app.appsearch.AppSearchSchema.Int64PropertyConfig.Builder setCardinality(int);
-  }
-
-  public static interface AppSearchSchema.Migrator {
-    method public default void onDowngrade(int, int, @NonNull android.app.appsearch.AppSearchMigrationHelper) throws java.lang.Exception;
-    method public default void onUpgrade(int, int, @NonNull android.app.appsearch.AppSearchMigrationHelper) throws java.lang.Exception;
   }
 
   public abstract static class AppSearchSchema.PropertyConfig {
@@ -219,6 +206,13 @@ package android.app.appsearch {
   public class GlobalSearchSession implements java.io.Closeable {
     method public void close();
     method @NonNull public android.app.appsearch.SearchResults search(@NonNull String, @NonNull android.app.appsearch.SearchSpec);
+  }
+
+  public abstract class Migrator {
+    ctor public Migrator();
+    ctor public Migrator(int);
+    method @NonNull @WorkerThread public abstract android.app.appsearch.GenericDocument onDowngrade(int, int, @NonNull android.app.appsearch.GenericDocument);
+    method @NonNull @WorkerThread public abstract android.app.appsearch.GenericDocument onUpgrade(int, int, @NonNull android.app.appsearch.GenericDocument);
   }
 
   public class PackageIdentifier {
@@ -357,7 +351,7 @@ package android.app.appsearch {
   }
 
   public final class SetSchemaRequest {
-    method @NonNull public java.util.Map<java.lang.String,android.app.appsearch.AppSearchSchema.Migrator> getMigrators();
+    method @NonNull public java.util.Map<java.lang.String,android.app.appsearch.Migrator> getMigrators();
     method @NonNull public java.util.Set<android.app.appsearch.AppSearchSchema> getSchemas();
     method @NonNull public java.util.Set<java.lang.String> getSchemasNotDisplayedBySystem();
     method @Deprecated @NonNull public java.util.Set<java.lang.String> getSchemasNotVisibleToSystemUi();
@@ -371,7 +365,7 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder addSchemas(@NonNull java.util.Collection<android.app.appsearch.AppSearchSchema>);
     method @NonNull public android.app.appsearch.SetSchemaRequest build();
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setForceOverride(boolean);
-    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setMigrator(@NonNull String, @NonNull android.app.appsearch.AppSearchSchema.Migrator);
+    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setMigrator(@NonNull String, @NonNull android.app.appsearch.Migrator);
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeDisplayedBySystem(@NonNull String, boolean);
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeVisibilityForPackage(@NonNull String, boolean, @NonNull android.app.appsearch.PackageIdentifier);
     method @Deprecated @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeVisibilityForSystemUi(@NonNull String, boolean);

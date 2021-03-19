@@ -53,7 +53,7 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
             "applyPostLayoutPolicy",
             "applySurfaceChanges",
             "AppTransitionReady",
-            "closeSurfaceTransactiom",
+            "closeSurfaceTransaction",
             "openSurfaceTransaction",
             "performLayout",
             "performSurfacePlacement",
@@ -98,6 +98,10 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
         }
 
         mTraceMarkParser.forAllSlices((key, slices) -> {
+            if (slices.size() < 2) {
+                Log.w(TAG, "No sufficient samples: " + key);
+                return;
+            }
             for (TraceMarkSlice slice : slices) {
                 state.addExtraResult(key, (long) (slice.getDurationInSeconds() * NANOS_PER_S));
             }

@@ -101,6 +101,8 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+// TODO (b/178655595) import static android.net.ConnectivityManager.USER_PREFERENCE_ENTERPRISE;
+// TODO (b/178655595) import static android.net.ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
@@ -3076,6 +3078,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
 
+        boolean enableEnterpriseNetworkSlice = true;
+        synchronized (getLockObject()) {
+            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
+            enableEnterpriseNetworkSlice = owner != null ? owner.mNetworkSlicingEnabled : true;
+        }
+        updateNetworkPreferenceForUser(userId, enableEnterpriseNetworkSlice);
+
         startOwnerService(userId, "start-user");
     }
 
@@ -3091,6 +3100,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     void handleStopUser(int userId) {
+        updateNetworkPreferenceForUser(userId, false);
         stopOwnerService(userId, "stop-user");
     }
 
@@ -5482,7 +5492,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean hasKeyPair(String callerPackage, String alias) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        Preconditions.checkCallAuthorization(canManageCertificates(caller));
+        Preconditions.checkCallAuthorization(canManageCertificates(caller)
+                || isCredentialManagementApp(caller, alias));
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
             try (KeyChainConnection keyChainConnection =
@@ -8799,11 +8810,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final ComponentName doComponent = mOwners.getDeviceOwnerComponent();
             final ComponentName poComponent =
                     mOwners.getProfileOwnerComponent(userHandle.getIdentifier());
-            // Return test only admin by default.
-            if (isAdminTestOnlyLocked(doComponent, userHandle.getIdentifier())) {
-                return doComponent;
-            } else if (isAdminTestOnlyLocked(poComponent, userHandle.getIdentifier())) {
-                return poComponent;
+            // Return test only admin if configured to do so.
+            // TODO(b/182994391): Replace with more generic solution to override the supervision
+            // component.
+            if (mConstants.USE_TEST_ADMIN_AS_SUPERVISION_COMPONENT) {
+                if (isAdminTestOnlyLocked(doComponent, userHandle.getIdentifier())) {
+                    return doComponent;
+                } else if (isAdminTestOnlyLocked(poComponent, userHandle.getIdentifier())) {
+                    return poComponent;
+                }
             }
             final String supervisor = mContext.getResources().getString(
                     com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
@@ -11389,21 +11404,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return;
         }
-
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(isProfileOwner(caller),
                 "Caller is not profile owner; only profile owner may control the network slicing");
-
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(
                     caller.getUserId());
             if (requiredAdmin != null && requiredAdmin.mNetworkSlicingEnabled != enabled) {
                 requiredAdmin.mNetworkSlicingEnabled = enabled;
                 saveSettingsLocked(caller.getUserId());
-                // TODO(b/178655595) notify CS the change.
-                // TODO(b/178655595) DevicePolicyEventLogger metrics
             }
         }
+        updateNetworkPreferenceForUser(caller.getUserId(), enabled);
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_NETWORK_SLICING_ENABLED)
+                .setBoolean(enabled)
+                .write();
     }
 
     @Override
@@ -11413,11 +11429,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
-        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
-                permission.READ_NETWORK_DEVICE_CONFIG) || isProfileOwner(caller),
-                        "Caller is not profile owner and not granted"
-                                + " READ_NETWORK_DEVICE_CONFIG permission");
+        Preconditions.checkCallAuthorization(isProfileOwner(caller),
+                "Caller is not profile owner");
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(userHandle);
             if (requiredAdmin != null) {
@@ -12123,6 +12136,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
             mConstants = loadConstants();
+
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                final Intent intent = new Intent(
+                        DevicePolicyManager.ACTION_DEVICE_POLICY_CONSTANTS_CHANGED);
+                intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                final List<UserInfo> users = mUserManager.getAliveUsers();
+                for (int i = 0; i < users.size(); i++) {
+                    mContext.sendBroadcastAsUser(intent, UserHandle.of(users.get(i).id));
+                }
+            });
         }
     }
 
@@ -16929,6 +16952,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final boolean canGrant = owner != null ? owner.mAdminCanGrantSensorsPermissions : false;
             mPolicyCache.setAdminCanGrantSensorsPermissions(userId, canGrant);
         }
+    }
+
+    private void updateNetworkPreferenceForUser(int userId, boolean enableEnterprise) {
+        if (!isManagedProfile(userId)) {
+            return;
+        }
+        // TODO(b/178655595)
+        // int networkPreference = enable ? ConnectivityManager.USER_PREFERENCE_ENTERPRISE :
+        //        ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT;
+        // mInjector.binderWithCleanCallingIdentity(() ->
+        //         mInjector.getConnectivityManager().setNetworkPreferenceForUser(
+        //                 UserHandle.of(userId),
+        //                 networkPreference,
+        //                 null /* executor */, null /* listener */));
     }
 
     @Override

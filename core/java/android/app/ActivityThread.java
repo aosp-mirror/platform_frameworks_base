@@ -292,7 +292,6 @@ public final class ActivityThread extends ClientTransactionHandler
     /** Use background GC policy and default JIT threshold. */
     private static final int VM_PROCESS_STATE_JANK_IMPERCEPTIBLE = 1;
 
-    private static final int REMOVE_SPLASH_SCREEN_VIEW_TIMEOUT = 5000;
     /**
      * Denotes an invalid sequence number corresponding to a process state change.
      */
@@ -1956,8 +1955,6 @@ public final class ActivityThread extends ClientTransactionHandler
         public static final int INSTRUMENT_WITHOUT_RESTART = 170;
         public static final int FINISH_INSTRUMENTATION_WITHOUT_RESTART = 171;
 
-        public static final int REMOVE_SPLASH_SCREEN_VIEW = 172;
-
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -2006,8 +2003,6 @@ public final class ActivityThread extends ClientTransactionHandler
                     case INSTRUMENT_WITHOUT_RESTART: return "INSTRUMENT_WITHOUT_RESTART";
                     case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
                         return "FINISH_INSTRUMENTATION_WITHOUT_RESTART";
-                    case REMOVE_SPLASH_SCREEN_VIEW:
-                        return "REMOVE_SPLASH_SCREEN_VIEW";
                 }
             }
             return Integer.toString(code);
@@ -2203,9 +2198,6 @@ public final class ActivityThread extends ClientTransactionHandler
                     break;
                 case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
                     handleFinishInstrumentationWithoutRestart();
-                    break;
-                case REMOVE_SPLASH_SCREEN_VIEW:
-                    handleRemoveSplashScreenView((ActivityClientRecord) msg.obj);
                     break;
             }
             Object obj = msg.obj;
@@ -4020,6 +4012,7 @@ public final class ActivityThread extends ClientTransactionHandler
         view.cacheRootWindow(r.window);
         view.makeSystemUIColorsTransparent();
         r.activity.mSplashScreenView = view;
+        view.attachHostActivity(r.activity);
         view.requestLayout();
         // Ensure splash screen view is shown before remove the splash screen window.
         final ViewRootImpl impl = decorView.getViewRootImpl();
@@ -4062,24 +4055,12 @@ public final class ActivityThread extends ClientTransactionHandler
     @Override
     public void handOverSplashScreenView(@NonNull ActivityClientRecord r) {
         if (r.activity.mSplashScreenView != null) {
-            Message msg = mH.obtainMessage(H.REMOVE_SPLASH_SCREEN_VIEW, r);
-            mH.sendMessageDelayed(msg, REMOVE_SPLASH_SCREEN_VIEW_TIMEOUT);
             synchronized (this) {
                 if (mSplashScreenGlobal != null) {
                     mSplashScreenGlobal.dispatchOnExitAnimation(r.token,
                             r.activity.mSplashScreenView);
                 }
             }
-        }
-    }
-
-    /**
-     * Force remove splash screen view.
-     */
-    private void handleRemoveSplashScreenView(@NonNull ActivityClientRecord r) {
-        if (r.activity.mSplashScreenView != null) {
-            r.activity.mSplashScreenView.remove();
-            r.activity.mSplashScreenView = null;
         }
     }
 

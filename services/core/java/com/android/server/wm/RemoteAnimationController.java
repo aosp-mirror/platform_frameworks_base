@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
@@ -41,6 +38,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FastPrintWriter;
@@ -60,10 +58,13 @@ class RemoteAnimationController implements DeathRecipient {
     private static final long TIMEOUT_MS = 2000;
 
     private final WindowManagerService mService;
+    private final DisplayContent mDisplayContent;
     private final RemoteAnimationAdapter mRemoteAnimationAdapter;
     private final ArrayList<RemoteAnimationRecord> mPendingAnimations = new ArrayList<>();
     private final ArrayList<WallpaperAnimationAdapter> mPendingWallpaperAnimations =
             new ArrayList<>();
+    @VisibleForTesting
+    final ArrayList<NonAppWindowAnimationAdapter> mPendingNonAppAnimations = new ArrayList<>();
     private final Rect mTmpRect = new Rect();
     private final Handler mHandler;
     private final Runnable mTimeoutRunnable = () -> cancelAnimation("timeoutRunnable");
@@ -72,9 +73,10 @@ class RemoteAnimationController implements DeathRecipient {
     private boolean mCanceled;
     private boolean mLinkedToDeathOfRunner;
 
-    RemoteAnimationController(WindowManagerService service,
+    RemoteAnimationController(WindowManagerService service, DisplayContent displayContent,
             RemoteAnimationAdapter remoteAnimationAdapter, Handler handler) {
         mService = service;
+        mDisplayContent = displayContent;
         mRemoteAnimationAdapter = remoteAnimationAdapter;
         mHandler = handler;
     }
@@ -224,12 +226,12 @@ class RemoteAnimationController implements DeathRecipient {
     private RemoteAnimationTarget[] createNonAppWindowAnimations(
             @WindowManager.TransitionOldType int transit) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "createNonAppWindowAnimations()");
-        return (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER)
-                ? NonAppWindowAnimationAdapter.startNonAppWindowAnimationsForKeyguardExit(mService,
-                    mRemoteAnimationAdapter.getDuration(),
-                    mRemoteAnimationAdapter.getStatusBarTransitionDelay())
-                : new RemoteAnimationTarget[0];
+        return NonAppWindowAnimationAdapter.startNonAppWindowAnimations(mService,
+                mDisplayContent,
+                transit,
+                mRemoteAnimationAdapter.getDuration(),
+                mRemoteAnimationAdapter.getStatusBarTransitionDelay(),
+                mPendingNonAppAnimations);
     }
 
     private void onAnimationFinished() {
@@ -266,6 +268,15 @@ class RemoteAnimationController implements DeathRecipient {
                             adapter.getLastAnimationType(), adapter);
                     mPendingWallpaperAnimations.remove(i);
                     ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "\twallpaper=%s", adapter.getToken());
+                }
+
+                for (int i = mPendingNonAppAnimations.size() - 1; i >= 0; i--) {
+                    final NonAppWindowAnimationAdapter adapter = mPendingNonAppAnimations.get(i);
+                    adapter.getLeashFinishedCallback().onAnimationFinished(
+                            adapter.getLastAnimationType(), adapter);
+                    mPendingNonAppAnimations.remove(i);
+                    ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "\tnonApp=%s",
+                            adapter.getWindowContainer());
                 }
             } catch (Exception e) {
                 Slog.e(TAG, "Failed to finish remote animation", e);

@@ -1158,6 +1158,11 @@ public class TimeDetectorStrategyImplTest {
         }
 
         @Override
+        public ConfigurationInternal configurationInternal(int userId) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public void acquireWakeLock() {
             if (mWakeLockAcquired) {
                 fail("Wake lock already acquired");

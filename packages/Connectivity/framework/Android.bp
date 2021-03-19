@@ -23,6 +23,25 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+java_library {
+    name: "framework-connectivity-protos",
+    proto: {
+        type: "nano",
+    },
+    srcs: [
+        // TODO: consider moving relevant .proto files directly to the module directory
+        ":framework-javastream-protos",
+    ],
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.tethering",
+    ],
+    jarjar_rules: "jarjar-rules-proto.txt",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
 filegroup {
     name: "framework-connectivity-internal-sources",
     srcs: [
@@ -81,5 +100,41 @@ java_sdk_library {
     libs: [
         "unsupportedappusage",
     ],
+    permitted_packages: ["android.net", "com.android.connectivity.aidl"],
+}
+
+java_library {
+    name: "framework-connectivity.impl",
+    // Instead of building against private API (framework.jar),
+    // build against core_platform + framework-minus-apex + module
+    // stub libs. This allows framework.jar to depend on this library,
+    // so it can be part of the private API until all clients have been migrated.
+    // TODO: just build against module_api, and remove this jar from
+    // the private API.
+    sdk_version: "core_platform",
+    srcs: [
+        ":framework-connectivity-sources",
+    ],
+    aidl: {
+        include_dirs: [
+            "frameworks/base/core/java", // For framework parcelables
+            "frameworks/native/aidl/binder", // For PersistableBundle.aidl
+        ],
+    },
+    libs: [
+        "framework-minus-apex",
+        // TODO: just framework-tethering, framework-wifi when building against module_api
+        "framework-tethering.stubs.module_lib",
+        "framework-wifi.stubs.module_lib",
+        "unsupportedappusage",
+        "ServiceConnectivityResources",
+    ],
+    static_libs: [
+        "framework-connectivity-protos",
+        "net-utils-device-common",
+    ],
+    jarjar_rules: "jarjar-rules.txt",
+    apex_available: ["com.android.tethering"],
+    installable: true,
     permitted_packages: ["android.net", "com.android.connectivity.aidl"],
 }

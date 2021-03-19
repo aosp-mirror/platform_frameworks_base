@@ -54,12 +54,14 @@ public final class PutDocumentStats {
     /** Number of tokens added to the index. */
     private final int mNativeNumTokensIndexed;
 
-    /** Number of tokens clipped for exceeding the max number. */
-    private final int mNativeNumTokensClipped;
+    /**
+     * Whether the number of tokens to be indexed exceeded the max number of tokens per document.
+     */
+    private final boolean mNativeExceededMaxNumTokens;
 
     PutDocumentStats(@NonNull Builder builder) {
         Preconditions.checkNotNull(builder);
-        mGeneralStats = Preconditions.checkNotNull(builder.mGeneralStats);
+        mGeneralStats = Preconditions.checkNotNull(builder.mGeneralStatsBuilder).build();
         mGenerateDocumentProtoLatencyMillis = builder.mGenerateDocumentProtoLatencyMillis;
         mRewriteDocumentTypesLatencyMillis = builder.mRewriteDocumentTypesLatencyMillis;
         mNativeLatencyMillis = builder.mNativeLatencyMillis;
@@ -68,7 +70,7 @@ public final class PutDocumentStats {
         mNativeIndexMergeLatencyMillis = builder.mNativeIndexMergeLatencyMillis;
         mNativeDocumentSizeBytes = builder.mNativeDocumentSizeBytes;
         mNativeNumTokensIndexed = builder.mNativeNumTokensIndexed;
-        mNativeNumTokensClipped = builder.mNativeNumTokensClipped;
+        mNativeExceededMaxNumTokens = builder.mNativeExceededMaxNumTokens;
     }
 
     /** Returns the {@link GeneralStats} object attached to this instance. */
@@ -117,14 +119,17 @@ public final class PutDocumentStats {
         return mNativeNumTokensIndexed;
     }
 
-    /** Returns number of tokens clipped for exceeding the max number. */
-    public int getNativeNumTokensClipped() {
-        return mNativeNumTokensClipped;
+    /**
+     * Returns whether the number of tokens to be indexed exceeded the max number of tokens per
+     * document.
+     */
+    public boolean getNativeExceededMaxNumTokens() {
+        return mNativeExceededMaxNumTokens;
     }
 
     /** Builder for {@link PutDocumentStats}. */
     public static class Builder {
-        @NonNull final GeneralStats mGeneralStats;
+        @NonNull final GeneralStats.Builder mGeneralStatsBuilder;
         int mGenerateDocumentProtoLatencyMillis;
         int mRewriteDocumentTypesLatencyMillis;
         int mNativeLatencyMillis;
@@ -133,11 +138,19 @@ public final class PutDocumentStats {
         int mNativeIndexMergeLatencyMillis;
         int mNativeDocumentSizeBytes;
         int mNativeNumTokensIndexed;
-        int mNativeNumTokensClipped;
+        boolean mNativeExceededMaxNumTokens;
 
-        /** Builder takes {@link GeneralStats} to hold general stats. */
-        public Builder(@NonNull GeneralStats generalStats) {
-            mGeneralStats = Preconditions.checkNotNull(generalStats);
+        /** Builder takes {@link GeneralStats.Builder}. */
+        public Builder(@NonNull String packageName, @NonNull String database) {
+            Preconditions.checkNotNull(packageName);
+            Preconditions.checkNotNull(database);
+            mGeneralStatsBuilder = new GeneralStats.Builder(packageName, database);
+        }
+
+        /** Returns {@link GeneralStats.Builder}. */
+        @NonNull
+        public GeneralStats.Builder getGeneralStatsBuilder() {
+            return mGeneralStatsBuilder;
         }
 
         /** Sets how much time we spend for generating document proto, in milliseconds. */
@@ -200,10 +213,13 @@ public final class PutDocumentStats {
             return this;
         }
 
-        /** Sets number of tokens clipped for exceeding the max number. */
+        /**
+         * Sets whether the number of tokens to be indexed exceeded the max number of tokens per
+         * document.
+         */
         @NonNull
-        public Builder setNativeNumTokensClipped(int nativeNumTokensClipped) {
-            mNativeNumTokensClipped = nativeNumTokensClipped;
+        public Builder setNativeExceededMaxNumTokens(boolean nativeExceededMaxNumTokens) {
+            mNativeExceededMaxNumTokens = nativeExceededMaxNumTokens;
             return this;
         }
 

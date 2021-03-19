@@ -1067,8 +1067,8 @@
         <![CDATA[
         Adjust how colors display on your device. This can be helpful when you want to:<br/><br/>
         <ol>
-            <li> See colors more accurately</li>
-            <li> Remove colors to help you focus</li>
+            <li>&nbsp;See colors more accurately</li>
+            <li>&nbsp;Remove colors to help you focus</li>
         </ol>
         ]]></string>
     <!-- Summary shown for color space correction preference when its value is overridden by another preference [CHAR LIMIT=35] -->

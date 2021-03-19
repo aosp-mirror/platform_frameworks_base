@@ -536,8 +536,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Test
     public void testCanCollapsePanelOnTouch_falseInDualPaneShade() {
         mStatusBarStateController.setState(SHADE);
-        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
+        enableSplitShade();
         mNotificationPanelViewController.setQsExpanded(true);
 
         assertThat(mNotificationPanelViewController.canCollapsePanelOnTouch()).isFalse();
@@ -562,6 +561,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private void enableSplitShade() {
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
         when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
+        mNotificationPanelViewController.updateResources();
     }
 
     private void onTouchEvent(MotionEvent ev) {

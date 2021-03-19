@@ -524,7 +524,7 @@ public class GestureLauncherServiceTest {
         assertTrue(outLaunched.value);
 
         verify(mUiEventLogger, times(1))
-                .log(GestureLauncherService.GestureLauncherEvent.GESTURE_PANIC_TAP_POWER);
+                .log(GestureLauncherService.GestureLauncherEvent.GESTURE_EMERGENCY_TAP_POWER);
         verify(mStatusBarManagerInternal).onEmergencyActionLaunchGestureDetected();
 
         final ArgumentCaptor<Integer> intervalCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -578,7 +578,7 @@ public class GestureLauncherServiceTest {
         assertTrue(intercepted);
 
         verify(mUiEventLogger, times(1))
-                .log(GestureLauncherService.GestureLauncherEvent.GESTURE_PANIC_TAP_POWER);
+                .log(GestureLauncherService.GestureLauncherEvent.GESTURE_EMERGENCY_TAP_POWER);
         verify(mStatusBarManagerInternal).onEmergencyActionLaunchGestureDetected();
 
         final ArgumentCaptor<Integer> intervalCaptor = ArgumentCaptor.forClass(Integer.class);

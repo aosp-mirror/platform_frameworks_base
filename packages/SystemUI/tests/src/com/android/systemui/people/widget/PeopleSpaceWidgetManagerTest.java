@@ -73,6 +73,7 @@ import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.SbnBuilder;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -134,6 +135,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private PeopleSpaceWidgetManager mManager;
 
     @Mock
+    private Context mMockContext;
+
+    @Mock
     private NotificationListener mListenerService;
 
     @Mock
@@ -144,6 +148,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private PeopleManager mPeopleManager;
     @Mock
     private LauncherApps mLauncherApps;
+    @Mock
+    private NotificationEntryManager mNotificationEntryManager;
 
     @Captor
     private ArgumentCaptor<NotificationHandler> mListenerCaptor;
@@ -159,10 +165,10 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mLauncherApps = mock(LauncherApps.class);
-        mManager =
-                new PeopleSpaceWidgetManager(mContext);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
+        mManager = new PeopleSpaceWidgetManager(mContext);
         mManager.setAppWidgetManager(mAppWidgetManager, mIPeopleManager, mPeopleManager,
-                mLauncherApps);
+                mLauncherApps, mNotificationEntryManager);
         mManager.attach(mListenerService);
         mProvider = new PeopleSpaceWidgetProvider();
         mProvider.setPeopleSpaceWidgetManager(mManager);
@@ -668,16 +674,21 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         mManager.onAppWidgetOptionsChanged(SECOND_WIDGET_ID_WITH_SHORTCUT, newOptions);
 
-        verify(mAppWidgetManager, times(1)).updateAppWidgetOptions(
+        verify(mAppWidgetManager, times(2)).updateAppWidgetOptions(
                 eq(SECOND_WIDGET_ID_WITH_SHORTCUT), mBundleArgumentCaptor.capture());
-        Bundle bundle = mBundleArgumentCaptor.getValue();
-        assertThat(bundle.getString(PeopleSpaceUtils.SHORTCUT_ID, EMPTY_STRING))
+        List<Bundle> bundles = mBundleArgumentCaptor.getAllValues();
+        Bundle first = bundles.get(0);
+        assertThat(first.getString(PeopleSpaceUtils.SHORTCUT_ID, EMPTY_STRING))
                 .isEqualTo(EMPTY_STRING);
-        assertThat(bundle.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(INVALID_USER_ID);
-        assertThat(bundle.getString(PACKAGE_NAME, EMPTY_STRING)).isEqualTo(EMPTY_STRING);
+        assertThat(first.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(INVALID_USER_ID);
+        assertThat(first.getString(PACKAGE_NAME, EMPTY_STRING)).isEqualTo(EMPTY_STRING);
         verify(mLauncherApps, times(1)).cacheShortcuts(eq(TEST_PACKAGE_A),
                 eq(Arrays.asList(SHORTCUT_ID)), eq(UserHandle.of(0)),
                 eq(LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS));
+
+        Bundle second = bundles.get(1);
+        PeopleSpaceTile tile = second.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tile.getId()).isEqualTo(SHORTCUT_ID);
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
         assertThat(sp.getStringSet(KEY.toString(), new HashSet<>())).contains(
@@ -689,6 +700,52 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         assertThat(widgetSp.getString(PeopleSpaceUtils.SHORTCUT_ID, EMPTY_STRING))
                 .isEqualTo(SHORTCUT_ID);
         assertThat(widgetSp.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(0);
+    }
+
+    @Test
+    public void testGetPeopleTileFromPersistentStorageExistingConversation()
+            throws Exception {
+        when(mIPeopleManager.getConversation(PACKAGE_NAME, 0, SHORTCUT_ID)).thenReturn(
+                getConversationWithShortcutId(SHORTCUT_ID));
+        PeopleTileKey key = new PeopleTileKey(SHORTCUT_ID, 0, PACKAGE_NAME);
+        PeopleSpaceTile tile = mManager.getTileFromPersistentStorage(key);
+        assertThat(tile.getId()).isEqualTo(key.getShortcutId());
+    }
+
+    @Test
+    public void testGetPeopleTileFromPersistentStorageNoConversation() {
+        PeopleTileKey key = new PeopleTileKey(SHORTCUT_ID, 0, PACKAGE_NAME);
+        PeopleSpaceTile tile = mManager.getTileFromPersistentStorage(key);
+        assertThat(tile).isNull();
+    }
+
+    @Test
+    public void testRequestPinAppWidgetExistingConversation() throws Exception {
+        when(mMockContext.getPackageName()).thenReturn(PACKAGE_NAME);
+        when(mMockContext.getUserId()).thenReturn(0);
+        when(mIPeopleManager.getConversation(PACKAGE_NAME, 0, SHORTCUT_ID))
+                .thenReturn(getConversationWithShortcutId(SHORTCUT_ID));
+        when(mAppWidgetManager.requestPinAppWidget(any(), any(), any())).thenReturn(true);
+
+        ShortcutInfo info = new ShortcutInfo.Builder(mMockContext, SHORTCUT_ID).build();
+        boolean valid = mManager.requestPinAppWidget(info);
+
+        assertThat(valid).isTrue();
+        verify(mAppWidgetManager, times(1)).requestPinAppWidget(
+                any(), any(), any());
+    }
+
+    @Test
+    public void testRequestPinAppWidgetNoConversation() throws Exception {
+        when(mMockContext.getPackageName()).thenReturn(PACKAGE_NAME);
+        when(mMockContext.getUserId()).thenReturn(0);
+        when(mIPeopleManager.getConversation(PACKAGE_NAME, 0, SHORTCUT_ID)).thenReturn(null);
+
+        ShortcutInfo info = new ShortcutInfo.Builder(mMockContext, SHORTCUT_ID).build();
+        boolean valid = mManager.requestPinAppWidget(info);
+
+        assertThat(valid).isFalse();
+        verify(mAppWidgetManager, never()).requestPinAppWidget(any(), any(), any());
     }
 
     /**
