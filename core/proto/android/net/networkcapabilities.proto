@@ -21,6 +21,7 @@ package android.net;
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/proto_logging/stats/enums/net/enums.proto";
 
 /**
  * An android.net.NetworkCapabilities object.
@@ -28,22 +29,6 @@ import "frameworks/base/core/proto/android/privacy.proto";
 message NetworkCapabilitiesProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    enum Transport {
-        // Indicates this network uses a Cellular transport.
-        TRANSPORT_CELLULAR = 0;
-        // Indicates this network uses a Wi-Fi transport.
-        TRANSPORT_WIFI = 1;
-        // Indicates this network uses a Bluetooth transport.
-        TRANSPORT_BLUETOOTH = 2;
-        // Indicates this network uses an Ethernet transport.
-        TRANSPORT_ETHERNET = 3;
-        // Indicates this network uses a VPN transport.
-        TRANSPORT_VPN = 4;
-        // Indicates this network uses a Wi-Fi Aware transport.
-        TRANSPORT_WIFI_AWARE = 5;
-        // Indicates this network uses a LoWPAN transport.
-        TRANSPORT_LOWPAN = 6;
-    }
     repeated Transport transports = 1;
 
     enum NetCapability {
