@@ -102,4 +102,6 @@
     <color name="privacy_circle_camera">#81C995</color> <!-- g300 -->
     <color name="privacy_circle_microphone_location">#FCAD70</color> <!--o300 -->
 
+    <!-- Accessibility floating menu -->
+    <color name="accessibility_floating_menu_background">#B3000000</color> <!-- 70% -->
 </resources>
