@@ -118,43 +118,43 @@ static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag, Parsed
     res->comment = trimmed_comment.to_string();
   }
 
+  NewResourceBuilder res_builder(res->name);
   if (res->visibility_level != Visibility::Level::kUndefined) {
     Visibility visibility;
     visibility.level = res->visibility_level;
     visibility.source = res->source;
     visibility.comment = res->comment;
-    if (!table->SetVisibilityWithId(res->name, visibility, res->id, diag)) {
-      return false;
-    }
+    res_builder.SetVisibility(visibility);
+  }
+
+  if (res->id.is_valid()) {
+    res_builder.SetId(res->id);
   }
 
   if (res->allow_new) {
     AllowNew allow_new;
     allow_new.source = res->source;
     allow_new.comment = res->comment;
-    if (!table->SetAllowNew(res->name, allow_new, diag)) {
-      return false;
-    }
+    res_builder.SetAllowNew(allow_new);
   }
 
   if (res->overlayable_item) {
-    if (!table->SetOverlayable(res->name, res->overlayable_item.value(), diag)) {
-      return false;
-    }
+    res_builder.SetOverlayable(res->overlayable_item.value());
   }
 
   if (res->value != nullptr) {
     // Attach the comment, source and config to the value.
     res->value->SetComment(std::move(res->comment));
     res->value->SetSource(std::move(res->source));
-
-    if (!table->AddResourceWithId(res->name, res->id, res->config, res->product,
-                                  std::move(res->value), diag)) {
-      return false;
-    }
+    res_builder.SetValue(std::move(res->value), res->config, res->product);
   }
 
   bool error = false;
+  if (!res->name.entry.empty()) {
+    if (!table->AddResource(res_builder.Build(), diag)) {
+      return false;
+    }
+  }
   for (ParsedResource& child : res->child_resources) {
     error |= !AddResourcesToTable(table, diag, &child);
   }
@@ -751,7 +751,7 @@ std::unique_ptr<Item> ResourceParser::ParseXml(xml::XmlPullParser* parser,
     // table.
     std::unique_ptr<Id> id = util::make_unique<Id>();
     id->SetSource(source_.WithLine(begin_xml_line));
-    table_->AddResource(name, {}, {}, std::move(id), diag_);
+    table_->AddResource(NewResourceBuilder(name).SetValue(std::move(id)).Build(), diag_);
   };
 
   // Process the raw value.

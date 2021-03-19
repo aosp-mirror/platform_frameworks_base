@@ -190,17 +190,6 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     }
   }
 
-  // Ensure we have the compilation package at least.
-  table.CreatePackage(context->GetCompilationPackage());
-
-  // Assign an ID to any package that has resources.
-  for (auto& pkg : table.packages) {
-    if (!pkg->id) {
-      // If no package ID was set while parsing (public identifiers), auto assign an ID.
-      pkg->id = context->GetPackageId();
-    }
-  }
-
   // Create the file/zip entry.
   if (!writer->StartEntry(output_path, 0)) {
     context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to open");
