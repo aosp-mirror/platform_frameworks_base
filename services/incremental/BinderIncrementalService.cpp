@@ -255,13 +255,12 @@ binder::Status BinderIncrementalService::unlink(int32_t storageId, const std::st
 binder::Status BinderIncrementalService::isFileFullyLoaded(int32_t storageId,
                                                            const std::string& path,
                                                            int32_t* _aidl_return) {
-    *_aidl_return = mImpl.isFileFullyLoaded(storageId, path);
+    *_aidl_return = (int)mImpl.isFileFullyLoaded(storageId, path);
     return ok();
 }
 
 binder::Status BinderIncrementalService::isFullyLoaded(int32_t storageId, int32_t* _aidl_return) {
-    *_aidl_return = mImpl.getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/true)
-                            .blocksRemainingOrError();
+    *_aidl_return = (int)mImpl.isMountFullyLoaded(storageId);
     return ok();
 }
 
