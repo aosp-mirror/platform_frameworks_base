@@ -1129,8 +1129,13 @@ public final class DisplayManagerService extends SystemService {
             recordStableDisplayStatsIfNeededLocked(display);
             recordTopInsetLocked(display);
         }
-        addDisplayPowerControllerLocked(display);
-        mDisplayStates.append(displayId, Display.STATE_UNKNOWN);
+        final int groupId = mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(displayId);
+        if (groupId != Display.INVALID_DISPLAY_GROUP) {
+            addDisplayPowerControllerLocked(display);
+            mDisplayStates.append(displayId, Display.STATE_UNKNOWN);
+        } else {
+            mDisplayStates.append(displayId, Display.STATE_ON);
+        }
         mDisplayBrightnesses.append(displayId, display.getDisplayInfoLocked().brightnessDefault);
 
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
@@ -1209,8 +1214,7 @@ public final class DisplayManagerService extends SystemService {
             final int displayId = display.getDisplayIdLocked();
             final int state = mDisplayStates.get(displayId);
 
-            // Only send a request for display state if the display state has already been
-            // initialized by DisplayPowercontroller.
+            // Only send a request for display state if display state has already been initialized.
             if (state != Display.STATE_UNKNOWN) {
                 final float brightness = mDisplayBrightnesses.get(displayId);
                 return device.requestDisplayStateLocked(state, brightness);
