@@ -117,12 +117,12 @@ public class EdgeEffect {
     /**
      * The natural frequency of the stretch spring.
      */
-    private static final double NATURAL_FREQUENCY = 14.4222;
+    private static final double NATURAL_FREQUENCY = 17.55;
 
     /**
      * The damping ratio of the stretch spring.
      */
-    private static final double DAMPING_RATIO = 0.875;
+    private static final double DAMPING_RATIO = 0.92;
 
     /** @hide */
     @IntDef({TYPE_GLOW, TYPE_STRETCH})
