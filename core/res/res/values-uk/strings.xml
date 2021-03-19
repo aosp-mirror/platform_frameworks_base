@@ -300,6 +300,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Працює додаток"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Додатки, що використовують заряд акумулятора"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Збільшення"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує заряд акумулятора"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Додатків, що використовують заряд акумулятора: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
@@ -350,6 +352,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Дозволяє програмі бути рядком стану."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"розгорнути/згорн. рядок стану"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Дозволяє програмі розгортати чи згортати рядок стану."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Показувати сповіщення як активності на весь екран заблокованого пристрою"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Додаток зможе показувати сповіщення як активності на весь екран заблокованого пристрою"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"створення ярликів"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Дозволяє програмі самостійно додавати ярлики на головний екран."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"видаляти ярлики"</string>
@@ -2163,6 +2167,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Екранний засіб спеціальних можливостей"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Вибір екранного засобу спеціальних можливостей"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Засіб спеціальних можливостей"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Закрити панель сповіщень"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Смуга із субтитрами для додатка <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакет \"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>\" додано в сегмент з обмеженнями"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2300,8 +2305,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Нове: збільшення вікон"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Тепер можна збільшити весь екран або його частину"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Збільшення частини екрана"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Тепер ви можете збільшувати весь екран чи певну область, а також переходити між цими режимами."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Увімкнути в налаштуваннях"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Закрити"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Щоб продовжити, надайте додатку &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; доступ до мікрофона пристрою."</string>
@@ -2310,4 +2315,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Конфіденційність датчиків"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Значок додатка"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Зображення фірмової символіки додатка"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

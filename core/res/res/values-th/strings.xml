@@ -294,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"แอปที่ทำงานอยู่"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"แอปหลายแอปกำลังใช้แบตเตอรี่"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"การขยาย"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังใช้แบตเตอรี่"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"แอป <xliff:g id="NUMBER">%1$d</xliff:g> แอปกำลังใช้แบตเตอรี่"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"แตะเพื่อดูรายละเอียดเกี่ยวกับแบตเตอรี่และปริมาณการใช้อินเทอร์เน็ต"</string>
@@ -344,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"อนุญาตให้แอปพลิเคชันเป็นแถบสถานะ"</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"ขยาย/ยุบแถบสถานะ"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"อนุญาตให้แอปพลิเคชันขยายหรือยุบแถบสถานะ"</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"แสดงการแจ้งเตือนเป็นกิจกรรมแบบเต็มหน้าจอในอุปกรณ์ที่ล็อกอยู่"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"อนุญาตให้แอปแสดงการแจ้งเตือนเป็นกิจกรรมแบบเต็มหน้าจอในอุปกรณ์ที่ล็อกอยู่"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"ติดตั้งทางลัด"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"อนุญาตให้แอปพลิเคชันเพิ่มทางลัดหน้าจอหลักโดยไม่ต้องให้ผู้ใช้จัดการ"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"ถอนการติดตั้งทางลัด"</string>
@@ -1001,8 +1005,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"คุณไม่ได้รับอนุญาตให้เปิดหน้าเว็บนี้"</string>
     <string name="text_copied" msgid="2531420577879738860">"คัดลอกข้อความไปยังคลิปบอร์ด"</string>
     <string name="copied" msgid="4675902854553014676">"คัดลอกแล้ว"</string>
-    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> วางจาก <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
-    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> วางจากคลิปบอร์ด"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"วาง <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> จาก <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> แล้ว"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"วาง <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> จากคลิปบอร์ดแล้ว"</string>
     <string name="more_item_label" msgid="7419249600215749115">"เพิ่มเติม"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"เมนู+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2095,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"ทางลัดการช่วยเหลือพิเศษบนหน้าจอ"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ตัวเลือกทางลัดการช่วยเหลือพิเศษบนหน้าจอ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ทางลัดการช่วยเหลือพิเศษ"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"ปิดหน้าต่างแจ้งเตือน"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"แถบคำบรรยาย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"ใส่ <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ในที่เก็บข้อมูลที่ถูกจำกัดแล้ว"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2232,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"ใหม่: แว่นขยายหน้าต่าง"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"คุณสามารถขยายหน้าจอบางส่วนหรือทั้งหมดได้แล้วตอนนี้"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"ขยายบางส่วนของหน้าจอ"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"ตอนนี้คุณสามารถขยายเป็นเต็มหน้าจอ ขยายพื้นที่ที่เจาะจง หรือจะสลับไปมาระหว่างตัวเลือกทั้ง 2 อย่างก็ได้"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"เปิดในการตั้งค่า"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ปิด"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"&lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ต้องได้รับสิทธิ์เข้าถึงไมโครโฟนของอุปกรณ์เพื่อดำเนินการต่อ"</string>
@@ -2242,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ความเป็นส่วนตัวสำหรับเซ็นเซอร์"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ไอคอนแอปพลิเคชัน"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ภาพลักษณ์ของแบรนด์แอปพลิเคชัน"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>
