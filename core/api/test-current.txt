@@ -2929,6 +2929,7 @@ package android.window {
 
   public final class SplashScreenView extends android.widget.FrameLayout {
     method @Nullable public android.view.View getBrandingView();
+    method @ColorInt public int getIconBackgroundColor();
   }
 
   public final class StartingWindowInfo implements android.os.Parcelable {
