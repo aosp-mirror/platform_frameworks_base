@@ -174,7 +174,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
