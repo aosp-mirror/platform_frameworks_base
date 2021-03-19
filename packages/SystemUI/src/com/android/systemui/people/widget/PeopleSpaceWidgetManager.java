@@ -45,7 +45,6 @@ import android.os.Bundle;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -129,12 +128,8 @@ public class PeopleSpaceWidgetManager {
             }
 
             if (DEBUG) Log.d(TAG, "updating " + widgetIds.length + " widgets");
-            boolean showSingleConversation = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
-            if (showSingleConversation) {
-                synchronized (mLock) {
-                    updateSingleConversationWidgets(widgetIds);
-                }
+            synchronized (mLock) {
+                updateSingleConversationWidgets(widgetIds);
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e);
@@ -227,11 +222,6 @@ public class PeopleSpaceWidgetManager {
     public void updateWidgetsWithNotificationChanged(StatusBarNotification sbn,
             PeopleSpaceUtils.NotificationAction notificationAction) {
         if (DEBUG) Log.d(TAG, "updateWidgetsWithNotificationChanged called");
-        boolean showSingleConversation = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
-        if (!showSingleConversation) {
-            return;
-        }
         try {
             String sbnShortcutId = sbn.getShortcutId();
             if (sbnShortcutId == null) {
