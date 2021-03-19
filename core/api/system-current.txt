@@ -1480,6 +1480,7 @@ package android.bluetooth {
     method public boolean disableBLE();
     method public boolean enableBLE();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean enableNoAutoConnect();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void generateLocalOobData(int, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OobDataCallback);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public long getDiscoveryEndMillis();
     method public boolean isBleScanAlwaysAvailable();
     method public boolean isLeEnabled();
@@ -1491,10 +1492,16 @@ package android.bluetooth {
     field public static final int ACTIVE_DEVICE_ALL = 2; // 0x2
     field public static final int ACTIVE_DEVICE_AUDIO = 0; // 0x0
     field public static final int ACTIVE_DEVICE_PHONE_CALL = 1; // 0x1
+    field public static final int OOB_ERROR_ADAPTER_DISABLED = 2; // 0x2
+    field public static final int OOB_ERROR_ANOTHER_ACTIVE_REQUEST = 1; // 0x1
+    field public static final int OOB_ERROR_UNKNOWN = 0; // 0x0
   }
 
   public static interface BluetoothAdapter.OnMetadataChangedListener {
     method public void onMetadataChanged(@NonNull android.bluetooth.BluetoothDevice, int, @Nullable byte[]);
+  }
+
+  public static interface BluetoothAdapter.OobDataCallback {
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
