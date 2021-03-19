@@ -1606,9 +1606,7 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccessWithNoFile) {
     int storageId =
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
                                                IncrementalService::CreateOptions::CreateNew);
-    ASSERT_EQ(1,
-              mIncrementalService->getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/false)
-                      .getProgress());
+    ASSERT_EQ(1, mIncrementalService->getLoadingProgress(storageId).getProgress());
 }
 
 TEST_F(IncrementalServiceTest, testGetLoadingProgressFailsWithFailedRanges) {
@@ -1620,9 +1618,7 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressFailsWithFailedRanges) {
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
                                                IncrementalService::CreateOptions::CreateNew);
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(1);
-    ASSERT_EQ(-1,
-              mIncrementalService->getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/false)
-                      .getProgress());
+    ASSERT_EQ(-1, mIncrementalService->getLoadingProgress(storageId).getProgress());
 }
 
 TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccessWithEmptyRanges) {
@@ -1634,9 +1630,7 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccessWithEmptyRanges) {
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
                                                IncrementalService::CreateOptions::CreateNew);
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(3);
-    ASSERT_EQ(1,
-              mIncrementalService->getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/false)
-                      .getProgress());
+    ASSERT_EQ(1, mIncrementalService->getLoadingProgress(storageId).getProgress());
 }
 
 TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccess) {
@@ -1648,9 +1642,7 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccess) {
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
                                                IncrementalService::CreateOptions::CreateNew);
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(3);
-    ASSERT_EQ(0.5,
-              mIncrementalService->getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/false)
-                      .getProgress());
+    ASSERT_EQ(0.5, mIncrementalService->getLoadingProgress(storageId).getProgress());
 }
 
 TEST_F(IncrementalServiceTest, testRegisterLoadingProgressListenerSuccess) {
@@ -1833,8 +1825,12 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
             .WillOnce(Invoke(&checkPerUidTimeoutsEmpty));
     EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(3);
 
-    // Empty storage.
-    mIncFs->countFilledBlocksEmpty();
+    // Loading storage.
+    EXPECT_CALL(*mIncFs, isEverythingFullyLoaded(_))
+            .WillOnce(Return(incfs::LoadingState::MissingBlocks))
+            .WillOnce(Return(incfs::LoadingState::MissingBlocks))
+            .WillOnce(Return(incfs::LoadingState::Full))
+            .WillOnce(Return(incfs::LoadingState::Full));
 
     // Mark DataLoader as 'system' so that readlogs don't pollute the timed queue.
     mDataLoaderParcel.packageName = "android";
@@ -1855,22 +1851,18 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
         const auto timedCallback = mTimedQueue->mWhat;
         mTimedQueue->clearJob(storageId);
 
-        // Still loading.
-        mIncFs->countFilledBlocksSuccess();
-
         // Call it again.
         timedCallback();
     }
 
     {
-        // Still present -> 0.5 progress.
+        // Still present -> some progress.
         ASSERT_EQ(storageId, mTimedQueue->mId);
         ASSERT_GE(mTimedQueue->mAfter, std::chrono::seconds(1));
         const auto timedCallback = mTimedQueue->mWhat;
         mTimedQueue->clearJob(storageId);
 
         // Fully loaded but readlogs collection enabled.
-        mIncFs->countFilledBlocksFullyLoaded();
         ASSERT_GE(mDataLoader->setStorageParams(true), 0);
 
         // Call it again.
