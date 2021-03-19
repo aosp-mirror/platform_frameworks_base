@@ -5546,6 +5546,10 @@
     <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
                 android:protectionLevel="signature|appPredictor" />
 
+    <!-- @hide @SystemApi Allows an application to manage app hibernation state. -->
+    <permission android:name="android.permission.MANAGE_APP_HIBERNATION"
+        android:protectionLevel="signature|installer" />
+
     <!-- @hide @TestApi Allows apps to reset the state of {@link com.android.server.am.AppErrors}.
          <p>CTS tests will use UiAutomation.adoptShellPermissionIdentity() to gain access.  -->
     <permission android:name="android.permission.RESET_APP_ERRORS"
