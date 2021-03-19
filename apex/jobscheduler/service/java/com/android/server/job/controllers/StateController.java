@@ -103,6 +103,10 @@ public abstract class StateController {
     public void onAppRemovedLocked(String packageName, int uid) {
     }
 
+    /** Called when a user is added to the device. */
+    public void onUserAddedLocked(int userId) {
+    }
+
     /** Called when a user is removed from the device. */
     public void onUserRemovedLocked(int userId) {
     }
