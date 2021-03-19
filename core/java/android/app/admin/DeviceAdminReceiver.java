@@ -290,7 +290,6 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
 
     /**
      * Broadcast action: notify that a new batch of security logs is ready to be collected.
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @BroadcastBehavior(explicitOnly = true)

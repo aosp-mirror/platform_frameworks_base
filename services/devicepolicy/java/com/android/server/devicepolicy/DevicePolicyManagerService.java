@@ -51,6 +51,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_KEEP_UNINSTALLED_
 import static android.app.admin.DevicePolicyManager.DELEGATION_NETWORK_LOGGING;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
+import static android.app.admin.DevicePolicyManager.DELEGATION_SECURITY_LOGGING;
 import static android.app.admin.DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
@@ -430,6 +431,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DELEGATION_INSTALL_EXISTING_PACKAGE,
         DELEGATION_KEEP_UNINSTALLED_PACKAGES,
         DELEGATION_NETWORK_LOGGING,
+        DELEGATION_SECURITY_LOGGING,
         DELEGATION_CERT_SELECTION,
     };
 
@@ -440,9 +442,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     DELEGATION_NETWORK_LOGGING,
             });
 
+    // Subset of delegations that can only be delegated by Device Owner or Profile Owner of an
+    // organization-owned and managed profile.
+    private static final List<String>
+            DEVICE_OWNER_OR_ORGANIZATION_OWNED_MANAGED_PROFILE_OWNER_DELEGATIONS =
+            Arrays.asList(new String[]{
+                    DELEGATION_SECURITY_LOGGING,
+            });
+
     // Subset of delegations that only one single package within a given user can hold
     private static final List<String> EXCLUSIVE_DELEGATIONS = Arrays.asList(new String[] {
             DELEGATION_NETWORK_LOGGING,
+            DELEGATION_SECURITY_LOGGING,
             DELEGATION_CERT_SELECTION,
     });
 
@@ -6024,6 +6035,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!Collections.disjoint(scopes, DEVICE_OWNER_OR_MANAGED_PROFILE_OWNER_DELEGATIONS)) {
             Preconditions.checkCallAuthorization(isDeviceOwner(caller)
                     || (isProfileOwner(caller) && isManagedProfile(caller.getUserId())));
+        } else if (!Collections.disjoint(
+                scopes, DEVICE_OWNER_OR_ORGANIZATION_OWNED_MANAGED_PROFILE_OWNER_DELEGATIONS)) {
+            Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                    || isProfileOwnerOfOrganizationOwnedDevice(caller));
         } else {
             Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
         }
@@ -7658,6 +7673,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             receiverComponent = resolveDelegateReceiver(DELEGATION_NETWORK_LOGGING, action,
                     deviceOwnerUserId);
         }
+        if (action.equals(DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE)) {
+            receiverComponent = resolveDelegateReceiver(DELEGATION_SECURITY_LOGGING, action,
+                    deviceOwnerUserId);
+        }
         if (receiverComponent == null) {
             synchronized (getLockObject()) {
                 receiverComponent = mOwners.getDeviceOwnerComponent();
@@ -7673,6 +7692,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         ComponentName receiverComponent = null;
         if (action.equals(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE)) {
             receiverComponent = resolveDelegateReceiver(DELEGATION_NETWORK_LOGGING, action, userId);
+        }
+        if (action.equals(DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE)) {
+            receiverComponent = resolveDelegateReceiver(
+                DELEGATION_SECURITY_LOGGING, action, userId);
         }
         if (receiverComponent == null) {
             receiverComponent = getOwnerComponent(userId);
@@ -13920,16 +13943,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setSecurityLoggingEnabled(ComponentName admin, boolean enabled) {
+    public void setSecurityLoggingEnabled(ComponentName admin, String packageName,
+            boolean enabled) {
         if (!mHasFeature) {
             return;
         }
-        Objects.requireNonNull(admin);
-        final CallerIdentity caller = getCallerIdentity(admin);
+        final CallerIdentity caller = getCallerIdentity(admin, packageName);
 
         synchronized (getLockObject()) {
-            Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller)
-                    || isDeviceOwner(caller));
+            if (admin != null) {
+                Preconditions.checkCallAuthorization(
+                        isProfileOwnerOfOrganizationOwnedDevice(caller)
+                        || isDeviceOwner(caller));
+            } else {
+                // A delegate app passes a null admin component, which is expected
+                Preconditions.checkCallAuthorization(
+                        isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
+            }
+
             if (enabled == mInjector.securityLogGetLoggingEnabledProperty()) {
                 return;
             }
@@ -13949,17 +13980,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isSecurityLoggingEnabled(ComponentName admin) {
+    public boolean isSecurityLoggingEnabled(ComponentName admin, String packageName) {
         if (!mHasFeature) {
             return false;
         }
 
         synchronized (getLockObject()) {
             if (!isCallerWithSystemUid()) {
-                Objects.requireNonNull(admin);
-                final CallerIdentity caller = getCallerIdentity(admin);
-                Preconditions.checkCallAuthorization(
-                        isProfileOwnerOfOrganizationOwnedDevice(caller) || isDeviceOwner(caller));
+                final CallerIdentity caller = getCallerIdentity(admin, packageName);
+                if (admin != null) {
+                    Preconditions.checkCallAuthorization(
+                            isProfileOwnerOfOrganizationOwnedDevice(caller)
+                            || isDeviceOwner(caller));
+                } else {
+                    // A delegate app passes a null admin component, which is expected
+                    Preconditions.checkCallAuthorization(
+                            isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
+                }
             }
             return mInjector.securityLogGetLoggingEnabledProperty();
         }
@@ -13977,15 +14014,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public ParceledListSlice<SecurityEvent> retrievePreRebootSecurityLogs(ComponentName admin) {
+    public ParceledListSlice<SecurityEvent> retrievePreRebootSecurityLogs(ComponentName admin,
+            String packageName) {
         if (!mHasFeature) {
             return null;
         }
-        Objects.requireNonNull(admin, "ComponentName is null");
 
-        final CallerIdentity caller = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
-                || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        if (admin != null) {
+            Preconditions.checkCallAuthorization(
+                    isProfileOwnerOfOrganizationOwnedDevice(caller)
+                    || isDeviceOwner(caller));
+        } else {
+            // A delegate app passes a null admin component, which is expected
+            Preconditions.checkCallAuthorization(
+                    isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
+        }
+
         Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
                 || areAllUsersAffiliatedWithDeviceLocked());
 
@@ -14015,15 +14060,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public ParceledListSlice<SecurityEvent> retrieveSecurityLogs(ComponentName admin) {
+    public ParceledListSlice<SecurityEvent> retrieveSecurityLogs(ComponentName admin,
+            String packageName) {
         if (!mHasFeature) {
             return null;
         }
-        Objects.requireNonNull(admin, "ComponentName is null");
 
-        final CallerIdentity caller = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
-                || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        if (admin != null) {
+            Preconditions.checkCallAuthorization(
+                    isProfileOwnerOfOrganizationOwnedDevice(caller)
+                    || isDeviceOwner(caller));
+        } else {
+            // A delegate app passes a null admin component, which is expected
+            Preconditions.checkCallAuthorization(
+                    isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
+        }
         Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
                 || areAllUsersAffiliatedWithDeviceLocked());
 

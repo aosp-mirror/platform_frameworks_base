@@ -386,10 +386,10 @@ interface IDevicePolicyManager {
     List<String> getAffiliationIds(in ComponentName admin);
     boolean isAffiliatedUser();
 
-    void setSecurityLoggingEnabled(in ComponentName admin, boolean enabled);
-    boolean isSecurityLoggingEnabled(in ComponentName admin);
-    ParceledListSlice retrieveSecurityLogs(in ComponentName admin);
-    ParceledListSlice retrievePreRebootSecurityLogs(in ComponentName admin);
+    void setSecurityLoggingEnabled(in ComponentName admin, String packageName, boolean enabled);
+    boolean isSecurityLoggingEnabled(in ComponentName admin, String packageName);
+    ParceledListSlice retrieveSecurityLogs(in ComponentName admin, String packageName);
+    ParceledListSlice retrievePreRebootSecurityLogs(in ComponentName admin, String packageName);
     long forceNetworkLogs();
     long forceSecurityLogs();
 
