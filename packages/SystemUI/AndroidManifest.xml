@@ -336,7 +336,7 @@
         </receiver>
 
         <activity android:name=".screenshot.LongScreenshotActivity"
-                  android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
+                  android:theme="@style/LongScreenshotActivity"
                   android:process=":screenshot"
                   android:exported="false"
                   android:finishOnTaskLaunch="true" />
