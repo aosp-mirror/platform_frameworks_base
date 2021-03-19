@@ -35,7 +35,6 @@ java_library {
         ":framework-javastream-protos",
     ],
     apex_available: [
-        "//apex_available:platform",
         "com.android.tethering",
     ],
     jarjar_rules: "jarjar-rules-proto.txt",
@@ -125,7 +124,6 @@ java_sdk_library {
         "//packages/modules/Connectivity/Tethering/tests/unit",
     ],
     apex_available: [
-        "//apex_available:platform",
         "com.android.tethering",
     ],
 }

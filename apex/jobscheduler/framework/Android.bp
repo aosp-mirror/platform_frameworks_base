@@ -32,6 +32,7 @@ java_library {
     },
     libs: [
         "app-compat-annotations",
+        "framework-connectivity.stubs.module_lib",
         "framework-minus-apex",
         "unsupportedappusage",
     ],
