@@ -291,6 +291,7 @@ package android.net {
     ctor public NetworkCapabilities();
     ctor public NetworkCapabilities(android.net.NetworkCapabilities);
     method public int describeContents();
+    method @NonNull public int[] getCapabilities();
     method public int getLinkDownstreamBandwidthKbps();
     method public int getLinkUpstreamBandwidthKbps();
     method @Nullable public android.net.NetworkSpecifier getNetworkSpecifier();
