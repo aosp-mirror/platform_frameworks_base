@@ -41,7 +41,6 @@ import android.os.UserHandle;
 import android.os.ZygoteProcess;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
-import android.security.keystore.AndroidKeyStoreProvider;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -74,7 +73,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.Provider;
 import java.security.Security;
-import java.util.Optional;
 
 /**
  * Startup class for the zygote process.
@@ -227,17 +225,7 @@ public class ZygoteInit {
         // AndroidKeyStoreProvider.install() manipulates the list of JCA providers to insert
         // preferred providers. Note this is not done via security.properties as the JCA providers
         // are not on the classpath in the case of, for example, raw dalvikvm runtimes.
-        // TODO b/171305684 This code is used to conditionally enable the installation of the
-        //      Keystore 2.0 provider to enable teams adjusting to Keystore 2.0 at their own
-        //      pace. This code will be removed when all calling code was adjusted to
-        //      Keystore 2.0.
-        Optional<Boolean> keystore2_enabled =
-                android.sysprop.Keystore2Properties.keystore2_enabled();
-        if (keystore2_enabled.isPresent() && keystore2_enabled.get()) {
-            android.security.keystore2.AndroidKeyStoreProvider.install();
-        } else {
-            AndroidKeyStoreProvider.install();
-        }
+        android.security.keystore2.AndroidKeyStoreProvider.install();
         Log.i(TAG, "Installed AndroidKeyStoreProvider in "
                 + (SystemClock.uptimeMillis() - startTime) + "ms.");
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
