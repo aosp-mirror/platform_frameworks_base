@@ -2341,8 +2341,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             params.packageName = packageName;
             params.windowAnimations = win.getWindowStyle().getResourceId(
                     com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
-            params.privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
             params.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
             // Setting as trusted overlay to let touches pass through. This is safe because this
             // window is controlled by the system.

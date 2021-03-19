@@ -181,11 +181,7 @@ public class StartingSurfaceDrawer {
         }
 
         int windowFlags = 0;
-        final boolean enableHardAccelerated =
-                (activityInfo.flags & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0;
-        if (enableHardAccelerated) {
-            windowFlags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        }
+        windowFlags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 
         final boolean[] showWallpaper = new boolean[1];
         final int[] splashscreenContentResId = new int[1];
@@ -246,8 +242,6 @@ public class StartingSurfaceDrawer {
         params.packageName = activityInfo.packageName;
         params.windowAnimations = win.getWindowStyle().getResourceId(
                 com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
-        params.privateFlags |=
-                WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
         params.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         // Setting as trusted overlay to let touches pass through. This is safe because this
         // window is controlled by the system.
