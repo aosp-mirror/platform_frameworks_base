@@ -15806,6 +15806,7 @@ public final class Settings {
          * 1: Enabled (All apps will receive the new rules)
          * @hide
          */
+        @Readable
         public static final String BACKPORT_S_NOTIF_RULES = "backport_s_notif_rules";
 
         /**
