@@ -124,6 +124,7 @@ public class BstatsCpuTimesValidationTest {
         sContext.getPackageManager().setApplicationEnabledSetting(TEST_PKG,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
         sTestPkgUid = sContext.getPackageManager().getPackageUid(TEST_PKG, 0);
+        executeCmd("cmd deviceidle whitelist +" + TEST_PKG);
 
         final ArrayMap<String, String> desiredConstants = new ArrayMap<>();
         desiredConstants.put(KEY_TRACK_CPU_TIMES_BY_PROC_STATE, Boolean.toString(true));
@@ -134,6 +135,7 @@ public class BstatsCpuTimesValidationTest {
 
     @AfterClass
     public static void tearDownOnce() throws Exception {
+        executeCmd("cmd deviceidle whitelist -" + TEST_PKG);
         if (sBatteryStatsConstsUpdated) {
             Settings.Global.putString(sContext.getContentResolver(),
                     Settings.Global.BATTERY_STATS_CONSTANTS, sOriginalBatteryStatsConsts);
@@ -382,7 +384,7 @@ public class BstatsCpuTimesValidationTest {
     }
 
     @Test
-    @SkipPresubmit("b/180015146 flakey")
+    @SkipPresubmit("b/183225190 flaky")
     public void testCpuFreqTimes_stateFgService() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
             Log.w(TAG, "Skipping " + testName.getMethodName()
@@ -515,7 +517,6 @@ public class BstatsCpuTimesValidationTest {
     }
 
     @Test
-    @SkipPresubmit("b/180015146")
     public void testCpuFreqTimes_trackingDisabled() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
             Log.w(TAG, "Skipping " + testName.getMethodName()
@@ -625,7 +626,7 @@ public class BstatsCpuTimesValidationTest {
         splitter.setString(settingsDump);
         String next;
         while (splitter.hasNext()) {
-            next = splitter.next();
+            next = splitter.next().trim();
             if (next.startsWith(key)) {
                 return next.split("=")[1];
             }
