@@ -120,12 +120,6 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTran
     int imgHeight = image->height();
     sk_sp<GrDirectContext> grContext = sk_ref_sp(mRenderThread.getGrContext());
 
-    if (bitmap->colorType() == kRGBA_F16_SkColorType &&
-        !grContext->colorTypeSupportedAsSurface(bitmap->colorType())) {
-        ALOGW("Can't copy surface into bitmap, RGBA_F16 config is not supported");
-        return CopyResult::DestinationInvalid;
-    }
-
     CopyResult copyResult = CopyResult::UnknownError;
 
     int displayedWidth = imgWidth, displayedHeight = imgHeight;
@@ -159,12 +153,10 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTran
 
 bool Readback::copyLayerInto(Layer* layer, const SkRect* srcRect, const SkRect* dstRect,
                              SkBitmap* bitmap) {
-    /* This intermediate surface is present to work around a bug in SwiftShader that
-     * prevents us from reading the contents of the layer's texture directly. The
-     * workaround involves first rendering that texture into an intermediate buffer and
-     * then reading from the intermediate buffer into the bitmap.
-     * Another reason to render in an offscreen buffer is to scale and to avoid an issue b/62262733
-     * with reading incorrect data from EGLImage backed SkImage (likely a driver bug).
+    /* This intermediate surface is present to work around limitations that LayerDrawable expects
+     * to render into a GPU backed canvas.  Additionally, the offscreen buffer solution works around
+     * a scaling issue (b/62262733) that was encountered when sampling from an EGLImage into a
+     * software buffer.
      */
     sk_sp<SkSurface> tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
                                                               SkBudgeted::kYes, bitmap->info(), 0,
