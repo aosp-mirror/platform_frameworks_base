@@ -27,11 +27,11 @@ import android.os.Parcelable;
  */
 public class ComponentInfoInternal implements Parcelable {
 
-    public final String componentId;
-    public final String hardwareVersion;
-    public final String firmwareVersion;
-    public final String serialNumber;
-    public final String softwareVersion;
+    @NonNull public final String componentId;
+    @NonNull public final String hardwareVersion;
+    @NonNull public final String firmwareVersion;
+    @NonNull public final String serialNumber;
+    @NonNull public final String softwareVersion;
 
     /**
      * Constructs a {@link ComponentInfoInternal} from another instance.
@@ -45,8 +45,9 @@ public class ComponentInfoInternal implements Parcelable {
     /**
      * @hide
      */
-    public ComponentInfoInternal(String componentId, String hardwareVersion,
-            String firmwareVersion, String serialNumber, String softwareVersion) {
+    public ComponentInfoInternal(@NonNull String componentId, @NonNull String hardwareVersion,
+            @NonNull String firmwareVersion, @NonNull String serialNumber,
+            @NonNull String softwareVersion) {
         this.componentId = componentId;
         this.hardwareVersion = hardwareVersion;
         this.firmwareVersion = firmwareVersion;

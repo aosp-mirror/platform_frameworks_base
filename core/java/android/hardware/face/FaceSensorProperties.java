@@ -17,6 +17,7 @@
 package android.hardware.face;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
 
@@ -74,7 +75,8 @@ public class FaceSensorProperties extends SensorProperties {
      * @hide
      */
     public FaceSensorProperties(int sensorId, int sensorStrength,
-            List<ComponentInfo> componentInfo, @FaceSensorProperties.SensorType int sensorType) {
+            @NonNull List<ComponentInfo> componentInfo,
+            @FaceSensorProperties.SensorType int sensorType) {
         super(sensorId, sensorStrength, componentInfo);
         mSensorType = sensorType;
     }
