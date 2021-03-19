@@ -1260,7 +1260,7 @@ public class Vpn {
         mNetworkAgent = new NetworkAgent(mContext, mLooper, NETWORKTYPE /* logtag */,
                 mNetworkCapabilities, lp, VPN_DEFAULT_SCORE, networkAgentConfig, mNetworkProvider) {
             @Override
-            public void unwanted() {
+            public void onNetworkUnwanted() {
                 // We are user controlled, not driven by NetworkRequest.
             }
         };
