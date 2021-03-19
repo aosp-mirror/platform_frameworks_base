@@ -50,6 +50,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private final String mSlotEthernet;
     private final String mSlotVpn;
     private final String mSlotNoCalling;
+    private final String mSlotCallStrength;
 
     private final Context mContext;
     private final StatusBarIconController mIconController;
@@ -83,6 +84,8 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         mSlotEthernet = mContext.getString(com.android.internal.R.string.status_bar_ethernet);
         mSlotVpn      = mContext.getString(com.android.internal.R.string.status_bar_vpn);
         mSlotNoCalling = mContext.getString(com.android.internal.R.string.status_bar_no_calling);
+        mSlotCallStrength =
+                mContext.getString(com.android.internal.R.string.status_bar_call_strength);
         mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
 
         mIconController = iconController;
@@ -212,8 +215,10 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             state.callStrengthResId = statusIcon.icon;
             state.callStrengthDescription = statusIcon.contentDescription;
         }
-        mIconController.setCallIndicatorIcons(
-                mSlotNoCalling, CallIndicatorIconState.copyStates(mCallIndicatorStates));
+        mIconController.setCallStrengthIcons(mSlotCallStrength,
+                CallIndicatorIconState.copyStates(mCallIndicatorStates));
+        mIconController.setNoCallingIcons(mSlotNoCalling,
+                CallIndicatorIconState.copyStates(mCallIndicatorStates));
     }
 
     @Override
@@ -300,6 +305,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
         mIconController.removeAllIconsForSlot(mSlotMobile);
         mIconController.removeAllIconsForSlot(mSlotNoCalling);
+        mIconController.removeAllIconsForSlot(mSlotCallStrength);
         mMobileStates.clear();
         List<CallIndicatorIconState> noCallingStates = new ArrayList<CallIndicatorIconState>();
         noCallingStates.addAll(mCallIndicatorStates);
