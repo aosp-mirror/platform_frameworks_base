@@ -43,6 +43,16 @@ public class QuickStepContract {
     public static final String KEY_EXTRA_SUPPORTS_WINDOW_CORNERS = "extra_supports_window_corners";
     // See IPip.aidl
     public static final String KEY_EXTRA_SHELL_PIP = "extra_shell_pip";
+    // See ISplitScreen.aidl
+    public static final String KEY_EXTRA_SHELL_SPLIT_SCREEN = "extra_shell_split_screen";
+    // See IOneHanded.aidl
+    public static final String KEY_EXTRA_SHELL_ONE_HANDED = "extra_shell_one_handed";
+    // See IShellTransitions.aidl
+    public static final String KEY_EXTRA_SHELL_SHELL_TRANSITIONS =
+            "extra_shell_shell_transitions";
+    // See IStartingWindow.aidl
+    public static final String KEY_EXTRA_SHELL_STARTING_WINDOW =
+            "extra_shell_starting_window";
 
     public static final String NAV_BAR_MODE_2BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
