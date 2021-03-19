@@ -16,23 +16,24 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.Postsubmit
+import android.provider.Settings
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.appWindowBecomesInVisible
 import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.flicker.helpers.reopenAppFromOverview
-import com.android.server.wm.flicker.layerBecomesInvisible
 import com.android.server.wm.flicker.layerBecomesVisible
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
+import com.android.wm.shell.flicker.dockedStackDividerIsVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import org.junit.After
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,65 +41,87 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test launch non resizable activity in split screen mode will trigger exit split screen mode
- * (Non resizable activity launch via recent overview)
- * To run this test: `atest WMShellFlickerTests:NonResizableDismissInLegacySplitScreen`
+ * Test launch non-resizable activity via intent in split screen mode. When the device supports
+ * non-resizable in multi window, it should show the non-resizable app in split screen.
+ * To run this test: `atest WMShellFlickerTests:LegacySplitScreenFromIntentSupportNonResizable`
  */
+@Postsubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class NonResizableDismissInLegacySplitScreen(
+class LegacySplitScreenFromIntentSupportNonResizable(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
+    var prevSupportNonResizableInMultiWindow = 0
+
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             cleanSetup(this, configuration)
             setup {
                 eachRun {
-                    nonResizeableApp.launchViaIntent(wmHelper)
                     splitScreenApp.launchViaIntent(wmHelper)
                     device.launchSplitScreen(wmHelper)
                 }
             }
             transitions {
-                device.reopenAppFromOverview(wmHelper)
+                nonResizeableApp.launchViaIntent(wmHelper)
+                wmHelper.waitForAppTransitionIdle()
             }
         }
 
     override val ignoredWindows: List<String>
-        get() = listOf(DOCKED_STACK_DIVIDER, LAUNCHER_PACKAGE_NAME, LETTERBOX_NAME, TOAST_NAME,
-            splitScreenApp.defaultWindowName, nonResizeableApp.defaultWindowName,
+        get() = listOf(DOCKED_STACK_DIVIDER, LAUNCHER_PACKAGE_NAME, LETTERBOX_NAME,
+            nonResizeableApp.defaultWindowName, splitScreenApp.defaultWindowName,
             WindowManagerStateHelper.SPLASH_SCREEN_NAME,
             WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
 
-    @Presubmit
-    @Test
-    fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(splitScreenApp.defaultWindowName)
+    @Before
+    fun setup() {
+        prevSupportNonResizableInMultiWindow = Settings.Global.getInt(context.contentResolver,
+                Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW)
+        if (prevSupportNonResizableInMultiWindow == 0) {
+            // Support non-resizable in multi window
+            Settings.Global.putInt(context.contentResolver,
+                    Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 1)
+        }
+    }
+
+    @After
+    fun teardown() {
+        Settings.Global.putInt(context.contentResolver,
+                Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
+                prevSupportNonResizableInMultiWindow)
+    }
 
     @FlakyTest(bugId = 178447631)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    @Presubmit
-    @Test
-    fun layerBecomesVisible() = testSpec.layerBecomesVisible(nonResizeableApp.defaultWindowName)
-
-    @Presubmit
-    @Test
-    fun appWindowBecomesVisible() =
-        testSpec.appWindowBecomesVisible(nonResizeableApp.defaultWindowName)
-
-    @Presubmit
-    @Test
-    fun appWindowBecomesInVisible() =
-        testSpec.appWindowBecomesInVisible(splitScreenApp.defaultWindowName)
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     @FlakyTest(bugId = 178447631)
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    @Test
+    fun nonResizableAppLayerBecomesVisible() =
+            testSpec.layerBecomesVisible(nonResizeableApp.defaultWindowName)
+
+    @Test
+    fun nonResizableAppWindowBecomesVisible() =
+            testSpec.appWindowBecomesVisible(nonResizeableApp.defaultWindowName)
+
+    @Test
+    fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisible()
+
+    @Test
+    fun bothAppsWindowsAreVisibleAtEnd() {
+        testSpec.assertWmEnd {
+            isVisible(splitScreenApp.defaultWindowName)
+            isVisible(nonResizeableApp.defaultWindowName)
+        }
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
