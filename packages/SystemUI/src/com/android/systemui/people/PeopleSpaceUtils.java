@@ -62,7 +62,6 @@ import android.os.Parcelable;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -170,8 +169,6 @@ public class PeopleSpaceUtils {
             Context context, INotificationManager notificationManager, IPeopleManager peopleManager,
             LauncherApps launcherApps, NotificationEntryManager notificationEntryManager)
             throws Exception {
-        boolean showOnlyPriority = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 1;
         List<ConversationChannelWrapper> conversations =
                 notificationManager.getConversations(
                         false).getList();
@@ -184,25 +181,23 @@ public class PeopleSpaceUtils {
                 priorityConversations);
 
         // Sort and then add recent and non priority conversations to tiles list.
-        if (!showOnlyPriority) {
-            if (DEBUG) Log.d(TAG, "Add recent conversations");
-            Stream<ShortcutInfo> nonPriorityConversations = conversations.stream()
-                    .filter(c -> c.getNotificationChannel() == null
-                            || !c.getNotificationChannel().isImportantConversation())
-                    .map(c -> c.getShortcutInfo());
+        if (DEBUG) Log.d(TAG, "Add recent conversations");
+        Stream<ShortcutInfo> nonPriorityConversations = conversations.stream()
+                .filter(c -> c.getNotificationChannel() == null
+                        || !c.getNotificationChannel().isImportantConversation())
+                .map(c -> c.getShortcutInfo());
 
-            List<ConversationChannel> recentConversationsList =
-                    peopleManager.getRecentConversations().getList();
-            Stream<ShortcutInfo> recentConversations = recentConversationsList
-                    .stream()
-                    .map(c -> c.getShortcutInfo());
+        List<ConversationChannel> recentConversationsList =
+                peopleManager.getRecentConversations().getList();
+        Stream<ShortcutInfo> recentConversations = recentConversationsList
+                .stream()
+                .map(c -> c.getShortcutInfo());
 
-            Stream<ShortcutInfo> mergedStream = Stream.concat(nonPriorityConversations,
-                    recentConversations);
-            List<PeopleSpaceTile> recentTiles =
-                    getSortedTiles(peopleManager, launcherApps, mergedStream);
-            tiles.addAll(recentTiles);
-        }
+        Stream<ShortcutInfo> mergedStream = Stream.concat(nonPriorityConversations,
+                recentConversations);
+        List<PeopleSpaceTile> recentTiles =
+                getSortedTiles(peopleManager, launcherApps, mergedStream);
+        tiles.addAll(recentTiles);
 
         tiles = augmentTilesFromVisibleNotifications(context, tiles, notificationEntryManager);
         return tiles;

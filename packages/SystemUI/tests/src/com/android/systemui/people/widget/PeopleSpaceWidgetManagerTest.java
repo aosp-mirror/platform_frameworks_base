@@ -60,7 +60,6 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 
@@ -176,9 +175,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         verify(mListenerService).addNotificationHandler(mListenerCaptor.capture());
         NotificationHandler serviceListener = requireNonNull(mListenerCaptor.getValue());
         mNoMan.addListener(serviceListener);
-        // Default to single People tile widgets.
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
 
         clearStorage();
         setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
@@ -304,8 +300,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
     @Test
     public void testDoNotUpdateNotificationPostedIfDifferentPackageName() throws Exception {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
