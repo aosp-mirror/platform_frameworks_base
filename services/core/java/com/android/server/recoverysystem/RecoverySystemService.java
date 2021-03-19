@@ -16,6 +16,8 @@
 
 package com.android.server.recoverysystem;
 
+import static android.os.UserHandle.USER_SYSTEM;
+
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.IntentSender;
@@ -33,12 +35,14 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.RebootEscrowListener;
 import com.android.server.LocalServices;
@@ -52,6 +56,8 @@ import java.io.FileDescriptor;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The recovery system service is responsible for coordinating recovery related
@@ -127,10 +133,28 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     /**
      * The action to perform upon resume on reboot clear request for a given client.
      */
-    @IntDef({ROR_NOT_REQUESTED,
+    @IntDef({ ROR_NOT_REQUESTED,
             ROR_REQUESTED_NEED_CLEAR,
             ROR_REQUESTED_SKIP_CLEAR})
-    private @interface ResumeOnRebootActionsOnClear{}
+    private @interface ResumeOnRebootActionsOnClear {}
+
+    /**
+     * The error code for reboots initiated by resume on reboot clients.
+     */
+    private static final int REBOOT_ERROR_NONE = 0;
+    private static final int REBOOT_ERROR_UNKNOWN = 1;
+    private static final int REBOOT_ERROR_INVALID_PACKAGE_NAME = 2;
+    private static final int REBOOT_ERROR_LSKF_NOT_CAPTURED = 3;
+    private static final int REBOOT_ERROR_SLOT_MISMATCH = 4;
+    private static final int REBOOT_ERROR_ARM_REBOOT_ESCROW_FAILURE = 5;
+
+    @IntDef({ REBOOT_ERROR_NONE,
+            REBOOT_ERROR_UNKNOWN,
+            REBOOT_ERROR_INVALID_PACKAGE_NAME,
+            REBOOT_ERROR_LSKF_NOT_CAPTURED,
+            REBOOT_ERROR_SLOT_MISMATCH,
+            REBOOT_ERROR_ARM_REBOOT_ESCROW_FAILURE})
+    private @interface ResumeOnRebootRebootErrorCode {}
 
     static class Injector {
         protected final Context mContext;
@@ -201,6 +225,35 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
 
         public void threadSleep(long millis) throws InterruptedException {
             Thread.sleep(millis);
+        }
+
+        public int getUidFromPackageName(String packageName) {
+            try {
+                return mContext.getPackageManager().getPackageUidAsUser(packageName, USER_SYSTEM);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.w(TAG, "Failed to find uid for " + packageName);
+            }
+            return -1;
+        }
+
+        public void reportRebootEscrowPreparationMetrics(int uid,
+                @ResumeOnRebootActionsOnRequest int requestResult, int requestedClientCount) {
+            FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_PREPARATION_REPORTED, uid,
+                    requestResult, requestedClientCount);
+        }
+
+        public void reportRebootEscrowLskfCapturedMetrics(int uid, int requestedClientCount,
+                int requestedToLskfCapturedDurationInSeconds) {
+            FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_LSKF_CAPTURE_REPORTED, uid,
+                    requestedClientCount, requestedToLskfCapturedDurationInSeconds);
+        }
+
+        public void reportRebootEscrowRebootMetrics(int errorCode, int uid,
+                int preparedClientCount, int requestCount, boolean slotSwitch, boolean serverBased,
+                int lskfCapturedToRebootDurationInSeconds, int lskfCapturedCounts) {
+            FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_REBOOT_REPORTED, errorCode,
+                    uid, preparedClientCount, requestCount, slotSwitch, serverBased,
+                    lskfCapturedToRebootDurationInSeconds, lskfCapturedCounts);
         }
     }
 
@@ -367,6 +420,16 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         }
     }
 
+    private void reportMetricsOnRequestLskf(String packageName, int requestResult) {
+        int uid = mInjector.getUidFromPackageName(packageName);
+        int pendingRequestCount;
+        synchronized (this) {
+            pendingRequestCount = mCallerPendingRequest.size();
+        }
+
+        mInjector.reportRebootEscrowPreparationMetrics(uid, requestResult, pendingRequestCount);
+    }
+
     @Override // Binder call
     public boolean requestLskf(String packageName, IntentSender intentSender) {
         enforcePermissionForResumeOnReboot();
@@ -378,6 +441,8 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
 
         @ResumeOnRebootActionsOnRequest int action = updateRoRPreparationStateOnNewRequest(
                 packageName, intentSender);
+        reportMetricsOnRequestLskf(packageName, action);
+
         switch (action) {
             case ROR_SKIP_PREPARATION_AND_NOTIFY:
                 // We consider the preparation done if someone else has prepared.
@@ -420,12 +485,26 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         return needPreparation ? ROR_NEED_PREPARATION : ROR_SKIP_PREPARATION_NOT_NOTIFY;
     }
 
+    private void reportMetricsOnPreparedForReboot() {
+        List<String> preparedClients;
+        synchronized (this) {
+            preparedClients = new ArrayList<>(mCallerPreparedForReboot);
+        }
+
+        for (String packageName : preparedClients) {
+            int uid = mInjector.getUidFromPackageName(packageName);
+            mInjector.reportRebootEscrowLskfCapturedMetrics(uid, preparedClients.size(),
+                    -1 /* duration */);
+        }
+    }
+
     @Override
     public void onPreparedForReboot(boolean ready) {
         if (!ready) {
             return;
         }
         updateRoRPreparationStateOnPreparedForReboot();
+        reportMetricsOnPreparedForReboot();
     }
 
     private synchronized void updateRoRPreparationStateOnPreparedForReboot() {
@@ -548,22 +627,49 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         return true;
     }
 
-    private boolean rebootWithLskfImpl(String packageName, String reason, boolean slotSwitch) {
+    private @ResumeOnRebootRebootErrorCode int armRebootEscrow(String packageName,
+            boolean slotSwitch) {
         if (packageName == null) {
             Slog.w(TAG, "Missing packageName when rebooting with lskf.");
-            return false;
+            return REBOOT_ERROR_INVALID_PACKAGE_NAME;
         }
         if (!isLskfCaptured(packageName)) {
-            return false;
+            return REBOOT_ERROR_LSKF_NOT_CAPTURED;
         }
 
         if (!verifySlotForNextBoot(slotSwitch)) {
-            return false;
+            return REBOOT_ERROR_SLOT_MISMATCH;
         }
 
-        // TODO(xunchang) write the vbmeta digest along with the escrowKey before reboot.
         if (!mInjector.getLockSettingsService().armRebootEscrow()) {
             Slog.w(TAG, "Failure to escrow key for reboot");
+            return REBOOT_ERROR_ARM_REBOOT_ESCROW_FAILURE;
+        }
+
+        return REBOOT_ERROR_NONE;
+    }
+
+    private void reportMetricsOnRebootWithLskf(String packageName, boolean slotSwitch,
+            @ResumeOnRebootRebootErrorCode int errorCode) {
+        int uid = mInjector.getUidFromPackageName(packageName);
+        boolean serverBased = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_OTA,
+                "server_based_ror_enabled", false);
+        int preparedClientCount;
+        synchronized (this) {
+            preparedClientCount = mCallerPreparedForReboot.size();
+        }
+
+        // TODO(b/179105110) report the true value of duration and counts
+        mInjector.reportRebootEscrowRebootMetrics(errorCode, uid, preparedClientCount,
+                1 /* request count */, slotSwitch, serverBased,
+                -1 /* duration */, 1 /* lskf capture count */);
+    }
+
+    private boolean rebootWithLskfImpl(String packageName, String reason, boolean slotSwitch) {
+        @ResumeOnRebootRebootErrorCode int errorCode = armRebootEscrow(packageName, slotSwitch);
+        reportMetricsOnRebootWithLskf(packageName, slotSwitch, errorCode);
+
+        if (errorCode != REBOOT_ERROR_NONE) {
             return false;
         }
 

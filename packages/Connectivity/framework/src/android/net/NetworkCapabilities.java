@@ -609,10 +609,8 @@ public final class NetworkCapabilities implements Parcelable {
      * Gets all the capabilities set on this {@code NetworkCapability} instance.
      *
      * @return an array of capability values for this instance.
-     * @hide
      */
-    @UnsupportedAppUsage
-    public @NetCapability int[] getCapabilities() {
+    public @NonNull @NetCapability int[] getCapabilities() {
         return NetworkCapabilitiesUtils.unpackBits(mNetworkCapabilities);
     }
 
