@@ -23,6 +23,7 @@ import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
@@ -134,10 +135,21 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         for (SensorProps prop : props) {
             final int sensorId = prop.commonProps.sensorId;
 
+            final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+            if (prop.commonProps.componentInfo != null) {
+                for (android.hardware.biometrics.common.ComponentInfo info
+                        : prop.commonProps.componentInfo) {
+                    componentInfo.add(new ComponentInfoInternal(info.componentId,
+                            info.hardwareVersion, info.firmwareVersion, info.serialNumber,
+                            info.softwareVersion));
+                }
+            }
+
             final FaceSensorPropertiesInternal internalProp = new FaceSensorPropertiesInternal(
                     prop.commonProps.sensorId, prop.commonProps.sensorStrength,
-                    prop.commonProps.maxEnrollmentsPerUser, false /* supportsFaceDetection */,
-                    prop.halControlsPreview, false /* resetLockoutRequiresChallenge */);
+                    prop.commonProps.maxEnrollmentsPerUser, componentInfo, prop.sensorType,
+                    false /* supportsFaceDetection */, prop.halControlsPreview,
+                    false /* resetLockoutRequiresChallenge */);
             final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
                     internalProp);
 

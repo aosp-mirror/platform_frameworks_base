@@ -22,6 +22,7 @@ import android.app.trust.TrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
@@ -421,6 +422,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
                 .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
         mSensorProperties = new FingerprintSensorPropertiesInternal(sensorId,
                 Utils.authenticatorStrengthToPropertyStrength(strength), maxTemplatesAllowed,
+                new ArrayList<ComponentInfoInternal>() /* componentInfo */,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                 resetLockoutRequiresHardwareAuthToken);
         mMockHalResultController = controller;
