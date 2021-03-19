@@ -563,8 +563,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 final PowerExemptionManager powerExemptionManager = userContext.getSystemService(
                         PowerExemptionManager.class);
                 powerExemptionManager.addToTemporaryAllowList(targetPackage,
-                        FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS,
-                        PowerExemptionManager.REASON_MEDIA_SESSION_CALLBACK, reason);
+                        PowerExemptionManager.REASON_MEDIA_SESSION_CALLBACK, reason,
+                        FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
