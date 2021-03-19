@@ -44,6 +44,7 @@ public class PromptInfo implements Parcelable {
     private boolean mDisallowBiometricsIfPolicyExists;
     private boolean mReceiveSystemEvents;
     @NonNull private List<Integer> mAllowedSensorIds = new ArrayList<>();
+    private boolean mAllowBackgroundAuthentication;
 
     public PromptInfo() {
 
@@ -64,6 +65,7 @@ public class PromptInfo implements Parcelable {
         mDisallowBiometricsIfPolicyExists = in.readBoolean();
         mReceiveSystemEvents = in.readBoolean();
         mAllowedSensorIds = in.readArrayList(Integer.class.getClassLoader());
+        mAllowBackgroundAuthentication = in.readBoolean();
     }
 
     public static final Creator<PromptInfo> CREATOR = new Creator<PromptInfo>() {
@@ -99,10 +101,13 @@ public class PromptInfo implements Parcelable {
         dest.writeBoolean(mDisallowBiometricsIfPolicyExists);
         dest.writeBoolean(mReceiveSystemEvents);
         dest.writeList(mAllowedSensorIds);
+        dest.writeBoolean(mAllowBackgroundAuthentication);
     }
 
     public boolean containsTestConfigurations() {
         if (!mAllowedSensorIds.isEmpty()) {
+            return true;
+        } else if (mAllowBackgroundAuthentication) {
             return true;
         }
         return false;
@@ -183,6 +188,10 @@ public class PromptInfo implements Parcelable {
         mAllowedSensorIds = sensorIds;
     }
 
+    public void setAllowBackgroundAuthentication(boolean allow) {
+        mAllowBackgroundAuthentication = allow;
+    }
+
     // Getters
 
     public CharSequence getTitle() {
@@ -247,5 +256,9 @@ public class PromptInfo implements Parcelable {
     @NonNull
     public List<Integer> getAllowedSensorIds() {
         return mAllowedSensorIds;
+    }
+
+    public boolean isAllowBackgroundAuthentication() {
+        return mAllowBackgroundAuthentication;
     }
 }

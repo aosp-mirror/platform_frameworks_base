@@ -1035,9 +1035,11 @@ package android.hardware.biometrics {
 
   public class BiometricPrompt {
     method @NonNull public java.util.List<java.lang.Integer> getAllowedSensorIds();
+    method public boolean isAllowBackgroundAuthentication();
   }
 
   public static class BiometricPrompt.Builder {
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowBackgroundAuthentication(boolean);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowedSensorIds(@NonNull java.util.List<java.lang.Integer>);
   }
 
