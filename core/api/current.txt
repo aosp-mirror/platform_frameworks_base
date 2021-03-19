@@ -40627,7 +40627,10 @@ package android.telephony {
 
   public static final class CarrierConfigManager.ImsServiceEntitlement {
     field public static final String KEY_ENTITLEMENT_SERVER_URL_STRING = "imsserviceentitlement.entitlement_server_url_string";
+    field public static final String KEY_FCM_SENDER_ID_STRING = "imsserviceentitlement.fcm_sender_id_string";
+    field public static final String KEY_IMS_PROVISIONING_BOOL = "imsserviceentitlement.ims_provisioning_bool";
     field public static final String KEY_PREFIX = "imsserviceentitlement.";
+    field public static final String KEY_SHOW_VOWIFI_WEBVIEW_BOOL = "imsserviceentitlement.show_vowifi_webview_bool";
   }
 
   public static final class CarrierConfigManager.Iwlan {
