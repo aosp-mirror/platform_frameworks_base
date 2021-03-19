@@ -32,6 +32,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.Range;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -153,7 +154,7 @@ public final class NetworkCapabilities implements Parcelable {
             setTransportInfo(null);
         }
         mSignalStrength = nc.mSignalStrength;
-        setUids(nc.mUids); // Will make the defensive copy
+        mUids = (nc.mUids == null) ? null : new ArraySet<>(nc.mUids);
         setAdministratorUids(nc.getAdministratorUids());
         mOwnerUid = nc.mOwnerUid;
         mUnwantedNetworkCapabilities = nc.mUnwantedNetworkCapabilities;
@@ -1458,9 +1459,8 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public @NonNull NetworkCapabilities setSingleUid(int uid) {
-        final ArraySet<UidRange> identity = new ArraySet<>(1);
-        identity.add(new UidRange(uid, uid));
-        setUids(identity);
+        mUids = new ArraySet<>(1);
+        mUids.add(new UidRange(uid, uid));
         return this;
     }
 
@@ -1469,12 +1469,8 @@ public final class NetworkCapabilities implements Parcelable {
      * This makes a copy of the set so that callers can't modify it after the call.
      * @hide
      */
-    public @NonNull NetworkCapabilities setUids(Set<UidRange> uids) {
-        if (null == uids) {
-            mUids = null;
-        } else {
-            mUids = new ArraySet<>(uids);
-        }
+    public @NonNull NetworkCapabilities setUids(@Nullable Set<Range<Integer>> uids) {
+        mUids = UidRange.fromIntRanges(uids);
         return this;
     }
 
@@ -1483,8 +1479,19 @@ public final class NetworkCapabilities implements Parcelable {
      * This returns a copy of the set so that callers can't modify the original object.
      * @hide
      */
-    public @Nullable Set<UidRange> getUids() {
-        return null == mUids ? null : new ArraySet<>(mUids);
+    public @Nullable Set<Range<Integer>> getUids() {
+        return UidRange.toIntRanges(mUids);
+    }
+
+    /**
+     * Get the list of UIDs this network applies to.
+     * This returns a copy of the set so that callers can't modify the original object.
+     * @hide
+     */
+    public @Nullable Set<UidRange> getUidRanges() {
+        if (mUids == null) return null;
+
+        return new ArraySet<>(mUids);
     }
 
     /**
