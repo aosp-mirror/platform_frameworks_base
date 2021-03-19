@@ -18,18 +18,10 @@ package com.android.server.connectivity;
 
 /**
  * A class encapsulating various constants used by Connectivity.
+ * TODO : remove this class.
  * @hide
  */
 public class ConnectivityConstants {
-
-    // Penalty applied to scores of Networks that have not been validated.
-    public static final int UNVALIDATED_SCORE_PENALTY = 40;
-
-    // Score for explicitly connected network.
-    //
-    // This ensures that a) the explicitly selected network is never trumped by anything else, and
-    // b) the explicitly selected network is never torn down.
-    public static final int EXPLICITLY_SELECTED_NETWORK_SCORE = 100;
     // VPNs typically have priority over other networks. Give them a score that will
     // let them win every single time.
     public static final int VPN_DEFAULT_SCORE = 101;
