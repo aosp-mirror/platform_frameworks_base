@@ -132,6 +132,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mHiddenShelfIconSize = res.getDimensionPixelOffset(R.dimen.hidden_shelf_icon_size);
         mGapHeight = res.getDimensionPixelSize(R.dimen.qs_notification_padding);
 
+        mShelfIcons.setInNotificationIconShelf(true);
         if (!mShowNotificationShelf) {
             setVisibility(GONE);
         }
