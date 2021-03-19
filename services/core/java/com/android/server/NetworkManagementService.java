@@ -643,7 +643,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 String route, String gateway, String ifName) throws RemoteException {
             final RouteInfo processRoute = new RouteInfo(new IpPrefix(route),
                     ("".equals(gateway)) ? null : InetAddresses.parseNumericAddress(gateway),
-                    ifName);
+                    ifName, RouteInfo.RTN_UNICAST);
             mDaemonHandler.post(() -> notifyRouteChange(updated, processRoute));
         }
 
