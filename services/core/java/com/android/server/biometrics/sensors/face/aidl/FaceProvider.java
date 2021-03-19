@@ -27,6 +27,7 @@ import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
+import android.hardware.biometrics.common.ComponentInfo;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
@@ -137,8 +138,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
             final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
             if (prop.commonProps.componentInfo != null) {
-                for (android.hardware.biometrics.common.ComponentInfo info
-                        : prop.commonProps.componentInfo) {
+                for (ComponentInfo info : prop.commonProps.componentInfo) {
                     componentInfo.add(new ComponentInfoInternal(info.componentId,
                             info.hardwareVersion, info.firmwareVersion, info.serialNumber,
                             info.softwareVersion));
