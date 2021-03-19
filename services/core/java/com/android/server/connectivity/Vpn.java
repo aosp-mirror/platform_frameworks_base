@@ -19,6 +19,7 @@ package com.android.server.connectivity;
 import static android.Manifest.permission.BIND_VPN_SERVICE;
 import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.os.UserHandle.PER_USER_RANGE;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
@@ -71,7 +72,6 @@ import android.net.NetworkProvider;
 import android.net.NetworkRequest;
 import android.net.NetworkScore;
 import android.net.RouteInfo;
-import android.net.UidRange;
 import android.net.UidRangeParcel;
 import android.net.UnderlyingNetworkInfo;
 import android.net.VpnManager;
@@ -1353,7 +1353,7 @@ public class Vpn {
         String oldInterface = mInterface;
         Connection oldConnection = mConnection;
         NetworkAgent oldNetworkAgent = mNetworkAgent;
-        Set<UidRange> oldUsers = mNetworkCapabilities.getUids();
+        Set<Range<Integer>> oldUsers = mNetworkCapabilities.getUids();
 
         // Configure the interface. Abort if any of these steps fails.
         ParcelFileDescriptor tun = ParcelFileDescriptor.adoptFd(jniCreate(config.mtu));
@@ -1459,7 +1459,7 @@ public class Vpn {
     }
 
     /**
-     * Creates a {@link Set} of non-intersecting {@link UidRange} objects including all UIDs
+     * Creates a {@link Set} of non-intersecting {@code Range<Integer>} objects including all UIDs
      * associated with one user, and any restricted profiles attached to that user.
      *
      * <p>If one of {@param allowedApplications} or {@param disallowedApplications} is provided,
@@ -1472,10 +1472,10 @@ public class Vpn {
      * @param disallowedApplications (optional) List of applications to deny.
      */
     @VisibleForTesting
-    Set<UidRange> createUserAndRestrictedProfilesRanges(@UserIdInt int userId,
+    Set<Range<Integer>> createUserAndRestrictedProfilesRanges(@UserIdInt int userId,
             @Nullable List<String> allowedApplications,
             @Nullable List<String> disallowedApplications) {
-        final Set<UidRange> ranges = new ArraySet<>();
+        final Set<Range<Integer>> ranges = new ArraySet<>();
 
         // Assign the top-level user to the set of ranges
         addUserToRanges(ranges, userId, allowedApplications, disallowedApplications);
@@ -1499,20 +1499,20 @@ public class Vpn {
     }
 
     /**
-     * Updates a {@link Set} of non-intersecting {@link UidRange} objects to include all UIDs
+     * Updates a {@link Set} of non-intersecting {@code Range<Integer>} objects to include all UIDs
      * associated with one user.
      *
      * <p>If one of {@param allowedApplications} or {@param disallowedApplications} is provided,
      * the UID ranges will match the app allowlist or denylist specified there. Otherwise, all UIDs
      * in the user will be included.
      *
-     * @param ranges {@link Set} of {@link UidRange}s to which to add.
+     * @param ranges {@link Set} of {@code Range<Integer>}s to which to add.
      * @param userId The userId to add to {@param ranges}.
      * @param allowedApplications (optional) allowlist of applications to include.
      * @param disallowedApplications (optional) denylist of applications to exclude.
      */
     @VisibleForTesting
-    void addUserToRanges(@NonNull Set<UidRange> ranges, @UserIdInt int userId,
+    void addUserToRanges(@NonNull Set<Range<Integer>> ranges, @UserIdInt int userId,
             @Nullable List<String> allowedApplications,
             @Nullable List<String> disallowedApplications) {
         if (allowedApplications != null) {
@@ -1522,40 +1522,41 @@ public class Vpn {
                 if (start == -1) {
                     start = uid;
                 } else if (uid != stop + 1) {
-                    ranges.add(new UidRange(start, stop));
+                    ranges.add(new Range<Integer>(start, stop));
                     start = uid;
                 }
                 stop = uid;
             }
-            if (start != -1) ranges.add(new UidRange(start, stop));
+            if (start != -1) ranges.add(new Range<Integer>(start, stop));
         } else if (disallowedApplications != null) {
             // Add all ranges for user skipping UIDs for disallowedApplications.
-            final UidRange userRange = UidRange.createForUser(UserHandle.of(userId));
-            int start = userRange.start;
+            final Range<Integer> userRange = createUidRangeForUser(userId);
+            int start = userRange.getLower();
             for (int uid : getAppsUids(disallowedApplications, userId)) {
                 if (uid == start) {
                     start++;
                 } else {
-                    ranges.add(new UidRange(start, uid - 1));
+                    ranges.add(new Range<Integer>(start, uid - 1));
                     start = uid + 1;
                 }
             }
-            if (start <= userRange.stop) ranges.add(new UidRange(start, userRange.stop));
+            if (start <= userRange.getUpper()) {
+                ranges.add(new Range<Integer>(start, userRange.getUpper()));
+            }
         } else {
             // Add all UIDs for the user.
-            ranges.add(UidRange.createForUser(UserHandle.of(userId)));
+            ranges.add(createUidRangeForUser(userId));
         }
     }
 
     // Returns the subset of the full list of active UID ranges the VPN applies to (mVpnUsers) that
     // apply to userId.
-    private static List<UidRange> uidRangesForUser(int userId, Set<UidRange> existingRanges) {
-        // UidRange#createForUser returns the entire range of UIDs available to a macro-user.
-        // This is something like 0-99999 ; {@see UserHandle#PER_USER_RANGE}
-        final UidRange userRange = UidRange.createForUser(UserHandle.of(userId));
-        final List<UidRange> ranges = new ArrayList<>();
-        for (UidRange range : existingRanges) {
-            if (userRange.containsRange(range)) {
+    private static List<Range<Integer>> uidRangesForUser(int userId,
+            Set<Range<Integer>> existingRanges) {
+        final Range<Integer> userRange = createUidRangeForUser(userId);
+        final List<Range<Integer>> ranges = new ArrayList<>();
+        for (Range<Integer> range : existingRanges) {
+            if (userRange.contains(range)) {
                 ranges.add(range);
             }
         }
@@ -1572,7 +1573,7 @@ public class Vpn {
         UserInfo user = mUserManager.getUserInfo(userId);
         if (user.isRestricted() && user.restrictedProfileParentId == mUserId) {
             synchronized(Vpn.this) {
-                final Set<UidRange> existingRanges = mNetworkCapabilities.getUids();
+                final Set<Range<Integer>> existingRanges = mNetworkCapabilities.getUids();
                 if (existingRanges != null) {
                     try {
                         addUserToRanges(existingRanges, userId, mConfig.allowedApplications,
@@ -1600,10 +1601,10 @@ public class Vpn {
         UserInfo user = mUserManager.getUserInfo(userId);
         if (user.isRestricted() && user.restrictedProfileParentId == mUserId) {
             synchronized(Vpn.this) {
-                final Set<UidRange> existingRanges = mNetworkCapabilities.getUids();
+                final Set<Range<Integer>> existingRanges = mNetworkCapabilities.getUids();
                 if (existingRanges != null) {
                     try {
-                        final List<UidRange> removedRanges =
+                        final List<Range<Integer>> removedRanges =
                                 uidRangesForUser(userId, existingRanges);
                         existingRanges.removeAll(removedRanges);
                         mNetworkCapabilities.setUids(existingRanges);
@@ -1664,7 +1665,7 @@ public class Vpn {
         final Set<UidRangeParcel> rangesToRemove = new ArraySet<>(mBlockedUidsAsToldToConnectivity);
         final Set<UidRangeParcel> rangesToAdd;
         if (enforce) {
-            final Set<UidRange> restrictedProfilesRanges =
+            final Set<Range<Integer>> restrictedProfilesRanges =
                     createUserAndRestrictedProfilesRanges(mUserId,
                     /* allowedApplications */ null,
                     /* disallowedApplications */ exemptedPackages);
@@ -1673,11 +1674,12 @@ public class Vpn {
             // The UID range of the first user (0-99999) would block the IPSec traffic, which comes
             // directly from the kernel and is marked as uid=0. So we adjust the range to allow
             // it through (b/69873852).
-            for (UidRange range : restrictedProfilesRanges) {
-                if (range.start == 0 && range.stop != 0) {
-                    rangesThatShouldBeBlocked.add(new UidRangeParcel(1, range.stop));
-                } else if (range.start != 0) {
-                    rangesThatShouldBeBlocked.add(new UidRangeParcel(range.start, range.stop));
+            for (Range<Integer> range : restrictedProfilesRanges) {
+                if (range.getLower() == 0 && range.getUpper() != 0) {
+                    rangesThatShouldBeBlocked.add(new UidRangeParcel(1, range.getUpper()));
+                } else if (range.getLower() != 0) {
+                    rangesThatShouldBeBlocked.add(
+                            new UidRangeParcel(range.getLower(), range.getUpper()));
                 }
             }
 
@@ -1699,12 +1701,12 @@ public class Vpn {
     }
 
     /**
-     * Tell ConnectivityService to add or remove a list of {@link UidRange}s to the list of UIDs
-     * that are only allowed to make connections through sockets that have had {@code protect()}
-     * called on them.
+     * Tell ConnectivityService to add or remove a list of {@link UidRangeParcel}s to the list of
+     * UIDs that are only allowed to make connections through sockets that have had
+     * {@code protect()} called on them.
      *
      * @param enforce {@code true} to add to the denylist, {@code false} to remove.
-     * @param ranges {@link Collection} of {@link UidRange}s to add (if {@param enforce} is
+     * @param ranges {@link Collection} of {@link UidRangeParcel}s to add (if {@param enforce} is
      *               {@code true}) or to remove.
      * @return {@code true} if all of the UIDs were added/removed. {@code false} otherwise,
      *         including added ranges that already existed or removed ones that didn't.
@@ -3347,5 +3349,13 @@ public class Vpn {
                     ikeSessionCallback,
                     firstChildSessionCallback);
         }
+    }
+
+    /**
+     * Returns the entire range of UIDs available to a macro-user. This is something like 0-99999.
+     */
+    @VisibleForTesting
+    static Range<Integer> createUidRangeForUser(int userId) {
+        return new Range<Integer>(userId * PER_USER_RANGE, (userId + 1) * PER_USER_RANGE - 1);
     }
 }
