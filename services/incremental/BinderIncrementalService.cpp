@@ -280,8 +280,8 @@ binder::Status BinderIncrementalService::getMetadataByPath(int32_t storageId,
 }
 
 static FileId toFileId(const std::vector<uint8_t>& id) {
-    FileId fid;
-    memcpy(&fid, id.data(), id.size());
+    FileId fid = {};
+    memcpy(&fid, id.data(), std::min(sizeof(fid), id.size()));
     return fid;
 }
 
