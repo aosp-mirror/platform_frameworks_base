@@ -362,7 +362,6 @@ public:
     MOCK_CONST_METHOD2(getMetadata, RawMetadata(const Control& control, FileId fileid));
     MOCK_CONST_METHOD2(getMetadata, RawMetadata(const Control& control, std::string_view path));
     MOCK_CONST_METHOD2(getFileId, FileId(const Control& control, std::string_view path));
-    MOCK_CONST_METHOD1(toString, std::string(FileId fileId));
     MOCK_CONST_METHOD2(countFilledBlocks,
                        std::pair<IncFsBlockIndex, IncFsBlockIndex>(const Control& control,
                                                                    std::string_view path));

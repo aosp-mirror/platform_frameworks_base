@@ -134,6 +134,10 @@ private:
     } mLooper;
 };
 
+std::string IncFsWrapper::toString(FileId fileId) {
+    return incfs::toString(fileId);
+}
+
 class RealIncFs final : public IncFsWrapper {
 public:
     RealIncFs() = default;
@@ -173,9 +177,16 @@ public:
     FileId getFileId(const Control& control, std::string_view path) const final {
         return incfs::getFileId(control, path);
     }
-    std::string toString(FileId fileId) const final { return incfs::toString(fileId); }
     std::pair<IncFsBlockIndex, IncFsBlockIndex> countFilledBlocks(
             const Control& control, std::string_view path) const final {
+        if (incfs::features() & Features::v2) {
+            const auto counts = incfs::getBlockCount(control, path);
+            if (!counts) {
+                return {-errno, -errno};
+            }
+            return {counts->filledDataBlocks + counts->filledHashBlocks,
+                    counts->totalDataBlocks + counts->totalHashBlocks};
+        }
         const auto fileId = incfs::getFileId(control, path);
         const auto fd = incfs::openForSpecialOps(control, fileId);
         int res = fd.get();
