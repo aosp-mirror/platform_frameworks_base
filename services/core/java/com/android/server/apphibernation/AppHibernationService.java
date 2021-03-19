@@ -173,7 +173,9 @@ public final class AppHibernationService extends SystemService {
         if (!checkHibernationEnabled("isHibernatingForUser")) {
             return false;
         }
-
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
         userId = handleIncomingUser(userId, "isHibernating");
         if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
             Slog.e(TAG, "Attempt to get hibernation state of stopped or nonexistent user "
@@ -202,6 +204,9 @@ public final class AppHibernationService extends SystemService {
         if (!checkHibernationEnabled("isHibernatingGlobally")) {
             return false;
         }
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
         synchronized (mLock) {
             GlobalLevelState state = mGlobalHibernationStates.get(packageName);
             if (state == null) {
@@ -223,6 +228,9 @@ public final class AppHibernationService extends SystemService {
         if (!checkHibernationEnabled("setHibernatingForUser")) {
             return;
         }
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
         userId = handleIncomingUser(userId, "setHibernating");
         if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
             Slog.w(TAG, "Attempt to set hibernation state for a stopped or nonexistent user "
@@ -263,6 +271,9 @@ public final class AppHibernationService extends SystemService {
         if (!checkHibernationEnabled("setHibernatingGlobally")) {
             return;
         }
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
         synchronized (mLock) {
             GlobalLevelState state = mGlobalHibernationStates.get(packageName);
             if (state == null) {
