@@ -75,10 +75,48 @@ public final class TimeManager {
     @NonNull
     public TimeZoneCapabilitiesAndConfig getTimeZoneCapabilitiesAndConfig() {
         if (DEBUG) {
-            Log.d(TAG, "getTimeZoneCapabilities called");
+            Log.d(TAG, "getTimeZoneCapabilitiesAndConfig called");
         }
         try {
             return mITimeZoneDetectorService.getCapabilitiesAndConfig();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the calling user's time capabilities and configuration.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
+    @NonNull
+    public TimeCapabilitiesAndConfig getTimeCapabilitiesAndConfig() {
+        if (DEBUG) {
+            Log.d(TAG, "getTimeCapabilitiesAndConfig called");
+        }
+        try {
+            return mITimeDetectorService.getCapabilitiesAndConfig();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Modifies the time detection configuration.
+     *
+     * @return {@code true} if all the configuration settings specified have been set to the
+     * new values, {@code false} if none have
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION)
+    public boolean updateTimeConfiguration(@NonNull TimeConfiguration configuration) {
+        if (DEBUG) {
+            Log.d(TAG, "updateTimeConfiguration called: " + configuration);
+        }
+        try {
+            return mITimeDetectorService.updateConfiguration(configuration);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -97,11 +135,11 @@ public final class TimeManager {
      * capabilities.
      *
      * <p>Attempts to modify configuration settings with capabilities that are {@link
-     * TimeZoneCapabilities#CAPABILITY_NOT_SUPPORTED} or {@link
-     * TimeZoneCapabilities#CAPABILITY_NOT_ALLOWED} will have no effect and a {@code false}
+     * Capabilities#CAPABILITY_NOT_SUPPORTED} or {@link
+     * Capabilities#CAPABILITY_NOT_ALLOWED} will have no effect and a {@code false}
      * will be returned. Modifying configuration settings with capabilities that are {@link
-     * TimeZoneCapabilities#CAPABILITY_NOT_APPLICABLE} or {@link
-     * TimeZoneCapabilities#CAPABILITY_POSSESSED} will succeed. See {@link
+     * Capabilities#CAPABILITY_NOT_APPLICABLE} or {@link
+     * Capabilities#CAPABILITY_POSSESSED} will succeed. See {@link
      * TimeZoneCapabilities} for further details.
      *
      * <p>If the supplied configuration only has some values set, then only the specified settings

@@ -694,6 +694,7 @@
 
     <!-- Added in S -->
     <protected-broadcast android:name="android.intent.action.REBOOT_READY" />
+    <protected-broadcast android:name="android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
@@ -2309,11 +2310,6 @@
     <permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi Allows read access to privileged network state in the device config.
-         @hide Used internally. -->
-    <permission android:name="android.permission.READ_NETWORK_DEVICE_CONFIG"
-        android:protectionLevel="signature|privileged" />
-
     <!-- Allows to read device identifiers and use ICC based authentication like EAP-AKA.
          Often required in authentication to access the carrier's server and manage services
          of the subscriber.
@@ -3706,6 +3702,13 @@
     -->
     <permission android:name="android.permission.BIND_HOTWORD_DETECTION_SERVICE"
         android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows an application to manage hotword detection on the device.
+         <p>Protection level: internal|preinstalled
+         @hide This is not a third-party API (intended for OEMs and system apps).
+    -->
+    <permission android:name="android.permission.MANAGE_HOTWORD_DETECTION"
+                android:protectionLevel="internal|preinstalled" />
 
     <!-- Must be required by a {@link android.service.autofill.AutofillService},
          to ensure that only the system can bind to it.

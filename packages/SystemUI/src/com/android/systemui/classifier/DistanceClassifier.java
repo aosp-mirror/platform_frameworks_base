@@ -136,8 +136,6 @@ class DistanceClassifier extends FalsingClassifier {
         float dX = getLastMotionEvent().getX() - getFirstMotionEvent().getX();
         float dY = getLastMotionEvent().getY() - getFirstMotionEvent().getY();
 
-        logInfo("dX: " + dX + " dY: " + dY + " xV: " + vX + " yV: " + vY);
-
         return new DistanceVectors(dX, dY, vX, vY);
     }
 
@@ -147,9 +145,10 @@ class DistanceClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
-        return !getPassedFlingThreshold()
-                ? Result.falsed(0.5, getReason()) : Result.passed(0.5);
+    Result calculateFalsingResult(
+            @Classifier.InteractionType int interactionType,
+            double historyBelief, double historyConfidence) {
+        return !getPassedFlingThreshold() ? falsed(0.5, getReason()) : Result.passed(0.5);
     }
 
     String getReason() {
@@ -172,7 +171,7 @@ class DistanceClassifier extends FalsingClassifier {
     Result isLongSwipe() {
         boolean longSwipe = getPassedDistanceThreshold();
         logDebug("Is longSwipe? " + longSwipe);
-        return longSwipe ? Result.passed(0.5) : Result.falsed(0.5, getReason());
+        return longSwipe ? Result.passed(0.5) : falsed(0.5, getReason());
     }
 
     private boolean getPassedDistanceThreshold() {

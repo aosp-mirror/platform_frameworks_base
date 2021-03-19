@@ -29,6 +29,7 @@ import android.content.ComponentName;
 import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -461,6 +462,14 @@ public class CommandQueueTest extends SysuiTestCase {
         mCommandQueue.hideAuthenticationDialog();
         waitForIdleSync();
         verify(mCallbacks).hideAuthenticationDialog();
+    }
+
+    @Test
+    public void testSetUdfpsHbmListener() {
+        final IUdfpsHbmListener listener = mock(IUdfpsHbmListener.class);
+        mCommandQueue.setUdfpsHbmListener(listener);
+        waitForIdleSync();
+        verify(mCallbacks).setUdfpsHbmListener(eq(listener));
     }
 
     @Test

@@ -162,7 +162,7 @@ public class GestureLauncherService extends SystemService {
         GESTURE_CAMERA_DOUBLE_TAP_POWER(660),
 
         @UiEvent(doc = "The user multi-tapped power quickly enough to signal an emergency.")
-        GESTURE_PANIC_TAP_POWER(661);
+        GESTURE_EMERGENCY_TAP_POWER(661);
 
         private final int mId;
 
@@ -508,7 +508,7 @@ public class GestureLauncherService extends SystemService {
         } else if (launchEmergencyGesture) {
             Slog.i(TAG, "Emergency gesture detected, launching.");
             launchEmergencyGesture = handleEmergencyGesture();
-            mUiEventLogger.log(GestureLauncherEvent.GESTURE_PANIC_TAP_POWER);
+            mUiEventLogger.log(GestureLauncherEvent.GESTURE_EMERGENCY_TAP_POWER);
         }
         mMetricsLogger.histogram("power_consecutive_short_tap_count",
                 mPowerButtonSlowConsecutiveTaps);

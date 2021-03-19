@@ -109,7 +109,7 @@ public class KeyguardPatternViewController
                 // Treat single-sized patterns as erroneous taps.
                 if (pattern.size() == 1) {
                     mFalsingCollector.updateFalseConfidence(FalsingClassifier.Result.falsed(
-                            0.7, "empty pattern input"));
+                            0.7, getClass().getSimpleName(), "empty pattern input"));
                 }
                 mLockPatternView.enableInput();
                 onPatternChecked(userId, false, 0, false /* not valid - too short */);

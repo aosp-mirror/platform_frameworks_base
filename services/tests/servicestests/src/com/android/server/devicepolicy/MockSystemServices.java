@@ -47,6 +47,7 @@ import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.hardware.usb.UsbManager;
 import android.media.IAudioService;
+import android.net.ConnectivityManager;
 import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -114,6 +115,7 @@ public class MockSystemServices {
     public final SettingsForMock settings;
     public final MockContentResolver contentResolver;
     public final TelephonyManager telephonyManager;
+    public final ConnectivityManager connectivityManager;
     public final AccountManager accountManager;
     public final AlarmManager alarmManager;
     public final KeyChain.KeyChainConnection keyChainConnection;
@@ -159,6 +161,7 @@ public class MockSystemServices {
         wifiManager = mock(WifiManager.class);
         settings = mock(SettingsForMock.class);
         telephonyManager = mock(TelephonyManager.class);
+        connectivityManager = mock(ConnectivityManager.class);
         accountManager = mock(AccountManager.class);
         alarmManager = mock(AlarmManager.class);
         keyChainConnection = mock(KeyChain.KeyChainConnection.class, RETURNS_DEEP_STUBS);

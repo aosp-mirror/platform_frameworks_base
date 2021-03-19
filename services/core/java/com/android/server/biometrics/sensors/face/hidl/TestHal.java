@@ -23,11 +23,11 @@ import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.biometrics.face.V1_0.OptionalBool;
 import android.hardware.biometrics.face.V1_0.OptionalUint64;
 import android.hardware.biometrics.face.V1_0.Status;
-import android.os.NativeHandle;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class TestHal extends IBiometricsFace.Stub {
     private static final String TAG = "face.hidl.TestHal";
@@ -107,8 +107,12 @@ public class TestHal extends IBiometricsFace.Stub {
     }
 
     @Override
-    public int remove(int faceId) {
+    public int remove(int faceId) throws RemoteException {
         Slog.w(TAG, "remove");
+        if (mCallback != null) {
+            mCallback.onRemoved(0 /* deviceId */, new ArrayList<Integer>(Arrays.asList(faceId)),
+                    0 /* userId */);
+        }
         return 0;
     }
 

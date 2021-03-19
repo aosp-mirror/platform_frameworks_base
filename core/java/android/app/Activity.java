@@ -1628,6 +1628,18 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Clear the splash screen view if exist.
+     * @hide
+     */
+    public void detachSplashScreenView() {
+        synchronized (this) {
+            if (mSplashScreenView != null) {
+                mSplashScreenView = null;
+            }
+        }
+    }
+
+    /**
      * Same as {@link #onCreate(android.os.Bundle)} but called for those activities created with
      * the attribute {@link android.R.attr#persistableMode} set to
      * <code>persistAcrossReboots</code>.

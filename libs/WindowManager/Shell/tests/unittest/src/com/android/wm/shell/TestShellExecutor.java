@@ -16,8 +16,6 @@
 
 package com.android.wm.shell;
 
-import android.os.Looper;
-
 import com.android.wm.shell.common.ShellExecutor;
 
 import java.util.ArrayList;
@@ -37,11 +35,6 @@ public class TestShellExecutor implements ShellExecutor {
     @Override
     public void executeDelayed(Runnable r, long delayMillis) {
         mRunnables.add(r);
-    }
-
-    @Override
-    public void removeAllCallbacks() {
-        mRunnables.clear();
     }
 
     @Override

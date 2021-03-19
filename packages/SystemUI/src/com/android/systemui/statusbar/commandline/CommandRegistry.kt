@@ -192,9 +192,9 @@ private class PrefsCommand(val context: Context) : Command {
         val pref = args[0]
 
         when (pref) {
-            Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING -> {
+            Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S -> {
                 val value = Integer.parseInt(args[1])
-                Prefs.putBoolean(context, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, value != 0)
+                Prefs.putBoolean(context, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, value != 0)
             }
             else -> {
                 pw.println("Cannot set pref ($pref)")

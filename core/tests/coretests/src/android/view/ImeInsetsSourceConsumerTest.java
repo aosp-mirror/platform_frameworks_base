@@ -91,7 +91,8 @@ public class ImeInsetsSourceConsumerTest {
 
     @Test
     public void testImeVisibility() {
-        final InsetsSourceControl ime = new InsetsSourceControl(ITYPE_IME, mLeash, new Point());
+        final InsetsSourceControl ime =
+                new InsetsSourceControl(ITYPE_IME, mLeash, new Point(), Insets.NONE);
         mController.onControlsChanged(new InsetsSourceControl[] { ime });
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
@@ -119,7 +120,8 @@ public class ImeInsetsSourceConsumerTest {
             mImeConsumer.applyImeVisibility(true /* setVisible */);
 
             // set control and verify visibility is applied.
-            InsetsSourceControl control = new InsetsSourceControl(ITYPE_IME, mLeash, new Point());
+            InsetsSourceControl control =
+                    new InsetsSourceControl(ITYPE_IME, mLeash, new Point(), Insets.NONE);
             mController.onControlsChanged(new InsetsSourceControl[] { control });
             // IME show animation should be triggered when control becomes available.
             verify(mController).applyAnimation(
@@ -138,7 +140,7 @@ public class ImeInsetsSourceConsumerTest {
 
             // set control and verify visibility is applied.
             InsetsSourceControl control = Mockito.spy(
-                    new InsetsSourceControl(ITYPE_IME, mLeash, new Point()));
+                    new InsetsSourceControl(ITYPE_IME, mLeash, new Point(), Insets.NONE));
             // Simulate IME source control set this flag when the target has starting window.
             control.setSkipAnimationOnce(true);
             mController.onControlsChanged(new InsetsSourceControl[] { control });

@@ -18,6 +18,7 @@ package com.android.server.timedetector;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
@@ -87,6 +88,9 @@ public interface TimeDetectorStrategy extends Dumpable {
 
     /** Processes the suggested time from external sources. */
     void suggestExternalTime(@NonNull ExternalTimeSuggestion timeSuggestion);
+
+    /** Returns the configuration that controls time detector behaviour for specified user. */
+    ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
 
     /**
      * Handles the auto-time configuration changing For example, when the auto-time setting is

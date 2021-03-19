@@ -1680,7 +1680,7 @@ package android {
     field public static final int windowSplashScreenAnimationDuration = 16844334; // 0x101062e
     field public static final int windowSplashScreenBackground = 16844332; // 0x101062c
     field public static final int windowSplashScreenBrandingImage = 16844335; // 0x101062f
-    field public static final int windowSplashscreenContent = 16844132; // 0x1010564
+    field @Deprecated public static final int windowSplashscreenContent = 16844132; // 0x1010564
     field @Deprecated public static final int windowSwipeToDismiss = 16843763; // 0x10103f3
     field public static final int windowTitleBackgroundStyle = 16842844; // 0x101005c
     field public static final int windowTitleSize = 16842842; // 0x101005a
@@ -6137,13 +6137,13 @@ package android.app {
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.NotificationChannel> CREATOR;
     field public static final String DEFAULT_CHANNEL_ID = "miscellaneous";
-    field public static final String EDIT_CONVERSATION = "convo";
+    field public static final String EDIT_CONVERSATION = "conversation";
     field public static final String EDIT_IMPORTANCE = "importance";
     field public static final String EDIT_LAUNCHER = "launcher";
     field public static final String EDIT_LOCKED_DEVICE = "locked";
     field public static final String EDIT_SOUND = "sound";
     field public static final String EDIT_VIBRATION = "vibration";
-    field public static final String EDIT_ZEN = "dnd";
+    field public static final String EDIT_ZEN = "zen";
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
@@ -18438,12 +18438,12 @@ package android.hardware.camera2 {
   }
 
   public class MultiResolutionImageReader implements java.lang.AutoCloseable {
+    ctor public MultiResolutionImageReader(@NonNull java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo>, int, @IntRange(from=1) int);
     method public void close();
     method protected void finalize();
     method public void flush();
     method @NonNull public android.hardware.camera2.params.MultiResolutionStreamInfo getStreamInfoForImageReader(@NonNull android.media.ImageReader);
     method @NonNull public android.view.Surface getSurface();
-    method @NonNull public static android.hardware.camera2.MultiResolutionImageReader newInstance(@NonNull java.util.Collection<android.hardware.camera2.params.MultiResolutionStreamInfo>, int, @IntRange(from=1) int);
     method public void setOnImageAvailableListener(@Nullable android.media.ImageReader.OnImageAvailableListener, @Nullable java.util.concurrent.Executor);
   }
 
@@ -18554,10 +18554,10 @@ package android.hardware.camera2.params {
   }
 
   public class MultiResolutionStreamInfo {
-    ctor public MultiResolutionStreamInfo(int, int, @NonNull String);
-    method public int getHeight();
+    ctor public MultiResolutionStreamInfo(@IntRange(from=1) int, @IntRange(from=1) int, @NonNull String);
+    method @IntRange(from=1) public int getHeight();
     method @NonNull public String getPhysicalCameraId();
-    method public int getWidth();
+    method @IntRange(from=1) public int getWidth();
   }
 
   public final class OisSample {
@@ -26824,17 +26824,14 @@ package android.net.vcn {
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
     method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
-    method @NonNull public int[] getRequiredUnderlyingCapabilities();
     method @NonNull public long[] getRetryInterval();
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
     ctor public VcnGatewayConnectionConfig.Builder(@NonNull android.net.vcn.VcnControlPlaneConfig);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addRequiredUnderlyingCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeRequiredUnderlyingCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryInterval(@NonNull long[]);
   }
@@ -37401,12 +37398,15 @@ package android.service.autofill {
     method @NonNull public android.service.autofill.Dataset.Builder setAuthentication(@Nullable android.content.IntentSender);
     method @NonNull public android.service.autofill.Dataset.Builder setId(@Nullable String);
     method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
     method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue);
     method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews);
     method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern);
     method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews);
     method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
     method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
   }
 
   public final class DateTransformation implements android.os.Parcelable android.service.autofill.Transformation {
@@ -37507,6 +37507,7 @@ package android.service.autofill {
     method @NonNull public android.service.autofill.FillResponse.Builder disableAutofill(long);
     method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews);
     method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation, @Nullable android.service.autofill.InlinePresentation);
     method @NonNull public android.service.autofill.FillResponse.Builder setClientState(@Nullable android.os.Bundle);
     method @NonNull public android.service.autofill.FillResponse.Builder setFieldClassificationIds(@NonNull android.view.autofill.AutofillId...);
     method @NonNull public android.service.autofill.FillResponse.Builder setFlags(int);
@@ -37534,6 +37535,7 @@ package android.service.autofill {
 
   public final class InlinePresentation implements android.os.Parcelable {
     ctor public InlinePresentation(@NonNull android.app.slice.Slice, @NonNull android.widget.inline.InlinePresentationSpec, boolean);
+    method @NonNull public static android.service.autofill.InlinePresentation createTooltipPresentation(@NonNull android.app.slice.Slice, @NonNull android.widget.inline.InlinePresentationSpec);
     method public int describeContents();
     method @NonNull public android.widget.inline.InlinePresentationSpec getInlinePresentationSpec();
     method @NonNull public android.app.slice.Slice getSlice();
@@ -51336,6 +51338,7 @@ package android.view.inputmethod {
     method @NonNull public android.os.Bundle getExtras();
     method @NonNull public String getHostPackageName();
     method @NonNull public java.util.List<android.widget.inline.InlinePresentationSpec> getInlinePresentationSpecs();
+    method @Nullable public android.widget.inline.InlinePresentationSpec getInlineTooltipPresentationSpec();
     method public int getMaxSuggestionCount();
     method @NonNull public android.os.LocaleList getSupportedLocales();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -51347,9 +51350,12 @@ package android.view.inputmethod {
     ctor public InlineSuggestionsRequest.Builder(@NonNull java.util.List<android.widget.inline.InlinePresentationSpec>);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder addInlinePresentationSpecs(@NonNull android.widget.inline.InlinePresentationSpec);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest build();
+    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setClientSupported(boolean);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setInlinePresentationSpecs(@NonNull java.util.List<android.widget.inline.InlinePresentationSpec>);
+    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setInlineTooltipPresentationSpec(@NonNull android.widget.inline.InlinePresentationSpec);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setMaxSuggestionCount(int);
+    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setServiceSupported(boolean);
     method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setSupportedLocales(@NonNull android.os.LocaleList);
   }
 
@@ -52306,10 +52312,10 @@ package android.view.textservice {
 
   public final class TextServicesManager {
     method @Nullable public android.view.textservice.SpellCheckerInfo getCurrentSpellCheckerInfo();
-    method @Nullable public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckerInfos();
+    method @NonNull public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckerInfos();
     method public boolean isSpellCheckerEnabled();
     method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
-    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean, int);
+    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable java.util.Locale, boolean, int, @Nullable android.os.Bundle, @NonNull java.util.concurrent.Executor, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener);
   }
 
 }

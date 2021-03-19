@@ -18,15 +18,15 @@ package com.android.server.connectivity;
 
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_DEFAULT_MODE;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_SPECIFIER;
 import static android.net.NetworkCapabilities.MAX_TRANSPORT;
 import static android.net.NetworkCapabilities.MIN_TRANSPORT;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.resolv.aidl.IDnsResolverUnsolicitedEventListener.VALIDATION_RESULT_FAILURE;
 import static android.net.resolv.aidl.IDnsResolverUnsolicitedEventListener.VALIDATION_RESULT_SUCCESS;
-import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
-import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
-import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 
 import static com.android.testutils.MiscAsserts.assertContainsExactly;
 import static com.android.testutils.MiscAsserts.assertContainsStringsExactly;
