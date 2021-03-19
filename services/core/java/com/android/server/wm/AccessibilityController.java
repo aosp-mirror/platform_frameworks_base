@@ -1511,10 +1511,15 @@ final class AccessibilityController {
             IBinder topFocusedWindowToken = null;
 
             synchronized (mService.mGlobalLock) {
-                // Do not send the windows if there is no top focus as
-                // the window manager is still looking for where to put it.
-                // We will do the work when we get a focus change callback.
-                final WindowState topFocusedWindowState = getTopFocusWindow();
+                // If there is a recents animation running, then use the animation target as the
+                // top window state. Otherwise,do not send the windows if there is no top focus as
+                // the window manager is still looking for where to put it. We will do the work when
+                // we get a focus change callback.
+                final RecentsAnimationController controller =
+                        mService.getRecentsAnimationController();
+                final WindowState topFocusedWindowState = controller != null
+                        ? controller.getTargetAppMainWindow()
+                        : getTopFocusWindow();
                 if (topFocusedWindowState == null) {
                     if (DEBUG) {
                         Slog.d(LOG_TAG, "top focused window is null, compute it again later");
