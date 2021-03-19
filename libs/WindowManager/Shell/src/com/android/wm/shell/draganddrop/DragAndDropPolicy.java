@@ -235,7 +235,7 @@ public class DragAndDropPolicy {
             mStarter.startShortcut(packageName, id, stage, position, opts, user);
         } else {
             mStarter.startIntent(intent.getParcelableExtra(EXTRA_PENDING_INTENT),
-                    mContext, null, stage, position, opts);
+                    null, stage, position, opts);
         }
     }
 
@@ -295,7 +295,7 @@ public class DragAndDropPolicy {
                 @Nullable Bundle options);
         void startShortcut(String packageName, String shortcutId, @StageType int stage,
                 @StagePosition int position, @Nullable Bundle options, UserHandle user);
-        void startIntent(PendingIntent intent, Context context, Intent fillInIntent,
+        void startIntent(PendingIntent intent, Intent fillInIntent,
                 @StageType int stage, @StagePosition int position,
                 @Nullable Bundle options);
         void enterSplitScreen(int taskId, boolean leftOrTop);
@@ -337,9 +337,8 @@ public class DragAndDropPolicy {
         }
 
         @Override
-        public void startIntent(PendingIntent intent, Context context,
-                @Nullable Intent fillInIntent, int stage, int position,
-                @Nullable Bundle options) {
+        public void startIntent(PendingIntent intent, @Nullable Intent fillInIntent, int stage,
+                int position, @Nullable Bundle options) {
             try {
                 intent.send(mContext, 0, fillInIntent, null, null, null, options);
             } catch (PendingIntent.CanceledException e) {

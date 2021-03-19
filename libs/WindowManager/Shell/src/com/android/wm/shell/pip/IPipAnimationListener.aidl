@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.recents;
+package com.android.wm.shell.pip;
 
 /**
- * Listener interface that Launcher attaches to SystemUI to get
- * pinned stack animation callbacks.
+ * Listener interface that Launcher attaches to SystemUI to get Pip animation callbacks.
  */
-oneway interface IPinnedStackAnimationListener {
+oneway interface IPipAnimationListener {
     /**
-     * Notifies the pinned stack animation is started.
+     * Notifies the listener that the Pip animation is started.
      */
-    void onPinnedStackAnimationStarted();
+    void onPipAnimationStarted();
 }
