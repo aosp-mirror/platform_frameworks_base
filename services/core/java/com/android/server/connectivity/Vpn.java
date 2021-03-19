@@ -1239,7 +1239,7 @@ public class Vpn {
         mLegacyState = LegacyVpnInfo.STATE_CONNECTING;
         updateState(DetailedState.CONNECTING, "agentConnect");
 
-        NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig();
+        NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig.Builder().build();
         networkAgentConfig.allowBypass = mConfig.allowBypass && !mLockdown;
 
         mNetworkCapabilities.setOwnerUid(mOwnerUID);
