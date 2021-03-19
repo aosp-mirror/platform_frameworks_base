@@ -19,14 +19,14 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
-import com.android.server.WatchableIntentResolver;
+import com.android.server.WatchedIntentResolver;
 import com.android.server.utils.Snappable;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class PreferredIntentResolver
-        extends WatchableIntentResolver<PreferredActivity, PreferredActivity>
+        extends WatchedIntentResolver<PreferredActivity, PreferredActivity>
         implements Snappable {
     @Override
     protected PreferredActivity[] newArray(int size) {

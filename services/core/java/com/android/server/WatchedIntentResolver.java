@@ -31,7 +31,7 @@ import java.util.List;
  * @param <R> The resolver type.
  * {@hide}
  */
-public abstract class WatchableIntentResolver<F, R extends Object>
+public abstract class WatchedIntentResolver<F, R extends Object>
         extends IntentResolver<F, R>
         implements Watchable {
 
