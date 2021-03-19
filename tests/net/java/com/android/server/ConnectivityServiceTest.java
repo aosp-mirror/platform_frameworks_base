@@ -1564,24 +1564,25 @@ public class ConnectivityServiceTest {
         }).when(deps).makeMultinetworkPolicyTracker(any(), any(), any());
         doReturn(true).when(deps).getCellular464XlatEnabled();
 
-        doReturn(60000).when(mResources).getInteger(
-                com.android.connectivity.resources.R.integer.config_networkTransitionTimeout);
-        doReturn("").when(mResources).getString(
-                com.android.connectivity.resources.R.string.config_networkCaptivePortalServerUrl);
+        doReturn(60000).when(mResources).getInteger(R.integer.config_networkTransitionTimeout);
+        doReturn("").when(mResources).getString(R.string.config_networkCaptivePortalServerUrl);
         doReturn(new String[]{ WIFI_WOL_IFNAME }).when(mResources).getStringArray(
-                com.android.connectivity.resources.R.array.config_wakeonlan_supported_interfaces);
+                R.array.config_wakeonlan_supported_interfaces);
         doReturn(new String[] { "0,1", "1,3" }).when(mResources).getStringArray(
-                com.android.connectivity.resources.R.array.config_networkSupportedKeepaliveCount);
-        doReturn(com.android.connectivity.resources.R.array.config_networkSupportedKeepaliveCount)
-                .when(mResources).getIdentifier(eq("config_networkSupportedKeepaliveCount"),
-                eq("array"), any());
-        doReturn(com.android.connectivity.resources.R.array.network_switch_type_name)
-                .when(mResources).getIdentifier(eq("network_switch_type_name"),
-                eq("array"), any());
-
+                R.array.config_networkSupportedKeepaliveCount);
+        doReturn(new String[0]).when(mResources).getStringArray(
+                R.array.config_networkNotifySwitches);
+        doReturn(new int[]{10, 11, 12, 14, 15}).when(mResources).getIntArray(
+                R.array.config_protectedNetworks);
         // We don't test the actual notification value strings, so just return an empty array.
         // It doesn't matter what the values are as long as it's not null.
         doReturn(new String[0]).when(mResources).getStringArray(R.array.network_switch_type_name);
+
+        doReturn(R.array.config_networkSupportedKeepaliveCount).when(mResources)
+                .getIdentifier(eq("config_networkSupportedKeepaliveCount"), eq("array"), any());
+        doReturn(R.array.network_switch_type_name).when(mResources)
+                .getIdentifier(eq("network_switch_type_name"), eq("array"), any());
+
 
         final ConnectivityResources connRes = mock(ConnectivityResources.class);
         doReturn(mResources).when(connRes).get();

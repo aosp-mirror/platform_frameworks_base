@@ -211,6 +211,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import com.android.connectivity.resources.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
@@ -817,8 +818,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         private ArrayMap<Integer, Integer> loadRestoreTimers() {
             final String[] configs = mService.mResources.get().getStringArray(
-                    com.android.connectivity.resources.R.array
-                            .config_legacy_networktype_restore_timers);
+                    R.array.config_legacy_networktype_restore_timers);
             final ArrayMap<Integer, Integer> ret = new ArrayMap<>(configs.length);
             for (final String config : configs) {
                 final String[] splits = TextUtils.split(config, ",");
@@ -1256,8 +1256,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mLegacyTypeTracker.loadSupportedTypes(mContext, mTelephonyManager);
         mProtectedNetworks = new ArrayList<>();
-        int[] protectedNetworks = context.getResources().getIntArray(
-                com.android.internal.R.array.config_protectedNetworks);
+        int[] protectedNetworks = mResources.get().getIntArray(R.array.config_protectedNetworks);
         for (int p : protectedNetworks) {
             if (mLegacyTypeTracker.isTypeSupported(p) && !mProtectedNetworks.contains(p)) {
                 mProtectedNetworks.add(p);
@@ -1422,8 +1421,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 ConnectivitySettingsManager.MOBILE_DATA_ALWAYS_ON, true /* defaultValue */);
         handleAlwaysOnNetworkRequest(mDefaultWifiRequest,
                 ConnectivitySettingsManager.WIFI_ALWAYS_REQUESTED, false /* defaultValue */);
+        final boolean vehicleAlwaysRequested = mResources.get().getBoolean(
+                R.bool.config_vehicleInternalNetworkAlwaysRequested);
+        // TODO (b/183076074): remove legacy fallback after migrating overlays
+        final boolean legacyAlwaysRequested = mContext.getResources().getBoolean(
+                mContext.getResources().getIdentifier(
+                        "config_vehicleInternalNetworkAlwaysRequested", "bool", "android"));
         handleAlwaysOnNetworkRequest(mDefaultVehicleRequest,
-                com.android.internal.R.bool.config_vehicleInternalNetworkAlwaysRequested);
+                vehicleAlwaysRequested || legacyAlwaysRequested);
     }
 
     private void registerSettingsCallbacks() {
@@ -4632,7 +4637,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mWakelockLogs.log("ACQUIRE for " + forWhom);
         Message msg = mHandler.obtainMessage(EVENT_EXPIRE_NET_TRANSITION_WAKELOCK);
         final int lockTimeout = mResources.get().getInteger(
-                com.android.connectivity.resources.R.integer.config_networkTransitionTimeout);
+                R.integer.config_networkTransitionTimeout);
         mHandler.sendMessageDelayed(msg, lockTimeout);
     }
 
@@ -6362,10 +6367,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
-        int mark = mContext.getResources().getInteger(
-            com.android.internal.R.integer.config_networkWakeupPacketMark);
-        int mask = mContext.getResources().getInteger(
-            com.android.internal.R.integer.config_networkWakeupPacketMask);
+        int mark = mResources.get().getInteger(R.integer.config_networkWakeupPacketMark);
+        int mask = mResources.get().getInteger(R.integer.config_networkWakeupPacketMask);
+
+        // TODO (b/183076074): remove legacy fallback after migrating overlays
+        final int legacyMark = mContext.getResources().getInteger(mContext.getResources()
+                .getIdentifier("config_networkWakeupPacketMark", "integer", "android"));
+        final int legacyMask = mContext.getResources().getInteger(mContext.getResources()
+                .getIdentifier("config_networkWakeupPacketMask", "integer", "android"));
+        mark = mark == 0 ? legacyMark : mark;
+        mask = mask == 0 ? legacyMask : mask;
 
         // Mask/mark of zero will not detect anything interesting.
         // Don't install rules unless both values are nonzero.
@@ -6558,8 +6569,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void updateWakeOnLan(@NonNull LinkProperties lp) {
         if (mWolSupportedInterfaces == null) {
             mWolSupportedInterfaces = new ArraySet<>(mResources.get().getStringArray(
-                    com.android.connectivity.resources.R.array
-                            .config_wakeonlan_supported_interfaces));
+                    R.array.config_wakeonlan_supported_interfaces));
         }
         lp.setWakeOnLanSupported(mWolSupportedInterfaces.contains(lp.getInterfaceName()));
     }
@@ -8123,7 +8133,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public String getCaptivePortalServerUrl() {
         enforceNetworkStackOrSettingsPermission();
         String settingUrl = mResources.get().getString(
-                com.android.connectivity.resources.R.string.config_networkCaptivePortalServerUrl);
+                R.string.config_networkCaptivePortalServerUrl);
 
         if (!TextUtils.isEmpty(settingUrl)) {
             return settingUrl;
