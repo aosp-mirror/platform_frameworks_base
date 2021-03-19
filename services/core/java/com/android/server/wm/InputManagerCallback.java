@@ -229,6 +229,12 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                 mService::reportFocusChanged, oldToken, newToken));
     }
 
+    @Override
+    public void notifyDropWindow(IBinder token, float x, float y) {
+        mService.mH.sendMessage(PooledLambda.obtainMessage(
+                mService.mDragDropController::reportDropWindow, token, x, y));
+    }
+
     /** Waits until the built-in input devices have been configured. */
     public boolean waitForInputDevicesReady(long timeoutMillis) {
         synchronized (mInputDevicesReadyMonitor) {
