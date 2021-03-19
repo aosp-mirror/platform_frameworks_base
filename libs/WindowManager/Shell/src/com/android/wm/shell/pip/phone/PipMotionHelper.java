@@ -29,7 +29,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.Choreographer;
 
-import androidx.annotation.VisibleForTesting;
 import androidx.dynamicanimation.animation.AnimationHandler;
 import androidx.dynamicanimation.animation.AnimationHandler.FrameCallbackScheduler;
 import androidx.dynamicanimation.animation.SpringForce;
@@ -489,8 +488,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /**
      * Animates the PiP to offset it from the IME or shelf.
      */
-    @VisibleForTesting
-    public void animateToOffset(Rect originalBounds, int offset) {
+    void animateToOffset(Rect originalBounds, int offset) {
         if (DEBUG) {
             Log.d(TAG, "animateToOffset: originalBounds=" + originalBounds + " offset=" + offset
                     + " callers=\n" + Debug.getCallers(5, "    "));

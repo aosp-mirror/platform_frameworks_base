@@ -35,6 +35,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Singleton source of truth for the current state of PIP bounds.
@@ -84,6 +85,7 @@ public final class PipBoundsState {
 
     private @Nullable Runnable mOnMinimalSizeChangeCallback;
     private @Nullable TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
+    private @Nullable Consumer<Rect> mOnPipExclusionBoundsChangeCallback;
 
     public PipBoundsState(@NonNull Context context) {
         mContext = context;
@@ -102,6 +104,9 @@ public final class PipBoundsState {
     /** Set the current PIP bounds. */
     public void setBounds(@NonNull Rect bounds) {
         mBounds.set(bounds);
+        if (mOnPipExclusionBoundsChangeCallback != null) {
+            mOnPipExclusionBoundsChangeCallback.accept(bounds);
+        }
     }
 
     /** Get the current PIP bounds. */
@@ -384,6 +389,18 @@ public final class PipBoundsState {
     public void setOnShelfVisibilityChangeCallback(
             @Nullable TriConsumer<Boolean, Integer, Boolean> onShelfVisibilityChangeCallback) {
         mOnShelfVisibilityChangeCallback = onShelfVisibilityChangeCallback;
+    }
+
+    /**
+     * Set a callback to watch out for PiP bounds. This is mostly used by SystemUI's
+     * Back-gesture handler, to avoid conflicting with PiP when it's stashed.
+     */
+    public void setPipExclusionBoundsChangeCallback(
+            @Nullable Consumer<Rect> onPipExclusionBoundsChangeCallback) {
+        mOnPipExclusionBoundsChangeCallback = onPipExclusionBoundsChangeCallback;
+        if (mOnPipExclusionBoundsChangeCallback != null) {
+            mOnPipExclusionBoundsChangeCallback.accept(getBounds());
+        }
     }
 
     /** Source of truth for the current bounds of PIP that may be in motion. */
