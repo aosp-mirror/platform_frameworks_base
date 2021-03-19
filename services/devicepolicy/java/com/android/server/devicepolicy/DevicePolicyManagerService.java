@@ -10598,21 +10598,58 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
+    /**
+     * Returns the apps that are non-exempt from some policies (such as suspension), and populates
+     * the given set with the apps that are exempt.
+     *
+     * @param packageNames apps to check
+     * @param outputExemptApps will be populate with subset of {@code packageNames} that is exempt
+     * from some policy restrictions
+     *
+     * @return subset of {@code packageNames} that is affected by some policy restrictions.
+     */
+    private String[] populateNonExemptAndExemptFromPolicyApps(String[] packageNames,
+            Set<String> outputExemptApps) {
+        Preconditions.checkArgument(outputExemptApps.isEmpty(), "outputExemptApps is not empty");
+        List<String> exemptApps = listPolicyExemptAppsUnchecked();
+        if (exemptApps.isEmpty()) {
+            return packageNames;
+        }
+        List<String> nonExemptApps = new ArrayList<>(packageNames.length);
+        for (int i = 0; i < packageNames.length; i++) {
+            String app = packageNames[i];
+            if (exemptApps.contains(app)) {
+                outputExemptApps.add(app);
+            } else {
+                nonExemptApps.add(app);
+            }
+        }
+        String[] result = new String[nonExemptApps.size()];
+        nonExemptApps.toArray(result);
+        return result;
+    }
+
     @Override
     public String[] setPackagesSuspended(ComponentName who, String callerPackage,
             String[] packageNames, boolean suspended) {
+        Objects.requireNonNull(packageNames, "array of packages cannot be null");
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_PACKAGE_ACCESS)));
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_PACKAGES_SUSPENDED);
 
-        String[] result = null;
+        // Must remove the exempt apps from the input before calling PM, then add them back to
+        // the array returned to the caller
+        Set<String> exemptApps = new HashSet<>();
+        packageNames = populateNonExemptAndExemptFromPolicyApps(packageNames, exemptApps);
+
+        String[] nonSuspendedPackages = null;
         synchronized (getLockObject()) {
             long id = mInjector.binderClearCallingIdentity();
             try {
-                result = mIPackageManager.setPackagesSuspendedAsUser(packageNames, suspended, null,
-                        null, null, PLATFORM_PACKAGE_NAME, caller.getUserId());
+                nonSuspendedPackages = mIPackageManager.setPackagesSuspendedAsUser(packageNames,
+                        suspended, null, null, null, PLATFORM_PACKAGE_NAME, caller.getUserId());
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed talking to the package manager", re);
@@ -10626,10 +10663,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .setBoolean(/* isDelegate */ who == null)
                 .setStrings(packageNames)
                 .write();
-        if (result != null) {
-            return result;
+
+        if (nonSuspendedPackages == null) {
+            Slog.w(LOG_TAG, "PM failed to suspend packages (%s)", Arrays.toString(packageNames));
+            return packageNames;
         }
-        return packageNames;
+        if (exemptApps.isEmpty()) {
+            return nonSuspendedPackages;
+        }
+
+        String[] result = buildNonSuspendedPackagesUnionArray(nonSuspendedPackages, exemptApps);
+        if (VERBOSE_LOG) Slog.v(LOG_TAG, "Returning %s", Arrays.toString(result));
+        return result;
+    }
+
+    /**
+     * Returns an array containing the union of the given non-suspended packages and
+     * exempt apps. Assumes both parameters are non-null and non-empty.
+     */
+    private String[] buildNonSuspendedPackagesUnionArray(String[] nonSuspendedPackages,
+            Set<String> exemptApps) {
+        String[] result = new String[nonSuspendedPackages.length + exemptApps.size()];
+        int index = 0;
+        for (String app : nonSuspendedPackages) {
+            result[index++] = app;
+        }
+        for (String app : exemptApps) {
+            result[index++] = app;
+        }
+        return result;
     }
 
     @Override
@@ -10655,9 +10717,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public List<String> listPolicyExemptApps() {
+        CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
-                hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
+                hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS) || isDeviceOwner(caller)
+                        || isProfileOwner(caller));
 
+        return listPolicyExemptAppsUnchecked();
+    }
+
+    private List<String> listPolicyExemptAppsUnchecked() {
         // TODO(b/181238156): decide whether it should only list the apps set by the resources,
         // or also the "critical" apps defined by PersonalAppsSuspensionHelper (like SMS app).
         // If it's the latter, refactor PersonalAppsSuspensionHelper so it (or a superclass) takes
