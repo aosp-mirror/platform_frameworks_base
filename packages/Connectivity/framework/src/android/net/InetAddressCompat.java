@@ -41,7 +41,12 @@ public class InetAddressCompat {
     public static void clearDnsCache() {
         try {
             InetAddress.class.getMethod("clearDnsCache").invoke(null);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            }
+            throw new IllegalStateException("Unknown InvocationTargetException", e.getCause());
+        } catch (IllegalAccessException | NoSuchMethodException e) {
             Log.wtf(InetAddressCompat.class.getSimpleName(), "Error clearing DNS cache", e);
         }
     }
@@ -51,13 +56,7 @@ public class InetAddressCompat {
      */
     public static InetAddress[] getAllByNameOnNet(String host, int netId) throws
             UnknownHostException {
-        try {
-            return (InetAddress[]) InetAddress.class.getMethod("getAllByNameOnNet",
-                    String.class, int.class).invoke(null, host, netId);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            Log.wtf(InetAddressCompat.class.getSimpleName(), "Error calling getAllByNameOnNet", e);
-            throw new IllegalStateException("Error querying via getAllNameOnNet", e);
-        }
+        return (InetAddress[]) callGetByNameMethod("getAllByNameOnNet", host, netId);
     }
 
     /**
@@ -65,12 +64,25 @@ public class InetAddressCompat {
      */
     public static InetAddress getByNameOnNet(String host, int netId) throws
             UnknownHostException {
+        return (InetAddress) callGetByNameMethod("getByNameOnNet", host, netId);
+    }
+
+    private static Object callGetByNameMethod(String method, String host, int netId)
+            throws UnknownHostException {
         try {
-            return (InetAddress) InetAddress.class.getMethod("getByNameOnNet",
-                    String.class, int.class).invoke(null, host, netId);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            Log.wtf(InetAddressCompat.class.getSimpleName(), "Error calling getAllByNameOnNet", e);
-            throw new IllegalStateException("Error querying via getByNameOnNet", e);
+            return InetAddress.class.getMethod(method, String.class, int.class)
+                    .invoke(null, host, netId);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof UnknownHostException) {
+                throw (UnknownHostException) e.getCause();
+            }
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            }
+            throw new IllegalStateException("Unknown InvocationTargetException", e.getCause());
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            Log.wtf(InetAddressCompat.class.getSimpleName(), "Error calling " + method, e);
+            throw new IllegalStateException("Error querying via " + method, e);
         }
     }
 }
