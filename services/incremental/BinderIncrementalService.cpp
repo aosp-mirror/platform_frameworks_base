@@ -266,8 +266,7 @@ binder::Status BinderIncrementalService::isFullyLoaded(int32_t storageId, int32_
 
 binder::Status BinderIncrementalService::getLoadingProgress(int32_t storageId,
                                                             float* _aidl_return) {
-    *_aidl_return =
-            mImpl.getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/false).getProgress();
+    *_aidl_return = mImpl.getLoadingProgress(storageId).getProgress();
     return ok();
 }
 

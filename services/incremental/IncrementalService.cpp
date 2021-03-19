@@ -247,14 +247,17 @@ auto IncrementalService::IncFsMount::makeStorage(StorageId id) -> StorageMap::it
 }
 
 template <class Func>
-static auto makeCleanup(Func&& f) {
+static auto makeCleanup(Func&& f) requires(!std::is_lvalue_reference_v<Func>) {
     auto deleter = [f = std::move(f)](auto) { f(); };
     // &f is a dangling pointer here, but we actually never use it as deleter moves it in.
     return std::unique_ptr<Func, decltype(deleter)>(&f, std::move(deleter));
 }
 
-static std::unique_ptr<DIR, decltype(&::closedir)> openDir(const char* dir) {
-    return {::opendir(dir), ::closedir};
+static auto openDir(const char* dir) {
+    struct DirCloser {
+        void operator()(DIR* d) const noexcept { ::closedir(d); }
+    };
+    return std::unique_ptr<DIR, DirCloser>(::opendir(dir));
 }
 
 static auto openDir(std::string_view dir) {
@@ -390,9 +393,7 @@ void IncrementalService::onDump(int fd) {
             dprintf(fd, "    storages (%d): {\n", int(mnt.storages.size()));
             for (auto&& [storageId, storage] : mnt.storages) {
                 dprintf(fd, "      [%d] -> [%s] (%d %% loaded) \n", storageId, storage.name.c_str(),
-                        (int)(getLoadingProgressFromPath(mnt, storage.name.c_str(),
-                                                         /*stopOnFirstIncomplete=*/false)
-                                      .getProgress() *
+                        (int)(getLoadingProgressFromPath(mnt, storage.name.c_str()).getProgress() *
                               100));
             }
             dprintf(fd, "    }\n");
@@ -425,21 +426,7 @@ bool IncrementalService::needStartDataLoaderLocked(IncFsMount& ifs) {
         return true;
     }
 
-    // Check all permanent binds.
-    for (auto&& [_, bindPoint] : ifs.bindPoints) {
-        if (bindPoint.kind != BindKind::Permanent) {
-            continue;
-        }
-        const auto progress = getLoadingProgressFromPath(ifs, bindPoint.sourceDir,
-                                                         /*stopOnFirstIncomplete=*/true);
-        if (!progress.isError() && !progress.fullyLoaded()) {
-            LOG(INFO) << "Non system mount: [" << bindPoint.sourceDir
-                      << "], partial progress: " << progress.getProgress() * 100 << "%";
-            return true;
-        }
-    }
-
-    return false;
+    return mIncFs->isEverythingFullyLoaded(ifs.control) == incfs::LoadingState::MissingBlocks;
 }
 
 void IncrementalService::onSystemReady() {
@@ -576,7 +563,7 @@ StorageId IncrementalService::createStorage(
             std::make_shared<IncFsMount>(std::move(mountRoot), mountId, std::move(control), *this);
     // Now it's the |ifs|'s responsibility to clean up after itself, and the only cleanup we need
     // is the removal of the |ifs|.
-    firstCleanupOnFailure.release();
+    (void)firstCleanupOnFailure.release();
 
     auto secondCleanup = [this, &l](auto itPtr) {
         if (!l.owns_lock()) {
@@ -622,7 +609,7 @@ StorageId IncrementalService::createStorage(
     }
 
     // Done here as well, all data structures are in good state.
-    secondCleanupOnFailure.release();
+    (void)secondCleanupOnFailure.release();
 
     mountIt->second = std::move(ifs);
     l.unlock();
@@ -840,7 +827,7 @@ binder::Status IncrementalService::applyStorageParams(IncFsMount& ifs, bool enab
     }
 
     std::lock_guard l(mMountOperationLock);
-    const auto status = mVold->setIncFsMountOptions(control, enableReadLogs);
+    auto status = mVold->setIncFsMountOptions(control, enableReadLogs);
     if (status.isOk()) {
         // Store enabled state.
         ifs.setReadLogsEnabled(enableReadLogs);
@@ -1257,13 +1244,13 @@ void IncrementalService::updateUidReadTimeouts(StorageId storage, Clock::time_po
     }
 
     // Still loading?
-    const auto progress = getLoadingProgress(storage, /*stopOnFirstIncomplete=*/true);
-    if (progress.isError()) {
+    const auto state = isMountFullyLoaded(storage);
+    if (int(state) < 0) {
         // Something is wrong, abort.
         return clearUidReadTimeouts(storage);
     }
 
-    if (progress.started() && progress.fullyLoaded()) {
+    if (state == incfs::LoadingState::Full) {
         // Fully loaded, check readLogs collection.
         const auto ifs = getIfs(storage);
         if (!ifs->readLogsEnabled()) {
@@ -1350,7 +1337,7 @@ std::unordered_set<std::string_view> IncrementalService::adoptMountedInstances()
 
         auto ifs = std::make_shared<IncFsMount>(std::string(expectedRoot), mountId,
                                                 std::move(control), *this);
-        cleanupFiles.release(); // ifs will take care of that now
+        (void)cleanupFiles.release(); // ifs will take care of that now
 
         // Check if marker file present.
         if (checkReadLogsDisabledMarker(root)) {
@@ -1455,7 +1442,7 @@ std::unordered_set<std::string_view> IncrementalService::adoptMountedInstances()
             }
             mVold->unmountIncFs(std::string(target));
         }
-        cleanupMounts.release(); // ifs now manages everything
+        (void)cleanupMounts.release(); // ifs now manages everything
 
         if (ifs->bindPoints.empty()) {
             LOG(WARNING) << "No valid bind points for mount " << expectedRoot;
@@ -2007,7 +1994,7 @@ incfs::LoadingState IncrementalService::isMountFullyLoaded(StorageId storage) co
 }
 
 IncrementalService::LoadingProgress IncrementalService::getLoadingProgress(
-        StorageId storage, bool stopOnFirstIncomplete) const {
+        StorageId storage) const {
     std::unique_lock l(mLock);
     const auto ifs = getIfsLocked(storage);
     if (!ifs) {
@@ -2020,12 +2007,11 @@ IncrementalService::LoadingProgress IncrementalService::getLoadingProgress(
         return {-EINVAL, -EINVAL};
     }
     l.unlock();
-    return getLoadingProgressFromPath(*ifs, storageInfo->second.name, stopOnFirstIncomplete);
+    return getLoadingProgressFromPath(*ifs, storageInfo->second.name);
 }
 
 IncrementalService::LoadingProgress IncrementalService::getLoadingProgressFromPath(
-        const IncFsMount& ifs, std::string_view storagePath,
-        const bool stopOnFirstIncomplete) const {
+        const IncFsMount& ifs, std::string_view storagePath) const {
     ssize_t totalBlocks = 0, filledBlocks = 0, error = 0;
     mFs->listFilesRecursive(storagePath, [&, this](auto filePath) {
         const auto [filledBlocksCount, totalBlocksCount] =
@@ -2038,15 +2024,12 @@ IncrementalService::LoadingProgress IncrementalService::getLoadingProgressFromPa
         }
         if (filledBlocksCount < 0) {
             LOG(ERROR) << "getLoadingProgress failed to get filled blocks count for: " << filePath
-                       << " errno: " << filledBlocksCount;
+                       << ", errno: " << filledBlocksCount;
             error = filledBlocksCount;
             return false;
         }
         totalBlocks += totalBlocksCount;
         filledBlocks += filledBlocksCount;
-        if (stopOnFirstIncomplete && filledBlocks < totalBlocks) {
-            return false;
-        }
         return true;
     });
 
@@ -2055,7 +2038,7 @@ IncrementalService::LoadingProgress IncrementalService::getLoadingProgressFromPa
 
 bool IncrementalService::updateLoadingProgress(
         StorageId storage, const StorageLoadingProgressListener& progressListener) {
-    const auto progress = getLoadingProgress(storage, /*stopOnFirstIncomplete=*/false);
+    const auto progress = getLoadingProgress(storage);
     if (progress.isError()) {
         // Failed to get progress from incfs, abort.
         return false;
@@ -2592,7 +2575,7 @@ bool IncrementalService::DataLoaderStub::isHealthParamsValid() const {
             mHealthCheckParams.blockedTimeoutMs < mHealthCheckParams.unhealthyTimeoutMs;
 }
 
-void IncrementalService::DataLoaderStub::onHealthStatus(StorageHealthListener healthListener,
+void IncrementalService::DataLoaderStub::onHealthStatus(const StorageHealthListener& healthListener,
                                                         int healthStatus) {
     LOG(DEBUG) << id() << ": healthStatus: " << healthStatus;
     if (healthListener) {
