@@ -139,8 +139,19 @@ class OverlayManagerServiceImplTestsBase {
         mState.add(pkg, userId);
     }
 
-    void configureSystemOverlay(String packageName, boolean mutable, boolean enabled,
+    enum ConfigState {
+        IMMUTABLE_DISABLED,
+        IMMUTABLE_ENABLED,
+        MUTABLE_DISABLED,
+        MUTABLE_ENABLED
+    }
+
+    void configureSystemOverlay(@NonNull String packageName, @NonNull ConfigState state,
             int priority) {
+        final boolean mutable = state == ConfigState.MUTABLE_DISABLED
+                || state == ConfigState.MUTABLE_ENABLED;
+        final boolean enabled = state == ConfigState.IMMUTABLE_ENABLED
+                || state == ConfigState.MUTABLE_ENABLED;
         when(mOverlayConfig.getPriority(packageName)).thenReturn(priority);
         when(mOverlayConfig.isEnabled(packageName)).thenReturn(enabled);
         when(mOverlayConfig.isMutable(packageName)).thenReturn(mutable);
@@ -154,13 +165,14 @@ class OverlayManagerServiceImplTestsBase {
      *
      * @throws IllegalStateException if the package is currently installed
      */
-    Set<PackageAndUser> installPackage(FakeDeviceState.PackageBuilder pkg, int userId)
+    void installAndAssert(@NonNull FakeDeviceState.PackageBuilder pkg, int userId,
+            @NonNull Set<PackageAndUser> onAddedUpdatedPackages)
             throws OperationFailedException {
         if (mState.select(pkg.packageName, userId) != null) {
             throw new IllegalStateException("package " + pkg.packageName + " already installed");
         }
         mState.add(pkg, userId);
-        return CollectionUtils.emptyIfNull(mImpl.onPackageAdded(pkg.packageName, userId));
+        assertEquals(onAddedUpdatedPackages, mImpl.onPackageAdded(pkg.packageName, userId));
     }
 
     /**
@@ -172,25 +184,20 @@ class OverlayManagerServiceImplTestsBase {
      * {@link android.content.Intent#ACTION_PACKAGE_ADDED} broadcast with the
      * {@link android.content.Intent#EXTRA_REPLACING} extra.
      *
-     * @return the two Optional<PackageAndUser> objects from starting and finishing the upgrade
-     *
      * @throws IllegalStateException if the package is not currently installed
      */
-    Pair<Set<PackageAndUser>, Set<PackageAndUser>> upgradePackage(
-            FakeDeviceState.PackageBuilder pkg, int userId) throws OperationFailedException {
+    void upgradeAndAssert(FakeDeviceState.PackageBuilder pkg, int userId,
+            @NonNull Set<PackageAndUser> onReplacingUpdatedPackages,
+            @NonNull Set<PackageAndUser> onReplacedUpdatedPackages)
+            throws OperationFailedException {
         final FakeDeviceState.Package replacedPackage = mState.select(pkg.packageName, userId);
         if (replacedPackage == null) {
             throw new IllegalStateException("package " + pkg.packageName + " not installed");
         }
 
-        final Set<PackageAndUser> updatedPackages1 =
-                CollectionUtils.emptyIfNull(mImpl.onPackageReplacing(pkg.packageName, userId));
-
+        assertEquals(onReplacingUpdatedPackages, mImpl.onPackageReplacing(pkg.packageName, userId));
         mState.add(pkg, userId);
-        final Set<PackageAndUser> updatedPackages2 =
-                CollectionUtils.emptyIfNull(mImpl.onPackageReplaced(pkg.packageName, userId));
-
-        return Pair.create(updatedPackages1, updatedPackages2);
+        assertEquals(onReplacedUpdatedPackages, mImpl.onPackageReplaced(pkg.packageName, userId));
     }
 
     /**
@@ -201,13 +208,14 @@ class OverlayManagerServiceImplTestsBase {
      *
      * @throws IllegalStateException if the package is not currently installed
      */
-    Set<PackageAndUser> uninstallPackage(String packageName, int userId) {
+    void uninstallAndAssert(@NonNull String packageName, int userId,
+            @NonNull Set<PackageAndUser> onRemovedUpdatedPackages) {
         final FakeDeviceState.Package pkg = mState.select(packageName, userId);
         if (pkg == null) {
-            throw new IllegalStateException("package " + packageName+ " not installed");
+            throw new IllegalStateException("package " + packageName + " not installed");
         }
         mState.remove(pkg.packageName);
-        return CollectionUtils.emptyIfNull(mImpl.onPackageRemoved(packageName, userId));
+        assertEquals(onRemovedUpdatedPackages, mImpl.onPackageRemoved(pkg.packageName, userId));
     }
 
     /** Represents the state of packages installed on a fake device. */
