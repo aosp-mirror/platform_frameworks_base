@@ -1287,7 +1287,6 @@ public class Vpn {
         });
         mNetworkAgent.setUnderlyingNetworks((mConfig.underlyingNetworks != null)
                 ? Arrays.asList(mConfig.underlyingNetworks) : null);
-        mNetworkInfo.setIsAvailable(true);
         updateState(DetailedState.CONNECTED, "agentConnect");
     }
 
