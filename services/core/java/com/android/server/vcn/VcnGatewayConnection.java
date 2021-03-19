@@ -42,7 +42,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkAgent;
-import android.net.NetworkAgent.ValidationStatus;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.RouteInfo;
@@ -1451,8 +1450,7 @@ public class VcnGatewayConnection extends StateMachine {
                         }
 
                         @Override
-                        public void onValidationStatus(
-                                @ValidationStatus int status, @Nullable Uri redirectUri) {
+                        public void onValidationStatus(int status, @Nullable Uri redirectUri) {
                             if (status == NetworkAgent.VALIDATION_STATUS_VALID) {
                                 clearFailedAttemptCounterAndSafeModeAlarm();
                             }
