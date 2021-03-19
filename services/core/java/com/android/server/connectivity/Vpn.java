@@ -68,6 +68,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkProvider;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.UidRangeParcel;
@@ -1258,7 +1259,9 @@ public class Vpn {
         }
 
         mNetworkAgent = new NetworkAgent(mContext, mLooper, NETWORKTYPE /* logtag */,
-                mNetworkCapabilities, lp, VPN_DEFAULT_SCORE, networkAgentConfig, mNetworkProvider) {
+                mNetworkCapabilities, lp,
+                new NetworkScore.Builder().setLegacyInt(VPN_DEFAULT_SCORE).build(),
+                networkAgentConfig, mNetworkProvider) {
             @Override
             public void unwanted() {
                 // We are user controlled, not driven by NetworkRequest.
