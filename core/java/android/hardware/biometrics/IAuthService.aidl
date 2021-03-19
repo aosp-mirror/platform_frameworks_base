@@ -69,6 +69,10 @@ interface IAuthService {
     // land as SIDs, and are used during key generation.
     long[] getAuthenticatorIds();
 
+    // See documentation in BiometricManager.
+    void resetLockoutTimeBound(IBinder token, String opPackageName, int fromSensorId, int userId,
+            in byte[] hardwareAuthToken);
+
     // Provides a localized string that may be used as the label for a button that invokes
     // BiometricPrompt.
     CharSequence getButtonLabel(int userId, String opPackageName, int authenticators);

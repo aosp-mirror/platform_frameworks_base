@@ -17,8 +17,6 @@
 package com.android.systemui.util
 
 import android.content.res.Resources
-import android.graphics.Canvas
-import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.DrawableWrapper
@@ -43,53 +41,25 @@ class RoundedCornerProgressDrawable @JvmOverloads constructor(
         private const val MAX_LEVEL = 10000 // Taken from Drawable
     }
 
-    private var clipPath: Path = Path()
-
-    init {
-        setClipPath(Rect())
-    }
-
     override fun onLayoutDirectionChanged(layoutDirection: Int): Boolean {
         onLevelChange(level)
         return super.onLayoutDirectionChanged(layoutDirection)
     }
 
     override fun onBoundsChange(bounds: Rect) {
-        setClipPath(bounds)
         super.onBoundsChange(bounds)
         onLevelChange(level)
     }
 
-    private fun setClipPath(bounds: Rect) {
-        clipPath.reset()
-        clipPath.addRoundRect(
-                bounds.left.toFloat(),
-                bounds.top.toFloat(),
-                bounds.right.toFloat(),
-                bounds.bottom.toFloat(),
-                bounds.height().toFloat() / 2,
-                bounds.height().toFloat() / 2,
-                Path.Direction.CW
-        )
-    }
-
     override fun onLevelChange(level: Int): Boolean {
         val db = drawable?.bounds!!
-        val width = bounds.width() * level / MAX_LEVEL
-        // Extra space on the left to keep the rounded shape on the right end
-        val leftBound = bounds.left - bounds.height()
-        drawable?.setBounds(leftBound, db.top, bounds.left + width, db.bottom)
+        // On 0, the width is bounds.height (a circle), and on MAX_LEVEL, the width is bounds.width
+        val width = bounds.height() + (bounds.width() - bounds.height()) * level / MAX_LEVEL
+        drawable?.setBounds(bounds.left, db.top, bounds.left + width, db.bottom)
         return super.onLevelChange(level)
     }
 
-    override fun draw(canvas: Canvas) {
-        canvas.save()
-        canvas.clipPath(clipPath)
-        super.draw(canvas)
-        canvas.restore()
-    }
-
-    override fun getConstantState(): ConstantState? {
+    override fun getConstantState(): ConstantState {
         // This should not be null as it was created with a state in the constructor.
         return RoundedCornerState(super.getConstantState()!!)
     }

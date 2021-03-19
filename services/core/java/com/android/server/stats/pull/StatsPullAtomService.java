@@ -25,7 +25,16 @@ import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.NetworkIdentity.OEM_PAID;
+import static android.net.NetworkIdentity.OEM_PRIVATE;
+import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
+import static android.net.NetworkStats.METERED_ALL;
+import static android.net.NetworkStats.ROAMING_ALL;
+import static android.net.NetworkTemplate.MATCH_ETHERNET;
+import static android.net.NetworkTemplate.MATCH_MOBILE_WILDCARD;
+import static android.net.NetworkTemplate.MATCH_WIFI_WILDCARD;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
+import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
 import static android.net.NetworkTemplate.buildTemplateMobileWithRatType;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
@@ -435,6 +444,7 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
                     case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED:
                     case FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER:
+                    case FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER:
                         synchronized (mDataBytesTransferLock) {
                             return pullDataBytesTransferLocked(atomTag, data);
                         }
@@ -867,6 +877,8 @@ public class StatsPullAtomService extends SystemService {
                 FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED));
         mNetworkStatsBaselines.addAll(
                 collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER));
+        mNetworkStatsBaselines.addAll(
+                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER));
 
         // Listen to subscription changes to record historical subscriptions that activated before
         // pulling, this is used by {@code DATA_USAGE_BYTES_TRANSFER}.
@@ -879,6 +891,7 @@ public class StatsPullAtomService extends SystemService {
         registerMobileBytesTransferBackground();
         registerBytesTransferByTagAndMetered();
         registerDataUsageBytesTransfer();
+        registerOemManagedBytesTransfer();
     }
 
     /**
@@ -1057,7 +1070,7 @@ public class StatsPullAtomService extends SystemService {
                             new int[] {TRANSPORT_WIFI, TRANSPORT_CELLULAR},
                             /*slicedByFgbg=*/false, /*slicedByTag=*/true,
                             /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                            /*subInfo=*/null));
+                            /*subInfo=*/null, OEM_MANAGED_ALL));
                 }
                 break;
             }
@@ -1065,6 +1078,10 @@ public class StatsPullAtomService extends SystemService {
                 for (final SubInfo subInfo : mHistoricalSubs) {
                     ret.addAll(getDataUsageBytesTransferSnapshotForSub(subInfo));
                 }
+                break;
+            }
+            case FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER: {
+                ret.addAll(getDataUsageBytesTransferSnapshotForOemManaged());
                 break;
             }
             default:
@@ -1094,7 +1111,7 @@ public class StatsPullAtomService extends SystemService {
             final NetworkStatsExt diff = new NetworkStatsExt(
                     item.stats.subtract(baseline.stats).removeEmptyEntries(), item.transports,
                     item.slicedByFgbg, item.slicedByTag, item.slicedByMetered, item.ratType,
-                    item.subInfo);
+                    item.subInfo, item.oemManaged);
 
             // If no diff, skip.
             if (diff.stats.size() == 0) continue;
@@ -1105,6 +1122,9 @@ public class StatsPullAtomService extends SystemService {
                     break;
                 case FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER:
                     addDataUsageBytesTransferAtoms(diff, pulledData);
+                    break;
+                case FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER:
+                    addOemDataUsageBytesTransferAtoms(diff, pulledData);
                     break;
                 default:
                     addNetworkStats(atomTag, pulledData, diff);
@@ -1177,6 +1197,49 @@ public class StatsPullAtomService extends SystemService {
         }
     }
 
+    private void addOemDataUsageBytesTransferAtoms(@NonNull NetworkStatsExt statsExt,
+            @NonNull List<StatsEvent> pulledData) {
+        final NetworkStats.Entry entry = new NetworkStats.Entry(); // for recycling
+        final int oemManaged = statsExt.oemManaged;
+        for (final int transport : statsExt.transports) {
+            for (int i = 0; i < statsExt.stats.size(); i++) {
+                statsExt.stats.getValues(i, entry);
+                pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                        FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER, entry.uid, (entry.set > 0),
+                        oemManaged, transport, entry.rxBytes, entry.rxPackets, entry.txBytes,
+                        entry.txPackets));
+            }
+        }
+    }
+
+    @NonNull private List<NetworkStatsExt> getDataUsageBytesTransferSnapshotForOemManaged() {
+        final int[] transports = new int[] {MATCH_ETHERNET, MATCH_MOBILE_WILDCARD,
+                MATCH_WIFI_WILDCARD};
+        final int[] oemManagedTypes = new int[] {OEM_PAID | OEM_PRIVATE, OEM_PAID, OEM_PRIVATE};
+
+        final List<NetworkStatsExt> ret = new ArrayList<>();
+
+        for (final int transport : transports) {
+            for (final int oemManaged : oemManagedTypes) {
+                /* A null subscriberId will set wildcard=true, since we aren't trying to select a
+                   specific ssid or subscriber. */
+                final NetworkTemplate template = new NetworkTemplate(transport,
+                        /*subscriberId=*/null, /*matchSubscriberIds=*/null, /*networkId=*/null,
+                        METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL,
+                        oemManaged);
+                final NetworkStats stats = getUidNetworkStatsSnapshotForTemplate(template, true);
+                if (stats != null) {
+                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
+                            new int[] {transport}, /*slicedByFgbg=*/true, /*slicedByTag=*/true,
+                            /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                            /*subInfo=*/null, oemManaged));
+                }
+            }
+        }
+
+        return ret;
+    }
+
     /**
      * Create a snapshot of NetworkStats for a given transport.
      */
@@ -1229,7 +1292,8 @@ public class StatsPullAtomService extends SystemService {
             if (stats != null) {
                 ret.add(new NetworkStatsExt(sliceNetworkStatsByFgbg(stats),
                         new int[] {TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true,
-                        /*slicedByTag=*/false, /*slicedByMetered=*/false, ratType, subInfo));
+                        /*slicedByTag=*/false, /*slicedByMetered=*/false, ratType, subInfo,
+                        OEM_MANAGED_ALL));
             }
         }
         return ret;
@@ -1365,6 +1429,19 @@ public class StatsPullAtomService extends SystemService {
         int tagId = FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3, 4, 5})
+                .build();
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                metadata,
+                BackgroundThread.getExecutor(),
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerOemManagedBytesTransfer() {
+        int tagId = FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER;
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
+                .setAdditiveFields(new int[] {5, 6, 7, 8})
                 .build();
         mStatsManager.setPullAtomCallback(
                 tagId,

@@ -103,12 +103,12 @@ public class AppSearchImplPlatformTest {
         // Insert package1 document
         GenericDocument document1 =
                 new GenericDocument.Builder<>("uri", "schema1").setNamespace("namespace").build();
-        mAppSearchImpl.putDocument("package1", "database1", document1);
+        mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
 
         // Insert package2 document
         GenericDocument document2 =
                 new GenericDocument.Builder<>("uri", "schema2").setNamespace("namespace").build();
-        mAppSearchImpl.putDocument("package2", "database2", document2);
+        mAppSearchImpl.putDocument("package2", "database2", document2, /*logger=*/ null);
 
         // No query filters specified, global query can retrieve all documents.
         SearchSpec searchSpec =
@@ -155,12 +155,12 @@ public class AppSearchImplPlatformTest {
         // Insert package1 document
         GenericDocument document1 =
                 new GenericDocument.Builder<>("uri", "schema1").setNamespace("namespace").build();
-        mAppSearchImpl.putDocument("package1", "database1", document1);
+        mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
 
         // Insert package2 document
         GenericDocument document2 =
                 new GenericDocument.Builder<>("uri", "schema2").setNamespace("namespace").build();
-        mAppSearchImpl.putDocument("package2", "database2", document2);
+        mAppSearchImpl.putDocument("package2", "database2", document2, /*logger=*/ null);
 
         // "package1" filter specified
         SearchSpec searchSpec =

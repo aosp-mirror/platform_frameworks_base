@@ -2816,6 +2816,7 @@
     <public type="attr" name="iconSpaceReserved" id="0x01010561"/>
     <public type="attr" name="defaultFocusHighlightEnabled" id="0x01010562" />
     <public type="attr" name="persistentWhenFeatureAvailable" id="0x01010563"/>
+    <!-- {@deprecated Use windowSplashscreenAnimatedIcon instead } -->
     <public type="attr" name="windowSplashscreenContent" id="0x01010564" />
     <!-- @hide @SystemApi -->
     <public type="attr" name="requiredSystemPropertyName" id="0x01010565" />

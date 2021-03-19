@@ -16147,7 +16147,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void waitForBroadcastIdle(PrintWriter pw) {
+    @Override
+    public void waitForBroadcastIdle() {
+        waitForBroadcastIdle(/* printWriter= */ null);
+    }
+
+    public void waitForBroadcastIdle(@Nullable PrintWriter pw) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastIdle()");
         while (true) {
             boolean idle = true;
@@ -16155,9 +16160,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 for (BroadcastQueue queue : mBroadcastQueues) {
                     if (!queue.isIdle()) {
                         final String msg = "Waiting for queue " + queue + " to become idle...";
-                        pw.println(msg);
-                        pw.println(queue.describeState());
-                        pw.flush();
+                        if (pw != null) {
+                            pw.println(msg);
+                            pw.println(queue.describeState());
+                            pw.flush();
+                        }
                         Slog.v(TAG, msg);
                         queue.cancelDeferrals();
                         idle = false;
@@ -16167,8 +16174,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (idle) {
                 final String msg = "All broadcast queues are idle!";
-                pw.println(msg);
-                pw.flush();
+                if (pw != null) {
+                    pw.println(msg);
+                    pw.flush();
+                }
                 Slog.v(TAG, msg);
                 return;
             } else {

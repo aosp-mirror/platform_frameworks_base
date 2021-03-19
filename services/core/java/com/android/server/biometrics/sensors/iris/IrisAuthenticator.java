@@ -95,4 +95,9 @@ public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
     public long getAuthenticatorId(int callingUserId) throws RemoteException {
         return 0;
     }
+
+    @Override
+    public void resetLockout(IBinder token, String opPackageName, int userId,
+            byte[] hardwareAuthToken) throws RemoteException {
+    }
 }

@@ -18,7 +18,6 @@ package com.android.wm.shell.common;
 
 import android.annotation.NonNull;
 import android.os.Handler;
-import android.os.Looper;
 
 /** Executor implementation which is backed by a Handler. */
 public class HandlerExecutor implements ShellExecutor {
@@ -44,11 +43,6 @@ public class HandlerExecutor implements ShellExecutor {
         if (!mHandler.postDelayed(r, delayMillis)) {
             throw new RuntimeException(mHandler + " is probably exiting");
         }
-    }
-
-    @Override
-    public void removeAllCallbacks() {
-        mHandler.removeCallbacksAndMessages(null);
     }
 
     @Override

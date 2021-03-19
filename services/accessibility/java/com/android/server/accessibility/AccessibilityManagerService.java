@@ -309,13 +309,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     public AccessibilityManagerService(Context context) {
         mContext = context;
-        mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mPowerManager = context.getSystemService(PowerManager.class);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
         mA11yController = mWindowManagerService.getAccessibilityController();
         mMainHandler = new MainHandler(mContext.getMainLooper());
         mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManager = mContext.getPackageManager();
-        mSecurityPolicy = new AccessibilitySecurityPolicy(mContext, this);
+        PolicyWarningUIController policyWarningUIController;
+        if (AccessibilitySecurityPolicy.POLICY_WARNING_ENABLED) {
+            policyWarningUIController = new PolicyWarningUIController(mMainHandler, context,
+                    new PolicyWarningUIController.NotificationController(context));
+        }
+        mSecurityPolicy = new AccessibilitySecurityPolicy(policyWarningUIController, mContext,
+                this);
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
@@ -351,6 +357,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (isA11yTracingEnabled()) {
             logTrace(LOG_TAG + ".onServiceInfoChangedLocked", "userState=" + userState);
         }
+        mSecurityPolicy.onBoundServicesChangedLocked(userState.mUserId,
+                userState.mBoundServices);
         scheduleNotifyClientsOfServicesStateChangeLocked(userState);
     }
 
@@ -1302,6 +1310,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityUserState userState = getCurrentUserStateLocked();
 
             readConfigurationForUserStateLocked(userState);
+            mSecurityPolicy.onSwitchUserLocked(mCurrentUserId, userState.mEnabledServices);
             // Even if reading did not yield change, we have to update
             // the state since the context in which the current user
             // state was used has changed since it was inactive.
@@ -3665,6 +3674,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 } else if (mEnabledAccessibilityServicesUri.equals(uri)) {
                     if (readEnabledAccessibilityServicesLocked(userState)) {
+                        mSecurityPolicy.onEnabledServicesChangedLocked(userState.mUserId,
+                                userState.mEnabledServices);
                         userState.updateCrashedServicesIfNeededLocked();
                         onUserStateChangedLocked(userState);
                     }

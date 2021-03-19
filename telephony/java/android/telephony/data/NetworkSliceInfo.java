@@ -34,7 +34,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public final class SliceInfo implements Parcelable {
+public final class NetworkSliceInfo implements Parcelable {
     /**
      * When set on a Slice Differentiator, this value indicates that there is no corresponding
      * Slice.
@@ -93,7 +93,7 @@ public final class SliceInfo implements Parcelable {
     @IntRange(from = MIN_SLICE_DIFFERENTIATOR, to = MAX_SLICE_DIFFERENTIATOR)
     private final int mMappedHplmnSliceDifferentiator;
 
-    private SliceInfo(@SliceServiceType int sliceServiceType,
+    private NetworkSliceInfo(@SliceServiceType int sliceServiceType,
             int sliceDifferentiator, int mappedHplmnSliceServiceType,
             int mappedHplmnSliceDifferentiator) {
         mSliceServiceType = sliceServiceType;
@@ -136,7 +136,7 @@ public final class SliceInfo implements Parcelable {
     }
 
     /**
-     * This Slice Differentiator corresponds to a {@link SliceInfo} (S-NSSAI) of the HPLMN;
+     * This Slice Differentiator corresponds to a {@link NetworkSliceInfo} (S-NSSAI) of the HPLMN;
      * {@link #getSliceDifferentiator()} is mapped to this value.
      * <p/>
      * Returns {@link #SLICE_DIFFERENTIATOR_NO_SLICE} if either of the following are true:
@@ -152,7 +152,7 @@ public final class SliceInfo implements Parcelable {
         return mMappedHplmnSliceDifferentiator;
     }
 
-    private SliceInfo(@NonNull Parcel in) {
+    private NetworkSliceInfo(@NonNull Parcel in) {
         mSliceServiceType = in.readInt();
         mSliceDifferentiator = in.readInt();
         mMappedHplmnSliceServiceType = in.readInt();
@@ -172,18 +172,18 @@ public final class SliceInfo implements Parcelable {
         dest.writeInt(mMappedHplmnSliceDifferentiator);
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<SliceInfo> CREATOR =
-            new Parcelable.Creator<SliceInfo>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<NetworkSliceInfo> CREATOR =
+            new Parcelable.Creator<NetworkSliceInfo>() {
                 @Override
                 @NonNull
-                public SliceInfo createFromParcel(@NonNull Parcel source) {
-                    return new SliceInfo(source);
+                public NetworkSliceInfo createFromParcel(@NonNull Parcel source) {
+                    return new NetworkSliceInfo(source);
                 }
 
                 @Override
                 @NonNull
-                public SliceInfo[] newArray(int size) {
-                    return new SliceInfo[size];
+                public NetworkSliceInfo[] newArray(int size) {
+                    return new NetworkSliceInfo[size];
                 }
             };
 
@@ -217,7 +217,7 @@ public final class SliceInfo implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SliceInfo sliceInfo = (SliceInfo) o;
+        NetworkSliceInfo sliceInfo = (NetworkSliceInfo) o;
         return mSliceServiceType == sliceInfo.mSliceServiceType
                 && mSliceDifferentiator == sliceInfo.mSliceDifferentiator
                 && mMappedHplmnSliceServiceType == sliceInfo.mMappedHplmnSliceServiceType
@@ -231,7 +231,7 @@ public final class SliceInfo implements Parcelable {
     }
 
     /**
-     * Provides a convenient way to set the fields of a {@link SliceInfo} when creating a
+     * Provides a convenient way to set the fields of a {@link NetworkSliceInfo} when creating a
      * new instance.
      *
      * <p>The example below shows how you might create a new {@code SliceInfo}:
@@ -329,13 +329,13 @@ public final class SliceInfo implements Parcelable {
         }
 
         /**
-         * Build the {@link SliceInfo}.
+         * Build the {@link NetworkSliceInfo}.
          *
-         * @return the {@link SliceInfo} object.
+         * @return the {@link NetworkSliceInfo} object.
          */
         @NonNull
-        public SliceInfo build() {
-            return new SliceInfo(this.mSliceServiceType, this.mSliceDifferentiator,
+        public NetworkSliceInfo build() {
+            return new NetworkSliceInfo(this.mSliceServiceType, this.mSliceDifferentiator,
                     this.mMappedHplmnSliceServiceType, this.mMappedHplmnSliceDifferentiator);
         }
     }

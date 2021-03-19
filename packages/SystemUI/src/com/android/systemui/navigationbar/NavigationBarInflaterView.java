@@ -40,9 +40,9 @@ import com.android.systemui.R;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.navigationbar.buttons.ReverseLinearLayout;
+import com.android.systemui.navigationbar.buttons.ReverseLinearLayout.ReverseRelativeLayout;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.navigationbar.buttons.ReverseLinearLayout.ReverseRelativeLayout;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -361,7 +361,7 @@ public class NavigationBarInflaterView extends FrameLayout
         return v;
     }
 
-    private View createView(String buttonSpec, ViewGroup parent, LayoutInflater inflater) {
+    View createView(String buttonSpec, ViewGroup parent, LayoutInflater inflater) {
         View v = null;
         String button = extractButton(buttonSpec);
         if (LEFT.equals(button)) {

@@ -1429,6 +1429,7 @@ class ActivityStarter {
                 + "; allowBackgroundActivityStart: " + allowBackgroundActivityStart
                 + "; intent: " + intent
                 + "; callerApp: " + callerApp
+                + "; inVisibleTask: " + (callerApp != null && callerApp.hasActivityInVisibleTask())
                 + "]");
         // log aborted activity start to TRON
         if (mService.isActivityStartsLoggingEnabled()) {

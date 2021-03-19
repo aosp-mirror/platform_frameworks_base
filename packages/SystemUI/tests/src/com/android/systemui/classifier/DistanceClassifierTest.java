@@ -16,8 +16,7 @@
 
 package com.android.systemui.classifier;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.testing.AndroidTestingRunner;
 
@@ -51,32 +50,32 @@ public class DistanceClassifierTest extends ClassifierTest {
 
     @Test
     public void testPass_noPointer() {
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
     }
 
     @Test
     public void testPass_fling() {
 
         mClassifier.onTouchEvent(appendDownEvent(1, 1));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
 
         mClassifier.onTouchEvent(appendMoveEvent(1, 40));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
 
         mClassifier.onTouchEvent(appendUpEvent(1, 80));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isFalse();
     }
 
     @Test
     public void testFail_flingShort() {
         mClassifier.onTouchEvent(appendDownEvent(1, 1));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
 
         mClassifier.onTouchEvent(appendMoveEvent(1, 2));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
 
         mClassifier.onTouchEvent(appendUpEvent(1, 10));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
     }
 
     @Test
@@ -84,26 +83,26 @@ public class DistanceClassifierTest extends ClassifierTest {
         // These events, in testing, result in a fling that falls just short of the threshold.
 
         mClassifier.onTouchEvent(appendDownEvent(1, 1, 1));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
 
         mClassifier.onTouchEvent(appendMoveEvent(1, 15, 2));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
 
         mClassifier.onTouchEvent(appendMoveEvent(1, 16, 3));
         mClassifier.onTouchEvent(appendMoveEvent(1, 17, 300));
         mClassifier.onTouchEvent(appendMoveEvent(1, 18, 301));
         mClassifier.onTouchEvent(appendUpEvent(1, 19, 501));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
     }
 
     @Test
     public void testPass_swipe() {
 
         mClassifier.onTouchEvent(appendDownEvent(1, 1));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
 
         mClassifier.onTouchEvent(appendMoveEvent(1, mDataProvider.getYdpi() * 3, 3));
         mClassifier.onTouchEvent(appendUpEvent(1, mDataProvider.getYdpi() * 3, 300));
-        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isFalse();
     }
 }

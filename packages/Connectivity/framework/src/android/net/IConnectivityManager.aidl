@@ -220,4 +220,6 @@ interface IConnectivityManager
 
     void setProfileNetworkPreference(in UserHandle profile, int preference,
             in IOnCompleteListener listener);
+
+    int getRestrictBackgroundStatusByCaller();
 }

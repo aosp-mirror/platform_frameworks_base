@@ -19,7 +19,6 @@ package com.android.server.wm.flicker.launch
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -41,7 +40,6 @@ import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
-import org.junit.Assume
 import org.junit.Test
 
 abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
@@ -86,14 +84,6 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     open fun navBarLayerRotatesAndScales() {
-        Assume.assumeFalse(testSpec.isRotated)
-        testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
-
-    @FlakyTest
-    @Test
-    open fun navBarLayerRotatesAndScales_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
         testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
     }
 
@@ -112,14 +102,6 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     open fun statusBarLayerRotatesScales() {
-        Assume.assumeFalse(testSpec.isRotated)
-        testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
-
-    @FlakyTest
-    @Test
-    open fun statusBarLayerRotatesScales_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
         testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0, testSpec.config.endRotation)
     }
 
@@ -131,7 +113,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         }
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {

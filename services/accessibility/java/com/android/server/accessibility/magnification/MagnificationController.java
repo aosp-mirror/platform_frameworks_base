@@ -52,6 +52,9 @@ import com.android.server.accessibility.AccessibilityManagerService;
  *   <li> 4. {@link #onTripleTapped} updates magnification switch UI depending on magnification
  *   capabilities and magnification active state when triple-tap gesture is detected. </li>
  * </ol>
+ *
+ *  <b>Note</b>  Updates magnification switch UI when magnification mode transition
+ *  is done {@link DisableMagnificationCallback#onResult}.
  */
 public class MagnificationController implements WindowMagnificationManager.Callback,
         MagnificationGestureHandler.Callback,
@@ -358,7 +361,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         boolean isActivated = false;
         if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
                 && mFullScreenMagnificationController != null) {
-            isActivated = mFullScreenMagnificationController.isMagnifying(displayId);
+            isActivated = mFullScreenMagnificationController.isMagnifying(displayId)
+                    || mFullScreenMagnificationController.isForceShowMagnifiableBounds(displayId);
         } else if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
                 && mWindowMagnificationMgr != null) {
             isActivated = mWindowMagnificationMgr.isWindowMagnifierEnabled(displayId);
@@ -400,6 +404,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                     adjustCurrentCenterIfNeededLocked();
                     applyMagnificationModeLocked(mTargetMode);
                 }
+                updateMagnificationButton(mDisplayId, mTargetMode);
                 mTransitionCallBack.onResult(success);
             }
         }
@@ -424,6 +429,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 }
                 setExpiredAndRemoveFromListLocked();
                 applyMagnificationModeLocked(mCurrentMode);
+                updateMagnificationButton(mDisplayId, mCurrentMode);
                 mTransitionCallBack.onResult(true);
             }
         }

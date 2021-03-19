@@ -27,6 +27,7 @@ import android.service.notification.NotificationStats;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.statusbar.IStatusBarService;
@@ -34,6 +35,9 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.wmshell.BubblesManager;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -43,16 +47,23 @@ public class LaunchConversationActivity extends Activity {
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
     private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
     private NotificationEntryManager mNotificationEntryManager;
+    private final Optional<BubblesManager> mBubblesManagerOptional;
+    private boolean mIsForTesting;
+    private IStatusBarService mIStatusBarService;
 
     @Inject
-    public LaunchConversationActivity(NotificationEntryManager notificationEntryManager) {
+    public LaunchConversationActivity(NotificationEntryManager notificationEntryManager,
+            Optional<BubblesManager> bubblesManagerOptional) {
         super();
         mNotificationEntryManager = notificationEntryManager;
+        mBubblesManagerOptional = bubblesManagerOptional;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        if (!mIsForTesting) {
+            super.onCreate(savedInstanceState);
+        }
         if (DEBUG) Log.d(TAG, "onCreate called");
 
         Intent intent = getIntent();
@@ -63,21 +74,30 @@ public class LaunchConversationActivity extends Activity {
         String notificationKey =
                 intent.getStringExtra(PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY);
 
-        if (tileId != null && !tileId.isEmpty()) {
+        if (!TextUtils.isEmpty(tileId)) {
             if (DEBUG) {
                 Log.d(TAG, "Launching conversation with shortcutInfo id " + tileId);
             }
             mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_CLICKED);
             try {
+                NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
+                        notificationKey);
+                if (entry != null && entry.canBubble() && mBubblesManagerOptional.isPresent()) {
+                    if (DEBUG) Log.d(TAG, "Open bubble for conversation");
+                    mBubblesManagerOptional.get().expandStackAndSelectBubble(entry);
+                    // Just opt-out and don't cancel the notification for bubbles.
+                    return;
+                }
+
+                if (mIStatusBarService == null) {
+                    mIStatusBarService = IStatusBarService.Stub.asInterface(
+                            ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+                }
+                clearNotificationIfPresent(notificationKey, packageName, userHandle);
                 LauncherApps launcherApps =
                         getApplicationContext().getSystemService(LauncherApps.class);
                 launcherApps.startShortcut(
                         packageName, tileId, null, null, userHandle);
-
-                IStatusBarService statusBarService = IStatusBarService.Stub.asInterface(
-                        ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-                clearNotificationIfPresent(
-                        statusBarService, notificationKey, packageName, userHandle);
             } catch (Exception e) {
                 Log.e(TAG, "Exception:" + e);
             }
@@ -87,15 +107,14 @@ public class LaunchConversationActivity extends Activity {
         finish();
     }
 
-    void clearNotificationIfPresent(IStatusBarService statusBarService,
-            String notifKey, String packageName, UserHandle userHandle) {
+    void clearNotificationIfPresent(String notifKey, String packageName, UserHandle userHandle) {
         if (TextUtils.isEmpty(notifKey)) {
             if (DEBUG) Log.d(TAG, "Skipping clear notification: notification key is empty");
             return;
         }
 
         try {
-            if (statusBarService == null || mNotificationEntryManager == null) {
+            if (mIStatusBarService == null || mNotificationEntryManager == null) {
                 if (DEBUG) {
                     Log.d(TAG, "Skipping clear notification: null services, key: " + notifKey);
                 }
@@ -117,12 +136,18 @@ public class LaunchConversationActivity extends Activity {
                     rank, count, true);
 
             if (DEBUG) Log.d(TAG, "Clearing notification, key: " + notifKey + ", rank: " + rank);
-            statusBarService.onNotificationClear(
+            mIStatusBarService.onNotificationClear(
                     packageName, userHandle.getIdentifier(), notifKey,
                     NotificationStats.DISMISSAL_OTHER,
                     NotificationStats.DISMISS_SENTIMENT_POSITIVE, notifVisibility);
         } catch (Exception e) {
             Log.e(TAG, "Exception cancelling notification:" + e);
         }
+    }
+
+    @VisibleForTesting
+    void setIsForTesting(boolean isForTesting, IStatusBarService statusBarService) {
+        mIsForTesting = isForTesting;
+        mIStatusBarService = statusBarService;
     }
 }
