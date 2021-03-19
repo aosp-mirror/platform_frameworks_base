@@ -493,6 +493,8 @@ applications that come with the platform
         <!-- Permission required for hotword detection service CTS tests -->
         <permission name="android.permission.MANAGE_HOTWORD_DETECTION" />
         <permission name="android.permission.MANAGE_APP_HIBERNATION"/>
+        <!-- Permission required for CTS test - ResourceObserverNativeTest -->
+        <permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
