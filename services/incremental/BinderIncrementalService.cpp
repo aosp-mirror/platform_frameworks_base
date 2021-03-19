@@ -118,9 +118,10 @@ binder::Status BinderIncrementalService::openStorage(const std::string& path,
 binder::Status BinderIncrementalService::createStorage(
         const ::std::string& path, const ::android::content::pm::DataLoaderParamsParcel& params,
         int32_t createMode, int32_t* _aidl_return) {
-    *_aidl_return = mImpl.createStorage(path, params,
-                                        android::incremental::IncrementalService::CreateOptions(
-                                                createMode));
+    *_aidl_return =
+            mImpl.createStorage(path, const_cast<content::pm::DataLoaderParamsParcel&&>(params),
+                                android::incremental::IncrementalService::CreateOptions(
+                                        createMode));
     return ok();
 }
 
@@ -144,9 +145,8 @@ binder::Status BinderIncrementalService::startLoading(
         bool* _aidl_return) {
     *_aidl_return =
             mImpl.startLoading(storageId, const_cast<content::pm::DataLoaderParamsParcel&&>(params),
-                               statusListener,
-                               const_cast<StorageHealthCheckParams&&>(healthCheckParams),
-                               healthListener, perUidReadTimeouts);
+                               statusListener, healthCheckParams, healthListener,
+                               perUidReadTimeouts);
     return ok();
 }
 
@@ -334,10 +334,8 @@ binder::Status BinderIncrementalService::registerStorageHealthListener(
         int32_t storageId,
         const ::android::os::incremental::StorageHealthCheckParams& healthCheckParams,
         const ::android::sp<IStorageHealthListener>& healthListener, bool* _aidl_return) {
-    *_aidl_return = mImpl.registerStorageHealthListener(storageId,
-                                                        const_cast<StorageHealthCheckParams&&>(
-                                                                healthCheckParams),
-                                                        healthListener);
+    *_aidl_return =
+            mImpl.registerStorageHealthListener(storageId, healthCheckParams, healthListener);
     return ok();
 }
 
