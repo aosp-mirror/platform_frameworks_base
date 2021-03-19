@@ -9990,26 +9990,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets whether 5g slicing is enabled on the work profile.
+     * Sets whether enterprise network preference is enabled on the work profile.
      *
-     * Slicing allows operators to virtually divide their networks in portions and use different
-     * portions for specific use cases; for example, a corporation can have a deal/agreement with
-     * a carrier that all of its employees’ devices use data on a slice dedicated for enterprise
-     * use.
+     * For example, a corporation can have a deal/agreement with a carrier that all of its
+     * employees’ devices use data on a network preference dedicated for enterprise use.
      *
-     * By default, 5g slicing is enabled on the work profile on supported carriers and devices.
-     * Admins can explicitly disable it with this API.
+     * By default, enterprise network preference is enabled on the work profile on supported
+     * carriers and devices. Admins can explicitly disable it with this API.
      *
      * <p>This method can only be called by the profile owner of a managed profile.
      *
-     * @param enabled whether 5g Slice should be enabled.
+     * @param enabled whether enterprise network preference should be enabled.
      * @throws SecurityException if the caller is not the profile owner.
      **/
-    public void setNetworkSlicingEnabled(boolean enabled) {
-        throwIfParentInstance("setNetworkSlicingEnabled");
+    public void setEnterpriseNetworkPreferenceEnabled(boolean enabled) {
+        throwIfParentInstance("setEnterpriseNetworkPreferenceEnabled");
         if (mService != null) {
             try {
-                mService.setNetworkSlicingEnabled(enabled);
+                mService.setEnterpriseNetworkPreferenceEnabled(enabled);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -10017,20 +10015,20 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Indicates whether 5g slicing is enabled.
+     * Indicates whether whether enterprise network preference is enabled.
      *
      * <p>This method can be called by the profile owner of a managed profile.
      *
-     * @return whether 5g Slice is enabled.
+     * @return whether whether enterprise network preference is enabled.
      * @throws SecurityException if the caller is not the profile owner.
      */
-    public boolean isNetworkSlicingEnabled() {
-        throwIfParentInstance("isNetworkSlicingEnabled");
+    public boolean isEnterpriseNetworkPreferenceEnabled() {
+        throwIfParentInstance("isEnterpriseNetworkPreferenceEnabled");
         if (mService == null) {
             return false;
         }
         try {
-            return mService.isNetworkSlicingEnabled(myUserId());
+            return mService.isEnterpriseNetworkPreferenceEnabled(myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
