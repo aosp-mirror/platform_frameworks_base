@@ -456,7 +456,8 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 any(IBiometricSensorReceiver.class),
                 anyString() /* opPackageName */,
-                cookieCaptor.capture() /* cookie */);
+                cookieCaptor.capture() /* cookie */,
+                anyBoolean() /* allowBackgroundAuthentication */);
 
         // onReadyForAuthentication, mCurrentAuthSession state OK
         mBiometricService.mImpl.onReadyForAuthentication(cookieCaptor.getValue());

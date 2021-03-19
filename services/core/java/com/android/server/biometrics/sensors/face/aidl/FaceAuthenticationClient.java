@@ -69,11 +69,11 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsClient, @NonNull UsageStats usageStats,
-            @NonNull LockoutCache lockoutCache, boolean isKeyguard) {
+            @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
-                lockoutCache, isKeyguard);
+                lockoutCache, allowBackgroundAuthentication);
         mUsageStats = usageStats;
         mLockoutCache = lockoutCache;
         mNotificationManager = context.getSystemService(NotificationManager.class);

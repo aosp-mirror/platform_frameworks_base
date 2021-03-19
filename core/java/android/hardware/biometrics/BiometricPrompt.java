@@ -368,6 +368,20 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * @param allow If true, allows authentication when the calling package is not in the
+         *              foreground. This is set to false by default.
+         * @return This builder
+         * @hide
+         */
+        @TestApi
+        @NonNull
+        @RequiresPermission(anyOf = {TEST_BIOMETRIC, USE_BIOMETRIC_INTERNAL})
+        public Builder setAllowBackgroundAuthentication(boolean allow) {
+            mPromptInfo.setAllowBackgroundAuthentication(allow);
+            return this;
+        }
+
+        /**
          * If set check the Device Policy Manager for disabled biometrics.
          *
          * @param checkDevicePolicyManager
@@ -617,6 +631,15 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     @NonNull
     public List<Integer> getAllowedSensorIds() {
         return mPromptInfo.getAllowedSensorIds();
+    }
+
+    /**
+     * @return The value set by {@link Builder#setAllowBackgroundAuthentication(boolean)}
+     * @hide
+     */
+    @TestApi
+    public boolean isAllowBackgroundAuthentication() {
+        return mPromptInfo.isAllowBackgroundAuthentication();
     }
 
     /**
