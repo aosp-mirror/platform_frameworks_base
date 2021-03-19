@@ -197,6 +197,13 @@ public:
         }
         return {filledBlockCount, totalBlocksCount};
     }
+    incfs::LoadingState isFileFullyLoaded(const Control& control,
+                                          std::string_view path) const final {
+        return incfs::isFullyLoaded(control, path);
+    }
+    incfs::LoadingState isEverythingFullyLoaded(const Control& control) const final {
+        return incfs::isEverythingFullyLoaded(control);
+    }
     ErrorCode link(const Control& control, std::string_view from, std::string_view to) const final {
         return incfs::link(control, from, to);
     }
