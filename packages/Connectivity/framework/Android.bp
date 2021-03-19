@@ -100,9 +100,50 @@ java_sdk_library {
     libs: [
         "unsupportedappusage",
     ],
-    permitted_packages: [
-        "android.net",
-        "com.android.connectivity.aidl",
+    permitted_packages: ["android.net"],
+}
+
+cc_defaults {
+    name: "libframework-connectivity-defaults",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libnativehelper",
+        "libnetd_client",
+    ],
+    header_libs: [
+        "dnsproxyd_protocol_headers",
+    ],
+}
+
+cc_library_static {
+    name: "libconnectivityframeworkutils",
+    defaults: ["libframework-connectivity-defaults"],
+    srcs: [
+        "jni/android_net_NetworkUtils.cpp",
+    ],
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.tethering",
+    ],
+}
+
+cc_library_shared {
+    name: "libframework-connectivity-jni",
+    defaults: ["libframework-connectivity-defaults"],
+    srcs: [
+        "jni/onload.cpp",
+    ],
+    static_libs: ["libconnectivityframeworkutils"],
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.tethering",
     ],
 }
 
@@ -124,7 +165,6 @@ java_library {
         "framework-tethering",
         "framework-wifi",
         "unsupportedappusage",
-        "ServiceConnectivityResources",
     ],
     static_libs: [
         "framework-connectivity-protos",
@@ -133,8 +173,5 @@ java_library {
     jarjar_rules: "jarjar-rules.txt",
     apex_available: ["com.android.tethering"],
     installable: true,
-    permitted_packages: [
-        "android.net",
-        "com.android.connectivity.aidl",
-    ],
+    permitted_packages: ["android.net"],
 }
