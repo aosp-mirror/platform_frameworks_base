@@ -63,13 +63,13 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
-        "--protolog-impl-class com.android.wm.shell.protolog.ShellProtoLogImpl " +
-        "--protolog-cache-class com.android.wm.shell.protolog.ShellProtoLogCache " +
-        "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
-        "--loggroups-jar $(location :wm_shell_protolog-groups) " +
-        "--output-srcjar $(out) " +
-        "$(locations :wm_shell-sources)",
+      "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+      "--protolog-impl-class com.android.wm.shell.protolog.ShellProtoLogImpl " +
+      "--protolog-cache-class com.android.wm.shell.protolog.ShellProtoLogCache " +
+      "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
+      "--loggroups-jar $(location :wm_shell_protolog-groups) " +
+      "--output-srcjar $(out) " +
+      "$(locations :wm_shell-sources)",
     out: ["wm_shell_protolog.srcjar"],
 }
 
@@ -81,14 +81,13 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
-        "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
-        "--loggroups-jar $(location :wm_shell_protolog-groups) " +
-        "--viewer-conf $(out) " +
-        "$(locations :wm_shell-sources)",
+      "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+      "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
+      "--loggroups-jar $(location :wm_shell_protolog-groups) " +
+      "--viewer-conf $(out) " +
+      "$(locations :wm_shell-sources)",
     out: ["wm_shell_protolog.json"],
 }
-
 // End ProtoLog
 
 java_library {
@@ -113,7 +112,7 @@ android_library {
         "res",
     ],
     java_resources: [
-        ":generate-wm_shell_protolog.json",
+        ":generate-wm_shell_protolog.json"
     ],
     static_libs: [
         "androidx.appcompat_appcompat",
@@ -126,10 +125,10 @@ android_library {
         "protolog-lib",
         "SettingsLib",
         "WindowManager-Shell-proto",
-        "jsr330",
+        "jsr330"
     ],
     kotlincflags: ["-Xjvm-default=enable"],
     manifest: "AndroidManifest.xml",
 
-    min_sdk_version: "30",
+    min_sdk_version: "26",
 }
