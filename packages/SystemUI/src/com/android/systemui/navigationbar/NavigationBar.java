@@ -113,6 +113,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
@@ -158,7 +159,8 @@ import dagger.Lazy;
  * Contains logic for a navigation bar view.
  */
 public class NavigationBar implements View.OnAttachStateChangeListener,
-        Callbacks, NavigationModeController.ModeChangedListener, DisplayManager.DisplayListener {
+        Callbacks, NavigationModeController.ModeChangedListener,
+        AccessibilityButtonModeObserver.ModeChangedListener, DisplayManager.DisplayListener {
 
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
@@ -186,6 +188,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final OverviewProxyService mOverviewProxyService;
     private final NavigationModeController mNavigationModeController;
+    private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
     private final Optional<Pip> mPipOptional;
@@ -226,6 +229,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private boolean mTransientShown;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
+    private int mA11yBtnMode;
     private LightBarController mLightBarController;
     private AutoHideController mAutoHideController;
 
@@ -443,6 +447,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             MetricsLogger metricsLogger,
             OverviewProxyService overviewProxyService,
             NavigationModeController navigationModeController,
+            AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             StatusBarStateController statusBarStateController,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
@@ -470,7 +475,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mOverviewProxyService = overviewProxyService;
         mNavigationModeController = navigationModeController;
-        mNavBarMode = navigationModeController.addListener(this);
+        mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
         mPipOptional = pipOptional;
@@ -480,6 +485,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mHandler = mainHandler;
         mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
+
+        mNavBarMode = mNavigationModeController.addListener(this);
+        mAccessibilityButtonModeObserver.addListener(this);
+        mA11yBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
     }
 
     public View getView() {
@@ -560,6 +569,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mContext.getSystemService(WindowManager.class).removeViewImmediate(
                 mNavigationBarView.getRootView());
         mNavigationModeController.removeListener(this);
+        mAccessibilityButtonModeObserver.removeListener(this);
 
         mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
@@ -1450,6 +1460,12 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             outFeedbackEnabled[0] = feedbackEnabled;
         }
 
+        // If accessibility button is floating menu mode, click and long click state should be
+        // disabled.
+        if (mA11yBtnMode == Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
+            return 0;
+        }
+
         return (requestingServices >= 1 ? SYSUI_STATE_A11Y_BUTTON_CLICKABLE : 0)
                 | (requestingServices >= 2 ? SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE : 0);
     }
@@ -1538,6 +1554,12 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (!canShowSecondaryHandle()) {
             resetSecondaryHandle();
         }
+    }
+
+    @Override
+    public void onAccessibilityButtonModeChanged(int mode) {
+        mA11yBtnMode = mode;
+        updateAccessibilityServicesState(mAccessibilityManager);
     }
 
     public void disableAnimationsDuringHide(long delay) {
