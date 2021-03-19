@@ -19,7 +19,7 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
-import com.android.server.WatchableIntentResolver;
+import com.android.server.WatchedIntentResolver;
 import com.android.server.utils.Snappable;
 
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.List;
  * Used to find a list of {@link CrossProfileIntentFilter}s that match an intent.
  */
 class CrossProfileIntentResolver
-        extends WatchableIntentResolver<CrossProfileIntentFilter, CrossProfileIntentFilter>
+        extends WatchedIntentResolver<CrossProfileIntentFilter, CrossProfileIntentFilter>
         implements Snappable {
     @Override
     protected CrossProfileIntentFilter[] newArray(int size) {
