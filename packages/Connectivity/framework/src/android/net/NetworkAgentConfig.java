@@ -50,7 +50,8 @@ public final class NetworkAgentConfig implements Parcelable {
      * ap in the wifi settings to trigger a connection is explicit.  A 3rd party app asking to
      * connect to a particular access point is also explicit, though this may change in the future
      * as we want apps to use the multinetwork apis.
-     *
+     * TODO : this is a bad name, because it sounds like the user just tapped on the network.
+     * It's not necessarily the case ; auto-reconnection to WiFi has this true for example.
      * @hide
      */
     public boolean explicitlySelected;

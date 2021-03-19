@@ -2961,6 +2961,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
                     if (nai.everConnected) {
                         loge("ERROR: cannot call explicitlySelected on already-connected network");
+                        // Note that if the NAI had been connected, this would affect the
+                        // score, and therefore would require re-mixing the score and performing
+                        // a rematch.
                     }
                     nai.networkAgentConfig.explicitlySelected = toBool(msg.arg1);
                     nai.networkAgentConfig.acceptUnvalidated = toBool(msg.arg1) && toBool(msg.arg2);
@@ -4045,6 +4048,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // network, we should respect the user's option and don't need to popup the
             // PARTIAL_CONNECTIVITY notification to user again.
             nai.networkAgentConfig.acceptPartialConnectivity = accept;
+            nai.updateScoreForNetworkAgentConfigUpdate();
             rematchAllNetworksAndRequests();
             sendUpdatedScoreToFactories(nai);
         }
