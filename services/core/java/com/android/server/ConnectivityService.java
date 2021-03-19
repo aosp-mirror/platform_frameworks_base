@@ -238,7 +238,6 @@ import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.ProfileNetworkPreferences;
 import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.QosCallbackTracker;
-import com.android.server.net.NetworkPolicyManagerInternal;
 
 import libcore.io.IoUtils;
 
@@ -351,7 +350,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     protected INetd mNetd;
     private NetworkStatsManager mStatsManager;
     private NetworkPolicyManager mPolicyManager;
-    private NetworkPolicyManagerInternal mPolicyManagerInternal;
     private final NetdCallback mNetdCallback;
 
     /**
@@ -1238,9 +1236,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mStatsManager = mContext.getSystemService(NetworkStatsManager.class);
         mPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
-        mPolicyManagerInternal = Objects.requireNonNull(
-                LocalServices.getService(NetworkPolicyManagerInternal.class),
-                "missing NetworkPolicyManagerInternal");
         mDnsResolver = Objects.requireNonNull(dnsresolver, "missing IDnsResolver");
         mProxyTracker = mDeps.makeProxyTracker(mContext, mHandler);
 
