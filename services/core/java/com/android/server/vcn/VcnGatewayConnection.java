@@ -1441,7 +1441,7 @@ public class VcnGatewayConnection extends StateMachine {
                             caps,
                             lp,
                             Vcn.getNetworkScore(),
-                            new NetworkAgentConfig(),
+                            new NetworkAgentConfig.Builder().build(),
                             mVcnContext.getVcnNetworkProvider()) {
                         @Override
                         public void unwanted() {
