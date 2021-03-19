@@ -610,6 +610,11 @@
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
+    <!-- Screenshots -->
+    <style name="LongScreenshotActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- Privacy dialog -->
     <style name="PrivacyDialog" parent="ScreenRecord">
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
