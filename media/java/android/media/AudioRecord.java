@@ -612,7 +612,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         }
 
         /**
-         * Sets the context the record belongs to.
+         * Sets the context the record belongs to. This context will be used to pull information,
+         * such as attribution tags, which will be associated with the AudioRecord. However, the
+         * context itself will not be retained by the AudioRecord.
          * @param context a non-null {@link Context} instance
          * @return the same Builder instance.
          */
