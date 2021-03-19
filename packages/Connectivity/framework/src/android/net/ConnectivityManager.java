@@ -4461,12 +4461,20 @@ public class ConnectivityManager {
     /**
      * Requests that the system open the captive portal app on the specified network.
      *
+     * <p>This is to be used on networks where a captive portal was detected, as per
+     * {@link NetworkCapabilities#NET_CAPABILITY_CAPTIVE_PORTAL}.
+     *
      * @param network The network to log into.
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void startCaptivePortalApp(Network network) {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
+    })
+    public void startCaptivePortalApp(@NonNull Network network) {
         try {
             mService.startCaptivePortalApp(network);
         } catch (RemoteException e) {
@@ -4661,7 +4669,7 @@ public class ConnectivityManager {
                 Log.e(TAG, "Can't set proxy properties", e);
             }
             // Must flush DNS cache as new network may have different DNS resolutions.
-            InetAddress.clearDnsCache();
+            InetAddressCompat.clearDnsCache();
             // Must flush socket pool as idle sockets will be bound to previous network and may
             // cause subsequent fetches to be performed on old network.
             NetworkEventDispatcher.getInstance().onNetworkConfigurationChanged();

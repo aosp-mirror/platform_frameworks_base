@@ -86,7 +86,7 @@ public class CaptivePortalLoginActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCm = ConnectivityManager.from(this);
+        mCm = getSystemService(ConnectivityManager.class);
         mUrl = getUrlForCaptivePortal();
         if (mUrl == null) {
             done(false);
@@ -161,7 +161,6 @@ public class CaptivePortalLoginActivity extends Activity {
         if (network != null) {
             network = network.getPrivateDnsBypassingCopy();
             mCm.bindProcessToNetwork(network);
-            mCm.setProcessDefaultNetworkForHostResolution(network);
         }
         mNetwork = network;
     }
