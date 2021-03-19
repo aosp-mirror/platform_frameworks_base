@@ -48,13 +48,6 @@ public class BiometricManager {
     private static final String TAG = "BiometricManager";
 
     /**
-     * An ID that should match any biometric sensor on the device.
-     *
-     * @hide
-     */
-    public static final int SENSOR_ID_ANY = -1;
-
-    /**
      * No error detected.
      */
     public static final int BIOMETRIC_SUCCESS =
