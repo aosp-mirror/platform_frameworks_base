@@ -28,7 +28,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import android.window.TaskSnapshot;
 import android.content.ComponentName;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
@@ -42,6 +41,7 @@ import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.UserManager;
 import android.view.Surface;
+import android.window.TaskSnapshot;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
@@ -154,8 +154,14 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         private int mSystemUiVisibility = 0;
         private int mRotation = Surface.ROTATION_0;
+        private ComponentName mTopActivityComponent = new ComponentName("", "");
 
         TaskSnapshotBuilder() {
+        }
+
+        TaskSnapshotBuilder setTopActivityComponent(ComponentName topActivityComponent) {
+            mTopActivityComponent = topActivityComponent;
+            return this;
         }
 
         TaskSnapshotBuilder setScaleFraction(float scale) {
@@ -199,7 +205,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             Canvas c = buffer.lockCanvas();
             c.drawColor(Color.RED);
             buffer.unlockCanvasAndPost(c);
-            return new TaskSnapshot(MOCK_SNAPSHOT_ID, new ComponentName("", ""),
+            return new TaskSnapshot(MOCK_SNAPSHOT_ID, mTopActivityComponent,
                     HardwareBuffer.createFromGraphicBuffer(buffer),
                     ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
                     mRotation, taskSize, TEST_INSETS,
