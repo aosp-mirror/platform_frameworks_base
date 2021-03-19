@@ -1505,6 +1505,8 @@ public final class BatteryService extends SystemService {
                             if (Objects.equals(newService, oldService)) return;
 
                             Slog.i(TAG, "health: new instance registered " + mInstanceName);
+                            // #init() may be called with null callback. Skip null callbacks.
+                            if (mCallback == null) return;
                             mCallback.onRegistration(oldService, newService, mInstanceName);
                         } catch (NoSuchElementException | RemoteException ex) {
                             Slog.e(TAG, "health: Cannot get instance '" + mInstanceName
