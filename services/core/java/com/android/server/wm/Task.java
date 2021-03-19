@@ -3595,7 +3595,7 @@ class Task extends WindowContainer<WindowContainer> {
             return false;
         }
 
-        if (r.occludesParent() || r.hasWallpaper) {
+        if (r.occludesParent()) {
             // Root task isn't translucent if it has at least one fullscreen activity
             // that is visible.
             return true;

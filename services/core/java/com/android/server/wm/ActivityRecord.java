@@ -438,10 +438,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final String packageName;
     // the intent component, or target of an alias.
     final ComponentName mActivityComponent;
-    // Has a wallpaper window as a background.
-    // TODO: Rename to mHasWallpaper and also see if it possible to combine this with the
-    // mOccludesParent field.
-    final boolean hasWallpaper;
     // Input application handle used by the input dispatcher.
     private InputApplicationHandle mInputApplicationHandle;
 
@@ -1104,19 +1100,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        boolean isLetterboxed = isLetterboxed(mainWin);
-        pw.println(prefix + "isLetterboxed=" + isLetterboxed);
-        if (!isLetterboxed) {
+        boolean areBoundsLetterboxed = mainWin.isLetterboxedAppWindow();
+        pw.println(prefix + "areBoundsLetterboxed=" + areBoundsLetterboxed);
+        if (!areBoundsLetterboxed) {
             return;
         }
 
         pw.println(prefix + "  letterboxReason=" + getLetterboxReasonString(mainWin));
+        pw.println(prefix + "  letterboxAspectRatio=" + computeAspectRatio(getBounds()));
+
+        boolean isLetterboxUiShown = isLetterboxed(mainWin);
+        pw.println(prefix + "isLetterboxUiShown=" + isLetterboxUiShown);
+
+        if (!isLetterboxUiShown) {
+            return;
+        }
         pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
                 getLetterboxBackgroundColor().toArgb()));
         pw.println(prefix + "  letterboxBackgroundType="
                 + letterboxBackgroundTypeToString(mWmService.getLetterboxBackgroundType()));
-        pw.println(prefix + "  letterboxAspectRatio="
-                + computeAspectRatio(getBounds()));
     }
 
     /**
@@ -1463,9 +1465,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 "Unexpected letterbox background type: " + letterboxBackgroundType);
     }
 
-    /** @return {@code true} when main window is letterboxed and activity isn't transparent. */
-    private boolean isLetterboxed(WindowState mainWindow) {
-        return mainWindow.isLetterboxedAppWindow() && fillsParent();
+    /**
+     * @return {@code true} when the main window is letterboxed, this activity isn't transparent
+     * and doesn't show a wallpaper.
+     */
+    @VisibleForTesting
+    boolean isLetterboxed(WindowState mainWindow) {
+        return mainWindow.isLetterboxedAppWindow() && fillsParent()
+                // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
+                // WindowContainer#showWallpaper because the later will return true when this
+                // activity is using blurred wallpaper for letterbox backgroud.
+                && (mainWindow.mAttrs.flags & FLAG_SHOW_WALLPAPER) == 0;
     }
 
     private void updateRoundedCorners(WindowState mainWindow) {
@@ -1655,11 +1665,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 realTheme, com.android.internal.R.styleable.Window, mUserId);
 
         if (ent != null) {
-            mOccludesParent = !ActivityInfo.isTranslucentOrFloating(ent.array);
-            hasWallpaper = ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
+            mOccludesParent = !ActivityInfo.isTranslucentOrFloating(ent.array)
+                    // This style is propagated to the main window attributes with
+                    // FLAG_SHOW_WALLPAPER from PhoneWindow#generateLayout.
+                    || ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
             noDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
         } else {
-            hasWallpaper = false;
             noDisplay = false;
         }
 
@@ -2468,7 +2479,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!includingFinishing && finishing) {
             return false;
         }
-        return mOccludesParent;
+        return mOccludesParent || showWallpaper();
     }
 
     boolean setOccludesParent(boolean occludesParent) {
