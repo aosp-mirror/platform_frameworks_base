@@ -108,7 +108,7 @@ public class PipResizeGestureHandler {
     // For pinch-resize
     private boolean mThresholdCrossed0;
     private boolean mThresholdCrossed1;
-    private boolean mUsingPinchToZoom = true;
+    private boolean mOngoingPinchToResize = false;
     private float mAngle = 0;
     int mFirstIndex = -1;
     int mSecondIndex = -1;
@@ -236,7 +236,7 @@ public class PipResizeGestureHandler {
         }
 
         if (ev instanceof MotionEvent) {
-            if (mUsingPinchToZoom) {
+            if (mOngoingPinchToResize) {
                 onPinchResize((MotionEvent) ev);
             } else {
                 onDragCornerResize((MotionEvent) ev);
@@ -248,7 +248,7 @@ public class PipResizeGestureHandler {
      * Checks if there is currently an on-going gesture, either drag-resize or pinch-resize.
      */
     public boolean hasOngoingGesture() {
-        return mCtrlType != CTRL_NONE || mUsingPinchToZoom;
+        return mCtrlType != CTRL_NONE || mOngoingPinchToResize;
     }
 
     /**
@@ -305,7 +305,7 @@ public class PipResizeGestureHandler {
                 case MotionEvent.ACTION_POINTER_DOWN:
                     if (mEnablePinchResize && ev.getPointerCount() == 2) {
                         onPinchResize(ev);
-                        mUsingPinchToZoom = true;
+                        mOngoingPinchToResize = true;
                         return true;
                     }
                     break;
@@ -587,7 +587,7 @@ public class PipResizeGestureHandler {
 
             // Pinch-to-resize needs to re-calculate snap fraction and animate to the snapped
             // position correctly. Drag-resize does not need to move, so just finalize resize.
-            if (mUsingPinchToZoom) {
+            if (mOngoingPinchToResize) {
                 final Rect startBounds = new Rect(mLastResizeBounds);
                 // If user resize is pretty close to max size, just auto resize to max.
                 if (mLastResizeBounds.width() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.x
@@ -612,7 +612,7 @@ public class PipResizeGestureHandler {
     private void resetState() {
         mCtrlType = CTRL_NONE;
         mAngle = 0;
-        mUsingPinchToZoom = false;
+        mOngoingPinchToResize = false;
         mAllowGesture = false;
         mThresholdCrossed = false;
     }
