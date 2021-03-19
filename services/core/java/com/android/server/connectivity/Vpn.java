@@ -1263,7 +1263,7 @@ public class Vpn {
                 new NetworkScore.Builder().setLegacyInt(VPN_DEFAULT_SCORE).build(),
                 networkAgentConfig, mNetworkProvider) {
             @Override
-            public void unwanted() {
+            public void onNetworkUnwanted() {
                 // We are user controlled, not driven by NetworkRequest.
             }
         };
