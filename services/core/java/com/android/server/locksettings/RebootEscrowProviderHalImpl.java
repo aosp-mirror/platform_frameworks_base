@@ -60,6 +60,11 @@ class RebootEscrowProviderHalImpl implements RebootEscrowProviderInterface {
     }
 
     @Override
+    public int getType() {
+        return TYPE_HAL;
+    }
+
+    @Override
     public boolean hasRebootEscrowSupport() {
         return mInjector.getRebootEscrow() != null;
     }
