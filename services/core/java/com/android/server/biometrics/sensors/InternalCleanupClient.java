@@ -127,7 +127,8 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
                 getContext().getPackageName(), mBiometricUtils, getSensorId(), mAuthenticatorIds);
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                 mStatsModality,
-                BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL);
+                BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL,
+                -1 /* sensorId */);
         mCurrentTask.start(mRemoveCallback);
     }
 
