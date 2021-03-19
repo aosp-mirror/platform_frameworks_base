@@ -433,6 +433,20 @@ public final class Settings {
             "android.settings.REQUEST_SCHEDULE_EXACT_ALARM";
 
     /**
+     * Activity Action: Show settings to allow configuration of
+     * {@link Manifest.permission#MANAGE_MEDIA} permission
+     *
+     * Input: Optionally, the Intent's data URI can specify the application package name to
+     * directly invoke the management GUI specific to the package name. For example
+     * "package:com.my.app".
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_MANAGE_MEDIA =
+            "android.settings.REQUEST_MANAGE_MEDIA";
+
+    /**
      * Activity Action: Show settings to allow configuration of cross-profile access for apps
      *
      * Input: Optionally, the Intent's data URI can specify the application package name to
