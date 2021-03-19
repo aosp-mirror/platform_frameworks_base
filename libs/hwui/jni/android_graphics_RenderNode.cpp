@@ -181,9 +181,10 @@ static jboolean android_view_RenderNode_clearStretch(CRITICAL_JNI_PARAMS_COMMA j
 
 static jboolean android_view_RenderNode_stretch(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr,
                                                 jfloat left, jfloat top, jfloat right,
-                                                jfloat bottom, jfloat vX, jfloat vY, jfloat max) {
-    StretchEffect effect =
-            StretchEffect(SkRect::MakeLTRB(left, top, right, bottom), {.fX = vX, .fY = vY}, max);
+                                                jfloat bottom, jfloat vX, jfloat vY, jfloat maxX,
+                                                jfloat maxY) {
+    StretchEffect effect = StretchEffect(SkRect::MakeLTRB(left, top, right, bottom),
+                                         {.fX = vX, .fY = vY}, maxX, maxY);
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     renderNode->mutateStagingProperties().mutateLayerProperties().mutableStretchEffect().mergeWith(
             effect);
@@ -662,7 +663,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             env->CallVoidMethod(localref, gPositionListener_ApplyStretchMethod,
                                 info.canvasContext.getFrameNumber(), area.left, area.top,
                                 area.right, area.bottom, stretchDirection.fX, stretchDirection.fY,
-                                effect->maxStretchAmount);
+                                effect->maxStretchAmountX, effect->maxStretchAmountY);
 #endif
             env->DeleteLocalRef(localref);
         }
@@ -738,7 +739,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetOutlineEmpty", "(J)Z", (void*)android_view_RenderNode_setOutlineEmpty},
         {"nSetOutlineNone", "(J)Z", (void*)android_view_RenderNode_setOutlineNone},
         {"nClearStretch", "(J)Z", (void*)android_view_RenderNode_clearStretch},
-        {"nStretch", "(JFFFFFFF)Z", (void*)android_view_RenderNode_stretch},
+        {"nStretch", "(JFFFFFFFF)Z", (void*)android_view_RenderNode_stretch},
         {"nHasShadow", "(J)Z", (void*)android_view_RenderNode_hasShadow},
         {"nSetSpotShadowColor", "(JI)Z", (void*)android_view_RenderNode_setSpotShadowColor},
         {"nGetSpotShadowColor", "(J)I", (void*)android_view_RenderNode_getSpotShadowColor},

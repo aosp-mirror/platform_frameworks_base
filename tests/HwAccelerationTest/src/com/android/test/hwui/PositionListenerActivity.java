@@ -75,11 +75,11 @@ public class PositionListenerActivity extends Activity {
                 // Although we could do this in a single call, the real one won't be - so mimic that
                 if (dir.x != 0f) {
                     node.stretch(0f, 0f, (float) getWidth(), (float) getHeight(),
-                            dir.x, 0f, maxStretchAmount);
+                            dir.x, 0f, maxStretchAmount, maxStretchAmount);
                 }
                 if (dir.y != 0f) {
                     node.stretch(0f, 0f, (float) getWidth(), (float) getHeight(),
-                            0f, dir.y, maxStretchAmount);
+                            0f, dir.y, maxStretchAmount, maxStretchAmount);
                 }
             }
         };
