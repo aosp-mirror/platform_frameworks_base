@@ -50,7 +50,6 @@ import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.system.OsConstants;
-import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -60,6 +59,7 @@ import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.LocalServices;
+import com.android.server.wm.ActivityAssistInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.ActivityTokens;
 
@@ -187,24 +187,23 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                     mSessionComponentName, mUser, mContext, this,
                     mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
-        List<Pair<IBinder, Integer>> allVisibleActivities =
+        List<ActivityAssistInfo> allVisibleActivities =
                 LocalServices.getService(ActivityTaskManagerInternal.class)
                         .getTopVisibleActivities();
 
-        List<Pair<IBinder, Integer>> visibleActivities = null;
+        List<ActivityAssistInfo> visibleActivities = null;
         if (activityToken != null) {
             visibleActivities = new ArrayList();
             int activitiesCount = allVisibleActivities.size();
             for (int i = 0; i < activitiesCount; i++) {
-                if (allVisibleActivities.get(i).first == activityToken) {
-                    visibleActivities.add(
-                            new Pair<>(activityToken, allVisibleActivities.get(i).second));
+                ActivityAssistInfo info = allVisibleActivities.get(i);
+                if (info.getActivityToken() == activityToken) {
+                    visibleActivities.add(info);
                     break;
                 }
             }
         } else {
-            visibleActivities = LocalServices.getService(ActivityTaskManagerInternal.class)
-                    .getTopVisibleActivities();
+            visibleActivities = allVisibleActivities;
         }
         return mActiveSession.showLocked(args, flags, mDisabledShowContext, showCallback,
                 visibleActivities);
