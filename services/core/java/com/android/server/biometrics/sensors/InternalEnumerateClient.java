@@ -118,7 +118,8 @@ public abstract class InternalEnumerateClient<T> extends HalClientMonitor<T>
                     getTargetUserId(), identifier.getBiometricId());
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                     mStatsModality,
-                    BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK);
+                    BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK,
+                    -1 /* sensorId */);
         }
         mEnrolledList.clear();
     }
