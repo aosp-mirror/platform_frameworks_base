@@ -1581,6 +1581,7 @@ package android {
     field public static final int useLevel = 16843167; // 0x101019f
     field public static final int userVisible = 16843409; // 0x1010291
     field public static final int usesCleartextTraffic = 16844012; // 0x10104ec
+    field public static final int usesPermissionFlags = 16844356; // 0x1010644
     field public static final int value = 16842788; // 0x1010024
     field public static final int valueFrom = 16843486; // 0x10102de
     field public static final int valueTo = 16843487; // 0x10102df
@@ -12168,6 +12169,7 @@ package android.content.pm {
     field public static final int INSTALL_LOCATION_INTERNAL_ONLY = 1; // 0x1
     field public static final int INSTALL_LOCATION_PREFER_EXTERNAL = 2; // 0x2
     field public static final int REQUESTED_PERMISSION_GRANTED = 2; // 0x2
+    field public static final int REQUESTED_PERMISSION_NEVER_FOR_LOCATION = 65536; // 0x10000
     field public android.content.pm.ActivityInfo[] activities;
     field public android.content.pm.ApplicationInfo applicationInfo;
     field @Nullable public android.content.pm.Attribution[] attributions;
