@@ -156,7 +156,7 @@ public class NetworkNotificationManager {
         final String tag = tagFor(id);
         final int eventId = notifyType.eventId;
         final int transportType;
-        final String name;
+        final CharSequence name;
         if (nai != null) {
             transportType = approximateTransportType(nai);
             final String extraInfo = nai.networkInfo.getExtraInfo();
