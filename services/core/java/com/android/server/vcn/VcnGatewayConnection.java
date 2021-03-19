@@ -1796,8 +1796,10 @@ public class VcnGatewayConnection extends StateMachine {
             lp.addDnsServer(addr);
         }
 
-        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
-        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null /*gateway*/,
+                null /*iface*/, RouteInfo.RTN_UNICAST));
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null /*gateway*/,
+                null /*iface*/, RouteInfo.RTN_UNICAST));
 
         lp.setMtu(gatewayConnectionConfig.getMaxMtu());
 
