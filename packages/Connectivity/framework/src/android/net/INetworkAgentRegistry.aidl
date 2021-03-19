@@ -13,7 +13,7 @@
  * See the License for the specific language governing perNmissions and
  * limitations under the License.
  */
-package com.android.connectivity.aidl;
+package android.net;
 
 import android.net.LinkProperties;
 import android.net.Network;
