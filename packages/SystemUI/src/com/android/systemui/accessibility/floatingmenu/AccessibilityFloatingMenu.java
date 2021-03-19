@@ -140,7 +140,7 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
     private static int getShapeType(Context context) {
         return Settings.Secure.getInt(
                 context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
-                ShapeType.CIRCLE);
+                ShapeType.OVAL);
     }
 
     private void registerContentObservers() {
