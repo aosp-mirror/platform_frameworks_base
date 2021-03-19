@@ -32,7 +32,7 @@ android_library {
         "src/**/*.kt",
     ],
 
-    min_sdk_version: "21",
+    min_sdk_version: "30",
 
 }
 
