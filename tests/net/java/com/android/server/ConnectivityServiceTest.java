@@ -275,6 +275,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.connectivity.resources.R;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.ArrayUtils;
@@ -1574,6 +1575,14 @@ public class ConnectivityServiceTest {
         doReturn(com.android.connectivity.resources.R.array.config_networkSupportedKeepaliveCount)
                 .when(mResources).getIdentifier(eq("config_networkSupportedKeepaliveCount"),
                 eq("array"), any());
+        doReturn(com.android.connectivity.resources.R.array.network_switch_type_name)
+                .when(mResources).getIdentifier(eq("network_switch_type_name"),
+                eq("array"), any());
+
+        // We don't test the actual notification value strings, so just return an empty array.
+        // It doesn't matter what the values are as long as it's not null.
+        doReturn(new String[0]).when(mResources).getStringArray(R.array.network_switch_type_name);
+
         final ConnectivityResources connRes = mock(ConnectivityResources.class);
         doReturn(mResources).when(connRes).get();
         doReturn(connRes).when(deps).getResources(any());
