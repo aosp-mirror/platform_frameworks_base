@@ -68,8 +68,6 @@
         <item>VPN</item>
     </string-array>
 
-    <!-- Network type names used in the network_switch_metered and network_switch_metered_detail strings. These must be kept in the sync with the values NetworkCapabilities.TRANSPORT_xxx values, and in the same order. -->
-
     <!-- Network type name displayed if one of the types is not found in network_switch_type_name. -->
     <string name="network_switch_type_name_unknown">an unknown network type</string>
 
