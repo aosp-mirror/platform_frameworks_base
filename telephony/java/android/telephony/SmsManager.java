@@ -19,6 +19,7 @@ package android.telephony;
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -2207,7 +2208,9 @@ public final class SmsManager {
      *
      * @return the total number of SMS records which can be stored on the SIM card.
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
+    @IntRange(from = 0)
     public int getSmsCapacityOnIcc() {
         int ret = 0;
         try {

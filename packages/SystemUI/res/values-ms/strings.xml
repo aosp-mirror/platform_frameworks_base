@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Batal"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Kongsi"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Rakaman skrin dibatalkan"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Rakaman skrin disimpan"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Ketik untuk lihat"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Ralat semasa memadamkan rakaman skrin"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Gagal mendapatkan kebenaran"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Ralat semasa memulakan rakaman skrin"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Pengguna baharu"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Selamat pesawat"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Rangkaian tersedia"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Rangkaian tidak tersedia"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Tidak Disambungkan"</string>
@@ -470,7 +467,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Tunjuk profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Tambah pengguna"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Pengguna baharu"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"Tamatkan sesi tetamu"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Alih keluar tetamu?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua apl dan data dalam sesi ini akan dipadam."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Alih keluar"</string>
@@ -519,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Peranti ini diurus oleh ibu bapa anda"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisasi anda memiliki peranti ini dan mungkin memantau trafik rangkaian"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> memiliki peranti ini dan mungkin memantau trafik rangkaian"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Peranti ini disediakan oleh <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Peranti ini milik organisasi anda dan dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan dihubungkan dengan <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Peranti ini milik organisasi anda"</string>
@@ -532,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Profil kerja anda dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Profil peribadi anda dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Peranti ini dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Peranti ini disediakan oleh <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Pengurusan peranti"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Pemantauan profil"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Pemantauan rangkaian"</string>
@@ -543,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Lihat Dasar"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Lihat kawalan"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nPentadbir IT anda boleh memantau dan mengurus tetapan, akses korporat, apl, data yang dikaitkan dengan peranti anda dan maklumat lokasi peranti anda.\n\nUntuk maklumat lanjut, hubungi pentadbir IT anda."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> mungkin dapat mengakses data yang dikaitkan dengan peranti ini, apl terurus dan menukar tetapan peranti ini.\n\nJika anda mempunyai pertanyaan, hubungi <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Peranti ini milik organisasi anda.\n\nPentadbir IT anda boleh memantau dan mengurus tetapan, akses korporat, apl, data yang dikaitkan dengan peranti anda dan maklumat lokasi peranti anda.\n\nUntuk maklumat lanjut, hubungi pentadbir IT anda."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organisasi anda memasang sijil kuasa pada peranti ini. Trafik rangkaian selamat anda mungkin dipantau atau diubah suai."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisasi anda memasang sijil kuasa dalam profil kerja anda. Trafik rangkaian selamat anda mungkin dipantau atau diubah suai."</string>
@@ -653,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Tunjukkan mod tunjuk cara"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Penggera"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Profil kerja"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mod pesawat"</string>
     <string name="add_tile" msgid="6239678623873086686">"Tambahkan jubin"</string>
@@ -721,7 +724,7 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Diturunkan Taraf kepada Senyap"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Dinilai Lebih Tinggi"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Dinilai Lebih Rendah"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Ditunjukkan di sebelah atas bahagian perbualan, muncul sebagai gelembung terapung, memaparkan gambar profil pada skrin kunci"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Ditunjukkan di sebelah atas bahagian perbualan, terpapar sebagai gelembung terapung, gambar profil dipaparkan pada skrin kunci"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Tetapan"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Keutamaan"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak menyokong ciri perbualan"</string>
@@ -899,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Tutup tetapan pantas."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Penggera ditetapkan."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Dilog masuk sebagai <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"pilih pengguna"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Tiada Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Buka butiran."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Tidak tersedia disebabkan <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Buka tetapan <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Edit susunan tetapan."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu kuasa"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Halaman <xliff:g id="ID_1">%1$d</xliff:g> daripada <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Kunci skrin"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon dimatikan kerana panas"</string>
@@ -1011,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Alih ke kiri"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Alih ke kanan"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Suis pembesaran"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Besarkan seluruh skrin"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Besarkan skrin penuh"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Besarkan sebahagian skrin"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Tukar"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Butang kebolehaksesan menggantikan gerak isyarat kebolehaksesan\n\n"<annotation id="link">"Lihat tetapan"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Gerakkan butang ke tepi untuk menyembunyikannya buat sementara waktu"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Kawalan peranti"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Tambah kawalan untuk peranti yang disambungkan"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Sediakan kawalan peranti"</string>
@@ -1081,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Gandingkan peranti baharu"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nombor binaan"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nombor binaan disalin ke papan keratan."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Buka perbualan"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Widget perbualan"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Ketik perbualan untuk menambahkan perbualan itu pada skrin Utama anda"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> yang lalu"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"Kurang daripada <xliff:g id="DURATION">%1$s</xliff:g> lalu"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"Lebih <xliff:g id="DURATION">%1$s</xliff:g> yang lalu"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Hari Lahir"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Hari lahir tak lama lagi"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Ulang tahun"</string>
+    <string name="location_status" msgid="1294990572202541812">"Berkongsi lokasi"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Cerita baharu"</string>
+    <string name="video_status" msgid="4548544654316843225">"Menonton"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Mendengar"</string>
+    <string name="game_status" msgid="1340694320630973259">"Memainkan"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Rakan"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Mari bersembang!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Panggilan terlepas"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Lihat mesej terbaharu, panggilan terlepas dan kemaskinian status"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Perbualan"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Masalah membaca meter bateri anda"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Ketik untuk mendapatkan maklumat lanjut"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Tiada penggera"</string>
 </resources>

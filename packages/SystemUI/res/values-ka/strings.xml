@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"გაუქმება"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"გაზიარება"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ეკრანის ჩაწერა გაუქმდა"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"ეკრანის ჩაწერა შეინახა"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"შეეხეთ სანახავად"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"ეკრანის ჩანაწერის წაშლისას წარმოიშვა შეცდომა"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ნებართვების მიღება ვერ მოხერხდა"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ეკრანის ჩაწერის დაწყებისას წარმოიქმნა შეცდომა"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"ახალი მომხმარებელი"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"ინტერნეტი"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"თვითმფრინავისთვის უსაფრთხო"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"ქსელები ხელმისაწვდომია"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ქსელები მიუწვდომელია"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"არ არის დაკავშირებული."</string>
@@ -470,7 +467,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"პროფილის ჩვენება"</string>
     <string name="user_add_user" msgid="4336657383006913022">"მომხმარებლის დამატება"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ახალი მომხმარებელი"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"სტუმრის სესიის დასრულება"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"სტუმრის ამოშლა?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ამ სესიის ყველა აპი და მონაცემი წაიშლება."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ამოშლა"</string>
@@ -519,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"მოწყობილობას თქვენი მშობელი მართავს"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია და მას ქსელის ტრაფიკის მონიტორინგი შეუძლია"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"ამ მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> და მას ქსელის ტრაფიკის მონიტორინგი შეუძლია"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ამ მოწყობილობის მომწოდებელია <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია და ის დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ამ მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> და ის დაკავშირებულია <xliff:g id="VPN_APP">%2$s</xliff:g>-თან"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია"</string>
@@ -532,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"თქვენი სამსახურის პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"თქვენი პერსონალური პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ეს მოწყობილობა დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ამ მოწყობილობის მომწოდებელია <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"მოწყობილობის მართვა"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"პროფილის მონიტორინგი"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"ქსელის მონიტორინგი"</string>
@@ -543,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"წესების ნახვა"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"მართვის საშუალებების ნახვა"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"ეს მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nთქვენს IT ადმინისტრატორს შეუძლია მოწყობილობასთან დაკავშირებული პარამეტრების, კორპორაციული წვდომის, აპებისა და მონაცემების (მათ შორის, თქვენი მოწყობილობის მდებარეობის ინფორმაციის) მონიტორინგი და მართვა.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს IT ადმინისტრატორს."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>-მა შეიძლება მოახერხოს ამ მოწყობილობასთან დაკავშირებულ მონაცემებზე წვდომა, მართოს აპები და შეცვალოს ამ მოწყობილობის პარამეტრები.\n\nთუ გაქვთ შეკითხვები, დაუკავშირდით <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>-ს."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია.\n\nთქვენს IT ადმინისტრატორს შეუძლია მოწყობილობასთან დაკავშირებული პარამეტრების, კორპორაციული წვდომის, აპებისა და მონაცემების (მათ შორის, თქვენი მოწყობილობის მდებარეობის ინფორმაციის) მონიტორინგი და მართვა.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს IT ადმინისტრატორს."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"თქვენმა ორგანიზაციამ ამ მოწყობილობაზე სერტიფიცირების ორგანო დააინსტალირა. თქვენი ქსელის დაცული ტრაფიკი შეიძლება შეიცვალოს, ან მასზე მონიტორინგი განხორციელდეს."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"თქვენმა ორგანიზაციამ სამსახურის პროფილში სერტიფიცირების ორგანო დააინსტალირა. თქვენი ქსელის დაცული ტრაფიკი შეიძლება შეიცვალოს, ან მასზე მონიტორინგი განხორციელდეს."</string>
@@ -653,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"დემო-რეჟიმის ჩვენება"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ეთერნეტი"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"მაღვიძარა"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"სამსახურის პროფილი"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"თვითმფრინავის რეჟიმი"</string>
     <string name="add_tile" msgid="6239678623873086686">"მოზაიკის დამატება"</string>
@@ -899,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"სწრაფი პარამეტრების დახურვა."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"მაღვიძარა დაყენებულია."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"შესული ხართ, როგორც <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"მომხმარებლის არჩევა"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ინტერნეტ-კავშირი არ არის"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"დეტალების გახსნა."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"მიუწვდომელია, რადგან <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> პარამეტრების გახსნა."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"პარამეტრების მიმდევრობის რედაქტირება."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ჩართვის მენიუ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"გვერდი <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>-დან"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ჩაკეტილი ეკრანი"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ტელეფონი გამოირთო გაცხელების გამო"</string>
@@ -1011,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"მარცხნივ გადატანა"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"მარჯვნივ გადატანა"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"გადიდების გადართვა"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"მთლიანი ეკრანის გადიდება"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"გაადიდეთ სრულ ეკრანზე"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ეკრანის ნაწილის გადიდება"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"გადართვა"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"მარტივი წვდომის ღილაკმა ჩაანაცვლა მარტივი წვდომის ჟესტი\n\n"<annotation id="link">"პარამეტრების ნახვა"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"გადაიტანეთ ღილაკი კიდეში, რათა დროებით დამალოთ ის"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"მოწყობილ. მართვის საშუალებები"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"მართვის საშუალებების დამატება თქვენს დაკავშირებულ მოწყობილობებზე"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"მოწყობილობის მართვის საშუალებების დაყენება"</string>
@@ -1081,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ახალი მოწყობილობის დაწყვილება"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ანაწყობის ნომერი"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ანაწყობის ნომერი დაკოპირებულია გაცვლის ბუფერში."</string>
+    <string name="basic_status" msgid="2315371112182658176">"მიმოწერის გახსნა"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"საუბრის ვიჯეტები"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"შეეხეთ საუბარს მის თქვენს მთავარ ეკრანზე დასამატებლად"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>-ს წინ"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>-ზე ნაკლები ხნის წინ"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>-ზე მეტი ხნის წინ"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"დაბადების დღე"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"მალე დაბადების დღეა"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"იუბილე"</string>
+    <string name="location_status" msgid="1294990572202541812">"მდებარეობა ზიარდება"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"ახალი ამბავი"</string>
+    <string name="video_status" msgid="4548544654316843225">"უყურებს"</string>
+    <string name="audio_status" msgid="4237055636967709208">"მიმდინარეობს მოსმენა"</string>
+    <string name="game_status" msgid="1340694320630973259">"იკვრება"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"მეგობრები"</string>
+    <string name="empty_status" msgid="5938893404951307749">"მოდით, ვისაუბროთ ამაღამ!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"გამოტოვებული ზარი"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"ბოლოდროინდელი შეტყობინებების, გამოტოვებული ზარების და სტატუსის განახლებების ნახვა"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"მიმოწერა"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"თქვენი ბატარეის მზომის წაკითხვასთან დაკავშირებით პრობლემა დაფიქსირდა"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"შეეხეთ მეტი ინფორმაციისთვის"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"მაღვიძარა არ არის"</string>
 </resources>

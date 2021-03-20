@@ -16,6 +16,7 @@
 
 package android.hardware.face;
 
+import android.annotation.NonNull;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
@@ -48,7 +49,7 @@ public class FaceSensorPropertiesInternal extends SensorPropertiesInternal {
      * Initializes SensorProperties with specified values
      */
     public FaceSensorPropertiesInternal(int sensorId, @SensorProperties.Strength int strength,
-            int maxEnrollmentsPerUser, List<ComponentInfoInternal> componentInfo,
+            int maxEnrollmentsPerUser, @NonNull List<ComponentInfoInternal> componentInfo,
             @FaceSensorProperties.SensorType int sensorType, boolean supportsFaceDetection,
             boolean supportsSelfIllumination, boolean resetLockoutRequiresChallenge) {
         // resetLockout is managed by the HAL and requires a HardwareAuthToken for all face

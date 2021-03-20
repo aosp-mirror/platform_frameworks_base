@@ -597,7 +597,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     mPreAuthInfo.confirmationRequested,
                     FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
                     latency,
-                    mDebugEnabled);
+                    mDebugEnabled,
+                    -1 /* sensorId */);
         } else {
             final long latency = System.currentTimeMillis() - mStartTimeMs;
 
@@ -625,7 +626,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     error,
                     0 /* vendorCode */,
                     mDebugEnabled,
-                    latency);
+                    latency,
+                    -1 /* sensorId */);
         }
     }
 

@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Cancel·la"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Comparteix"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"S\'ha cancel·lat la gravació de la pantalla"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"S\'ha desat la gravació de pantalla"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Toca per veure-la"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"S\'ha produït un error en suprimir la gravació de la pantalla"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"No s\'han pogut obtenir els permisos"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"S\'ha produït un error en iniciar la gravació de pantalla"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Usuari nou"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Mode d\'avió"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Xarxes disponibles"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Xarxes no disponibles"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Desconnectat"</string>
@@ -470,7 +467,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostra el perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Afegeix un usuari"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Usuari nou"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"Finalitza la sessió de convidat"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vols suprimir el convidat?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Totes les aplicacions i les dades d\'aquesta sessió se suprimiran."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Suprimeix"</string>
@@ -519,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Els teus pares gestionen aquest dispositiu"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"La teva organització és propietària del dispositiu i és possible que supervisi el trànsit de xarxa"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> és propietària d\'aquest dispositiu i és possible que supervisi el trànsit de xarxa"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> proporciona aquest dispositiu"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Aquest dispositiu pertany a la teva organització i està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Aquest dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i està connectat a <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Aquest dispositiu pertany a la teva organització"</string>
@@ -532,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"El teu perfil de treball està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"El teu perfil personal està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Aquest dispositiu està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> proporciona aquest dispositiu"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestió del dispositiu"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Supervisió del perfil"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Supervisió de la xarxa"</string>
@@ -543,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Consulta les polítiques"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Mostra els controls"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"El dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nL\'administrador de TI pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions, les dades associades al dispositiu i la informació d\'ubicació.\n\nPer obtenir més informació, contacta amb l\'administrador de TI."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"És possible que <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> pugui canviar la configuració d\'aquest dispositiu, accedir a les dades que hi estiguin associades i gestionar les aplicacions.\n\nSi tens cap pregunta, contacta amb <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"El dispositiu pertany a la teva organització.\n\nL\'administrador de TI pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions, les dades associades al dispositiu i la informació d\'ubicació.\n\nPer obtenir més informació, contacta amb l\'administrador de TI."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"La teva organització ha instal·lat una autoritat de certificació en aquest dispositiu. És possible que el trànsit a la xarxa segura se supervisi o es modifiqui."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"La teva organització ha instal·lat una autoritat de certificació al teu perfil de treball. És possible que el trànsit de xarxa segura se supervisi o es modifiqui."</string>
@@ -653,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Mostra el mode de demostració"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de treball"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode d\'avió"</string>
     <string name="add_tile" msgid="6239678623873086686">"Afegeix un mosaic"</string>
@@ -721,7 +724,7 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Estat&lt;/b&gt;: s\'ha disminuït a Silenci"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Estat&lt;/b&gt;: s\'ha classificat amb un nivell superior"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Estat&lt;/b&gt;: s\'ha classificat amb un nivell inferior"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Es mostra com a bombolla flotant a la part superior de la secció de converses i mostra la foto de perfil a la pantalla de bloqueig"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Es mostra com a bombolla flotant a la part superior de la secció de converses i la foto de perfil apareix a la pantalla de bloqueig"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuració"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet les funcions de converses"</string>
@@ -899,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Tanca la configuració ràpida."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"S\'ha configurat l\'alarma."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"S\'ha iniciat la sessió com a <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"triar un usuari"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Sense connexió a Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Obre la informació detallada."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"No està disponible pel motiu següent: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Obre la configuració per a <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Edita l\'ordre de la configuració."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menú d\'engegada"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pàgina <xliff:g id="ID_1">%1$d</xliff:g> (<xliff:g id="ID_2">%2$d</xliff:g> en total)"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantalla de bloqueig"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telèfon apagat per la calor"</string>
@@ -1011,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Mou cap a l\'esquerra"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Mou cap a la dreta"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Canvia al mode d\'ampliació"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Amplia tota la pantalla"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Amplia la pantalla completa"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Amplia una part de la pantalla"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Canvia"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"El gest d\'accessibilitat s\'ha substituït pel botó d\'accessibilitat\n\n"<annotation id="link">"Mostra la configuració"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mou el botó a l\'extrem per amagar-lo temporalment"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Controls de dispositius"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Afegeix controls per als teus dispositius connectats"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configura els controls de dispositius"</string>
@@ -1081,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Vincula un dispositiu nou"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilació"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"El número de compilació s\'ha copiat al porta-retalls."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Conversa oberta"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversa"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Toca una conversa per afegir-la a la teva pantalla d\'inici"</string>
+    <string name="timestamp" msgid="6577851592534538533">"Fa <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"Fa menys de: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"Fa més de: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Natalici"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Natalici aviat"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Aniversari"</string>
+    <string name="location_status" msgid="1294990572202541812">"Compartint la ubicació"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Història nova"</string>
+    <string name="video_status" msgid="4548544654316843225">"Mirant"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Escoltant"</string>
+    <string name="game_status" msgid="1340694320630973259">"Jugant"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Amics"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Parlem aquesta nit!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Trucada perduda"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Consulta els missatges recents, les trucades perdudes i les actualitzacions d\'estat"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Conversa"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Hi ha hagut un problema en llegir el mesurador de la bateria"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toca per obtenir més informació"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Cap alarma configurada"</string>
 </resources>

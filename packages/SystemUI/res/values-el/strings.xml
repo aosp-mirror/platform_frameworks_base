@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Ακύρωση"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Κοινοποίηση"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Η εγγραφή οθόνης ακυρώθηκε"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Η εγγραφή οθόνης αποθηκεύτηκε"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Πατήστε για προβολή"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Παρουσιάστηκε σφάλμα κατά τη διαγραφή της εγγραφής οθόνης"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Η λήψη αδειών απέτυχε"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Σφάλμα κατά την έναρξη της εγγραφής οθόνης"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Νέος χρήστης"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Διαδίκτυο"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Ασφαλές για πτήση"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Υπάρχουν διαθέσιμα δίκτυα"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Δεν υπάρχουν διαθέσιμα δίκτυα"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Μη συνδεδεμένο"</string>
@@ -470,11 +467,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Εμφάνιση προφίλ"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Προσθήκη χρήστη"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Νέος χρήστης"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"Λήξη περιόδου σύνδεσης επισκέπτη"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Κατάργηση επισκέπτη;"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Όλες οι εφαρμογές και τα δεδομένα αυτής της περιόδου σύνδεσης θα διαγραφούν."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Κατάργηση"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Επισκέπτη , καλώς όρισες ξανά!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Kαλώς ορίσατε ξανά!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Θέλετε να συνεχίσετε την περίοδο σύνδεσής σας;"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Έναρξη από την αρχή"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ναι, συνέχεια"</string>
@@ -485,7 +481,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Αποσύνδεση τρέχοντα χρήστη"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ΑΠΟΣΥΝΔΕΣΗ ΧΡΗΣΤΗ"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Προσθήκη νέου χρήστη;"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει το χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει τον χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Συμπληρώθηκε το όριο χρηστών"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Μπορείτε να προσθέσετε έως <xliff:g id="COUNT">%d</xliff:g> χρήστες.</item>
@@ -519,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Αυτή η συσκευή είναι διαχειριζόμενη από τον γονέα σου"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ο οργανισμός σας κατέχει αυτήν τη συσκευή και μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Ο οργανισμός <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> κατέχει αυτήν τη συσκευή και μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου."</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Αυτή η συσκευή παρέχεται από τον οργανισμό <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Αυτή η συσκευή ανήκει στον οργανισμό σας και είναι συνδεδεμένη στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> και είναι συνδεδεμένη στην εφαρμογή <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Αυτή η συσκευή ανήκει στον οργανισμό σας."</string>
@@ -532,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Το προφίλ εργασίας σας είναι συνδεδεμένο στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Το προσωπικό σας προφίλ είναι συνδεδεμένο στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Αυτή η συσκευή είναι συνδεδεμένη στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Αυτή η συσκευή παρέχεται από τον οργανισμό <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Διαχείριση συσκευών"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Παρακολούθηση προφίλ"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Παρακολούθηση δικτύου"</string>
@@ -543,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Προβολή πολιτικών"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Προβολή στοιχείων ελέγχου"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nΟ διαχειριστής IT μπορεί να παρακολουθεί και να διαχειρίζεται τις ρυθμίσεις, την εταιρική πρόσβαση, τις εφαρμογές, τα δεδομένα που σχετίζονται με τη συσκευή καθώς και τις πληροφορίες τοποθεσίας της συσκευής σας.\n\nΓια περισσότερες πληροφορίες, επικοινωνήστε με τον διαχειριστή IT."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"Ο οργανισμός <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> ενδέχεται να έχει πρόσβαση σε δεδομένα που σχετίζονται με αυτήν τη συσκευή, να διαχειρίζεται εφαρμογές και να αλλάξει τις ρυθμίσεις της.\n\nΕάν έχετε ερωτήσεις, επικονωνήστε με τον οργανισμό <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Αυτή η συσκευή ανήκει στον οργανισμό σας.\n\nΟ διαχειριστής IT μπορεί να παρακολουθεί και να διαχειρίζεται τις ρυθμίσεις, την εταιρική πρόσβαση, τις εφαρμογές, τα δεδομένα που σχετίζονται με τη συσκευή καθώς και τις πληροφορίες τοποθεσίας της συσκευής σας.\n\nΓια περισσότερες πληροφορίες, επικοινωνήστε με τον διαχειριστή IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Ο οργανισμός σας εγκατέστησε μια αρχή έκδοσης πιστοποιητικών σε αυτήν τη συσκευή. Η ασφαλής επισκεψιμότητα δικτύου σας μπορεί να παρακολουθείται ή να τροποποιείται."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ο οργανισμός σας εγκατέστησε μια αρχή έκδοσης πιστοποιητικών στο προφίλ εργασίας σας. Η ασφαλής επισκεψιμότητα δικτύου σας μπορεί να παρακολουθείται ή να τροποποιείται."</string>
@@ -653,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Εμφάνιση λειτουργίας επίδειξης"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Ξυπνητήρι"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Προφίλ εργασίας"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Λειτουργία πτήσης"</string>
     <string name="add_tile" msgid="6239678623873086686">"Προσθήκη πλακιδίου"</string>
@@ -899,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Κλείσιμο γρήγορων ρυθμίσεων."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Το ξυπνητήρι ορίστηκε."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Σύνδεση ως <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"επιλογή χρήστη"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Δεν υπάρχει σύνδεση στο διαδίκτυο"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Άνοιγμα λεπτομερειών."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Μη διαθέσιμα λόγω <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Άνοιγμα ρυθμίσεων <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Επεξεργασία σειράς ρυθμίσεων."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Μενού λειτουργίας"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Σελίδα <xliff:g id="ID_1">%1$d</xliff:g> από <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Οθόνη κλειδώματος"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Το τηλέφωνο απεν. λόγω ζέστης"</string>
@@ -1011,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Μετακίνηση αριστερά"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Μετακίνηση δεξιά"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Εναλλαγή μεγιστοποίησης"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Μεγέθυνση ολόκληρης της οθόνης"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Μεγέθυνση πλήρους οθόνης"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Μεγέθυνση μέρους της οθόνης"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Εναλλαγή"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Το κουμπί προσβασιμότητας αντικατέστησε την κίνηση προσβασιμότητας\n\n"<annotation id="link">"Προβολή ρυθμίσεων"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Μετακινήστε το κουμπί στο άκρο για προσωρινή απόκρυψη"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Στοιχεία ελέγχου συσκευής"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Προσθήκη στοιχείων ελέγχου για τις συνδεδεμένες συσκευές σας."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Ρύθμιση στοιχείων ελέγχου συσκευής"</string>
@@ -1081,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Σύζευξη νέας συσκευής"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Αριθμός έκδοσης"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Ο αριθμός έκδοσης αντιγράφηκε στο πρόχειρο."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Άνοιγμα συνομιλίας"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Γραφικά στοιχεία συνομιλίας"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Πατήστε μια συνομιλία για να την προσθέσετε στην αρχική οθόνη"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> πριν"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"Λιγότερο από <xliff:g id="DURATION">%1$s</xliff:g> πριν"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"Περισσότερο από <xliff:g id="DURATION">%1$s</xliff:g> πριν"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Γενέθλια"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Προσεχώς γενέθλια"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Επέτειος"</string>
+    <string name="location_status" msgid="1294990572202541812">"Κοινοποίηση τοποθ."</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Νέα είδηση"</string>
+    <string name="video_status" msgid="4548544654316843225">"Παρακολούθηση"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Ακρόαση"</string>
+    <string name="game_status" msgid="1340694320630973259">"Παίζει τώρα"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Φίλοι"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Συζήτηση απόψε!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Αναπάντητη κλήση"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Δείτε πρόσφατα μηνύματα, αναπάντητες κλήσεις και ενημερώσεις κατάστασης"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Συνομιλία"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Υπάρχει κάποιο πρόβλημα με την ανάγνωση του μετρητή μπαταρίας"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Πατήστε για περισσότερες πληροφορίες."</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Δεν ορίστηκε ξυπνητ."</string>
 </resources>

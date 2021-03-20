@@ -34,7 +34,7 @@ public class SensorPropertiesInternal implements Parcelable {
     public final int sensorId;
     @SensorProperties.Strength public final int sensorStrength;
     public final int maxEnrollmentsPerUser;
-    public final List<ComponentInfoInternal> componentInfo;
+    @NonNull public final List<ComponentInfoInternal> componentInfo;
     public final boolean resetLockoutRequiresHardwareAuthToken;
     public final boolean resetLockoutRequiresChallenge;
 

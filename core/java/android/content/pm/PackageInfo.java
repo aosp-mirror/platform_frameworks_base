@@ -232,13 +232,23 @@ public class PackageInfo implements Parcelable {
      *
      * @removed We do not support required permissions.
      */
-    public static final int REQUESTED_PERMISSION_REQUIRED = 1<<0;
+    public static final int REQUESTED_PERMISSION_REQUIRED = 0x00000001;
 
     /**
      * Flag for {@link #requestedPermissionsFlags}: the requested permission
      * is currently granted to the application.
      */
-    public static final int REQUESTED_PERMISSION_GRANTED = 1<<1;
+    public static final int REQUESTED_PERMISSION_GRANTED = 0x00000002;
+
+    /**
+     * Flag for {@link #requestedPermissionsFlags}: the requested permission has
+     * declared {@code neverForLocation} in their manifest as a strong assertion
+     * by a developer that they will never use this permission to derive the
+     * physical location of the device, regardless of
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and/or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} being granted.
+     */
+    public static final int REQUESTED_PERMISSION_NEVER_FOR_LOCATION = 0x00010000;
 
     /**
      * Array of all signatures read from the package file. This is only filled

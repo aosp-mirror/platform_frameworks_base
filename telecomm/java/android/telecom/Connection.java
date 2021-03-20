@@ -44,6 +44,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.telephony.CallQuality;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.util.ArraySet;
 import android.view.Surface;
@@ -977,6 +978,23 @@ public abstract class Connection extends Conferenceable {
     @SystemApi
     public static final String EXTRA_DEVICE_TO_DEVICE_MESSAGE_VALUE =
             "android.telecom.extra.DEVICE_TO_DEVICE_MESSAGE_VALUE";
+
+    /**
+     * Connection event used to communicate a {@link android.telephony.CallQuality} report from
+     * telephony to Telecom for relaying to
+     * {@link DiagnosticCall#onCallQualityReceived(CallQuality)}.
+     * @hide
+     */
+    public static final String EVENT_CALL_QUALITY_REPORT =
+            "android.telecom.event.CALL_QUALITY_REPORT";
+
+    /**
+     * Extra sent with {@link #EVENT_CALL_QUALITY_REPORT} containing the
+     * {@link android.telephony.CallQuality} data.
+     * @hide
+     */
+    public static final String EXTRA_CALL_QUALITY_REPORT =
+            "android.telecom.extra.CALL_QUALITY_REPORT";
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);

@@ -204,6 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"Մթնշաղի սկիզբը որոշող ծառայություն"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Ժամային գոտու դետեկտոր (աշխատում է առանց ինտերնետի)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Ժամանակի թարմացման GNSS ծառայություն"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Երաժշտության ճանաչումը կառավարող ծառայություն"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Ձեր սարքը ջնջվելու է"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Հնարավոր չէ օգտագործել ադմինիստրատորի հավելվածը։ Ձեր սարքից բոլոր տվյալները կջնջվեն։\n\nՀարցեր ունենալու դեպքում դիմեք ձեր կազմակերպության ադմինիստրատորին։"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Տպումն անջատված է <xliff:g id="OWNER_APP">%s</xliff:g> հավելվածի կողմից։"</string>
@@ -293,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Հավելվածն աշխատում է"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Մարտկոցի լիցքը ծախսող հավելվածներ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Խոշորացում"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"«<xliff:g id="APP_NAME">%1$s</xliff:g>» հավելվածը ծախսում է մարտկոցի լիցքը"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> հավելված ծախսում է մարտկոցի լիցքը"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Հպեք՝ մարտկոցի և թրաֆիկի մանրամասները տեսնելու համար"</string>
@@ -343,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Թույլ է տալիս հավելվածին կարգավիճակի գոտին լինել:"</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"ընդլայնել կամ հետ ծալել կարգավիճակի գոտին"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Թույլ է տալիս ծրագրին ընդլայնել կամ հետ ծալել կարգավիճակի գոտին:"</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"ցուցադրել ծանուցումներ կողպված սարքի էկրանին լիաէկրան ռեժիմում"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Թույլ է տալիս հավելվածին ծանուցումներ ցուցադրել կողպված սարքի էկրանին լիաէկրան ռեժիմում"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"տեղադրել դյուրանցումներ"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Հավելվածին թույլ է տալիս ավելացնել գլխավոր էկրանի դյուրանցումներ՝ առանց օգտագործողի միջամտության:"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"ապատեղադրել դյուրանցումները"</string>
@@ -554,6 +559,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Օգտագործել կենսաչափական համակարգեր կամ էկրանի կողպում"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Հաստատեք ձեր ինքնությունը"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Շարունակելու համար օգտագործեք կենսաչափական համակարգեր"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Շարունակելու համար օգտագործեք ձեր կենսաչափական տվյալները կամ էկրանի կողպումը"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Կենսաչափական սարքը հասանելի չէ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Նույնականացումը չեղարկվեց"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Չհաջողվեց ճանաչել"</string>
@@ -587,6 +593,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Օգտագործել մատնահետք"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Օգտագործել մատնահետք կամ էկրանի կողպում"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Շարունակելու համար անհրաժեշտ է ձեր մատնահետքը"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Շարունակելու համար օգտագործեք ձեր մատնահետքը կամ էկրանի կողպումը"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Մատնահետքի պատկերակ"</string>
@@ -634,6 +641,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Օգտագործել դեմքով ապակողպում"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Օգտագործել դեմքով ապակողպում կամ էկրանի կողպում"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Շարունակելու համար օգտագործեք դեմքով ապակողպում"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Շարունակելու համար օգտագործեք ձեր դեմքը կամ էկրանի կողպումը"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Դեմքի պատկերակ"</string>
@@ -997,6 +1005,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Դուք չունեք այս էջը բացելու թույլտվություն:"</string>
     <string name="text_copied" msgid="2531420577879738860">"Տեքստը պատճենված է սեղմատախտակին:"</string>
     <string name="copied" msgid="4675902854553014676">"Պատճենվեց"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> հավելվածը տվյալներ տեղադրեց <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> հավելվածից"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> հավելվածը տվյալներ տեղադրեց սեղմատախտակից"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Ավելին"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Ցանկ+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1370,11 +1380,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Անջատել"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> հիշասարքի ստուգում…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Բովանդակության ստուգում"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Արտաքին կրիչի ստուգում"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Նոր հիշասարք (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Հպեք՝ կարգավորելու համար"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Ընտրեք՝ կարգավորելու համար"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը։ Հպեք՝ հեռացնելու համար։"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Լուսանկարներ և մեդիա ֆայլեր տեղափոխելու համար"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Մեդիա ֆայլերի դիտում"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> հիշասարքի հետ կապված խնդիր կա"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Հպեք՝ շտկելու համար"</string>
@@ -1383,7 +1396,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Չապահովվող <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Այս սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>-ը: Հպեք՝ աջակցվող ձևաչափով կարգավորելու համար:"</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Այս սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>-ը: Ընտրեք՝ աջակցվող ձևաչափով կարգավորելու համար:"</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Ընտրեք՝ կրիչը (<xliff:g id="NAME">%s</xliff:g>) աջակցվող ձևաչափով կարգավորելու համար։"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>-ը հեռացվել է առանց անջատելու"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Տվյալներ չկորցնելու համար կրիչը հեռացնելուց առաջ անջատեք այն"</string>
@@ -1689,7 +1702,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Մի գործառույթից մյուսին անցնելու համար երեք մատը սահեցրեք վերև և պահեք։"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Խոշորացում"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ներկայիս օգտատերը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Փոխարկվում է <xliff:g id="NAME">%1$s</xliff:g>-ին..."</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Անցում հետևյալ պրոֆիլին՝ <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Ելք <xliff:g id="NAME">%1$s</xliff:g>-ից…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Սեփականատեր"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Սխալ"</string>
@@ -2086,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Հատուկ գործառույթների դյուրանցում"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Հատուկ գործառույթների դյուրանցման ընտրիչ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Հատուկ գործառույթների դյուրանցում"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Փակել ծանուցումների վահանակը"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի ենթագրերի գոտին։"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> փաթեթը գցվեց ՍԱՀՄԱՆԱՓԱԿՎԱԾ զամբյուղի մեջ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>՝"</string>
@@ -2223,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Նոր գործառույթ. Պատուհանի խոշորացույց"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Այժմ կարող եք խոշորացնել ամբողջ էկրանը կամ դրա մի մասը"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Խոշորացրեք էկրանի մի հատվածը"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Այժմ կարող եք խոշորացնել ամբողջ էկրանը կամ էկրանի որոշակի հատված, ինչպես նաև փոխել ռեժիմները։"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Միացնել կարգավորումներում"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Փակել"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Շարունակելու համար &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; հավելվածին անհրաժեշտ է սարքի խոսափողի օգտագործման թույլտվություն։"</string>
@@ -2233,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Տվիչների գաղտնիություն"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Հավելվածի պատկերակ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Հավելվածի բրենդային պատկեր"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>
