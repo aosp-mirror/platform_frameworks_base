@@ -20,13 +20,15 @@ import android.annotation.ColorInt;
 import android.graphics.Color;
 import android.graphics.RuntimeShader;
 import android.graphics.Shader;
+import android.util.DisplayMetrics;
 
 final class RippleShader extends RuntimeShader {
     private static final String SHADER_UNIFORMS =  "uniform vec2 in_origin;\n"
             + "uniform vec2 in_touch;\n"
             + "uniform float in_progress;\n"
             + "uniform float in_maxRadius;\n"
-            + "uniform vec2 in_resolution;\n"
+            + "uniform vec2 in_resolutionScale;\n"
+            + "uniform vec2 in_noiseScale;\n"
             + "uniform float in_hasMask;\n"
             + "uniform float in_noisePhase;\n"
             + "uniform vec4 in_color;\n"
@@ -40,18 +42,15 @@ final class RippleShader extends RuntimeShader {
             + "}"
             + "const float PI = 3.1415926535897932384626;\n"
             + "\n"
-            + "float threshold(float v, float l, float h) {\n"
-            + "  return step(l, v) * (1.0 - step(h, v));\n"
-            + "}\n"
-            + "\n"
             + "float sparkles(vec2 uv, float t) {\n"
             + "  float n = triangleNoise(uv);\n"
             + "  float s = 0.0;\n"
             + "  for (float i = 0; i < 4; i += 1) {\n"
-            + "    float l = i * 0.25;\n"
-            + "    float h = l + 0.005;\n"
-            + "    float o = abs(sin(0.1 * PI * (t + i)));\n"
-            + "    s += threshold(n + o, l, h);\n"
+            + "    float l = i * 0.01;\n"
+            + "    float h = l + 0.1;\n"
+            + "    float o = smoothstep(n - l, h, n);\n"
+            + "    o *= abs(sin(PI * o * (t + 0.55 * i)));\n"
+            + "    s += o;\n"
             + "  }\n"
             + "  return saturate(s);\n"
             + "}\n"
@@ -83,7 +82,9 @@ final class RippleShader extends RuntimeShader {
             + "    vec2 center = mix(in_touch, in_origin, fadeIn);\n"
             + "    float ring = getRingMask(p, center, in_maxRadius, fadeIn);\n"
             + "    float alpha = min(fadeIn, 1. - fadeOutNoise);\n"
-            + "    float sparkle = sparkles(p, in_noisePhase) * ring * alpha;\n"
+            + "    vec2 uv = p * in_resolutionScale;\n"
+            + "    vec2 densityUv = uv - mod(uv, in_noiseScale);\n"
+            + "    float sparkle = sparkles(densityUv, in_noisePhase) * ring * alpha;\n"
             + "    float fade = min(fadeIn, 1. - fadeOutRipple);\n"
             + "    vec4 circle = in_color * (softCircle(p, center, in_maxRadius "
             + "      * fadeIn, 0.2) * fade);\n"
@@ -135,7 +136,10 @@ final class RippleShader extends RuntimeShader {
                 color.green(), color.blue(), color.alpha()});
     }
 
-    public void setResolution(float w, float h) {
-        setUniform("in_resolution", w, h);
+    public void setResolution(float w, float h, int density) {
+        float noiseScale = 0.8f;
+        float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE * 0.5f * noiseScale;
+        setUniform("in_resolutionScale", new float[] {1f / w, 1f / h});
+        setUniform("in_noiseScale", new float[] {densityScale / w, densityScale / h});
     }
 }

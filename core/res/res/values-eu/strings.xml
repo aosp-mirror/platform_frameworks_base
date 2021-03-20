@@ -195,7 +195,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"Jabeak kudeatzen du gailua"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Erakundeak kudeatzen du gailua eta baliteke sareko trafikoa gainbegiratzea. Sakatu hau xehetasunak ikusteko."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikazioek zure kokapena atzi dezakete"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Informazio gehiago lortzeko, jo IKT sailaren administratzailearengana"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Informazio gehiago lortzeko, jo IKT saileko administratzailearengana"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"Muga geografikoen zerbitzua"</string>
     <string name="country_detector" msgid="7023275114706088854">"Herrialde-hautemailea"</string>
     <string name="location_service" msgid="2439187616018455546">"Kokapen-zerbitzua"</string>
@@ -204,6 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"Ilunabarreko zerbitzua"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Ordu-zonaren hautemailea (ez zaude konektatuta sarera)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS ordua eguneratzeko zerbitzua"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Musika hautemateko kudeaketa-zerbitzua"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Gailuko datuak ezabatu egingo dira"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Ezin da erabili administratzeko aplikazioa. Ezabatu egingo da gailuko eduki guztia.\n\nZalantzarik baduzu, jarri erakundeko administratzailearekin harremanetan."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> aplikazioak desgaitu egin du inprimatzeko aukera."</string>
@@ -293,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikazio bat abian da"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Bateria kontsumitzen ari diren aplikazioak"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Lupa"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ari da bateria erabiltzen"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikazio ari dira bateria erabiltzen"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
@@ -343,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Egoera-barra izatea baimentzen die aplikazioei."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"zabaldu/tolestu egoera-barra"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Egoera-barra zabaltzeko edo tolesteko aukera ematen die aplikazioei."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"blokeatutako gailu batean jakinarazpenak pantaila osoko jarduera gisa bistaratzea"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Blokeatutako gailu batean jakinarazpenak pantaila osoko jarduera gisa bistaratzeko baimena ematen dio aplikazioari"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalatu lasterbideak"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Erabiltzaileak ezer egin gabe hasierako pantailan lasterbideak gehitzeko aukera ematen die aplikazioei."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalatu lasterbideak"</string>
@@ -554,6 +559,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Erabili sistema biometrikoak edo pantailaren blokeoa"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Egiaztatu zeu zarela"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Aurrera egiteko, erabili sistema biometrikoak"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Aurrera egiteko, erabili sistema biometrikoak edo pantailaren blokeoa"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biometrikoa ez dago erabilgarri"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Utzi da autentifikazioa"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Ez da ezagutu"</string>
@@ -587,6 +593,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Erabili hatz-marka"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Erabili hatz-marka edo pantailaren blokeoa"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Aurrera egiteko, erabili hatz-marka"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Aurrera egiteko, erabili hatz-marka edo pantailaren blokeoa"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Hatz-markaren ikonoa"</string>
@@ -634,6 +641,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Erabili aurpegiaren bidez desblokeatzeko eginbidea"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Erabili aurpegia edo pantailaren blokeoa"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Aurrera egiteko, erabili aurpegiaren bidez desblokeatzeko eginbidea"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Aurrera egiteko, erabili aurpegia edo pantailaren blokeoa"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Aurpegiaren ikonoa"</string>
@@ -997,6 +1005,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Ez duzu orri hau irekitzeko baimenik."</string>
     <string name="text_copied" msgid="2531420577879738860">"Testua arbelean kopiatu da."</string>
     <string name="copied" msgid="4675902854553014676">"Kopiatu da"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> aplikaziotik itsatsi da <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"Arbeletik itsatsi da <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Gehiago"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menua+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta +"</string>
@@ -1213,7 +1223,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Erakutsi beti"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Android sistema eragilearen bertsio bateraezin baterako dago egina <xliff:g id="APP_NAME">%1$s</xliff:g>; beraz, espero ez bezala funtziona lezake. Baliteke aplikazioaren bertsio eguneratuago bat eskuragarri egotea."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Erakutsi beti"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Bilatu eguneratzea"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Bilatu eguneratzeak"</string>
     <string name="smv_application" msgid="3775183542777792638">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioak (<xliff:g id="PROCESS">%2$s</xliff:g> prozesua) berak aplikatutako StrictMode gidalerroa urratu du."</string>
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> prozesuak bere kabuz ezarritako StrictMode gidalerroak urratu ditu."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefonoa eguneratzen ari da…"</string>
@@ -1370,11 +1380,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desaktibatu"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> egiaztatzen…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Edukia berrikusten"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Multimedia-edukiaren memoria-unitatea aztertzen"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Euskarri berria: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ez da funtzionatzen ari"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Sakatu konfiguratzeko"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Hauta ezazu konfiguratzeko"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Gailua formateatu beharko duzu, agian. Saka ezazu kanporatzeko."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Argazkiak eta multimedia-fitxategiak transferitzeko"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Arakatu multimedia-fitxategiak"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Arazo bat dago honekin: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ez da funtzionatzen ari"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Sakatu konpontzeko"</string>
@@ -1383,7 +1396,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Ez da onartzen <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ez da funtzionatzen ari"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Gailuak ez du <xliff:g id="NAME">%s</xliff:g> onartzen. Sakatu onartzen den formatu batean konfiguratzeko."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Gailuak ez du <xliff:g id="NAME">%s</xliff:g> onartzen. Hauta ezazu onartzen den formatu batean konfiguratzeko."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Hauta ezazu onartzen den formatu batean <xliff:g id="NAME">%s</xliff:g> konfiguratzeko."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Gailua formateatu beharko duzu, agian"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> ustekabean kendu da"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Kendu aurretik, kanporatu euskarria edukirik ez galtzeko"</string>
@@ -1689,7 +1702,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Eginbide batetik bestera aldatzeko, pasatu hiru hatz pantailaren behealdetik gora eta eduki sakatuta une batez."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Lupa"</string>
     <string name="user_switched" msgid="7249833311585228097">"Erabiltzailea: <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailera aldatzen…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"\"<xliff:g id="NAME">%1$s</xliff:g>\" erabiltzailera aldatzen…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailearen saioa amaitzen…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Jabea"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Errorea"</string>
@@ -2086,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Pantailako erabilerraztasun-lasterbidea"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Pantailako erabilerraztasun-lasterbideen hautatzailea"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Erabilerraztasun-lasterbidea"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Baztertu jakinarazpenen panela"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioko azpitituluen barra."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Murriztuen edukiontzian ezarri da <xliff:g id="PACKAGE_NAME">%1$s</xliff:g>"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2223,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Berria: leihoen lupa"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Orain, pantaila osoa edo haren zati bat handi dezakezu"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Handitu pantailaren zati bat"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Orain, pantaila osoa edo eremu zehatz bat handi dezakezu, edo bi aukeren artean aldatu."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Aktibatu ezarpenetan"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Baztertu"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Aurrera egiteko, gailuaren mikrofonoa atzitzeko baimena behar du &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; aplikazioak."</string>
@@ -2233,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sentsoreen pribatutasuna"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Aplikazioaren ikonoa"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Aplikazioaren marka-irudia"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.os.Build.IS_USER;
+import static android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED;
 
 import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
 import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
@@ -135,6 +136,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runGetLetterboxBackgroundColor(pw);
                 case "reset":
                     return runReset(pw);
+                case "disable-blur":
+                    return runSetBlurDisabled(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -211,6 +214,33 @@ public class WindowManagerShellCommand extends ShellCommand {
         } else {
             mInterface.clearForcedDisplaySize(displayId);
         }
+        return 0;
+    }
+
+    private int runSetBlurDisabled(PrintWriter pw) throws RemoteException {
+        String arg = getNextArg();
+        if (arg == null) {
+            pw.println("Blur supported on device: " + CROSS_WINDOW_BLUR_SUPPORTED);
+            pw.println("Blur enabled: " + mInternal.mBlurController.mBlurEnabled);
+            return 0;
+        }
+
+        final boolean disableBlur;
+        switch (arg) {
+            case "true":
+            case "1":
+                disableBlur = true;
+                break;
+            case "false":
+            case "0":
+                disableBlur = false;
+                break;
+            default:
+                getErrPrintWriter().println("Error: expected true, 1, false, 0, but got " + arg);
+                return -1;
+        }
+
+        mInterface.setForceCrossWindowBlurDisabled(disableBlur);
         return 0;
     }
 
@@ -725,6 +755,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Set display scaling mode.");
         pw.println("  dismiss-keyguard");
         pw.println("    Dismiss the keyguard, prompting user for auth if necessary.");
+        pw.println("  disable-blur [true|1|false|0]");
         pw.println("  user-rotation [-d DISPLAY_ID] [free|lock] [rotation]");
         pw.println("    Print or set user rotation mode and user rotation.");
         pw.println("  dump-visible-window-views");

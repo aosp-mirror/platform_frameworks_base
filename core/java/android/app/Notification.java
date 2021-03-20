@@ -12423,10 +12423,6 @@ public class Notification implements Parcelable
          */
         public static final int DECORATION_FULL_CONSTRAINED = 4;
 
-        private static final boolean DEFAULT_BACKPORT_S_NOTIF_RULES = false;
-        private static final int DEFAULT_FULLY_CUSTOM_DECORATION = DECORATION_MINIMAL;
-        private static final int DEFAULT_DECORATED_DECORATION = DECORATION_PARTIAL;
-
         /**
          * Used by unit tests to force that this class returns its default values, which is required
          * in cases where the ContentResolver instance is a mock.
@@ -12439,11 +12435,7 @@ public class Notification implements Parcelable
          * @hide
          */
         public static boolean shouldBackportSNotifRules(@NonNull ContentResolver contentResolver) {
-            if (sForceDefaults) {
-                return DEFAULT_BACKPORT_S_NOTIF_RULES;
-            }
-            return Settings.Global.getInt(contentResolver, Settings.Global.BACKPORT_S_NOTIF_RULES,
-                        DEFAULT_BACKPORT_S_NOTIF_RULES ? 1 : 0) == 1;
+            return false;
         }
 
         /**
@@ -12452,14 +12444,7 @@ public class Notification implements Parcelable
          */
         public static int getFullyCustomViewNotifDecoration(
                 @NonNull ContentResolver contentResolver) {
-            if (sForceDefaults) {
-                return DEFAULT_FULLY_CUSTOM_DECORATION;
-            }
-            final int decoration = Settings.Global.getInt(contentResolver,
-                    Settings.Global.FULLY_CUSTOM_VIEW_NOTIF_DECORATION,
-                    DEFAULT_FULLY_CUSTOM_DECORATION);
-            // clamp to a valid decoration value
-            return Math.max(DECORATION_NONE, Math.min(decoration, DECORATION_FULL_CONSTRAINED));
+            return DECORATION_MINIMAL;
         }
 
         /**
@@ -12468,14 +12453,7 @@ public class Notification implements Parcelable
          */
         public static int getDecoratedCustomViewNotifDecoration(
                 @NonNull ContentResolver contentResolver) {
-            if (sForceDefaults) {
-                return DEFAULT_DECORATED_DECORATION;
-            }
-            final int decoration = Settings.Global.getInt(contentResolver,
-                    Settings.Global.DECORATED_CUSTOM_VIEW_NOTIF_DECORATION,
-                    DEFAULT_DECORATED_DECORATION);
-            // clamp to a valid decoration value (and don't allow decoration to be NONE or MINIMAL)
-            return Math.max(DECORATION_PARTIAL, Math.min(decoration, DECORATION_FULL_CONSTRAINED));
+            return DECORATION_PARTIAL;
         }
     }
 }

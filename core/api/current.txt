@@ -1581,6 +1581,7 @@ package android {
     field public static final int useLevel = 16843167; // 0x101019f
     field public static final int userVisible = 16843409; // 0x1010291
     field public static final int usesCleartextTraffic = 16844012; // 0x10104ec
+    field public static final int usesPermissionFlags = 16844356; // 0x1010644
     field public static final int value = 16842788; // 0x1010024
     field public static final int valueFrom = 16843486; // 0x10102de
     field public static final int valueTo = 16843487; // 0x10102df
@@ -6943,6 +6944,7 @@ package android.app.admin {
     method @Nullable public String onChoosePrivateKeyAlias(@NonNull android.content.Context, @NonNull android.content.Intent, int, @Nullable android.net.Uri, @Nullable String);
     method public void onNetworkLogsAvailable(@NonNull android.content.Context, @NonNull android.content.Intent, long, @IntRange(from=1) int);
     method public final void onReceive(@NonNull android.content.Context, @NonNull android.content.Intent);
+    method public void onSecurityLogsAvailable(@NonNull android.content.Context, @NonNull android.content.Intent);
   }
 
   public final class DeviceAdminInfo implements android.os.Parcelable {
@@ -7020,6 +7022,7 @@ package android.app.admin {
     field public static final String ACTION_PASSWORD_FAILED = "android.app.action.ACTION_PASSWORD_FAILED";
     field public static final String ACTION_PASSWORD_SUCCEEDED = "android.app.action.ACTION_PASSWORD_SUCCEEDED";
     field public static final String ACTION_PROFILE_PROVISIONING_COMPLETE = "android.app.action.PROFILE_PROVISIONING_COMPLETE";
+    field public static final String ACTION_SECURITY_LOGS_AVAILABLE = "android.app.action.SECURITY_LOGS_AVAILABLE";
     field public static final int BUGREPORT_FAILURE_FAILED_COMPLETING = 0; // 0x0
     field public static final int BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE = 1; // 0x1
     field public static final String DEVICE_ADMIN_META_DATA = "android.app.device_admin";
@@ -7315,6 +7318,7 @@ package android.app.admin {
     field public static final String DELEGATION_NETWORK_LOGGING = "delegation-network-logging";
     field public static final String DELEGATION_PACKAGE_ACCESS = "delegation-package-access";
     field public static final String DELEGATION_PERMISSION_GRANT = "delegation-permission-grant";
+    field public static final String DELEGATION_SECURITY_LOGGING = "delegation-security-logging";
     field public static final int ENCRYPTION_STATUS_ACTIVATING = 2; // 0x2
     field public static final int ENCRYPTION_STATUS_ACTIVE = 3; // 0x3
     field public static final int ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY = 4; // 0x4
@@ -12168,6 +12172,7 @@ package android.content.pm {
     field public static final int INSTALL_LOCATION_INTERNAL_ONLY = 1; // 0x1
     field public static final int INSTALL_LOCATION_PREFER_EXTERNAL = 2; // 0x2
     field public static final int REQUESTED_PERMISSION_GRANTED = 2; // 0x2
+    field public static final int REQUESTED_PERMISSION_NEVER_FOR_LOCATION = 65536; // 0x10000
     field public android.content.pm.ActivityInfo[] activities;
     field public android.content.pm.ApplicationInfo applicationInfo;
     field @Nullable public android.content.pm.Attribution[] attributions;
@@ -41803,7 +41808,7 @@ package android.telephony {
     method @NonNull public android.os.Bundle getCarrierConfigValues();
     method @Deprecated public static android.telephony.SmsManager getDefault();
     method public static int getDefaultSmsSubscriptionId();
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int getSmsCapacityOnIcc();
+    method @IntRange(from=0) @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public int getSmsCapacityOnIcc();
     method @Deprecated public static android.telephony.SmsManager getSmsManagerForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.SMS_FINANCIAL_TRANSACTIONS) public void getSmsMessagesForFinancialApp(android.os.Bundle, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.SmsManager.FinancialSmsCallback);
     method @Nullable @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getSmscAddress();

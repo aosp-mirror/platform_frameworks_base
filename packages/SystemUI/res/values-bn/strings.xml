@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"বাতিল করুন"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"শেয়ার করুন"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"স্ক্রিন রেকর্ডিং বাতিল করা হয়েছে"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"স্ক্রিন রেকর্ডিং সেভ করা হয়েছে"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"দেখতে ট্যাপ করুন"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"স্ক্রিন রেকডিং মুছে ফেলার সময় সমস্যা হয়েছে"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"অনুমতি পাওয়া যায়নি"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"স্ক্রিন রেকর্ডিং শুরু করার সময় সমস্যা হয়েছে"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"নতুন ব্যবহারকারী"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"ওয়াই-ফাই"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"ইন্টারনেট"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"বিমানের জন্য নিরাপদ"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"নেটওয়ার্ক উপলভ্য"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"নেটওয়ার্ক উপলভ্য নেই"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"সংযুক্ত নয়"</string>
@@ -470,14 +467,13 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"প্রোফাইল দেখান"</string>
     <string name="user_add_user" msgid="4336657383006913022">"ব্যবহারকারী জুড়ুন"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"নতুন ব্যবহারকারী"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"গেস্ট সেশন শেষ করুন"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"অতিথি সরাবেন?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই সেশনের সব অ্যাপ্লিকেশান ও ডেটা মুছে ফেলা হবে।"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই সেশনের সব অ্যাপ ও ডেটা মুছে ফেলা হবে।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"সরান"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"অতিথি, আপনি ফিরে আসায় আপনাকে স্বাগত!"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপনি কি আপনার সেশনটি অবিরত রাখতে চান?"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপনি কি আপনার সেশনটি চালিয়ে যেতে চান?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আবার শুরু করুন"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হ্যাঁ, অবিরত থাকুন"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হ্যাঁ, চালিয়ে যান"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"অতিথি ব্যবহারকারী"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"অ্যাপ্লিকেশান এবং ডেটা মুছে ফেলার জন্য অতিথি ব্যবহারকারী সরান।"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"অতিথি সরান"</string>
@@ -485,7 +481,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"বর্তমান ব্যবহারকারীকে লগ-আউট করুন"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ব্যবহারকারীকে লগ-আউট করুন"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"নতুন ব্যবহারকারীকে যোগ করবেন?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট-আপ করে নিতে হবে৷\n\nযেকোনো ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ্লিকেশান আপডেট করতে পারবেন৷"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট-আপ করে নিতে হবে৷\n\nযেকোনও ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ আপডেট করতে পারবেন৷"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"আর কোনও প্রোফাইল যোগ করা যাবে না"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">আপনি <xliff:g id="COUNT">%d</xliff:g> জন পর্যন্ত ব্যবহারকারীর প্রোফাইল যোগ করতে পারেন।</item>
@@ -519,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"আপনার অভিভাবক এই ডিভাইস ম্যানেজ করেন"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের এবং এরা ডিভাইসের নেটওয়ার্ক ট্রাফিক মনিটর করতে পারে"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> এই ডিভাইসের মালিক এবং এটির নেটওয়ার্ক ট্রাফিক মনিটর করতে পারে"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"এই ডিভাইস <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> দিয়েছে"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের এবং <xliff:g id="VPN_APP">%1$s</xliff:g>-এ কানেক্ট করা আছে"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"এই ডিভাইস <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-এর এবং <xliff:g id="VPN_APP">%2$s</xliff:g>-এ কানেক্ট করা আছে"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের"</string>
@@ -532,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"<xliff:g id="VPN_APP">%1$s</xliff:g>-এ আপনার অফিস প্রোফাইল কানেক্ট করা রয়েছে"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"আপনার ব্যক্তিগত প্রোফাইল <xliff:g id="VPN_APP">%1$s</xliff:g>-এ কানেক্ট করা আছে"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"এই ডিভাইস <xliff:g id="VPN_APP">%1$s</xliff:g>-এ কানেক্ট করা আছে"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"এই ডিভাইস <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> দিয়েছে"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ডিভাইসের পরিচালনা"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"প্রোফাইল দেখরেখ করা"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"নেটওয়ার্ক নিরীক্ষণ"</string>
@@ -543,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"নীতিগুলি দেখুন"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"কন্ট্রোল দেখুন"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"এই ডিভাইসটি <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-এর।\n\nআপনার আইটি অ্যাডমিন এই ডিভাইসের সেটিংস, কর্পোরেট অ্যাক্সেস, অ্যাপ, ডিভাইসের সাথে সম্পর্কিত ডেটা এবং ডিভাইসের লোকেশন সম্পর্কিত ডেটা মনিটর ও ম্যানেজ করতে পারে।\n\nআরও তথ্যের জন্য আপনার আইটি অ্যাডমিনের সাথে যোগাযোগ করুন।"</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> হয়ত এই ডিভাইস সম্পর্কিত ডেটা ব্যবহার করতে, অ্যাপ ম্যানেজ করতে এবং এই ডিভাইসের সেটিংস পরিবর্তন করতে পারবে।\n\nকোনও প্রশ্ন থাকলে, <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>-এর সাথে যোগাযোগ করুন।"</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের।\n\nআপনার আইটি অ্যাডমিন এই ডিভাইসের সেটিংস, কর্পোরেট অ্যাক্সেস, অ্যাপ, ডিভাইসের সাথে সম্পর্কিত ডেটা এবং ডিভাইসের লোকেশন সম্পর্কিত ডেটা মনিটর ও ম্যানেজ করতে পারে।\n\nআরও তথ্যের জন্য আপনার আইটি অ্যাডমিনের সাথে যোগাযোগ করুন।"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"আপনার প্রতিষ্ঠান আপনার অফিস প্রোফাইলে একটি সার্টিফিকেট কর্তৃপক্ষ ইনস্টল করেছে।আপনার সুরক্ষিত নেটওয়ার্ক ট্রাফিক নিরীক্ষণ বা পরিবর্তন করা হতে পারে।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"আপনার প্রতিষ্ঠান আপনার অফিস প্রোফাইলে একটি সার্টিফিকেট কর্তৃপক্ষ ইনস্টল করেছে। আপনার নিরাপদ নেটওয়ার্ক ট্রাফিকে নজর রাখা হতে পারে বা তাতে পরিবর্তন করা হতে পারে।"</string>
@@ -653,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ডেমো মোড দেখান"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ইথারনেট"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"অ্যালার্ম"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"কাজের প্রোফাইল"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"বিমান মোড"</string>
     <string name="add_tile" msgid="6239678623873086686">"টাইল যোগ করুন"</string>
@@ -899,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"দ্রুত সেটিংস বন্ধ করুন৷"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"অ্যালার্ম সেট করা হয়েছে৷"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> হিসেবে প্রবেশ করে রয়েছেন"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ব্যবহারকারী বেছে নিন"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ইন্টারনেট কানেকশন নেই"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"বিশদ বিবরণ খুলুন৷"</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g>-এর জন্য পাওয়া যাবে না"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> সেটিংস খুলুন৷"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ক্রম বা সেটিংস সম্পাদনা করুন৷"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"পাওয়ার মেনু"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>টির মধ্যে <xliff:g id="ID_1">%1$d</xliff:g> নং পৃষ্ঠা"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"লক স্ক্রিন"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"আপনার ফোন গরম হওয়ার জন্য বন্ধ হয়ে গেছে"</string>
@@ -1011,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"বাঁদিকে সরান"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"ডানদিকে সরান"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"বড় করে দেখার সুইচ"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"ফুল-স্ক্রিন মোডে দেখুন"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"সম্পূর্ণ স্ক্রিন বড় করে দেখা"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"স্ক্রিনের কিছুটা অংশ বড় করুন"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"বদল করুন"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"অ্যাক্সেসিবিলিটি জেসচার পরিবর্তন করে অ্যাক্সেসেবিলিটি বোতাম করা হয়েছে\n\n"<annotation id="link">"সেটিংস দেখুন"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"এটি অস্থায়ীভাবে লুকাতে বোতামটি কোণে সরান"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ডিভাইস কন্ট্রোল"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"আপনার কানেক্ট করা ডিভাইসের জন্য কন্ট্রোল যোগ করুন"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ডিভাইস কন্ট্রোল সেট-আপ করুন"</string>
@@ -1081,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"নতুন ডিভাইস পেয়ার করুন"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"বিল্ড নম্বর"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"বিল্ড নম্বর ক্লিপবোর্ডে কপি করা হয়েছে।"</string>
+    <string name="basic_status" msgid="2315371112182658176">"খোলা কথোপকথন"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"কথোপকথন উইজেট"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"কোনও কথোপথন আপনার হোম স্ক্রিনে যোগ করার জন্য এতে ট্যাপ করুন"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> ঘণ্টা আগে"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> থেকে কিছু কম সময় আগে"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> সপ্তাহেরও আগে"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"জন্মদিন"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"জন্মদিন শীঘ্রই আসছে"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"বার্ষিকী"</string>
+    <string name="location_status" msgid="1294990572202541812">"লোকেশন শেয়ার করা হচ্ছে"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"নতুন খবর"</string>
+    <string name="video_status" msgid="4548544654316843225">"দেখছি"</string>
+    <string name="audio_status" msgid="4237055636967709208">"অডিও শুনছি"</string>
+    <string name="game_status" msgid="1340694320630973259">"চালানো হচ্ছে"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"বন্ধু"</string>
+    <string name="empty_status" msgid="5938893404951307749">"আজ রাতে চ্যাট করা যাক!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"মিসড কল"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"সাম্প্রতিক মেসেজ, মিসড কল এবং স্ট্যাটাস সংক্রান্ত আপডেট দেখুন"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"কথোপকথন"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ব্যাটারির মিটারের রিডিং নেওয়ার সময় সমস্যা হয়েছে"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"আরও তথ্যের জন্য ট্যাপ করুন"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"কোনও অ্যালার্ম সেট করা নেই"</string>
 </resources>
