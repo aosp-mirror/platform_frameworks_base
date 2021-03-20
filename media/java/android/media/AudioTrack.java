@@ -2077,6 +2077,65 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
+     * Sets the streaming start threshold for an <code>AudioTrack</code>.
+     * <p> The streaming start threshold is the buffer level that the written audio
+     * data must reach for audio streaming to start after {@link #play()} is called.
+     * <p> For compressed streams, the size of a frame is considered to be exactly one byte.
+     *
+     * @param startThresholdInFrames the desired start threshold.
+     * @return the actual start threshold in frames value. This is
+     *         an integer between 1 to the buffer capacity
+     *         (see {@link #getBufferCapacityInFrames()}),
+     *         and might change if the output sink changes after track creation.
+     * @throws IllegalStateException if the track is not initialized or the
+     *         track transfer mode is not {@link #MODE_STREAM}.
+     * @throws IllegalArgumentException if startThresholdInFrames is not positive.
+     * @see #getStartThresholdInFrames()
+     */
+    public @IntRange(from = 1) int setStartThresholdInFrames(
+            @IntRange (from = 1) int startThresholdInFrames) {
+        if (mState != STATE_INITIALIZED) {
+            throw new IllegalStateException("AudioTrack is not initialized");
+        }
+        if (mDataLoadMode != MODE_STREAM) {
+            throw new IllegalStateException("AudioTrack must be a streaming track");
+        }
+        if (startThresholdInFrames < 1) {
+            throw new IllegalArgumentException("startThresholdInFrames "
+                    + startThresholdInFrames + " must be positive");
+        }
+        return native_setStartThresholdInFrames(startThresholdInFrames);
+    }
+
+    /**
+     * Returns the streaming start threshold of the <code>AudioTrack</code>.
+     * <p> The streaming start threshold is the buffer level that the written audio
+     * data must reach for audio streaming to start after {@link #play()} is called.
+     * When an <code>AudioTrack</code> is created, the streaming start threshold
+     * is the buffer capacity in frames. If the buffer size in frames is reduced
+     * by {@link #setBufferSizeInFrames(int)} to a value smaller than the start threshold
+     * then that value will be used instead for the streaming start threshold.
+     * <p> For compressed streams, the size of a frame is considered to be exactly one byte.
+     *
+     * @return the current start threshold in frames value. This is
+     *         an integer between 1 to the buffer capacity
+     *         (see {@link #getBufferCapacityInFrames()}),
+     *         and might change if the  output sink changes after track creation.
+     * @throws IllegalStateException if the track is not initialized or the
+     *         track is not {@link #MODE_STREAM}.
+     * @see #setStartThresholdInFrames(int)
+     */
+    public @IntRange (from = 1) int getStartThresholdInFrames() {
+        if (mState != STATE_INITIALIZED) {
+            throw new IllegalStateException("AudioTrack is not initialized");
+        }
+        if (mDataLoadMode != MODE_STREAM) {
+            throw new IllegalStateException("AudioTrack must be a streaming track");
+        }
+        return native_getStartThresholdInFrames();
+    }
+
+    /**
      *  Returns the frame count of the native <code>AudioTrack</code> buffer.
      *  @return current size in frames of the <code>AudioTrack</code> buffer.
      *  @throws IllegalStateException
@@ -4179,6 +4238,8 @@ public class AudioTrack extends PlayerBase
     private native int native_get_audio_description_mix_level_db(float[] level);
     private native int native_set_dual_mono_mode(int dualMonoMode);
     private native int native_get_dual_mono_mode(int[] dualMonoMode);
+    private native int native_setStartThresholdInFrames(int startThresholdInFrames);
+    private native int native_getStartThresholdInFrames();
 
     //---------------------------------------------------------
     // Utility methods
