@@ -126,7 +126,8 @@ public abstract class LoggableMonitor {
                 mStatsClient,
                 acquiredInfo,
                 vendorCode,
-                Utils.isDebugEnabled(context, targetUserId));
+                Utils.isDebugEnabled(context, targetUserId),
+                -1 /* sensorId */);
     }
 
     protected final void logOnError(Context context, int error, int vendorCode, int targetUserId) {
@@ -164,7 +165,8 @@ public abstract class LoggableMonitor {
                 error,
                 vendorCode,
                 Utils.isDebugEnabled(context, targetUserId),
-                sanitizeLatency(latency));
+                sanitizeLatency(latency),
+                -1 /* sensorId */);
     }
 
     protected final void logOnAuthenticated(Context context, boolean authenticated,
@@ -214,7 +216,8 @@ public abstract class LoggableMonitor {
                 requireConfirmation,
                 authState,
                 sanitizeLatency(latency),
-                Utils.isDebugEnabled(context, targetUserId));
+                Utils.isDebugEnabled(context, targetUserId),
+                -1 /* sensorId */);
     }
 
     protected final void logOnEnrolled(int targetUserId, long latency, boolean enrollSuccessful) {
@@ -240,7 +243,8 @@ public abstract class LoggableMonitor {
                 mStatsModality,
                 targetUserId,
                 sanitizeLatency(latency),
-                enrollSuccessful);
+                enrollSuccessful,
+                -1 /* sensorId */);
     }
 
     private long sanitizeLatency(long latency) {

@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Отказ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Споделяне"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Записването на екрана е анулирано"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Записът на екрана е запазен"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Докоснете за преглед"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"При изтриването на записа на екрана възникна грешка"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Извличането на разрешенията не бе успешно."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"При стартирането на записа на екрана възникна грешка"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Нов потребител"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Интернет"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Безопасно в самолети"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Налице са мрежи"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Няма достъпни мрежи"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Няма връзка"</string>
@@ -470,7 +467,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Показване на потребителския профил"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Добавяне на потребител"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Нов потребител"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"Прекратяване на сесията като гост"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Да се премахне ли гостът?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Всички приложения и данни в тази сесия ще бъдат изтрити."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Премахване"</string>
@@ -484,7 +480,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Излизане на потребителя"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Излезте от профила на текущия потребител"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ИЗЛИЗАНЕ НА ПОТРЕБИТЕЛЯ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Да се добави ли нов потреб.?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Да се добави ли нов потребител?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Достигнахте огранич. за потребители"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -519,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Това устройство се управлява от родителя ви"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Организацията ви притежава това устройство и може да наблюдава трафика в мрежата"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> притежава това устройство и може да наблюдава трафика в мрежата"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Това устройство е предоставено от <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Това устройство принадлежи на организацията ви и е свързано с(ъс) <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Това устройство принадлежи на <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> и е свързано с(ъс) <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Това устройство принадлежи на организацията ви"</string>
@@ -532,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Служебният ви потребителски профил е свързан с(ъс) <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Личният ви потребителски профил е свързан с(ъс) <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Това устройство е свързано с(ъс) <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Това устройство е предоставено от <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Управление на устройствата"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Наблюдаване на потр. профил"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Наблюдение на мрежата"</string>
@@ -543,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Преглед на правилата"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Преглед на контролите"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Това устройство принадлежи на <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nСистемният ви администратор може да наблюдава и управлява настройките, корпоративния достъп, приложенията, свързаните с устройството данни и информацията за местоположението му.\n\nЗа повече информация се обърнете към него."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> може да има достъп до свързаните с това устройство данни, да управлява приложенията и да променя настройките му.\n\nОбърнете се към <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>, ако имате въпроси."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Това устройство принадлежи на организацията ви.\n\nСистемният ви администратор може да наблюдава и управлява настройките, корпоративния достъп, приложенията, свързаните с устройството данни и информацията за местоположението му.\n\nЗа повече информация се обърнете към него."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Организацията ви е инсталирала сертифициращ орган на това устройство. Трафикът в защитената ви мрежа може да бъде наблюдаван или променян."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Организацията ви е инсталирала сертифициращ орган в служебния ви потребителски профил. Трафикът в защитената ви мрежа може да бъде наблюдаван или променян."</string>
@@ -653,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Показване на демонстрационния режим"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Будилник"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Потребителски профил в Work"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Самолетен режим"</string>
     <string name="add_tile" msgid="6239678623873086686">"Добавяне на плочка"</string>
@@ -899,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Затваряне на бързите настройки."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Будилникът е навит."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Влезли сте като <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"изберете потребител"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Няма връзка с интернет"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Отвaряне на страницата с подробности."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Няма достъп, защото <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Отваряне на настройките за <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Редактиране на подредбата на настройките."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Меню за включване/изключване"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Страница <xliff:g id="ID_1">%1$d</xliff:g> от <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заключен екран"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Тел. се изкл. поради загряване"</string>
@@ -1011,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Преместване наляво"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Преместване надясно"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Превключване на увеличението"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Увеличаване на целия екран"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Увеличаване на целия екран"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увеличаване на част от екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Превключване"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Жестът за достъпност бе заменен от бутон\n\n"<annotation id="link">"Преглед на настройките"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете бутона до края, за да го скриете временно"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Контроли за устройството"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Добавяне на контроли за свързаните ви устройства"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Настройване на контролите за устройството"</string>
@@ -1081,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Сдвояване на ново устройство"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер на компилацията"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номерът на компилацията е копиран в буферната памет."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Отворен разговор"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Приспособления за разговор"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Докоснете разговор, за да го добавите към началния си екран"</string>
+    <string name="timestamp" msgid="6577851592534538533">"Преди <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"Преди по-малко от <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"Преди повече от <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Рожден ден"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Предстоящ рожден ден"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Годишнина"</string>
+    <string name="location_status" msgid="1294990572202541812">"Местопол. се споделя"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Нова история"</string>
+    <string name="video_status" msgid="4548544654316843225">"Гледате"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Слуша се"</string>
+    <string name="game_status" msgid="1340694320630973259">"Играете"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Приятели"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Да разговаряме!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Пропуснато обаждане"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Преглеждайте скорошните съобщения, пропуснатите обаждания и актуална информация за състоянието"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Разговор"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Възникна проблем при четенето на данните за нивото на батерията"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Докоснете за още информация"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Няма зададен будилник"</string>
 </resources>

@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Avbryt"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Del"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Skjermopptak er avbrutt"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Skjermopptaket er lagret"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Trykk for å se"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Feil ved sletting av skjermopptaket"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Kunne ikke få tillatelser"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Feil ved start av skjermopptaket"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Ny bruker"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internett"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Trygg på fly"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Nettverk er tilgjengelige"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nettverk er utilgjengelige"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Ikke tilkoblet"</string>
@@ -470,7 +467,6 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Vis profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Legg til brukere"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Ny bruker"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"Avslutt gjesteøkten"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vil du fjerne gjesten?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle appene og all informasjon i denne økten slettes."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Fjern"</string>
@@ -519,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Denne enheten administreres av forelderen din"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisasjonen din eier denne enheten og kan overvåke nettverkstrafikken"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> eier denne enheten og kan overvåke nettverkstrafikken"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Denne enheten leveres av <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Denne enheten tilhører organisasjonen din og er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Denne enheten tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> og er koblet til <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Denne enheten tilhører organisasjonen din"</string>
@@ -532,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Jobbprofilen din er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Den personlige profilen din er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Denne enheten er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Denne enheten leveres av <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Enhetsadministrasjon"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Profilovervåking"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Nettverksovervåking"</string>
@@ -543,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Se retningslinjer"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Visningskontroller"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Denne enheten tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nIT-administratoren din kan overvåke og administrere innstillinger, bedriftstilgang, apper, data som er tilknyttet denne enheten, og enhetens posisjonsinformasjon.\n\nKontakt IT-administratoren for å få mer informasjon."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> kan ha tilgang til data som er knyttet til denne enheten, kan administrere apper og kan endre enhetsinnstillingene.\n\nHvis du har spørsmål, kan du kontakte <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Denne enheten tilhører organisasjonen din.\n\nIT-administratoren din kan overvåke og administrere innstillinger, bedriftstilgang, apper, data som er tilknyttet denne enheten, og enhetens posisjonsinformasjon.\n\nKontakt IT-administratoren for å få mer informasjon."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organisasjonen din installerte en sertifiseringsinstans på denne enheten. Den sikre nettverkstrafikken din kan overvåkes eller endres."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisasjonen din installerte en sertifiseringsinstans i jobbprofilen din. Den sikre nettverkstrafikken din kan overvåkes eller endres."</string>
@@ -653,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Vis demo-modus"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Work-profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flymodus"</string>
     <string name="add_tile" msgid="6239678623873086686">"Legg til felt"</string>
@@ -899,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Lukk hurtiginnstillingene."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Alarm er angitt."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Logget på som <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"velge en bruker"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Ingen internettilkobling"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Åpne informasjonen."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Utilgjengelig fordi <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Åpne <xliff:g id="ID_1">%s</xliff:g>-innstillingene."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Endre rekkefølgen på innstillingene."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Av/på-meny"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskjerm"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon ble slått av pga varme"</string>
@@ -1011,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Flytt til venstre"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Flytt til høyre"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Forstørringsbryter"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Forstørr hele skjermen"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Forstørr fullskjermen"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Forstørr en del av skjermen"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Bytt"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Tilgjengelighet-knappen har erstattet tilgjengelighetsbevegelsen\n\n"<annotation id="link">"Se innstillingene"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Flytt knappen til kanten for å skjule den midlertidig"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Enhetsstyring"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Legg til kontroller for de tilkoblede enhetene dine"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurer enhetsstyring"</string>
@@ -1081,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Koble til en ny enhet"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Delversjonsnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Delversjonsnummeret er kopiert til utklippstavlen."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Åpen samtale"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Samtalemoduler"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Trykk på en samtale for å legge den til på startskjermen"</string>
+    <string name="timestamp" msgid="6577851592534538533">"For <xliff:g id="DURATION">%1$s</xliff:g> siden"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"For mindre enn <xliff:g id="DURATION">%1$s</xliff:g> siden"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"For mer enn <xliff:g id="DURATION">%1$s</xliff:g> siden"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Bursdag"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Bursdag snart"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Merkedag"</string>
+    <string name="location_status" msgid="1294990572202541812">"Deler posisjonen"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Ny nyhetssak"</string>
+    <string name="video_status" msgid="4548544654316843225">"Ser på"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Lytter"</string>
+    <string name="game_status" msgid="1340694320630973259">"Spiller"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Venner"</string>
+    <string name="empty_status" msgid="5938893404951307749">"La oss chatte senere"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Tapt anrop"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Se nylige meldinger, tapte anrop og statusoppdateringer"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Samtale"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Kunne ikke lese batterimåleren"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Trykk for å få mer informasjon"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ingen alarm angitt"</string>
 </resources>

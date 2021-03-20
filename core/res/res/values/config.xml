@@ -4649,6 +4649,10 @@
     <!-- WindowsManager JetPack display features -->
     <string name="config_display_features" translatable="false" />
 
+    <!-- Map of System DeviceState supplied by DeviceStateManager to WM Jetpack posture. Must be in
+         the format [System DeviceState]:[WM Jetpack Posture], for example: "0:1". -->
+    <string-array name="config_device_state_postures" translatable="false" />
+
     <!-- Aspect ratio of letterboxing for fixed orientation. Values <= 1.0 will be ignored.
          Note: Activity min/max aspect ratio restrictions will still be respected.
          Therefore this override can control the maximum screen area that can be occupied by
