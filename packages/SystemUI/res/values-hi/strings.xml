@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"रद्द करें"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"शेयर करें"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"स्क्रीन रिकॉर्डिंग रद्द कर दी गई"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"स्क्रीन रिकॉर्डिंग सेव की गई"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"देखने के लिए टैप करें"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रीन रिकॉर्डिंग मिटाने में गड़बड़ी हुई"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"मंज़ूरी नहीं मिल सकी"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रीन को रिकॉर्ड करने में गड़बड़ी आ रही है"</string>
@@ -363,7 +361,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"नया उपयोगकर्ता"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"वाई-फ़ाई"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"इंटरनेट"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"हवाई जहाज़ मोड पर, काम करने वाले सुरक्षित नेटवर्क"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"नेटवर्क उपलब्ध हैं"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"नेटवर्क उपलब्ध नहीं हैं"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"कनेक्ट नहीं है"</string>
@@ -472,11 +469,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"प्रोफ़ाइल दिखाएं"</string>
     <string name="user_add_user" msgid="4336657383006913022">"उपयोगकर्ता जोड़ें"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नया उपयोगकर्ता"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"मेहमान के तौर पर ब्राउज़ करने का सेशन खत्म करें"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथि को निकालें?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सत्र के सभी ऐप्स और डेटा को हटा दिया जाएगा."</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"क्या आप मेहमान को हटाना चाहते हैं?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सत्र के सभी ऐप्लिकेशन और डेटा को हटा दिया जाएगा."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"निकालें"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"अतिथि, आपका फिर से स्वागत है!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"मेहमान, आपका फिर से स्वागत है!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"क्‍या आप अपना सत्र जारी रखना चाहते हैं?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"फिर से शुरू करें"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"हां, जारी रखें"</string>
@@ -495,7 +491,7 @@
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"उपयोगकर्ता निकालें?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"इस उपयोगकर्ता के सभी ऐप और डेटा को हटा दिया जाएगा."</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"निकालें"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"हटाएं"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"बैटरी सेवर चालू है"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"निष्‍पादन और पृष्ठभूमि डेटा को कम करता है"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"बैटरी सेवर बंद करें"</string>
@@ -521,6 +517,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"इस डिवाइस का प्रबंधन आपके अभिभावक करते हैं"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है. आपका संगठन, नेटवर्क के ट्रैफ़िक की निगरानी कर सकता है"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है. आपका संगठन, नेटवर्क के ट्रैफ़िक की निगरानी कर सकता है"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"यह डिवाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ने दिया है"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है. इस डिवाइस को <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट किया गया है"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है. इस डिवाइस को <xliff:g id="VPN_APP">%2$s</xliff:g> से कनेक्ट किया गया है"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है"</string>
@@ -534,6 +531,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"आपकी वर्क प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट की गई है"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"आपकी निजी प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट की गई है"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"इस डिवाइस को <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट किया गया है"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"यह डिवाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ने दिया है"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"डिवाइस प्रबंधन"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"प्रोफ़ाइल को मॉनीटर करना"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"नेटवर्क को मॉनीटर करना"</string>
@@ -545,6 +543,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"नीतियां देखें"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"कंट्रोल देखें"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है.\n\nआपके संगठन का आईटी एडमिन कुछ चीज़ों की निगरानी और उन्हें प्रबंधित कर सकता है, जैसे कि सेटिंग, कॉर्पोरेट ऐक्सेस, ऐप्लिकेशन, आपके डिवाइस से जुड़ा डेटा, और आपके डिवाइस की जगह की जानकारी.\n\nज़्यादा जानकारी के लिए, अपने आईटी एडमिन से संपर्क करें."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> इस डिवाइस के डेटा को ऐक्सेस कर सकता है, ऐप्लिकेशन मैनेज कर सकता है, और इसकी सेटिंग में बदलाव कर सकता है.\n\nअगर आपके पास कोई सवाल है, तो <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> से संपर्क करें."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है.\n\nआपके संगठन का आईटी एडमिन कुछ चीज़ों की निगरानी और उन्हें प्रबंधित कर सकता है, जैसे कि सेटिंग, कॉर्पोरेट ऐक्सेस, ऐप्लिकेशन, आपके डिवाइस से जुड़ा डेटा, और आपके डिवाइस की जगह की जानकारी.\n\nज़्यादा जानकारी के लिए, अपने आईटी एडमिन से संपर्क करें."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"आपके संगठन ने इस डिवाइस पर एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क पर ट्रेफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"आपके संगठन ने आपकी वर्क प्रोफ़ाइल में एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
@@ -655,6 +654,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"डेमो मोड दिखाएं"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ईथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"वर्क प्रोफ़ाइल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"हवाई जहाज़ मोड"</string>
     <string name="add_tile" msgid="6239678623873086686">"टाइल जोड़ें"</string>
@@ -723,7 +726,7 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;स्थिति:&lt;/b&gt; लेवल घटाकर, साइलेंट पर सेट किया गया"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;स्थिति:&lt;/b&gt; रैंकिंग में ऊपर किया गया"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;स्थिति:&lt;/b&gt; रैंकिंग में नीचे किया गया"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे बातचीत, सेक्शन में सबसे ऊपर और फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे चैट, बातचीत सेक्शन में सबसे ऊपर फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>
@@ -901,11 +904,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"त्वरित सेटिंग बंद करें."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"अलार्म सेट."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> के रूप में प्रवेश किया हुआ है"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"उपयोगकर्ता चुनें"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"इंटरनेट कनेक्शन नहीं है"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"विवरण खोलें."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g> की वजह से मौजूद नहीं है"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> सेटिंग खोलें."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"सेटिंग के क्रम को बदलें"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पावर मेन्यू"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"पेज <xliff:g id="ID_2">%2$d</xliff:g> में से <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लॉक स्‍क्रीन"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"गर्म होने की वजह से फ़ोन बंद हुआ"</string>
@@ -1013,9 +1018,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"बाईं ओर ले जाएं"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"दाईं ओर ले जाएं"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ज़ूम करने की सुविधा वाला स्विच"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"पूरी स्क्रीन को ज़ूम करें"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"फ़ुल स्क्रीन को ज़ूम करें"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीन के किसी हिस्से को ज़ूम करें"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"स्विच"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"सुलभता वाले हाथ के जेस्चर (हाव-भाव) को सुलभता बटन से बदल दिया गया है\n\n"<annotation id="link">"सेटिंग देखें"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"बटन को कुछ समय छिपाने के लिए, उसे किनारे पर ले जाएं"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"डिवाइस कंट्रोल"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"कनेक्ट किए गए डिवाइस के लिए कंट्रोल जोड़ें"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिवाइस कंट्रोल सेट अप करें"</string>
@@ -1083,6 +1090,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नया डिवाइस जोड़ें"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नंबर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नंबर को क्लिपबोर्ड पर कॉपी किया गया."</string>
+    <string name="basic_status" msgid="2315371112182658176">"ऐसी बातचीत जिसमें इंटरैक्शन डेटा मौजूद नहीं है"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"बातचीत विजेट"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"किसी बातचीत को होम स्क्रीन पर जोड़ने के लिए, उस बातचीत पर टैप करें"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> पहले"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> से थोड़ा पहले"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"करीब <xliff:g id="DURATION">%1$s</xliff:g> से ज़्यादा"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"जन्मदिन"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"जन्मदिन आने वाला है"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"सालगिरह"</string>
+    <string name="location_status" msgid="1294990572202541812">"जगह की जानकारी शेयर की जा रही है"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"नई स्टोरी"</string>
+    <string name="video_status" msgid="4548544654316843225">"देख रहे हैं"</string>
+    <string name="audio_status" msgid="4237055636967709208">"सुना जा रहा है"</string>
+    <string name="game_status" msgid="1340694320630973259">"खेला जा रहा है"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"दोस्त"</string>
+    <string name="empty_status" msgid="5938893404951307749">"आज रात चैट करते हैं!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"मिस्ड कॉल"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"हाल के मैसेज, मिस्ड कॉल, और स्टेटस अपडेट देखें"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"बातचीत"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"आपके डिवाइस के बैटरी मीटर की रीडिंग लेने में समस्या आ रही है"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ज़्यादा जानकारी के लिए टैप करें"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"कोई अलार्म सेट नहीं है"</string>
 </resources>

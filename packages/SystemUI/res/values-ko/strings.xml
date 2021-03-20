@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"취소"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"공유"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"화면 녹화가 취소되었습니다."</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"화면 녹화 저장됨"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"탭하여 보기"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"화면 녹화는 삭제하는 중에 오류가 발생했습니다."</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"권한을 확보하지 못했습니다."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"화면 녹화 시작 중 오류 발생"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"신규 사용자"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"인터넷"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"항공 안전"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"네트워크 사용 가능"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"네트워크 사용 불가"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"연결되어 있지 않음"</string>
@@ -470,14 +467,13 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"프로필 표시"</string>
     <string name="user_add_user" msgid="4336657383006913022">"사용자 추가"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"신규 사용자"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"게스트 세션 종료"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"게스트를 삭제하시겠습니까?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"이 세션에 있는 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"삭제"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"게스트 세션 다시 시작"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"게스트 세션 진행"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"세션을 계속 진행하시겠습니까?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"다시 시작"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"예, 계속합니다."</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"계속 진행"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"게스트 사용자"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"앱 및 데이터를 삭제하려면 게스트 사용자를 삭제하세요."</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"게스트 삭제"</string>
@@ -485,7 +481,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"현재 사용자 로그아웃"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"사용자 로그아웃"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"신규 사용자를 추가할까요?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n사용자라면 누구든 다른 사용자를 위해 앱을 업데이트할 수 있습니다."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"사용자 제한 도달"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">사용자를 <xliff:g id="COUNT">%d</xliff:g>명까지 추가할 수 있습니다.</item>
@@ -519,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"부모님이 관리하는 기기입니다."</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"내 조직에서 이 기기를 소유하며 네트워크 트래픽을 모니터링할 수 있습니다."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>에서 이 기기를 소유하며 네트워크 트래픽을 모니터링할 수 있습니다."</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>에서 제공하는 기기"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"내 조직에 속한 기기이며 <xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다."</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>에 속한 기기이며 <xliff:g id="VPN_APP">%2$s</xliff:g>에 연결되었습니다."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"내 조직에 속한 기기입니다."</string>
@@ -532,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"직장 프로필이 <xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다."</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"개인 프로필이 <xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다."</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"기기가 <xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다."</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>에서 제공하는 기기"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"기기 관리"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"프로필 모니터링"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"네트워크 모니터링"</string>
@@ -543,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"정책 보기"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"제어 기능 보기"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>에 속한 기기입니다.\n\nIT 관리자가 설정, 기업 액세스, 앱, 기기와 연결된 데이터, 기기 위치 정보를 모니터링 및 관리할 수 있습니다.\n\n자세한 정보를 확인하려면 IT 관리자에게 문의하세요."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>에서 이 기기와 연결된 데이터에 액세스하고 앱을 관리하고 기기 설정을 변경할 수 있습니다.\n\n궁금한 점이 있으면 <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>에 문의하세요."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"내 조직에 속한 기기입니다.\n\nIT 관리자가 설정, 기업 액세스, 앱, 기기와 연결된 데이터, 기기 위치 정보를 모니터링 및 관리할 수 있습니다.\n\n자세한 정보를 확인하려면 IT 관리자에게 문의하세요."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"조직에서 이 기기에 인증기관을 설치했습니다. 보안 네트워크 트래픽을 모니터링 또는 수정할 수 있습니다."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"조직에서 직장 프로필에 인증기관을 설치했습니다. 보안 네트워크 트래픽을 모니터링 또는 수정할 수 있습니다."</string>
@@ -653,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"데모 모드 표시"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"이더넷"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"알람"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"직장 프로필"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"비행기 모드"</string>
     <string name="add_tile" msgid="6239678623873086686">"타일 추가"</string>
@@ -721,7 +724,7 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;상태:&lt;/b&gt; 무음으로 낮춤"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;상태:&lt;/b&gt; 순위 높임"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;상태:&lt;/b&gt; 순위 낮춤"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"대화 섹션 상단에 표시, 플로팅 대화창으로 표시, 그리고 잠금 화면에 프로필 사진이 표시됨"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"대화 섹션 상단에 표시, 플로팅 대화창으로 표시, 잠금 화면에 프로필 사진이 표시됨"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"설정"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 대화 기능을 지원하지 않습니다."</string>
@@ -899,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"빠른 설정 닫기"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"알람이 설정됨"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g>(으)로 로그인됨"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"사용자 선택"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"인터넷 연결 없음"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"세부정보 열기"</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"다음 이유로 사용할 수 없음: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> 설정 열기"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"설정 순서 수정"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"전원 메뉴"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>페이지 중 <xliff:g id="ID_1">%1$d</xliff:g>페이지"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"잠금 화면"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"발열로 인해 휴대전화 전원이 종료됨"</string>
@@ -1011,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"왼쪽으로 이동"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"오른쪽으로 이동"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"확대 전환"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"전체 화면 확대"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"전체 화면 확대"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"화면 일부 확대"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"전환"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"접근성 동작이 접근성 버튼으로 대체되었습니다\n\n"<annotation id="link">"설정 보기"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"버튼을 가장자리로 옮겨서 일시적으로 숨기세요"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"기기 컨트롤"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"연결된 기기의 컨트롤을 추가하세요."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"기기 컨트롤 설정"</string>
@@ -1081,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"새 기기와 페어링"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"빌드 번호"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"빌드 번호가 클립보드에 복사되었습니다."</string>
+    <string name="basic_status" msgid="2315371112182658176">"대화 열기"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"대화 위젯"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"대화를 탭하여 홈 화면에 추가하세요."</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> 전"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> 이내"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> 이상 경과"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"생일"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"다가오는 생일"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"기념일"</string>
+    <string name="location_status" msgid="1294990572202541812">"위치 공유 중"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"새 스토리"</string>
+    <string name="video_status" msgid="4548544654316843225">"시청 중"</string>
+    <string name="audio_status" msgid="4237055636967709208">"듣는 중"</string>
+    <string name="game_status" msgid="1340694320630973259">"플레이 중"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"친구"</string>
+    <string name="empty_status" msgid="5938893404951307749">"오늘 밤에 채팅"</string>
+    <string name="missed_call" msgid="4228016077700161689">"부재중 전화"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"최근 메시지, 부재중 전화, 상태 업데이트 보기"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"대화"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"배터리 수준을 읽는 중에 문제가 발생함"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"탭하여 자세한 정보를 확인하세요."</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"설정된 알람 없음"</string>
 </resources>

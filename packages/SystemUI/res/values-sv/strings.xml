@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Avbryt"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Dela"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Skärminspelningen har avbrutits"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Skärminspelningen har sparats"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Tryck för att visa"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Det gick inte att radera skärminspelningen"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Behörighet saknas"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Det gick inte att starta skärminspelningen"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Ny användare"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Flygplanssäker"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Nätverk är tillgängliga"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Inga nätverk är tillgängliga"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Ej ansluten"</string>
@@ -470,11 +467,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Visa profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Lägg till användare"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Ny användare"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"Avsluta gästsession"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vill du ta bort gästen?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alla appar och data i denna session kommer att raderas."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ta bort"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Välkommen tillbaka gäst!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Välkommen tillbaka som gäst!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vill du fortsätta sessionen?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Börja om"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, fortsätt"</string>
@@ -519,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Den här enheten hanteras av din förälder"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisationen äger den här enheten och kan övervaka nätverkstrafiken"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> äger den här enheten och kan övervaka nätverkstrafiken"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Den här enheten tillhandahålls av <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Den här enheten tillhör organisationen och är ansluten till <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Den här enheten tillhör <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> och är ansluten till <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Den här enheten tillhör organisationen"</string>
@@ -532,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Jobbprofilen är ansluten till <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Din personliga profil är ansluten till <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Den här enheten är ansluten till <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Den här enheten tillhandahålls av <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Enhetshantering"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Profilövervakning"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Nätverksövervakning"</string>
@@ -543,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Visa policyer"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Visa kontroller"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Den här enheten tillhör <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nIT-administratören kan övervaka och hantera inställningar, företagsåtkomst, appar, data med koppling till enheten och enhetens plats.\n\nKontakta IT-administratören om du vill veta mer."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> kanske kan komma åt data kopplad till den här enheten, hantera appar och ändra enhetens inställningar.\n\nKontakta <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> om du har frågor."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Den här enheten tillhör organisationen.\n\nIT-administratören kan övervaka och hantera inställningar, företagsåtkomst, appar, data med koppling till enheten och enhetens plats.\n\nKontakta IT-administratören om du vill veta mer."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organisationen har installerat en certifikatutfärdare på enheten. Din säkra nätverkstrafik kan övervakas och ändras."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisationen har installerat en certifikatutfärdare i jobbprofilen. Din säkra nätverkstrafik kan övervakas och ändras."</string>
@@ -653,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Visa demoläge"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Jobbprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flygplansläge"</string>
     <string name="add_tile" msgid="6239678623873086686">"Lägg till en ruta"</string>
@@ -721,7 +724,7 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Ändrad till Tyst"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Höjd"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Sänkt"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Visas högst upp bland konversationerna som en flytande bubbla, visar profilbilden på låsskärmen"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Visas högst upp bland konversationerna som en flytande bubbla och visar profilbilden på låsskärmen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> har inte stöd för konversationsfunktioner"</string>
@@ -899,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Stäng snabbinställningarna"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Alarmet aktiverat"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Inloggad som <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"välj användare"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Inget internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Visa information."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Inte tillgänglig på grund av <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Öppna <xliff:g id="ID_1">%s</xliff:g>-inställningarna."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Ändra ordning på inställningarna."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Startmeny"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Sida <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låsskärm"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Mobilen stängdes av pga. värme"</string>
@@ -1011,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Flytta åt vänster"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Flytta åt höger"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Förstoringsreglage"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Förstora hela skärmen"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Förstora hela skärmen"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Förstora en del av skärmen"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Reglage"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Tillgänglighetsknappen har ersatt tillgänglighetsrörelsen\n\n"<annotation id="link">"Visa inställningarna"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Flytta knappen till kanten för att dölja den tillfälligt"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Enhetsstyrning"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lägg till snabbkontroller för anslutna enheter"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurera enhetsstyrning"</string>
@@ -1081,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Parkoppla en ny enhet"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versionsnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versionsnumret har kopierats till urklipp."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Öppen konversation"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Konversationswidgetar"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Tryck på en konversation för att lägga till den på startskärmen"</string>
+    <string name="timestamp" msgid="6577851592534538533">"För <xliff:g id="DURATION">%1$s</xliff:g> sedan"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"Mindre än <xliff:g id="DURATION">%1$s</xliff:g> sedan"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"Mer än <xliff:g id="DURATION">%1$s</xliff:g> sedan"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Födelsedag"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Födelsedag inom kort"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Högtidsdag"</string>
+    <string name="location_status" msgid="1294990572202541812">"Delar plats"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Ny artikel"</string>
+    <string name="video_status" msgid="4548544654316843225">"Tittar"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Lyssnar"</string>
+    <string name="game_status" msgid="1340694320630973259">"Spelar"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Vänner"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Vi chattar i kväll!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Missat samtal"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Se de senaste meddelandena, missade samtal och statusuppdateringar"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Konversation"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Batteriindikatorn visas inte"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tryck för mer information"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Inget inställt alarm"</string>
 </resources>
