@@ -294,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Ilova faol"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Batareya quvvatini sarflayotgan ilovalar"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Kattalashtirish"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasi batareya quvvatini sarflamoqda"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ta ilova batareya quvvatini sarflamoqda"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Batareya va trafik sarfi tafsilotlari uchun ustiga bosing"</string>
@@ -344,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Ilova holat qatorining o‘rnini egallashi mumkin."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"holat panelini yoyish/yig‘ish"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Ilova holat panelini yoyishi va yig‘ishi mumkin."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Barcha bildirishnomalarni qulflangan qurilmada butun ekranda koʻrsatish"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Ilova qulflangan qurilmada toʻliq ekranda bildirishnomalarni koʻrsata oladi"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"yorliqlar yaratish"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Dasturga foydalanuvchini aralashtirmasdan, Uy ekraniga yorliqlar qo‘shish imkonini beradi."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"yorliqlarni o‘chirish"</string>
@@ -2095,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Ekranda tezkor ishga tushirish"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Ekranda tezkor ishga tushirishni tanlagich"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Tezkor ishga tushirish"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Eslatma soyasini yopish"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> taglavhalar paneli."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> cheklangan turkumga joylandi"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2232,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Yangi: Ekran lupasi"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Ekranni toʻliq yoki qisman kattalashtirish mumkin"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Ekranning bir qismini kattalashtirish"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Endi siz ekranni toʻliq yoki bir qismini kattalashtirishingiz yoki bu parametrlar orasida almashtirishingiz mumkin."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Sozlamalar orqali yoqish"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Yopish"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Davom etish uchun &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; mikrofoningizdan foydalanishi kerak."</string>
@@ -2242,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorlar maxfiyligi"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ilova belgisi"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Ilova brendining rasmi"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

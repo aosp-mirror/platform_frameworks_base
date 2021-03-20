@@ -294,6 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplicação em execução"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Apps que estão a consumir bateria"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ampliação"</string>
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Política de segurança de acessibilidade"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> está a consumir bateria."</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplicações estão a consumir bateria."</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Toque para obter detalhes acerca da utilização da bateria e dos dados"</string>
@@ -344,6 +345,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Permite que a app seja apresentada na barra de estado."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"expandir/fechar barra de estado"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permite à app expandir ou fechar a barra de estado."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"apresentar notificações como atividades em ecrã inteiro num dispositivo bloqueado"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permite à app apresentar notificações como atividades em ecrã inteiro num dispositivo bloqueado"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalar atalhos"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permite que uma app adicione atalhos ao Ecrã principal sem a intervenção do utilizador."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalar atalhos"</string>
@@ -2095,6 +2098,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Atalho de acessibilidade no ecrã"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Selecionador de atalhos de acessibilidade no ecrã"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Atalho de acessibilidade"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Ignorar o painel de notificações"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de legendas da app <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> foi colocado no contentor RESTRITO."</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2232,8 +2236,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Novidade: ampliador da janela"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Já pode ampliar o ecrã parcial ou totalmente."</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Amplie parte do ecrã"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Já pode ampliar o ecrã inteiro, uma área específica ou alternar entre as duas opções."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Ativar nas Definições"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ignorar"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Para continuar, a app &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; precisa de acesso ao microfone do dispositivo."</string>
@@ -2242,4 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privacidade dos sensores"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ícone de aplicação."</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imagem de branding da aplicação."</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Verifique as definições de acesso"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"O serviço <xliff:g id="SERVICE_NAME">%s</xliff:g> pode ver e controlar o seu ecrã. Toque para rever."</string>
 </resources>

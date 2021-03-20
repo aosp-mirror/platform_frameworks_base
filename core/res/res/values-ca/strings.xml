@@ -294,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplicació en execució"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplicacions que consumeixen bateria"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ampliació"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> està consumint bateria"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplicacions estan consumint bateria"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Toca per obtenir informació sobre l\'ús de dades i de bateria"</string>
@@ -344,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Permet que l\'aplicació sigui la barra d\'estat."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"desplega/contrau la barra d\'estat"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permet que l\'aplicació desplegui o replegui la barra d\'estat."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"mostrar notificacions com a activitats de pantalla completa en un dispositiu bloquejat"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permet a l\'aplicació mostrar notificacions com a activitats de pantalla completa en un dispositiu bloquejat"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"instal·lar dreceres"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permet que una aplicació afegeixi dreceres a la pantalla d\'inici sense la intervenció de l\'usuari."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstal·la dreceres"</string>
@@ -1030,7 +1034,7 @@
       <item quantity="other">Darrers <xliff:g id="COUNT_1">%d</xliff:g> dies</item>
       <item quantity="one">Darrer dia (<xliff:g id="COUNT_0">%d</xliff:g>)</item>
     </plurals>
-    <string name="last_month" msgid="1528906781083518683">"El mes passat"</string>
+    <string name="last_month" msgid="1528906781083518683">"Darrer mes"</string>
     <string name="older" msgid="1645159827884647400">"Més antigues"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"el <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="4336835286453822053">"a les <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -2095,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Drecera d\'accessibilitat en pantalla"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Selector de dreceres d\'accessibilitat en pantalla"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Drecera d\'accessibilitat"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Ignora l\'àrea de notificacions"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de títol de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> s\'ha transferit al segment RESTRINGIT"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2232,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Novetat: Window Magnifier"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Ara pots ampliar la pantalla completa o una part"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Amplia una part de la pantalla"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Ara pots ampliar la pantalla completa o una àrea concreta, o canviar d\'una opció a l\'altra."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activa a Configuració"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ignora"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Per continuar, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; necessita accedir al micròfon del dispositiu."</string>
@@ -2242,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privadesa dels sensors"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Icona d\'aplicació"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imatge de brànding de l\'aplicació"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>
