@@ -170,6 +170,7 @@ please see themes_device_defaults.xml.
         <item name="windowSplashScreenBackground">@color/transparent</item>
         <item name="windowSplashScreenAnimatedIcon">@null</item>
         <item name="windowSplashScreenBrandingImage">@null</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/transparent</item>
         <item name="windowClipToOutline">false</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>

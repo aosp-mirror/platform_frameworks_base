@@ -25,6 +25,7 @@ import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
@@ -138,10 +139,21 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         for (SensorProps prop : props) {
             final int sensorId = prop.commonProps.sensorId;
 
+            final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+            if (prop.commonProps.componentInfo != null) {
+                for (android.hardware.biometrics.common.ComponentInfo info
+                        : prop.commonProps.componentInfo) {
+                    componentInfo.add(new ComponentInfoInternal(info.componentId,
+                            info.hardwareVersion, info.firmwareVersion, info.serialNumber,
+                            info.softwareVersion));
+                }
+            }
+
             final FingerprintSensorPropertiesInternal internalProp =
                     new FingerprintSensorPropertiesInternal(prop.commonProps.sensorId,
                             prop.commonProps.sensorStrength,
                             prop.commonProps.maxEnrollmentsPerUser,
+                            componentInfo,
                             prop.sensorType,
                             true /* resetLockoutRequiresHardwareAuthToken */);
             final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
@@ -457,7 +469,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean isKeyguard) {
+            boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
             final IFingerprint daemon = getHalInstance();
             if (daemon == null) {
@@ -479,7 +491,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         operationId, restricted, opPackageName, cookie,
                         false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
                         mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
-                        mUdfpsOverlayController, isKeyguard);
+                        mUdfpsOverlayController, allowBackgroundAuthentication);
                 mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling authenticate", e);

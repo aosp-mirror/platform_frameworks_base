@@ -1006,7 +1006,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     private boolean isProfileConnectedFail() {
         return mIsA2dpProfileConnectedFail || mIsHearingAidProfileConnectedFail
-                || mIsHeadsetProfileConnectedFail;
+                || (!isConnectedSapDevice() && mIsHeadsetProfileConnectedFail);
     }
 
     /**
@@ -1147,6 +1147,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         HearingAidProfile hearingAidProfile = mProfileManager.getHearingAidProfile();
         return hearingAidProfile != null && hearingAidProfile.getConnectionStatus(mDevice) ==
                 BluetoothProfile.STATE_CONNECTED;
+    }
+
+    private boolean isConnectedSapDevice() {
+        SapProfile sapProfile = mProfileManager.getSapProfile();
+        return sapProfile != null && sapProfile.getConnectionStatus(mDevice)
+                == BluetoothProfile.STATE_CONNECTED;
     }
 
     public CachedBluetoothDevice getSubDevice() {

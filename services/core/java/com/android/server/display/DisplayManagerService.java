@@ -20,6 +20,7 @@ import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.hardware.display.DisplayManager.EventsMask;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
@@ -28,6 +29,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLI
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
+import static android.hardware.display.DisplayManagerGlobal.DisplayEvent;
 import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_VIRTUAL;
@@ -125,6 +127,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 /**
@@ -820,14 +823,16 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void registerCallbackInternal(IDisplayManagerCallback callback, int callingPid,
-            int callingUid) {
+            int callingUid, @EventsMask long eventsMask) {
         synchronized (mSyncRoot) {
-            if (mCallbacks.get(callingPid) != null) {
-                throw new SecurityException("The calling process has already "
-                        + "registered an IDisplayManagerCallback.");
+            CallbackRecord record = mCallbacks.get(callingPid);
+
+            if (record != null) {
+                record.updateEventsMask(eventsMask);
+                return;
             }
 
-            CallbackRecord record = new CallbackRecord(callingPid, callingUid, callback);
+            record = new CallbackRecord(callingPid, callingUid, callback, eventsMask);
             try {
                 IBinder binder = callback.asBinder();
                 binder.linkToDeath(record, 0);
@@ -1695,7 +1700,7 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void sendDisplayEventLocked(int displayId, int event) {
+    private void sendDisplayEventLocked(int displayId, @DisplayEvent int event) {
         Message msg = mHandler.obtainMessage(MSG_DELIVER_DISPLAY_EVENT, displayId, event);
         mHandler.sendMessage(msg);
     }
@@ -1724,7 +1729,8 @@ public final class DisplayManagerService extends SystemService {
 
     // Runs on Handler thread.
     // Delivers display event notifications to callbacks.
-    private void deliverDisplayEvent(int displayId, ArraySet<Integer> uids, int event) {
+    private void deliverDisplayEvent(int displayId, ArraySet<Integer> uids,
+            @DisplayEvent int event) {
         if (DEBUG) {
             Slog.d(TAG, "Delivering display event: displayId="
                     + displayId + ", event=" + event);
@@ -2059,13 +2065,20 @@ public final class DisplayManagerService extends SystemService {
         public final int mPid;
         public final int mUid;
         private final IDisplayManagerCallback mCallback;
+        private @EventsMask AtomicLong mEventsMask;
 
         public boolean mWifiDisplayScanRequested;
 
-        CallbackRecord(int pid, int uid, IDisplayManagerCallback callback) {
+        CallbackRecord(int pid, int uid, IDisplayManagerCallback callback,
+                @EventsMask long eventsMask) {
             mPid = pid;
             mUid = uid;
             mCallback = callback;
+            mEventsMask = new AtomicLong(eventsMask);
+        }
+
+        public void updateEventsMask(@EventsMask long eventsMask) {
+            mEventsMask.set(eventsMask);
         }
 
         @Override
@@ -2076,13 +2089,33 @@ public final class DisplayManagerService extends SystemService {
             onCallbackDied(this);
         }
 
-        public void notifyDisplayEventAsync(int displayId, int event) {
+        public void notifyDisplayEventAsync(int displayId, @DisplayEvent int event) {
+            if (!shouldSendEvent(event)) {
+                return;
+            }
+
             try {
                 mCallback.onDisplayEvent(displayId, event);
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify process "
                         + mPid + " that displays changed, assuming it died.", ex);
                 binderDied();
+            }
+        }
+
+        private boolean shouldSendEvent(@DisplayEvent int event) {
+            final long mask = mEventsMask.get();
+            switch (event) {
+                case DisplayManagerGlobal.EVENT_DISPLAY_ADDED:
+                    return (mask & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0;
+                case DisplayManagerGlobal.EVENT_DISPLAY_CHANGED:
+                    return (mask & DisplayManager.EVENT_FLAG_DISPLAY_CHANGED) != 0;
+                case DisplayManagerGlobal.EVENT_DISPLAY_REMOVED:
+                    return (mask & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0;
+                default:
+                    // This should never happen.
+                    Slog.e(TAG, "Unknown display event " + event);
+                    return true;
             }
         }
     }
@@ -2149,6 +2182,14 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public void registerCallback(IDisplayManagerCallback callback) {
+            registerCallbackWithEventMask(callback, DisplayManager.EVENT_FLAG_DISPLAY_ADDED
+                    | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                    | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
+        }
+
+        @Override // Binder call
+        public void registerCallbackWithEventMask(IDisplayManagerCallback callback,
+                @EventsMask long eventsMask) {
             if (callback == null) {
                 throw new IllegalArgumentException("listener must not be null");
             }
@@ -2157,7 +2198,7 @@ public final class DisplayManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                registerCallbackInternal(callback, callingPid, callingUid);
+                registerCallbackInternal(callback, callingPid, callingUid, eventsMask);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

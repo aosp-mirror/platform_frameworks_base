@@ -93,7 +93,9 @@ public class DisplayManagerServiceTest {
     private static final long SHORT_DEFAULT_DISPLAY_TIMEOUT_MILLIS = 10;
     private static final String VIRTUAL_DISPLAY_NAME = "Test Virtual Display";
     private static final String PACKAGE_NAME = "com.android.frameworks.servicestests";
-
+    private static final long ALL_DISPLAY_EVENTS = DisplayManager.EVENT_FLAG_DISPLAY_ADDED
+                    | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                    | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED;
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
@@ -355,29 +357,13 @@ public class DisplayManagerServiceTest {
 
         // Find the display id of the added FakeDisplayDevice
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
-        final int[] displayIds = bs.getDisplayIds();
-        assertTrue(displayIds.length > 0);
-        int displayId = Display.INVALID_DISPLAY;
-        for (int i = 0; i < displayIds.length; i++) {
-            DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayIds[i]);
-            if (displayDeviceInfo.equals(ddi)) {
-                displayId = displayIds[i];
-                break;
-            }
-        }
-        assertFalse(displayId == Display.INVALID_DISPLAY);
-
+        int displayId = getDisplayIdForDisplayDevice(displayManager, bs, displayDevice);
         // Setup override DisplayInfo
         DisplayInfo overrideInfo = bs.getDisplayInfo(displayId);
         displayManager.setDisplayInfoOverrideFromWindowManagerInternal(displayId, overrideInfo);
 
-        Handler handler = displayManager.getDisplayHandler();
-        handler.runWithScissors(() -> {
-        }, 0 /* now */);
-
-        // register display listener callback
-        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback(displayId);
-        bs.registerCallback(callback);
+        FakeDisplayManagerCallback callback = registerDisplayListenerCallback(
+                displayManager, bs, displayDevice);
 
         // Simulate DisplayDevice change
         DisplayDeviceInfo displayDeviceInfo2 = new DisplayDeviceInfo();
@@ -387,9 +373,9 @@ public class DisplayManagerServiceTest {
         displayManager.getDisplayDeviceRepository()
                 .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_CHANGED);
 
-        handler.runWithScissors(() -> {
-        }, 0 /* now */);
-        assertTrue(callback.mCalled);
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+        assertTrue(callback.mDisplayChangedCalled);
     }
 
     /**
@@ -400,7 +386,7 @@ public class DisplayManagerServiceTest {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
         Handler handler = displayManager.getDisplayHandler();
-        handler.runWithScissors(() -> {}, 0 /* now */);
+        waitForIdleHandler(handler);
 
         try {
             displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
@@ -616,7 +602,7 @@ public class DisplayManagerServiceTest {
     }
 
     /**
-     * Tests that there should be a display change notification if the frame rate overrides
+     * Tests that there is a display change notification if the frame rate override
      * list is updated.
      */
     @Test
@@ -637,7 +623,7 @@ public class DisplayManagerServiceTest {
                 new DisplayEventReceiver.FrameRateOverride[]{
                         new DisplayEventReceiver.FrameRateOverride(myUid, 30f),
                 });
-        assertTrue(callback.mCalled);
+        assertTrue(callback.mDisplayChangedCalled);
         callback.clear();
 
         updateFrameRateOverride(displayManager, displayDevice,
@@ -645,7 +631,7 @@ public class DisplayManagerServiceTest {
                         new DisplayEventReceiver.FrameRateOverride(myUid, 30f),
                         new DisplayEventReceiver.FrameRateOverride(1234, 30f),
                 });
-        assertFalse(callback.mCalled);
+        assertFalse(callback.mDisplayChangedCalled);
 
         updateFrameRateOverride(displayManager, displayDevice,
                 new DisplayEventReceiver.FrameRateOverride[]{
@@ -653,7 +639,7 @@ public class DisplayManagerServiceTest {
                         new DisplayEventReceiver.FrameRateOverride(1234, 30f),
                         new DisplayEventReceiver.FrameRateOverride(5678, 30f),
                 });
-        assertTrue(callback.mCalled);
+        assertTrue(callback.mDisplayChangedCalled);
         callback.clear();
 
         updateFrameRateOverride(displayManager, displayDevice,
@@ -661,14 +647,14 @@ public class DisplayManagerServiceTest {
                         new DisplayEventReceiver.FrameRateOverride(1234, 30f),
                         new DisplayEventReceiver.FrameRateOverride(5678, 30f),
                 });
-        assertTrue(callback.mCalled);
+        assertTrue(callback.mDisplayChangedCalled);
         callback.clear();
 
         updateFrameRateOverride(displayManager, displayDevice,
                 new DisplayEventReceiver.FrameRateOverride[]{
                         new DisplayEventReceiver.FrameRateOverride(5678, 30f),
                 });
-        assertFalse(callback.mCalled);
+        assertFalse(callback.mDisplayChangedCalled);
     }
 
     /**
@@ -758,6 +744,136 @@ public class DisplayManagerServiceTest {
                 /*compatChangeEnabled*/  true);
         testDisplayInfoNonNativeFrameRateOverrideMode(mAllowNonNativeRefreshRateOverrideInjector,
                 /*compatChangeEnabled*/  true);
+    }
+
+    /**
+     * Tests that EVENT_DISPLAY_ADDED is sent when a display is added.
+     */
+    @Test
+    public void testShouldNotifyDisplayAdded_WhenNewDisplayDeviceIsAdded() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+
+        // register display listener callback
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        displayManagerBinderService.registerCallbackWithEventMask(callback, ALL_DISPLAY_EVENTS);
+
+        waitForIdleHandler(handler);
+
+        createFakeDisplayDevice(displayManager, new float[]{60f});
+
+        waitForIdleHandler(handler);
+
+        assertFalse(callback.mDisplayChangedCalled);
+        assertFalse(callback.mDisplayRemovedCalled);
+        assertTrue(callback.mDisplayAddedCalled);
+    }
+
+    /**
+     * Tests that EVENT_DISPLAY_ADDED is not sent when a display is added and the
+     * client has a callback which is not subscribed to this event type.
+     */
+    @Test
+    public void testShouldNotNotifyDisplayAdded_WhenClientIsNotSubscribed() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+
+        // register display listener callback
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        long allEventsExceptDisplayAdded = ALL_DISPLAY_EVENTS
+                & ~DisplayManager.EVENT_FLAG_DISPLAY_ADDED;
+        displayManagerBinderService.registerCallbackWithEventMask(callback,
+                allEventsExceptDisplayAdded);
+
+        waitForIdleHandler(handler);
+
+        createFakeDisplayDevice(displayManager, new float[]{60f});
+
+        waitForIdleHandler(handler);
+
+        assertFalse(callback.mDisplayChangedCalled);
+        assertFalse(callback.mDisplayRemovedCalled);
+        assertFalse(callback.mDisplayAddedCalled);
+    }
+
+    /**
+     * Tests that EVENT_DISPLAY_REMOVED is sent when a display is removed.
+     */
+    @Test
+    public void testShouldNotifyDisplayRemoved_WhenDisplayDeviceIsRemoved() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager,
+                new float[]{60f});
+
+        waitForIdleHandler(handler);
+
+        FakeDisplayManagerCallback callback = registerDisplayListenerCallback(
+                displayManager, displayManagerBinderService, displayDevice);
+
+        waitForIdleHandler(handler);
+
+        displayManager.getDisplayDeviceRepository()
+                .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
+
+        waitForIdleHandler(handler);
+
+        assertFalse(callback.mDisplayChangedCalled);
+        assertTrue(callback.mDisplayRemovedCalled);
+        assertFalse(callback.mDisplayAddedCalled);
+    }
+
+    /**
+     * Tests that EVENT_DISPLAY_REMOVED is not sent when a display is added and the
+     * client has a callback which is not subscribed to this event type.
+     */
+    @Test
+    public void testShouldNotNotifyDisplayRemoved_WhenClientIsNotSubscribed() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager,
+                new float[]{60f});
+
+        waitForIdleHandler(handler);
+
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        long allEventsExceptDisplayRemoved = ALL_DISPLAY_EVENTS
+                & ~DisplayManager.EVENT_FLAG_DISPLAY_REMOVED;
+        displayManagerBinderService.registerCallbackWithEventMask(callback,
+                allEventsExceptDisplayRemoved);
+
+        waitForIdleHandler(handler);
+
+        displayManager.getDisplayDeviceRepository()
+                .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
+
+        waitForIdleHandler(handler);
+
+        assertFalse(callback.mDisplayChangedCalled);
+        assertFalse(callback.mDisplayRemovedCalled);
+        assertFalse(callback.mDisplayAddedCalled);
     }
 
     private void testDisplayInfoFrameRateOverrideModeCompat(boolean compatChangeEnabled)
@@ -879,8 +995,7 @@ public class DisplayManagerServiceTest {
         displayManager.getDisplayDeviceRepository()
                 .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_CHANGED);
         Handler handler = displayManager.getDisplayHandler();
-        handler.runWithScissors(() -> {
-        }, 0 /* now */);
+        waitForIdleHandler(handler);
     }
 
     private void updateFrameRateOverride(DisplayManagerService displayManager,
@@ -906,18 +1021,15 @@ public class DisplayManagerServiceTest {
             DisplayManagerService.BinderService displayManagerBinderService,
             FakeDisplayDevice displayDevice) {
         // Find the display id of the added FakeDisplayDevice
-        DisplayDeviceInfo displayDeviceInfo = displayDevice.getDisplayDeviceInfoLocked();
-
         int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
                 displayDevice);
 
         Handler handler = displayManager.getDisplayHandler();
-        handler.runWithScissors(() -> {
-        }, 0 /* now */);
+        waitForIdleHandler(handler);
 
         // register display listener callback
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback(displayId);
-        displayManagerBinderService.registerCallback(callback);
+        displayManagerBinderService.registerCallbackWithEventMask(callback, ALL_DISPLAY_EVENTS);
         return callback;
     }
 
@@ -951,6 +1063,10 @@ public class DisplayManagerServiceTest {
         // Would prefer to call displayManager.onStart() directly here but it performs binderService
         // registration which triggers security exceptions when running from a test.
         handler.sendEmptyMessage(MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS);
+        waitForIdleHandler(handler);
+    }
+
+    private void waitForIdleHandler(Handler handler) {
         waitForIdleHandler(handler, Duration.ofSeconds(1));
     }
 
@@ -971,21 +1087,41 @@ public class DisplayManagerServiceTest {
 
     private class FakeDisplayManagerCallback extends IDisplayManagerCallback.Stub {
         int mDisplayId;
-        boolean mCalled = false;
+        boolean mDisplayAddedCalled = false;
+        boolean mDisplayChangedCalled = false;
+        boolean mDisplayRemovedCalled = false;
 
         FakeDisplayManagerCallback(int displayId) {
             mDisplayId = displayId;
         }
 
+        FakeDisplayManagerCallback() {
+            mDisplayId = -1;
+        }
+
         @Override
         public void onDisplayEvent(int displayId, int event) {
-            if (displayId == mDisplayId && event == DisplayManagerGlobal.EVENT_DISPLAY_CHANGED) {
-                mCalled = true;
+            if (mDisplayId != -1 && displayId != mDisplayId) {
+                return;
+            }
+
+            if (event == DisplayManagerGlobal.EVENT_DISPLAY_ADDED) {
+                mDisplayAddedCalled = true;
+            }
+
+            if (event == DisplayManagerGlobal.EVENT_DISPLAY_CHANGED) {
+                mDisplayChangedCalled = true;
+            }
+
+            if (event == DisplayManagerGlobal.EVENT_DISPLAY_REMOVED) {
+                mDisplayRemovedCalled = true;
             }
         }
 
         public void clear() {
-            mCalled = false;
+            mDisplayAddedCalled = false;
+            mDisplayChangedCalled = false;
+            mDisplayRemovedCalled = false;
         }
     }
 

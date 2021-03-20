@@ -25,6 +25,7 @@ package {
 
 java_library {
     name: "framework-connectivity-protos",
+    sdk_version: "module_current",
     proto: {
         type: "nano",
     },
@@ -82,8 +83,7 @@ java_sdk_library {
     name: "framework-connectivity",
     api_only: true,
     defaults: ["framework-module-defaults"],
-    // TODO: build against module API
-    platform_apis: true,
+    installable: true,
     srcs: [
         ":framework-connectivity-sources",
     ],
@@ -100,18 +100,56 @@ java_sdk_library {
     libs: [
         "unsupportedappusage",
     ],
-    permitted_packages: ["android.net", "com.android.connectivity.aidl"],
+    permitted_packages: ["android.net"],
+}
+
+cc_defaults {
+    name: "libframework-connectivity-defaults",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libnativehelper",
+        "libnetd_client",
+    ],
+    header_libs: [
+        "dnsproxyd_protocol_headers",
+    ],
+}
+
+cc_library_static {
+    name: "libconnectivityframeworkutils",
+    defaults: ["libframework-connectivity-defaults"],
+    srcs: [
+        "jni/android_net_NetworkUtils.cpp",
+    ],
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.tethering",
+    ],
+}
+
+cc_library_shared {
+    name: "libframework-connectivity-jni",
+    defaults: ["libframework-connectivity-defaults"],
+    srcs: [
+        "jni/onload.cpp",
+    ],
+    static_libs: ["libconnectivityframeworkutils"],
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.tethering",
+    ],
 }
 
 java_library {
     name: "framework-connectivity.impl",
-    // Instead of building against private API (framework.jar),
-    // build against core_platform + framework-minus-apex + module
-    // stub libs. This allows framework.jar to depend on this library,
-    // so it can be part of the private API until all clients have been migrated.
-    // TODO: just build against module_api, and remove this jar from
-    // the private API.
-    sdk_version: "core_platform",
+    sdk_version: "module_current",
     srcs: [
         ":framework-connectivity-sources",
     ],
@@ -122,12 +160,11 @@ java_library {
         ],
     },
     libs: [
-        "framework-minus-apex",
-        // TODO: just framework-tethering, framework-wifi when building against module_api
-        "framework-tethering.stubs.module_lib",
-        "framework-wifi.stubs.module_lib",
+        // TODO (b/183097033) remove once module_current includes core_current
+        "stable.core.platform.api.stubs",
+        "framework-tethering",
+        "framework-wifi",
         "unsupportedappusage",
-        "ServiceConnectivityResources",
     ],
     static_libs: [
         "framework-connectivity-protos",
@@ -136,5 +173,5 @@ java_library {
     jarjar_rules: "jarjar-rules.txt",
     apex_available: ["com.android.tethering"],
     installable: true,
-    permitted_packages: ["android.net", "com.android.connectivity.aidl"],
+    permitted_packages: ["android.net"],
 }

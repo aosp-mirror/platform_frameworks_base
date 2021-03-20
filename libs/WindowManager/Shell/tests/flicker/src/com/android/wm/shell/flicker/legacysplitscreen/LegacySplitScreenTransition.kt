@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.app.Instrumentation
+import android.content.Context
 import android.platform.test.annotations.Presubmit
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
@@ -36,6 +37,7 @@ import org.junit.Test
 
 abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    protected val context: Context = instrumentation.context
     protected val isRotated = testSpec.config.startRotation.isRotated()
     protected val splitScreenApp = SplitScreenHelper.getPrimary(instrumentation)
     protected val secondaryApp = SplitScreenHelper.getSecondary(instrumentation)

@@ -72,7 +72,7 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
         mStateListener.onStateChanged(mStatusBarStateController.getState());
         mStatusBar.addExpansionChangedListener(mStatusBarExpansionChangedListener);
 
-        mDumpManger.registerDumpable(getTag(), this);
+        mDumpManger.registerDumpable(getDumpTag(), this);
     }
 
     @Override
@@ -80,7 +80,17 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
         mStatusBarStateController.removeCallback(mStateListener);
         mStatusBar.removeExpansionChangedListener(mStatusBarExpansionChangedListener);
 
-        mDumpManger.unregisterDumpable(getTag());
+        mDumpManger.unregisterDumpable(getDumpTag());
+    }
+
+    /**
+     * in some cases, onViewAttached is called for the newly added view using an instance of
+     * this controller before onViewDetached is called on the previous view, so we must have a
+     * unique dump tag per instance of this class
+     * @return a unique tag for this instance of this class
+     */
+    private String getDumpTag() {
+        return getTag() + " (" + this + ")";
     }
 
     @Override

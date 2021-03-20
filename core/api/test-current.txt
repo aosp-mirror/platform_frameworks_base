@@ -1035,9 +1035,11 @@ package android.hardware.biometrics {
 
   public class BiometricPrompt {
     method @NonNull public java.util.List<java.lang.Integer> getAllowedSensorIds();
+    method public boolean isAllowBackgroundAuthentication();
   }
 
   public static class BiometricPrompt.Builder {
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowBackgroundAuthentication(boolean);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.TEST_BIOMETRIC, "android.permission.USE_BIOMETRIC_INTERNAL"}) public android.hardware.biometrics.BiometricPrompt.Builder setAllowedSensorIds(@NonNull java.util.List<java.lang.Integer>);
   }
 
@@ -1053,11 +1055,20 @@ package android.hardware.biometrics {
   }
 
   public class SensorProperties {
+    method @NonNull public java.util.List<android.hardware.biometrics.SensorProperties.ComponentInfo> getComponentInfo();
     method public int getSensorId();
     method public int getSensorStrength();
     field public static final int STRENGTH_CONVENIENCE = 0; // 0x0
     field public static final int STRENGTH_STRONG = 2; // 0x2
     field public static final int STRENGTH_WEAK = 1; // 0x1
+  }
+
+  public static final class SensorProperties.ComponentInfo {
+    method @NonNull public String getComponentId();
+    method @NonNull public String getFirmwareVersion();
+    method @NonNull public String getHardwareVersion();
+    method @NonNull public String getSerialNumber();
+    method @NonNull public String getSoftwareVersion();
   }
 
 }
@@ -2925,6 +2936,7 @@ package android.window {
 
   public final class SplashScreenView extends android.widget.FrameLayout {
     method @Nullable public android.view.View getBrandingView();
+    method @ColorInt public int getIconBackgroundColor();
   }
 
   public final class StartingWindowInfo implements android.os.Parcelable {

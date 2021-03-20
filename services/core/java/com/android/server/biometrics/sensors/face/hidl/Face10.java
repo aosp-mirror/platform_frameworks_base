@@ -27,11 +27,13 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
+import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
@@ -332,8 +334,9 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             @NonNull BiometricScheduler scheduler) {
         mSensorProperties = new FaceSensorPropertiesInternal(sensorId,
                 Utils.authenticatorStrengthToPropertyStrength(strength),
-                maxTemplatesAllowed, false /* supportsFaceDetect */, supportsSelfIllumination,
-                true /* resetLockoutRequiresChallenge */);
+                maxTemplatesAllowed, new ArrayList<ComponentInfoInternal>() /* componentInfo */,
+                FaceSensorProperties.TYPE_UNKNOWN, false /* supportsFaceDetect */,
+                supportsSelfIllumination, true /* resetLockoutRequiresChallenge */);
         mContext = context;
         mSensorId = sensorId;
         mScheduler = scheduler;
@@ -635,7 +638,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter receiver,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean isKeyguard) {
+            boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -643,7 +646,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final FaceAuthenticationClient client = new FaceAuthenticationClient(mContext,
                     mLazyDaemon, token, receiver, userId, operationId, restricted, opPackageName,
                     cookie, false /* requireConfirmation */, mSensorId, isStrongBiometric,
-                    statsClient, mLockoutTracker, mUsageStats, isKeyguard);
+                    statsClient, mLockoutTracker, mUsageStats, allowBackgroundAuthentication);
             mScheduler.scheduleClientMonitor(client);
         });
     }

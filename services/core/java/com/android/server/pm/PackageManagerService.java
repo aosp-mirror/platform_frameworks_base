@@ -883,7 +883,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // Lock for global state used when modifying package state or settings.
     // Methods that must be called with this lock held have
     // the suffix "Locked". Some methods may use the legacy suffix "LP"
-    final Object mLock;
+    final PackageManagerTracedLock mLock;
 
     // Keys are String (package name), values are Package.
     @Watched
@@ -1042,7 +1042,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         private final PackageAbiHelper mAbiHelper;
         private final Context mContext;
-        private final Object mLock;
+        private final PackageManagerTracedLock mLock;
         private final Installer mInstaller;
         private final Object mInstallLock;
         private final Handler mBackgroundHandler;
@@ -1082,7 +1082,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mDomainVerificationManagerInternalProducer;
         private final Singleton<Handler> mHandlerProducer;
 
-        Injector(Context context, Object lock, Installer installer,
+        Injector(Context context, PackageManagerTracedLock lock, Installer installer,
                 Object installLock, PackageAbiHelper abiHelper,
                 Handler backgroundHandler,
                 List<ScanPartition> systemPartitions,
@@ -1182,7 +1182,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return mUserManagerProducer.get(this, mPackageManager);
         }
 
-        public Object getLock() {
+        public PackageManagerTracedLock getLock() {
             return mLock;
         }
 
@@ -5964,7 +5964,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
         t.traceBegin("create package manager");
-        final Object lock = new Object();
+        final PackageManagerTracedLock lock = new PackageManagerTracedLock();
         final Object installLock = new Object();
         HandlerThread backgroundThread = new HandlerThread("PackageManagerBg");
         backgroundThread.start();
@@ -26890,11 +26890,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     outUpdatedPackageNames.add(targetPackageName);
                     modified = true;
                 }
+
+                if (modified) {
+                    invalidatePackageInfoCache();
+                }
             }
 
-            if (modified) {
-                invalidatePackageInfoCache();
-            }
             return true;
         }
 

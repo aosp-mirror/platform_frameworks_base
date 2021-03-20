@@ -29,7 +29,6 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.ServiceManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.ViewGroup;
 
@@ -58,7 +57,6 @@ public class PeopleSpaceActivity extends Activity {
     private Context mContext;
     private NotificationEntryManager mNotificationEntryManager;
     private int mAppWidgetId;
-    private boolean mShowSingleConversation;
 
     @Inject
     public PeopleSpaceActivity(NotificationEntryManager notificationEntryManager,
@@ -84,15 +82,7 @@ public class PeopleSpaceActivity extends Activity {
         setTileViewsWithPriorityConversations();
         mAppWidgetId = getIntent().getIntExtra(EXTRA_APPWIDGET_ID,
                 INVALID_APPWIDGET_ID);
-        mShowSingleConversation = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
         setResult(RESULT_CANCELED);
-        // Finish the configuration activity immediately if a widget is added for multiple
-        // conversations. If the mAppWidgetId is INVALID, then the activity wasn't launched as a
-        // widget configuration activity.
-        if (!mShowSingleConversation && mAppWidgetId != INVALID_APPWIDGET_ID) {
-            finishActivity();
-        }
     }
 
     /**

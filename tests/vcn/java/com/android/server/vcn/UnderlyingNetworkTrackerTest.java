@@ -328,7 +328,7 @@ public class UnderlyingNetworkTrackerTest {
     public void testRecordTrackerCallbackNotifiedForNetworkSuspended() {
         RouteSelectionCallback cb = verifyRegistrationOnAvailableAndGetCallback();
 
-        cb.onNetworkSuspended(mNetwork);
+        cb.onCapabilitiesChanged(mNetwork, SUSPENDED_NETWORK_CAPABILITIES);
 
         UnderlyingNetworkRecord expectedRecord =
                 new UnderlyingNetworkRecord(
@@ -336,7 +336,11 @@ public class UnderlyingNetworkTrackerTest {
                         SUSPENDED_NETWORK_CAPABILITIES,
                         INITIAL_LINK_PROPERTIES,
                         false /* isBlocked */);
-        verify(mNetworkTrackerCb).onSelectedUnderlyingNetworkChanged(eq(expectedRecord));
+        verify(mNetworkTrackerCb, times(1)).onSelectedUnderlyingNetworkChanged(eq(expectedRecord));
+        // onSelectedUnderlyingNetworkChanged() won't be fired twice if network capabilities doesn't
+        // change.
+        cb.onCapabilitiesChanged(mNetwork, SUSPENDED_NETWORK_CAPABILITIES);
+        verify(mNetworkTrackerCb, times(1)).onSelectedUnderlyingNetworkChanged(eq(expectedRecord));
     }
 
     @Test
@@ -344,7 +348,7 @@ public class UnderlyingNetworkTrackerTest {
         RouteSelectionCallback cb =
                 verifyRegistrationOnAvailableAndGetCallback(SUSPENDED_NETWORK_CAPABILITIES);
 
-        cb.onNetworkResumed(mNetwork);
+        cb.onCapabilitiesChanged(mNetwork, INITIAL_NETWORK_CAPABILITIES);
 
         UnderlyingNetworkRecord expectedRecord =
                 new UnderlyingNetworkRecord(
@@ -352,7 +356,11 @@ public class UnderlyingNetworkTrackerTest {
                         INITIAL_NETWORK_CAPABILITIES,
                         INITIAL_LINK_PROPERTIES,
                         false /* isBlocked */);
-        verify(mNetworkTrackerCb).onSelectedUnderlyingNetworkChanged(eq(expectedRecord));
+        verify(mNetworkTrackerCb, times(1)).onSelectedUnderlyingNetworkChanged(eq(expectedRecord));
+        // onSelectedUnderlyingNetworkChanged() won't be fired twice if network capabilities doesn't
+        // change.
+        cb.onCapabilitiesChanged(mNetwork, INITIAL_NETWORK_CAPABILITIES);
+        verify(mNetworkTrackerCb, times(1)).onSelectedUnderlyingNetworkChanged(eq(expectedRecord));
     }
 
     @Test
