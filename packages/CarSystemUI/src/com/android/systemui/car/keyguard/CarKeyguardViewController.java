@@ -238,9 +238,6 @@ public class CarKeyguardViewController extends OverlayViewController implements
     public void setOccluded(boolean occluded, boolean animate) {
         mIsOccluded = occluded;
         getOverlayViewGlobalStateController().setOccluded(occluded);
-        if (!occluded) {
-            reset(/* hideBouncerWhenShowing= */ false);
-        }
     }
 
     @Override
