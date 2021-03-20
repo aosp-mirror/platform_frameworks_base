@@ -2063,13 +2063,14 @@
         requested.  If it does support the feature, it will be as if the manifest didn't
         request it at all. -->
         <attr name="requiredNotFeature" format="string" />
-        <!-- Optional: set of flags that should apply to this permission request. -->
+        <!-- Optional: set of flags that should apply to this permission request. Note that
+             these flags start at 0x4 to match PackageInfo.requestedPermissionsFlags. -->
         <attr name="usesPermissionFlags">
             <!-- Strong assertion by a developer that they will never use this
                  permission to derive the physical location of the device, even
                  when the app has been granted the ACCESS_FINE_LOCATION and/or
                  ACCESS_COARSE_LOCATION permissions. -->
-            <flag name="neverForLocation" value="0x1" />
+            <flag name="neverForLocation" value="0x00010000" />
         </attr>
     </declare-styleable>
 
