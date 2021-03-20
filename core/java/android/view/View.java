@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.content.res.Resources.ID_NULL;
+import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
@@ -26747,6 +26748,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.view.DragEvent#getAction()} returns one of the action type constants defined
      * in DragEvent. The method uses these to determine what is happening in the drag and drop
      * operation.
+     * </p>
+     * <p>
+     * The default implementation returns false, except if an {@link OnReceiveContentListener}
+     * is {@link #setOnReceiveContentListener set} for this view. If an
+     * {@link OnReceiveContentListener} is set, the default implementation...
+     * <ul>
+     * <li>returns true for an
+     * {@link android.view.DragEvent#ACTION_DRAG_STARTED ACTION_DRAG_STARTED} event
+     * <li>calls {@link #performReceiveContent} for an
+     * {@link android.view.DragEvent#ACTION_DROP ACTION_DROP} event
+     * <li>returns true for an {@link android.view.DragEvent#ACTION_DROP ACTION_DROP} event, if
+     * the listener consumed some or all of the content
+     * </ul>
+     * </p>
+     *
      * @param event The {@link android.view.DragEvent} sent by the system.
      * The {@link android.view.DragEvent#getAction()} method returns an action type constant defined
      * in DragEvent, indicating the type of drag event represented by this object.
@@ -26766,6 +26782,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </p>
      */
     public boolean onDragEvent(DragEvent event) {
+        if (mListenerInfo == null || mListenerInfo.mOnReceiveContentListener == null) {
+            return false;
+        }
+        // Accept drag events by default if there's an OnReceiveContentListener set.
+        if (event.getAction() == DragEvent.ACTION_DRAG_STARTED) {
+            return true;
+        }
+        if (event.getAction() == DragEvent.ACTION_DROP) {
+            final DragAndDropPermissions permissions = DragAndDropPermissions.obtain(event);
+            if (permissions != null) {
+                permissions.takeTransient();
+            }
+            final ContentInfo payload = new ContentInfo.Builder(
+                    event.getClipData(), SOURCE_DRAG_AND_DROP).build();
+            ContentInfo remainingPayload = performReceiveContent(payload);
+            // Return true unless none of the payload was consumed.
+            return remainingPayload != payload;
+        }
         return false;
     }
 
