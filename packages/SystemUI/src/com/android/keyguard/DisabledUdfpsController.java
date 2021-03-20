@@ -154,7 +154,9 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
                 @Override
                 public void onBiometricRunningStateChanged(boolean running,
                         BiometricSourceType biometricSourceType) {
-                    mRunningFPS = running && biometricSourceType == FINGERPRINT;
+                    if (biometricSourceType == FINGERPRINT) {
+                        mRunningFPS = running;
+                    }
                     mAuthenticated &= !mRunningFPS;
                     updateButtonVisibility();
                 }

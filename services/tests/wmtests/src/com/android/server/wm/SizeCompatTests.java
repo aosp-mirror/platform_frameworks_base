@@ -27,6 +27,8 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -322,6 +324,22 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFalse(mActivity.mDisplayContent.isImeAttachedToApp());
         // Activity max bounds should be sandboxed since it is letterboxed.
         assertActivityMaxBoundsSandboxed();
+    }
+
+    @Test
+    public void testIsLetterboxed_activityShowsWallpaper_returnsFalse() {
+        setUpDisplaySizeWithApp(1000, 2500);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+        final WindowState window = createWindow(null, TYPE_BASE_APPLICATION, mActivity, "window");
+
+        assertEquals(window, mActivity.findMainWindow());
+        assertTrue(mActivity.isLetterboxed(mActivity.findMainWindow()));
+
+        window.mAttrs.flags |= FLAG_SHOW_WALLPAPER;
+
+        assertFalse(mActivity.isLetterboxed(mActivity.findMainWindow()));
     }
 
     @Test

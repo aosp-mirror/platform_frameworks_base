@@ -652,8 +652,11 @@ public class BrightnessTracker {
                     builder.setPackageName(parser.getAttributeValue(null, ATTR_PACKAGE_NAME));
                     builder.setUserId(mInjector.getUserId(mUserManager,
                             parser.getAttributeInt(null, ATTR_USER)));
-                    builder.setUniqueDisplayId(
-                            parser.getAttributeValue(null, ATTR_UNIQUE_DISPLAY_ID));
+                    String uniqueDisplayId = parser.getAttributeValue(null, ATTR_UNIQUE_DISPLAY_ID);
+                    if (uniqueDisplayId == null) {
+                        uniqueDisplayId = "";
+                    }
+                    builder.setUniqueDisplayId(uniqueDisplayId);
                     builder.setBatteryLevel(parser.getAttributeFloat(null, ATTR_BATTERY_LEVEL));
                     builder.setNightMode(parser.getAttributeBoolean(null, ATTR_NIGHT_MODE));
                     builder.setColorTemperature(

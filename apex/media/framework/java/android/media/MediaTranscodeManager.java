@@ -822,83 +822,102 @@ public final class MediaTranscodeManager {
         }
 
         /**
-         * Helper class for deciding if transcoding is needed, and if so, the track
+         * Abstract base class for all the format resolvers.
+         */
+        abstract static class MediaFormatResolver {
+            private @NonNull ApplicationMediaCapabilities mClientCaps;
+
+            /**
+             * Prevents public constructor access.
+             */
+            /* package private */ MediaFormatResolver() {
+            }
+
+            /**
+             * Constructs MediaFormatResolver object.
+             *
+             * @param clientCaps An ApplicationMediaCapabilities object containing the client's
+             *                   capabilities.
+             */
+            MediaFormatResolver(@NonNull ApplicationMediaCapabilities clientCaps) {
+                if (clientCaps == null) {
+                    throw new IllegalArgumentException("Client capabilities must not be null");
+                }
+                mClientCaps = clientCaps;
+            }
+
+            /**
+             * Returns the client capabilities.
+             */
+            @NonNull
+            /* package */ ApplicationMediaCapabilities getClientCapabilities() {
+                return mClientCaps;
+            }
+
+            abstract boolean shouldTranscode();
+        }
+
+        /**
+         * VideoFormatResolver for deciding if video transcoding is needed, and if so, the track
          * formats to use.
          */
-        public static class MediaFormatResolver {
+        public static class VideoFormatResolver extends MediaFormatResolver {
             private static final int BIT_RATE = 20000000;            // 20Mbps
 
             private MediaFormat mSrcVideoFormatHint;
             private MediaFormat mSrcAudioFormatHint;
-            private ApplicationMediaCapabilities mClientCaps;
 
             /**
-             * Sets the abilities of the client consuming the media. Must be called
-             * before {@link #shouldTranscode()} or {@link #resolveVideoFormat()}.
+             * Constructs a new VideoFormatResolver object.
              *
              * @param clientCaps An ApplicationMediaCapabilities object containing the client's
              *                   capabilities.
-             * @return the same VideoFormatResolver instance.
+             * @param srcVideoFormatHint A MediaFormat object containing information about the
+             *                           source's video track format that could affect the
+             *                           transcoding decision. Such information could include video
+             *                           codec types, color spaces, whether special format info (eg.
+             *                           slow-motion markers) are present, etc.. If a particular
+             *                           information is not present, it will not be used to make the
+             *                           decision.
              */
-            @NonNull
-            public MediaFormatResolver setClientCapabilities(
-                    @NonNull ApplicationMediaCapabilities clientCaps) {
-                mClientCaps = clientCaps;
-                return this;
+            public VideoFormatResolver(@NonNull ApplicationMediaCapabilities clientCaps,
+                    @NonNull MediaFormat srcVideoFormatHint) {
+                super(clientCaps);
+                mSrcVideoFormatHint = srcVideoFormatHint;
             }
 
             /**
-             * Sets the video format hint about the source. Must be called before
-             * {@link #shouldTranscode()} or {@link #resolveVideoFormat()}.
+             * Constructs a new VideoFormatResolver object.
              *
-             * @param format A MediaFormat object containing information about the source's
-             *               video track format that could affect the transcoding decision.
-             *               Such information could include video codec types, color spaces,
-             *               whether special format info (eg. slow-motion markers) are present,
-             *               etc.. If a particular information is not present, it will not be
-             *               used to make the decision.
-             * @return the same MediaFormatResolver instance.
-             */
-            @NonNull
-            public MediaFormatResolver setSourceVideoFormatHint(@NonNull MediaFormat format) {
-                mSrcVideoFormatHint = format;
-                return this;
-            }
-
-            /**
-             * Sets the audio format hint about the source.
-             *
-             * @param format A MediaFormat object containing information about the source's
-             *               audio track format that could affect the transcoding decision.
-             * @return the same MediaFormatResolver instance.
+             * @param clientCaps An ApplicationMediaCapabilities object containing the client's
+             *                   capabilities.
+             * @param srcVideoFormatHint A MediaFormat object containing information about the
+             *                           source's video track format that could affect the
+             *                           transcoding decision. Such information could include video
+             *                           codec types, color spaces, whether special format info (eg.
+             *                           slow-motion markers) are present, etc.. If a particular
+             *                           information is not present, it will not be used to make the
+             *                           decision.
+             * @param srcAudioFormatHint A MediaFormat object containing information about the
+             *                           source's audio track format that could affect the
+             *                           transcoding decision.
              * @hide
              */
-            @NonNull
-            public MediaFormatResolver setSourceAudioFormatHint(@NonNull MediaFormat format) {
-                mSrcAudioFormatHint = format;
-                return this;
+            VideoFormatResolver(@NonNull ApplicationMediaCapabilities clientCaps,
+                    @NonNull MediaFormat srcVideoFormatHint,
+                    @NonNull MediaFormat srcAudioFormatHint) {
+                super(clientCaps);
+                mSrcVideoFormatHint = srcVideoFormatHint;
+                mSrcAudioFormatHint = srcAudioFormatHint;
             }
 
             /**
              * Returns whether the source content should be transcoded.
              *
              * @return true if the source should be transcoded.
-             * @throws UnsupportedOperationException
-             *         if {@link #setClientCapabilities(ApplicationMediaCapabilities)}
-             *         or {@link #setSourceVideoFormatHint(MediaFormat)} was not called.
              */
             public boolean shouldTranscode() {
-                if (mClientCaps == null) {
-                    throw new UnsupportedOperationException(
-                            "Client caps must be set!");
-                }
-                // Video src hint must be provided, audio src hint is not used right now.
-                if (mSrcVideoFormatHint == null) {
-                    throw new UnsupportedOperationException(
-                            "Source video format hint must be set!");
-                }
-
-                boolean supportHevc = mClientCaps.isVideoMimeTypeSupported(
+                boolean supportHevc = getClientCapabilities().isVideoMimeTypeSupported(
                         MediaFormat.MIMETYPE_VIDEO_HEVC);
                 if (!supportHevc && MediaFormat.MIMETYPE_VIDEO_HEVC.equals(
                         mSrcVideoFormatHint.getString(MediaFormat.KEY_MIME))) {
@@ -910,13 +929,11 @@ public final class MediaTranscodeManager {
 
             /**
              * Retrieves the video track format to be used on
-             * {@link Builder#setVideoTrackFormat(MediaFormat)} for this configuration.
+             * {@link VideoTranscodingRequest.Builder#setVideoTrackFormat(MediaFormat)} for this
+             * configuration.
              *
              * @return the video track format to be used if transcoding should be performed,
              *         and null otherwise.
-             * @throws UnsupportedOperationException
-             *         if {@link #setClientCapabilities(ApplicationMediaCapabilities)}
-             *         or {@link #setSourceVideoFormatHint(MediaFormat)} was not called.
              */
             @Nullable
             public MediaFormat resolveVideoFormat() {
@@ -1015,9 +1032,6 @@ public final class MediaTranscodeManager {
              *
              * @return the audio track format to be used if transcoding should be performed, and
              *         null otherwise.
-             * @throws UnsupportedOperationException
-             *         if {@link #setClientCapabilities(ApplicationMediaCapabilities)}
-             *         or {@link #setSourceVideoFormatHint(MediaFormat)} was not called.
              * @hide
              */
             @Nullable
@@ -1364,21 +1378,6 @@ public final class MediaTranscodeManager {
          * @param listener The progress listener.
          */
         public void setOnProgressUpdateListener(
-                @NonNull @CallbackExecutor Executor executor,
-                @Nullable OnProgressUpdateListener listener) {
-            setOnProgressUpdateListener(
-                    0 /* minProgressUpdateInterval */,
-                    executor, listener);
-        }
-
-        /**
-         * Set a progress listener with specified progress update interval.
-         * @param minProgressUpdateInterval The minimum interval between each progress update.
-         * @param executor The executor on which listener will be invoked.
-         * @param listener The progress listener.
-         */
-        public void setOnProgressUpdateListener(
-                int minProgressUpdateInterval,
                 @NonNull @CallbackExecutor Executor executor,
                 @Nullable OnProgressUpdateListener listener) {
             synchronized (mLock) {

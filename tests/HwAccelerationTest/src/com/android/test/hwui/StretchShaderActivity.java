@@ -415,6 +415,7 @@ public class StretchShaderActivity extends Activity {
                         bounds.height(),
                         mOverScrollX,
                         mOverScrollY,
+                        mStretchDistance,
                         mStretchDistance
                 );
             }

@@ -3084,6 +3084,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return null;
     }
 
+    /** Cheap way of doing cast and instanceof. */
+    DisplayContent asDisplayContent() {
+        return null;
+    }
+
     /**
      * @return {@code true} if window container is manage by a
      *          {@link android.window.WindowOrganizer}

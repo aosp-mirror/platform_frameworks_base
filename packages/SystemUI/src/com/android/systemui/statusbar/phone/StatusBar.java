@@ -144,6 +144,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.charging.WirelessChargingAnimation;
@@ -201,6 +202,8 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.charging.ChargingRippleView;
+import com.android.systemui.statusbar.charging.WiredChargingRippleController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -376,6 +379,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
     private LightRevealScrim mLightRevealScrim;
+    private ChargingRippleView mChargingRipple;
+    private WiredChargingRippleController mChargingRippleAnimationController;
     private PowerButtonReveal mPowerButtonReveal;
 
     private final Object mQueueLock = new Object();
@@ -737,6 +742,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
+            AccessibilityFloatingMenuController accessibilityFloatingMenuController,
             Lazy<AssistManager> assistManagerLazy,
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -775,6 +781,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSlider.Factory brightnessSliderFactory,
+            WiredChargingRippleController chargingRippleAnimationController,
             FeatureFlags featureFlags) {
         super(context);
         mNotificationsController = notificationsController;
@@ -853,6 +860,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDemoModeController = demoModeController;
         mNotificationIconAreaController = notificationIconAreaController;
         mBrightnessSliderFactory = brightnessSliderFactory;
+        mChargingRippleAnimationController = chargingRippleAnimationController;
         mFeatureFlags = featureFlags;
 
         mExpansionChangedListeners = new ArrayList<>();
@@ -1196,6 +1204,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
+        mChargingRippleAnimationController.setViewHost(mNotificationShadeWindowView);
 
         if (mFeatureFlags.useNewLockscreenAnimations() && mDozeParameters.getAlwaysOn()) {
             mLightRevealScrim.setVisibility(View.VISIBLE);

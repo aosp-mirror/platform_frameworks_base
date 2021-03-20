@@ -73,9 +73,7 @@ import android.util.Log;
 import android.util.Range;
 import android.util.SparseIntArray;
 
-import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 
 import libcore.net.event.NetworkEventDispatcher;
 
@@ -425,7 +423,8 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    public static final String ACTION_PROMPT_UNVALIDATED = "android.net.conn.PROMPT_UNVALIDATED";
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final String ACTION_PROMPT_UNVALIDATED = "android.net.action.PROMPT_UNVALIDATED";
 
     /**
      * Action used to display a dialog that asks the user whether to avoid a network that is no
@@ -433,8 +432,9 @@ public class ConnectivityManager {
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final String ACTION_PROMPT_LOST_VALIDATION =
-            "android.net.conn.PROMPT_LOST_VALIDATION";
+            "android.net.action.PROMPT_LOST_VALIDATION";
 
     /**
      * Action used to display a dialog that asks the user whether to stay connected to a network
@@ -443,8 +443,9 @@ public class ConnectivityManager {
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final String ACTION_PROMPT_PARTIAL_CONNECTIVITY =
-            "android.net.conn.PROMPT_PARTIAL_CONNECTIVITY";
+            "android.net.action.PROMPT_PARTIAL_CONNECTIVITY";
 
     /**
      * Invalid tethering type.
@@ -1775,7 +1776,9 @@ public class ConnectivityManager {
         // Map from type to transports.
         final int NOT_FOUND = -1;
         final int transport = sLegacyTypeToTransport.get(type, NOT_FOUND);
-        Preconditions.checkArgument(transport != NOT_FOUND, "unknown legacy type: " + type);
+        if (transport == NOT_FOUND) {
+            throw new IllegalArgumentException("unknown legacy type: " + type);
+        }
         nc.addTransportType(transport);
 
         // Map from type to capabilities.
@@ -1880,8 +1883,8 @@ public class ConnectivityManager {
         }
 
         private PacketKeepalive(Network network, PacketKeepaliveCallback callback) {
-            Preconditions.checkNotNull(network, "network cannot be null");
-            Preconditions.checkNotNull(callback, "callback cannot be null");
+            Objects.requireNonNull(network, "network cannot be null");
+            Objects.requireNonNull(callback, "callback cannot be null");
             mNetwork = network;
             mExecutor = Executors.newSingleThreadExecutor();
             mCallback = new ISocketKeepaliveCallback.Stub() {
@@ -2256,7 +2259,9 @@ public class ConnectivityManager {
      */
     public void removeDefaultNetworkActiveListener(@NonNull OnNetworkActiveListener l) {
         INetworkActivityListener rl = mNetworkActivityListeners.get(l);
-        Preconditions.checkArgument(rl != null, "Listener was not registered.");
+        if (rl == null) {
+            throw new IllegalArgumentException("Listener was not registered.");
+        }
         try {
             mService.registerNetworkActivityListener(rl);
         } catch (RemoteException e) {
@@ -2284,8 +2289,8 @@ public class ConnectivityManager {
      * {@hide}
      */
     public ConnectivityManager(Context context, IConnectivityManager service) {
-        mContext = Preconditions.checkNotNull(context, "missing context");
-        mService = Preconditions.checkNotNull(service, "missing IConnectivityManager");
+        mContext = Objects.requireNonNull(context, "missing context");
+        mService = Objects.requireNonNull(service, "missing IConnectivityManager");
         mTetheringManager = (TetheringManager) mContext.getSystemService(Context.TETHERING_SERVICE);
         sInstance = this;
     }
@@ -2552,7 +2557,7 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public void startTethering(int type, boolean showProvisioningUi,
             final OnStartTetheringCallback callback, Handler handler) {
-        Preconditions.checkNotNull(callback, "OnStartTetheringCallback cannot be null.");
+        Objects.requireNonNull(callback, "OnStartTetheringCallback cannot be null.");
 
         final Executor executor = new Executor() {
             @Override
@@ -2645,7 +2650,7 @@ public class ConnectivityManager {
     public void registerTetheringEventCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull final OnTetheringEventCallback callback) {
-        Preconditions.checkNotNull(callback, "OnTetheringEventCallback cannot be null.");
+        Objects.requireNonNull(callback, "OnTetheringEventCallback cannot be null.");
 
         final TetheringEventCallback tetherCallback =
                 new TetheringEventCallback() {
@@ -2943,7 +2948,7 @@ public class ConnectivityManager {
     public void getLatestTetheringEntitlementResult(int type, boolean showEntitlementUi,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull final OnTetheringEntitlementResultListener listener) {
-        Preconditions.checkNotNull(listener, "TetheringEntitlementResultListener cannot be null.");
+        Objects.requireNonNull(listener, "TetheringEntitlementResultListener cannot be null.");
         ResultReceiver wrappedListener = new ResultReceiver(null) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
@@ -3316,7 +3321,9 @@ public class ConnectivityManager {
         }
 
         public NetworkCallback(@Flag int flags) {
-            Preconditions.checkArgument((flags & VALID_FLAGS) == flags);
+            if ((flags & VALID_FLAGS) != flags) {
+                throw new IllegalArgumentException("Invalid flags");
+            }
             mFlags = flags;
         }
 
@@ -3602,7 +3609,7 @@ public class ConnectivityManager {
         }
 
         CallbackHandler(Handler handler) {
-            this(Preconditions.checkNotNull(handler, "Handler cannot be null.").getLooper());
+            this(Objects.requireNonNull(handler, "Handler cannot be null.").getLooper());
         }
 
         @Override
@@ -3700,9 +3707,9 @@ public class ConnectivityManager {
             int timeoutMs, NetworkRequest.Type reqType, int legacyType, CallbackHandler handler) {
         printStackTrace();
         checkCallbackNotNull(callback);
-        Preconditions.checkArgument(
-                reqType == TRACK_DEFAULT || reqType == TRACK_SYSTEM_DEFAULT || need != null,
-                "null NetworkCapabilities");
+        if (reqType != TRACK_DEFAULT && reqType != TRACK_SYSTEM_DEFAULT && need == null) {
+            throw new IllegalArgumentException("null NetworkCapabilities");
+        }
         final NetworkRequest request;
         final String callingPackageName = mContext.getOpPackageName();
         try {
@@ -4049,15 +4056,17 @@ public class ConnectivityManager {
     }
 
     private static void checkPendingIntentNotNull(PendingIntent intent) {
-        Preconditions.checkNotNull(intent, "PendingIntent cannot be null.");
+        Objects.requireNonNull(intent, "PendingIntent cannot be null.");
     }
 
     private static void checkCallbackNotNull(NetworkCallback callback) {
-        Preconditions.checkNotNull(callback, "null NetworkCallback");
+        Objects.requireNonNull(callback, "null NetworkCallback");
     }
 
     private static void checkTimeout(int timeoutMs) {
-        Preconditions.checkArgumentPositive(timeoutMs, "timeoutMs must be strictly positive.");
+        if (timeoutMs <= 0) {
+            throw new IllegalArgumentException("timeoutMs must be strictly positive.");
+        }
     }
 
     /**
@@ -4337,8 +4346,9 @@ public class ConnectivityManager {
         // Find all requests associated to this callback and stop callback triggers immediately.
         // Callback is reusable immediately. http://b/20701525, http://b/35921499.
         synchronized (sCallbacks) {
-            Preconditions.checkArgument(networkCallback.networkRequest != null,
-                    "NetworkCallback was not registered");
+            if (networkCallback.networkRequest == null) {
+                throw new IllegalArgumentException("NetworkCallback was not registered");
+            }
             if (networkCallback.networkRequest == ALREADY_UNREGISTERED) {
                 Log.d(TAG, "NetworkCallback was already unregistered");
                 return;
@@ -4459,12 +4469,20 @@ public class ConnectivityManager {
     /**
      * Requests that the system open the captive portal app on the specified network.
      *
+     * <p>This is to be used on networks where a captive portal was detected, as per
+     * {@link NetworkCapabilities#NET_CAPABILITY_CAPTIVE_PORTAL}.
+     *
      * @param network The network to log into.
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void startCaptivePortalApp(Network network) {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
+    })
+    public void startCaptivePortalApp(@NonNull Network network) {
         try {
             mService.startCaptivePortalApp(network);
         } catch (RemoteException e) {
@@ -4659,7 +4677,7 @@ public class ConnectivityManager {
                 Log.e(TAG, "Can't set proxy properties", e);
             }
             // Must flush DNS cache as new network may have different DNS resolutions.
-            InetAddress.clearDnsCache();
+            InetAddressCompat.clearDnsCache();
             // Must flush socket pool as idle sockets will be bound to previous network and may
             // cause subsequent fetches to be performed on old network.
             NetworkEventDispatcher.getInstance().onNetworkConfigurationChanged();

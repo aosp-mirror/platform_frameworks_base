@@ -50,6 +50,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
@@ -192,9 +193,19 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // IBiometricsFace@1.0 does not support detection, only authentication.
         when(mFaceSensorProperties.isEmpty()).thenReturn(false);
+
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */, "" /* softwareVersion */));
+        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */));
+
         when(mFaceSensorProperties.get(anyInt())).thenReturn(new FaceSensorPropertiesInternal(
                 0 /* id */,
                 FaceSensorProperties.STRENGTH_STRONG, 1 /* maxTemplatesAllowed */,
+                componentInfo, FaceSensorProperties.TYPE_UNKNOWN,
                 false /* supportsFaceDetection */, true /* supportsSelfIllumination */,
                 false /* resetLockoutRequiresChallenge */));
 

@@ -42,7 +42,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkAgent;
-import android.net.NetworkAgent.ValidationStatus;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.RouteInfo;
@@ -1442,17 +1441,16 @@ public class VcnGatewayConnection extends StateMachine {
                             caps,
                             lp,
                             Vcn.getNetworkScore(),
-                            new NetworkAgentConfig(),
+                            new NetworkAgentConfig.Builder().build(),
                             mVcnContext.getVcnNetworkProvider()) {
                         @Override
-                        public void unwanted() {
+                        public void onNetworkUnwanted() {
                             Slog.d(TAG, "NetworkAgent was unwanted");
                             teardownAsynchronously();
                         }
 
                         @Override
-                        public void onValidationStatus(
-                                @ValidationStatus int status, @Nullable Uri redirectUri) {
+                        public void onValidationStatus(int status, @Nullable Uri redirectUri) {
                             if (status == NetworkAgent.VALIDATION_STATUS_VALID) {
                                 clearFailedAttemptCounterAndSafeModeAlarm();
                             }
@@ -1798,8 +1796,10 @@ public class VcnGatewayConnection extends StateMachine {
             lp.addDnsServer(addr);
         }
 
-        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
-        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null /*gateway*/,
+                null /*iface*/, RouteInfo.RTN_UNICAST));
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null /*gateway*/,
+                null /*iface*/, RouteInfo.RTN_UNICAST));
 
         lp.setMtu(gatewayConnectionConfig.getMaxMtu());
 

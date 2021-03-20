@@ -1231,6 +1231,12 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
+    "-672355406": {
+      "message": "  Rejecting as no-op: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-672228342": {
       "message": "resumeTopActivityLocked: Top activity resumed %s",
       "level": "DEBUG",

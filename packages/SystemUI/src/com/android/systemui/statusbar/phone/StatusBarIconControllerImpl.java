@@ -219,27 +219,56 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     }
 
     /**
-     * Accept a list of CallIndicatorIconStates, and show them in the same slot
-     * @param slot StatusBar slot
+     * Accept a list of CallIndicatorIconStates, and show the call strength icons.
+     * @param slot StatusBar slot for the call strength icons
      * @param states All of the no Calling & SMS icon states
      */
     @Override
-    public void setCallIndicatorIcons(String slot, List<CallIndicatorIconState> states) {
-        Slot noCallingSlot = getSlot(slot);
-        int slotIndex = getSlotIndex(slot);
+    public void setCallStrengthIcons(String slot, List<CallIndicatorIconState> states) {
+        Slot callStrengthSlot = getSlot(slot);
+        int callStrengthSlotIndex = getSlotIndex(slot);
+        Collections.reverse(states);
         for (CallIndicatorIconState state : states) {
-            StatusBarIconHolder holder = noCallingSlot.getHolderForTag(state.subId);
-            if (holder == null) {
-                holder = StatusBarIconHolder.fromCallIndicatorState(mContext, state);
-                setIcon(slotIndex, holder);
-            } else {
-                int resId = state.isNoCalling ? state.noCallingResId : state.callStrengthResId;
-                String contentDescription = state.isNoCalling
-                        ? state.noCallingDescription : state.callStrengthDescription;
-                holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
-                        Icon.createWithResource(mContext, resId), 0, 0, contentDescription));
-                setIcon(slotIndex, holder);
+            if (!state.isNoCalling) {
+                StatusBarIconHolder holder = callStrengthSlot.getHolderForTag(state.subId);
+                if (holder == null) {
+                    holder = StatusBarIconHolder.fromCallIndicatorState(mContext, state);
+                    setIcon(callStrengthSlotIndex, holder);
+                } else {
+                    holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
+                            Icon.createWithResource(mContext, state.callStrengthResId), 0, 0,
+                            state.callStrengthDescription));
+                    setIcon(callStrengthSlotIndex, holder);
+                }
             }
+            setIconVisibility(slot, !state.isNoCalling, state.subId);
+        }
+    }
+
+    /**
+     * Accept a list of CallIndicatorIconStates, and show the no calling icons.
+     * @param slot StatusBar slot for the no calling icons
+     * @param states All of the no Calling & SMS icon states
+     */
+    @Override
+    public void setNoCallingIcons(String slot, List<CallIndicatorIconState> states) {
+        Slot noCallingSlot = getSlot(slot);
+        int noCallingSlotIndex = getSlotIndex(slot);
+        Collections.reverse(states);
+        for (CallIndicatorIconState state : states) {
+            if (state.isNoCalling) {
+                StatusBarIconHolder holder = noCallingSlot.getHolderForTag(state.subId);
+                if (holder == null) {
+                    holder = StatusBarIconHolder.fromCallIndicatorState(mContext, state);
+                    setIcon(noCallingSlotIndex, holder);
+                } else {
+                    holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
+                            Icon.createWithResource(mContext, state.noCallingResId), 0, 0,
+                            state.noCallingDescription));
+                    setIcon(noCallingSlotIndex, holder);
+                }
+            }
+            setIconVisibility(slot, state.isNoCalling, state.subId);
         }
     }
 
@@ -282,9 +311,15 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         }
     }
 
+    /** */
     public void setIconVisibility(String slot, boolean visibility) {
+        setIconVisibility(slot, visibility, 0);
+    }
+
+    /** */
+    public void setIconVisibility(String slot, boolean visibility, int tag) {
         int index = getSlotIndex(slot);
-        StatusBarIconHolder holder = getIcon(index, 0);
+        StatusBarIconHolder holder = getIcon(index, tag);
         if (holder == null || holder.isVisible() == visibility) {
             return;
         }

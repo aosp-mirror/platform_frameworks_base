@@ -136,6 +136,23 @@ public interface AppStandbyInternal {
     void restrictApp(@NonNull String packageName, int userId,
             @SystemForcedReasons int restrictReason);
 
+    /**
+     * Put the specified app in the
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
+     * bucket. If it has been used by the user recently, the restriction will delayed
+     * until an appropriate time. This should only be used in cases where
+     * {@link #restrictApp(String, int, int)} is not sufficient.
+     *
+     * @param mainReason     The main reason for restricting the app. Must be either {@link
+     *                       android.app.usage.UsageStatsManager#REASON_MAIN_FORCED_BY_SYSTEM} or
+     *                       {@link android.app.usage.UsageStatsManager#REASON_MAIN_FORCED_BY_USER}.
+     *                       Calls providing any other value will be ignored.
+     * @param restrictReason The restrictReason for restricting the app. Should be one of the
+     *                       UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_* reasons.
+     */
+    void restrictApp(@NonNull String packageName, int userId, int mainReason,
+            @SystemForcedReasons int restrictReason);
+
     void addActiveDeviceAdmin(String adminPkg, int userId);
 
     void setActiveAdminApps(Set<String> adminPkgs, int userId);

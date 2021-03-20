@@ -252,6 +252,7 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
@@ -882,7 +883,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // Lock for global state used when modifying package state or settings.
     // Methods that must be called with this lock held have
     // the suffix "Locked". Some methods may use the legacy suffix "LP"
-    final Object mLock;
+    final PackageManagerTracedLock mLock;
 
     // Keys are String (package name), values are Package.
     @Watched
@@ -1041,7 +1042,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         private final PackageAbiHelper mAbiHelper;
         private final Context mContext;
-        private final Object mLock;
+        private final PackageManagerTracedLock mLock;
         private final Installer mInstaller;
         private final Object mInstallLock;
         private final Handler mBackgroundHandler;
@@ -1081,7 +1082,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mDomainVerificationManagerInternalProducer;
         private final Singleton<Handler> mHandlerProducer;
 
-        Injector(Context context, Object lock, Installer installer,
+        Injector(Context context, PackageManagerTracedLock lock, Installer installer,
                 Object installLock, PackageAbiHelper abiHelper,
                 Handler backgroundHandler,
                 List<ScanPartition> systemPartitions,
@@ -1181,7 +1182,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return mUserManagerProducer.get(this, mPackageManager);
         }
 
-        public Object getLock() {
+        public PackageManagerTracedLock getLock() {
             return mLock;
         }
 
@@ -5963,7 +5964,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
         t.traceBegin("create package manager");
-        final Object lock = new Object();
+        final PackageManagerTracedLock lock = new PackageManagerTracedLock();
         final Object installLock = new Object();
         HandlerThread backgroundThread = new HandlerThread("PackageManagerBg");
         backgroundThread.start();
@@ -26889,11 +26890,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     outUpdatedPackageNames.add(targetPackageName);
                     modified = true;
                 }
+
+                if (modified) {
+                    invalidatePackageInfoCache();
+                }
             }
 
-            if (modified) {
-                invalidatePackageInfoCache();
-            }
             return true;
         }
 
@@ -27321,6 +27323,28 @@ public class PackageManagerService extends IPackageManager.Stub
                 int callingUid, int userId) {
             return PackageManagerService.this.getPackageStartability(
                     packageName, callingUid, userId) == PACKAGE_STARTABILITY_FROZEN;
+        }
+
+        @Override
+        public boolean isPackageUsesPermissionNeverForLocation(@NonNull String packageName,
+                @NonNull String permissionName) {
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(permissionName);
+            final AndroidPackage pkg;
+            synchronized (mLock) {
+                pkg = mPackages.get(packageName);
+            }
+            if (pkg == null) return false;
+            final List<ParsedUsesPermission> usesPermissions = pkg.getUsesPermissions();
+            final int size = usesPermissions.size();
+            for (int i = 0; i < size; i++) {
+                final ParsedUsesPermission usesPermission = usesPermissions.get(i);
+                if (Objects.equals(usesPermission.name, permissionName)) {
+                    return (usesPermission.usesPermissionFlags
+                            & ParsedUsesPermission.FLAG_NEVER_FOR_LOCATION) != 0;
+                }
+            }
+            return false;
         }
     }
 

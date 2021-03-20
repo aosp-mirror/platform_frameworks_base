@@ -25,8 +25,8 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
+import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -98,14 +98,14 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
 
     @Override
     public CharSequence getTileLabel() {
-        return mContext.getString(R.string.quick_settings_reduce_bright_colors_label);
+        return mContext.getString(R.string.reduce_bright_colors_feature_name);
     }
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.value = mReduceBrightColorsController.isReduceBrightColorsActivated();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.label = mContext.getString(R.string.quick_settings_reduce_bright_colors_label);
+        state.label = mContext.getString(R.string.reduce_bright_colors_feature_name);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
     }

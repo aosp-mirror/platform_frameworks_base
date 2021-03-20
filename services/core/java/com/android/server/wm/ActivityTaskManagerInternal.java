@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.Pair;
 import android.util.proto.ProtoOutputStream;
 import android.window.TaskSnapshot;
 
@@ -162,10 +163,10 @@ public abstract class ActivityTaskManagerInternal {
             IVoiceInteractor mInteractor);
 
     /**
-     * Returns the top activity from each of the currently visible root tasks. The first entry
-     * will be the focused activity.
+     * Returns the top activity from each of the currently visible root tasks, and the related task
+     * id. The first entry will be the focused activity.
      */
-    public abstract List<IBinder> getTopVisibleActivities();
+    public abstract List<Pair<IBinder, Integer>> getTopVisibleActivities();
 
     /**
      * Returns whether {@code uid} has any resumed activity.

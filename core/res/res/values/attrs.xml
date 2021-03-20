@@ -2280,6 +2280,10 @@
         <!-- Place an drawable image in the bottom of the starting window, it can be used to
              represent the branding of the application. -->
         <attr name="windowSplashScreenBrandingImage" format="reference"/>
+        <!-- Set a background behind the splash screen icon. This is useful if there is not enough
+             contrast between the window background and the icon. Note the shape would also be
+             masking like an icon. -->
+        <attr name="windowSplashScreenIconBackgroundColor" format="color"/>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->

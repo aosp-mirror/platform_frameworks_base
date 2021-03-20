@@ -118,9 +118,10 @@ binder::Status BinderIncrementalService::openStorage(const std::string& path,
 binder::Status BinderIncrementalService::createStorage(
         const ::std::string& path, const ::android::content::pm::DataLoaderParamsParcel& params,
         int32_t createMode, int32_t* _aidl_return) {
-    *_aidl_return = mImpl.createStorage(path, params,
-                                        android::incremental::IncrementalService::CreateOptions(
-                                                createMode));
+    *_aidl_return =
+            mImpl.createStorage(path, const_cast<content::pm::DataLoaderParamsParcel&&>(params),
+                                android::incremental::IncrementalService::CreateOptions(
+                                        createMode));
     return ok();
 }
 
@@ -144,9 +145,8 @@ binder::Status BinderIncrementalService::startLoading(
         bool* _aidl_return) {
     *_aidl_return =
             mImpl.startLoading(storageId, const_cast<content::pm::DataLoaderParamsParcel&&>(params),
-                               statusListener,
-                               const_cast<StorageHealthCheckParams&&>(healthCheckParams),
-                               healthListener, perUidReadTimeouts);
+                               statusListener, healthCheckParams, healthListener,
+                               perUidReadTimeouts);
     return ok();
 }
 
@@ -255,20 +255,18 @@ binder::Status BinderIncrementalService::unlink(int32_t storageId, const std::st
 binder::Status BinderIncrementalService::isFileFullyLoaded(int32_t storageId,
                                                            const std::string& path,
                                                            int32_t* _aidl_return) {
-    *_aidl_return = mImpl.isFileFullyLoaded(storageId, path);
+    *_aidl_return = (int)mImpl.isFileFullyLoaded(storageId, path);
     return ok();
 }
 
 binder::Status BinderIncrementalService::isFullyLoaded(int32_t storageId, int32_t* _aidl_return) {
-    *_aidl_return = mImpl.getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/true)
-                            .blocksRemainingOrError();
+    *_aidl_return = (int)mImpl.isMountFullyLoaded(storageId);
     return ok();
 }
 
 binder::Status BinderIncrementalService::getLoadingProgress(int32_t storageId,
                                                             float* _aidl_return) {
-    *_aidl_return =
-            mImpl.getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/false).getProgress();
+    *_aidl_return = mImpl.getLoadingProgress(storageId).getProgress();
     return ok();
 }
 
@@ -281,8 +279,8 @@ binder::Status BinderIncrementalService::getMetadataByPath(int32_t storageId,
 }
 
 static FileId toFileId(const std::vector<uint8_t>& id) {
-    FileId fid;
-    memcpy(&fid, id.data(), id.size());
+    FileId fid = {};
+    memcpy(&fid, id.data(), std::min(sizeof(fid), id.size()));
     return fid;
 }
 
@@ -336,10 +334,8 @@ binder::Status BinderIncrementalService::registerStorageHealthListener(
         int32_t storageId,
         const ::android::os::incremental::StorageHealthCheckParams& healthCheckParams,
         const ::android::sp<IStorageHealthListener>& healthListener, bool* _aidl_return) {
-    *_aidl_return = mImpl.registerStorageHealthListener(storageId,
-                                                        const_cast<StorageHealthCheckParams&&>(
-                                                                healthCheckParams),
-                                                        healthListener);
+    *_aidl_return =
+            mImpl.registerStorageHealthListener(storageId, healthCheckParams, healthListener);
     return ok();
 }
 

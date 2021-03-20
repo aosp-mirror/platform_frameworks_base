@@ -126,6 +126,7 @@ package android {
     field public static final String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
     field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
+    field public static final String MANAGE_APP_HIBERNATION = "android.permission.MANAGE_APP_HIBERNATION";
     field public static final String MANAGE_APP_OPS_RESTRICTIONS = "android.permission.MANAGE_APP_OPS_RESTRICTIONS";
     field public static final String MANAGE_APP_PREDICTIONS = "android.permission.MANAGE_APP_PREDICTIONS";
     field public static final String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
@@ -1831,10 +1832,10 @@ package android.app.usage {
 package android.apphibernation {
 
   public final class AppHibernationManager {
-    method public boolean isHibernatingForUser(@NonNull String);
-    method public boolean isHibernatingGlobally(@NonNull String);
-    method public void setHibernatingForUser(@NonNull String, boolean);
-    method public void setHibernatingGlobally(@NonNull String, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public boolean isHibernatingForUser(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public boolean isHibernatingGlobally(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void setHibernatingForUser(@NonNull String, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void setHibernatingGlobally(@NonNull String, boolean);
   }
 
 }
@@ -10341,6 +10342,32 @@ package android.service.voice {
     method public int getStart();
   }
 
+  public final class HotwordDetectedResult implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getByteOffset();
+    method public int getConfidenceLevel();
+    method @NonNull public android.os.Bundle getExtras();
+    method @Nullable public String getHotwordPhrase();
+    method public static int getMaxBundleSize();
+    method public static int getMaxScore();
+    method public int getPersonalizedScore();
+    method public int getScore();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int BYTE_OFFSET_UNSET = -1; // 0xffffffff
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordDetectedResult> CREATOR;
+  }
+
+  public static final class HotwordDetectedResult.Builder {
+    ctor public HotwordDetectedResult.Builder();
+    method @NonNull public android.service.voice.HotwordDetectedResult build();
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setByteOffset(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordPhrase(@NonNull String);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedScore(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
+  }
+
   public abstract class HotwordDetectionService extends android.app.Service {
     ctor public HotwordDetectionService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
@@ -10352,6 +10379,20 @@ package android.service.voice {
   public static final class HotwordDetectionService.DspHotwordDetectionCallback {
     method public void onDetected();
     method public void onRejected();
+  }
+
+  public interface HotwordDetector {
+    field public static final int CONFIDENCE_LEVEL_HIGH = 3; // 0x3
+    field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
+    field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
+    field public static final int CONFIDENCE_LEVEL_NONE = 0; // 0x0
+  }
+
+  public final class HotwordRejectedResult implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getConfidenceLevel();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordRejectedResult> CREATOR;
   }
 
   public class VoiceInteractionService extends android.app.Service {

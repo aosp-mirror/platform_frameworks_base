@@ -330,7 +330,7 @@ package android {
     field public static final int apiKey = 16843281; // 0x1010211
     field public static final int appCategory = 16844101; // 0x1010545
     field public static final int appComponentFactory = 16844154; // 0x101057a
-    field public static final int attributionTags = 16844353; // 0x1010641
+    field public static final int attributionTags = 16844354; // 0x1010642
     field public static final int author = 16843444; // 0x10102b4
     field public static final int authorities = 16842776; // 0x1010018
     field public static final int autoAdvanceViewId = 16843535; // 0x101030f
@@ -508,7 +508,7 @@ package android {
     field public static final int dashGap = 16843175; // 0x10101a7
     field public static final int dashWidth = 16843174; // 0x10101a6
     field public static final int data = 16842798; // 0x101002e
-    field public static final int dataExtractionRules = 16844349; // 0x101063d
+    field public static final int dataExtractionRules = 16844350; // 0x101063e
     field public static final int datePickerDialogTheme = 16843948; // 0x10104ac
     field public static final int datePickerMode = 16843955; // 0x10104b3
     field public static final int datePickerStyle = 16843612; // 0x101035c
@@ -530,8 +530,8 @@ package android {
     field public static final int detailSocialSummary = 16843428; // 0x10102a4
     field public static final int detailsElementBackground = 16843598; // 0x101034e
     field public static final int dial = 16843010; // 0x1010102
-    field public static final int dialTint = 16844341; // 0x1010635
-    field public static final int dialTintMode = 16844342; // 0x1010636
+    field public static final int dialTint = 16844342; // 0x1010636
+    field public static final int dialTintMode = 16844343; // 0x1010637
     field public static final int dialogCornerRadius = 16844145; // 0x1010571
     field public static final int dialogIcon = 16843252; // 0x10101f4
     field public static final int dialogLayout = 16843255; // 0x10101f7
@@ -729,14 +729,14 @@ package android {
     field public static final int groupIndicator = 16843019; // 0x101010b
     field public static final int gwpAsanMode = 16844310; // 0x1010616
     field public static final int hand_hour = 16843011; // 0x1010103
-    field public static final int hand_hourTint = 16844343; // 0x1010637
-    field public static final int hand_hourTintMode = 16844344; // 0x1010638
+    field public static final int hand_hourTint = 16844344; // 0x1010638
+    field public static final int hand_hourTintMode = 16844345; // 0x1010639
     field public static final int hand_minute = 16843012; // 0x1010104
-    field public static final int hand_minuteTint = 16844345; // 0x1010639
-    field public static final int hand_minuteTintMode = 16844346; // 0x101063a
+    field public static final int hand_minuteTint = 16844346; // 0x101063a
+    field public static final int hand_minuteTintMode = 16844347; // 0x101063b
     field public static final int hand_second = 16844323; // 0x1010623
-    field public static final int hand_secondTint = 16844347; // 0x101063b
-    field public static final int hand_secondTintMode = 16844348; // 0x101063c
+    field public static final int hand_secondTint = 16844348; // 0x101063c
+    field public static final int hand_secondTintMode = 16844349; // 0x101063d
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
@@ -820,7 +820,7 @@ package android {
     field public static final int installLocation = 16843447; // 0x10102b7
     field public static final int interactiveUiTimeout = 16844181; // 0x1010595
     field public static final int interpolator = 16843073; // 0x1010141
-    field public static final int isAccessibilityTool = 16844352; // 0x1010640
+    field public static final int isAccessibilityTool = 16844353; // 0x1010641
     field public static final int isAlwaysSyncable = 16843571; // 0x1010333
     field public static final int isAsciiCapable = 16843753; // 0x10103e9
     field public static final int isAuxiliary = 16843647; // 0x101037f
@@ -972,8 +972,8 @@ package android {
     field public static final int maxLines = 16843091; // 0x1010153
     field public static final int maxLongVersionCode = 16844163; // 0x1010583
     field public static final int maxRecents = 16843846; // 0x1010446
-    field public static final int maxResizeHeight = 16844338; // 0x1010632
-    field public static final int maxResizeWidth = 16844337; // 0x1010631
+    field public static final int maxResizeHeight = 16844339; // 0x1010633
+    field public static final int maxResizeWidth = 16844338; // 0x1010632
     field public static final int maxRows = 16843059; // 0x1010133
     field public static final int maxSdkVersion = 16843377; // 0x1010271
     field public static final int maxWidth = 16843039; // 0x101011f
@@ -1076,7 +1076,7 @@ package android {
     field public static final int panelTextAppearance = 16842850; // 0x1010062
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
-    field public static final int passwordsActivity = 16844350; // 0x101063e
+    field public static final int passwordsActivity = 16844351; // 0x101063f
     field public static final int path = 16842794; // 0x101002a
     field public static final int pathAdvancedPattern = 16844320; // 0x1010620
     field public static final int pathData = 16843781; // 0x1010405
@@ -1262,7 +1262,7 @@ package android {
     field public static final int segmentedButtonStyle = 16843568; // 0x1010330
     field public static final int selectAllOnFocus = 16843102; // 0x101015e
     field public static final int selectable = 16843238; // 0x10101e6
-    field public static final int selectableAsDefault = 16844351; // 0x101063f
+    field public static final int selectableAsDefault = 16844352; // 0x1010640
     field public static final int selectableItemBackground = 16843534; // 0x101030e
     field public static final int selectableItemBackgroundBorderless = 16843868; // 0x101045c
     field @Deprecated public static final int selectedDateVerticalBar = 16843591; // 0x1010347
@@ -1312,7 +1312,7 @@ package android {
     field public static final int spinnerMode = 16843505; // 0x10102f1
     field public static final int spinnerStyle = 16842881; // 0x1010081
     field public static final int spinnersShown = 16843595; // 0x101034b
-    field public static final int splashScreenTheme = 16844336; // 0x1010630
+    field public static final int splashScreenTheme = 16844337; // 0x1010631
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
     field public static final int splitName = 16844105; // 0x1010549
     field public static final int splitTrack = 16843852; // 0x101044c
@@ -1395,7 +1395,7 @@ package android {
     field public static final int supportsRtl = 16843695; // 0x10103af
     field public static final int supportsSwitchingToNextInputMethod = 16843755; // 0x10103eb
     field public static final int supportsUploading = 16843419; // 0x101029b
-    field public static final int suppressesSpellChecker = 16844354; // 0x1010642
+    field public static final int suppressesSpellChecker = 16844355; // 0x1010643
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
     field public static final int switchPreferenceStyle = 16843629; // 0x101036d
@@ -1410,8 +1410,8 @@ package android {
     field public static final int tabWidgetStyle = 16842883; // 0x1010083
     field public static final int tag = 16842961; // 0x10100d1
     field public static final int targetActivity = 16843266; // 0x1010202
-    field public static final int targetCellHeight = 16844340; // 0x1010634
-    field public static final int targetCellWidth = 16844339; // 0x1010633
+    field public static final int targetCellHeight = 16844341; // 0x1010635
+    field public static final int targetCellWidth = 16844340; // 0x1010634
     field public static final int targetClass = 16842799; // 0x101002f
     field @Deprecated public static final int targetDescriptions = 16843680; // 0x10103a0
     field public static final int targetId = 16843740; // 0x10103dc
@@ -1680,6 +1680,7 @@ package android {
     field public static final int windowSplashScreenAnimationDuration = 16844334; // 0x101062e
     field public static final int windowSplashScreenBackground = 16844332; // 0x101062c
     field public static final int windowSplashScreenBrandingImage = 16844335; // 0x101062f
+    field public static final int windowSplashScreenIconBackgroundColor = 16844336; // 0x1010630
     field @Deprecated public static final int windowSplashscreenContent = 16844132; // 0x1010564
     field @Deprecated public static final int windowSwipeToDismiss = 16843763; // 0x10103f3
     field public static final int windowTitleBackgroundStyle = 16842844; // 0x101005c
@@ -8005,13 +8006,14 @@ package android.app.people {
     method public long getStartTimeMillis();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int ACTIVITY_ANNIVERSARY = 2; // 0x2
+    field public static final int ACTIVITY_AUDIO = 4; // 0x4
     field public static final int ACTIVITY_BIRTHDAY = 1; // 0x1
-    field public static final int ACTIVITY_GAME = 5; // 0x5
-    field public static final int ACTIVITY_LOCATION = 6; // 0x6
-    field public static final int ACTIVITY_MEDIA = 4; // 0x4
+    field public static final int ACTIVITY_GAME = 6; // 0x6
+    field public static final int ACTIVITY_LOCATION = 7; // 0x7
     field public static final int ACTIVITY_NEW_STORY = 3; // 0x3
     field public static final int ACTIVITY_OTHER = 0; // 0x0
-    field public static final int ACTIVITY_UPCOMING_BIRTHDAY = 7; // 0x7
+    field public static final int ACTIVITY_UPCOMING_BIRTHDAY = 8; // 0x8
+    field public static final int ACTIVITY_VIDEO = 5; // 0x5
     field public static final int AVAILABILITY_AVAILABLE = 0; // 0x0
     field public static final int AVAILABILITY_BUSY = 1; // 0x1
     field public static final int AVAILABILITY_OFFLINE = 2; // 0x2
@@ -20678,6 +20680,7 @@ package android.media {
     method public android.media.AudioDeviceInfo getPreferredDevice();
     method public android.media.AudioDeviceInfo getRoutedDevice();
     method public int getSampleRate();
+    method @IntRange(from=1) public int getStartThresholdInFrames();
     method public int getState();
     method public int getStreamType();
     method public boolean getTimestamp(android.media.AudioTimestamp);
@@ -20708,6 +20711,7 @@ package android.media {
     method public int setPositionNotificationPeriod(int);
     method public boolean setPreferredDevice(android.media.AudioDeviceInfo);
     method public int setPresentation(@NonNull android.media.AudioPresentation);
+    method @IntRange(from=1) public int setStartThresholdInFrames(@IntRange(from=1) int);
     method @Deprecated protected void setState(int);
     method @Deprecated public int setStereoVolume(float, float);
     method public int setVolume(float);
@@ -34828,6 +34832,7 @@ package android.provider {
     field public static final String ACTION_QUICK_ACCESS_WALLET_SETTINGS = "android.settings.QUICK_ACCESS_WALLET_SETTINGS";
     field public static final String ACTION_QUICK_LAUNCH_SETTINGS = "android.settings.QUICK_LAUNCH_SETTINGS";
     field public static final String ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
+    field public static final String ACTION_REQUEST_MANAGE_MEDIA = "android.settings.REQUEST_MANAGE_MEDIA";
     field public static final String ACTION_REQUEST_SCHEDULE_EXACT_ALARM = "android.settings.REQUEST_SCHEDULE_EXACT_ALARM";
     field public static final String ACTION_REQUEST_SET_AUTOFILL_SERVICE = "android.settings.REQUEST_SET_AUTOFILL_SERVICE";
     field public static final String ACTION_SEARCH_SETTINGS = "android.search.action.SEARCH_SETTINGS";
@@ -40316,7 +40321,6 @@ package android.telephony {
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
     method public void notifyConfigChangedForSubId(int);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
-    field public static final int CARRIER_NR_AVAILABILITY_NONE = 0; // 0x0
     field public static final int CARRIER_NR_AVAILABILITY_NSA = 1; // 0x1
     field public static final int CARRIER_NR_AVAILABILITY_SA = 2; // 0x2
     field public static final int CROSS_SIM_SPN_FORMAT_CARRIER_NAME_ONLY = 0; // 0x0
@@ -40381,7 +40385,7 @@ package android.telephony {
     field public static final String KEY_CARRIER_INSTANT_LETTERING_LENGTH_LIMIT_INT = "carrier_instant_lettering_length_limit_int";
     field public static final String KEY_CARRIER_NAME_OVERRIDE_BOOL = "carrier_name_override_bool";
     field public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
-    field public static final String KEY_CARRIER_NR_AVAILABILITY_INT = "carrier_nr_availability_int";
+    field public static final String KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY = "carrier_nr_availabilities_int_array";
     field public static final String KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL = "carrier_provisions_wifi_merged_networks_bool";
     field public static final String KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL = "carrier_rcs_provisioning_required_bool";
     field public static final String KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING = "carrier_settings_activity_component_name_string";
@@ -40626,7 +40630,10 @@ package android.telephony {
 
   public static final class CarrierConfigManager.ImsServiceEntitlement {
     field public static final String KEY_ENTITLEMENT_SERVER_URL_STRING = "imsserviceentitlement.entitlement_server_url_string";
+    field public static final String KEY_FCM_SENDER_ID_STRING = "imsserviceentitlement.fcm_sender_id_string";
+    field public static final String KEY_IMS_PROVISIONING_BOOL = "imsserviceentitlement.ims_provisioning_bool";
     field public static final String KEY_PREFIX = "imsserviceentitlement.";
+    field public static final String KEY_SHOW_VOWIFI_WEBVIEW_BOOL = "imsserviceentitlement.show_vowifi_webview_bool";
   }
 
   public static final class CarrierConfigManager.Iwlan {

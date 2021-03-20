@@ -83,7 +83,6 @@ public class StatusBarIconHolder {
         holder.mIcon = new StatusBarIcon(UserHandle.SYSTEM, context.getPackageName(),
                 Icon.createWithResource(context, resId), 0, 0, contentDescription);
         holder.mTag = state.subId;
-        holder.setVisible(true);
         return holder;
     }
 

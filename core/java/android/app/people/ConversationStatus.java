@@ -36,7 +36,8 @@ public final class ConversationStatus implements Parcelable {
             ACTIVITY_BIRTHDAY,
             ACTIVITY_ANNIVERSARY,
             ACTIVITY_NEW_STORY,
-            ACTIVITY_MEDIA,
+            ACTIVITY_AUDIO,
+            ACTIVITY_VIDEO,
             ACTIVITY_GAME,
             ACTIVITY_LOCATION,
             ACTIVITY_UPCOMING_BIRTHDAY
@@ -44,14 +45,47 @@ public final class ConversationStatus implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ActivityType {}
 
+    /**
+     * Constant representing that the conversation user is engaged in an activity that cannot be
+     * more specifically represented by another type.
+     */
     public static final int ACTIVITY_OTHER = 0;
+    /**
+     * Constant representing that today is the conversation user's birthday.
+     */
     public static final int ACTIVITY_BIRTHDAY = 1;
+    /**
+     * Constant representing that the conversation user and the device user are celebrating
+     * and anniversary today.
+     */
     public static final int ACTIVITY_ANNIVERSARY = 2;
+    /**
+     * Constant representing that the conversation user has posted a new story.
+     */
     public static final int ACTIVITY_NEW_STORY = 3;
-    public static final int ACTIVITY_MEDIA = 4;
-    public static final int ACTIVITY_GAME = 5;
-    public static final int ACTIVITY_LOCATION = 6;
-    public static final int ACTIVITY_UPCOMING_BIRTHDAY = 7;
+    /**
+     * Constant representing that the conversation user is listening to music or other audio
+     * like a podcast.
+     */
+    public static final int ACTIVITY_AUDIO = 4;
+    /**
+     * Constant representing that the conversation user is watching video content.
+     */
+    public static final int ACTIVITY_VIDEO = 5;
+    /**
+     * Constant representing that the conversation user is playing a game.
+     */
+    public static final int ACTIVITY_GAME = 6;
+    /**
+     * Constant representing that the conversation user is sharing status with the device user.
+     * Use this to represent a general 'this person is sharing their location with you' status or
+     * a more specific 'this is the current location of this person' status.
+     */
+    public static final int ACTIVITY_LOCATION = 7;
+    /**
+     * Constant representing that the conversation user's birthday is approaching soon.
+     */
+    public static final int ACTIVITY_UPCOMING_BIRTHDAY = 8;
 
     /** @hide */
     @IntDef(prefix = { "AVAILABILITY_" }, value = {
