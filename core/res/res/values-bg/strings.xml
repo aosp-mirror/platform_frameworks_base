@@ -204,6 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"Услуга Twilight"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Инструмент за установяване на часовата зона (няма връзка)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Услуга на GNSS за актуализиране на часа"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Услуга за управление на разпознаването на музика"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Данните на устройството ви ще бъдат изтрити"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Приложението за администриране не може да се използва. Сега данните на устройството ви ще бъдат изтрити.\n\nАко имате въпроси, свържете се с администратора на организацията си."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Отпечатването е деактивиранo от <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -293,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Приложението работи"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Приложения, използващи батерията"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Увеличение"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> използва батерията"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> приложения използват батерията"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Докоснете за информация относно използването на батерията и преноса на данни"</string>
@@ -343,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Разрешава на приложението да бъде лентата на състоянието."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"разгъване или свиване на лентата на състоянието"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Разрешава на приложението да разгъва или свива лентата на състоянието."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"показване на известия като активности на цял екран на заключено устройство"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Дава възможност на приложението да показва известия като активности на цял екран на заключено устройство"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"инсталиране на преки пътища"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Разрешава на приложението да добавя към началния екран преки пътища без намеса на потребителя."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"деинсталиране на преки пътища"</string>
@@ -554,6 +559,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Използване на биометрични данни или опцията за заключване на екрана"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Потвърдете, че сте вие"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Използвайте биометричните си данни, за да продължите"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Използвайте биометричните си данни или опцията за заключване на екрана, за да продължите"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометричният хардуер не е налице"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Удостоверяването бе анулирано"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Не е разпознато"</string>
@@ -587,6 +593,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Използване на отпечатък"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Използване на отпечатък или опцията за заключване на екрана"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Използвайте отпечатъка си, за да продължите"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Използвайте отпечатъка си или опцията за заключване на екрана, за да продължите"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона за отпечатък"</string>
@@ -634,6 +641,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Използване на отключв. с лице"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Използване на отключването с лице или опцията за заключване на екрана"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Използвайте функцията за отключване с лице, за да продължите"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Използвайте лицето си или опцията за заключване на екрана, за да продължите"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Икона на лице"</string>
@@ -997,6 +1005,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"Нямате разрешение да отворите тази страница."</string>
     <string name="text_copied" msgid="2531420577879738860">"Текстът е копиран в буферната памет."</string>
     <string name="copied" msgid="4675902854553014676">"Копирано"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави данни от <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> постави данни от буферната памет"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Още"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Меню+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1370,11 +1380,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Изключване"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> се проверява…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Текущото съдържание се преглежда"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Хранилището за мултимедия се анализира"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Ново хранилище (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> не работи"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Докоснете, за да настроите"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Изберете, за да настроите"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Може да е необходимо да форматирате отново устройството. Докоснете, за да извадите."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"За прехвърляне на снимки и мултимедия"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Преглед на мултимедийните файлове"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Проблем с хранилището (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> не работи"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Докоснете за коригиране"</string>
@@ -1383,7 +1396,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g>: Не се поддържа"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> не работи"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Устройството не поддържа този носител (<xliff:g id="NAME">%s</xliff:g>). Докоснете, за да настроите в поддържан формат."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Устройството не поддържа този носител (<xliff:g id="NAME">%s</xliff:g>). Изберете, за да настроите в поддържан формат."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Изберете, за да настроите <xliff:g id="NAME">%s</xliff:g> в поддържан формат."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Може да е необходимо да форматирате отново устройството"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>: Неочаквано премахване"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Спрете носителя, преди да го премахнете, за да избегнете загубата на съдържание"</string>
@@ -1689,9 +1702,9 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"За превключване между функциите прекарайте три пръста нагоре и задръжте."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ниво на мащаба"</string>
     <string name="user_switched" msgid="7249833311585228097">"Текущ потребител <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Превключва се към <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Превключва се към: <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> излиза…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"собственик"</string>
+    <string name="owner_name" msgid="8713560351570795743">"Собственик"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Грешка"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Тази промяна не е разрешена от администратора ви"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Няма намерено приложение за извършване на това действие"</string>
@@ -2086,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Пряк път към достъпността на екрана"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Инструмент за избор на пряк път към достъпността на екрана"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Пряк път за достъпност"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Отхвърляне на падащия панел с известия"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Лента за надписи на <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакетът <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> е поставен в ОГРАНИЧЕНИЯ контейнер"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2223,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Ново: Увеличаване на прозорци"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Можете да увеличите целия екран или част от него"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Увеличаване на част от екрана"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Вече можете да увеличавате целия екран или конкретна област от него, както и да превключвате между двете опции."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Включете от настройките"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Отхвърляне"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"За да продължите, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; се нуждае от достъп до микрофона на устройството ви."</string>
@@ -2233,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Поверителност на сензорните данни"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Икона на приложението"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Изображение на търговската марка на приложението"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

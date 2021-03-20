@@ -204,6 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"새벽 서비스"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"시간대 감지(연결되지 않음)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 시간 업데이트 서비스"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"음악 인식 관리자 서비스"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"기기가 삭제됩니다."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"관리자 앱을 사용할 수 없습니다. 곧 기기가 삭제됩니다.\n\n궁금한 점이 있으면 조직의 관리자에게 문의하세요."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g>에 의해 사용 중지되었습니다."</string>
@@ -293,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"실행 중인 앱"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"배터리를 소모하는 앱"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"확대"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 배터리 사용 중"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"앱 <xliff:g id="NUMBER">%1$d</xliff:g>개에서 배터리 사용 중"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"탭하여 배터리 및 데이터 사용량 확인"</string>
@@ -343,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"앱이 상태 표시줄이 되도록 허용합니다."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"상태 표시줄 확장/축소"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"앱이 상태 표시줄을 확장하거나 축소할 수 있도록 허용합니다."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"잠긴 기기에 알림을 전체 화면 활동으로 표시"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"앱에서 잠긴 기기에 알림을 전체 화면 활동으로 표시하도록 허용합니다."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"바로가기 설치"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"애플리케이션이 사용자의 작업 없이 홈 화면 바로가기를 추가할 수 있도록 허용합니다."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"바로가기 제거"</string>
@@ -554,6 +559,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"생체 인식 또는 화면 잠금을 사용"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"본인 확인"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"생체 인식을 사용하여 계속하세요"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"계속하려면 생체 인식이나 화면 잠금을 사용하세요"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"생체 인식 하드웨어를 사용할 수 없음"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"인증이 취소되었습니다."</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"인식할 수 없음"</string>
@@ -587,6 +593,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"지문 사용"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"지문 또는 화면 잠금 사용"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"계속하려면 지문을 사용하세요."</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"계속하려면 지문이나 화면 잠금을 사용하세요"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"지문 아이콘"</string>
@@ -634,6 +641,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"얼굴인식 잠금해제 사용"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"얼굴 또는 화면 잠금 사용"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"얼굴인식 잠금해제를 사용하여 계속하세요"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"계속하려면 얼굴 또는 화면 잠금을 사용하세요"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"얼굴 아이콘"</string>
@@ -997,6 +1005,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"페이지를 열 수 있는 권한이 없습니다."</string>
     <string name="text_copied" msgid="2531420577879738860">"텍스트가 클립보드에 복사되었습니다."</string>
     <string name="copied" msgid="4675902854553014676">"복사 완료"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> 앱이 <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> 앱에서 복사하여 붙여넣음"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> 앱이 클립보드에서 복사하여 붙여넣음"</string>
     <string name="more_item_label" msgid="7419249600215749115">"더보기"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1370,11 +1380,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"사용 중지"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> 확인 중…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"현재 콘텐츠 검토 중"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"미디어 저장소를 분석하는 중입니다."</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"새로운 <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g>이(가) 작동하지 않음"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"설정하려면 탭하세요."</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"설정하려면 선택하세요."</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"기기를 다시 포맷해야 할 수 있습니다. 꺼내려면 탭하세요."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"사진 및 미디어를 전송하는 데 사용합니다."</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"미디어 파일을 둘러보세요."</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>에 문제 발생"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>이(가) 작동하지 않음"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"문제를 해결하려면 탭하세요."</string>
@@ -1383,7 +1396,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"지원되지 않는 <xliff:g id="NAME">%s</xliff:g>입니다."</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>이(가) 작동하지 않음"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"이 기기는 <xliff:g id="NAME">%s</xliff:g>을(를) 지원하지 않습니다. 지원하는 형식으로 설정하려면 탭하세요."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"이 기기는 이 <xliff:g id="NAME">%s</xliff:g>을(를) 지원하지 않습니다. 선택하여 지원되는 형식으로 설정하세요."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g>을(를) 지원되는 형식으로 설정하려면 선택하세요."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"기기를 다시 포맷해야 할 수 있습니다."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>이(가) 예기치 않게 삭제됨"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"콘텐츠 손실을 피하려면 미디어를 제거하기 전에 마운트 해제하세요."</string>
@@ -2086,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"화면상의 접근성 바로가기"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"화면상의 접근성 바로가기 선택 도구"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"접근성 단축키"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"알림 창 닫기"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 자막 표시줄입니다."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 항목이 RESTRICTED 버킷으로 이동함"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2223,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"새로운 기능: 창 돋보기"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"이제 화면 일부 또는 전체를 확대할 수 있습니다."</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"일부 화면 확대"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"이제 전체 화면, 특정 영역을 확대하거나 두 가지 옵션 간에 전환할 수 있습니다."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"설정에서 사용 설정"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"닫기"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"계속하려면 &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;에서 기기 마이크에 액세스해야 합니다."</string>
@@ -2233,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"센서 개인정보 보호"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"애플리케이션 아이콘"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"애플리케이션 브랜드 이미지"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>
