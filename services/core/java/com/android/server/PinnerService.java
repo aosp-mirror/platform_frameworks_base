@@ -521,13 +521,6 @@ public final class PinnerService extends SystemService {
         return pinKeys;
     }
 
-    private static boolean shouldPinSplitApks() {
-        // For now this is disabled by default bcause the pinlist support for split APKs are
-        // missing in the toolchain. This flag should be removed once it is ready. b/174697187.
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
-                "pin_split_apks", false);
-    }
-
     private synchronized ArraySet<Integer> getPinKeys() {
         return mPinKeys;
     }
@@ -685,7 +678,7 @@ public final class PinnerService extends SystemService {
         List<String> apks = new ArrayList<>();
         apks.add(appInfo.sourceDir);
 
-        if (shouldPinSplitApks() && appInfo.splitSourceDirs != null) {
+        if (appInfo.splitSourceDirs != null) {
             for (String splitApk : appInfo.splitSourceDirs) {
                 apks.add(splitApk);
             }

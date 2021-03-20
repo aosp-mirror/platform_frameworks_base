@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -376,6 +377,43 @@ public final class DisplayManager {
     @TestApi
     public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2;
 
+    /**
+     * @hide
+     */
+    @LongDef(flag = true, prefix = {"EVENT_FLAG_"}, value = {
+            EVENT_FLAG_DISPLAY_ADDED,
+            EVENT_FLAG_DISPLAY_CHANGED,
+            EVENT_FLAG_DISPLAY_REMOVED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EventsMask {}
+
+    /**
+     * Event type for when a new display is added.
+     *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_DISPLAY_ADDED = 1L << 0;
+
+    /**
+     * Event type for when a display is removed.
+     *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_DISPLAY_REMOVED = 1L << 1;
+
+    /**
+     * Event type for when a display is changed.
+     *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_DISPLAY_CHANGED = 1L << 2;
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -486,7 +524,7 @@ public final class DisplayManager {
     }
 
     /**
-     * Registers an display listener to receive notifications about when
+     * Registers a display listener to receive notifications about when
      * displays are added, removed or changed.
      *
      * @param listener The listener to register.
@@ -496,7 +534,29 @@ public final class DisplayManager {
      * @see #unregisterDisplayListener
      */
     public void registerDisplayListener(DisplayListener listener, Handler handler) {
-        mGlobal.registerDisplayListener(listener, handler);
+        registerDisplayListener(listener, handler, EVENT_FLAG_DISPLAY_ADDED
+                | EVENT_FLAG_DISPLAY_CHANGED | EVENT_FLAG_DISPLAY_REMOVED);
+    }
+
+    /**
+     * Registers a display listener to receive notifications about given display event types.
+     *
+     * @param listener The listener to register.
+     * @param handler The handler on which the listener should be invoked, or null
+     * if the listener should be invoked on the calling thread's looper.
+     * @param eventsMask A bitmask of the event types for which this listener is subscribed.
+     *
+     * @see #EVENT_FLAG_DISPLAY_ADDED
+     * @see #EVENT_FLAG_DISPLAY_CHANGED
+     * @see #EVENT_FLAG_DISPLAY_REMOVED
+     * @see #registerDisplayListener(DisplayListener, Handler)
+     * @see #unregisterDisplayListener
+     *
+     * @hide
+     */
+    public void registerDisplayListener(@NonNull DisplayListener listener,
+            @Nullable Handler handler, @EventsMask long eventsMask) {
+        mGlobal.registerDisplayListener(listener, handler, eventsMask);
     }
 
     /**

@@ -17,6 +17,7 @@
 package android.apphibernation;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -54,6 +55,7 @@ public final class AppHibernationManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_APP_HIBERNATION)
     public boolean isHibernatingForUser(@NonNull String packageName) {
         try {
             return mIAppHibernationService.isHibernatingForUser(packageName, mContext.getUserId());
@@ -68,6 +70,7 @@ public final class AppHibernationManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_APP_HIBERNATION)
     public void setHibernatingForUser(@NonNull String packageName, boolean isHibernating) {
         try {
             mIAppHibernationService.setHibernatingForUser(packageName, mContext.getUserId(),
@@ -83,6 +86,7 @@ public final class AppHibernationManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_APP_HIBERNATION)
     public boolean isHibernatingGlobally(@NonNull String packageName) {
         try {
             return mIAppHibernationService.isHibernatingGlobally(packageName);
@@ -99,6 +103,7 @@ public final class AppHibernationManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_APP_HIBERNATION)
     public void setHibernatingGlobally(@NonNull String packageName, boolean isHibernating) {
         try {
             mIAppHibernationService.setHibernatingGlobally(packageName, isHibernating);

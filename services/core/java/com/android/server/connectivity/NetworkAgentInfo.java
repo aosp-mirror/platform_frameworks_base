@@ -25,6 +25,8 @@ import android.content.Context;
 import android.net.CaptivePortalData;
 import android.net.IDnsResolver;
 import android.net.INetd;
+import android.net.INetworkAgent;
+import android.net.INetworkAgentRegistry;
 import android.net.INetworkMonitor;
 import android.net.LinkProperties;
 import android.net.NattKeepalivePacketData;
@@ -51,8 +53,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
-import com.android.connectivity.aidl.INetworkAgent;
-import com.android.connectivity.aidl.INetworkAgentRegistry;
 import com.android.internal.util.WakeupMessage;
 import com.android.server.ConnectivityService;
 
@@ -303,8 +303,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // validated).
     private boolean mInactive;
 
-    // This represents the quality of the network.
-    private NetworkScore mScore;
+    // This represents the quality of the network. As opposed to NetworkScore, FullScore includes
+    // the ConnectivityService-managed bits.
+    private FullScore mScore;
 
     // The list of NetworkRequests being satisfied by this Network.
     private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
@@ -356,12 +357,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         networkInfo = info;
         linkProperties = lp;
         networkCapabilities = nc;
-        mScore = score;
+        networkAgentConfig = config;
+        setScore(score); // uses members networkCapabilities and networkAgentConfig
         clatd = new Nat464Xlat(this, netd, dnsResolver, deps);
         mConnService = connService;
         mContext = context;
         mHandler = handler;
-        networkAgentConfig = config;
         this.factorySerialNumber = factorySerialNumber;
         this.creatorUid = creatorUid;
         mQosCallbackTracker = qosCallbackTracker;
@@ -667,6 +668,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             @NonNull final NetworkCapabilities nc) {
         final NetworkCapabilities oldNc = networkCapabilities;
         networkCapabilities = nc;
+        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig);
         final NetworkMonitorManager nm = mNetworkMonitor;
         if (nm != null) {
             nm.notifyNetworkCapabilitiesChanged(nc);
@@ -844,30 +846,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return isVPN();
     }
 
-    private int getCurrentScore(boolean pretendValidated) {
-        // TODO: We may want to refactor this into a NetworkScore class that takes a base score from
-        // the NetworkAgent and signals from the NetworkAgent and uses those signals to modify the
-        // score.  The NetworkScore class would provide a nice place to centralize score constants
-        // so they are not scattered about the transports.
-
-        // If this network is explicitly selected and the user has decided to use it even if it's
-        // unvalidated, give it the maximum score. Also give it the maximum score if it's explicitly
-        // selected and we're trying to see what its score could be. This ensures that we don't tear
-        // down an explicitly selected network before the user gets a chance to prefer it when
-        // a higher-scoring network (e.g., Ethernet) is available.
-        if (networkAgentConfig.explicitlySelected
-                && (networkAgentConfig.acceptUnvalidated || pretendValidated)) {
-            return ConnectivityConstants.EXPLICITLY_SELECTED_NETWORK_SCORE;
-        }
-
-        int score = mScore.getLegacyInt();
-        if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty() && !isVPN()) {
-            score -= ConnectivityConstants.UNVALIDATED_SCORE_PENALTY;
-        }
-        if (score < 0) score = 0;
-        return score;
-    }
-
     // Return true on devices configured to ignore score penalty for wifi networks
     // that become unvalidated (b/31075769).
     private boolean ignoreWifiUnvalidationPenalty() {
@@ -880,17 +858,29 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Get the current score for this Network.  This may be modified from what the
     // NetworkAgent sent, as it has modifiers applied to it.
     public int getCurrentScore() {
-        return getCurrentScore(false);
+        return mScore.getLegacyInt();
     }
 
     // Get the current score for this Network as if it was validated.  This may be modified from
     // what the NetworkAgent sent, as it has modifiers applied to it.
     public int getCurrentScoreAsValidated() {
-        return getCurrentScore(true);
+        return mScore.getLegacyIntAsValidated();
     }
 
+    /**
+     * Mix-in the ConnectivityService-managed bits in the score.
+     */
     public void setScore(final NetworkScore score) {
-        mScore = score;
+        mScore = FullScore.fromNetworkScore(score, networkCapabilities, networkAgentConfig);
+    }
+
+    /**
+     * Update the ConnectivityService-managed bits in the score.
+     *
+     * Call this after updating the network agent config.
+     */
+    public void updateScoreForNetworkAgentConfigUpdate() {
+        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig);
     }
 
     /**

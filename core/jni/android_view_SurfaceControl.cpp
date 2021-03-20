@@ -498,19 +498,14 @@ static void nativeSetAnimationTransaction(JNIEnv* env, jclass clazz, jlong trans
     transaction->setAnimationTransaction();
 }
 
-static void nativeSetEarlyWakeup(JNIEnv* env, jclass clazz, jlong transactionObj) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->setEarlyWakeup();
-}
-
 static void nativeSetEarlyWakeupStart(JNIEnv* env, jclass clazz, jlong transactionObj) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->setExplicitEarlyWakeupStart();
+    transaction->setEarlyWakeupStart();
 }
 
 static void nativeSetEarlyWakeupEnd(JNIEnv* env, jclass clazz, jlong transactionObj) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->setExplicitEarlyWakeupEnd();
+    transaction->setEarlyWakeupEnd();
 }
 
 static void nativeSetLayer(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1737,8 +1732,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeMergeTransaction },
     {"nativeSetAnimationTransaction", "(J)V",
             (void*)nativeSetAnimationTransaction },
-    {"nativeSetEarlyWakeup", "(J)V",
-            (void*)nativeSetEarlyWakeup },
     {"nativeSetEarlyWakeupStart", "(J)V",
             (void*)nativeSetEarlyWakeupStart },
     {"nativeSetEarlyWakeupEnd", "(J)V",

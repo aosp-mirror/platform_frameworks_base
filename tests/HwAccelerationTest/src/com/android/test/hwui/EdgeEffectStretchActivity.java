@@ -18,8 +18,6 @@ package com.android.test.hwui;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.HorizontalScrollView;
-import android.widget.ScrollView;
 
 public class EdgeEffectStretchActivity extends Activity {
 
@@ -27,10 +25,5 @@ public class EdgeEffectStretchActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stretch_layout);
-        HorizontalScrollView hsv = findViewById(R.id.horizontal_scroll_view);
-        hsv.setStretchDistance(50f);
-
-        ScrollView sv = findViewById(R.id.scroll_view);
-        sv.setStretchDistance(50f);
     }
 }

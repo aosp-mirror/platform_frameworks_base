@@ -124,7 +124,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         resetAll();
 
         // Public key operations get diverted to the default provider.
-        if (opmode == Cipher.ENCRYPT_MODE
+        if (!(key instanceof AndroidKeyStorePrivateKey)
                 && (key instanceof PrivateKey || key instanceof PublicKey)) {
             try {
                 mCipher = Cipher.getInstance(getTransform());
@@ -186,7 +186,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         resetAll();
 
         // Public key operations get diverted to the default provider.
-        if (opmode == Cipher.ENCRYPT_MODE
+        if (!(key instanceof AndroidKeyStorePrivateKey)
                 && (key instanceof PrivateKey || key instanceof PublicKey)) {
             try {
                 mCipher = Cipher.getInstance(getTransform());
@@ -216,7 +216,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         resetAll();
 
         // Public key operations get diverted to the default provider.
-        if (opmode == Cipher.ENCRYPT_MODE
+        if (!(key instanceof AndroidKeyStorePrivateKey)
                 && (key instanceof PrivateKey || key instanceof PublicKey)) {
             try {
                 mCipher = Cipher.getInstance(getTransform());

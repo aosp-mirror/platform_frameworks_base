@@ -32,11 +32,12 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
         private final UncryptSocket mUncryptSocket;
         private final LockSettingsInternal mLockSettingsInternal;
         private final IBootControl mIBootControl;
+        private final IMetricsReporter mIMetricsReporter;
 
         MockInjector(Context context, FakeSystemProperties systemProperties,
                 PowerManager powerManager, FileWriter uncryptPackageFileWriter,
                 UncryptSocket uncryptSocket, LockSettingsInternal lockSettingsInternal,
-                IBootControl bootControl) {
+                IBootControl bootControl, IMetricsReporter metricsReporter) {
             super(context);
             mSystemProperties = systemProperties;
             mPowerManager = powerManager;
@@ -44,6 +45,7 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
             mUncryptSocket = uncryptSocket;
             mLockSettingsInternal = lockSettingsInternal;
             mIBootControl = bootControl;
+            mIMetricsReporter = metricsReporter;
         }
 
         @Override
@@ -94,14 +96,45 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
         public IBootControl getBootControl() {
             return mIBootControl;
         }
+        @Override
+        public int getUidFromPackageName(String packageName) {
+            if ("fake.ota.package".equals(packageName)) {
+                return 1000;
+            }
+            if ("fake.other.package".equals(packageName)) {
+                return 2000;
+            }
+            return 3000;
+        }
+
+        @Override
+        public void reportRebootEscrowPreparationMetrics(int uid, int requestResult,
+                int requestedClientCount) {
+            mIMetricsReporter.reportRebootEscrowPreparationMetrics(uid, requestResult,
+                    requestedClientCount);
+        }
+
+        public void reportRebootEscrowLskfCapturedMetrics(int uid, int requestedClientCount,
+                int requestedToLskfCapturedDurationInSeconds) {
+            mIMetricsReporter.reportRebootEscrowLskfCapturedMetrics(uid, requestedClientCount,
+                    requestedToLskfCapturedDurationInSeconds);
+        }
+
+        public void reportRebootEscrowRebootMetrics(int errorCode, int uid, int preparedClientCount,
+                int requestCount, boolean slotSwitch, boolean serverBased,
+                int lskfCapturedToRebootDurationInSeconds, int lskfCapturedCounts) {
+            mIMetricsReporter.reportRebootEscrowRebootMetrics(errorCode, uid, preparedClientCount,
+                    requestCount, slotSwitch, serverBased, lskfCapturedToRebootDurationInSeconds,
+                    lskfCapturedCounts);
+        }
     }
 
     RecoverySystemServiceTestable(Context context, FakeSystemProperties systemProperties,
             PowerManager powerManager, FileWriter uncryptPackageFileWriter,
             UncryptSocket uncryptSocket, LockSettingsInternal lockSettingsInternal,
-            IBootControl bootControl) {
+            IBootControl bootControl, IMetricsReporter metricsReporter) {
         super(new MockInjector(context, systemProperties, powerManager, uncryptPackageFileWriter,
-                uncryptSocket, lockSettingsInternal, bootControl));
+                uncryptSocket, lockSettingsInternal, bootControl, metricsReporter));
     }
 
     public static class FakeSystemProperties {
@@ -131,4 +164,17 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
             return mCtlStart;
         }
     }
+
+    public interface IMetricsReporter {
+        void reportRebootEscrowPreparationMetrics(int uid, int requestResult,
+                int requestedClientCount);
+
+        void reportRebootEscrowLskfCapturedMetrics(int uid, int requestedClientCount,
+                int requestedToLskfCapturedDurationInSeconds);
+
+        void reportRebootEscrowRebootMetrics(int errorCode, int uid, int preparedClientCount,
+                int requestCount, boolean slotSwitch, boolean serverBased,
+                int lskfCapturedToRebootDurationInSeconds, int lskfCapturedCounts);
+    }
+
 }

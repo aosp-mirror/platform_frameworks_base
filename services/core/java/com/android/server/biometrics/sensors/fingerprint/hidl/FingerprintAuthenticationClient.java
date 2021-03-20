@@ -59,11 +59,12 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             int sensorId, boolean isStrongBiometric, int statsClient,
             @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutFrameworkImpl lockoutTracker,
-            @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isKeyguard) {
+            @Nullable IUdfpsOverlayController udfpsOverlayController,
+            boolean allowBackgroundAuthentication) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
-                lockoutTracker, isKeyguard);
+                lockoutTracker, allowBackgroundAuthentication);
         mLockoutFrameworkImpl = lockoutTracker;
         mUdfpsOverlayController = udfpsOverlayController;
     }

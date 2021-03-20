@@ -34,8 +34,6 @@ import android.os.RemoteException;
 import android.telephony.data.EpsBearerQosSessionAttributes;
 import android.util.Log;
 
-import com.android.connectivity.aidl.INetworkAgent;
-import com.android.connectivity.aidl.INetworkAgentRegistry;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;

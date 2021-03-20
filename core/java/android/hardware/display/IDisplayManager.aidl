@@ -38,6 +38,7 @@ interface IDisplayManager {
     boolean isUidPresentOnDisplay(int uid, int displayId);
 
     void registerCallback(in IDisplayManagerCallback callback);
+    void registerCallbackWithEventMask(in IDisplayManagerCallback callback, long eventsMask);
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
     // The process must have previously registered a callback.

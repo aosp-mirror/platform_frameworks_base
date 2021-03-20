@@ -152,6 +152,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private boolean mDozing;
     private boolean mOnLockScreen;
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
+    private boolean mInNotificationIconShelf;
     private boolean mChangingViewPositions;
     private int mAddAnimationStartIndex = -1;
     private int mCannedAnimationStartIndex = -1;
@@ -702,6 +703,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mLockScreenMode = lockScreenMode;
     }
 
+    public void setInNotificationIconShelf(boolean inShelf) {
+        mInNotificationIconShelf = inShelf;
+    }
+
     public class IconState extends ViewState {
         public static final int NO_VALUE = NotificationIconContainer.NO_VALUE;
         public float iconAppearAmount = 1.0f;
@@ -813,7 +818,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     }
                 }
                 icon.setVisibleState(visibleState, animationsAllowed);
-                icon.setIconColor(mThemedTextColorPrimary,
+                icon.setIconColor(mInNotificationIconShelf ? mThemedTextColorPrimary : iconColor,
                         needsCannedAnimation && animationsAllowed);
                 if (animate) {
                     animateTo(icon, animationProperties);

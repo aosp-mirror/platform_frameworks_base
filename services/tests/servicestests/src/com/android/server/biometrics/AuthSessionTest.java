@@ -39,6 +39,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.hardware.biometrics.BiometricManager.Authenticators;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
@@ -150,7 +151,8 @@ public class AuthSessionTest {
                     eq(userId),
                     eq(mSensorReceiver),
                     eq(TEST_PACKAGE),
-                    eq(sensor.getCookie()));
+                    eq(sensor.getCookie()),
+                    anyBoolean() /* allowBackgroundAuthentication */);
         }
 
         final int cookie1 = session.mPreAuthInfo.eligibleSensors.get(0).getCookie();
@@ -292,9 +294,18 @@ public class AuthSessionTest {
             }
         });
 
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */, "" /* softwareVersion */));
+        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */));
+
         mFingerprintSensorProps.add(new FingerprintSensorPropertiesInternal(id,
                 SensorProperties.STRENGTH_STRONG,
                 5 /* maxEnrollmentsPerUser */,
+                componentInfo,
                 type,
                 false /* resetLockoutRequiresHardwareAuthToken */));
     }

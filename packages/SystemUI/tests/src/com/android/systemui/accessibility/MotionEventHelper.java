@@ -23,11 +23,11 @@ import com.android.internal.annotations.GuardedBy;
 import java.util.ArrayList;
 import java.util.List;
 
-class MotionEventHelper {
+public class MotionEventHelper {
     @GuardedBy("this")
     private final List<MotionEvent> mMotionEvents = new ArrayList<>();
 
-    void recycleEvents() {
+    public void recycleEvents() {
         for (MotionEvent event:mMotionEvents) {
             event.recycle();
         }
@@ -36,7 +36,7 @@ class MotionEventHelper {
         }
     }
 
-    MotionEvent obtainMotionEvent(long downTime, long eventTime, int action, float x,
+    public MotionEvent obtainMotionEvent(long downTime, long eventTime, int action, float x,
             float y) {
         MotionEvent event = MotionEvent.obtain(downTime, eventTime, action, x, y, 0);
         synchronized (this) {

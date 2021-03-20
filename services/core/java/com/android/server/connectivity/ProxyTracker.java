@@ -34,7 +34,6 @@ import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -105,7 +104,7 @@ public class ProxyTracker {
 
         PacProxyInstalledListener listener = new PacProxyInstalledListener(pacChangedEvent);
         mPacProxyManager.addPacProxyInstalledListener(
-                new HandlerExecutor(mConnectivityServiceHandler), listener);
+                mConnectivityServiceHandler::post, listener);
     }
 
     // Convert empty ProxyInfo's to null as null-checks are used to determine if proxies are present

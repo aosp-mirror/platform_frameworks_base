@@ -50,6 +50,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.system.OsConstants;
+import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -186,17 +187,27 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                     mSessionComponentName, mUser, mContext, this,
                     mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
-        List<IBinder> activityTokens = null;
+        List<Pair<IBinder, Integer>> allVisibleActivities =
+                LocalServices.getService(ActivityTaskManagerInternal.class)
+                        .getTopVisibleActivities();
+
+        List<Pair<IBinder, Integer>> visibleActivities = null;
         if (activityToken != null) {
-            activityTokens = new ArrayList<>();
-            activityTokens.add(activityToken);
+            visibleActivities = new ArrayList();
+            int activitiesCount = allVisibleActivities.size();
+            for (int i = 0; i < activitiesCount; i++) {
+                if (allVisibleActivities.get(i).first == activityToken) {
+                    visibleActivities.add(
+                            new Pair<>(activityToken, allVisibleActivities.get(i).second));
+                    break;
+                }
+            }
         } else {
-            // Let's get top activities from all visible stacks
-            activityTokens = LocalServices.getService(ActivityTaskManagerInternal.class)
+            visibleActivities = LocalServices.getService(ActivityTaskManagerInternal.class)
                     .getTopVisibleActivities();
         }
         return mActiveSession.showLocked(args, flags, mDisabledShowContext, showCallback,
-                activityTokens);
+                visibleActivities);
     }
 
     public void getActiveServiceSupportedActions(List<String> commands,
