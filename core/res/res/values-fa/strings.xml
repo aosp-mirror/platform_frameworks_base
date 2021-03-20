@@ -204,6 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"‏سرویس Twilight"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"شناساگر منطقه زمانی (بدون اتصال)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"‏سرویس به‌روزرسانی زمان GNSS"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"سرویس مدیر تشخیص موسیقی"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"دستگاهتان پاک خواهد شد"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"برنامه سرپرست سیستم را نمی‌توان استفاده کرد. دستگاه شما در این لحظه پاک می‌شود.\n\nاگر سؤالی دارید، با سرپرست سیستم سازمانتان تماس بگیرید."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> چاپ کردن را غیرفعال کرده است."</string>
@@ -293,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"برنامه درحال اجرا"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"برنامه‌های مصرف‌کننده باتری"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"درشت‌نمایی"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال استفاده کردن از باتری است"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> برنامه درحال استفاده کردن از باتری هستند"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"برای جزئیات مربوط به مصرف باتری و داده، ضربه بزنید"</string>
@@ -343,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"‏به برنامه اجازه می‎دهد که تبدیل به نوار وضعیت شود."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"گسترش دادن/جمع کردن نوار وضعیت"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"‏به برنامه اجازه می‎دهد تا نوار ابزار را جمع کند یا باز کند."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"نمایش اعلان‌ها به‌صورت فعالیت‌های تمام‌صفحه در دستگاه قفل"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"به برنامه امکان می‌دهد اعلان‌ها را به‌صورت فعالیت‌های تمام‌صفحه در دستگاه قفل نمایش دهد"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"نصب میان‌برها"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"به برنامه اجازه می‌دهد میان‌برهای صفحه اصلی را بدون دخالت کاربر اضافه کند."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"حذف نصب میان‌برها"</string>
@@ -554,6 +559,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استفاده از زیست‌سنجشی یا قفل صفحه"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شما هستید"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"برای ادامه، از زیست‌سنجشی استفاده کنید"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"برای ادامه، از زیست‌سنجشی یا قفل صفحه استفاده کنید"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"سخت‌افزار زیست‌سنجی دردسترس نیست"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"اصالت‌سنجی لغو شد"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"شناسایی نشد"</string>
@@ -587,6 +593,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"استفاده از اثر انگشت"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"استفاده از اثر انگشت یا قفل صفحه"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"برای ادامه، از اثر انگشتتان استفاده کنید"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"برای ادامه، از اثر انگشت یا قفل صفحه استفاده کنید"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"نماد اثر انگشت"</string>
@@ -634,6 +641,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"استفاده از «بازگشایی با چهره»"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"استفاده از قفل صفحه یا چهره"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"برای ادامه، از «بازگشایی با چهره» استفاده کنید"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"برای ادامه، از تشخیص چهره یا قفل صفحه استفاده کنید"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"نماد چهره"</string>
@@ -997,6 +1005,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"شما اجازه بازکردن این صفحه را ندارید."</string>
     <string name="text_copied" msgid="2531420577879738860">"متن در بریده‌دان کپی شد."</string>
     <string name="copied" msgid="4675902854553014676">"کپی شد"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> از <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> جای‌گذاری کرد"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> از بریده‌دان جای‌گذاری کرد"</string>
     <string name="more_item_label" msgid="7419249600215749115">"بیشتر"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"منو+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"‎Meta+‎"</string>
@@ -1025,7 +1035,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> روز قبل</item>
     </plurals>
     <string name="last_month" msgid="1528906781083518683">"ماه گذشته"</string>
-    <string name="older" msgid="1645159827884647400">"قدیمی تر"</string>
+    <string name="older" msgid="1645159827884647400">"قدیمی‌تر"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"در <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="4336835286453822053">"در <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="3149809685340130039">"در <xliff:g id="YEAR">%s</xliff:g>"</string>
@@ -1370,11 +1380,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"خاموش کردن"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"درحال بررسی <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"درحال مرور محتوای کنونی"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"درحال تجزیه‌وتحلیل فضای ذخیره‌سازی رسانه"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> جدید"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> کار نمی‌کند"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"برای راه‌اندازی ضربه بزنید"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"برای راه‌اندازی، انتخاب کنید"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید. برای خارج کردن، ضربه بزنید."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"برای انتقال عکس‌ها و رسانه"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"فایل‌های رسانه‌ای را مرور کنید"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"مشکل مرتبط با <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> کار نمی‌کند"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"برای برطرف کردن مشکل، ضربه بزنید"</string>
@@ -1383,7 +1396,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> پشتیبانی نشده"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> کار نمی‌کند"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"این دستگاه از این <xliff:g id="NAME">%s</xliff:g> پشتیبانی نمی‌کند. برای نصب آن در قالب پشتیبانی‌شده ضربه بزنید."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"این دستگاه از این <xliff:g id="NAME">%s</xliff:g> پشتیبانی نمی‌کند. برای تنظیم در یک قالب پشتیبانی‌شده، آن را انتخاب کنید."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"برای راه‌اندازی <xliff:g id="NAME">%s</xliff:g> در قالب پشتیبانی‌شده، انتخاب کنید."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> به‌طور غیرمنتظره جدا شد"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"برای جلوگیری از از دست رفتن محتوا، رسانه را قبل از برداشتن بیرون برانید"</string>
@@ -2086,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"میان‌بر دسترس‌پذیری روی صفحه"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"انتخاب‌گر میان‌بر دسترس‌پذیری روی صفحه"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"میان‌بر دسترسی‌پذیری"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"رد کردن کشوی اعلانات"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"نوار شرح <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> در سطل «محدودشده» قرار گرفت"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2223,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"‏جدید: Window Magnifier"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"اکنون می‌توانید بخشی از صفحه یا کل آن را درشت کنید"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"درشت‌نمایی بخشی از صفحه‌نمایش"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"اکنون می‌توانید بخش مشخصی صفحه یا کل آن را درشت‌نمایی کنید، یا بیت دو گزینه جابه‌جا شوید."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"روشن کردن در «تنظیمات»"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"رد شدن"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"‏برای ادامه دادن، &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; باید به میکروفون دستگاه دسترسی داشته باشد."</string>
@@ -2233,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"حریم‌خصوصی حسگر"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"نماد برنامه"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"تصویر نمانام‌سازی برنامه"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>
