@@ -27,6 +27,8 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.RemoteException;
+
+import android.telephony.CallQuality;
 import android.util.ArrayMap;
 
 import com.android.internal.telecom.ICallDiagnosticService;
@@ -110,6 +112,12 @@ public abstract class CallDiagnosticService extends Service {
         public void notifyCallDisconnected(@NonNull String callId,
                 @NonNull DisconnectCause disconnectCause) throws RemoteException {
             handleCallDisconnected(callId, disconnectCause);
+        }
+
+        @Override
+        public void callQualityChanged(String callId, CallQuality callQuality)
+                throws RemoteException {
+            handleCallQualityChanged(callId, callQuality);
         }
     }
 
@@ -372,6 +380,21 @@ public abstract class CallDiagnosticService extends Service {
             qualityReport) {
         Log.i(this, "handleBluetoothCallQualityReport; report=%s", qualityReport);
         getExecutor().execute(() -> onBluetoothCallQualityReportReceived(qualityReport));
+    }
+
+    /**
+     * Handles a change reported by Telecom to the call quality for a call.
+     * @param callId the call ID the change applies to.
+     * @param callQuality The new call quality.
+     */
+    private void handleCallQualityChanged(@NonNull String callId,
+            @NonNull CallQuality callQuality) {
+        Log.i(this, "handleCallQualityChanged; call=%s, cq=%s", callId, callQuality);
+        CallDiagnostics callDiagnostics;
+        callDiagnostics = mDiagnosticCallByTelecomCallId.get(callId);
+        if (callDiagnostics != null) {
+            callDiagnostics.onCallQualityReceived(callQuality);
+        }
     }
 
     /**
