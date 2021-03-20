@@ -293,6 +293,35 @@ public final class AppHibernationService extends SystemService {
     }
 
     /**
+     * Get the hibernating packages for the given user. This is equivalent to the list of
+     * packages for the user that return true for {@link #isHibernatingForUser}.
+     */
+    @NonNull List<String> getHibernatingPackagesForUser(int userId) {
+        ArrayList<String> hibernatingPackages = new ArrayList<>();
+        if (!checkHibernationEnabled("getHibernatingPackagesForUser")) {
+            return hibernatingPackages;
+        }
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
+        userId = handleIncomingUser(userId, "getHibernatingPackagesForUser");
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            Slog.w(TAG, "Attempt to get hibernating packages for a stopped or nonexistent user "
+                    + userId);
+            return hibernatingPackages;
+        }
+        synchronized (mLock) {
+            Map<String, UserLevelState> userStates = mUserStates.get(userId);
+            for (UserLevelState state : userStates.values()) {
+                if (state.hibernated) {
+                    hibernatingPackages.add(state.packageName);
+                }
+            }
+            return hibernatingPackages;
+        }
+    }
+
+    /**
      * Put an app into hibernation for a given user, allowing user-level optimizations to occur.
      *
      * @param pkgState package hibernation state
@@ -616,6 +645,11 @@ public final class AppHibernationService extends SystemService {
         @Override
         public boolean isHibernatingGlobally(String packageName) {
             return mService.isHibernatingGlobally(packageName);
+        }
+
+        @Override
+        public List<String> getHibernatingPackagesForUser(int userId) {
+            return mService.getHibernatingPackagesForUser(userId);
         }
 
         @Override
