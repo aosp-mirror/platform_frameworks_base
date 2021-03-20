@@ -415,7 +415,9 @@ public class LongScreenshotActivity extends Activity {
         }
         Rect bounds = drawable.getBounds();
         float imageRatio = bounds.width() / (float) bounds.height();
-        float viewRatio = mPreview.getWidth() / (float) mPreview.getHeight();
+        int previewWidth = mPreview.getWidth() - mPreview.getPaddingLeft()
+                - mPreview.getPaddingRight();
+        float viewRatio = previewWidth / (float) mPreview.getHeight();
 
         if (imageRatio > viewRatio) {
             // Image is full width and height is constrained, compute extra padding to inform
@@ -423,7 +425,7 @@ public class LongScreenshotActivity extends Activity {
             float imageHeight = mPreview.getHeight() * viewRatio / imageRatio;
             int extraPadding = (int) (mPreview.getHeight() - imageHeight) / 2;
             mCropView.setExtraPadding(extraPadding, extraPadding);
-            mCropView.setImageWidth(mPreview.getWidth());
+            mCropView.setImageWidth(previewWidth);
         } else {
             // Image is full height
             mCropView.setExtraPadding(0, 0);
