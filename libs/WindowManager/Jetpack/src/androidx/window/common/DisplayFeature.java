@@ -14,39 +14,23 @@
  * limitations under the License.
  */
 
-package androidx.window.util;
+package androidx.window.common;
 
+import android.annotation.Nullable;
 import android.graphics.Rect;
 
 import androidx.annotation.NonNull;
 
 /** Wrapper for both Extension and Sidecar versions of DisplayFeature. */
-public class BaseDisplayFeature {
-    private final int mType;
-    private final int mState;
+public interface DisplayFeature {
+    /** Returns the type of the feature. */
+    int getType();
+
+    /** Returns the state of the feature, or {@code null} if the feature has no state. */
+    @Nullable
+    Integer getState();
+
+    /** Returns the bounds of the feature. */
     @NonNull
-    public final Rect mRect;
-
-    public BaseDisplayFeature(int type, int state, @NonNull Rect rect) {
-        this.mType = type;
-        this.mState = state;
-        if (rect.width() == 0 && rect.height() == 0) {
-            throw new IllegalArgumentException(
-                    "Display feature rectangle cannot have zero width and height simultaneously.");
-        }
-        this.mRect = rect;
-    }
-
-    public int getType() {
-        return mType;
-    }
-
-    public int getState() {
-        return mState;
-    }
-
-    @NonNull
-    public Rect getRect() {
-        return mRect;
-    }
+    Rect getRect();
 }

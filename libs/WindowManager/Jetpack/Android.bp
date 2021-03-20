@@ -30,13 +30,20 @@ android_library_import {
 
 java_library {
     name: "androidx.window.sidecar",
-    srcs: ["src/androidx/window/sidecar/**/*.java", "src/androidx/window/util/**/*.java"],
+    srcs: [
+        "src/androidx/window/sidecar/**/*.java",
+        "src/androidx/window/util/**/*.java",
+        "src/androidx/window/common/**/*.java",
+    ],
     static_libs: ["window-sidecar"],
     installable: true,
     sdk_version: "core_platform",
     system_ext_specific: true,
-    libs: ["framework", "androidx.annotation_annotation",],
-    required: ["androidx.window.sidecar.xml",],
+    libs: [
+        "framework",
+        "androidx.annotation_annotation",
+    ],
+    required: ["androidx.window.sidecar.xml"],
 }
 
 prebuilt_etc {
@@ -58,13 +65,20 @@ android_library_import {
 
 java_library {
     name: "androidx.window.extensions",
-    srcs: ["src/androidx/window/extensions/**/*.java", "src/androidx/window/util/**/*.java"],
+    srcs: [
+        "src/androidx/window/extensions/**/*.java",
+        "src/androidx/window/util/**/*.java",
+        "src/androidx/window/common/**/*.java",
+    ],
     static_libs: ["window-extensions"],
     installable: true,
     sdk_version: "core_platform",
     system_ext_specific: true,
-    libs: ["framework", "androidx.annotation_annotation",],
-    required: ["androidx.window.extensions.xml",],
+    libs: [
+        "framework",
+        "androidx.annotation_annotation",
+    ],
+    required: ["androidx.window.extensions.xml"],
 }
 
 prebuilt_etc {
