@@ -204,6 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"شفقی سروس"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"ٹائم زون ڈیٹیکٹر (کوئی کنیکٹوٹی نہیں ہے)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"‏GNSS کی ٹائم اپ ڈیٹ سروس"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"میوزک ریکگنیشن مینیجر سروس"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"آپ کا آلہ صاف کر دیا جائے گا"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"منتظم کی ایپ استعمال نہیں کی جا سکتی۔ آپ کا آلہ اب مٹا دیا جائے گا۔\n\nاگر آپ کے سوالات ہیں تو اپنی تنظیم کے منتظم سے رابطہ کریں۔"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> نے پرنٹنگ کو غیر فعال کر دیا ہے۔"</string>
@@ -293,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ایپ چل رہی ہے"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ایپس بیٹری خرچ کر رہی ہیں"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"میگنیفکیشن"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> بیٹری کا استعمال کر رہی ہے"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ایپس بیٹری کا استعمال کر رہی ہیں"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"بیٹری اور ڈیٹا استعمال کے بارے میں تفصیلات کے لیے تھپتھپائیں"</string>
@@ -343,6 +346,10 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"ایپ کو اسٹیٹس بار بننے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"حیثیت بار پھیلائیں/سکیڑیں"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"ایپ کو اسٹیٹس بار پھیلانے یا سکیڑنے کی اجازت دیتا ہے۔"</string>
+    <!-- no translation found for permlab_fullScreenIntent (4310888199502509104) -->
+    <skip />
+    <!-- no translation found for permdesc_fullScreenIntent (1100721419406643997) -->
+    <skip />
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"شارٹ کٹس انسٹال کریں"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"کسی ایپلیکیشن کو صارف کی مداخلت کے بغیر ہوم اسکرین شارٹ کٹس شامل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"شارٹ کٹس کو اَن انسٹال کریں"</string>
@@ -554,6 +561,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"بایو میٹرکس یا اسکرین لاک استعمال کریں"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"توثیق کریں کہ یہ آپ ہیں"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"جاری رکھنے کیلئے اپنا بایو میٹرک استعمال کریں"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"جاری رکھنے کے لیے اپنے بایو میٹرک اور اسکرین لاک کا استعمال کریں"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"بایومیٹرک ہارڈ ویئر دستیاب نہیں ہے"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"تصدیق کا عمل منسوخ ہو گیا"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"تسلیم شدہ نہیں ہے"</string>
@@ -587,6 +595,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"فنگر پرنٹ استعمال کریں"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"فنگر پرنٹ یا اسکرین لاک استعمال کریں"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"جاری رکھنے کیلئے اپنا فنگر پرنٹ استعمال کریں"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"جاری رکھنے کے لیے اپنے فنگر پرنٹ یا اسکرین لاک کا استعمال کریں"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"فنگر پرنٹ آئیکن"</string>
@@ -634,6 +643,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"چہرے کے ذریعے غیر مقفل کرنا استعمال کریں"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"چہرہ یا اسکرین لاک استعمال کریں"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"جاری رکھنے کیلئے چہرے کے ذریعے غیر مقفل کرنا استعمال کریں"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"جاری رکھنے کے لیے اپنے چہرے یا اسکرین لاک کا استعمال کریں"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"چہرے کا آئیکن"</string>
@@ -997,6 +1007,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"آپ کے پاس یہ صفحہ کھولنے کی اجازت نہیں ہے۔"</string>
     <string name="text_copied" msgid="2531420577879738860">"متن کو کلپ بورڈ پر کاپی کیا گیا۔"</string>
     <string name="copied" msgid="4675902854553014676">"کاپی ہو گیا"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> سے <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> میں پیسٹ کیا گیا"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"کلپ بورڈ سے <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> میں پیسٹ کیا گیا"</string>
     <string name="more_item_label" msgid="7419249600215749115">"مزید"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"مینو+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+‎"</string>
@@ -1370,11 +1382,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"آف کریں"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> کو چیک کیا جا رہا ہے…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"موجودہ مواد کا جائزہ لیا جا رہا ہے"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"میڈیا اسٹوریج کا تجزیہ کیا جا رہا ہے"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"نیا <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> کام نہیں کر رہا ہے"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"سیٹ اپ کرنے کیلئے تھپتھپائیں"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"سیٹ اپ کرنے کے لیے منتخب کریں"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"آپ کو آلے کو پھر سے فارمیٹ کرنے کی ضرورت پیش آ سکتی ہے۔ خارج کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"تصاویر اور میڈیا منتقل کرنے کیلئے"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"میڈیا فائلز کو براؤز کریں"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> کے ساتھ مسئلہ"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> کام نہیں کر رہا ہے"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"درست کرنے کیلئے تھپتھپائیں"</string>
@@ -1383,7 +1398,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"غیر تعاون یافتہ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> کام نہیں کر رہا ہے"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"یہ آلہ <xliff:g id="NAME">%s</xliff:g> کو سپورٹ نہیں کرتا۔ ایک سپورٹ یافتہ فارمیٹ میں سیٹ اپ کرنے کیلئے تھپتھپائیں۔"</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"یہ آلہ اس <xliff:g id="NAME">%s</xliff:g> کو سپورٹ نہیں کرتا ہے۔ ایک سپورٹ یافتہ فارمیٹ میں سیٹ اپ کرنے کیلئے منتخب کریں۔"</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"سپورٹ یافتہ فارمیٹ میں <xliff:g id="NAME">%s</xliff:g> سیٹ اپ کرنے کے لیے منتخب کریں۔"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"آپ کو آلے کو پھر سے فارمیٹ کرنے کی ضرورت پیش آ سکتی ہے"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> غیر متوقع طور پر ہٹا دیا گیا"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"مواد کھونے سے بچنے کے لئے ہٹانے سے پہلے میڈیا خارج کریں"</string>
@@ -2086,6 +2101,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"آن اسکرین ایکسیسبیلٹی شارٹ کٹ"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"آن اسکرین ایکسیسبیلٹی شارٹ کٹ منتخب کنندہ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ایکسیسبیلٹی کا شارٹ کٹ"</string>
+    <!-- no translation found for accessibility_system_action_dismiss_notification_shade (8931637495533770352) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> کی کیپشن بار۔"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> کو پابند کردہ بکٹ میں رکھ دیا گیا ہے"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2223,8 +2240,10 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"نیا: ونڈو میگنیفائر"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"اب آپ اپنی تمام یا کچھ اسکرین کو بڑا کر سکتے ہیں"</string>
+    <!-- no translation found for window_magnification_prompt_title (4657040468055863672) -->
+    <skip />
+    <!-- no translation found for window_magnification_prompt_content (3549230303326142349) -->
+    <skip />
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ترتیبات میں آن کریں"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"برخاست کریں"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"‏جاری رکھنے کیلئے ‎<xliff:g id="APP">%s</xliff:g>&lt;b&gt;‎‏‎‎‏‏‎&lt;b&gt;‎ کو آپ کے آلے کے مائیکروفون تک رسائی درکار ہے۔"</string>
@@ -2233,4 +2252,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"سینسر کی رازداری"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ایپلیکیشن کا آئیکن"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ایپلیکیشن کی برانڈنگ تصویر"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

@@ -321,6 +321,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
         checkArgument(mSensorProps != null);
+        mStatusBar.setSensorRect(getSensorLocation());
 
         mCoreLayoutParams = new WindowManager.LayoutParams(
                 // TODO(b/152419866): Use the UDFPS window type when it becomes available.
@@ -367,7 +368,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
      */
     public RectF getSensorLocation() {
         // This is currently used to calculate the amount of space available for notifications
-        // on lockscreen. Keyguard is only shown in portrait mode for now, so this will need to
+        // on lockscreen and for the udfps light reveal animation on keyguard.
+        // Keyguard is only shown in portrait mode for now, so this will need to
         // be updated if that ever changes.
         return new RectF(mSensorProps.sensorLocationX - mSensorProps.sensorRadius,
                 mSensorProps.sensorLocationY - mSensorProps.sensorRadius,

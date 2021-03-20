@@ -22,6 +22,7 @@ import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
+import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -46,6 +47,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import static com.android.wm.shell.bubbles.BubbleController.TASKBAR_CHANGED_BROADCAST;
 
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -74,6 +76,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
@@ -179,6 +182,7 @@ import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
+import com.android.systemui.statusbar.CircleReveal;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -382,6 +386,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private ChargingRippleView mChargingRipple;
     private WiredChargingRippleController mChargingRippleAnimationController;
     private PowerButtonReveal mPowerButtonReveal;
+    private CircleReveal mCircleReveal;
+    private ValueAnimator mCircleRevealAnimator = ValueAnimator.ofFloat(0f, 1f);
 
     private final Object mQueueLock = new Object();
 
@@ -1206,7 +1212,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
         mChargingRippleAnimationController.setViewHost(mNotificationShadeWindowView);
 
-        if (mFeatureFlags.useNewLockscreenAnimations() && mDozeParameters.getAlwaysOn()) {
+
+        if (mFeatureFlags.useNewLockscreenAnimations()
+                && (mDozeParameters.getAlwaysOn() || mDozeParameters.isQuickPickupEnabled())) {
             mLightRevealScrim.setVisibility(View.VISIBLE);
             mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
         } else {
@@ -3353,6 +3361,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanelViewController.fadeOut(0, FADE_KEYGUARD_DURATION_PULSING,
                 ()-> {
                 hideKeyguard();
+                if (shouldShowCircleReveal()) {
+                    startCircleReveal();
+                }
                 mStatusBarKeyguardViewManager.onKeyguardFadedAway();
             }).start();
     }
@@ -3666,15 +3677,16 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateQsExpansionEnabled();
         mKeyguardViewMediator.setDozing(mDozing);
 
-        final boolean usePowerButtonEffect =
-                (isDozing && mWakefulnessLifecycle.getLastSleepReason()
-                        == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON)
-                        || (!isDozing && mWakefulnessLifecycle.getLastWakeReason()
-                        == PowerManager.WAKE_REASON_POWER_BUTTON);
-
-        mLightRevealScrim.setRevealEffect(usePowerButtonEffect
-                ? mPowerButtonReveal
-                : LiftReveal.INSTANCE);
+        if (!isDozing && shouldShowCircleReveal()) {
+            startCircleReveal();
+        } else if ((isDozing && mWakefulnessLifecycle.getLastSleepReason()
+                == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON)
+                || (!isDozing && mWakefulnessLifecycle.getLastWakeReason()
+                == PowerManager.WAKE_REASON_POWER_BUTTON)) {
+            mLightRevealScrim.setRevealEffect(mPowerButtonReveal);
+        } else if (!mCircleRevealAnimator.isRunning()) {
+            mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
+        }
 
         mNotificationsController.requestNotificationUpdate("onDozingChanged");
         updateDozingState();
@@ -3682,6 +3694,22 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateScrimController();
         updateReportRejectedTouchVisibility();
         Trace.endSection();
+    }
+
+    private void startCircleReveal() {
+        mLightRevealScrim.setRevealEffect(mCircleReveal);
+        mCircleRevealAnimator.cancel();
+        mCircleRevealAnimator.addUpdateListener(animation ->
+                mLightRevealScrim.setRevealAmount(
+                        (float) mCircleRevealAnimator.getAnimatedValue()));
+        mCircleRevealAnimator.setDuration(900);
+        mCircleRevealAnimator.start();
+    }
+
+    private boolean shouldShowCircleReveal() {
+        return mCircleReveal != null && !mCircleRevealAnimator.isRunning()
+                && mKeyguardUpdateMonitor.isUdfpsEnrolled()
+                && mBiometricUnlockController.getBiometricType() == FINGERPRINT;
     }
 
     private void updateKeyguardState() {
@@ -4168,6 +4196,15 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mBiometricUnlockController.isWakeAndUnlock(),
                 mBiometricUnlockController.isBiometricUnlock(),
                 mBiometricUnlockController.getBiometricType());
+    }
+
+    /**
+     * Set the location of the sensor on UDFPS if existent.
+     */
+    public void setSensorRect(RectF rect) {
+        final float startRadius = (rect.right - rect.left) / 2f;
+        mCircleReveal = new CircleReveal(rect.centerX(), rect.centerY(),
+                startRadius, rect.centerY() - startRadius);
     }
 
     @VisibleForTesting

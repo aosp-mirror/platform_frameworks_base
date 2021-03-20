@@ -82,6 +82,31 @@ object LiftReveal : LightRevealEffect {
     }
 }
 
+class CircleReveal(
+    /** X-value of the circle center of the reveal. */
+    val centerX: Float,
+    /** Y-value of the circle center of the reveal. */
+    val centerY: Float,
+    /** Radius of initial state of circle reveal */
+    val startRadius: Float,
+    /** Radius of end state of circle reveal */
+    val endRadius: Float
+) : LightRevealEffect {
+    override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
+        val interpolatedAmount = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(amount)
+        val fadeAmount =
+            LightRevealEffect.getPercentPastThreshold(interpolatedAmount, 0.75f)
+        val radius = startRadius + ((endRadius - startRadius) * interpolatedAmount)
+        scrim.revealGradientEndColorAlpha = 1f - fadeAmount
+        scrim.setRevealGradientBounds(
+            centerX - radius /* left */,
+            centerY - radius /* top */,
+            centerX + radius /* right */,
+            centerY + radius /* bottom */
+        )
+    }
+}
+
 class PowerButtonReveal(
     /** Approximate Y-value of the center of the power button on the physical device. */
     val powerButtonY: Float

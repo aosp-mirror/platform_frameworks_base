@@ -24,51 +24,27 @@
 
     <Button
         android:id="@+id/save"
+        style="@android:style/Widget.DeviceDefault.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/save"
-        app:layout_constraintEnd_toStartOf="@id/cancel"
-        app:layout_constraintHorizontal_chainStyle="packed"
+        android:layout_marginLeft="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/guideline" />
+        app:layout_constraintBottom_toTopOf="@id/preview" />
 
-    <Button
-        android:id="@+id/cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/cancel"
-        app:layout_constraintEnd_toStartOf="@id/edit"
-        app:layout_constraintStart_toEndOf="@id/save"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/guideline" />
-
-    <Button
-        android:id="@+id/edit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/screenshot_edit_label"
-        app:layout_constraintEnd_toStartOf="@id/share"
-        app:layout_constraintStart_toEndOf="@id/cancel"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/guideline" />
-
-    <Button
+    <ImageButton
         android:id="@+id/share"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@*android:string/share"
+        style="@android:style/Widget.Material.Button.Borderless"
+        android:tint="?android:textColorPrimary"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="6dp"
+        android:src="@drawable/ic_screenshot_share"
+        android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/edit"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/guideline" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.1" />
+        app:layout_constraintBottom_toTopOf="@id/preview" />
 
     <ImageView
         android:id="@+id/preview"
@@ -78,7 +54,7 @@
         android:layout_marginHorizontal="48dp"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
-        app:layout_constraintTop_toBottomOf="@id/guideline"
+        app:layout_constraintTop_toBottomOf="@id/save"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -93,7 +69,7 @@
         android:layout_marginBottom="42dp"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
-        app:layout_constraintTop_toBottomOf="@id/guideline"
+        app:layout_constraintTop_toTopOf="@id/preview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -110,7 +86,7 @@
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:elevation="2dp"
-        app:layout_constraintTop_toBottomOf="@id/guideline"
+        app:layout_constraintTop_toTopOf="@id/preview"
         app:layout_constraintLeft_toLeftOf="parent"
         app:handleThickness="@dimen/screenshot_crop_handle_thickness"
         app:handleColor="@*android:color/accent_device_default"
@@ -118,6 +94,25 @@
         app:borderThickness="4dp"
         app:borderColor="#fff"
         />
+
+    <Button
+        android:id="@+id/edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        style="@android:style/Widget.DeviceDefault.Button.Colored"
+        android:backgroundTint="?android:colorBackground"
+        android:drawableStart="@drawable/ic_screenshot_edit"
+        android:drawableTint="?android:textColorPrimary"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        android:paddingVertical="8dp"
+        android:textColor="?android:textColorPrimary"
+        android:text="@string/screenshot_edit_label"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+    />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

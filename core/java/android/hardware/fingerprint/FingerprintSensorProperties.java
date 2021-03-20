@@ -17,6 +17,7 @@
 package android.hardware.fingerprint;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
 
@@ -94,7 +95,7 @@ public class FingerprintSensorProperties extends SensorProperties {
      * @hide
      */
     public FingerprintSensorProperties(int sensorId, int sensorStrength,
-            List<ComponentInfo> componentInfo, @SensorType int sensorType) {
+            @NonNull List<ComponentInfo> componentInfo, @SensorType int sensorType) {
         super(sensorId, sensorStrength, componentInfo);
         mSensorType = sensorType;
     }

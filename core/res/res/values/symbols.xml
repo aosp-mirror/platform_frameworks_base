@@ -4182,6 +4182,7 @@
   <java-symbol type="dimen" name="default_background_blur_radius" />
   <java-symbol type="array" name="config_keep_warming_services" />
   <java-symbol type="string" name="config_display_features" />
+  <java-symbol type="array" name="config_device_state_postures" />
 
   <java-symbol type="dimen" name="controls_thumbnail_image_max_height" />
   <java-symbol type="dimen" name="controls_thumbnail_image_max_width" />
@@ -4324,8 +4325,11 @@
   <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed" />
   <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default" />
 
+  <!-- Ids for RemoteViews -->
   <java-symbol type="id" name="remote_views_next_child" />
   <java-symbol type="id" name="remote_views_stable_id" />
+  <java-symbol type="id" name="remote_views_override_id" />
+
   <!-- View and control prompt -->
   <java-symbol type="drawable" name="ic_accessibility_24dp" />
   <java-symbol type="string" name="view_and_control_notification_title" />

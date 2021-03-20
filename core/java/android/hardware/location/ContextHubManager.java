@@ -60,8 +60,8 @@ public final class ContextHubManager {
     private static final String TAG = "ContextHubManager";
 
     /**
-     * An extra containing an int from {@link AuthorizationState} describing the client's
-     * authorization state.
+     * An extra containing one of the {@code AUTHORIZATION_*} constants such as
+     * {@link #AUTHORIZATION_GRANTED} describing the client's authorization state.
      */
     public static final String EXTRA_CLIENT_AUTHORIZATION_STATE =
             "android.hardware.location.extra.CLIENT_AUTHORIZATION_STATE";

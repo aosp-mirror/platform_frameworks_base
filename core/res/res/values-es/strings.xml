@@ -204,6 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"Servicio de Twilight"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detector de zona horaria (sin conexión)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Servicio de actualización de tiempo GNSS"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Servicio de gestión de reconocimiento de música"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Tu dispositivo se borrará"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"No se puede utilizar la aplicación de administración. Se borrarán todos los datos del dispositivo.\n\nSi tienes alguna pregunta, ponte en contacto con el administrador de tu organización."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ha inhabilitado la impresión."</string>
@@ -293,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplicación en ejecución"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplicaciones que consumen batería"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ampliación"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando la batería"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplicaciones están usando la batería"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Toca para ver información detallada sobre el uso de datos y de la batería"</string>
@@ -343,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Permite que la aplicación aparezca en la barra de estado."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"expandir/contraer la barra de estado"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permite que la aplicación expanda o contraiga la barra de estado."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Mostrar notificaciones como actividades de pantalla completa en un dispositivo bloqueado"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permite que la aplicación muestre las notificaciones como actividades de pantalla completa en un dispositivo bloqueado"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalar accesos directos"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permite que una aplicación añada accesos directos a la pantalla de inicio sin intervención del usuario."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalar accesos directos"</string>
@@ -554,6 +559,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Usar biometría o bloqueo de pantalla"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifica que eres tú"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Usa tu biometría para continuar"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Usa la biometría o tu bloqueo de pantalla para continuar"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biométrico no disponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autenticación cancelada"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No se reconoce"</string>
@@ -587,6 +593,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella digital"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar huella digital o bloqueo de pantalla"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Usa tu huella digital para continuar"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Usa tu huella digital o tu bloqueo de pantalla para continuar"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icono de huella digital"</string>
@@ -634,6 +641,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"Usar desbloqueo facial"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar desbloqueo facial o bloqueo de pantalla"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Usa el desbloqueo facial para continuar"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Usa tu cara o tu bloqueo de pantalla para continuar"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Icono cara"</string>
@@ -997,6 +1005,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"No tienes permiso para abrir esta página."</string>
     <string name="text_copied" msgid="2531420577879738860">"Texto copiado al portapapeles."</string>
     <string name="copied" msgid="4675902854553014676">"Copiado"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha pegado contenido de <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha pegado contenido del portapapeles"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Más"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"MENU+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta +"</string>
@@ -1370,11 +1380,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desactivar"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Comprobando <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Revisando el contenido actual"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Analizando almacenamiento del dispositivo"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nueva unidad: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> no funciona"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Toca para configurar"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Selecciona para configurar"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Es posible que tengas que reformatear el dispositivo. Toca para expulsar."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Para transferir fotos y multimedia"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Consulta los archivos del dispositivo"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problema con <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> no funciona"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Toca para solucionar el problema"</string>
@@ -1383,7 +1396,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Medio externo (<xliff:g id="NAME">%s</xliff:g>) no admitido"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> no funciona"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"El dispositivo no admite este medio externo (<xliff:g id="NAME">%s</xliff:g>). Toca para configurarlo con un formato admitido."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"El dispositivo no admite esta <xliff:g id="NAME">%s</xliff:g>. Selecciónala para configurarla en un formato admitido."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Selecciona para configurar <xliff:g id="NAME">%s</xliff:g> en un formato compatible."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Es posible que tengas que reformatear el dispositivo"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Extracción inesperada de <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Extrae el dispositivo de forma segura antes de sacarlo para evitar perder contenido"</string>
@@ -2086,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Acceso directo de accesibilidad en pantalla"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Menú de acceso directo de accesibilidad en pantalla"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Acceso directo de accesibilidad"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Cerrar pantalla de notificaciones"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de subtítulos de <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> se ha incluido en el grupo de restringidos"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2223,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Nuevo: Lupa de ventanas"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Ahora puedes ampliar toda la pantalla o una parte"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Ampliar parte de la pantalla"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Ahora puedes ampliar toda la pantalla o una parte concreta, o cambiar entre ambas opciones."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activar en Ajustes"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Cerrar"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Para continuar, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; necesita tener acceso al micrófono del dispositivo."</string>
@@ -2233,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privacidad del sensor"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Icono de aplicación"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imagen de marca de aplicación"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

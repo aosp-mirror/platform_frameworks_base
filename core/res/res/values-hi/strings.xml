@@ -204,6 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"ट्वाइलाइट समय बताने वाली सेवा"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"समय क्षेत्र का पता लगाने वाली सुविधा (ऑफ़लाइन होने पर)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS समय अपडेट सेवा"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"Music Recognition Manager Service"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"आपके डिवाइस को मिटा दिया जाएगा"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"एडमिन ऐप्लिकेशन का इस्तेमाल नहीं किया जा सकता. आपके डिवाइस पर मौजूद डेटा अब मिटा दिया जाएगा.\n\nअगर आप कुछ पूछना चाहते हैं तो, अपने संगठन के एडमिन से संपर्क करें."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ने प्रिंटिंग सुविधा बंद कर दी है."</string>
@@ -293,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ऐप अभी इस्तेमाल हो रहा है"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"बैटरी की खपत करने वाले ऐप"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ज़ूम करने की सुविधा"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> बैटरी का इस्तेमाल कर रहा है"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ऐप बैटरी का इस्तेमाल कर रहे हैं"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"बैटरी और डेटा खर्च की जानकारी के लिए छूएं"</string>
@@ -343,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"ऐप को स्टेटस बार बने रहने की अनुमति देता है."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"स्टेटस बार खोलकर बड़ा करें/छोटा करें"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"ऐप को, स्टेटस बार खोलकर बड़ा करने या उसे छोटा करने की अनुमति देता है."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"लॉक किए गए किसी डिवाइस पर सूचनाओं को फ़ुल स्क्रीन पर दिखाता है"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"यह अनुमति मिलने के बाद ऐप्लिकेशन, लॉक किए गए डिवाइस में सूचनाओं को फ़ुल स्क्रीन मोड में दिखाता है"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"शॉर्टकट इंस्‍टॉल करें"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"ऐप्‍लिकेशन को उपयोगकर्ता की रोक के बिना होमस्‍क्रीन शॉर्टकट जोड़ने की अनुमति देता है."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"शॉर्टकट अनइंस्टॉल करें"</string>
@@ -554,6 +559,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"बायोमेट्रिक्स या स्क्रीन लॉक का क्रेडेंशियल इस्तेमाल करें"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"अपनी पहचान की पुष्टि करें"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"जारी रखने के लिए, बायोमेट्रिक्स इस्तेमाल करें"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"जारी रखने के लिए, बायोमेट्रिक या स्क्रीन लॉक क्रेडेंशियल डालकर पुष्टि करें"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"बायोमेट्रिक हार्डवेयर उपलब्ध नहीं है"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"प्रमाणीकरण रद्द किया गया"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"पहचान नहीं हो पाई"</string>
@@ -587,6 +593,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"फ़िंगरप्रिंट इस्तेमाल करें"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"फ़िंगरप्रिंट या स्क्रीन लॉक का क्रेडेंशियल इस्तेमाल करें"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"जारी रखने के लिए फ़िंगरप्रिंट का इस्तेमाल करें"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"जारी रखने के लिए, फ़िंगरप्रिंट या स्क्रीन लॉक क्रेडेंशियल डालकर पुष्टि करें"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फ़िंगरप्रिंट आइकॉन"</string>
@@ -632,8 +639,9 @@
     <string name="face_error_security_update_required" msgid="5076017208528750161">"सेंसर कुछ समय के लिए बंद कर दिया गया है."</string>
     <string name="face_name_template" msgid="3877037340223318119">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"\'फ़ेस अनलॉक\' इस्तेमाल करें"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"चेहरा पहचानने की सुविधा या स्क्रीन लॉक का क्रेडेंशियल इस्तेमाल करें"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"\'फ़ेस अनलॉक\' या स्क्रीन लॉक का क्रेडेंशियल इस्तेमाल करें"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"जारी रखने के लिए, \'फ़ेस अनलॉक\' इस्तेमाल करें"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"जारी रखने के लिए, अपना चेहरा दिखाकर या स्क्रीन लॉक क्रेडेंशियल डालकर पुष्टि करें"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"चेहरे का आइकॉन"</string>
@@ -997,6 +1005,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"आपके पास इस पेज को खोलने की अनुमति नहीं है."</string>
     <string name="text_copied" msgid="2531420577879738860">"लेख को क्‍लिपबोर्ड पर कॉपी किया गया."</string>
     <string name="copied" msgid="4675902854553014676">"कॉपी किया गया"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> से कॉपी किए गए डेटा को <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> में चिपकाया गया है"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"क्लिपबोर्ड के डेटा को <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> में चिपकाया गया है"</string>
     <string name="more_item_label" msgid="7419249600215749115">"और"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"मेन्यू+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1370,11 +1380,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"बंद करें"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> ढूंढा जा रहा है…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"मौजूदा सामग्री की जाँच की जा रही है"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"मीडिया स्टोरेज की जांच हो रही है"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"नया <xliff:g id="NAME">%s</xliff:g> लगाया गया"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> काम नहीं कर रहा है"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"सेटअप करने के लिए टैप करें"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"सेट अप करने के लिए चुनें"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"आपको डिवाइस फिर से फ़ॉर्मैट करना पड़ सकता है. निकालने के लिए टैप करें."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"फ़ोटो और मीडिया ट्रांसफर करने के लिए"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"मीडिया फ़ाइलों को ब्राउज़ करें"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> में गड़बड़ी है"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> काम नहीं कर रहा है"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"समस्या ठीक करने के लिए टैप करें"</string>
@@ -1383,7 +1396,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"असमर्थित <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> काम नहीं कर रहा है"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"यह डिवाइस इस <xliff:g id="NAME">%s</xliff:g> का समर्थन नहीं करता है. समर्थित प्रारूप में सेट करने के लिए टैप करें."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"इस डिवाइस पर <xliff:g id="NAME">%s</xliff:g> काम नहीं करता है. काम करने वाले प्रारूप में सेट अप करने के लिए चुनें."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g> को काम करने वाले फ़ॉर्मैट में सेट अप करने के लिए चुनें."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"आपको डिवाइस फिर से फ़ॉर्मैट करना पड़ सकता है"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> अप्रत्याशित रूप से निकाला गया"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"पहले मीडिया डिवाइस निकालने का विकल्प चुनें, फिर उसे निकालें ताकि आपकी सामग्री सुरक्षित रहे"</string>
@@ -1645,7 +1658,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"आपने अपना लॉक खोलने का पैटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से बनाया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और गलत प्रयासों के बाद, आपसे अपने Android TV डिवाइस को अपने ईमेल खाते का इस्तेमाल करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड बाद प्रयास करें."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"निकालें"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"हटाएं"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"वॉल्यूम को सुझाए गए स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर ज़्यादा समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"सुलभता शॉर्टकट का इस्तेमाल करना चाहते हैं?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट के चालू होने पर, दाेनाें वॉल्यूम बटन (आवाज़ कम या ज़्यादा करने वाले बटन) को तीन सेकंड तक दबाने से, सुलभता सुविधा शुरू हाे जाएगी."</string>
@@ -2086,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"स्क्रीन पर दिखने वाला सुलभता का शॉर्टकट"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"स्क्रीन पर दिखने वाले सुलभता के शॉर्टकट को चुनने का मेन्यू"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"सुलभता का शॉर्टकट"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"नोटिफ़िकेशन शेड खारिज करें"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> का कैप्शन बार."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> को प्रतिबंधित बकेट में रखा गया है"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2223,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"नई सुविधा: विंडो को ज़ूम करके देखने की सुविधा"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"अब अपनी पूरी स्क्रीन या कुछ हिस्से को ज़ूम करके देख सकते हैं"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"अपनी स्क्रीन के कुछ हिस्से को ज़ूम करें"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"अब आप अपनी फ़ुल स्क्रीन या स्क्रीन के किसी खास हिस्से को ज़ूम करके देख सकते हैं. इसके अलावा, आप इन दोनों विकल्पों के बीच स्विच भी कर सकते हैं."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"सेटिंग में जाकर, इस सुविधा को चालू करें"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"खारिज करें"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"जारी रखने के लिए, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; को आपके डिवाइस का माइक्रोफ़ोन ऐक्सेस करने की ज़रूरत है."</string>
@@ -2233,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"सेंसर से जुड़ी निजता के बारे में सूचना"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ऐप्लिकेशन का आइकॉन"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ऐप्लिकेशन की ब्रैंड इमेज"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

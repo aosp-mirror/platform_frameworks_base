@@ -29,6 +29,7 @@ import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
+import android.hardware.biometrics.common.ComponentInfo;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
@@ -141,8 +142,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
             final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
             if (prop.commonProps.componentInfo != null) {
-                for (android.hardware.biometrics.common.ComponentInfo info
-                        : prop.commonProps.componentInfo) {
+                for (ComponentInfo info : prop.commonProps.componentInfo) {
                     componentInfo.add(new ComponentInfoInternal(info.componentId,
                             info.hardwareVersion, info.firmwareVersion, info.serialNumber,
                             info.softwareVersion));

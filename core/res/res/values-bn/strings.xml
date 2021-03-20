@@ -204,6 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"গোধূলি পরিষেবা"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"টাইম জোন ডিটেক্টর (কানেকশন নেই)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS সময় আপডেট পরিষেবা"</string>
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"সঙ্গীত স্বীকৃতি পরিচালনার পরিষেবা"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"অ্যাডমিন অ্যাপটি ব্যবহার করা যাবে না। আপনার ডিভাইসে থাকা সবকিছু এখন মুছে ফেলা হবে।\n\nকোনও প্রশ্ন থাকলে আপনার প্রতিষ্ঠানের অ্যাডমিনের সাথে যোগাযোগ করুন।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> প্রিন্টিং বন্ধ রেখেছে।"</string>
@@ -293,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"অ্যাপ চলছে"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"কিছু অ্যাপ ব্যাটারি ব্যবহার করছে"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"বড় করে দেখুন"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপটি ব্যাটারি ব্যবহার করছে"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g>টি অ্যাপ ব্যাটারি ব্যবহার করছে"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ব্যাটারি এবং ডেটার ব্যবহারের বিশদ বিবরণের জন্য ট্যাপ করুন"</string>
@@ -343,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"অ্যাপ্লিকেশানটিকে স্থিতি দন্ডে থাকতে দেয়৷"</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"স্ট্যাটাস বার সম্প্রসারিত/সঙ্কুচিত করে"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"অ্যাপ্লিকেশনটিকে স্ট্যাটাস বার প্রসারিত বা সঙ্কুচিত করতে দেয়৷"</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"লক করা ডিভাইসে ফুল স্ক্রিন অ্যাক্টিভিটি হিসাবে বিজ্ঞপ্তি দেখায়"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"এই অ্যাপকে লক করা ডিভাইসে ফুল স্ক্রিন অ্যাক্টিভিটি হিসাবে বিজ্ঞপ্তি দেখানোর অনুমতি দেয়"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"শর্টকাটগুলি ইনস্টল করে"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"একটি অ্যাপ্লিকেশানকে ব্যবহারকারীর হস্তক্ষেপ ছাড়াই হোমস্ক্রীণে শর্টকাটগুলি যোগ করার অনুমতি দেয়৷"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"শর্টকাটগুলি আনইনস্টল করে"</string>
@@ -554,6 +559,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"বায়োমেট্রিক্স অথবা স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"আপনার পরিচয় যাচাই করুন"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"চালিয়ে যেতে আপনার বায়োমেট্রিক্স ব্যবহার করুন"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"চালিয়ে যেতে আপনার বায়োমেট্রিক্স বা স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"বায়োমেট্রিক হার্ডওয়্যার পাওয়া যাবে না"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"যাচাইকরণ বাতিল হয়েছে"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"স্বীকৃত নয়"</string>
@@ -587,6 +593,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"আঙ্গুলের ছাপ ব্যবহার করুন"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"আঙ্গুলের ছাপ অথবা স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"চালিয়ে যেতে আঙ্গুলের ছাপ ব্যবহার করুন"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"চালিয়ে যেতে আপনার আঙুলের ছাপ বা স্ক্রিন লক ব্য়বহার করুন"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"আঙ্গুলের ছাপ আইকন"</string>
@@ -634,6 +641,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"মুখের সাহায্যে আনলক ব্যবহার করুন"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"মুখ অথবা স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"চালিয়ে যেতে মুখের সাহায্যে আনলক ব্যবহার করুন"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"চালিয়ে যেতে আপনার ফেস বা স্ক্রিন লক ব্যবহার করুন"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"ফেস আইকন"</string>
@@ -997,6 +1005,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"এই পৃষ্ঠাটি খোলার জন্য আপনার কাছে অনুমতি নেই৷"</string>
     <string name="text_copied" msgid="2531420577879738860">"ক্লিপবোর্ডে পাঠ্য অনুলিপি করা হয়েছে৷"</string>
     <string name="copied" msgid="4675902854553014676">"কপি করা হয়েছে"</string>
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> থেকে কপি করা ডেটা <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>-এ পেস্ট করা হয়েছে"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"ক্লিপবোর্ডের ডেটা <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>-এ পেস্ট করা হয়েছে"</string>
     <string name="more_item_label" msgid="7419249600215749115">"আরও"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"মেনু+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1370,11 +1380,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"বন্ধ করুন"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> পরীক্ষা করা হচ্ছে…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"বর্তমান কন্টেন্টটি পর্যালোচনা করা হচ্ছে"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"মিডিয়া স্টোরেজ বিশ্লেষণ করা হচ্ছে"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"নতুন <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> কাজ করছে না"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"সেট-আপ করতে ট্যাপ করুন"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"সেটআপ করতে বেছে নিন"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"আপনাকে ডিভাইসটি আবার ফর্ম্যাট করতে হতে পারে। বের করে নিতে ট্যাপ করুন।"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ফটো এবং মিডিয়া ট্রান্সফার"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"মিডিয়া ফাইল ব্রাউজ করুন"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> নিয়ে সমস্যা আছে"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> কাজ করছে না"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ঠিক করতে ট্যাপ করুন"</string>
@@ -1383,7 +1396,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> অসমর্থিত"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> কাজ করছে না"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"এই ডিভাইসটি <xliff:g id="NAME">%s</xliff:g> সমর্থন করে না। কোনো সমর্থিত ফর্ম্যাটে সেট-আপ করতে আলতো চাপুন।"</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"এই ডিভাইসটি <xliff:g id="NAME">%s</xliff:g> সমর্থন করে না। কোনো সমর্থিত ফর্ম্যাটে সেট-আপ করতে চাইলে বেছে নিন।"</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g> সঠিক ফর্ম্যাটে সেটআপ করতে বেছে নিন।"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"আপনাকে ডিভাইসটি আবার ফর্ম্যাট করতে হতে পারে"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> অপ্রত্যাশিতভাবে মুছে ফেলা হয়েছে"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"মিডিয়া সরিয়ে নেওয়ার আগে সেটি সিস্টেম থেকে ইজেক্ট করুন, নাহলে কন্টেন্ট সেভ নাও হতে পারে"</string>
@@ -1689,7 +1702,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"একটি ফিচার থেকে অন্যটিতে যেতে, তিনটি আঙ্গুল দিয়ে উপরের দিকে সোয়াইপ করে ধরে থাকুন।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"বড় করে দেখা"</string>
     <string name="user_switched" msgid="7249833311585228097">"বর্তমান ব্যবহারকারী <xliff:g id="NAME">%1$s</xliff:g>৷"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> নামের ব্যবহারকারীতে যাচ্ছে…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"ব্যবহারকারী পরিবর্তন করে <xliff:g id="NAME">%1$s</xliff:g> করা হচ্ছে…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>কে লগ-আউট করা হচ্ছে..."</string>
     <string name="owner_name" msgid="8713560351570795743">"মালিক"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ত্রুটি"</string>
@@ -2086,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"অন-স্ক্রিন অ্যাক্সেসিবিলিটি শর্টকাট"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"অন-স্ক্রিন অ্যাক্সেসিবিলিটি শর্টকাট বেছে নেওয়ার বিকল্প"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"অ্যাক্সেসিবিলিটি শর্টকাট"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"বিজ্ঞপ্তি শেড বাতিল করুন"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর ক্যাপশন বার।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> সীমাবদ্ধ গ্রুপে অন্তর্ভুক্ত করা হয়েছে"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2223,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"নতুন: উইন্ডো ম্যাগনিফায়ার"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"এখন আপনি কিছু বা সবকটি স্ক্রিন বড় করে দেখতে পারেন"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"স্ক্রিনের কোনও অংশ বড় করে দেখা"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"এখন আপনি সম্পূর্ণ স্ক্রিন বা এর কোনও অংশ বড় করে দেখতে পারেন অথবা দুটি বিকল্পের মধ্যে পারস্পরিক পরিবর্তন করতে পারেন।"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"সেটিংস থেকে চালু করুন"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"বাতিল করুন"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"চালিয়ে যেতে, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; আপনার ডিভাইসের মাইক্রোফোন অ্যাক্সেস করতে চায়।"</string>
@@ -2233,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"সেন্সর গোপনীয়তা"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"অ্যাপের আইকন"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"অ্যাপের ব্র্যান্ড ছবি"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>
