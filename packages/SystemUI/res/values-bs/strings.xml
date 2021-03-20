@@ -116,8 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Otkaži"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Dijeli"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Snimanje ekrana je otkazano"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"Snimanje zaslona spremljeno"</string>
-    <string name="screenrecord_save_text" msgid="3008973099800840163">"Dodirnite za prikaz"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"Snimak ekrana je sačuvan"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Dodirnite da vidite"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Greška prilikom brisanja snimka ekrana"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Dobijanje odobrenja nije uspjelo"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Greška pri pokretanju snimanja ekrana"</string>
@@ -360,7 +360,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Novi korisnik"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"WiFi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Sigurno za korištenje u avionu"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Mreže su dostupne"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Mreže nisu dostupne"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Nije povezano"</string>
@@ -470,8 +469,8 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Pokaži profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Dodaj korisnika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novi korisnik"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Želite li ukloniti gosta?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i svi podaci iz ove sesije bit će izbrisani."</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ukloniti gosta?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i podaci iz ove sesije će se izbrisati."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ukloni"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Zdravo! Lijepo je opet vidjeti goste."</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Želite li nastaviti sesiju?"</string>
@@ -483,7 +482,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Odjavi korisnika"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Odjavi trenutnog korisnika"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ODJAVI KORISNIKA"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Želite dodati novog korisnika?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Dodati novog korisnika?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Kada dodate novog korisnika, ta osoba treba postaviti svoj prostor.\n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dostignut limit za broj korisnika"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -519,6 +518,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Ovim uređajem upravlja tvoj roditelj"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Vaša organizacija je vlasnik ovog uređaja i može nadzirati mrežni saobraćaj"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> upravlja ovim uređajem i može nadzirati mrežni saobraćaj"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Ovaj uređaj pruža <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Ovaj uređaj pripada vašoj organizaciji i povezan je s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je s aplikacijom <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Ovaj uređaj pripada vašoj organizaciji"</string>
@@ -532,6 +532,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Vaš radni profil je povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Vaš lični profil je povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Ovaj uređaj je povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Ovaj uređaj pruža <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Upravljanje uređajem"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Praćenje profila"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Praćenje mreže"</string>
@@ -543,6 +544,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Prikaži pravila"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Prikaži kontrole"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVaš IT administrator može nadzirati postavke, korporativni pristup, aplikacije, podatke povezane s vašim uređajem i informacije o lokaciji uređaja te njima upravljati.\n\nZa više informacija kontaktirajte IT administratora."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> će moći pristupiti podacima povezanim s ovim uređajem, upravljati aplikacijama i promijeniti postavke uređaja.\n\nAko imate pitanja, kontaktirajte organizaciju <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Ovaj uređaj pripada vašoj organizaciji.\n\nVaš IT administrator može nadzirati postavke, korporativni pristup, aplikacije, podatke povezane s vašim uređajem i informacije o lokaciji uređaja te njima upravljati.\n\nZa više informacija kontaktirajte IT administratora."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Vaša organizacija je instalirala CA certifikat na ovom uređaju. Vaš saobraćaj preko sigurne mreže može se pratiti."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Vaša organizacija je instalirala CA certifikat na vašem radnom profilu. Vaš saobraćaj preko sigurne mreže može se pratiti."</string>
@@ -653,6 +655,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži način rada za demonstraciju"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Novčanik"</string>
+    <string name="wallet_secondary_label" msgid="2017028770884957543">"Spremno"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil za posao"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Način rada u avionu"</string>
     <string name="add_tile" msgid="6239678623873086686">"Dodaj pločicu"</string>
@@ -901,11 +905,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Zatvoriti brze postavke."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Alarm postavljen."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Prijavljeni ste kao <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"odaberete korisnika"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Nema internetske veze"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Otvori detalje."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Nije dostupno zbog razloga <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Otvori postavke za: <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Urediti raspored postavki."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meni napajanja"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključavanje ekrana"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se isključio zbog pregrijavanja"</string>
@@ -1013,9 +1019,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Pomjeranje lijevo"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Pomjeranje desno"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Prekidač za uvećavanje"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Uvećavanje cijelog ekrana"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Uvećavanje prikaza preko cijelog ekrana"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Uvećavanje dijela ekrana"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Prekidač"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Dugme za pristupačnost je zamijenilo pokret za pristupačnost\n\n"<annotation id="link">"Prikaži postavke"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Premjestite dugme do ivice da ga privremeno sakrijete"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Kontrole uređaja"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodajte kontrole za povezane uređaje"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Postavite kontrole uređaja"</string>
@@ -1084,6 +1092,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Uparite novi uređaj"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj verzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj verzije je kopiran u međumemoriju."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Otvoreni razgovor"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Vidžeti za razgovor"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Dodirnite razgovor da ga dodate na početni ekran"</string>
+    <string name="timestamp" msgid="6577851592534538533">"Prije <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"Prije manje od <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"Prije više od <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Rođendan"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Rođendan je uskoro"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Godišnjica"</string>
+    <string name="location_status" msgid="1294990572202541812">"Dijeljenje lokacije"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Nova priča"</string>
+    <string name="video_status" msgid="4548544654316843225">"Gleda"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Slušanje"</string>
+    <string name="game_status" msgid="1340694320630973259">"Reproduciranje"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Prijatelji"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Chatajmo večeras!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Propušteni poziv"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Pregledajte nedavne poruke, propuštene pozive i ažuriranja statusa"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Razgovor"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Došlo je do problema prilikom očitavanja mjerača stanja baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nije postavljen alarm"</string>
 </resources>
