@@ -5180,6 +5180,10 @@
     <permission android:name="android.permission.INPUT_CONSUMER"
                 android:protectionLevel="signature" />
 
+    <!-- @hide @SystemApi Allows an application to manage app hibernation state. -->
+    <permission android:name="android.permission.MANAGE_APP_HIBERNATION"
+                android:protectionLevel="signature|installer" />
+
     <!-- Attribution for Country Detector. -->
     <attribution android:tag="CountryDetector" android:label="@string/country_detector"/>
     <!-- Attribution for Location service. -->
