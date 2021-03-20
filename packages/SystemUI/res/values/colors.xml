@@ -274,4 +274,8 @@
     <!-- TODO(b/178093014) Colors for privacy dialog. These should be changed to the new palette -->
     <color name="privacy_circle_camera">#1E8E3E</color> <!-- g600 -->
     <color name="privacy_circle_microphone_location">#E8710A</color> <!--o600 -->
+
+    <!-- Accessibility floating menu -->
+    <color name="accessibility_floating_menu_background">#CCFFFFFF</color> <!-- 80% -->
+    <color name="accessibility_floating_menu_stroke_dark">#26FFFFFF</color> <!-- 15% -->
 </resources>

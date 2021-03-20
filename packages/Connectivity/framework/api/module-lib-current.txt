@@ -19,7 +19,11 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void setGlobalProxy(@Nullable android.net.ProxyInfo);
     method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void setProfileNetworkPreference(@NonNull android.os.UserHandle, int, @Nullable java.util.concurrent.Executor, @Nullable Runnable);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void startCaptivePortalApp(@NonNull android.net.Network);
     method public void systemReady();
+    field public static final String ACTION_PROMPT_LOST_VALIDATION = "android.net.action.PROMPT_LOST_VALIDATION";
+    field public static final String ACTION_PROMPT_PARTIAL_CONNECTIVITY = "android.net.action.PROMPT_PARTIAL_CONNECTIVITY";
+    field public static final String ACTION_PROMPT_UNVALIDATED = "android.net.action.PROMPT_UNVALIDATED";
     field public static final String PRIVATE_DNS_MODE_OFF = "off";
     field public static final String PRIVATE_DNS_MODE_OPPORTUNISTIC = "opportunistic";
     field public static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = "hostname";
@@ -36,7 +40,16 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
+    method @Nullable public java.util.Set<android.util.Range<java.lang.Integer>> getUids();
     field public static final int TRANSPORT_TEST = 7; // 0x7
+  }
+
+  public static final class NetworkCapabilities.Builder {
+    method @NonNull public android.net.NetworkCapabilities.Builder setUids(@Nullable java.util.Set<android.util.Range<java.lang.Integer>>);
+  }
+
+  public static class NetworkRequest.Builder {
+    method @NonNull public android.net.NetworkRequest.Builder setUids(@Nullable java.util.Set<android.util.Range<java.lang.Integer>>);
   }
 
   public class ParseException extends java.lang.RuntimeException {

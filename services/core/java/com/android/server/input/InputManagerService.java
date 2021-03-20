@@ -2606,6 +2606,11 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback
+    private void notifyDropWindow(IBinder token, float x, float y) {
+        mWindowManagerCallbacks.notifyDropWindow(token, x, y);
+    }
+
+    // Native callback
     private void notifyUntrustedTouch(String packageName) {
         // TODO(b/169067926): Remove toast after gathering feedback on dogfood.
         if (!UNTRUSTED_TOUCHES_TOAST || ArrayUtils.contains(
@@ -3035,6 +3040,11 @@ public class InputManagerService extends IInputManager.Stub
          * Called when the focused window has changed.
          */
         void notifyFocusChanged(IBinder oldToken, IBinder newToken);
+
+        /**
+         * Called when the drag over window has changed.
+         */
+        void notifyDropWindow(IBinder token, float x, float y);
     }
 
     /**

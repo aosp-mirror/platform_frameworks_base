@@ -34,6 +34,7 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -89,7 +90,7 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage addReqFeature(FeatureInfo reqFeature);
 
-    ParsingPackage addRequestedPermission(String permission);
+    ParsingPackage addUsesPermission(ParsedUsesPermission parsedUsesPermission);
 
     ParsingPackage addService(ParsedService parsedService);
 

@@ -3871,7 +3871,9 @@ public class AudioService extends IAudioService.Stub
      * @return true if microphone is reported as muted by primary HAL
      */
     public boolean isMicrophoneMuted() {
-        return mMicMuteFromSystemCached && !mMicMuteFromPrivacyToggle;
+        return mMicMuteFromSystemCached
+                && (!mMicMuteFromPrivacyToggle
+                        || mMicMuteFromApi || mMicMuteFromRestrictions || mMicMuteFromSwitch);
     }
 
     private boolean isMicrophoneSupposedToBeMuted() {

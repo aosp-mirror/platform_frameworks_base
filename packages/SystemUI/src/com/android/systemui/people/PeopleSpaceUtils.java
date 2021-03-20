@@ -19,12 +19,13 @@ package com.android.systemui.people;
 import static android.app.Notification.CATEGORY_MISSED_CALL;
 import static android.app.Notification.EXTRA_MESSAGES;
 import static android.app.people.ConversationStatus.ACTIVITY_ANNIVERSARY;
+import static android.app.people.ConversationStatus.ACTIVITY_AUDIO;
 import static android.app.people.ConversationStatus.ACTIVITY_BIRTHDAY;
 import static android.app.people.ConversationStatus.ACTIVITY_GAME;
 import static android.app.people.ConversationStatus.ACTIVITY_LOCATION;
-import static android.app.people.ConversationStatus.ACTIVITY_MEDIA;
 import static android.app.people.ConversationStatus.ACTIVITY_NEW_STORY;
 import static android.app.people.ConversationStatus.ACTIVITY_UPCOMING_BIRTHDAY;
+import static android.app.people.ConversationStatus.ACTIVITY_VIDEO;
 import static android.app.people.ConversationStatus.AVAILABILITY_AVAILABLE;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH;
@@ -62,7 +63,6 @@ import android.os.Parcelable;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -170,8 +170,6 @@ public class PeopleSpaceUtils {
             Context context, INotificationManager notificationManager, IPeopleManager peopleManager,
             LauncherApps launcherApps, NotificationEntryManager notificationEntryManager)
             throws Exception {
-        boolean showOnlyPriority = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 1;
         List<ConversationChannelWrapper> conversations =
                 notificationManager.getConversations(
                         false).getList();
@@ -184,25 +182,23 @@ public class PeopleSpaceUtils {
                 priorityConversations);
 
         // Sort and then add recent and non priority conversations to tiles list.
-        if (!showOnlyPriority) {
-            if (DEBUG) Log.d(TAG, "Add recent conversations");
-            Stream<ShortcutInfo> nonPriorityConversations = conversations.stream()
-                    .filter(c -> c.getNotificationChannel() == null
-                            || !c.getNotificationChannel().isImportantConversation())
-                    .map(c -> c.getShortcutInfo());
+        if (DEBUG) Log.d(TAG, "Add recent conversations");
+        Stream<ShortcutInfo> nonPriorityConversations = conversations.stream()
+                .filter(c -> c.getNotificationChannel() == null
+                        || !c.getNotificationChannel().isImportantConversation())
+                .map(c -> c.getShortcutInfo());
 
-            List<ConversationChannel> recentConversationsList =
-                    peopleManager.getRecentConversations().getList();
-            Stream<ShortcutInfo> recentConversations = recentConversationsList
-                    .stream()
-                    .map(c -> c.getShortcutInfo());
+        List<ConversationChannel> recentConversationsList =
+                peopleManager.getRecentConversations().getList();
+        Stream<ShortcutInfo> recentConversations = recentConversationsList
+                .stream()
+                .map(c -> c.getShortcutInfo());
 
-            Stream<ShortcutInfo> mergedStream = Stream.concat(nonPriorityConversations,
-                    recentConversations);
-            List<PeopleSpaceTile> recentTiles =
-                    getSortedTiles(peopleManager, launcherApps, mergedStream);
-            tiles.addAll(recentTiles);
-        }
+        Stream<ShortcutInfo> mergedStream = Stream.concat(nonPriorityConversations,
+                recentConversations);
+        List<PeopleSpaceTile> recentTiles =
+                getSortedTiles(peopleManager, launcherApps, mergedStream);
+        tiles.addAll(recentTiles);
 
         tiles = augmentTilesFromVisibleNotifications(context, tiles, notificationEntryManager);
         return tiles;
@@ -501,8 +497,10 @@ public class PeopleSpaceUtils {
                 return context.getString(R.string.location_status);
             case ACTIVITY_NEW_STORY:
                 return context.getString(R.string.new_story_status);
-            case ACTIVITY_MEDIA:
+            case ACTIVITY_VIDEO:
                 return context.getString(R.string.video_status);
+            case ACTIVITY_AUDIO:
+                return context.getString(R.string.audio_status);
             case ACTIVITY_GAME:
                 return context.getString(R.string.game_status);
             default:

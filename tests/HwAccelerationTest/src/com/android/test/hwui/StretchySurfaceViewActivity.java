@@ -99,7 +99,8 @@ public class StretchySurfaceViewActivity extends Activity implements Callback {
                 super.onDraw(canvas);
 
                 RenderNode node = ((RecordingCanvas) canvas).mNode;
-                node.stretch(0f, 0f, getWidth(), getHeight() / 2f, 0f, 1f, 400f);
+                node.stretch(0f, 0f, getWidth(), getHeight() / 2f, 0f,
+                        1f, 400f, 400f);
             }
         };
 

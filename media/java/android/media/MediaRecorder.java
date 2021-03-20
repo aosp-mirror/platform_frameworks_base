@@ -395,6 +395,26 @@ public class MediaRecorder implements AudioRouting,
     @Retention(RetentionPolicy.SOURCE)
     public @interface Source {}
 
+    /** @hide */
+    @IntDef({
+        AudioSource.DEFAULT,
+        AudioSource.MIC,
+        AudioSource.VOICE_UPLINK,
+        AudioSource.VOICE_DOWNLINK,
+        AudioSource.VOICE_CALL,
+        AudioSource.CAMCORDER,
+        AudioSource.VOICE_RECOGNITION,
+        AudioSource.VOICE_COMMUNICATION,
+        AudioSource.REMOTE_SUBMIX,
+        AudioSource.UNPROCESSED,
+        AudioSource.VOICE_PERFORMANCE,
+        AudioSource.ECHO_REFERENCE,
+        AudioSource.RADIO_TUNER,
+        AudioSource.HOTWORD,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemSource {}
+
     // TODO make AudioSource static (API change) and move this method inside the AudioSource class
     /**
      * @hide

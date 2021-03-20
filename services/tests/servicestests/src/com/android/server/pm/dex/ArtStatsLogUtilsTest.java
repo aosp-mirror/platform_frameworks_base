@@ -245,14 +245,6 @@ public final class ArtStatsLogUtilsTest {
                 UID,
                 COMPILATION_REASON,
                 COMPILER_FILTER,
-                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_DEX_CODE_BYTES,
-                DEX_CONTENT.length,
-                dexMetadataType);
-        inorder.verify(mockLogger).write(
-                SESSION_ID,
-                UID,
-                COMPILATION_REASON,
-                COMPILER_FILTER,
                 ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_TOTAL_TIME,
                 COMPILE_TIME,
                 dexMetadataType);

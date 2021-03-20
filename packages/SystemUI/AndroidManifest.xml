@@ -605,11 +605,6 @@
         <receiver android:name=".people.widget.PeopleSpaceWidgetPinnedReceiver"
             android:enabled="true"/>
 
-        <!-- Widget service -->
-        <service android:name=".people.widget.PeopleSpaceWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"
-            android:exported="false" />
-
         <!-- ContentProvider that returns a People Tile preview for a given shortcut -->
         <provider
             android:name="com.android.systemui.people.PeopleProvider"

@@ -566,6 +566,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mInSwipePipToHomeTransition = false;
         mPictureInPictureParams = null;
         mState = State.UNDEFINED;
+        // Re-set the PIP bounds to none.
+        mPipBoundsState.setBounds(new Rect());
         mPipUiEventLoggerLogger.setTaskInfo(null);
         mPipMenuController.detach();
 

@@ -17,10 +17,13 @@
 package android.hardware.biometrics;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The base class containing all modality-agnostic information.
@@ -56,15 +59,93 @@ public class SensorProperties {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Strength {}
 
+    /**
+     * A class storing the component info for a subsystem of the sensor.
+     */
+    public static final class ComponentInfo {
+        @NonNull private final String mComponentId;
+        @NonNull private final String mHardwareVersion;
+        @NonNull private final String mFirmwareVersion;
+        @NonNull private final String mSerialNumber;
+        @NonNull private final String mSoftwareVersion;
+
+        /**
+         * @hide
+         */
+        public ComponentInfo(@NonNull String componentId, @NonNull String hardwareVersion,
+                @NonNull String firmwareVersion, @NonNull String serialNumber,
+                @NonNull String softwareVersion) {
+            mComponentId = componentId;
+            mHardwareVersion = hardwareVersion;
+            mFirmwareVersion = firmwareVersion;
+            mSerialNumber = serialNumber;
+            mSoftwareVersion = softwareVersion;
+        }
+
+        /**
+         * @return The unique identifier for the subsystem.
+         */
+        @NonNull
+        public String getComponentId() {
+            return mComponentId;
+        }
+
+        /**
+         * @return The hardware version for the subsystem. For example, <vendor>/<model>/<revision>.
+         */
+        @NonNull
+        public String getHardwareVersion() {
+            return mHardwareVersion;
+        }
+
+        /**
+         * @return The firmware version for the subsystem.
+         */
+        @NonNull
+        public String getFirmwareVersion() {
+            return mFirmwareVersion;
+        }
+
+        /**
+         * @return The serial number for the subsystem.
+         */
+        @NonNull
+        public String getSerialNumber() {
+            return mSerialNumber;
+        }
+
+        /**
+         * @return The software version for the subsystem.
+         * For example, <vendor>/<version>/<revision>.
+         */
+        @NonNull
+        public String getSoftwareVersion() {
+            return mSoftwareVersion;
+        }
+
+        /**
+         * Constructs a {@link ComponentInfo} from the internal parcelable representation.
+         * @hide
+         */
+        public static ComponentInfo from(ComponentInfoInternal internalComp) {
+            return new ComponentInfo(internalComp.componentId, internalComp.hardwareVersion,
+                    internalComp.firmwareVersion, internalComp.serialNumber,
+                    internalComp.softwareVersion);
+        }
+    }
+
     private final int mSensorId;
     @Strength private final int mSensorStrength;
+    private final List<ComponentInfo> mComponentInfo;
 
     /**
      * @hide
      */
-    public SensorProperties(int sensorId, @Strength int sensorStrength) {
+    public SensorProperties(int sensorId, @Strength int sensorStrength,
+            List<ComponentInfo> componentInfo) {
         mSensorId = sensorId;
         mSensorStrength = sensorStrength;
+        mComponentInfo = componentInfo;
     }
 
     /**
@@ -83,10 +164,23 @@ public class SensorProperties {
     }
 
     /**
+     * @return The sensor's component info.
+     */
+    @NonNull
+    public List<ComponentInfo> getComponentInfo() {
+        return mComponentInfo;
+    }
+
+    /**
      * Constructs a {@link SensorProperties} from the internal parcelable representation.
      * @hide
      */
     public static SensorProperties from(SensorPropertiesInternal internalProp) {
-        return new SensorProperties(internalProp.sensorId, internalProp.sensorStrength);
+        final List<ComponentInfo> componentInfo = new ArrayList<>();
+        for (ComponentInfoInternal internalComp : internalProp.componentInfo) {
+            componentInfo.add(ComponentInfo.from(internalComp));
+        }
+        return new SensorProperties(internalProp.sensorId, internalProp.sensorStrength,
+                componentInfo);
     }
 }

@@ -29,6 +29,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
+import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
@@ -59,6 +60,7 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.charging.WiredChargingRippleController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -164,6 +166,7 @@ public interface StatusBarPhoneModule {
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
+            AccessibilityFloatingMenuController accessibilityFloatingMenuController,
             Lazy<AssistManager> assistManagerLazy,
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -202,6 +205,7 @@ public interface StatusBarPhoneModule {
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSlider.Factory brightnessSliderFactory,
+            WiredChargingRippleController chargingRippleAnimationController,
             FeatureFlags featureFlags) {
         return new StatusBar(
                 context,
@@ -245,6 +249,7 @@ public interface StatusBarPhoneModule {
                 visualStabilityManager,
                 deviceProvisionedController,
                 navigationBarController,
+                accessibilityFloatingMenuController,
                 assistManagerLazy,
                 configurationController,
                 notificationShadeWindowController,
@@ -282,6 +287,7 @@ public interface StatusBarPhoneModule {
                 statusBarTouchableRegionManager,
                 notificationIconAreaController,
                 brightnessSliderFactory,
+                chargingRippleAnimationController,
                 featureFlags);
     }
 }

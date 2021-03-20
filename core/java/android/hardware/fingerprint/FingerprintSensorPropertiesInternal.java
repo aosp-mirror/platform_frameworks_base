@@ -21,9 +21,12 @@ import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_UDFP
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.Parcel;
+
+import java.util.List;
 
 /**
  * Container for fingerprint sensor properties.
@@ -59,6 +62,7 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
 
     public FingerprintSensorPropertiesInternal(int sensorId,
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
+            List<ComponentInfoInternal> componentInfo,
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken, int sensorLocationX, int sensorLocationY,
             int sensorRadius) {
@@ -66,8 +70,8 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
         // required as it can only be generated/attested/verified by TEE components.
         // IFingerprint@1.0 handles lockout below the HAL, but does not require a challenge. See
         // the HAL interface for more details.
-        super(sensorId, strength, maxEnrollmentsPerUser, resetLockoutRequiresHardwareAuthToken,
-                false /* resetLockoutRequiresChallenge */);
+        super(sensorId, strength, maxEnrollmentsPerUser, componentInfo,
+            resetLockoutRequiresHardwareAuthToken, false /* resetLockoutRequiresChallenge */);
         this.sensorType = sensorType;
         this.sensorLocationX = sensorLocationX;
         this.sensorLocationY = sensorLocationY;
@@ -79,10 +83,11 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
      */
     public FingerprintSensorPropertiesInternal(int sensorId,
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
+            List<ComponentInfoInternal> componentInfo,
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken) {
         // TODO(b/179175438): Value should be provided from the HAL
-        this(sensorId, strength, maxEnrollmentsPerUser, sensorType,
+        this(sensorId, strength, maxEnrollmentsPerUser, componentInfo, sensorType,
                 resetLockoutRequiresHardwareAuthToken, 540 /* sensorLocationX */,
                 1636 /* sensorLocationY */, 130 /* sensorRadius */);
     }
@@ -94,10 +99,11 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
     // TODO(b/179175438): Remove this constructor once all HALs move to AIDL.
     public FingerprintSensorPropertiesInternal(@NonNull Context context, int sensorId,
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
+            List<ComponentInfoInternal> componentInfo,
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken) {
-        super(sensorId, strength, maxEnrollmentsPerUser, resetLockoutRequiresHardwareAuthToken,
-                false /* resetLockoutRequiresChallenge */);
+        super(sensorId, strength, maxEnrollmentsPerUser, componentInfo,
+            resetLockoutRequiresHardwareAuthToken, false /* resetLockoutRequiresChallenge */);
         this.sensorType = sensorType;
 
         int[] props = context.getResources().getIntArray(

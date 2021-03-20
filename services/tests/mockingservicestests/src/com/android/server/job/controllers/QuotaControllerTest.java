@@ -52,6 +52,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
@@ -66,7 +67,10 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
 import android.os.BatteryManager;
@@ -142,6 +146,8 @@ public class QuotaControllerTest {
     @Mock
     private JobSchedulerService mJobSchedulerService;
     @Mock
+    private PackageManager mPackageManager;
+    @Mock
     private PackageManagerInternal mPackageManagerInternal;
     @Mock
     private PowerAllowlistInternal mPowerAllowlistInternal;
@@ -201,6 +207,8 @@ public class QuotaControllerTest {
                         -> mDeviceConfigPropertiesBuilder.build())
                 .when(() -> DeviceConfig.getProperties(
                         eq(DeviceConfig.NAMESPACE_JOB_SCHEDULER), ArgumentMatchers.<String>any()));
+        // Used in QuotaController.onSystemServicesReady
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
 
         // Freeze the clocks at 24 hours after this moment in time. Several tests create sessions
         // in the past, and QuotaController sometimes floors values at 0, so if the test time
@@ -2704,7 +2712,8 @@ public class QuotaControllerTest {
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_FREQUENT_MS, 1 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RARE_MS, 30 * MINUTE_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RESTRICTED_MS, 27 * MINUTE_IN_MILLIS);
-        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_SPECIAL_ADDITION_MS, 10 * HOUR_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_ADDITION_INSTALLER_MS, 7 * HOUR_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_ADDITION_SPECIAL_MS, 10 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_WINDOW_SIZE_MS, 12 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS, 10 * MINUTE_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_REWARD_TOP_APP_MS, 87 * SECOND_IN_MILLIS);
@@ -2745,7 +2754,8 @@ public class QuotaControllerTest {
         assertEquals(HOUR_IN_MILLIS, mQuotaController.getEJLimitsMs()[FREQUENT_INDEX]);
         assertEquals(30 * MINUTE_IN_MILLIS, mQuotaController.getEJLimitsMs()[RARE_INDEX]);
         assertEquals(27 * MINUTE_IN_MILLIS, mQuotaController.getEJLimitsMs()[RESTRICTED_INDEX]);
-        assertEquals(10 * HOUR_IN_MILLIS, mQuotaController.getEjLimitSpecialAdditionMs());
+        assertEquals(7 * HOUR_IN_MILLIS, mQuotaController.getEjLimitAdditionInstallerMs());
+        assertEquals(10 * HOUR_IN_MILLIS, mQuotaController.getEjLimitAdditionSpecialMs());
         assertEquals(12 * HOUR_IN_MILLIS, mQuotaController.getEJLimitWindowSizeMs());
         assertEquals(10 * MINUTE_IN_MILLIS, mQuotaController.getEJTopAppTimeChunkSizeMs());
         assertEquals(87 * SECOND_IN_MILLIS, mQuotaController.getEJRewardTopAppMs());
@@ -2786,7 +2796,8 @@ public class QuotaControllerTest {
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_FREQUENT_MS, -1);
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RARE_MS, -1);
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RESTRICTED_MS, -1);
-        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_SPECIAL_ADDITION_MS, -1);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_ADDITION_INSTALLER_MS, -1);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_ADDITION_SPECIAL_MS, -1);
         setDeviceConfigLong(QcConstants.KEY_EJ_WINDOW_SIZE_MS, -1);
         setDeviceConfigLong(QcConstants.KEY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS, -1);
         setDeviceConfigLong(QcConstants.KEY_EJ_REWARD_TOP_APP_MS, -1);
@@ -2823,7 +2834,8 @@ public class QuotaControllerTest {
         assertEquals(10 * MINUTE_IN_MILLIS, mQuotaController.getEJLimitsMs()[FREQUENT_INDEX]);
         assertEquals(10 * MINUTE_IN_MILLIS, mQuotaController.getEJLimitsMs()[RARE_INDEX]);
         assertEquals(5 * MINUTE_IN_MILLIS, mQuotaController.getEJLimitsMs()[RESTRICTED_INDEX]);
-        assertEquals(0, mQuotaController.getEjLimitSpecialAdditionMs());
+        assertEquals(0, mQuotaController.getEjLimitAdditionInstallerMs());
+        assertEquals(0, mQuotaController.getEjLimitAdditionSpecialMs());
         assertEquals(HOUR_IN_MILLIS, mQuotaController.getEJLimitWindowSizeMs());
         assertEquals(1, mQuotaController.getEJTopAppTimeChunkSizeMs());
         assertEquals(10 * SECOND_IN_MILLIS, mQuotaController.getEJRewardTopAppMs());
@@ -2858,7 +2870,8 @@ public class QuotaControllerTest {
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_FREQUENT_MS, 25 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RARE_MS, 25 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RESTRICTED_MS, 25 * HOUR_IN_MILLIS);
-        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_SPECIAL_ADDITION_MS, 25 * HOUR_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_ADDITION_INSTALLER_MS, 25 * HOUR_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_ADDITION_SPECIAL_MS, 25 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_WINDOW_SIZE_MS, 25 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS, 25 * HOUR_IN_MILLIS);
         setDeviceConfigLong(QcConstants.KEY_EJ_REWARD_TOP_APP_MS, 25 * HOUR_IN_MILLIS);
@@ -2885,7 +2898,8 @@ public class QuotaControllerTest {
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getEJLimitsMs()[FREQUENT_INDEX]);
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getEJLimitsMs()[RARE_INDEX]);
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getEJLimitsMs()[RESTRICTED_INDEX]);
-        assertEquals(0, mQuotaController.getEjLimitSpecialAdditionMs());
+        assertEquals(0, mQuotaController.getEjLimitAdditionInstallerMs());
+        assertEquals(0, mQuotaController.getEjLimitAdditionSpecialMs());
         assertEquals(24 * HOUR_IN_MILLIS, mQuotaController.getEJLimitWindowSizeMs());
         assertEquals(15 * MINUTE_IN_MILLIS, mQuotaController.getEJTopAppTimeChunkSizeMs());
         assertEquals(15 * MINUTE_IN_MILLIS, mQuotaController.getEJRewardTopAppMs());
@@ -3957,9 +3971,16 @@ public class QuotaControllerTest {
     }
 
     @Test
-    public void testGetRemainingEJExecutionTimeLocked_SpecialApp() {
-        doReturn(new String[]{SOURCE_PACKAGE}).when(mPackageManagerInternal)
-                .getKnownPackageNames(eq(PackageManagerInternal.PACKAGE_VERIFIER), anyInt());
+    public void testGetRemainingEJExecutionTimeLocked_Installer() {
+        PackageInfo pi = new PackageInfo();
+        pi.packageName = SOURCE_PACKAGE;
+        pi.requestedPermissions = new String[]{Manifest.permission.INSTALL_PACKAGES};
+        pi.requestedPermissionsFlags = new int[]{PackageInfo.REQUESTED_PERMISSION_GRANTED};
+        pi.applicationInfo = new ApplicationInfo();
+        pi.applicationInfo.uid = mSourceUid;
+        doReturn(List.of(pi)).when(mPackageManager).getInstalledPackagesAsUser(anyInt(), anyInt());
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mContext).checkPermission(
+                eq(Manifest.permission.INSTALL_PACKAGES), anyInt(), eq(mSourceUid));
         mQuotaController.onSystemServicesReady();
 
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
@@ -3980,7 +4001,7 @@ public class QuotaControllerTest {
             setStandbyBucket(i);
             assertEquals("Got wrong remaining EJ execution time for bucket #" + i,
                     i == NEVER_INDEX ? 0
-                            : (limits[i] + mQuotaController.getEjLimitSpecialAdditionMs()
+                            : (limits[i] + mQuotaController.getEjLimitAdditionInstallerMs()
                                     - 5 * MINUTE_IN_MILLIS),
                     mQuotaController.getRemainingEJExecutionTimeLocked(
                             SOURCE_USER_ID, SOURCE_PACKAGE));

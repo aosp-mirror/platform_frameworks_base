@@ -1343,13 +1343,24 @@ public class AppStandbyController
     @Override
     public void restrictApp(@NonNull String packageName, int userId,
             @SystemForcedReasons int restrictReason) {
+        restrictApp(packageName, userId, REASON_MAIN_FORCED_BY_SYSTEM, restrictReason);
+    }
+
+    @Override
+    public void restrictApp(@NonNull String packageName, int userId, int mainReason,
+            @SystemForcedReasons int restrictReason) {
+        if (mainReason != REASON_MAIN_FORCED_BY_SYSTEM
+                && mainReason != REASON_MAIN_FORCED_BY_USER) {
+            Slog.e(TAG, "Tried to restrict app " + packageName + " for an unsupported reason");
+            return;
+        }
         // If the package is not installed, don't allow the bucket to be set.
         if (!mInjector.isPackageInstalled(packageName, 0, userId)) {
             Slog.e(TAG, "Tried to restrict uninstalled app: " + packageName);
             return;
         }
 
-        final int reason = REASON_MAIN_FORCED_BY_SYSTEM | (REASON_SUB_MASK & restrictReason);
+        final int reason = (REASON_MAIN_MASK & mainReason) | (REASON_SUB_MASK & restrictReason);
         final long nowElapsed = mInjector.elapsedRealtime();
         final int bucket = mAllowRestrictedBucket ? STANDBY_BUCKET_RESTRICTED : STANDBY_BUCKET_RARE;
         setAppStandbyBucket(packageName, userId, bucket, reason, nowElapsed, false);

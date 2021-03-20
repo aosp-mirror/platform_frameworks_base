@@ -315,7 +315,8 @@ public class FingerprintService extends SystemService implements BiometricServic
                                     Slog.e(TAG, "Remote exception in negative button onClick()", e);
                                 }
                             })
-                    .setSensorId(props.sensorId)
+                    .setAllowedSensorIds(new ArrayList<>(
+                            Collections.singletonList(props.sensorId)))
                     .build();
 
             final BiometricPrompt.AuthenticationCallback promptCallback =
@@ -402,7 +403,7 @@ public class FingerprintService extends SystemService implements BiometricServic
         @Override // Binder call
         public void prepareForAuthentication(int sensorId, IBinder token, long operationId,
                 int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-                int cookie) {
+                int cookie, boolean allowBackgroundAuthentication) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -414,7 +415,7 @@ public class FingerprintService extends SystemService implements BiometricServic
             final boolean restricted = true; // BiometricPrompt is always restricted
             provider.scheduleAuthenticate(sensorId, token, operationId, userId, cookie,
                     new ClientMonitorCallbackConverter(sensorReceiver), opPackageName, restricted,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, false /* isKeyguard */);
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, allowBackgroundAuthentication);
         }
 
         @Override // Binder call

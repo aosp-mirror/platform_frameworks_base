@@ -33,8 +33,12 @@ public:
         SmoothStep,
     };
 
-    StretchEffect(const SkRect& area, const SkVector& direction, float maxStretchAmount)
-            : stretchArea(area), maxStretchAmount(maxStretchAmount), mStretchDirection(direction) {}
+    StretchEffect(const SkRect& area, const SkVector& direction, float maxStretchAmountX,
+                  float maxStretchAmountY)
+            : stretchArea(area)
+            , maxStretchAmountX(maxStretchAmountX)
+            , maxStretchAmountY(maxStretchAmountY)
+            , mStretchDirection(direction) {}
 
     StretchEffect() {}
 
@@ -50,7 +54,8 @@ public:
         this->stretchArea = other.stretchArea;
         this->mStretchDirection = other.mStretchDirection;
         this->mStretchFilter = nullptr;
-        this->maxStretchAmount = other.maxStretchAmount;
+        this->maxStretchAmountX = other.maxStretchAmountX;
+        this->maxStretchAmountY = other.maxStretchAmountY;
         return *this;
     }
 
@@ -67,13 +72,15 @@ public:
             return setEmpty();
         }
         stretchArea.join(other.stretchArea);
-        maxStretchAmount = std::max(maxStretchAmount, other.maxStretchAmount);
+        maxStretchAmountX = std::max(maxStretchAmountX, other.maxStretchAmountX);
+        maxStretchAmountY = std::max(maxStretchAmountY, other.maxStretchAmountY);
     }
 
     sk_sp<SkImageFilter> getImageFilter(const sk_sp<SkImage>& snapshotImage) const;
 
     SkRect stretchArea {0, 0, 0, 0};
-    float maxStretchAmount = 0;
+    float maxStretchAmountX = 0;
+    float maxStretchAmountY = 0;
 
     void setStretchDirection(const SkVector& direction) {
         mStretchFilter = nullptr;

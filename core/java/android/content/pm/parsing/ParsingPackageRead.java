@@ -37,6 +37,7 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -45,6 +46,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -193,6 +195,14 @@ public interface ParsingPackageRead extends Parcelable {
     List<FeatureInfo> getReqFeatures();
 
     /**
+     * @deprecated consider migrating to {@link #getUsesPermissions} which has
+     *             more parsed details, such as flags
+     */
+    @NonNull
+    @Deprecated
+    List<String> getRequestedPermissions();
+
+    /**
      * All the permissions declared. This is an effective set, and may include permissions
      * transformed from split/migrated permissions from previous versions, so may not be exactly
      * what the package declares in its manifest.
@@ -200,7 +210,7 @@ public interface ParsingPackageRead extends Parcelable {
      * @see R.styleable#AndroidManifestUsesPermission
      */
     @NonNull
-    List<String> getRequestedPermissions();
+    List<ParsedUsesPermission> getUsesPermissions();
 
     /**
      * Returns the properties set on the application

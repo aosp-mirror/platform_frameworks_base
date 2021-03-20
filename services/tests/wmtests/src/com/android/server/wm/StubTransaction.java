@@ -198,11 +198,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction setEarlyWakeup() {
-        return this;
-    }
-
-    @Override
     public SurfaceControl.Transaction setMetadata(SurfaceControl sc, int key, int data) {
         return this;
     }

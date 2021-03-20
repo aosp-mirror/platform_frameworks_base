@@ -57,8 +57,6 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUiEventLogger;
 
 import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
-import java.util.function.Consumer;
 
 /**
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
@@ -73,7 +71,6 @@ public class PipTouchHandler {
     // Allow PIP to resize to a slightly bigger state upon touch
     private boolean mEnableResize;
     private final Context mContext;
-    private final PipTaskOrganizer mPipTaskOrganizer;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final @NonNull PipBoundsState mPipBoundsState;
     private final PipUiEventLogger mPipUiEventLogger;
@@ -81,7 +78,6 @@ public class PipTouchHandler {
     private final ShellExecutor mMainExecutor;
 
     private PipResizeGestureHandler mPipResizeGestureHandler;
-    private WeakReference<Consumer<Rect>> mPipExclusionBoundsChangeListener;
 
     private final PhonePipMenuController mMenuController;
     private final AccessibilityManager mAccessibilityManager;
@@ -170,7 +166,6 @@ public class PipTouchHandler {
         mContext = context;
         mMainExecutor = mainExecutor;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
-        mPipTaskOrganizer = pipTaskOrganizer;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
         mMenuController = menuController;
@@ -289,11 +284,6 @@ public class PipTouchHandler {
             mPipDismissTargetHandler.cleanUpDismissTarget();
 
             mFloatingContentCoordinator.onContentRemoved(mMotionHelper);
-        }
-        // Reset exclusion to none.
-        if (mPipExclusionBoundsChangeListener != null
-                && mPipExclusionBoundsChangeListener.get() != null) {
-            mPipExclusionBoundsChangeListener.get().accept(new Rect());
         }
         mPipResizeGestureHandler.onActivityUnpinned();
     }
@@ -931,10 +921,6 @@ public class PipTouchHandler {
         }
 
         private void stashEndAction() {
-            if (mPipExclusionBoundsChangeListener != null
-                    && mPipExclusionBoundsChangeListener.get() != null) {
-                mPipExclusionBoundsChangeListener.get().accept(mPipBoundsState.getBounds());
-            }
             if (mPipBoundsState.getBounds().left < 0
                     && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT) {
                 mPipUiEventLogger.log(
@@ -953,11 +939,6 @@ public class PipTouchHandler {
                 // If the menu is not visible, then we can still be showing the activity for the
                 // dismiss overlay, so just finish it after the animation completes
                 mMenuController.hideMenu();
-            }
-            // Reset exclusion to none.
-            if (mPipExclusionBoundsChangeListener != null
-                    && mPipExclusionBoundsChangeListener.get() != null) {
-                mPipExclusionBoundsChangeListener.get().accept(new Rect());
             }
         }
 
@@ -980,13 +961,6 @@ public class PipTouchHandler {
 
             return stashFromFlingToEdge || stashFromDroppingOnEdge;
         }
-    }
-
-    void setPipExclusionBoundsChangeListener(Consumer<Rect> pipExclusionBoundsChangeListener) {
-        mPipExclusionBoundsChangeListener = new WeakReference<>(pipExclusionBoundsChangeListener);
-        pipExclusionBoundsChangeListener.accept(mPipTaskOrganizer.isInPip()
-                ? mPipBoundsState.getBounds() : new Rect());
-
     }
 
     /**

@@ -99,11 +99,6 @@ public class TransactionCompat {
         return this;
     }
 
-    @Deprecated
-    public TransactionCompat setEarlyWakeup() {
-        return this;
-    }
-
     public TransactionCompat setColor(SurfaceControlCompat surfaceControl, float[] color) {
         mTransaction.setColor(surfaceControl.mSurfaceControl, color);
         return this;
@@ -117,9 +112,5 @@ public class TransactionCompat {
     public static void setRelativeLayer(Transaction t, SurfaceControl surfaceControl,
             SurfaceControl relativeTo, int z) {
         t.setRelativeLayer(surfaceControl, relativeTo, z);
-    }
-
-    @Deprecated
-    public static void setEarlyWakeup(Transaction t) {
     }
 }
