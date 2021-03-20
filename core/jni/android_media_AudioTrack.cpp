@@ -1419,6 +1419,42 @@ static jint android_media_AudioTrack_getDualMonoMode(JNIEnv *env, jobject thiz,
     return nativeToJavaStatus(status);
 }
 
+static jint android_media_AudioTrack_getStartThresholdInFrames(JNIEnv *env, jobject thiz) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Unable to retrieve AudioTrack pointer for getStartThresholdInFrames()");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    const ssize_t result = lpTrack->getStartThresholdInFrames();
+    if (result <= 0) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
+                             "Internal error detected in getStartThresholdInFrames() = %zd",
+                             result);
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    return (jint)result; // this should be a positive value.
+}
+
+static jint android_media_AudioTrack_setStartThresholdInFrames(JNIEnv *env, jobject thiz,
+                                                               jint startThresholdInFrames) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Unable to retrieve AudioTrack pointer for setStartThresholdInFrames()");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    // non-positive values of startThresholdInFrames are not allowed by the Java layer.
+    const ssize_t result = lpTrack->setStartThresholdInFrames(startThresholdInFrames);
+    if (result <= 0) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
+                             "Internal error detected in setStartThresholdInFrames() = %zd",
+                             result);
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    return (jint)result; // this should be a positive value.
+}
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
@@ -1496,6 +1532,10 @@ static const JNINativeMethod gMethods[] = {
          (void *)android_media_AudioTrack_getAudioDescriptionMixLeveldB},
         {"native_set_dual_mono_mode", "(I)I", (void *)android_media_AudioTrack_setDualMonoMode},
         {"native_get_dual_mono_mode", "([I)I", (void *)android_media_AudioTrack_getDualMonoMode},
+        {"native_setStartThresholdInFrames", "(I)I",
+         (void *)android_media_AudioTrack_setStartThresholdInFrames},
+        {"native_getStartThresholdInFrames", "()I",
+         (void *)android_media_AudioTrack_getStartThresholdInFrames},
 };
 
 // field names found in android/media/AudioTrack.java
