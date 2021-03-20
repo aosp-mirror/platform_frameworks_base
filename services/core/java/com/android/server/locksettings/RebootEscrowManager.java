@@ -115,6 +115,7 @@ class RebootEscrowManager {
             ERROR_RETRY_COUNT_EXHAUSTED,
             ERROR_UNLOCK_ALL_USERS,
             ERROR_PROVIDER_MISMATCH,
+            ERROR_KEYSTORE_FAILURE,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface RebootEscrowErrorCode {
@@ -127,6 +128,7 @@ class RebootEscrowManager {
     static final int ERROR_RETRY_COUNT_EXHAUSTED = 4;
     static final int ERROR_UNLOCK_ALL_USERS = 5;
     static final int ERROR_PROVIDER_MISMATCH = 6;
+    static final int ERROR_KEYSTORE_FAILURE = 7;
 
     private @RebootEscrowErrorCode int mLoadEscrowDataErrorCode = ERROR_NONE;
 
@@ -471,6 +473,13 @@ class RebootEscrowManager {
             Slog.w(TAG,
                     "Had reboot escrow data for users, but RebootEscrowProvider is unavailable");
             mLoadEscrowDataErrorCode = ERROR_NO_PROVIDER;
+            return null;
+        }
+
+        // Server based RoR always need the decryption key from keystore.
+        if (rebootEscrowProvider.getType() == RebootEscrowProviderInterface.TYPE_SERVER_BASED
+                && kk == null) {
+            mLoadEscrowDataErrorCode = ERROR_KEYSTORE_FAILURE;
             return null;
         }
 
