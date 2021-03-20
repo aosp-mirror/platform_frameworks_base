@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.init
 
 import android.content.Context
-import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
@@ -132,11 +131,7 @@ class NotificationsControllerImpl @Inject constructor(
             entryManager.attach(notificationListener)
         }
 
-        val showPeopleSpace = Settings.Global.getInt(context.contentResolver,
-                Settings.Global.SHOW_PEOPLE_SPACE, 1)
-        if (showPeopleSpace == 1) {
-            peopleSpaceWidgetManager.attach(notificationListener)
-        }
+        peopleSpaceWidgetManager.attach(notificationListener)
     }
 
     override fun dump(

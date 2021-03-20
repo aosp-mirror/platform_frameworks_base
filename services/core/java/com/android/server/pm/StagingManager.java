@@ -214,7 +214,7 @@ public class StagingManager {
             newSigningDetails = ApkSignatureVerifier.verify(apexPath, minSignatureScheme);
         } catch (PackageParserException e) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Failed to parse APEX package " + apexPath, e);
+                    "Failed to parse APEX package " + apexPath + " : " + e, e);
         }
 
         // Get signing details of the existing package
@@ -232,7 +232,8 @@ public class StagingManager {
                 existingApexPkg.applicationInfo.sourceDir, SignatureSchemeVersion.JAR);
         } catch (PackageParserException e) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Failed to parse APEX package " + existingApexPkg.applicationInfo.sourceDir, e);
+                    "Failed to parse APEX package " + existingApexPkg.applicationInfo.sourceDir
+                            + " : " + e, e);
         }
 
         // Verify signing details for upgrade
@@ -291,7 +292,7 @@ public class StagingManager {
                 }
             } catch (PackageParserException e) {
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                        "Failed to parse APEX package " + apexInfo.modulePath, e);
+                        "Failed to parse APEX package " + apexInfo.modulePath + " : " + e, e);
             }
             final PackageInfo activePackage = mApexManager.getPackageInfo(packageInfo.packageName,
                     ApexManager.MATCH_ACTIVE_PACKAGE);

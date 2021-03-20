@@ -28,6 +28,7 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
@@ -355,7 +356,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
         mSensorProperties = new FingerprintSensorPropertiesInternal(context, sensorId,
                 Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,
-                sensorType, resetLockoutRequiresHardwareAuthToken);
+                new ArrayList<ComponentInfoInternal>() /* componentInfo */, sensorType,
+                resetLockoutRequiresHardwareAuthToken);
     }
 
     public static Fingerprint21 newInstance(@NonNull Context context, int sensorId, int strength,
@@ -609,7 +611,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter listener,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean isKeyguard) {
+            boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -618,7 +620,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     mContext, mLazyDaemon, token, listener, userId, operationId, restricted,
                     opPackageName, cookie, false /* requireConfirmation */,
                     mSensorProperties.sensorId, isStrongBiometric, statsClient,
-                    mTaskStackListener, mLockoutTracker, mUdfpsOverlayController, isKeyguard);
+                    mTaskStackListener, mLockoutTracker, mUdfpsOverlayController,
+                    allowBackgroundAuthentication);
             mScheduler.scheduleClientMonitor(client);
         });
     }

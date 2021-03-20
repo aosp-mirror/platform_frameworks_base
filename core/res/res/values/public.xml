@@ -3071,6 +3071,7 @@
     <public name="windowSplashScreenAnimatedIcon"/>
     <public name="windowSplashScreenAnimationDuration"/>
     <public name="windowSplashScreenBrandingImage"/>
+    <public name="windowSplashScreenIconBackgroundColor"/>
     <public name="splashScreenTheme" />
     <public name="maxResizeWidth" />
     <public name="maxResizeHeight" />

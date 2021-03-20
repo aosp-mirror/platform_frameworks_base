@@ -16,25 +16,75 @@
 
 package android.hardware.face;
 
+import android.annotation.IntDef;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Container for face sensor properties.
  * @hide
  */
 public class FaceSensorProperties extends SensorProperties {
+    /**
+     * @hide
+     */
+    public static final int TYPE_UNKNOWN = 0;
+
+    /**
+     * @hide
+     */
+    public static final int TYPE_RGB = 1;
+
+    /**
+     * @hide
+     */
+    public static final int TYPE_IR = 2;
+
+    /**
+     * @hide
+     */
+    @IntDef({TYPE_UNKNOWN,
+            TYPE_RGB,
+            TYPE_IR})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SensorType {}
+
+    @FaceSensorProperties.SensorType
+    final int mSensorType;
 
     /**
      * @hide
      */
     public static FaceSensorProperties from(FaceSensorPropertiesInternal internalProp) {
-        return new FaceSensorProperties(internalProp.sensorId, internalProp.sensorStrength);
+        final List<ComponentInfo> componentInfo = new ArrayList<>();
+        for (ComponentInfoInternal internalComp : internalProp.componentInfo) {
+            componentInfo.add(ComponentInfo.from(internalComp));
+        }
+        return new FaceSensorProperties(internalProp.sensorId,
+                internalProp.sensorStrength,
+                componentInfo,
+                internalProp.sensorType);
     }
     /**
      * @hide
      */
-    public FaceSensorProperties(int sensorId, int sensorStrength) {
-        super(sensorId, sensorStrength);
+    public FaceSensorProperties(int sensorId, int sensorStrength,
+            List<ComponentInfo> componentInfo, @FaceSensorProperties.SensorType int sensorType) {
+        super(sensorId, sensorStrength, componentInfo);
+        mSensorType = sensorType;
     }
 
+    /**
+     * @hide
+     * @return The sensor's type.
+     */
+    @FaceSensorProperties.SensorType
+    public int getSensorType() {
+        return mSensorType;
+    }
 }

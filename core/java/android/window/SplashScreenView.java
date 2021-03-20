@@ -17,8 +17,6 @@ package android.window;
 
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
-import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,7 +27,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
@@ -46,6 +43,8 @@ import android.widget.FrameLayout;
 
 import com.android.internal.R;
 import com.android.internal.policy.DecorView;
+
+import java.util.function.Consumer;
 
 /**
  * <p>The view which allows an activity to customize its splash screen exit animation.</p>
@@ -69,6 +68,7 @@ public final class SplashScreenView extends FrameLayout {
 
     private boolean mNotCopyable;
     private int mInitBackgroundColor;
+    private int mInitIconBackgroundColor;
     private View mIconView;
     private Bitmap mParceledIconBitmap;
     private View mBrandingImageView;
@@ -76,8 +76,6 @@ public final class SplashScreenView extends FrameLayout {
     private long mIconAnimationDuration;
     private long mIconAnimationStart;
 
-    private Animatable mAnimatableIcon;
-    private ValueAnimator mAnimator;
     // The host activity when transfer view to it.
     private Activity mHostActivity;
     // cache original window and status
@@ -94,6 +92,7 @@ public final class SplashScreenView extends FrameLayout {
         private final Context mContext;
         private int mIconSize;
         private @ColorInt int mBackgroundColor;
+        private @ColorInt int mIconBackground;
         private Bitmap mParceledIconBitmap;
         private Drawable mIconDrawable;
         private int mBrandingImageWidth;
@@ -114,6 +113,7 @@ public final class SplashScreenView extends FrameLayout {
         public Builder createFromParcel(SplashScreenViewParcelable parcelable) {
             mIconSize = parcelable.getIconSize();
             mBackgroundColor = parcelable.getBackgroundColor();
+            mIconBackground = parcelable.getIconBackground();
             if (parcelable.mIconBitmap != null) {
                 mIconDrawable = new BitmapDrawable(mContext.getResources(), parcelable.mIconBitmap);
                 mParceledIconBitmap = parcelable.mIconBitmap;
@@ -154,6 +154,14 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         /**
+         * Set the background color for the icon.
+         */
+        public Builder setIconBackground(int color) {
+            mIconBackground = color;
+            return this;
+        }
+
+        /**
          * Set the animation duration if icon is animatable.
          */
         public Builder setAnimationDuration(int duration) {
@@ -179,6 +187,7 @@ public final class SplashScreenView extends FrameLayout {
             final SplashScreenView view = (SplashScreenView)
                     layoutInflater.inflate(R.layout.splash_screen_view, null, false);
             view.mInitBackgroundColor = mBackgroundColor;
+            view.mInitIconBackgroundColor = mIconBackground;
             view.setBackgroundColor(mBackgroundColor);
             view.mIconView = view.findViewById(R.id.splashscreen_icon_view);
             view.mBrandingImageView = view.findViewById(R.id.splashscreen_branding_view);
@@ -266,43 +275,15 @@ public final class SplashScreenView extends FrameLayout {
     }
 
     void initIconAnimation(Drawable iconDrawable, long duration) {
-        if (iconDrawable instanceof Animatable) {
-            mAnimatableIcon = (Animatable) iconDrawable;
-            mAnimator = ValueAnimator.ofInt(0, 1);
-            mAnimator.setDuration(duration);
-            mAnimator.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    mIconAnimationStart = SystemClock.uptimeMillis();
-                    mAnimatableIcon.start();
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mAnimatableIcon.stop();
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                    mAnimatableIcon.stop();
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {
-                    // do not repeat
-                    mAnimatableIcon.stop();
-                }
-            });
+        if (!(iconDrawable instanceof SplashscreenIconDrawable)) {
+            return;
         }
+        SplashscreenIconDrawable aniDrawable = (SplashscreenIconDrawable) iconDrawable;
+        aniDrawable.prepareAnimate(duration, this::animationStartCallback);
     }
 
-    /**
-     * @hide
-     */
-    public void startIntroAnimation() {
-        if (mAnimatableIcon != null) {
-            mAnimator.start();
-        }
+    private void animationStartCallback(long startAt) {
+        mIconAnimationStart = startAt;
     }
 
     /**
@@ -401,11 +382,37 @@ public final class SplashScreenView extends FrameLayout {
     }
 
     /**
+     * Get the icon background color
+     * @hide
+     */
+    @TestApi
+    public @ColorInt int getIconBackgroundColor() {
+        return mInitIconBackgroundColor;
+    }
+
+    /**
      * Get the initial background color of this view.
      * @hide
      */
     public @ColorInt int getInitBackgroundColor() {
         return mInitBackgroundColor;
+    }
+
+    /**
+     * A lightweight Drawable object to make the view drawing faster and keep this
+     * drawable masked by config_icon_mask.
+     * @hide
+     */
+    public abstract static class SplashscreenIconDrawable extends Drawable {
+        /**
+         * Prepare the animation if this drawable also be animatable.
+         * @param duration The animation duration.
+         * @param startListener The callback listener used to receive the start of the animation.
+         * @return true if this drawable object can also be animated and it can be played now.
+         */
+        protected boolean prepareAnimate(long duration, Consumer<Long> startListener) {
+            return false;
+        }
     }
 
     /**
@@ -415,6 +422,7 @@ public final class SplashScreenView extends FrameLayout {
     public static class SplashScreenViewParcelable implements Parcelable {
         private int mIconSize;
         private int mBackgroundColor;
+        private int mIconBackground;
 
         private Bitmap mIconBitmap;
         private int mBrandingWidth;
@@ -428,7 +436,7 @@ public final class SplashScreenView extends FrameLayout {
             ViewGroup.LayoutParams params = view.getIconView().getLayoutParams();
             mIconSize = params.height;
             mBackgroundColor = view.getInitBackgroundColor();
-
+            mIconBackground = view.getIconBackgroundColor();
             mIconBitmap = copyDrawable(view.getIconView().getBackground());
             mBrandingBitmap = copyDrawable(view.getBrandingView().getBackground());
             params = view.getBrandingView().getLayoutParams();
@@ -469,6 +477,7 @@ public final class SplashScreenView extends FrameLayout {
             mBrandingBitmap = source.readTypedObject(Bitmap.CREATOR);
             mIconAnimationStart = source.readLong();
             mIconAnimationDuration = source.readLong();
+            mIconBackground = source.readInt();
         }
 
         @Override
@@ -486,6 +495,7 @@ public final class SplashScreenView extends FrameLayout {
             dest.writeTypedObject(mBrandingBitmap, flags);
             dest.writeLong(mIconAnimationStart);
             dest.writeLong(mIconAnimationDuration);
+            dest.writeInt(mIconBackground);
         }
 
         public static final @NonNull Parcelable.Creator<SplashScreenViewParcelable> CREATOR =
@@ -518,6 +528,10 @@ public final class SplashScreenView extends FrameLayout {
 
         int getBackgroundColor() {
             return mBackgroundColor;
+        }
+
+        int getIconBackground() {
+            return mIconBackground;
         }
     }
 }

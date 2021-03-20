@@ -1687,6 +1687,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void testIsSnapshotCompatible() {
         final ActivityRecord activity = createActivityWithTask();
         final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
+                .setTopActivityComponent(activity.mActivityComponent)
                 .setRotation(activity.getWindowConfiguration().getRotation())
                 .build();
 
@@ -1694,6 +1695,26 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         setRotatedScreenOrientationSilently(activity);
 
+        assertFalse(activity.isSnapshotCompatible(snapshot));
+    }
+
+    /**
+     * Test that the snapshot should be obsoleted if the top activity changed.
+     */
+    @Test
+    public void testIsSnapshotCompatibleTopActivityChanged() {
+        final ActivityRecord activity = createActivityWithTask();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
+                .setTask(activity.getTask())
+                .setOnTop(true)
+                .build();
+        final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
+                .setTopActivityComponent(secondActivity.mActivityComponent)
+                .build();
+
+        assertTrue(secondActivity.isSnapshotCompatible(snapshot));
+
+        // Emulate the top activity changed.
         assertFalse(activity.isSnapshotCompatible(snapshot));
     }
 

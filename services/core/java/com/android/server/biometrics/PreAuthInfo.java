@@ -23,6 +23,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -112,7 +113,8 @@ class PreAuthInfo {
 
                 @AuthenticatorStatus int status = getStatusForBiometricAuthenticator(
                         devicePolicyManager, settingObserver, sensor, userId, opPackageName,
-                        checkDevicePolicyManager, requestedStrength, promptInfo.getSensorId());
+                        checkDevicePolicyManager, requestedStrength,
+                        promptInfo.getAllowedSensorIds());
 
                 Slog.d(TAG, "Package: " + opPackageName
                         + " Sensor ID: " + sensor.id
@@ -142,9 +144,10 @@ class PreAuthInfo {
             DevicePolicyManager devicePolicyManager,
             BiometricService.SettingObserver settingObserver,
             BiometricSensor sensor, int userId, String opPackageName,
-            boolean checkDevicePolicyManager, int requestedStrength, int requestedSensorId) {
+            boolean checkDevicePolicyManager, int requestedStrength,
+            @NonNull List<Integer> requestedSensorIds) {
 
-        if (requestedSensorId != BiometricManager.SENSOR_ID_ANY && sensor.id != requestedSensorId) {
+        if (!requestedSensorIds.isEmpty() && !requestedSensorIds.contains(sensor.id)) {
             return BIOMETRIC_NO_HARDWARE;
         }
 

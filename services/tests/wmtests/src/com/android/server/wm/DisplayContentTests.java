@@ -119,6 +119,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
+import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
@@ -1608,6 +1609,54 @@ public class DisplayContentTests extends WindowTestsBase {
 
         mWm.stopFreezingDisplayLocked();
         assertFalse(mWm.mDisplayFrozen);
+    }
+
+    @Test
+    public void testShellTransitRotation() {
+        DisplayContent dc = createNewDisplay();
+
+        // Set-up mock shell transitions
+        final TestTransitionPlayer testPlayer = new TestTransitionPlayer(
+                mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
+        mAtm.getTransitionController().registerTransitionPlayer(testPlayer);
+
+        final DisplayRotation dr = dc.getDisplayRotation();
+        doCallRealMethod().when(dr).updateRotationUnchecked(anyBoolean());
+        // Rotate 180 degree so the display doesn't have configuration change. This condition is
+        // used for the later verification of stop-freezing (without setting mWaitingForConfig).
+        doReturn((dr.getRotation() + 2) % 4).when(dr).rotationForOrientation(anyInt(), anyInt());
+        mWm.mDisplayRotationController =
+                new IDisplayWindowRotationController.Stub() {
+                    @Override
+                    public void onRotateDisplay(int displayId, int fromRotation, int toRotation,
+                            IDisplayWindowRotationCallback callback) {
+                        try {
+                            callback.continueRotateDisplay(toRotation, null);
+                        } catch (RemoteException e) {
+                            assertTrue(false);
+                        }
+                    }
+                };
+
+        // kill any existing rotation animation (vestigial from test setup).
+        dc.setRotationAnimation(null);
+
+        final int origRot = dc.getConfiguration().windowConfiguration.getRotation();
+
+        mWm.updateRotation(true /* alwaysSendConfiguration */, false /* forceRelayout */);
+        // Should create a transition request without performing rotation
+        assertNotNull(testPlayer.mLastRequest);
+        assertEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
+
+        // Once transition starts, rotation is applied and transition shows DC rotating.
+        testPlayer.start();
+        assertNotEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
+        assertNotNull(testPlayer.mLastReady);
+        assertEquals(dc, DisplayRotation.getDisplayFromTransition(testPlayer.mLastTransit));
+        WindowContainerToken dcToken = dc.mRemoteToken.toWindowContainerToken();
+        assertNotEquals(testPlayer.mLastReady.getChange(dcToken).getEndRotation(),
+                testPlayer.mLastReady.getChange(dcToken).getStartRotation());
+        testPlayer.finish();
     }
 
     @Test

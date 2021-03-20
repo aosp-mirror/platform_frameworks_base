@@ -44,8 +44,6 @@ import android.telephony.ims.feature.RcsFeature;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -116,31 +114,17 @@ public class CarrierConfigManager {
      */
     public static final int USSD_OVER_IMS_ONLY       = 3;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CARRIER_NR_AVAILABILITY_" }, value = {
-            CARRIER_NR_AVAILABILITY_NONE,
-            CARRIER_NR_AVAILABILITY_NSA,
-            CARRIER_NR_AVAILABILITY_SA,
-    })
-    public @interface DeviceNrCapability {}
-
-    /**
-     * Indicates CARRIER_NR_AVAILABILITY_NONE determine that the carrier does not enable 5G NR.
-     */
-    public static final int CARRIER_NR_AVAILABILITY_NONE = 0;
-
     /**
      * Indicates CARRIER_NR_AVAILABILITY_NSA determine that the carrier enable the non-standalone
      * (NSA) mode of 5G NR.
      */
-    public static final int CARRIER_NR_AVAILABILITY_NSA = 1 << 0;
+    public static final int CARRIER_NR_AVAILABILITY_NSA = 1;
 
     /**
      * Indicates CARRIER_NR_AVAILABILITY_SA determine that the carrier enable the standalone (SA)
      * mode of 5G NR.
      */
-    public static final int CARRIER_NR_AVAILABILITY_SA = 1 << 1;
+    public static final int CARRIER_NR_AVAILABILITY_SA = 2;
 
     private final Context mContext;
 
@@ -1882,23 +1866,20 @@ public class CarrierConfigManager {
             "show_precise_failed_cause_bool";
 
     /**
-     * Bit-field integer to determine whether the carrier enable the non-standalone (NSA) mode of
-     * 5G NR, standalone (SA) mode of 5G NR
+     * A list of carrier nr availability is used to determine whether the carrier enable the
+     * non-standalone (NSA) mode of 5G NR, standalone (SA) mode of 5G NR
      *
-     * <UL>
-     *  <LI>CARRIER_NR_AVAILABILITY_NONE: non-NR = 0 </LI>
-     *  <LI>CARRIER_NR_AVAILABILITY_NSA: NSA = 1 << 0</LI>
-     *  <LI>CARRIER_NR_AVAILABILITY_SA: SA = 1 << 1</LI>
-     * </UL>
-     * <p> The value of this key must be bitwise OR of
-     * {@link #CARRIER_NR_AVAILABILITY_NONE}, {@link #CARRIER_NR_AVAILABILITY_NSA},
-     * {@link #CARRIER_NR_AVAILABILITY_SA}.
+     * <p> The value of list is
+     * {@link #CARRIER_NR_AVAILABILITY_NSA}, or {@link #CARRIER_NR_AVAILABILITY_SA}.
      *
-     * <p> For example, if both NSA and SA are used, the value of key is 3 (1 << 0 | 1 << 1).
-     * If the carrier doesn't support 5G NR, the value of key is 0 (non-NR).
-     * If the key is invalid or not configured, a default value 3 (NSA|SA = 3) will apply.
+     * <p> For example, if both NSA and SA are used, the list value is {
+     * {@link #CARRIER_NR_AVAILABILITY_NSA},{@link #CARRIER_NR_AVAILABILITY_SA}}.
+     * If the carrier doesn't support 5G NR, the value is the empty array.
+     * If the key is invalid or not configured, the default value {
+     * {@link #CARRIER_NR_AVAILABILITY_NSA},{@link #CARRIER_NR_AVAILABILITY_SA}} will apply.
      */
-    public static final String KEY_CARRIER_NR_AVAILABILITY_INT = "carrier_nr_availability_int";
+    public static final String KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY =
+            "carrier_nr_availabilities_int_array";
 
     /**
      * Boolean to decide whether LTE is enabled.
@@ -3784,13 +3765,64 @@ public class CarrierConfigManager {
         /** Prefix of all ImsServiceEntitlement.KEY_* constants. */
         public static final String KEY_PREFIX = "imsserviceentitlement.";
 
-        /** The address of the entitlement configuration server. */
+        /**
+         * The address of the entitlement configuration server.
+         *
+         * Reference: GSMA TS.43-v5, section 2.1 Default Entitlement Configuration Server.
+         */
         public static final String KEY_ENTITLEMENT_SERVER_URL_STRING =
                 KEY_PREFIX + "entitlement_server_url_string";
+
+        /**
+         * For some carriers, end-users may be presented with a web portal of the carrier before
+         * being allowed to use the VoWiFi service.
+         * To support this feature, the app hosts a {@link android.webkit.WebView} in the foreground
+         * VoWiFi entitlement configuration flow to show the web portal.
+         *
+         * {@code true} - show the VoWiFi portal in a webview.
+         *
+         * Note: this is effective only if the {@link #KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING}
+         * is set to this app.
+         *
+         * Reference: GSMA TS.43-v5, section 3, VoWiFi entitlement configuration.
+         */
+        public static final String KEY_SHOW_VOWIFI_WEBVIEW_BOOL =
+                KEY_PREFIX + "show_vowifi_webview_bool";
+
+        /**
+         * For some carriers, the network is not provisioned by default to support
+         * IMS (VoLTE/VoWiFi/SMSoIP) service for all end users. Some type of network-side
+         * provisioning must then take place before offering the IMS service to the end-user.
+         *
+         * {@code true} - need this ImsServiceEntitlement app to do IMS (VoLTE/VoWiFi/SMSoIP)
+         * provisioning in the background before offering the IMS service to the end-user.
+         *
+         * Note: this is effective only if the carrier needs IMS provisioning, i.e.
+         * {@link #KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL} is set to true.
+         *
+         * Reference: GSMA TS.43-v5, section 3 - 5, VoWiFi/VoLTE/SMSoIP entitlement configuration.
+         */
+        public static final String KEY_IMS_PROVISIONING_BOOL = KEY_PREFIX + "ims_provisioning_bool";
+
+        /**
+         * The FCM sender ID for the carrier.
+         * Used to trigger a carrier network requested entitlement configuration
+         * via Firebase Cloud Messaging (FCM). Do not set if the carrier doesn't use FCM for network
+         * requested entitlement configuration.
+         *
+         * Reference: GSMA TS.43-v5, section 2.4, Network Requested Entitlement Configuration.
+         *
+         * @see <a href="https://firebase.google.com/docs/cloud-messaging/concept-options#senderid">
+         *     About FCM messages - Credentials</a>
+         */
+        public static final String KEY_FCM_SENDER_ID_STRING = KEY_PREFIX + "fcm_sender_id_string";
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putString(KEY_ENTITLEMENT_SERVER_URL_STRING, "");
+            defaults.putString(KEY_FCM_SENDER_ID_STRING, "");
+            defaults.putBoolean(KEY_SHOW_VOWIFI_WEBVIEW_BOOL, false);
+            defaults.putBoolean(KEY_IMS_PROVISIONING_BOOL, false);
             return defaults;
         }
     }
@@ -5199,8 +5231,8 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
-        sDefaults.putInt(KEY_CARRIER_NR_AVAILABILITY_INT,
-                CARRIER_NR_AVAILABILITY_NSA | CARRIER_NR_AVAILABILITY_SA);
+        sDefaults.putIntArray(KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
+                new int[]{CARRIER_NR_AVAILABILITY_NSA, CARRIER_NR_AVAILABILITY_SA});
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);

@@ -96,6 +96,17 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         };
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getMode() == TRANSIT_CHANGE) {
+                // No default animation for this, so just update bounds/position.
+                t.setPosition(change.getLeash(),
+                        change.getEndAbsBounds().left - change.getEndRelOffset().x,
+                        change.getEndAbsBounds().top - change.getEndRelOffset().y);
+                if (change.getTaskInfo() != null) {
+                    // Skip non-tasks since those usually have null bounds.
+                    t.setWindowCrop(change.getLeash(),
+                            change.getEndAbsBounds().width(), change.getEndAbsBounds().height());
+                }
+            }
 
             // Don't animate anything that isn't independent.
             if (!TransitionInfo.isIndependent(change, info)) continue;

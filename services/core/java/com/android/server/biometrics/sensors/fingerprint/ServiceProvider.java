@@ -96,7 +96,8 @@ public interface ServiceProvider {
 
     void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, boolean restricted, int statsClient, boolean isKeyguard);
+            @NonNull String opPackageName, boolean restricted, int statsClient,
+            boolean allowBackgroundAuthentication);
 
     void startPreparedClient(int sensorId, int cookie);
 

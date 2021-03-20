@@ -59,7 +59,7 @@ interface IFaceService {
     // startPreparedClient().
     void prepareForAuthentication(int sensorId, boolean requireConfirmation, IBinder token, long operationId,
             int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-            int cookie);
+            int cookie, boolean allowBackgroundAuthentication);
 
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int sensorId, int cookie);

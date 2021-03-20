@@ -55,7 +55,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Nullable private final TaskStackListener mTaskStackListener;
     private final LockoutTracker mLockoutTracker;
     private final boolean mIsRestricted;
-    private final boolean mIsKeyguard;
+    private final boolean mAllowBackgroundAuthentication;
 
     protected final long mOperationId;
 
@@ -68,7 +68,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             int targetUserId, long operationId, boolean restricted, @NonNull String owner,
             int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
             int statsModality, int statsClient, @Nullable TaskStackListener taskStackListener,
-            @NonNull LockoutTracker lockoutTracker, boolean isKeyguard) {
+            @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
@@ -79,7 +79,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
         mIsRestricted = restricted;
-        mIsKeyguard = isKeyguard;
+        mAllowBackgroundAuthentication = allowBackgroundAuthentication;
     }
 
     public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
@@ -120,7 +120,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     }
 
     public boolean isKeyguard() {
-        return mIsKeyguard;
+        return Utils.isKeyguard(getContext(), getOwnerString());
     }
 
     @Override
@@ -152,9 +152,15 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 pm.incrementAuthForUser(getTargetUserId(), authenticated);
             }
 
+            if (mAllowBackgroundAuthentication) {
+                Slog.w(TAG, "Allowing background authentication,"
+                        + " this is allowed only for platform or test invocations");
+            }
+
             // Ensure authentication only succeeds if the client activity is on top.
             boolean isBackgroundAuth = false;
-            if (authenticated && !Utils.isKeyguard(getContext(), getOwnerString())
+            if (!mAllowBackgroundAuthentication && authenticated
+                    && !Utils.isKeyguard(getContext(), getOwnerString())
                     && !Utils.isSystem(getContext(), getOwnerString())) {
                 final List<ActivityManager.RunningTaskInfo> tasks =
                         mActivityTaskManager.getTasks(1);
