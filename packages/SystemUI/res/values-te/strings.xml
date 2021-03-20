@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"రద్దు చేయి"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"షేర్ చేయి"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"స్క్రీన్ రికార్డ్ రద్దు చేయబడింది"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"స్క్రీన్ రికార్డింగ్ సేవ్ చేయబడింది"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"చూడటానికి ట్యాప్ చేయండి"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"స్క్రీన్ రికార్డింగ్‌ని తొలగిస్తున్నప్పుడు ఎర్రర్ ఏర్పడింది"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"అనుమతులను పొందడం విఫలమైంది"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"స్క్రీన్ రికార్డింగ్ ప్రారంభించడంలో ఎర్రర్ ఏర్పడింది"</string>
@@ -357,11 +355,10 @@
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"సెట్టింగ్‌లు"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"సమయం"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"నేను"</string>
-    <string name="quick_settings_user_title" msgid="8673045967216204537">"వినియోగదారు"</string>
+    <string name="quick_settings_user_title" msgid="8673045967216204537">"యూజర్"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"కొత్త వినియోగదారు"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"ఇంటర్నెట్"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"విమాన-సురక్షితం"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"నెట్‌వర్క్‌లు అందుబాటులో ఉన్నాయి"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"నెట్‌వర్క్‌లు అందుబాటులో లేవు"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"కనెక్ట్ చేయబడలేదు"</string>
@@ -468,13 +465,12 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"వినియోగదారుని మార్చు, ప్రస్తుత వినియోగదారు <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"ప్రస్తుత వినియోగదారు <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"ప్రొఫైల్‌ని చూపు"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"వినియోగదారుని జోడించండి"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"యూజర్‌ను జోడించండి"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"కొత్త వినియోగదారు"</string>
-    <string name="guest_exit_button" msgid="3059840571760915762">"గెస్ట్ సెషన్‌ను ముగించు"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"అతిథిని తీసివేయాలా?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"గెస్ట్‌ను తీసివేయాలా?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"తీసివేయి"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"పునఃస్వాగతం, అతిథి!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"గెస్ట్‌కు తిరిగి స్వాగతం!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించు"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
@@ -484,8 +480,8 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"వినియోగదారుని లాగ్ అవుట్ చేయండి"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ప్రస్తుత వినియోగదారును లాగ్ అవుట్ చేయండి"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"వినియోగదారుని లాగ్ అవుట్ చేయి"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"కొత్త వినియోగదారుని జోడించాలా?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"మీరు కొత్త వినియోగదారుని జోడించినప్పుడు, ఆ వ్యక్తి తన స్థలాన్ని సెటప్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగతా అందరు వినియోగదారుల కోసం అనువర్తనాలను నవీకరించగలరు."</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"కొత్త యూజర్‌ను జోడించాలా?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"ఒక కొత్త యూజర్‌ను మీరు జోడించినప్పుడు, ఆ వ్యక్తి తన స్పేస్‌ను సెటప్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగతా అందరు యూజర్‌ల కోసం యాప్‌లను అప్‌డేట్ చేయగలరు."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"వినియోగదారు పరిమితిని చేరుకున్నారు"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">మీరు <xliff:g id="COUNT">%d</xliff:g> వినియోగదారుల వరకు జోడించవచ్చు.</item>
@@ -519,6 +515,8 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ఈ పరికరాన్ని మీ తల్లి/తండ్రి మేనేజ్ చేస్తున్నారు"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ఈ పరికరం మీ సంస్థకు చెందినది, కాబట్టి అది నెట్‌వర్క్ ట్రాఫిక్‌ను పర్యవేక్షించవచ్చు"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"మీ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది, కాబట్టి అది నెట్‌వర్క్ ట్రాఫిక్‌ను పర్యవేక్షించవచ్చు"</string>
+    <!-- no translation found for quick_settings_financed_disclosure_named_management (2307703784594859524) -->
+    <skip />
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ఈ పరికరం మీ సంస్థకు చెందినది, ఇది <xliff:g id="VPN_APP">%1$s</xliff:g>కు కనెక్ట్ అయి ఉంది"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది, ఇది <xliff:g id="VPN_APP">%2$s</xliff:g>కు కనెక్ట్ అయి ఉంది"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
@@ -532,6 +530,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"మీ వర్క్ ప్రొఫైల్ <xliff:g id="VPN_APP">%1$s</xliff:g>కు కనెక్ట్ చేయబడింది"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"<xliff:g id="VPN_APP">%1$s</xliff:g>కు మీ వ్యక్తిగత ప్రొఫైల్ కనెక్ట్ చేయబడింది"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ఈ పరికరం <xliff:g id="VPN_APP">%1$s</xliff:g>కు కనెక్ట్ అయి ఉంది"</string>
+    <!-- no translation found for monitoring_title_financed_device (3659962357973919387) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"పరికర నిర్వహణ"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"ప్రొఫైల్ పర్యవేక్షణ"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"నెట్‌వర్క్ పర్యవేక్షణ"</string>
@@ -543,6 +543,8 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"విధానాలను వీక్షించండి"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"నియంత్రణలను చూడండి"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది.\n\nసెట్టింగ్‌లను, కార్పొరేట్ యాక్సెస్‌ను, యాప్‌లను, మీ పరికరానికి సంబంధించిన డేటాను, అలాగే మీ పరికరం యొక్క లొకేషన్ సమాచారాన్ని మీ IT అడ్మిన్ పర్యవేక్షించగలరు, మేనేజ్ చేయగలరు.\n\nమరింత సమాచారం కోసం, మీ IT అడ్మిన్‌ను సంప్రదించండి."</string>
+    <!-- no translation found for monitoring_financed_description_named_management (6108439201399938668) -->
+    <skip />
     <string name="monitoring_description_management" msgid="4308879039175729014">"ఈ పరికరం మీ సంస్థకు చెందినది.\n\nసెట్టింగ్‌లను, కార్పొరేట్ యాక్సెస్‌ను, యాప్‌లను, మీ పరికరానికి సంబంధించిన డేటాను, అలాగే మీ పరికరం యొక్క లొకేషన్ సమాచారాన్ని మీ IT అడ్మిన్ పర్యవేక్షించగలరు, మేనేజ్ చేయగలరు.\n\nమరింత సమాచారం కోసం, మీ IT అడ్మిన్‌ను సంప్రదించండి."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ఈ పరికరంలో మీ సంస్థ ఒక ప్రమాణపత్ర అధికారాన్ని ఇన్‌స్టాల్ చేసింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"మీ కార్యాలయ ప్రొఫైల్‌లో మీ సంస్థ ఒక ప్రమాణపత్ర అధికారాన్ని ఇన్‌స్టాల్ చేసింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
@@ -653,6 +655,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"డెమో మోడ్ చూపు"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ఈథర్‌నెట్"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"అలారం"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"కార్యాలయ ప్రొఫైల్‌"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ఎయిర్‌ప్లేన్ మోడ్"</string>
     <string name="add_tile" msgid="6239678623873086686">"టైల్‌ను జోడించండి"</string>
@@ -899,11 +905,14 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"శీఘ్ర సెట్టింగ్‌లను మూసివేయండి."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"అలారం సెట్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> వలె సైన్ ఇన్ చేసారు"</string>
+    <!-- no translation found for accessibility_quick_settings_choose_user_action (4554388498186576087) -->
+    <skip />
     <string name="data_connection_no_internet" msgid="691058178914184544">"ఇంటర్నెట్ లేదు"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"వివరాలను తెరవండి."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g> కారణంగా అందుబాటులో లేదు"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> సెట్టింగ్‌లను తెరవండి."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"సెట్టింగ్‌ల క్రమాన్ని సవరించండి."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"పవర్ మెనూ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"లాక్ స్క్రీన్"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"వేడెక్కినందుకు ఫోన్ ఆఫ్ చేయబడింది"</string>
@@ -1011,9 +1020,13 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ఎడమవైపుగా జరపండి"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"కుడివైపుగా జరపండి"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"మాగ్నిఫికేషన్ స్విచ్"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"స్క్రీన్ మొత్తాన్ని మాగ్నిఫై చేయండి"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ఫుల్ స్క్రీన్‌ను మ్యాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"స్క్రీన్‌లో భాగాన్ని మాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"స్విచ్ చేయి"</string>
+    <!-- no translation found for accessibility_floating_button_migration_tooltip (4431046858918714564) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_docking_tooltip (6814897496767461517) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"పరికరం నియంత్రణలు"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"మీ కనెక్ట్ అయిన పరికరాలకు నియంత్రణలను జోడించండి"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"పరికరం నియంత్రణలను సెటప్ చేయడం"</string>
@@ -1081,6 +1094,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"కొత్త పరికరాన్ని పెయిర్ చేయండి"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"బిల్డ్ నంబర్"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"బిల్డ్ నంబర్, క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది."</string>
+    <string name="basic_status" msgid="2315371112182658176">"సంభాషణను తెరవండి"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"సంభాషణ విడ్జెట్‌లు"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"దీనిని మీ మొదటి స్క్రీన్‌కు జోడించడానికి సంభాషణను ట్యాప్ చేయండి"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> క్రితం"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> కంటే ముందు"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> క్రితం"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"పుట్టినరోజు"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"పుట్టినరోజు వస్తోంది"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"వార్షికోత్సవం"</string>
+    <string name="location_status" msgid="1294990572202541812">"లొకేషన్ షేరింగ్"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"కొత్త కథనం"</string>
+    <string name="video_status" msgid="4548544654316843225">"చూస్తున్నారు"</string>
+    <string name="audio_status" msgid="4237055636967709208">"వినడం"</string>
+    <string name="game_status" msgid="1340694320630973259">"ఆడుతున్నారు"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"ఫ్రెండ్స్"</string>
+    <string name="empty_status" msgid="5938893404951307749">"రాత్రి చాట్ చేద్దాం!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"మిస్డ్ కాల్"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"ఇటీవలి మెసేజ్‌లు, మిస్డ్ కాల్‌లు, అలాగే స్టేటస్ అప్‌డేట్‌లను చూడండి"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"సంభాషణ"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"మీ బ్యాటరీ మీటర్‌ను చదవడంలో సమస్య"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"మరింత సమాచారం కోసం ట్యాప్ చేయండి"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"అలారం సెట్ చేయలేదు"</string>
 </resources>
