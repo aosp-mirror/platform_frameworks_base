@@ -219,6 +219,7 @@ public class BackupEligibilityRulesTest {
     }
 
     @Test
+    @EnableCompatChanges({BackupEligibilityRules.IGNORE_ALLOW_BACKUP_IN_D2D})
     public void appIsEligibleForBackup_backupNotAllowedAndInMigration_returnsTrue()
             throws Exception {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
@@ -235,7 +236,7 @@ public class BackupEligibilityRulesTest {
     public void appIsEligibleForBackup_backupNotAllowedForSystemAppAndInMigration_returnsFalse()
             throws Exception {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.SYSTEM_UID,
-                /* flags */ 0, CUSTOM_BACKUP_AGENT_NAME);
+                ApplicationInfo.FLAG_SYSTEM, CUSTOM_BACKUP_AGENT_NAME);
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
                 OperationType.MIGRATION);
         boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
@@ -478,34 +479,6 @@ public class BackupEligibilityRulesTest {
     }
 
     @Test
-    public void appGetsFullBackup_withCustomBackupAgentAndWithoutFullBackupOnlyFlagAndInMigration_returnsTrue()
-            throws Exception {
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
-                ~ApplicationInfo.FLAG_FULL_BACKUP_ONLY, CUSTOM_BACKUP_AGENT_NAME);
-
-        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.MIGRATION);
-        boolean result = eligibilityRules.appGetsFullBackup(packageInfo);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void appGetsFullBackup_systemAppWithCustomBackupAgentAndWithoutFullBackupOnlyFlagAndInMigration_returnsFalse()
-            throws Exception {
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.applicationInfo = getApplicationInfo(Process.SYSTEM_UID,
-                ~ApplicationInfo.FLAG_FULL_BACKUP_ONLY, CUSTOM_BACKUP_AGENT_NAME);
-
-        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.MIGRATION);
-        boolean result = eligibilityRules.appGetsFullBackup(packageInfo);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
     public void appIsKeyValueOnly_noCustomBackupAgent_returnsTrue() throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -540,52 +513,6 @@ public class BackupEligibilityRulesTest {
         boolean result = mBackupEligibilityRules.appIsKeyValueOnly(packageInfo);
 
         assertThat(result).isTrue();
-    }
-
-    @Test
-    public void appIgnoresIncludeExcludeRules_systemAppAndInMigration_returnsFalse() {
-        ApplicationInfo applicationInfo = new ApplicationInfo();
-        applicationInfo.uid = Process.SYSTEM_UID;
-
-        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.MIGRATION);
-        boolean result = eligibilityRules.appIgnoresIncludeExcludeRules(applicationInfo);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    public void appIgnoresIncludeExcludeRules_systemAppInBackup_returnsFalse() {
-        ApplicationInfo applicationInfo = new ApplicationInfo();
-        applicationInfo.uid = Process.SYSTEM_UID;
-
-        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.MIGRATION);
-        boolean result = eligibilityRules.appIgnoresIncludeExcludeRules(applicationInfo);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    public void appIgnoresIncludeExcludeRules_nonSystemAppInMigration_returnsTrue() {
-        ApplicationInfo applicationInfo = new ApplicationInfo();
-        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
-
-        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
-                OperationType.MIGRATION);
-        boolean result = eligibilityRules.appIgnoresIncludeExcludeRules(applicationInfo);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void appIgnoresIncludeExcludeRules_nonSystemInBackup_returnsFalse() {
-        ApplicationInfo applicationInfo = new ApplicationInfo();
-        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
-
-        boolean result = mBackupEligibilityRules.appIgnoresIncludeExcludeRules(applicationInfo);
-
-        assertThat(result).isFalse();
     }
 
     @Test

@@ -71,6 +71,14 @@ public class BackupEligibilityRules {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     static final long RESTRICT_ADB_BACKUP = 171032338L;
 
+    /**
+     * When  this change is enabled, {@code android:allowBackup}  is ignored for apps during D2D
+     * (device-to-device) migrations.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    static final long IGNORE_ALLOW_BACKUP_IN_D2D = 183147249L;
+
     public static BackupEligibilityRules forBackup(PackageManager packageManager,
             PackageManagerInternal packageManagerInternal,
             int userId) {
@@ -148,13 +156,15 @@ public class BackupEligibilityRules {
     * @return boolean indicating whether backup is allowed.
     */
     public boolean isAppBackupAllowed(ApplicationInfo app) {
-        boolean isSystemApp = UserHandle.isCore(app.uid);
         boolean allowBackup = (app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
         switch (mOperationType) {
             case OperationType.MIGRATION:
                 // Backup / restore of all non-system apps is force allowed during
                 // device-to-device migration.
-                return !isSystemApp || allowBackup;
+                boolean isSystemApp = (app.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                boolean ignoreAllowBackup = !isSystemApp && CompatChanges.isChangeEnabled(
+                        IGNORE_ALLOW_BACKUP_IN_D2D, app.packageName, UserHandle.of(mUserId));
+                return ignoreAllowBackup || allowBackup;
             case OperationType.ADB_BACKUP:
                 String packageName = app.packageName;
                 if (packageName == null) {
@@ -176,7 +186,7 @@ public class BackupEligibilityRules {
 
                 boolean isPrivileged = (app.flags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
                 boolean isDebuggable = (app.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-                if (isSystemApp || isPrivileged) {
+                if (UserHandle.isCore(app.uid) || isPrivileged) {
                     try {
                         return mPackageManager.getProperty(PackageManager.PROPERTY_ALLOW_ADB_BACKUP,
                                 packageName).getBoolean();
@@ -283,11 +293,6 @@ public class BackupEligibilityRules {
      */
     @VisibleForTesting
     public boolean appGetsFullBackup(PackageInfo pkg) {
-        if (forceFullBackup(pkg.applicationInfo.uid, mOperationType)) {
-            // If this is a migration, all non-system packages get full backup.
-            return true;
-        }
-
         if (pkg.applicationInfo.backupAgentName != null) {
             // If it has an agent, it gets full backups only if it says so
             return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FULL_BACKUP_ONLY) != 0;
@@ -295,15 +300,6 @@ public class BackupEligibilityRules {
 
         // No agent or fullBackupOnly="true" means we do indeed perform full-data backups for it
         return true;
-    }
-
-    public boolean appIgnoresIncludeExcludeRules(ApplicationInfo app) {
-        return forceFullBackup(app.uid, mOperationType);
-    }
-
-    private boolean forceFullBackup(int appUid, @OperationType int operationType) {
-        return operationType == OperationType.MIGRATION &&
-                !UserHandle.isCore(appUid);
     }
 
     /**
