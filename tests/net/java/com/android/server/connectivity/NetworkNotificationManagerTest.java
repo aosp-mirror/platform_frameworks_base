@@ -20,6 +20,7 @@ import static com.android.server.connectivity.NetworkNotificationManager.Notific
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -142,15 +143,15 @@ public class NetworkNotificationManagerTest {
     public void testTitleOfPrivateDnsBroken() {
         // Test the title of mobile data.
         verifyTitleByNetwork(100, mCellNai, R.string.mobile_no_internet);
-        reset(mResources);
+        clearInvocations(mResources);
 
         // Test the title of wifi.
         verifyTitleByNetwork(101, mWifiNai, R.string.wifi_no_internet);
-        reset(mResources);
+        clearInvocations(mResources);
 
         // Test the title of other networks.
         verifyTitleByNetwork(102, mVpnNai, R.string.other_networks_no_internet);
-        reset(mResources);
+        clearInvocations(mResources);
     }
 
     @Test
