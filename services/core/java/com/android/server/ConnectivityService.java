@@ -106,6 +106,8 @@ import android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
 import android.net.ConnectivityDiagnosticsManager.DataStallReport;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.ConnectivityManager.RestrictBackgroundStatus;
+import android.net.ConnectivityResources;
 import android.net.ConnectivitySettingsManager;
 import android.net.DataStallReportParcelable;
 import android.net.DnsResolverServiceManager;
@@ -115,6 +117,7 @@ import android.net.IConnectivityManager;
 import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.INetworkActivityListener;
+import android.net.INetworkAgent;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.IOnCompleteListener;
@@ -208,7 +211,6 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
-import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
@@ -222,7 +224,6 @@ import com.android.net.module.util.LocationPermissionChecker;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.net.module.util.PermissionUtils;
 import com.android.server.connectivity.AutodestructReference;
-import com.android.server.connectivity.ConnectivityResources;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
 import com.android.server.connectivity.KeepaliveTracker;
@@ -237,7 +238,6 @@ import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.ProfileNetworkPreferences;
 import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.QosCallbackTracker;
-import com.android.server.net.NetworkPolicyManagerInternal;
 
 import libcore.io.IoUtils;
 
@@ -350,7 +350,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     protected INetd mNetd;
     private NetworkStatsManager mStatsManager;
     private NetworkPolicyManager mPolicyManager;
-    private NetworkPolicyManagerInternal mPolicyManagerInternal;
     private final NetdCallback mNetdCallback;
 
     /**
@@ -1237,9 +1236,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mStatsManager = mContext.getSystemService(NetworkStatsManager.class);
         mPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
-        mPolicyManagerInternal = Objects.requireNonNull(
-                LocalServices.getService(NetworkPolicyManagerInternal.class),
-                "missing NetworkPolicyManagerInternal");
         mDnsResolver = Objects.requireNonNull(dnsresolver, "missing IDnsResolver");
         mProxyTracker = mDeps.makeProxyTracker(mContext, mHandler);
 
@@ -1994,6 +1990,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void restrictBackgroundRequestForCaller(NetworkCapabilities nc) {
         if (!mPermissionMonitor.hasUseBackgroundNetworksPermission(mDeps.getCallingUid())) {
             nc.addCapability(NET_CAPABILITY_FOREGROUND);
+        }
+    }
+
+    @Override
+    public @RestrictBackgroundStatus int getRestrictBackgroundStatusByCaller() {
+        enforceAccessPermission();
+        final int callerUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return mPolicyManager.getRestrictBackgroundStatus(callerUid);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -4407,7 +4415,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkPolicyManager netPolicyManager =
                  mContext.getSystemService(NetworkPolicyManager.class);
 
-        final int networkPreference = netPolicyManager.getMultipathPreference(network);
+        final long token = Binder.clearCallingIdentity();
+        final int networkPreference;
+        try {
+            networkPreference = netPolicyManager.getMultipathPreference(network);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
         if (networkPreference != 0) {
             return networkPreference;
         }

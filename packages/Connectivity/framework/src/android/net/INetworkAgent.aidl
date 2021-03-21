@@ -13,13 +13,13 @@
  * See the License for the specific language governing perNmissions and
  * limitations under the License.
  */
-package com.android.connectivity.aidl;
+package android.net;
 
 import android.net.NattKeepalivePacketData;
 import android.net.QosFilterParcelable;
 import android.net.TcpKeepalivePacketData;
 
-import com.android.connectivity.aidl.INetworkAgentRegistry;
+import android.net.INetworkAgentRegistry;
 
 /**
  * Interface to notify NetworkAgent of connectivity events.

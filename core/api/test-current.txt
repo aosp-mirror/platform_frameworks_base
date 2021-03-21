@@ -996,6 +996,8 @@ package android.net {
 
   public class NetworkPolicyManager {
     method public boolean getRestrictBackground();
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public boolean isUidNetworkingBlocked(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public boolean isUidRestrictedOnMeteredNetworks(int);
     method @NonNull public static String resolveNetworkId(@NonNull android.net.wifi.WifiConfiguration);
     method public void setRestrictBackground(boolean);
   }

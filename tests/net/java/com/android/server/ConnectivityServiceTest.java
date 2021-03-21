@@ -179,6 +179,7 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.ConnectivityManager.PacketKeepaliveCallback;
 import android.net.ConnectivityManager.TooManyRequestsException;
+import android.net.ConnectivityResources;
 import android.net.ConnectivitySettingsManager;
 import android.net.ConnectivityThread;
 import android.net.DataStallReportParcelable;
@@ -273,6 +274,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.connectivity.resources.R;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.ArrayUtils;
@@ -282,7 +284,6 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.net.module.util.ArrayTrackRecord;
 import com.android.server.ConnectivityService.ConnectivityDiagnosticsCallbackInfo;
 import com.android.server.connectivity.ConnectivityConstants;
-import com.android.server.connectivity.ConnectivityResources;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
@@ -292,7 +293,6 @@ import com.android.server.connectivity.QosCallbackTracker;
 import com.android.server.connectivity.Vpn;
 import com.android.server.connectivity.VpnProfileStore;
 import com.android.server.net.NetworkPinner;
-import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.testutils.ExceptionUtils;
 import com.android.testutils.HandlerUtils;
 import com.android.testutils.RecorderCallback.CallbackEntry;
@@ -1501,9 +1501,6 @@ public class ConnectivityServiceTest {
         mServiceContext = new MockContext(InstrumentationRegistry.getContext(),
                 new FakeSettingsProvider());
         mServiceContext.setUseRegisteredHandlers(true);
-        LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
-        LocalServices.addService(
-                NetworkPolicyManagerInternal.class, mock(NetworkPolicyManagerInternal.class));
 
         mAlarmManagerThread = new HandlerThread("TestAlarmManager");
         mAlarmManagerThread.start();
@@ -1570,10 +1567,26 @@ public class ConnectivityServiceTest {
                 com.android.connectivity.resources.R.string.config_networkCaptivePortalServerUrl);
         doReturn(new String[]{ WIFI_WOL_IFNAME }).when(mResources).getStringArray(
                 com.android.connectivity.resources.R.array.config_wakeonlan_supported_interfaces);
-        final com.android.server.connectivity.ConnectivityResources connRes = mock(
-                ConnectivityResources.class);
+        doReturn(new String[] { "0,1", "1,3" }).when(mResources).getStringArray(
+                com.android.connectivity.resources.R.array.config_networkSupportedKeepaliveCount);
+        doReturn(com.android.connectivity.resources.R.array.config_networkSupportedKeepaliveCount)
+                .when(mResources).getIdentifier(eq("config_networkSupportedKeepaliveCount"),
+                eq("array"), any());
+        doReturn(com.android.connectivity.resources.R.array.network_switch_type_name)
+                .when(mResources).getIdentifier(eq("network_switch_type_name"),
+                eq("array"), any());
+
+        // We don't test the actual notification value strings, so just return an empty array.
+        // It doesn't matter what the values are as long as it's not null.
+        doReturn(new String[0]).when(mResources).getStringArray(R.array.network_switch_type_name);
+
+        final ConnectivityResources connRes = mock(ConnectivityResources.class);
         doReturn(mResources).when(connRes).get();
         doReturn(connRes).when(deps).getResources(any());
+
+        final Context mockResContext = mock(Context.class);
+        doReturn(mResources).when(mockResContext).getResources();
+        ConnectivityResources.setResourcesContextForTest(mockResContext);
 
         return deps;
     }
@@ -1630,6 +1643,7 @@ public class ConnectivityServiceTest {
         waitForIdle();
 
         FakeSettingsProvider.clearSettingsProvider();
+        ConnectivityResources.setResourcesContextForTest(null);
 
         mCsHandlerThread.quitSafely();
         mAlarmManagerThread.quitSafely();
