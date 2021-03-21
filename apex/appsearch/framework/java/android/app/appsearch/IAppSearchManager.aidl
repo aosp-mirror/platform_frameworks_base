@@ -40,6 +40,7 @@ interface IAppSearchManager {
      *     packages. The value List contains PackageIdentifier Bundles.
      * @param forceOverride Whether to apply the new schema even if it is incompatible. All
      *     incompatible documents will be deleted.
+     * @param schemaVersion  The overall schema version number of the request.
      * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link Bundle}&gt;, where the value are
@@ -52,8 +53,8 @@ interface IAppSearchManager {
         in List<String> schemasNotDisplayedBySystem,
         in Map<String, List<Bundle>> schemasPackageAccessibleBundles,
         boolean forceOverride,
-        in int userId,
         in int schemaVersion,
+        in int userId,
         in IAppSearchResultCallback callback);
 
     /**
