@@ -3,7 +3,7 @@ package com.android.systemui.statusbar.policy;
 import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +41,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        when(mWifiInfo.makeCopy(anyBoolean())).thenReturn(mWifiInfo);
+        when(mWifiInfo.makeCopy(anyLong())).thenReturn(mWifiInfo);
     }
 
     @Test
