@@ -608,8 +608,7 @@ public class ActivityManager {
     @TestApi
     public static final int PROCESS_CAPABILITY_ALL = PROCESS_CAPABILITY_FOREGROUND_LOCATION
             | PROCESS_CAPABILITY_FOREGROUND_CAMERA
-            | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
-            | PROCESS_CAPABILITY_NETWORK;
+            | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
     /**
      * All explicit capabilities. These are capabilities that need to be specified from manifest
      * file.

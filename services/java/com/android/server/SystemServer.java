@@ -51,7 +51,6 @@ import android.graphics.GraphicsStatsService;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityModuleConnector;
-import android.net.IConnectivityManager;
 import android.net.NetworkStackClient;
 import android.os.BaseBundle;
 import android.os.Binder;
@@ -109,6 +108,7 @@ import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.compat.PlatformCompatNative;
+import com.android.server.connectivity.PacProxyService;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.coverage.CoverageService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
@@ -331,8 +331,6 @@ public final class SystemServer {
 
     private static final String UNCRYPT_PACKAGE_FILE = "/cache/recovery/uncrypt_file";
     private static final String BLOCK_MAP_FILE = "/cache/recovery/block.map";
-
-    private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
 
     // maximum number of binder threads used for system_server
     // will be higher than the system default
@@ -1107,7 +1105,6 @@ public final class SystemServer {
         VcnManagementService vcnManagement = null;
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
-        IConnectivityManager connectivity = null;
         NsdService serviceDiscovery = null;
         WindowManagerService wm = null;
         SerialService serial = null;
@@ -1117,6 +1114,7 @@ public final class SystemServer {
         ConsumerIrService consumerIr = null;
         MmsServiceBroker mmsService = null;
         HardwarePropertiesManagerService hardwarePropertiesService = null;
+        PacProxyService pacProxyService = null;
 
         boolean disableSystemTextClassifier = SystemProperties.getBoolean(
                 "config.disable_systemtextclassifier", false);
@@ -1127,7 +1125,7 @@ public final class SystemServer {
                 false);
         boolean enableLeftyService = SystemProperties.getBoolean("config.enable_lefty", false);
 
-        boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
+        boolean isEmulator = SystemProperties.get("ro.boot.qemu").equals("1");
 
         boolean isWatch = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WATCH);
@@ -1443,8 +1441,7 @@ public final class SystemServer {
             t.traceEnd();
 
             final boolean hasPdb = !SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP).equals("");
-            final boolean hasGsi = SystemProperties.getInt(GSI_RUNNING_PROP, 0) > 0;
-            if (hasPdb && !hasGsi) {
+            if (hasPdb) {
                 t.traceBegin("StartPersistentDataBlock");
                 mSystemServiceManager.startService(PersistentDataBlockService.class);
                 t.traceEnd();
@@ -1625,16 +1622,22 @@ public final class SystemServer {
                 t.traceEnd();
             }
 
+            t.traceBegin("StartPacProxyService");
+            try {
+                pacProxyService = new PacProxyService(context);
+                ServiceManager.addService(Context.PAC_PROXY_SERVICE, pacProxyService);
+            } catch (Throwable e) {
+                reportWtf("starting PacProxyService", e);
+            }
+            t.traceEnd();
+
             t.traceBegin("StartConnectivityService");
             // This has to be called after NetworkManagementService, NetworkStatsService
             // and NetworkPolicyManager because ConnectivityService needs to take these
             // services to initialize.
             mSystemServiceManager.startServiceFromJar(CONNECTIVITY_SERVICE_INITIALIZER_CLASS,
                     CONNECTIVITY_SERVICE_APEX_PATH);
-            connectivity = IConnectivityManager.Stub.asInterface(
-                    ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
-            // TODO: Use ConnectivityManager instead of ConnectivityService.
-            networkPolicy.bindConnectivityManager(connectivity);
+            networkPolicy.bindConnectivityManager();
             t.traceEnd();
 
             t.traceBegin("StartVpnManagerService");

@@ -73,7 +73,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         mGatewayConnection.setUnderlyingNetwork(TEST_UNDERLYING_NETWORK_RECORD_1);
 
-        mIkeSession = mGatewayConnection.buildIkeSession();
+        mIkeSession = mGatewayConnection.buildIkeSession(TEST_UNDERLYING_NETWORK_RECORD_1.network);
         mGatewayConnection.setIkeSession(mIkeSession);
 
         mGatewayConnection.transitionTo(mGatewayConnection.mConnectedState);
@@ -188,7 +188,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         any(),
                         lpCaptor.capture(),
                         ncCaptor.capture(),
-                        anyInt(),
+                        any(),
                         any(),
                         anyInt());
         verify(mIpSecSvc)
@@ -241,7 +241,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         verify(mGatewayStatusCallback)
                 .onGatewayConnectionError(
-                        eq(mConfig.getRequiredUnderlyingCapabilities()),
+                        eq(mConfig.getExposedCapabilities()),
                         eq(VCN_ERROR_CODE_INTERNAL_ERROR),
                         any(),
                         any());
@@ -275,10 +275,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         verify(mGatewayStatusCallback)
                 .onGatewayConnectionError(
-                        eq(mConfig.getRequiredUnderlyingCapabilities()),
-                        eq(expectedErrorType),
-                        any(),
-                        any());
+                        eq(mConfig.getExposedCapabilities()), eq(expectedErrorType), any(), any());
     }
 
     @Test

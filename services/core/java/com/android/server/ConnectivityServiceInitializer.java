@@ -16,9 +16,6 @@
 
 package com.android.server;
 
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
-
 import android.content.Context;
 import android.util.Log;
 
@@ -42,6 +39,6 @@ public final class ConnectivityServiceInitializer extends SystemService {
     public void onStart() {
         Log.i(TAG, "Registering " + Context.CONNECTIVITY_SERVICE);
         publishBinderService(Context.CONNECTIVITY_SERVICE, mConnectivity,
-                /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
+                /* allowIsolated= */ false);
     }
 }

@@ -24,7 +24,6 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.net.ConnectivityManager.isNetworkTypeMobile;
 import static android.net.NetworkIdentity.SUBTYPE_COMBINED;
 import static android.net.NetworkStack.checkNetworkStackPermission;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
@@ -71,6 +70,7 @@ import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
+import static com.android.net.module.util.NetworkCapabilitiesUtils.getDisplayTransport;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
 import static com.android.server.NetworkManagementSocketTagger.setKernelCounterSet;
@@ -1291,7 +1291,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final boolean combineSubtypeEnabled = mSettings.getCombineSubtypeEnabled();
         final ArraySet<String> mobileIfaces = new ArraySet<>();
         for (NetworkStateSnapshot snapshot : snapshots) {
-            final boolean isMobile = isNetworkTypeMobile(snapshot.legacyType);
+            final int displayTransport =
+                    getDisplayTransport(snapshot.networkCapabilities.getTransportTypes());
+            final boolean isMobile = (NetworkCapabilities.TRANSPORT_CELLULAR == displayTransport);
             final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, snapshot.network);
             final int subType = combineSubtypeEnabled ? SUBTYPE_COMBINED
                     : getSubTypeForStateSnapshot(snapshot);

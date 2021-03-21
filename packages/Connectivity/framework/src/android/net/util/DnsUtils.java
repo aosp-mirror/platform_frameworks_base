@@ -29,8 +29,6 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 
-import com.android.internal.util.BitUtils;
-
 import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
@@ -332,7 +330,7 @@ public class DnsUtils {
             if (srcByte[i] == dstByte[i]) {
                 continue;
             }
-            int x = BitUtils.uint8(srcByte[i]) ^ BitUtils.uint8(dstByte[i]);
+            int x = (srcByte[i] & 0xff) ^ (dstByte[i] & 0xff);
             return i * CHAR_BIT + (Integer.numberOfLeadingZeros(x) - 24);  // Java ints are 32 bits
         }
         return dstByte.length * CHAR_BIT;

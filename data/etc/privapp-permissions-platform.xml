@@ -451,6 +451,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_SOUND_TRIGGER" />
         <permission name="android.permission.CAPTURE_AUDIO_HOTWORD" />
         <permission name="android.permission.MODIFY_QUIET_MODE" />
+        <permission name="android.permission.MANAGE_APP_HIBERNATION"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

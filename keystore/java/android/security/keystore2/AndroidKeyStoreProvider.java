@@ -145,23 +145,15 @@ public class AndroidKeyStoreProvider extends Provider {
         sInstalled = true;
 
         Security.addProvider(new AndroidKeyStoreProvider());
-        Security.addProvider(
-                new android.security.keystore.AndroidKeyStoreProvider(
-                        "AndroidKeyStoreLegacy"));
         Provider workaroundProvider = new AndroidKeyStoreBCWorkaroundProvider();
-        Provider legacyWorkaroundProvider =
-                new android.security.keystore.AndroidKeyStoreBCWorkaroundProvider(
-                        "AndroidKeyStoreBCWorkaroundLegacy");
         if (bcProviderIndex != -1) {
             // Bouncy Castle provider found -- install the workaround provider above it.
             // insertProviderAt uses 1-based positions.
-            Security.insertProviderAt(legacyWorkaroundProvider, bcProviderIndex + 1);
             Security.insertProviderAt(workaroundProvider, bcProviderIndex + 1);
         } else {
             // Bouncy Castle provider not found -- install the workaround provider at lowest
             // priority.
             Security.addProvider(workaroundProvider);
-            Security.addProvider(legacyWorkaroundProvider);
         }
     }
 
@@ -340,11 +332,11 @@ public class AndroidKeyStoreProvider extends Provider {
      * @param keyStore The keystore2 backend.
      * @param alias The alias of the key in the Keystore database.
      * @param namespace The a Keystore namespace. This is used by system api only to request
-     *                  Android system specific keystore namespace, which can be configured
-     *                  in the device's SEPolicy. Third party apps and most system components
-     *                  set this parameter to -1 to indicate their application specific namespace.
-     *                  TODO b/171806779 link to public Keystore 2.0 documentation.
-     *                       See bug for more details for now.
+     *         Android system specific keystore namespace, which can be configured
+     *         in the device's SEPolicy. Third party apps and most system components
+     *         set this parameter to -1 to indicate their application specific namespace.
+     *         See <a href="https://source.android.com/security/keystore#access-control">
+     *             Keystore 2.0 access control</a>
      * @hide
      **/
     @NonNull

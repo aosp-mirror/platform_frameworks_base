@@ -478,7 +478,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real.
-    static final int PROC_START_TIMEOUT = 10*1000;
+    static final int PROC_START_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
     // How long we wait to kill an application zygote, after the last process using
     // it has gone away.
     static final int KILL_APP_ZYGOTE_DELAY_MS = 5 * 1000;
@@ -490,8 +490,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int PROC_START_TIMEOUT_WITH_WRAPPER = 1200*1000;
 
     // How long we allow a receiver to run before giving up on it.
-    static final int BROADCAST_FG_TIMEOUT = 10*1000;
-    static final int BROADCAST_BG_TIMEOUT = 60*1000;
+    static final int BROADCAST_FG_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+    static final int BROADCAST_BG_TIMEOUT = 60 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     public static final int MY_PID = myPid();
 
@@ -573,7 +573,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final int MAX_BUGREPORT_TITLE_SIZE = 50;
     private static final int MAX_BUGREPORT_DESCRIPTION_SIZE = 150;
 
-    private static final int NATIVE_DUMP_TIMEOUT_MS = 2000; // 2 seconds;
+    private static final int NATIVE_DUMP_TIMEOUT_MS =
+            2000 * Build.HW_TIMEOUT_MULTIPLIER; // 2 seconds;
     private static final int JAVA_DUMP_MINIMUM_SIZE = 100; // 100 bytes.
 
     OomAdjuster mOomAdjuster;
@@ -13772,9 +13773,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print(" unmapped + ");
                         pw.print(stringifyKBSize(ionPool));
                         pw.println(" pools)");
+                kernelUsed += ionUnmapped;
                 // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
-                // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
-                kernelUsed += ionHeap;
+                // set on ION VMAs, however it might be included by the memtrack HAL.
+                // Replace memtrack HAL reported Graphics category with mapped dmabufs
+                totalPss -= totalMemtrackGraphics;
+                totalPss += dmabufMapped;
             } else {
                 final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
                 if (totalExportedDmabuf >= 0) {
@@ -14634,17 +14638,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         long kernelUsed = memInfo.getKernelUsedSizeKb();
         final long ionHeap = Debug.getIonHeapsSizeKb();
         final long ionPool = Debug.getIonPoolsSizeKb();
+        final long dmabufMapped = Debug.getDmabufMappedSizeKb();
         if (ionHeap >= 0 && ionPool >= 0) {
+            final long ionUnmapped = ionHeap - dmabufMapped;
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
             memInfoBuilder.append("\n");
+            kernelUsed += ionUnmapped;
             // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
-            // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
-            kernelUsed += ionHeap;
+            // set on ION VMAs, however it might be included by the memtrack HAL.
+            // Replace memtrack HAL reported Graphics category with mapped dmabufs
+            totalPss -= totalMemtrackGraphics;
+            totalPss += dmabufMapped;
         } else {
             final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
             if (totalExportedDmabuf >= 0) {
-                final long dmabufMapped = Debug.getDmabufMappedSizeKb();
                 final long dmabufUnmapped = totalExportedDmabuf - dmabufMapped;
                 memInfoBuilder.append("DMA-BUF: ");
                 memInfoBuilder.append(stringifyKBSize(totalExportedDmabuf));

@@ -36,6 +36,8 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -430,7 +432,8 @@ public class RcsUceAdapter {
 
         /**
          * The pending request has completed successfully due to all requested contacts information
-         * being delivered.
+         * being delivered. The callback {@link #onCapabilitiesReceived(List)}
+         * for each contacts is required to be called before {@link #onComplete} is called.
          */
         void onComplete();
 
@@ -486,7 +489,7 @@ public class RcsUceAdapter {
     @SystemApi
     @RequiresPermission(allOf = {Manifest.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE,
             Manifest.permission.READ_CONTACTS})
-    public void requestCapabilities(@NonNull List<Uri> contactNumbers,
+    public void requestCapabilities(@NonNull Collection<Uri> contactNumbers,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull CapabilitiesCallback c) throws ImsException {
         if (c == null) {
@@ -538,7 +541,7 @@ public class RcsUceAdapter {
 
         try {
             imsRcsController.requestCapabilities(mSubId, mContext.getOpPackageName(),
-                    mContext.getAttributionTag(), contactNumbers, internalCallback);
+                    mContext.getAttributionTag(), new ArrayList(contactNumbers), internalCallback);
         } catch (ServiceSpecificException e) {
             throw new ImsException(e.toString(), e.errorCode);
         } catch (RemoteException e) {
@@ -569,6 +572,10 @@ public class RcsUceAdapter {
      * {@link CapabilitiesCallback} is called.
      * @param c A one-time callback for when the request for capabilities completes or there is
      * an error processing the request.
+     * @throws ImsException if the subscription associated with this instance of
+     * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
+     * available. This can happen if the ImsService has crashed, for example, or if the subscription
+     * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
      * @hide
      */
     @SystemApi

@@ -99,6 +99,13 @@ public class VcnControlPlaneIkeConfigTest {
     }
 
     @Test
+    public void testPersistableBundle() {
+        final VcnControlPlaneIkeConfig config = buildTestConfig();
+
+        assertEquals(config, new VcnControlPlaneIkeConfig(config.toPersistableBundle()));
+    }
+
+    @Test
     public void testConstructConfigWithoutIkeParams() {
         try {
             new VcnControlPlaneIkeConfig(null, CHILD_PARAMS);

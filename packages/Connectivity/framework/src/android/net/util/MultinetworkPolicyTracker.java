@@ -16,8 +16,8 @@
 
 package android.net.util;
 
-import static android.provider.Settings.Global.NETWORK_AVOID_BAD_WIFI;
-import static android.provider.Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI;
+import static android.net.ConnectivitySettingsManager.NETWORK_METERED_MULTIPATH_PREFERENCE;
 
 import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
@@ -30,8 +30,8 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
-import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -92,8 +92,8 @@ public class MultinetworkPolicyTracker {
     }
 
     @VisibleForTesting
-    protected class ActiveDataSubscriptionIdChangedListener extends PhoneStateListener
-            implements PhoneStateListener.ActiveDataSubscriptionIdChangedListener {
+    protected class ActiveDataSubscriptionIdListener extends TelephonyCallback
+            implements TelephonyCallback.ActiveDataSubscriptionIdListener {
         @Override
         public void onActiveDataSubscriptionIdChanged(int subId) {
             mActiveSubId = subId;
@@ -110,8 +110,8 @@ public class MultinetworkPolicyTracker {
         mHandler = handler;
         mAvoidBadWifiCallback = avoidBadWifiCallback;
         mSettingsUris = Arrays.asList(
-            Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI),
-            Settings.Global.getUriFor(NETWORK_METERED_MULTIPATH_PREFERENCE));
+                Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI),
+                Settings.Global.getUriFor(NETWORK_METERED_MULTIPATH_PREFERENCE));
         mResolver = mContext.getContentResolver();
         mSettingObserver = new SettingObserver();
         mBroadcastReceiver = new BroadcastReceiver() {
@@ -121,8 +121,8 @@ public class MultinetworkPolicyTracker {
             }
         };
 
-        ctx.getSystemService(TelephonyManager.class).registerPhoneStateListener(
-                new HandlerExecutor(handler), new ActiveDataSubscriptionIdChangedListener());
+        ctx.getSystemService(TelephonyManager.class).registerTelephonyCallback(
+                new HandlerExecutor(handler), new ActiveDataSubscriptionIdListener());
 
         updateAvoidBadWifi();
         updateMeteredMultipathPreference();

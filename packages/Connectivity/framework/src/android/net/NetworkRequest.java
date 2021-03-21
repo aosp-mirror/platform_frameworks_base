@@ -31,6 +31,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVIT
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -113,6 +114,10 @@ public class NetworkRequest implements Parcelable {
      *       for the network (if any) that satisfies the default Internet
      *       request.
      *
+     *     - TRACK_BEST, which causes the framework to send callbacks about
+     *       the single, highest scoring current network (if any) that matches
+     *       the specified NetworkCapabilities.
+     *
      *     - BACKGROUND_REQUEST, like REQUEST but does not cause any networks
      *       to retain the NET_CAPABILITY_FOREGROUND capability. A network with
      *       no foreground requests is in the background. A network that has
@@ -135,6 +140,7 @@ public class NetworkRequest implements Parcelable {
         REQUEST,
         BACKGROUND_REQUEST,
         TRACK_SYSTEM_DEFAULT,
+        LISTEN_FOR_BEST,
     };
 
     /**
@@ -382,11 +388,17 @@ public class NetworkRequest implements Parcelable {
                 return setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
                         .setSubscriptionId(subId).build());
             } catch (NumberFormatException nfe) {
-                // A StringNetworkSpecifier does not accept null or empty ("") strings. When network
-                // specifiers were strings a null string and an empty string were considered
-                // equivalent. Hence no meaning is attached to a null or empty ("") string.
-                return setNetworkSpecifier(TextUtils.isEmpty(networkSpecifier) ? null
-                        : new StringNetworkSpecifier(networkSpecifier));
+                // An EthernetNetworkSpecifier or TestNetworkSpecifier does not accept null or empty
+                // ("") strings. When network specifiers were strings a null string and an empty
+                // string were considered equivalent. Hence no meaning is attached to a null or
+                // empty ("") string.
+                if (TextUtils.isEmpty(networkSpecifier)) {
+                    return setNetworkSpecifier((NetworkSpecifier) null);
+                } else if (mNetworkCapabilities.hasTransport(TRANSPORT_TEST)) {
+                    return setNetworkSpecifier(new TestNetworkSpecifier(networkSpecifier));
+                } else {
+                    return setNetworkSpecifier(new EthernetNetworkSpecifier(networkSpecifier));
+                }
             }
         }
 
@@ -449,6 +461,21 @@ public class NetworkRequest implements Parcelable {
             }
             nc.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
         }
+
+        /**
+         * Sets the optional subscription ID set.
+         * <p>
+         * This specify the subscription IDs requirement.
+         * A network will satisfy this request only if it matches one of the subIds in this set.
+         * An empty set matches all networks, including those without a subId.
+         *
+         * @param subIds A {@code Set} that represents subscription IDs.
+         */
+        @NonNull
+        public Builder setSubIds(@NonNull Set<Integer> subIds) {
+            mNetworkCapabilities.setSubIds(subIds);
+            return this;
+        }
     }
 
     // implement the Parcelable interface
@@ -484,6 +511,15 @@ public class NetworkRequest implements Parcelable {
      */
     public boolean isListen() {
         return type == Type.LISTEN;
+    }
+
+    /**
+     * Returns true iff. this NetworkRequest is of type LISTEN_FOR_BEST.
+     *
+     * @hide
+     */
+    public boolean isListenForBest() {
+        return type == Type.LISTEN_FOR_BEST;
     }
 
     /**

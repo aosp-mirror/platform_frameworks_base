@@ -525,7 +525,7 @@ java_library {
         "android.hardware.vibrator-V1.3-java",
         "android.security.apc-java",
         "android.security.authorization-java",
-        "android.security.usermanager-java",
+        "android.security.maintenance-java",
         "android.security.vpnprofilestore-java",
         "android.system.keystore2-V1-java",
         "android.system.suspend.control.internal-java",
@@ -834,17 +834,20 @@ filegroup {
     ],
 }
 
-// keep these files in sync with the package/Tethering/jarjar-rules.txt for the tethering module.
+// keep these files in sync with the package/Tethering/jarjar-rules.txt and
+// package/Connectivity/jarjar-rules.txt for the tethering module and connectivity module.
 filegroup {
-    name: "framework-tethering-shared-srcs",
+    name: "framework-connectivity-shared-srcs",
     srcs: [
         "core/java/android/util/LocalLog.java",
+        // This should be android.util.IndentingPrintWriter, but it's not available in all branches.
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/MessageUtils.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
+        "core/java/com/android/internal/util/WakeupMessage.java",
     ],
 }
 
@@ -1126,6 +1129,21 @@ aidl_interface {
         },
         ndk: {
             enabled: false,
+        },
+    },
+}
+
+// Build Rust bindings for PermissionController. Needed by keystore2.
+aidl_interface {
+    name: "android.os.permissions_aidl",
+    unstable: true,
+    local_include_dir: "core/java",
+    srcs: [
+        "core/java/android/os/IPermissionController.aidl",
+    ],
+    backend: {
+        rust: {
+            enabled: true,
         },
     },
 }

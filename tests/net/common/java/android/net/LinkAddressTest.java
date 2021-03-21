@@ -53,6 +53,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -116,6 +117,20 @@ public class LinkAddressTest {
         assertEquals(123, address.getFlags());
         assertEquals(456, address.getScope());
         assertTrue(address.isIpv4());
+
+        address = new LinkAddress("/64", 1 /* flags */, 2 /* scope */);
+        assertEquals(Inet6Address.LOOPBACK, address.getAddress());
+        assertEquals(64, address.getPrefixLength());
+        assertEquals(1, address.getFlags());
+        assertEquals(2, address.getScope());
+        assertTrue(address.isIpv6());
+
+        address = new LinkAddress("[2001:db8::123]/64", 3 /* flags */, 4 /* scope */);
+        assertEquals(InetAddresses.parseNumericAddress("2001:db8::123"), address.getAddress());
+        assertEquals(64, address.getPrefixLength());
+        assertEquals(3, address.getFlags());
+        assertEquals(4, address.getScope());
+        assertTrue(address.isIpv6());
 
         // InterfaceAddress doesn't have a constructor. Fetch some from an interface.
         List<InterfaceAddress> addrs = NetworkInterface.getByName("lo").getInterfaceAddresses();

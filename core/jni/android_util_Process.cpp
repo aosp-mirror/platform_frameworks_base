@@ -52,6 +52,7 @@
 #include <string.h>
 #include <sys/epoll.h>
 #include <sys/errno.h>
+#include <sys/pidfd.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
@@ -1290,34 +1291,10 @@ void android_os_Process_removeAllProcessGroups(JNIEnv* env, jobject clazz)
     return removeAllProcessGroups();
 }
 
-static void throwErrnoException(JNIEnv* env, const char* functionName, int error) {
-    ScopedLocalRef<jstring> detailMessage(env, env->NewStringUTF(functionName));
-    if (detailMessage.get() == NULL) {
-        // Not really much we can do here. We're probably dead in the water,
-        // but let's try to stumble on...
-        env->ExceptionClear();
-    }
-    static jclass errnoExceptionClass =
-            MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/system/ErrnoException"));
-
-    static jmethodID errnoExceptionCtor =
-            GetMethodIDOrDie(env, errnoExceptionClass, "<init>", "(Ljava/lang/String;I)V");
-
-    jobject exception =
-            env->NewObject(errnoExceptionClass, errnoExceptionCtor, detailMessage.get(), error);
-    env->Throw(reinterpret_cast<jthrowable>(exception));
-}
-
-// Wrapper function to the syscall pidfd_open, which creates a file
-// descriptor that refers to the process whose PID is specified in pid.
-static inline int sys_pidfd_open(pid_t pid, unsigned int flags) {
-    return syscall(__NR_pidfd_open, pid, flags);
-}
-
 static jint android_os_Process_nativePidFdOpen(JNIEnv* env, jobject, jint pid, jint flags) {
-    int fd = sys_pidfd_open(pid, flags);
+    int fd = pidfd_open(pid, flags);
     if (fd < 0) {
-        throwErrnoException(env, "nativePidFdOpen", errno);
+        jniThrowErrnoException(env, "nativePidFdOpen", errno);
         return -1;
     }
     return fd;

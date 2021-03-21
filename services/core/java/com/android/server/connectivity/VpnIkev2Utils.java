@@ -405,7 +405,8 @@ public class VpnIkev2Utils {
         for (final IkeTrafficSelector selector : trafficSelectors) {
             for (final IpPrefix prefix :
                     new IpRange(selector.startingAddress, selector.endingAddress).asIpPrefixes()) {
-                routes.add(new RouteInfo(prefix, null));
+                routes.add(new RouteInfo(prefix, null /*gateway*/, null /*iface*/,
+                        RouteInfo.RTN_UNICAST));
             }
         }
 

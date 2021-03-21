@@ -74,7 +74,7 @@ import android.telephony.TelephonyManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.util.LocationPermissionChecker;
+import com.android.net.module.util.LocationPermissionChecker;
 import com.android.server.VcnManagementService.VcnCallback;
 import com.android.server.VcnManagementService.VcnStatusCallbackInfo;
 import com.android.server.vcn.TelephonySubscriptionTracker;
@@ -461,6 +461,34 @@ public class VcnManagementServiceTest {
     }
 
     @Test
+    public void testSetVcnConfigNotifiesStatusCallback() throws Exception {
+        mVcnMgmtSvc.systemReady();
+        doReturn(true)
+                .when(mLocationPermissionChecker)
+                .checkLocationPermission(eq(TEST_PACKAGE_NAME), any(), eq(TEST_UID), any());
+        triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_2));
+
+        mVcnMgmtSvc.registerVcnStatusCallback(TEST_UUID_2, mMockStatusCallback, TEST_PACKAGE_NAME);
+        verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_NOT_CONFIGURED);
+
+        // Use a different UUID to simulate a new VCN config.
+        mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);
+
+        verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_ACTIVE);
+    }
+
+    @Test
+    public void testSetVcnConfigInSafeModeNotifiesStatusCallback() throws Exception {
+        setupSubscriptionAndStartVcn(TEST_SUBSCRIPTION_ID, TEST_UUID_2, false /* isActive */);
+        mVcnMgmtSvc.registerVcnStatusCallback(TEST_UUID_2, mMockStatusCallback, TEST_PACKAGE_NAME);
+        verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
+
+        mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);
+
+        verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_ACTIVE);
+    }
+
+    @Test
     public void testClearVcnConfigRequiresNonSystemServer() throws Exception {
         doReturn(Process.SYSTEM_UID).when(mMockDeps).getBinderCallingUid();
 
@@ -500,6 +528,17 @@ public class VcnManagementServiceTest {
         mVcnMgmtSvc.clearVcnConfig(TEST_UUID_1);
         assertTrue(mVcnMgmtSvc.getConfigs().isEmpty());
         verify(mConfigReadWriteHelper).writeToDisk(any(PersistableBundle.class));
+    }
+
+    @Test
+    public void testClearVcnConfigNotifiesStatusCallback() throws Exception {
+        setupSubscriptionAndStartVcn(TEST_SUBSCRIPTION_ID, TEST_UUID_2, true /* isActive */);
+        mVcnMgmtSvc.registerVcnStatusCallback(TEST_UUID_2, mMockStatusCallback, TEST_PACKAGE_NAME);
+        verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_ACTIVE);
+
+        mVcnMgmtSvc.clearVcnConfig(TEST_UUID_2);
+
+        verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_NOT_CONFIGURED);
     }
 
     @Test
@@ -550,6 +589,16 @@ public class VcnManagementServiceTest {
     @Test
     public void testRemoveVcnUnderlyingNetworkPolicyListener() {
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+
+        mVcnMgmtSvc.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+    }
+
+    @Test(expected = SecurityException.class)
+    public void testRemoveVcnUnderlyingNetworkPolicyListenerInvalidPermission() {
+        doThrow(new SecurityException())
+                .when(mMockContext)
+                .enforceCallingOrSelfPermission(
+                        eq(android.Manifest.permission.NETWORK_FACTORY), any());
 
         mVcnMgmtSvc.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
     }
