@@ -294,6 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"යෙදුම ධාවනය කරමින්"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"බැටරිය භාවිත කරන යෙදුම්"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"විශාලනය"</string>
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"ප්‍රවේශ්‍යතා ආරක්ෂක ප්‍රතිපත්තිය"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> බැටරිය භාවිත කරයි"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"යෙදුම් <xliff:g id="NUMBER">%1$d</xliff:g>ක් බැටරිය භාවිත කරයි"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"බැටරි හා දත්ත භාවිතය පිළිබඳව විස්තර සඳහා තට්ටු කරන්න"</string>
@@ -344,6 +345,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"තත්ව තීරුව වීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"තත්ව තීරුව දිග හැරීම/හැකිලීම"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"තත්ව තීරුව දිග හැරීමට හෝ හැකිළීමට යෙදුමට අවසර දෙන්න."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"අගුලු දැමූ උපාංගයක සම්පූර්ණ තිර ක්‍රියාකාරකම් ලෙස දැනුම්දීම් සංදර්ශනය කරන්න"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"අගුලු දැමූ උපාංගයක පූර්ණ තිර ක්‍රියාකාරකම් ලෙස දැනුම්දීම් සංදර්ශනය කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"කෙටිමං ස්ථාපනය කරන්න"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"පරිශීලක මැදිහත්වීමෙන් තොරව කෙටිමං එක් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"කෙටිමං අස්ථාපනය කරන්න"</string>
@@ -2095,6 +2098,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"තිරය මත ප්‍රවේශ්‍යතා කෙටිමග"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"තිරය මත ප්‍රවේශ්‍යතා කෙටිමං තෝරනය"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ප්‍රවේශ්‍යතා කෙටිමඟ"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"දැනුම්දීම් සෙවන ඉවත ලන්න"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> හි සිරස්තල තීරුව."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> අවහිර කළ බාල්දියට දමා ඇත"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2232,8 +2236,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"නව: කවුළු විශාලකය"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"ඔබට දැන් තිරයේ සමහර හෝ සියලු දේ විශාලනය කළ හැකිය"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"ඔබගේ තිරයේ කොටසක් විශාලනය කරන්න"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"ඔබට දැන් ඔබගේ පූර්ණ තිරය, විශේෂිත ප්‍රදේශයක් විශාලනය කළ හැකිය, නැතහොත් විකල්ප දෙක අතර මාරු විය හැකිය."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"සැකසීම් තුළ ක්‍රියාත්මක කරන්න"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ඉවත ලන්න"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"දිගටම කර ගෙන යාමට, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; හට ඔබගේ උපාංගයෙහි මයික්‍රෆෝනයට ප්‍රවේශය අවශ්‍යයි."</string>
@@ -2242,4 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"සංවේදක පෞද්ගලිකත්වය"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"යෙදුම් නිරූපකය"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"යෙදුම් සන්නම් කිරීමේ රූපය"</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"ප්‍රවේශ සැකසීම් පරීක්ෂා කරන්න"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> හට ඔබගේ තිරය බැලීමට සහ පාලනය කිරීමට හැකිය. සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
 </resources>

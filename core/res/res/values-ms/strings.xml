@@ -294,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Apl berjalan"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Apl yang menggunakan bateri"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Pembesaran"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang menggunakan bateri"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> apl sedang menggunakan bateri"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Ketik untuk mendapatkan butiran tentang penggunaan kuasa bateri dan data"</string>
@@ -344,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Membenarkan apl menjadi bar status."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"kembangkan/runtuhkan bar status"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Membenarkan apl mengembangkan atau meruntuhkan bar status."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"paparkan pemberitahuan sebagai aktiviti skrin penuh pada peranti yang dikunci"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Membolehkan apl memaparkan pemberitahuan sebagai aktiviti skrin penuh pada peranti yang dikunci"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"pasang pintasan"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Membenarkan aplikasi menambah pintasan Skrin Laman Utama tanpa campur tangan pengguna."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"nyahpasang pintasan"</string>
@@ -555,7 +559,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Gunakan biometrik atau kunci skrin"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Sahkan itu anda"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Gunakan biometrik anda untuk meneruskan"</string>
-    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Gunakan biometrik atau kunci skrin anda untuk meneruskan"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Gunakan biometrik atau kunci skrin anda untuk meneruskan pengesahan"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Perkakasan biometrik tidak tersedia"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Pengesahan dibatalkan"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Tidak dikenali"</string>
@@ -2095,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Pintasan Kebolehaksesan Pada Skrin"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Pemilih Pintasan Kebolehaksesan Pada Skrin"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Pintasan Kebolehaksesan"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Ketepikan Bidai Pemberitahuan"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Bar kapsyen <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> telah diletakkan dalam baldi TERHAD"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2232,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Baharu: Pembesar Tetingkap"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Besarkan sebahagian atau keseluruhan skrin anda"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Besarkan sebahagian skrin anda"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Kini anda boleh membesarkan skrin penuh, kawasan tertentu atau beralih antara kedua-dua pilihan."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Hidupkan dalam Tetapan"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Tolak"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Untuk meneruskan proses, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; memerlukan akses kepada mikrofon peranti anda."</string>
@@ -2242,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privasi Penderia"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikon aplikasi"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imej jenama aplikasi"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

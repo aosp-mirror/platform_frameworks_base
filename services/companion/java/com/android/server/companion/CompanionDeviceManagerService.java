@@ -1298,13 +1298,11 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         boolean justAppeared = oldTimestamp == null
                 || timestamp.getTime() - oldTimestamp.getTime() >= DEVICE_DISAPPEARED_TIMEOUT_MS;
         if (justAppeared) {
+            Slog.i(LOG_TAG, "onDeviceNearby(justAppeared, address = " + address + ")");
             for (Association association : getAllAssociations(address)) {
                 if (association.isNotifyOnDeviceNearby()) {
-                    if (DEBUG) {
-                        Slog.i(LOG_TAG, "Device " + address
-                                + " managed by " + association.getPackageName()
-                                + " is nearby on " + timestamp);
-                    }
+                    Slog.i(LOG_TAG,
+                            "Sending onDeviceAppeared to " + association.getPackageName() + ")");
                     getDeviceListenerServiceConnector(association).run(
                             service -> service.onDeviceAppeared(association.getDeviceMacAddress()));
                 }
@@ -1318,13 +1316,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         boolean hasDeviceListeners = false;
         for (Association association : getAllAssociations(address)) {
             if (association.isNotifyOnDeviceNearby()) {
-                if (DEBUG) {
-                    Slog.i(LOG_TAG, "Device " + address
-                            + " managed by " + association.getPackageName()
-                            + " disappeared; last seen on "
-                            + sDateFormat.format(mDevicesLastNearby.get(address)));
-                }
-
+                Slog.i(LOG_TAG,
+                        "Sending onDeviceDisappeared to " + association.getPackageName() + ")");
                 getDeviceListenerServiceConnector(association).run(
                         service -> service.onDeviceDisappeared(address));
                 hasDeviceListeners = true;

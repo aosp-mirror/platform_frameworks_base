@@ -294,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"აპი გაშვებულია"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ბატარეის მხარჯავი აპები"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"გადიდება"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> იყენებს ბატარეას"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"ბატარეას <xliff:g id="NUMBER">%1$d</xliff:g> აპი იყენებს"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"შეეხეთ ბატარეისა და მონაცემების მოხმარების შესახებ დეტალური ინფორმაციისთვის"</string>
@@ -344,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"აპს შეეძლება სტატუსის ზოლის ჩანაცვლება."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"სტატუსების ზოლის გაფართოება/აკეცვა"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"აპს შეეძლება სტატუსის ზოლის გახსნა-დახურვა."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"შეტყობინებების ჩვენება სრული ეკრანის აქტივობების სახით ჩაკეტილ მოწყობილობაზე"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"ნებას რთავს აპს, აჩვენოს შეტყობინებები სრული ეკრანის აქტივობების სახით ჩაკეტილ მოწყობილობაზე"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"მალსახმობების დაყენება"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"მთავარ ეკრანზე აპლიკაციისთვის მალსახმობების დამოუკიდებლად დამატების უფლების მიცემა."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"მალსახმობების წაშლა"</string>
@@ -2095,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"მისაწვდომობის ეკრანული მალსახმობი"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"მისაწვდომობის ეკრანული მალსახმობის ამომრჩევი"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"მისაწვდომობის მალსახმობი"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"შეტყობინებების ფარდის დახურვა"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ის სუბტიტრების ზოლი."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> მოთავსდა კალათაში „შეზღუდული“"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2232,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"სიახლე: ფანჯრის გამადიდებელი"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"ახლა შეგიძლიათ, გაადიდოთ ეკრანი ან მისი ნაწილი"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"გაადიდეთ თქვენი ეკრანის ნაწილი"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"თქვენ უკვე შეგიძლიათ გაადიდოთ სრული ეკრანი, მისი გარკვეული ნაწილი, ან მონაცვლეობით გადართოთ ამ ორ ვარიანტს შორის."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ჩართვა პარამეტრებში"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"უარყოფა"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"გასაგრძელებლად &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;-ს თქვენი მოწყობილობის მიკროფონზე წვდომა სჭირდება."</string>
@@ -2242,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"სენსორის კონფიდენციალურობა"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"აპლიკაციის ხატულა"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"აპლიკაციის ბრენდის სურათი"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

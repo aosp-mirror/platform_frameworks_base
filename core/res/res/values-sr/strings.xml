@@ -297,6 +297,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Активна апликација"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Апликације које троше батерију"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Увећање"</string>
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Безбедносне смернице за приступачност"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> користи батерију"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Апликације (<xliff:g id="NUMBER">%1$d</xliff:g>) користе батерију"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Додирните за детаље о батерији и потрошњи података"</string>
@@ -347,6 +348,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Дозвољава апликацији да функционише као статусна трака."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"проширење/скупљање статусне траке"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Дозвољава апликацији да проширује или скупља статусну траку."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"приказује обавештења као активности преко целог екрана на закључаном уређају"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Омогућава апликацији да на закључаном уређају приказује обавештења као активности преко целог екрана."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"инсталирање пречица"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Омогућава апликацији да додаје пречице на почетни екран без интервенције корисника."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"деинсталирање пречица"</string>
@@ -2129,6 +2132,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Пречица за приступачност на екрану"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Алатка за бирање пречица за приступачност на екрану"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Пречица за приступачност"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Одбаци траку са обавештењима"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Трака са насловима апликације <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакет <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> је додат у сегмент ОГРАНИЧЕНО"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2266,8 +2270,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Ново: Лупа за прозор"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Можете да увећате део екрана или цео екран"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Увећајте приказ дела екрана"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Сада можете да увећате цео екран, одређену област или да прелазите са једне опције на другу."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Укључите у Подешавањима"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Одбаци"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"&lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; захтева приступ микрофону уређаја ради настављања."</string>
@@ -2276,4 +2280,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Приватност сензора"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Икона апликације"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Имиџ бренда апликације"</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Проверите подешавања приступа"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> може да прегледа и контролише екран. Додирните да бисте прегледали."</string>
 </resources>

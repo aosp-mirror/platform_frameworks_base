@@ -294,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Приложението работи"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Приложения, използващи батерията"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Увеличение"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> използва батерията"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> приложения използват батерията"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Докоснете за информация относно използването на батерията и преноса на данни"</string>
@@ -344,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Разрешава на приложението да бъде лентата на състоянието."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"разгъване или свиване на лентата на състоянието"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Разрешава на приложението да разгъва или свива лентата на състоянието."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"показване на известия като активности на цял екран на заключено устройство"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Дава възможност на приложението да показва известия като активности на цял екран на заключено устройство"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"инсталиране на преки пътища"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Разрешава на приложението да добавя към началния екран преки пътища без намеса на потребителя."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"деинсталиране на преки пътища"</string>
@@ -2095,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Пряк път към достъпността на екрана"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Инструмент за избор на пряк път към достъпността на екрана"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Пряк път за достъпност"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Отхвърляне на падащия панел с известия"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Лента за надписи на <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакетът <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> е поставен в ОГРАНИЧЕНИЯ контейнер"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2232,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Ново: Увеличаване на прозорци"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Можете да увеличите целия екран или част от него"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Увеличаване на част от екрана"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Вече можете да увеличавате целия екран или конкретна област от него, както и да превключвате между двете опции."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Включете от настройките"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Отхвърляне"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"За да продължите, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; се нуждае от достъп до микрофона на устройството ви."</string>
@@ -2242,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Поверителност на сензорните данни"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Икона на приложението"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Изображение на търговската марка на приложението"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

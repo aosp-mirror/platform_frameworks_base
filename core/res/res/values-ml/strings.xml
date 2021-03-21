@@ -204,8 +204,7 @@
     <string name="twilight_service" msgid="8964898045693187224">"സന്ധ്യാസമയത്തെ സേവനം"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"സമയമേഖല കണ്ടെത്താനുള്ള സംവിധാനം (കണക്റ്റിവിറ്റി ഇല്ല)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS സമയ അപ്ഡേറ്റ് സേവനം"</string>
-    <!-- no translation found for music_recognition_manager_service (7481956037950276359) -->
-    <skip />
+    <string name="music_recognition_manager_service" msgid="7481956037950276359">"സംഗീതം തിരിച്ചറിയൽ മാനേജര്‍ സേവനം"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"അഡ്‌മിൻ ആപ്പ് ഉപയോഗിക്കാനാകില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ മായ്ക്കപ്പെടും.\n\nനിങ്ങൾക്ക് ചോദ്യങ്ങൾ ഉണ്ടെങ്കിൽ, നിങ്ങളുടെ സ്ഥാപനത്തിന്റെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> പ്രിന്റിംഗ് പ്രവർത്തനരഹിതമാക്കി."</string>
@@ -295,6 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ആപ്പ് പ്രവർത്തിക്കുന്നു"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ആപ്പുകൾ ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"മാഗ്നിഫിക്കേഷൻ"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ആപ്പുകൾ ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ബാറ്ററി, ഡാറ്റ ഉപയോഗം എന്നിവയുടെ വിശദാംശങ്ങളറിയാൻ ടാപ്പുചെയ്യുക"</string>
@@ -345,6 +346,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"അപ്ലിക്കേഷനെ നില ബാർ ആകാൻ അനുവദിക്കുന്നു."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"സ്റ്റാറ്റസ് വിപുലീകരിക്കുക/ചുരുക്കുക"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"നില ബാർ വിപുലീകരിക്കുന്നതിനോ ചുരുക്കുന്നതിനോ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"ലോക്ക് ചെയ്‌ത ഒരു ഉപകരണത്തിൽ പൂർണ്ണ സ്ക്രീൻ ആക്റ്റിവിറ്റികളായി അറിയിപ്പുകൾ പ്രദർശിപ്പിക്കുക"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"ലോക്ക് ചെയ്‌ത ഒരു ഉപകരണത്തിൽ പൂർണ്ണ സ്ക്രീൻ ആക്റ്റിവിറ്റികളായി അറിയിപ്പുകൾ പ്രദർശിപ്പിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"കുറുക്കുവഴികൾ ഇൻസ്റ്റാളുചെയ്യുക"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"ഉപയോക്തൃ ഇടപെടലില്ലാതെ ഹോംസ്‌ക്രീൻ കുറുക്കുവഴികൾ ചേർക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"കുറുക്കുവഴികൾ അൺഇൻസ്റ്റാളുചെയ്യുക"</string>
@@ -556,8 +559,7 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"ബയോമെട്രിക്‌സ് അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"ഇത് നിങ്ങളാണെന്ന് പരിശോധിച്ചുറപ്പിക്കുക"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"തുടരാൻ ബയോമെട്രിക് ഉപയോഗിക്കുക"</string>
-    <!-- no translation found for biometric_or_screen_lock_dialog_default_subtitle (159539678371552009) -->
-    <skip />
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"തുടരാൻ നിങ്ങളുടെ ബയോമെട്രിക്‌ അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ബയോമെട്രിക് ഹാർ‌ഡ്‌വെയർ ലഭ്യമല്ല"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"തിരിച്ചറിഞ്ഞില്ല"</string>
@@ -591,8 +593,7 @@
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കുക"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ഫിംഗർപ്രിന്റ് അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"തുടരുന്നതിന് നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കുക"</string>
-    <!-- no translation found for fingerprint_or_screen_lock_dialog_default_subtitle (5195808203117992200) -->
-    <skip />
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"തുടരാൻ നിങ്ങളുടെ ഫിംഗർപ്രിന്റ്‌ അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
@@ -640,8 +641,7 @@
     <string name="face_app_setting_name" msgid="8130135875458467243">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"മുഖം അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"തുടരാൻ മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഉപയോഗിക്കുക"</string>
-    <!-- no translation found for face_or_screen_lock_dialog_default_subtitle (5006381531158341844) -->
-    <skip />
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"തുടരാൻ നിങ്ങളുടെ മുഖം‌ അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"മുഖത്തിന്റെ ഐക്കൺ"</string>
@@ -1005,10 +1005,8 @@
     <string name="open_permission_deny" msgid="5136793905306987251">"ഈ പേജ് തുറക്കുന്നതിന് നിങ്ങൾക്ക് അനുമതിയില്ല."</string>
     <string name="text_copied" msgid="2531420577879738860">"ടെക്‌സ്റ്റ് ക്ലിപ്‍ബോർഡിലേക്ക് പകർത്തി."</string>
     <string name="copied" msgid="4675902854553014676">"പകർത്തി"</string>
-    <!-- no translation found for pasted_from_app (5627698450808256545) -->
-    <skip />
-    <!-- no translation found for pasted_from_clipboard (6295556725844421812) -->
-    <skip />
+    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> എന്നതിൽ നിന്ന് <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ഒട്ടിച്ചു"</string>
+    <string name="pasted_from_clipboard" msgid="6295556725844421812">"ക്ലിപ്‌ബോർഡിൽ നിന്ന് <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ഒട്ടിച്ചു"</string>
     <string name="more_item_label" msgid="7419249600215749115">"കൂടുതൽ"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"മെനു+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"മെറ്റ+"</string>
@@ -1382,17 +1380,14 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"ഓഫാക്കുക"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> പരിശോധിക്കുന്നു…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"നിലവിലെ ഉള്ളടക്കം അവലോകനം ചെയ്യുന്നു"</string>
-    <!-- no translation found for ext_media_checking_notification_message (7986154434946021415) -->
-    <skip />
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"മീഡിയാ സ്റ്റോറേജ് വിശകലനം ചെയ്യുന്നു"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"പുതിയ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> പ്രവർത്തിക്കുന്നില്ല"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"സജ്ജമാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
-    <!-- no translation found for ext_media_new_notification_message (216863352100263668) -->
-    <skip />
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"സജ്ജീകരിക്കാൻ തിരഞ്ഞെടുക്കുക"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം. പുറത്തെടുക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ഫോട്ടോകളും മീഡിയയും ട്രാൻസ്‌ഫർ ചെയ്യാൻ"</string>
-    <!-- no translation found for ext_media_ready_notification_message (8847134811163165935) -->
-    <skip />
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"മീഡിയാ ഫയലുകൾ ബ്രൗസ് ചെയ്യുക"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>-ൽ പ്രശ്‌നം"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> പ്രവർത്തിക്കുന്നില്ല"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"പരിഹരിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
@@ -1401,8 +1396,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"പിന്തുണയില്ലാത്ത <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> പ്രവർത്തിക്കുന്നില്ല"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ഈ ഉപകരണം <xliff:g id="NAME">%s</xliff:g> പിന്തുണയ്ക്കുന്നതല്ല. പിന്തുണയുള്ള ഫോർമാറ്റിൽ സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക."</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (1595482802187036532) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"പിന്തുണയ്‌ക്കുന്ന ഫോർമാറ്റിൽ <xliff:g id="NAME">%s</xliff:g> സജ്ജീകരിക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> അപ്രതീക്ഷിതമായി നീക്കംചെയ്‌തു"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"ഉള്ളടക്കം നഷ്‌ടമാകുന്നത് തടയാൻ, നീക്കം ചെയ്യുന്നതിന് മുൻപ് മീഡിയ ഒഴിവാക്കുക"</string>
@@ -2105,6 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"സ്ക്രീനിലെ ഉപയോഗസഹായി കുറുക്കുവഴി"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"സ്ക്രീനിലെ ഉപയോഗസഹായി കുറുക്കുവഴി ചൂസർ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ഉപയോഗസഹായി കുറുക്കുവഴി"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"അറിയിപ്പ് ഷെയ്‌ഡ് ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിന്റെ അടിക്കുറിപ്പ് ബാർ."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> നിയന്ത്രിത ബക്കറ്റിലേക്ക് നീക്കി"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2242,8 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"പുതിയത്: വിൻഡോ മാഗ്നിഫൈയർ"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"സ്ക്രീനിന്റെ ഭാഗങ്ങളോ മുഴുവനുമോ മാഗ്നിഫൈ ചെയ്യാം"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"നിങ്ങളുടെ സ്ക്രീനിന്റെ ഒരു ഭാഗം മാഗ്നിഫൈ ചെയ്യുക"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"നിങ്ങൾക്ക് സ്ക്രീൻ പൂർണ്ണമായോ, ഒരു പ്രത്യേക ഭാഗമോ മാഗ്നിഫൈ ചെയ്യാം അല്ലെങ്കിൽ ഈ രണ്ട് ഓപ്ഷനുകൾക്കിടയിൽ പരസ്‌പരം മാറുക."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ക്രമീകരണത്തിൽ ഓണാക്കുക"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"തുടരാൻ, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ആപ്പിന് നിങ്ങളുടെ ഉപകരണത്തിന്റെ മൈക്രോഫോണിലേക്ക് ആക്‌സസ് നൽകേണ്ടതുണ്ട്."</string>
@@ -2252,4 +2247,8 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"സെൻസർ സ്വകാര്യത"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ആപ്പ് ഐക്കൺ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"അപ്ലിക്കേഷൻ ബ്രാൻഡിംഗ് ഇമേജ്"</string>
+    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
+    <skip />
+    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
+    <skip />
 </resources>

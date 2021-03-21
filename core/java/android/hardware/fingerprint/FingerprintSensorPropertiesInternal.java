@@ -62,7 +62,7 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
 
     public FingerprintSensorPropertiesInternal(int sensorId,
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
-            List<ComponentInfoInternal> componentInfo,
+            @NonNull List<ComponentInfoInternal> componentInfo,
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken, int sensorLocationX, int sensorLocationY,
             int sensorRadius) {
@@ -83,7 +83,7 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
      */
     public FingerprintSensorPropertiesInternal(int sensorId,
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
-            List<ComponentInfoInternal> componentInfo,
+            @NonNull List<ComponentInfoInternal> componentInfo,
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken) {
         // TODO(b/179175438): Value should be provided from the HAL
@@ -99,7 +99,7 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
     // TODO(b/179175438): Remove this constructor once all HALs move to AIDL.
     public FingerprintSensorPropertiesInternal(@NonNull Context context, int sensorId,
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
-            List<ComponentInfoInternal> componentInfo,
+            @NonNull List<ComponentInfoInternal> componentInfo,
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken) {
         super(sensorId, strength, maxEnrollmentsPerUser, componentInfo,

@@ -469,7 +469,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mListeners.getNotificationListenerFilter(any())).thenReturn(mNlf);
         mListener = mListeners.new ManagedServiceInfo(
                 null, new ComponentName(PKG, "test_class"),
-                UserHandle.getUserId(mUid), true, null, 0);
+                UserHandle.getUserId(mUid), true, null, 0, 123);
         ComponentName defaultComponent = ComponentName.unflattenFromString("config/device");
         ArraySet<ComponentName> components = new ArraySet<>();
         components.add(defaultComponent);
@@ -2869,7 +2869,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         snoozeNotificationRunnable.run();
 
         ManagedServices.ManagedServiceInfo listener = mListeners.new ManagedServiceInfo(
-                null, new ComponentName(PKG, "test_class"), mUid, true, null, 0);
+                null, new ComponentName(PKG, "test_class"), mUid, true, null, 0, 234);
         listener.isSystem = true;
         when(mListeners.checkServiceTokenLocked(any())).thenReturn(listener);
 

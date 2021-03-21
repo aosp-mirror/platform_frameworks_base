@@ -297,6 +297,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Pokrenuta aplikacija"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacije koje troše bateriju"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Uvećavanje"</string>
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Pravila o sigurnosti za pristupačnost"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> troši bateriju"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Broj aplikacija koje troše bateriju: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
@@ -347,6 +348,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Dozvoljava aplikaciji da postane statusna traka."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"proširivanje/sužavanje statusne trake"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Dozvoljava aplikaciji proširivanje ili sužavanje statusne trake."</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"prikaz obavještenja kao aktivnosti preko cijelog ekrana na zaključanom uređaju"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Dozvoljava aplikaciji da prikazuje obavještenja kao aktivnosti preko cijelog ekrana na zaključanom uređaju"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"instaliranje prečica"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Omogućava aplikaciji dodavanje prečice za početni ekran bez intervencije korisnika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"uklanjanje prečica"</string>
@@ -2129,6 +2132,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Prečica za pristupačnost na ekranu"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Okvir za odabir prečice za pristupačnost na ekranu"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Prečica za pristupačnost"</string>
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Odbacite lokaciju za obavještenja"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Traka za natpis aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Paket <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> je stavljen u odjeljak OGRANIČENO"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2266,8 +2270,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Novo: povećalo prozora"</string>
-    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Sada možete uvećati dio ekrana ili cijeli ekran"</string>
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Uvećajte dio ekrana"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Sada možete uvećati prikaz preko cijelog ekrana, željeno područje ili prebacivati s jedne opcije na drugu."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Uključite u Postavkama"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Odbaci"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Da nastavite, aplikaciji &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; je potreban pristup mikrofonu vašeg uređaja."</string>
@@ -2276,4 +2280,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privatnost senzora"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikona aplikacije"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Slika robne marke za aplikaciju"</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Provjerite postavke pristupa"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> može pregledavati i kontrolirati vaš zaslon. Dodirnite za pregled."</string>
 </resources>
