@@ -24,6 +24,6 @@ import android.view.translation.TranslationResponse;
  * @hide
  */
 oneway interface ITranslationCallback {
-    void onTranslationComplete(in TranslationResponse translationResponse);
+    void onTranslationResponse(in TranslationResponse translationResponse);
     void onError();
 }
