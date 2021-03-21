@@ -287,7 +287,7 @@ public class UiTranslationController {
         final TranslationRequest request = new TranslationRequest.Builder()
                 .setViewTranslationRequests(requests)
                 .build();
-        translator.requestUiTranslate(request, this::onTranslationCompleted);
+        translator.requestUiTranslate(request, (r) -> r.run(), this::onTranslationCompleted);
     }
 
     /**

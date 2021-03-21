@@ -42,7 +42,6 @@ import android.view.translation.TranslationResponse;
 import android.view.translation.TranslationSpec;
 
 import com.android.internal.os.IResultReceiver;
-import com.android.internal.util.SyncResultReceiver;
 
 /**
  * Service for translating text.
@@ -139,30 +138,10 @@ public abstract class TranslationService extends Service {
 
                 @Override
                 public void onTranslationRequest(TranslationRequest request, int sessionId,
-                        ITranslationCallback callback, IResultReceiver receiver)
+                        ITranslationCallback callback)
                         throws RemoteException {
-                    // TODO(b/176464808): Currently, the API is used for both sync and async case.
-                    // It may work now, but maybe two methods is more cleaner. To think how to
-                    // define the APIs for these two cases.
-                    final ITranslationCallback cb = callback != null
-                            ? callback
-                            : new ITranslationCallback.Stub() {
-                                @Override
-                                public void onTranslationComplete(
-                                        TranslationResponse translationResponse)
-                                        throws RemoteException {
-                                    receiver.send(0,
-                                            SyncResultReceiver.bundleFor(translationResponse));
-                                }
-
-                                @Override
-                                public void onError() throws RemoteException {
-                                    //TODO: implement default error callback
-                                }
-                            };
-                    // TODO(b/176464808): make it a private member of client
                     final OnTranslationResultCallback translationResultCallback =
-                            new OnTranslationResultCallbackWrapper(cb);
+                            new OnTranslationResultCallbackWrapper(callback);
                     mHandler.sendMessage(obtainMessage(TranslationService::onTranslationRequest,
                             TranslationService.this, request, sessionId, mCancellationSignal,
                             translationResultCallback));
