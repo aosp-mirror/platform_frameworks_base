@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.net.ConnectivityManager.NETID_UNSET;
+
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.system.ErrnoException;
@@ -55,6 +57,8 @@ public class NetworkUtils {
      */
     public static native void detachBPFFilter(FileDescriptor fd) throws SocketException;
 
+    private static native boolean bindProcessToNetworkHandle(long netHandle);
+
     /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created
      * in the future (and not explicitly bound via a bound {@link SocketFactory} (see
@@ -63,13 +67,20 @@ public class NetworkUtils {
      * is by design so an application doesn't accidentally use sockets it thinks are still bound to
      * a particular {@code Network}.  Passing NETID_UNSET clears the binding.
      */
-    public native static boolean bindProcessToNetwork(int netId);
+    public static boolean bindProcessToNetwork(int netId) {
+        return bindProcessToNetworkHandle(new Network(netId).getNetworkHandle());
+    }
+
+    private static native long getBoundNetworkHandleForProcess();
 
     /**
      * Return the netId last passed to {@link #bindProcessToNetwork}, or NETID_UNSET if
      * {@link #unbindProcessToNetwork} has been called since {@link #bindProcessToNetwork}.
      */
-    public native static int getBoundNetworkForProcess();
+    public static int getBoundNetworkForProcess() {
+        final long netHandle = getBoundNetworkHandleForProcess();
+        return netHandle == 0L ? NETID_UNSET : Network.fromNetworkHandle(netHandle).getNetId();
+    }
 
     /**
      * Binds host resolutions performed by this process to the network designated by {@code netId}.
