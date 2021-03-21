@@ -67,6 +67,14 @@ public final class TranslationResponse implements Parcelable {
     @NonNull
     private final SparseArray<ViewTranslationResponse> mViewTranslationResponses;
 
+    /**
+     * Whether this response contains complete translated values, or is the final response in a
+     * series of partial responses.
+     *
+     * <p>This is {@code true} by default.</p>
+     */
+    private final boolean mFinalResponse;
+
     abstract static class BaseBuilder {
 
         /**
@@ -122,6 +130,10 @@ public final class TranslationResponse implements Parcelable {
         return new SparseArray<>();
     }
 
+    private static boolean defaultFinalResponse() {
+        return true;
+    }
+
 
 
 
@@ -166,7 +178,8 @@ public final class TranslationResponse implements Parcelable {
     /* package-private */ TranslationResponse(
             @TranslationStatus int translationStatus,
             @NonNull SparseArray<TranslationResponseValue> translationResponseValues,
-            @NonNull SparseArray<ViewTranslationResponse> viewTranslationResponses) {
+            @NonNull SparseArray<ViewTranslationResponse> viewTranslationResponses,
+            boolean finalResponse) {
         this.mTranslationStatus = translationStatus;
 
         if (!(mTranslationStatus == TRANSLATION_STATUS_SUCCESS)
@@ -185,6 +198,7 @@ public final class TranslationResponse implements Parcelable {
         this.mViewTranslationResponses = viewTranslationResponses;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mViewTranslationResponses);
+        this.mFinalResponse = finalResponse;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -215,6 +229,17 @@ public final class TranslationResponse implements Parcelable {
         return mViewTranslationResponses;
     }
 
+    /**
+     * Whether this response contains complete translated values, or is the final response in a
+     * series of partial responses.
+     *
+     * <p>This is {@code true} by default.</p>
+     */
+    @DataClass.Generated.Member
+    public boolean isFinalResponse() {
+        return mFinalResponse;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -224,7 +249,8 @@ public final class TranslationResponse implements Parcelable {
         return "TranslationResponse { " +
                 "translationStatus = " + translationStatusToString(mTranslationStatus) + ", " +
                 "translationResponseValues = " + mTranslationResponseValues + ", " +
-                "viewTranslationResponses = " + mViewTranslationResponses +
+                "viewTranslationResponses = " + mViewTranslationResponses + ", " +
+                "finalResponse = " + mFinalResponse +
         " }";
     }
 
@@ -234,6 +260,9 @@ public final class TranslationResponse implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
+        byte flg = 0;
+        if (mFinalResponse) flg |= 0x8;
+        dest.writeByte(flg);
         dest.writeInt(mTranslationStatus);
         dest.writeSparseArray(mTranslationResponseValues);
         dest.writeSparseArray(mViewTranslationResponses);
@@ -250,6 +279,8 @@ public final class TranslationResponse implements Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
+        byte flg = in.readByte();
+        boolean finalResponse = (flg & 0x8) != 0;
         int translationStatus = in.readInt();
         SparseArray<TranslationResponseValue> translationResponseValues = (SparseArray) in.readSparseArray(TranslationResponseValue.class.getClassLoader());
         SparseArray<ViewTranslationResponse> viewTranslationResponses = (SparseArray) in.readSparseArray(ViewTranslationResponse.class.getClassLoader());
@@ -272,6 +303,7 @@ public final class TranslationResponse implements Parcelable {
         this.mViewTranslationResponses = viewTranslationResponses;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mViewTranslationResponses);
+        this.mFinalResponse = finalResponse;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -300,6 +332,7 @@ public final class TranslationResponse implements Parcelable {
         private @TranslationStatus int mTranslationStatus;
         private @NonNull SparseArray<TranslationResponseValue> mTranslationResponseValues;
         private @NonNull SparseArray<ViewTranslationResponse> mViewTranslationResponses;
+        private boolean mFinalResponse;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -360,10 +393,24 @@ public final class TranslationResponse implements Parcelable {
             return this;
         }
 
+        /**
+         * Whether this response contains complete translated values, or is the final response in a
+         * series of partial responses.
+         *
+         * <p>This is {@code true} by default.</p>
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setFinalResponse(boolean value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x8;
+            mFinalResponse = value;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull TranslationResponse build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x8; // Mark builder used
+            mBuilderFieldsSet |= 0x10; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x2) == 0) {
                 mTranslationResponseValues = defaultTranslationResponseValues();
@@ -371,15 +418,19 @@ public final class TranslationResponse implements Parcelable {
             if ((mBuilderFieldsSet & 0x4) == 0) {
                 mViewTranslationResponses = defaultViewTranslationResponses();
             }
+            if ((mBuilderFieldsSet & 0x8) == 0) {
+                mFinalResponse = defaultFinalResponse();
+            }
             TranslationResponse o = new TranslationResponse(
                     mTranslationStatus,
                     mTranslationResponseValues,
-                    mViewTranslationResponses);
+                    mViewTranslationResponses,
+                    mFinalResponse);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x8) != 0) {
+            if ((mBuilderFieldsSet & 0x10) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -387,10 +438,10 @@ public final class TranslationResponse implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1614211889478L,
+            time = 1616189850232L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationResponse.java",
-            inputSignatures = "public static final  int TRANSLATION_STATUS_SUCCESS\npublic static final  int TRANSLATION_STATUS_UNKNOWN_ERROR\npublic static final  int TRANSLATION_STATUS_CONTEXT_UNSUPPORTED\nprivate final @android.view.translation.TranslationResponse.TranslationStatus int mTranslationStatus\nprivate final @android.annotation.NonNull android.util.SparseArray<android.view.translation.TranslationResponseValue> mTranslationResponseValues\nprivate final @android.annotation.NonNull android.util.SparseArray<android.view.translation.ViewTranslationResponse> mViewTranslationResponses\nprivate static  android.util.SparseArray<android.view.translation.TranslationResponseValue> defaultTranslationResponseValues()\nprivate static  android.util.SparseArray<android.view.translation.ViewTranslationResponse> defaultViewTranslationResponses()\nclass TranslationResponse extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int,android.view.translation.TranslationResponseValue)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int,android.view.translation.ViewTranslationResponse)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genHiddenConstDefs=true)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int,android.view.translation.TranslationResponseValue)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int,android.view.translation.ViewTranslationResponse)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "public static final  int TRANSLATION_STATUS_SUCCESS\npublic static final  int TRANSLATION_STATUS_UNKNOWN_ERROR\npublic static final  int TRANSLATION_STATUS_CONTEXT_UNSUPPORTED\nprivate final @android.view.translation.TranslationResponse.TranslationStatus int mTranslationStatus\nprivate final @android.annotation.NonNull android.util.SparseArray<android.view.translation.TranslationResponseValue> mTranslationResponseValues\nprivate final @android.annotation.NonNull android.util.SparseArray<android.view.translation.ViewTranslationResponse> mViewTranslationResponses\nprivate final  boolean mFinalResponse\nprivate static  android.util.SparseArray<android.view.translation.TranslationResponseValue> defaultTranslationResponseValues()\nprivate static  android.util.SparseArray<android.view.translation.ViewTranslationResponse> defaultViewTranslationResponses()\nprivate static  boolean defaultFinalResponse()\nclass TranslationResponse extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int,android.view.translation.TranslationResponseValue)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int,android.view.translation.ViewTranslationResponse)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genHiddenConstDefs=true)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int,android.view.translation.TranslationResponseValue)\npublic @android.annotation.NonNull @java.lang.SuppressWarnings android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int,android.view.translation.ViewTranslationResponse)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 
