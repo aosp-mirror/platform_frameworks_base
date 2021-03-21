@@ -7641,8 +7641,7 @@ public class ConnectivityServiceTest {
         assertUidRangesUpdatedForMyUid(true);
         defaultCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
         vpnUidCallback.assertNoCallback();  // vpnUidCallback has NOT_VPN capability.
-        // TODO: this is a bug. The VPN does not apply to VPN_UID.
-        vpnUidDefaultCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
+        vpnUidDefaultCallback.assertNoCallback();  // VPN does not apply to VPN_UID
         assertEquals(mMockVpn.getNetwork(), mCm.getActiveNetwork());
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetworkForUid(VPN_UID));
         assertActiveNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
@@ -7654,7 +7653,7 @@ public class ConnectivityServiceTest {
         defaultCallback.expectCallback(CallbackEntry.LOST, mMockVpn);
         defaultCallback.expectAvailableCallbacksUnvalidatedAndBlocked(mWiFiNetworkAgent);
         vpnUidCallback.assertNoCallback();
-        vpnUidDefaultCallback.expectCallback(CallbackEntry.LOST, mMockVpn);  // BUG!
+        vpnUidDefaultCallback.assertNoCallback();
         assertNull(mCm.getActiveNetwork());
 
         mCm.unregisterNetworkCallback(callback);
