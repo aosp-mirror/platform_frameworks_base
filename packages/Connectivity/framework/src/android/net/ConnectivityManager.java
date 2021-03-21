@@ -73,7 +73,6 @@ import android.util.Log;
 import android.util.Range;
 import android.util.SparseIntArray;
 
-import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
