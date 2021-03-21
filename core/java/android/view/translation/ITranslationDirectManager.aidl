@@ -18,7 +18,6 @@ package android.view.translation;
 
 import android.view.translation.TranslationRequest;
 import android.service.translation.ITranslationCallback;
-import com.android.internal.os.IResultReceiver;
 
 /**
   * Interface between an app (TranslationManager / Translator) and the remote TranslationService
@@ -28,6 +27,6 @@ import com.android.internal.os.IResultReceiver;
   */
 oneway interface ITranslationDirectManager {
     void onTranslationRequest(in TranslationRequest request, int sessionId,
-         in ITranslationCallback callback, in IResultReceiver receiver);
+         in ITranslationCallback callback);
     void onFinishTranslationSession(int sessionId);
 }
