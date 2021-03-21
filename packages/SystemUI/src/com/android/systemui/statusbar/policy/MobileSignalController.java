@@ -25,11 +25,11 @@ import android.provider.Settings.Global;
 import android.telephony.Annotation;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthCdma;
-import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.text.Html;
@@ -63,7 +63,7 @@ public class MobileSignalController extends SignalController<
     private final String mNetworkNameSeparator;
     private final ContentObserver mObserver;
     @VisibleForTesting
-    final PhoneStateListener mPhoneStateListener;
+    final MobileTelephonyCallback mTelephonyCallback;
     // Save entire info for logging, we only use the id.
     final SubscriptionInfo mSubscriptionInfo;
 
@@ -83,6 +83,7 @@ public class MobileSignalController extends SignalController<
     private Config mConfig;
     @VisibleForTesting
     boolean mInflateSignalStrengths = false;
+    final Handler mHandler;
 
     // TODO: Reduce number of vars passed in, if we have the NetworkController, probably don't
     // need listener lists anymore.
@@ -98,7 +99,8 @@ public class MobileSignalController extends SignalController<
         mPhone = phone;
         mDefaults = defaults;
         mSubscriptionInfo = info;
-        mPhoneStateListener = new MobilePhoneStateListener((new Handler(receiverLooper))::post);
+        mHandler = new Handler(receiverLooper);
+        mTelephonyCallback = new MobileTelephonyCallback();
         mNetworkNameSeparator = getTextIfExists(R.string.status_bar_network_name_separator)
                 .toString();
         mNetworkNameDefault = getTextIfExists(
@@ -157,15 +159,7 @@ public class MobileSignalController extends SignalController<
      * Start listening for phone state changes.
      */
     public void registerListener() {
-        mPhone.listen(mPhoneStateListener,
-                PhoneStateListener.LISTEN_SERVICE_STATE
-                        | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
-                        | PhoneStateListener.LISTEN_CALL_STATE
-                        | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
-                        | PhoneStateListener.LISTEN_DATA_ACTIVITY
-                        | PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE
-                        | PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE
-                        | PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED);
+        mPhone.registerTelephonyCallback(mHandler::post, mTelephonyCallback);
         mContext.getContentResolver().registerContentObserver(Global.getUriFor(Global.MOBILE_DATA),
                 true, mObserver);
         mContext.getContentResolver().registerContentObserver(Global.getUriFor(
@@ -177,7 +171,7 @@ public class MobileSignalController extends SignalController<
      * Stop listening for phone state changes.
      */
     public void unregisterListener() {
-        mPhone.listen(mPhoneStateListener, 0);
+        mPhone.unregisterTelephonyCallback(mTelephonyCallback);
         mContext.getContentResolver().unregisterContentObserver(mObserver);
     }
 
@@ -622,11 +616,15 @@ public class MobileSignalController extends SignalController<
         pw.println("  isDataDisabled=" + isDataDisabled() + ",");
     }
 
-    class MobilePhoneStateListener extends PhoneStateListener {
-        public MobilePhoneStateListener(Executor executor) {
-            super(executor);
-        }
-
+    class MobileTelephonyCallback extends TelephonyCallback implements
+            TelephonyCallback.SignalStrengthsListener,
+            TelephonyCallback.ServiceStateListener,
+            TelephonyCallback.DataConnectionStateListener,
+            TelephonyCallback.DataActivityListener,
+            TelephonyCallback.CarrierNetworkListener,
+            TelephonyCallback.ActiveDataSubscriptionIdListener,
+            TelephonyCallback.DisplayInfoListener
+    {
         @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
             if (DEBUG) {

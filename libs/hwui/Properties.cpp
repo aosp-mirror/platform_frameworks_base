@@ -124,7 +124,7 @@ bool Properties::load() {
     SkAndroidFrameworkTraceUtil::setEnableTracing(
             base::GetBoolProperty(PROPERTY_SKIA_ATRACE_ENABLED, false));
 
-    runningInEmulator = base::GetBoolProperty(PROPERTY_QEMU_KERNEL, false);
+    runningInEmulator = base::GetBoolProperty(PROPERTY_IS_EMULATOR, false);
 
     defaultRenderAhead = std::max(-1, std::min(2, base::GetIntProperty(PROPERTY_RENDERAHEAD,
             render_ahead().value_or(0))));

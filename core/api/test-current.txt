@@ -82,7 +82,7 @@ package android.app {
     method public static boolean isHighEndGfx();
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
-    field public static final int PROCESS_CAPABILITY_ALL = 15; // 0xf
+    field public static final int PROCESS_CAPABILITY_ALL = 7; // 0x7
     field public static final int PROCESS_CAPABILITY_ALL_EXPLICIT = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_ALL_IMPLICIT = 6; // 0x6
     field public static final int PROCESS_CAPABILITY_FOREGROUND_CAMERA = 2; // 0x2
@@ -246,6 +246,10 @@ package android.app {
     method public void disallowAssistantAdjustment(String);
     method public android.content.ComponentName getEffectsSuppressor();
     method public boolean matchesCallFilter(android.os.Bundle);
+  }
+
+  public final class PendingIntent implements android.os.Parcelable {
+    method @RequiresPermission("android.permission.GET_INTENT_SENDER_INTENT") public boolean intentFilterEquals(@Nullable android.app.PendingIntent);
   }
 
   public final class PictureInPictureParams implements android.os.Parcelable {
@@ -1600,6 +1604,10 @@ package android.telecom {
     method @NonNull public android.telecom.ConnectionRequest.Builder setVideoState(int);
   }
 
+  public abstract class ConnectionService extends android.app.Service {
+    method public void onBindClient(@Nullable android.content.Intent);
+  }
+
 }
 
 package android.telephony {
@@ -1629,10 +1637,10 @@ package android.telephony {
     method public static void setMinMatchForTest(int);
   }
 
-  public class PhoneStateListener {
-    method public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
+  @Deprecated public class PhoneStateListener {
+    method @Deprecated public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
     method @Deprecated public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
-    method public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
+    method @Deprecated public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
   }
 
   public final class PreciseDataConnectionState implements android.os.Parcelable {

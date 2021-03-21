@@ -5580,28 +5580,25 @@ public class TelephonyManager {
      * instability. If a process has registered too many listeners without unregistering them, it
      * may encounter an {@link IllegalStateException} when trying to register more listeners.
      *
-     * @param listener The {@link PhoneStateListener} object to register (or unregister)
-     * @param events The telephony state(s) of interest to the listener, as a bitwise-OR combination
-     *               of {@link PhoneStateListener} LISTEN_ flags.
-     * @deprecated Use {@link #registerPhoneStateListener(Executor, PhoneStateListener)}.
+     * @param listener The {@link PhoneStateListener} object to register
+     *                 (or unregister)
+     * @param events The telephony state(s) of interest to the listener,
+     *               as a bitwise-OR combination of {@link PhoneStateListener}
+     *               LISTEN_ flags.
+     * @deprecated Use {@link #registerTelephonyCallback(Executor, TelephonyCallback)}.
      */
     @Deprecated
     public void listen(PhoneStateListener listener, int events) {
-        if (!listener.isExecutorSet()) {
-            throw new IllegalStateException("PhoneStateListener should be created on a thread "
-                    + "with Looper.myLooper() != null");
-        }
-        boolean notifyNow = getITelephony() != null;
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr != null) {
-            if (events != PhoneStateListener.LISTEN_NONE) {
-                mTelephonyRegistryMgr.registerPhoneStateListenerWithEvents(mSubId,
-                        getOpPackageName(), getAttributionTag(), listener, events, notifyNow);
-            } else {
-                unregisterPhoneStateListener(listener);
-            }
+        if (mContext == null) return;
+        boolean notifyNow = (getITelephony() != null);
+        TelephonyRegistryManager telephonyRegistry =
+                (TelephonyRegistryManager)
+                        mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
+        if (telephonyRegistry != null) {
+            telephonyRegistry.listenFromListener(mSubId, getOpPackageName(),
+                    getAttributionTag(), listener, events, notifyNow);
         } else {
-            throw new IllegalStateException("telephony service is null.");
+            Rlog.w(TAG, "telephony registry not ready.");
         }
     }
 
@@ -8227,7 +8224,8 @@ public class TelephonyManager {
     @IntDef({
             ALLOWED_NETWORK_TYPES_REASON_USER,
             ALLOWED_NETWORK_TYPES_REASON_POWER,
-            ALLOWED_NETWORK_TYPES_REASON_CARRIER
+            ALLOWED_NETWORK_TYPES_REASON_CARRIER,
+            ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -8264,6 +8262,14 @@ public class TelephonyManager {
     public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2;
 
     /**
+     * To indicate allowed network type change is requested by the user via the 2G toggle.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
+
+    /**
      * Set the allowed network types of the device and
      * provide the reason triggering the allowed network change.
      * This can be called for following reasons
@@ -8272,6 +8278,8 @@ public class TelephonyManager {
      * <li>Allowed network types control by power manager
      * {@link #ALLOWED_NETWORK_TYPES_REASON_POWER}
      * <li>Allowed network types control by carrier {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER}
+     * <li>Allowed network types control by the user-controlled "Allow 2G" toggle
+     * {@link #ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}
      * </ol>
      * This API will result in allowing an intersection of allowed network types for all reasons,
      * including the configuration done through other reasons.
@@ -8361,6 +8369,7 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_POWER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
+            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
                 return true;
         }
         return false;
@@ -13984,33 +13993,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Get carrier bandwidth. In case of Dual connected network this will report
-     * bandwidth per primary and secondary network.
-     * @return CarrierBandwidth with bandwidth of both primary and secondary carrier.
-     * @throws IllegalStateException if the Telephony process is not currently available.
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    @NonNull
-    public CarrierBandwidth getCarrierBandwidth() {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.getCarrierBandwidth(getSubId());
-            } else {
-                throw new IllegalStateException("telephony service is null.");
-            }
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getCarrierBandwidth RemoteException", ex);
-            ex.rethrowFromSystemServer();
-        }
-
-        //Should not reach. Adding return statement to make compiler happy
-        return null;
-    }
-
-    /**
      * Called when userActivity is signalled in the power manager.
      * This should only be called from system Uid.
      * @hide
@@ -14114,6 +14096,10 @@ public class TelephonyManager {
     /**
      * Enable/Disable E-UTRA-NR Dual Connectivity.
      *
+     * This api is supported only if
+     * {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
+     * ({@link TelephonyManager#CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE})
+     * returns true.
      * @param nrDualConnectivityState expected NR dual connectivity state
      * This can be passed following states
      * <ol>
@@ -14123,12 +14109,14 @@ public class TelephonyManager {
      * {@link #NR_DUAL_CONNECTIVITY_DISABLE_IMMEDIATE}
      * </ol>
      * @return operation result.
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE)
     public @EnableNrDualConnectivityResult int setNrDualConnectivityState(
             @NrDualConnectivityState int nrDualConnectivityState) {
         try {
@@ -14148,15 +14136,21 @@ public class TelephonyManager {
 
     /**
      * Is E-UTRA-NR Dual Connectivity enabled.
+     * This api is supported only if
+     * {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
+     * ({@link TelephonyManager#CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE})
+     * returns true.
      * @return true if dual connectivity is enabled else false. Enabled state does not mean dual
      * connectivity is active. It means the device is allowed to connect to both primary and
      * secondary cell.
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE)
     public boolean isNrDualConnectivityEnabled() {
         try {
             ITelephony telephony = getITelephony();
@@ -14408,11 +14402,23 @@ public class TelephonyManager {
     public static final String CAPABILITY_ALLOWED_NETWORK_TYPES_USED =
             "CAPABILITY_ALLOWED_NETWORK_TYPES_USED";
 
+    /**
+     * Indicates whether {@link #setNrDualConnectivityState()} and
+     * {@link #isNrDualConnectivityEnabled()} ()} are available.  See comments
+     * on respective methods for more information.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE =
+            "CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = "CAPABILITY_", value = {
             CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE,
             CAPABILITY_ALLOWED_NETWORK_TYPES_USED,
+            CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE
     })
     public @interface RadioInterfaceCapability {}
 
@@ -14548,6 +14554,80 @@ public class TelephonyManager {
         return THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR;
     }
 
+    /**
+     * Registers a callback object to receive notification of changes in specified telephony states.
+     * <p>
+     * To register a callback, pass a {@link TelephonyCallback} which implements
+     * interfaces of events. For example,
+     * FakeServiceStateCallback extends {@link TelephonyCallback} implements
+     * {@link TelephonyCallback.ServiceStateListener}.
+     *
+     * At registration, and when a specified telephony state changes, the telephony manager invokes
+     * the appropriate callback method on the callback object and passes the current (updated)
+     * values.
+     * <p>
+     *
+     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
+     * applies to the given subId. Otherwise, applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To register events for multiple
+     * subIds, pass a separate callback object to each TelephonyManager object created with
+     * {@link #createForSubscriptionId}.
+     *
+     * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
+     * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
+     * {@link SecurityException} will be thrown otherwise.
+     *
+     * This API should be used sparingly -- large numbers of callbacks will cause system
+     * instability. If a process has registered too many callbacks without unregistering them, it
+     * may encounter an {@link IllegalStateException} when trying to register more callbacks.
+     *
+     * @param executor The executor of where the callback will execute.
+     * @param callback The {@link TelephonyCallback} object to register.
+     */
+    public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull TelephonyCallback callback) {
+
+        if (mContext == null) {
+            throw new IllegalStateException("telephony service is null.");
+        }
+
+        if (executor == null || callback == null) {
+            throw new IllegalArgumentException("TelephonyCallback and executor must be non-null");
+        }
+        mTelephonyRegistryMgr = (TelephonyRegistryManager)
+                mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
+        if (mTelephonyRegistryMgr != null) {
+            mTelephonyRegistryMgr.registerTelephonyCallback(executor, mSubId, getOpPackageName(),
+                    getAttributionTag(), callback, getITelephony() != null);
+        } else {
+            throw new IllegalStateException("telephony service is null.");
+        }
+    }
+
+    /**
+     * Unregister an existing {@link TelephonyCallback}.
+     *
+     * @param callback The {@link TelephonyCallback} object to unregister.
+     */
+    public void unregisterTelephonyCallback(@NonNull TelephonyCallback callback) {
+
+        if (mContext == null) {
+            throw new IllegalStateException("telephony service is null.");
+        }
+
+        if (callback.callback == null) {
+            return;
+        }
+
+        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (mTelephonyRegistryMgr != null) {
+            mTelephonyRegistryMgr.unregisterTelephonyCallback(mSubId, getOpPackageName(),
+                    getAttributionTag(), callback, getITelephony() != null);
+        } else {
+            throw new IllegalStateException("telephony service is null.");
+        }
+    }
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"GBA_FAILURE_REASON_"}, value = {
@@ -14655,13 +14735,17 @@ public class TelephonyManager {
      * </ul>
      * @param appType icc application type, like {@link #APPTYPE_USIM} or {@link
      * #APPTYPE_ISIM} or {@link#APPTYPE_UNKNOWN}
-     * @param nafId Network Application Function(NAF) fully qualified domain name and
-     * the selected GBA mode. It shall contain two parts delimited by "@" sign. The first
-     * part is the constant string "3GPP-bootstrapping" (GBA_ME),
-     * "3GPP-bootstrapping-uicc" (GBA_ U), or "3GPP-bootstrapping-digest" (GBA_Digest),
-     * and the latter part shall be the FQDN of the NAF (e.g.
-     * "3GPP-bootstrapping@naf1.operator.com" or "3GPP-bootstrapping-uicc@naf1.operator.com",
-     * or "3GPP-bootstrapping-digest@naf1.operator.com").
+     * @param nafId A URI to specify Network Application Function(NAF) fully qualified domain
+     * name (FQDN) and the selected GBA mode. The authority of the URI must contain two parts
+     * delimited by "@" sign. The first part is the constant string "3GPP-bootstrapping" (GBA_ME),
+     * "3GPP-bootstrapping-uicc" (GBA_ U), or "3GPP-bootstrapping-digest" (GBA_Digest).
+     * The second part shall be the FQDN of the NAF. The scheme of the URI is not actually used
+     * for the authentication, which may be set the same as the resource that the application is
+     * going to access. For example, the nafId can be
+     * "https://3GPP-bootstrapping@naf1.operator.com",
+     * "https://3GPP-bootstrapping-uicc@naf1.operator.com",
+     * "https://3GPP-bootstrapping-digest@naf1.operator.com",
+     * "ftps://3GPP-bootstrapping-digest@naf1.operator.com".
      * @param securityProtocol Security protocol identifier between UE and NAF.  See
      * 3GPP TS 33.220 Annex H. Application can use
      * {@link UaSecurityProtocolIdentifier#createDefaultUaSpId},
@@ -14720,73 +14804,6 @@ public class TelephonyManager {
         } catch (RemoteException exception) {
             Log.e(TAG, "Error calling ITelephony#bootstrapAuthenticationRequest", exception);
             e.execute(() -> callback.onAuthenticationFailure(GBA_FAILURE_REASON_FEATURE_NOT_READY));
-        }
-    }
-
-    /**
-     * Registers a listener object to receive notification of changes in specified telephony states.
-     * <p>
-     * To register a listener, pass a {@link PhoneStateListener} which implements
-     * interfaces of events. For example,
-     * FakeServiceStateChangedListener extends {@link PhoneStateListener} implements
-     * {@link PhoneStateListener.ServiceStateChangedListener}.
-     *
-     * At registration, and when a specified telephony state changes, the telephony manager invokes
-     * the appropriate callback method on the listener object and passes the current (updated)
-     * values.
-     * <p>
-     *
-     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
-     * applies to the given subId. Otherwise, applies to
-     * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}. To listen events for multiple subIds,
-     * pass a separate listener object to each TelephonyManager object created with
-     * {@link #createForSubscriptionId}. Only {@link PhoneStateListener.CallStateChangedListener}
-     * can be used to receive changes for all subIds through
-     * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}.
-     *
-     * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
-     * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
-     * {@link SecurityException} will be thrown otherwise.
-     *
-     * This API should be used sparingly -- large numbers of listeners will cause system
-     * instability. If a process has registered too many listeners without unregistering them, it
-     * may encounter an {@link IllegalStateException} when trying to register more listeners.
-     *
-     * @param executor The executor of where the callback will execute.
-     * @param listener The {@link PhoneStateListener} object to register.
-     */
-    public void registerPhoneStateListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull PhoneStateListener listener) {
-        if (executor == null || listener == null) {
-            throw new IllegalArgumentException("PhoneStateListener and executor must be non-null");
-        }
-        mTelephonyRegistryMgr = (TelephonyRegistryManager)
-                mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
-        if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.registerPhoneStateListener(executor, mSubId,
-                    getOpPackageName(), getAttributionTag(), listener, getITelephony() != null);
-        } else {
-            throw new IllegalStateException("telephony service is null.");
-        }
-    }
-
-    /**
-     * Unregister an existing {@link PhoneStateListener}.
-     *
-     * @param listener The {@link PhoneStateListener} object to unregister.
-     */
-    public void unregisterPhoneStateListener(@NonNull PhoneStateListener listener) {
-
-        if (mContext == null) {
-            throw new IllegalStateException("telephony service is null.");
-        }
-
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.unregisterPhoneStateListener(mSubId, getOpPackageName(),
-                    getAttributionTag(), listener, getITelephony() != null);
-        } else {
-            throw new IllegalStateException("telephony service is null.");
         }
     }
 
@@ -14900,7 +14917,9 @@ public class TelephonyManager {
     public static final int PREPARE_UNATTENDED_REBOOT_PIN_REQUIRED = 1;
 
     /**
-     * The unattended reboot was not prepared due to generic error.
+     * The unattended reboot was not prepared due to a non-recoverable error. After this error,
+     * the client that manages the unattended reboot should not try to invoke the API again
+     * until the next power cycle.
      * @hide
      */
     @SystemApi

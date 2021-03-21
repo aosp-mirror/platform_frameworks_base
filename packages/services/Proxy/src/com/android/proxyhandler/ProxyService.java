@@ -30,7 +30,7 @@ public class ProxyService extends Service {
 
     private static ProxyServer server = null;
 
-    /** Keep these values up-to-date with PacProxyInstaller.java */
+    /** Keep these values up-to-date with PacProxyService.java */
     public static final String KEY_PROXY = "keyProxy";
     public static final String HOST = "localhost";
     public static final String EXCL_LIST = "";

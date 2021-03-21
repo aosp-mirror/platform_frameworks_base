@@ -138,7 +138,7 @@ public class Build {
      */
     @UnsupportedAppUsage
     @TestApi
-    public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
+    public static final boolean IS_EMULATOR = getString("ro.boot.qemu").equals("1");
 
     /**
      * A hardware serial number, if available. Alphanumeric only, case-insensitive.
@@ -1114,6 +1114,18 @@ public class Build {
             }
         }
     }
+
+    /**
+     * A multiplier for various timeouts on the system.
+     *
+     * The intent is that products targeting software emulators that are orders of magnitude slower
+     * than real hardware may set this to a large number. On real devices and hardware-accelerated
+     * virtualized devices this should not be set.
+     *
+     * @hide
+     */
+    public static final int HW_TIMEOUT_MULTIPLIER =
+        SystemProperties.getInt("ro.hw_timeout_multiplier", 1);
 
     /**
      * True if Treble is enabled and required for this device.

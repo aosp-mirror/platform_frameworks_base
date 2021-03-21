@@ -87,6 +87,7 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public boolean isActiveNetworkMetered();
     method public boolean isDefaultNetworkActive();
     method @Deprecated public static boolean isNetworkTypeValid(int);
+    method public void registerBestMatchingNetworkCallback(@NonNull android.net.NetworkRequest, @NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public void registerDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public void registerDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public void registerNetworkCallback(@NonNull android.net.NetworkRequest, @NonNull android.net.ConnectivityManager.NetworkCallback);
@@ -143,6 +144,7 @@ package android.net {
 
   public static class ConnectivityManager.NetworkCallback {
     ctor public ConnectivityManager.NetworkCallback();
+    ctor public ConnectivityManager.NetworkCallback(int);
     method public void onAvailable(@NonNull android.net.Network);
     method public void onBlockedStatusChanged(@NonNull android.net.Network, boolean);
     method public void onCapabilitiesChanged(@NonNull android.net.Network, @NonNull android.net.NetworkCapabilities);
@@ -150,6 +152,7 @@ package android.net {
     method public void onLosing(@NonNull android.net.Network, int);
     method public void onLost(@NonNull android.net.Network);
     method public void onUnavailable();
+    field public static final int FLAG_INCLUDE_LOCATION_INFO = 1; // 0x1
   }
 
   public static interface ConnectivityManager.OnNetworkActiveListener {
@@ -288,11 +291,13 @@ package android.net {
     ctor public NetworkCapabilities();
     ctor public NetworkCapabilities(android.net.NetworkCapabilities);
     method public int describeContents();
+    method @NonNull public int[] getCapabilities();
     method public int getLinkDownstreamBandwidthKbps();
     method public int getLinkUpstreamBandwidthKbps();
     method @Nullable public android.net.NetworkSpecifier getNetworkSpecifier();
     method public int getOwnerUid();
     method public int getSignalStrength();
+    method @NonNull public java.util.Set<java.lang.Integer> getSubIds();
     method @Nullable public android.net.TransportInfo getTransportInfo();
     method public boolean hasCapability(int);
     method public boolean hasTransport(int);
@@ -399,6 +404,11 @@ package android.net {
     method public android.net.NetworkRequest.Builder removeTransportType(int);
     method @Deprecated public android.net.NetworkRequest.Builder setNetworkSpecifier(String);
     method public android.net.NetworkRequest.Builder setNetworkSpecifier(android.net.NetworkSpecifier);
+    method @NonNull public android.net.NetworkRequest.Builder setSubIds(@NonNull java.util.Set<java.lang.Integer>);
+  }
+
+  public class ParseException extends java.lang.RuntimeException {
+    field public String response;
   }
 
   public class ProxyInfo implements android.os.Parcelable {

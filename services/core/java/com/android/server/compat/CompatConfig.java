@@ -67,18 +67,21 @@ final class CompatConfig {
 
     private static final String TAG = "CompatConfig";
     private static final String APP_COMPAT_DATA_DIR = "/data/misc/appcompat";
+    private static final String STATIC_OVERRIDES_PRODUCT_DIR = "/product/etc/appcompat";
     private static final String OVERRIDES_FILE = "compat_framework_overrides.xml";
 
     @GuardedBy("mChanges")
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
 
     private final OverrideValidatorImpl mOverrideValidator;
+    private final AndroidBuildClassifier mAndroidBuildClassifier;
     private Context mContext;
     private File mOverridesFile;
 
     @VisibleForTesting
     CompatConfig(AndroidBuildClassifier androidBuildClassifier, Context context) {
         mOverrideValidator = new OverrideValidatorImpl(androidBuildClassifier, context, this);
+        mAndroidBuildClassifier = androidBuildClassifier;
         mContext = context;
     }
 
@@ -94,8 +97,7 @@ final class CompatConfig {
             config.initConfigFromLib(Environment.buildPath(
                     apex.apexDirectory, "etc", "compatconfig"));
         }
-        File overridesFile = new File(APP_COMPAT_DATA_DIR, OVERRIDES_FILE);
-        config.initOverrides(overridesFile);
+        config.initOverrides();
         config.invalidateCache();
         return config;
     }
@@ -133,7 +135,7 @@ final class CompatConfig {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
                 CompatChange c = mChanges.valueAt(i);
-                if (!c.isEnabled(app)) {
+                if (!c.isEnabled(app, mAndroidBuildClassifier)) {
                     disabled.add(c.getId());
                 }
             }
@@ -175,7 +177,7 @@ final class CompatConfig {
                 // we know nothing about this change: default behaviour is enabled.
                 return true;
             }
-            return c.isEnabled(app);
+            return c.isEnabled(app, mAndroidBuildClassifier);
         }
     }
 
@@ -475,7 +477,7 @@ final class CompatConfig {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
                 CompatChange c = mChanges.valueAt(i);
-                if (c.isEnabled(applicationInfo)) {
+                if (c.isEnabled(applicationInfo, mAndroidBuildClassifier)) {
                     enabled.add(c.getId());
                 } else {
                     disabled.add(c.getId());
@@ -525,10 +527,34 @@ final class CompatConfig {
         }
     }
 
-    void initOverrides(File overridesFile) {
+    private void initOverrides() {
+        initOverrides(new File(APP_COMPAT_DATA_DIR, OVERRIDES_FILE),
+                new File(STATIC_OVERRIDES_PRODUCT_DIR, OVERRIDES_FILE));
+    }
+
+    @VisibleForTesting
+    void initOverrides(File dynamicOverridesFile, File staticOverridesFile) {
+        // Clear overrides from all changes before loading.
+        synchronized (mChanges) {
+            for (int i = 0; i < mChanges.size(); ++i) {
+                mChanges.valueAt(i).clearOverrides();
+            }
+        }
+
+        loadOverrides(staticOverridesFile);
+
+        mOverridesFile = dynamicOverridesFile;
+        loadOverrides(dynamicOverridesFile);
+
+        if (staticOverridesFile.exists()) {
+            // Only save overrides if there is a static overrides file.
+            saveOverrides();
+        }
+    }
+
+    private void loadOverrides(File overridesFile) {
         if (!overridesFile.exists()) {
-            mOverridesFile = overridesFile;
-            // There have not been any overrides added yet.
+            // Overrides file doesn't exist.
             return;
         }
 
@@ -548,7 +574,6 @@ final class CompatConfig {
             Slog.w(TAG, "Error processing " + overridesFile + " " + e.toString());
             return;
         }
-        mOverridesFile = overridesFile;
     }
 
     /**

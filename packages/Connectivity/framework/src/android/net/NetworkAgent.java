@@ -37,7 +37,6 @@ import android.util.Log;
 import com.android.connectivity.aidl.INetworkAgent;
 import com.android.connectivity.aidl.INetworkAgentRegistry;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Protocol;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -125,7 +124,10 @@ public abstract class NetworkAgent {
      */
     public final int providerId;
 
-    private static final int BASE = Protocol.BASE_NETWORK_AGENT;
+    // ConnectivityService parses message constants from itself and NetworkAgent with MessageUtils
+    // for debugging purposes, and crashes if some messages have the same values.
+    // TODO: have ConnectivityService store message names in different maps and remove this base
+    private static final int BASE = 200;
 
     /**
      * Sent by ConnectivityService to the NetworkAgent to inform it of
@@ -371,6 +373,14 @@ public abstract class NetworkAgent {
         return ni;
     }
 
+    // Temporary backward compatibility constructor
+    public NetworkAgent(@NonNull Context context, @NonNull Looper looper, @NonNull String logTag,
+            @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp, int score,
+            @NonNull NetworkAgentConfig config, @Nullable NetworkProvider provider) {
+        this(context, looper, logTag, nc, lp,
+                new NetworkScore.Builder().setLegacyInt(score).build(), config, provider);
+    }
+
     /**
      * Create a new network agent.
      * @param context a {@link Context} to get system services from.
@@ -382,10 +392,12 @@ public abstract class NetworkAgent {
      * @param score the initial score of this network. Update with sendNetworkScore.
      * @param config an immutable {@link NetworkAgentConfig} for this agent.
      * @param provider the {@link NetworkProvider} managing this agent.
+     * @hide TODO : unhide when impl is complete
      */
     public NetworkAgent(@NonNull Context context, @NonNull Looper looper, @NonNull String logTag,
-            @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp, int score,
-            @NonNull NetworkAgentConfig config, @Nullable NetworkProvider provider) {
+            @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp,
+            @NonNull NetworkScore score, @NonNull NetworkAgentConfig config,
+            @Nullable NetworkProvider provider) {
         this(looper, context, logTag, nc, lp, score, config,
                 provider == null ? NetworkProvider.ID_NONE : provider.getProviderId(),
                 getLegacyNetworkInfo(config));
@@ -395,12 +407,12 @@ public abstract class NetworkAgent {
         public final Context context;
         public final NetworkCapabilities capabilities;
         public final LinkProperties properties;
-        public final int score;
+        public final NetworkScore score;
         public final NetworkAgentConfig config;
         public final NetworkInfo info;
         InitialConfiguration(@NonNull Context context, @NonNull NetworkCapabilities capabilities,
-                @NonNull LinkProperties properties, int score, @NonNull NetworkAgentConfig config,
-                @NonNull NetworkInfo info) {
+                @NonNull LinkProperties properties, @NonNull NetworkScore score,
+                @NonNull NetworkAgentConfig config, @NonNull NetworkInfo info) {
             this.context = context;
             this.capabilities = capabilities;
             this.properties = properties;
@@ -412,8 +424,9 @@ public abstract class NetworkAgent {
     private volatile InitialConfiguration mInitialConfiguration;
 
     private NetworkAgent(@NonNull Looper looper, @NonNull Context context, @NonNull String logTag,
-            @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp, int score,
-            @NonNull NetworkAgentConfig config, int providerId, @NonNull NetworkInfo ni) {
+            @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp,
+            @NonNull NetworkScore score, @NonNull NetworkAgentConfig config, int providerId,
+            @NonNull NetworkInfo ni) {
         mHandler = new NetworkAgentHandler(looper);
         LOG_TAG = logTag;
         mNetworkInfo = new NetworkInfo(ni);
@@ -875,13 +888,22 @@ public abstract class NetworkAgent {
     /**
      * Must be called by the agent to update the score of this network.
      *
+     * @param score the new score.
+     * @hide TODO : unhide when impl is complete
+     */
+    public final void sendNetworkScore(@NonNull NetworkScore score) {
+        Objects.requireNonNull(score);
+        queueOrSendMessage(reg -> reg.sendScore(score));
+    }
+
+    /**
+     * Must be called by the agent to update the score of this network.
+     *
      * @param score the new score, between 0 and 99.
+     * deprecated use sendNetworkScore(NetworkScore) TODO : remove in S.
      */
     public final void sendNetworkScore(@IntRange(from = 0, to = 99) int score) {
-        if (score < 0) {
-            throw new IllegalArgumentException("Score must be >= 0");
-        }
-        queueOrSendMessage(reg -> reg.sendScore(score));
+        sendNetworkScore(new NetworkScore.Builder().setLegacyInt(score).build());
     }
 
     /**

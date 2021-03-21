@@ -3451,6 +3451,7 @@ public abstract class Context {
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
             CONNECTIVITY_SERVICE,
+            PAC_PROXY_SERVICE,
             VCN_MANAGEMENT_SERVICE,
             //@hide: IP_MEMORY_STORE_SERVICE,
             IPSEC_SERVICE,
@@ -4017,6 +4018,17 @@ public abstract class Context {
     public static final String CONNECTIVITY_SERVICE = "connectivity";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.net.PacProxyManager} for handling management of
+     * pac proxy information.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.PacProxyManager
+     * @hide
+     */
+    public static final String PAC_PROXY_SERVICE = "pac_proxy";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.vcn.VcnManager}
      * for managing Virtual Carrier Networks
      *
@@ -4087,7 +4099,8 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
-    @TestApi public static final String TEST_NETWORK_SERVICE = "test_network";
+    @TestApi @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String TEST_NETWORK_SERVICE = "test_network";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link

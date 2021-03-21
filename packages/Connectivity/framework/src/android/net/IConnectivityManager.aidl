@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 import android.net.ConnectionInfo;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.IConnectivityDiagnosticsCallback;
-import android.net.IOnSetOemNetworkPreferenceListener;
+import android.net.IOnCompleteListener;
 import android.net.INetworkActivityListener;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
@@ -30,6 +30,7 @@ import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
 import android.net.NetworkState;
 import android.net.NetworkStateSnapshot;
 import android.net.OemNetworkPreferences;
@@ -42,6 +43,7 @@ import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 
 import com.android.connectivity.aidl.INetworkAgent;
 
@@ -138,12 +140,12 @@ interface IConnectivityManager
     void declareNetworkRequestUnfulfillable(in NetworkRequest request);
 
     Network registerNetworkAgent(in INetworkAgent na, in NetworkInfo ni, in LinkProperties lp,
-            in NetworkCapabilities nc, int score, in NetworkAgentConfig config,
+            in NetworkCapabilities nc, in NetworkScore score, in NetworkAgentConfig config,
             in int factorySerialNumber);
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities, int reqType,
             in Messenger messenger, int timeoutSec, in IBinder binder, int legacy,
-            String callingPackageName, String callingAttributionTag);
+            int callbackFlags, String callingPackageName, String callingAttributionTag);
 
     NetworkRequest pendingRequestForNetwork(in NetworkCapabilities networkCapabilities,
             in PendingIntent operation, String callingPackageName, String callingAttributionTag);
@@ -151,7 +153,7 @@ interface IConnectivityManager
     void releasePendingNetworkRequest(in PendingIntent operation);
 
     NetworkRequest listenForNetwork(in NetworkCapabilities networkCapabilities,
-            in Messenger messenger, in IBinder binder, String callingPackageName,
+            in Messenger messenger, in IBinder binder, int callbackFlags, String callingPackageName,
             String callingAttributionTag);
 
     void pendingListenForNetwork(in NetworkCapabilities networkCapabilities,
@@ -214,5 +216,8 @@ interface IConnectivityManager
     void unregisterQosCallback(in IQosCallback callback);
 
     void setOemNetworkPreference(in OemNetworkPreferences preference,
-            in IOnSetOemNetworkPreferenceListener listener);
+            in IOnCompleteListener listener);
+
+    void setProfileNetworkPreference(in UserHandle profile, int preference,
+            in IOnCompleteListener listener);
 }

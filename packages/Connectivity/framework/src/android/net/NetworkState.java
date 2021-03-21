@@ -22,7 +22,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Slog;
+import android.util.Log;
 
 /**
  * Snapshot of network state.
@@ -83,7 +83,7 @@ public class NetworkState implements Parcelable {
         if (VALIDATE_ROAMING_STATE && networkInfo != null && networkCapabilities != null) {
             if (networkInfo.isRoaming() == networkCapabilities
                     .hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING)) {
-                Slog.wtf("NetworkState", "Roaming state disagreement between " + networkInfo
+                Log.wtf("NetworkState", "Roaming state disagreement between " + networkInfo
                         + " and " + networkCapabilities);
             }
         }

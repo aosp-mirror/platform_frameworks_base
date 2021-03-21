@@ -59,6 +59,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.File;
@@ -134,6 +135,8 @@ public final class AppHibernationService extends SystemService {
         intentFilter.addAction(ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
         userAllContext.registerReceiver(mBroadcastReceiver, intentFilter);
+
+        LocalServices.addService(AppHibernationManagerInternal.class, mLocalService);
     }
 
     @Override
@@ -170,7 +173,9 @@ public final class AppHibernationService extends SystemService {
         if (!checkHibernationEnabled("isHibernatingForUser")) {
             return false;
         }
-
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
         userId = handleIncomingUser(userId, "isHibernating");
         if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
             Slog.e(TAG, "Attempt to get hibernation state of stopped or nonexistent user "
@@ -199,6 +204,9 @@ public final class AppHibernationService extends SystemService {
         if (!checkHibernationEnabled("isHibernatingGlobally")) {
             return false;
         }
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
         synchronized (mLock) {
             GlobalLevelState state = mGlobalHibernationStates.get(packageName);
             if (state == null) {
@@ -220,6 +228,9 @@ public final class AppHibernationService extends SystemService {
         if (!checkHibernationEnabled("setHibernatingForUser")) {
             return;
         }
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
         userId = handleIncomingUser(userId, "setHibernating");
         if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
             Slog.w(TAG, "Attempt to set hibernation state for a stopped or nonexistent user "
@@ -260,6 +271,9 @@ public final class AppHibernationService extends SystemService {
         if (!checkHibernationEnabled("setHibernatingGlobally")) {
             return;
         }
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
         synchronized (mLock) {
             GlobalLevelState state = mGlobalHibernationStates.get(packageName);
             if (state == null) {
@@ -275,6 +289,35 @@ public final class AppHibernationService extends SystemService {
                 List<GlobalLevelState> states = new ArrayList<>(mGlobalHibernationStates.values());
                 mGlobalLevelHibernationDiskStore.scheduleWriteHibernationStates(states);
             }
+        }
+    }
+
+    /**
+     * Get the hibernating packages for the given user. This is equivalent to the list of
+     * packages for the user that return true for {@link #isHibernatingForUser}.
+     */
+    @NonNull List<String> getHibernatingPackagesForUser(int userId) {
+        ArrayList<String> hibernatingPackages = new ArrayList<>();
+        if (!checkHibernationEnabled("getHibernatingPackagesForUser")) {
+            return hibernatingPackages;
+        }
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
+        userId = handleIncomingUser(userId, "getHibernatingPackagesForUser");
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            Slog.w(TAG, "Attempt to get hibernating packages for a stopped or nonexistent user "
+                    + userId);
+            return hibernatingPackages;
+        }
+        synchronized (mLock) {
+            Map<String, UserLevelState> userStates = mUserStates.get(userId);
+            for (UserLevelState state : userStates.values()) {
+                if (state.hibernated) {
+                    hibernatingPackages.add(state.packageName);
+                }
+            }
+            return hibernatingPackages;
         }
     }
 
@@ -545,6 +588,36 @@ public final class AppHibernationService extends SystemService {
         }
     }
 
+    private final AppHibernationManagerInternal mLocalService = new LocalService(this);
+
+    private static final class LocalService extends AppHibernationManagerInternal {
+        private final AppHibernationService mService;
+
+        LocalService(AppHibernationService service) {
+            mService = service;
+        }
+
+        @Override
+        public boolean isHibernatingForUser(String packageName, int userId) {
+            return mService.isHibernatingForUser(packageName, userId);
+        }
+
+        @Override
+        public void setHibernatingForUser(String packageName, int userId, boolean isHibernating) {
+            mService.setHibernatingForUser(packageName, userId, isHibernating);
+        }
+
+        @Override
+        public void setHibernatingGlobally(String packageName, boolean isHibernating) {
+            mService.setHibernatingGlobally(packageName, isHibernating);
+        }
+
+        @Override
+        public boolean isHibernatingGlobally(String packageName) {
+            return mService.isHibernatingGlobally(packageName);
+        }
+    }
+
     private final AppHibernationServiceStub mServiceStub = new AppHibernationServiceStub(this);
 
     static final class AppHibernationServiceStub extends IAppHibernationService.Stub {
@@ -572,6 +645,11 @@ public final class AppHibernationService extends SystemService {
         @Override
         public boolean isHibernatingGlobally(String packageName) {
             return mService.isHibernatingGlobally(packageName);
+        }
+
+        @Override
+        public List<String> getHibernatingPackagesForUser(int userId) {
+            return mService.getHibernatingPackagesForUser(userId);
         }
 
         @Override

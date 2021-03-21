@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -1887,6 +1888,7 @@ public abstract class ConnectionService extends Service {
     /** {@inheritDoc} */
     @Override
     public final IBinder onBind(Intent intent) {
+        onBindClient(intent);
         return mBinder;
     }
 
@@ -1897,6 +1899,13 @@ public abstract class ConnectionService extends Service {
         return super.onUnbind(intent);
     }
 
+    /**
+     * Used for testing to let the test suite know when the connection service has been bound.
+     * @hide
+     */
+    @TestApi
+    public void onBindClient(@Nullable Intent intent) {
+    }
 
     /**
      * This can be used by telecom to either create a new outgoing conference call or attach
@@ -2544,9 +2553,9 @@ public abstract class ConnectionService extends Service {
      * @return The {@code Connection} object to satisfy this call, or {@code null} to
      *         not handle the call.
      */
-    public final RemoteConnection createRemoteIncomingConnection(
-            PhoneAccountHandle connectionManagerPhoneAccount,
-            ConnectionRequest request) {
+    public final @Nullable RemoteConnection createRemoteIncomingConnection(
+            @NonNull PhoneAccountHandle connectionManagerPhoneAccount,
+            @NonNull ConnectionRequest request) {
         return mRemoteConnectionManager.createRemoteConnection(
                 connectionManagerPhoneAccount, request, true);
     }
@@ -2563,9 +2572,9 @@ public abstract class ConnectionService extends Service {
      * @return The {@code Connection} object to satisfy this call, or {@code null} to
      *         not handle the call.
      */
-    public final RemoteConnection createRemoteOutgoingConnection(
-            PhoneAccountHandle connectionManagerPhoneAccount,
-            ConnectionRequest request) {
+    public final @Nullable RemoteConnection createRemoteOutgoingConnection(
+            @NonNull PhoneAccountHandle connectionManagerPhoneAccount,
+            @NonNull ConnectionRequest request) {
         return mRemoteConnectionManager.createRemoteConnection(
                 connectionManagerPhoneAccount, request, false);
     }
@@ -2805,12 +2814,14 @@ public abstract class ConnectionService extends Service {
      * @param connectionManagerPhoneAccount See description at
      *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
      * @param request Details about the incoming conference call.
-     * @return The {@code Conference} object to satisfy this call, or {@code null} to
-     *         not handle the call.
+     * @return The {@code Conference} object to satisfy this call. If the conference attempt is
+     *         failed, the return value will be a result of an invocation of
+     *         {@link Connection#createFailedConnection(DisconnectCause)}.
+     *         Return {@code null} if the {@link ConnectionService} cannot handle the call.
      */
     public @Nullable Conference onCreateIncomingConference(
-            @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
-            @Nullable ConnectionRequest request) {
+            @NonNull PhoneAccountHandle connectionManagerPhoneAccount,
+            @NonNull ConnectionRequest request) {
         return null;
     }
 
@@ -2913,8 +2924,8 @@ public abstract class ConnectionService extends Service {
      * @param request The outgoing connection request.
      */
     public void onCreateOutgoingConferenceFailed(
-            @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
-            @Nullable ConnectionRequest request) {
+            @NonNull PhoneAccountHandle connectionManagerPhoneAccount,
+            @NonNull ConnectionRequest request) {
     }
 
 
@@ -2978,12 +2989,14 @@ public abstract class ConnectionService extends Service {
      *         a {@code PhoneAccount} registered by this {@code ConnectionService} to use for
      *         making the connection.
      * @param request Details about the outgoing call.
-     * @return The {@code Conference} object to satisfy this call, or the result of an invocation
-     *         of {@link Connection#createFailedConnection(DisconnectCause)} to not handle the call.
+     * @return The {@code Conference} object to satisfy this call. If the conference attempt is
+     *         failed, the return value will be a result of an invocation of
+     *         {@link Connection#createFailedConnection(DisconnectCause)}.
+     *         Return {@code null} if the {@link ConnectionService} cannot handle the call.
      */
     public @Nullable Conference onCreateOutgoingConference(
-            @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
-            @Nullable ConnectionRequest request) {
+            @NonNull PhoneAccountHandle connectionManagerPhoneAccount,
+            @NonNull ConnectionRequest request) {
         return null;
     }
 

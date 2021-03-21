@@ -67,7 +67,7 @@ import java.util.function.Consumer;
  * <p>Content capture provides real-time, continuous capture of application activity, display and
  * events to an intelligence service that is provided by the Android system. The intelligence
  * service then uses that info to mediate and speed user journey through different apps. For
- * example, when the user receives a restaurant address in a chat app and switchs to a map app
+ * example, when the user receives a restaurant address in a chat app and switches to a map app
  * to search for that restaurant, the intelligence service could offer an autofill dialog to
  * let the user automatically select its address.
  *

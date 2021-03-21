@@ -73,8 +73,8 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
+import com.android.net.module.util.PermissionUtils;
 import com.android.server.LocalServices;
-import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.net.BaseNetworkObserver;
 
 import java.io.File;
@@ -1103,7 +1103,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     public void noteNetworkInterfaceForTransports(final String iface, int[] transportTypes) {
-        enforceCallingPermission();
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         mStats.noteNetworkInterfaceForTransports(iface, transportTypes);
     }
 

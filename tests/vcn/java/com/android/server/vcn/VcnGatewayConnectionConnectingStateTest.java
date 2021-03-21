@@ -25,12 +25,15 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.net.ipsec.ike.IkeSessionParams;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 /** Tests for VcnGatewayConnection.ConnectingState */
 @RunWith(AndroidJUnit4.class)
@@ -51,7 +54,12 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
 
     @Test
     public void testEnterStateCreatesNewIkeSession() throws Exception {
-        verify(mDeps).newIkeSession(any(), any(), any(), any(), any());
+        final ArgumentCaptor<IkeSessionParams> paramsCaptor =
+                ArgumentCaptor.forClass(IkeSessionParams.class);
+        verify(mDeps).newIkeSession(any(), paramsCaptor.capture(), any(), any(), any());
+        assertEquals(
+                TEST_UNDERLYING_NETWORK_RECORD_1.network,
+                paramsCaptor.getValue().getConfiguredNetwork());
     }
 
     @Test

@@ -1279,7 +1279,6 @@ public final class BluetoothDevice implements Parcelable {
      * the bonding process completes, and its result.
      * <p>Android system services will handle the necessary user interactions
      * to confirm and complete the bonding process.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @param transport The transport to use for the pairing procedure.
      * @return false on immediate error, true if bonding will begin
@@ -1287,8 +1286,9 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean createBond(int transport) {
-        return createBondOutOfBand(transport, null);
+        return createBondInternal(transport, null, null);
     }
 
     /**
@@ -1302,21 +1302,38 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Android system services will handle the necessary user interactions
      * to confirm and complete the bonding process.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     * <p>There are two possible versions of OOB Data.  This data can come in as
+     * P192 or P256.  This is a reference to the cryptography used to generate the key.
+     * The caller may pass one or both.  If both types of data are passed, then the
+     * P256 data will be preferred, and thus used.
      *
      * @param transport - Transport to use
-     * @param oobData - Out Of Band data
+     * @param remoteP192Data - Out Of Band data (P192) or null
+     * @param remoteP256Data - Out Of Band data (P256) or null
      * @return false on immediate error, true if bonding will begin
      * @hide
      */
-    public boolean createBondOutOfBand(int transport, OobData oobData) {
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean createBondOutOfBand(int transport, @Nullable OobData remoteP192Data,
+            @Nullable OobData remoteP256Data) {
+        if (remoteP192Data == null && remoteP256Data == null) {
+            throw new IllegalArgumentException(
+                "One or both arguments for the OOB data types are required to not be null."
+                + "  Please use createBond() instead if you do not have OOB data to pass.");
+        }
+        return createBondInternal(transport, remoteP192Data, remoteP256Data);
+    }
+
+    private boolean createBondInternal(int transport, @Nullable OobData remoteP192Data,
+            @Nullable OobData remoteP256Data) {
         final IBluetooth service = sService;
         if (service == null) {
             Log.w(TAG, "BT not enabled, createBondOutOfBand failed");
             return false;
         }
         try {
-            return service.createBond(this, transport, oobData);
+            return service.createBond(this, transport, remoteP192Data, remoteP256Data);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1343,27 +1360,6 @@ public final class BluetoothDevice implements Parcelable {
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
-        return false;
-    }
-
-    /**
-     * Set the Out Of Band data for a remote device to be used later
-     * in the pairing mechanism. Users can obtain this data through other
-     * trusted channels
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
-     *
-     * @param hash Simple Secure pairing hash
-     * @param randomizer The random key obtained using OOB
-     * @return false on error; true otherwise
-     * @hide
-     */
-    public boolean setDeviceOutOfBandData(byte[] hash, byte[] randomizer) {
-        //TODO(BT)
-      /*
-      try {
-        return sService.setDeviceOutOfBandData(this, hash, randomizer);
-      } catch (RemoteException e) {Log.e(TAG, "", e);} */
         return false;
     }
 

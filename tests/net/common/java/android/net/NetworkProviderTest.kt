@@ -27,6 +27,7 @@ import android.os.HandlerThread
 import android.os.Looper
 import androidx.test.InstrumentationRegistry
 import com.android.net.module.util.ArrayTrackRecord
+import com.android.testutils.CompatUtil
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo
 import com.android.testutils.DevSdkIgnoreRunner
 import com.android.testutils.isDevSdkInRange
@@ -102,7 +103,8 @@ class NetworkProviderTest {
         mCm.registerNetworkProvider(provider)
         assertNotEquals(provider.getProviderId(), NetworkProvider.ID_NONE)
 
-        val specifier = StringNetworkSpecifier(UUID.randomUUID().toString())
+        val specifier = CompatUtil.makeTestNetworkSpecifier(
+                UUID.randomUUID().toString())
         val nr: NetworkRequest = NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_TEST)
                 .setNetworkSpecifier(specifier)
@@ -183,7 +185,8 @@ class NetworkProviderTest {
 
         mCm.registerNetworkProvider(provider)
 
-        val specifier = StringNetworkSpecifier(UUID.randomUUID().toString())
+        val specifier = CompatUtil.makeTestNetworkSpecifier(
+                UUID.randomUUID().toString())
         val nr: NetworkRequest = NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_TEST)
                 .setNetworkSpecifier(specifier)
