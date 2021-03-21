@@ -35,6 +35,9 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
+import static android.net.NetworkCapabilities.REDACT_FOR_ACCESS_FINE_LOCATION;
+import static android.net.NetworkCapabilities.REDACT_FOR_LOCAL_MAC_ADDRESS;
+import static android.net.NetworkCapabilities.REDACT_FOR_NETWORK_SETTINGS;
 import static android.net.NetworkCapabilities.RESTRICTED_CAPABILITIES;
 import static android.net.NetworkCapabilities.SIGNAL_STRENGTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -51,7 +54,6 @@ import static com.android.testutils.MiscAsserts.assertEmpty;
 import static com.android.testutils.MiscAsserts.assertThrows;
 import static com.android.testutils.ParcelUtils.assertParcelSane;
 import static com.android.testutils.ParcelUtils.assertParcelingIsLossless;
-import static com.android.testutils.ParcelUtils.parcelingRoundTrip;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -62,7 +64,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
-import android.net.wifi.WifiInfo;
 import android.net.wifi.aware.DiscoverySession;
 import android.net.wifi.aware.PeerHandle;
 import android.net.wifi.aware.WifiAwareNetworkSpecifier;
@@ -352,55 +353,6 @@ public class NetworkCapabilitiesTest {
         testParcelSane(netCap);
     }
 
-    private NetworkCapabilities createNetworkCapabilitiesWithWifiInfo() {
-        // uses a real WifiInfo to test parceling of sensitive data.
-        final WifiInfo wifiInfo = new WifiInfo.Builder()
-                .setSsid("sssid1234".getBytes())
-                .setBssid("00:11:22:33:44:55")
-                .build();
-        return new NetworkCapabilities()
-                .addCapability(NET_CAPABILITY_INTERNET)
-                .addCapability(NET_CAPABILITY_EIMS)
-                .addCapability(NET_CAPABILITY_NOT_METERED)
-                .setSSID(TEST_SSID)
-                .setTransportInfo(wifiInfo)
-                .setRequestorPackageName("com.android.test")
-                .setRequestorUid(9304);
-    }
-
-    @Test
-    public void testParcelNetworkCapabilitiesWithLocationSensitiveFields() {
-        assumeTrue(isAtLeastS());
-
-        final NetworkCapabilities netCap = createNetworkCapabilitiesWithWifiInfo();
-        final NetworkCapabilities netCapWithLocationSensitiveFields =
-                new NetworkCapabilities(netCap, true);
-
-        assertParcelingIsLossless(netCapWithLocationSensitiveFields);
-        testParcelSane(netCapWithLocationSensitiveFields);
-
-        assertEquals(netCapWithLocationSensitiveFields,
-                parcelingRoundTrip(netCapWithLocationSensitiveFields));
-    }
-
-    @Test
-    public void testParcelNetworkCapabilitiesWithoutLocationSensitiveFields() {
-        assumeTrue(isAtLeastS());
-
-        final NetworkCapabilities netCap = createNetworkCapabilitiesWithWifiInfo();
-        final NetworkCapabilities netCapWithoutLocationSensitiveFields =
-                new NetworkCapabilities(netCap, false);
-
-        final NetworkCapabilities sanitizedNetCap =
-                new NetworkCapabilities(netCapWithoutLocationSensitiveFields);
-        final WifiInfo sanitizedWifiInfo = new WifiInfo.Builder()
-                .setSsid(new byte[0])
-                .setBssid(WifiInfo.DEFAULT_MAC_ADDRESS)
-                .build();
-        sanitizedNetCap.setTransportInfo(sanitizedWifiInfo);
-        assertEquals(sanitizedNetCap, parcelingRoundTrip(netCapWithoutLocationSensitiveFields));
-    }
-
     private void testParcelSane(NetworkCapabilities cap) {
         if (isAtLeastS()) {
             assertParcelSane(cap, 17);
@@ -409,6 +361,45 @@ public class NetworkCapabilitiesTest {
         } else {
             assertParcelSane(cap, 11);
         }
+    }
+
+    private static NetworkCapabilities createNetworkCapabilitiesWithTransportInfo() {
+        return new NetworkCapabilities()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addCapability(NET_CAPABILITY_EIMS)
+                .addCapability(NET_CAPABILITY_NOT_METERED)
+                .setSSID(TEST_SSID)
+                .setTransportInfo(new TestTransportInfo())
+                .setRequestorPackageName("com.android.test")
+                .setRequestorUid(9304);
+    }
+
+    @Test
+    public void testNetworkCapabilitiesCopyWithNoRedactions() {
+        assumeTrue(isAtLeastS());
+
+        final NetworkCapabilities netCap = createNetworkCapabilitiesWithTransportInfo();
+        final NetworkCapabilities netCapWithNoRedactions =
+                new NetworkCapabilities(netCap, NetworkCapabilities.REDACT_NONE);
+        TestTransportInfo testTransportInfo =
+                (TestTransportInfo) netCapWithNoRedactions.getTransportInfo();
+        assertFalse(testTransportInfo.locationRedacted);
+        assertFalse(testTransportInfo.localMacAddressRedacted);
+        assertFalse(testTransportInfo.settingsRedacted);
+    }
+
+    @Test
+    public void testNetworkCapabilitiesCopyWithoutLocationSensitiveFields() {
+        assumeTrue(isAtLeastS());
+
+        final NetworkCapabilities netCap = createNetworkCapabilitiesWithTransportInfo();
+        final NetworkCapabilities netCapWithNoRedactions =
+                new NetworkCapabilities(netCap, REDACT_FOR_ACCESS_FINE_LOCATION);
+        TestTransportInfo testTransportInfo =
+                (TestTransportInfo) netCapWithNoRedactions.getTransportInfo();
+        assertTrue(testTransportInfo.locationRedacted);
+        assertFalse(testTransportInfo.localMacAddressRedacted);
+        assertFalse(testTransportInfo.settingsRedacted);
     }
 
     @Test
@@ -1062,18 +1053,42 @@ public class NetworkCapabilitiesTest {
         } catch (IllegalArgumentException e) { }
     }
 
-    private class TestTransportInfo implements TransportInfo {
+    /**
+     * Test TransportInfo to verify redaction mechanism.
+     */
+    private static class TestTransportInfo implements TransportInfo {
+        public final boolean locationRedacted;
+        public final boolean localMacAddressRedacted;
+        public final boolean settingsRedacted;
+
         TestTransportInfo() {
+            locationRedacted = false;
+            localMacAddressRedacted = false;
+            settingsRedacted = false;
+        }
+
+        TestTransportInfo(boolean locationRedacted,
+                boolean localMacAddressRedacted,
+                boolean settingsRedacted) {
+            this.locationRedacted = locationRedacted;
+            this.localMacAddressRedacted =
+                    localMacAddressRedacted;
+            this.settingsRedacted = settingsRedacted;
         }
 
         @Override
-        public TransportInfo makeCopy(boolean parcelLocationSensitiveFields) {
-            return this;
+        public TransportInfo makeCopy(@NetworkCapabilities.RedactionType long redactions) {
+            return new TestTransportInfo(
+                    (redactions & NetworkCapabilities.REDACT_FOR_ACCESS_FINE_LOCATION) != 0,
+                    (redactions & REDACT_FOR_LOCAL_MAC_ADDRESS) != 0,
+                    (redactions & REDACT_FOR_NETWORK_SETTINGS) != 0
+            );
         }
 
         @Override
-        public boolean hasLocationSensitiveFields() {
-            return false;
+        public @NetworkCapabilities.RedactionType long getApplicableRedactions() {
+            return REDACT_FOR_ACCESS_FINE_LOCATION | REDACT_FOR_LOCAL_MAC_ADDRESS
+                    | REDACT_FOR_NETWORK_SETTINGS;
         }
     }
 
@@ -1084,7 +1099,7 @@ public class NetworkCapabilitiesTest {
         final int requestUid = 10100;
         final int[] administratorUids = {ownerUid, 10001};
         final TelephonyNetworkSpecifier specifier = new TelephonyNetworkSpecifier(1);
-        final TestTransportInfo transportInfo = new TestTransportInfo();
+        final TransportInfo transportInfo = new TransportInfo() {};
         final String ssid = "TEST_SSID";
         final String packageName = "com.google.test.networkcapabilities";
         final NetworkCapabilities nc = new NetworkCapabilities.Builder()
