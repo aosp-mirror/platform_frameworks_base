@@ -51,12 +51,12 @@ final class OnTranslationResultCallbackWrapper implements
     @Override
     public void onTranslationSuccess(@Nullable TranslationResponse response) {
         assertNotCalled();
-        if (mCalled.getAndSet(true)) {
-            throw new IllegalStateException("Already called");
+        if (mCalled.getAndSet(response.isFinalResponse())) {
+            throw new IllegalStateException("Already called with complete response");
         }
 
         try {
-            mCallback.onTranslationComplete(response);
+            mCallback.onTranslationResponse(response);
         } catch (RemoteException e) {
             if (e instanceof DeadObjectException) {
                 Log.w(TAG, "Process is dead, ignore.");
