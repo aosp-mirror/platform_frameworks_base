@@ -6291,6 +6291,20 @@ public final class Settings {
                 "selected_input_method_subtype";
 
         /**
+         * The {@link android.view.inputmethod.InputMethodInfo.InputMethodInfo#getId() ID} of the
+         * default voice input method.
+         * <p>
+         * This stores the last known default voice IME. If the related system config value changes,
+         * this is reset by InputMethodManagerService.
+         * <p>
+         * This IME is not necessarily in the enabled IME list. That state is still stored in
+         * {@link #ENABLED_INPUT_METHODS}.
+         *
+         * @hide
+         */
+        public static final String DEFAULT_VOICE_INPUT_METHOD = "default_voice_input_method";
+
+        /**
          * Setting to record the history of input method subtype, holding the pair of ID of IME
          * and its last used subtype.
          * @hide

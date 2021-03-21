@@ -296,6 +296,7 @@ message SecureSettingsProto {
         optional SettingProto subtype_history = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto selected_input_method_subtype = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto show_ime_with_hard_keyboard = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto default_voice_input_method = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional InputMethods input_methods = 26;
 
