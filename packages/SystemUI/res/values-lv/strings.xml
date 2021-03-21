@@ -360,7 +360,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Jauns lietotājs"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internets"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Var izmantot lidojuma režīmā"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Tīkli ir pieejami"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Tīkli nav pieejami"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Nav izveidots savienojums"</string>
@@ -519,6 +518,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Šo ierīci pārvalda viens no jūsu vecākiem."</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Šī ierīce pieder jūsu organizācijai, un jūsu organizācija var uzraudzīt tīkla datplūsmu."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Šī ierīce pieder organizācijai<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, un šī organizācija var uzraudzīt tīkla datplūsmu."</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Šo ierīci nodrošina <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Šī ierīce pieder jūsu organizācijai un ir saistīta ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> un ir savienota ar: <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Šī ierīce pieder jūsu organizācijai."</string>
@@ -532,6 +532,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Jūsu darba profils ir savienots ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Jūsu personīgais profils ir saistīts ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Šī ierīce ir savienota ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Šo ierīci nodrošina <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Ierīces pārvaldība"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Profila pārraudzība"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Tīkla pārraudzība"</string>
@@ -543,6 +544,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Skatīt politikas"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Skatīt vadīklas"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nJūsu IT administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes, ar ierīci saistītos datus un ierīces atrašanās vietas informāciju.\n\nLai iegūtu plašāku informāciju, sazinieties ar IT administratoru."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"Iespējams, organizācija <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> var piekļūt ar šo ierīci saistītajiem datiem, pārvaldīt lietotnes un mainīt šīs ierīces iestatījumus.\n\nJa jums ir jautājumi, sazinieties ar organizāciju <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Šī ierīce pieder jūsu organizācijai.\n\nJūsu IT administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes, ar ierīci saistītos datus un ierīces atrašanās vietas informāciju.\n\nLai iegūtu plašāku informāciju, sazinieties ar IT administratoru."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Jūsu organizācija instalēja sertifikātu šajā ierīcē. Jūsu drošā tīkla datplūsma var tikt uzraudzīta."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Jūsu organizācija instalēja sertifikātu jūsu darba profilā. Jūsu drošā tīkla datplūsma var tikt uzraudzīta."</string>
@@ -653,6 +655,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Rādīt demonstrācijas režīmu"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Tīkls Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Signāls"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Darba profils"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lidojuma režīms"</string>
     <string name="add_tile" msgid="6239678623873086686">"Pievienot elementu"</string>
@@ -901,11 +907,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Aizvērt ātros iestatījumus."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Signāls ir iestatīts."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Pierakstījies kā <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"izvēlēties lietotāju"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Nav piekļuves internetam"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Atvērt detalizēto informāciju."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Nav pieejams šāda iemesla dēļ: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Atvērt <xliff:g id="ID_1">%s</xliff:g> iestatījumus."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Rediģēt iestatījumu secību."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Barošanas izvēlne"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. lpp. no <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Bloķēšanas ekrāns"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tālrunis izslēgts karstuma dēļ"</string>
@@ -1013,9 +1021,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Pārvietot pa kreisi"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Pārvietot pa labi"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Palielinājuma slēdzis"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Palielināt visu ekrānu"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Palielināt visu ekrānu"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Palielināt ekrāna daļu"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Pārslēgt"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Pieejamības žests ir aizstāts ar pieejamības pogu\n\n"<annotation id="link">"Skatīt iestatījumus"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Lai īslaicīgi paslēptu pogu, pārvietojiet to uz malu"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Ierīču vadīklas"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Pievienojiet vadīklas pievienotajām ierīcēm"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Ierīču vadīklu iestatīšana"</string>
@@ -1084,6 +1094,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Savienošana pārī ar jaunu ierīci"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versijas numurs"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versijas numurs ir kopēts starpliktuvē."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Atvērt sarunu"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Sarunu logrīki"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Pieskarieties kādai sarunai, lai pievienotu to savam sākuma ekrānam."</string>
+    <string name="timestamp" msgid="6577851592534538533">"Pirms šāda laika: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"Pirms mazāk nekā: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"Pirms vairāk nekā: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Dzimšanas diena"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Gaidāma dzimšanas diena"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Gadadiena"</string>
+    <string name="location_status" msgid="1294990572202541812">"Tiek kopīgota vieta…"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Jauns raksts"</string>
+    <string name="video_status" msgid="4548544654316843225">"Notiek skatīšanās…"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Notiek klausīšanās…"</string>
+    <string name="game_status" msgid="1340694320630973259">"Tiek spēlēta spēle…"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Draugi"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Patērzēsim šovakar!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Neatbildēts zvans"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Skatiet jaunākos ziņojumus, neatbildētos zvanus un statusa atjauninājumus."</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Saruna"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Nevar iegūt informāciju par akumulatora uzlādes līmeni."</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Pieskarieties, lai iegūtu plašāku informāciju."</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nav iestatīts signāls"</string>
 </resources>

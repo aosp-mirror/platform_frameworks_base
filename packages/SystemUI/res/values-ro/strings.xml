@@ -360,7 +360,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Utilizator nou"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Sigur pentru avion"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Sunt disponibile rețele"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nu sunt disponibile rețele"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Neconectată"</string>
@@ -519,6 +518,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Dispozitivul este gestionat de unul dintre părinți"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizația dvs. deține acest dispozitiv și poate monitoriza traficul de rețea"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> deține acest dispozitiv și poate monitoriza traficul din rețea"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Acest dispozitiv este oferit de <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Dispozitivul aparține organizației dvs. și este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Dispozitivul aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Dispozitivul aparține organizației dvs."</string>
@@ -532,6 +532,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Profilul dvs. de serviciu este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Profilul dvs. personal este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Dispozitivul este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Acest dispozitiv este oferit de <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestionarea dispozitivului"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Monitorizarea profilului"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Monitorizarea rețelei"</string>
@@ -543,6 +544,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Afișați politicile"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Vedeți opțiunile"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Dispozitivul aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nAdministratorul dvs. IT poate să monitorizeze și să gestioneze setările, accesul la nivelul companiei, aplicațiile, datele asociate dispozitivului și informațiile despre locația dispozitivului.\n\nPentru mai multe informații, contactați administratorul IT."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"Este posibil ca <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> să acceseze date asociate dispozitivului, să gestioneze aplicații și să modifice setările acestuia.\n\nDacă aveți întrebări, luați legătura cu <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Dispozitivul aparține organizației dvs.\n\nAdministratorul dvs. IT poate să monitorizeze și să gestioneze setările, accesul la nivelul companiei, aplicațiile, datele asociate dispozitivului și informațiile despre locația dispozitivului.\n\nPentru mai multe informații, contactați administratorul IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organizația dvs. a instalat un certificat CA pe acest dispozitiv. Traficul dvs. sigur de rețea poate fi monitorizat sau modificat."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizația dvs. a instalat un certificat CA în profilul dvs. de serviciu. Traficul dvs. sigur de rețea poate fi monitorizat sau modificat."</string>
@@ -653,6 +655,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Afișați modul demonstrativ"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarmă"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Profil de serviciu"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mod Avion"</string>
     <string name="add_tile" msgid="6239678623873086686">"Adăugați o casetă"</string>
@@ -901,11 +907,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Închideți setările rapide."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Alarmă setată."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Conectat(ă) ca <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"alege utilizatorul"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Fără conexiune la internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Deschideți detaliile."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Indisponibile deoarece <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Deschideți setările <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Editați ordinea setărilor."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meniul de pornire"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> din <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ecran de blocare"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefonul s-a oprit din cauza încălzirii"</string>
@@ -1013,9 +1021,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Deplasați spre stânga"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Deplasați spre dreapta"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Comutator de mărire"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Măriți întregul ecran"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Măriți tot ecranul"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Măriți o parte a ecranului"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Comutator"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Butonul de accesibilitate a înlocuit gestul de accesibilitate\n\n"<annotation id="link">"Vedeți setările"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mutați butonul spre margine pentru a-l ascunde temporar"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Comenzile dispozitivelor"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Adăugați comenzi pentru dispozitivele conectate"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurați comenzile dispozitivelor"</string>
@@ -1084,6 +1094,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Asociați un nou dispozitiv"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numărul versiunii"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numărul versiunii s-a copiat în clipboard."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Deschideți conversația"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Widgeturi pentru conversație"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Atingeți o conversație ca să o adăugați pe ecranul de pornire"</string>
+    <string name="timestamp" msgid="6577851592534538533">"Acum <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"În urmă cu mai puțin de <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"În urmă cu peste <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Ziua de naștere"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Zi de naștere în curând"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Zi aniversară"</string>
+    <string name="location_status" msgid="1294990572202541812">"Se afișează locația"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Subiect nou"</string>
+    <string name="video_status" msgid="4548544654316843225">"Urmăresc"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Se ascultă"</string>
+    <string name="game_status" msgid="1340694320630973259">"Se redă"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Prieteni"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Conversăm prin chat diseară?"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Apel nepreluat"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Vedeți mesaje recente, apeluri pierdute și actualizări de stare"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Conversație"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problemă la citirea măsurării bateriei"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Atingeți pentru mai multe informații"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nicio alarmă setată"</string>
 </resources>

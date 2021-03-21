@@ -359,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"ผู้ใช้ใหม่"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"อินเทอร์เน็ต"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"ใช้บนเครื่องบินได้อย่างปลอดภัย"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"เครือข่ายที่พร้อมใช้งาน"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ใช้งานเครือข่ายไม่ได้"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"ไม่ได้เชื่อมต่อ"</string>
@@ -471,7 +470,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้เข้าร่วมออกไหม"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"นำออก"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับท่านผู้เยี่ยมชมกลับมาอีกครั้ง!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้เข้าร่วมกลับมาอีกครั้ง"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"เริ่มต้นใหม่"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ใช่ ดำเนินการต่อ"</string>
@@ -516,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"อุปกรณ์นี้จัดการโดยผู้ปกครอง"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> เป็นเจ้าของอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"อุปกรณ์นี้ให้บริการโดย <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้ และอุปกรณ์เชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> เป็นเจ้าของอุปกรณ์นี้ และอุปกรณ์เชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้"</string>
@@ -529,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"โปรไฟล์งานของคุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"โปรไฟล์ส่วนตัวของคุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"อุปกรณ์นี้เชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"อุปกรณ์นี้ให้บริการโดย <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"การจัดการอุปกรณ์"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"การตรวจสอบโปรไฟล์"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"การตรวจสอบเครือข่าย"</string>
@@ -540,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ดูนโยบาย"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"ดูการควบคุม"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> เป็นเจ้าของอุปกรณ์นี้\n\nผู้ดูแลระบบไอทีจะตรวจสอบและจัดการการตั้งค่า การเข้าถึงของบริษัท แอป ข้อมูลที่เชื่อมโยงกับอุปกรณ์ และข้อมูลตำแหน่งของอุปกรณ์ได้\n\nติดต่อผู้ดูแลระบบไอทีหากต้องการข้อมูลเพิ่มเติม"</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> อาจเข้าถึงข้อมูลที่เชื่อมโยงกับอุปกรณ์นี้ จัดการแอป และเปลี่ยนการตั้งค่าอุปกรณ์ได้\n\nหากมีคำถาม โปรดติดต่อ <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>"</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้\n\nผู้ดูแลระบบไอทีจะตรวจสอบและจัดการการตั้งค่า การเข้าถึงของบริษัท แอป ข้อมูลที่เชื่อมโยงกับอุปกรณ์ และข้อมูลตำแหน่งของอุปกรณ์ได้\n\nติดต่อผู้ดูแลระบบไอทีหากต้องการข้อมูลเพิ่มเติม"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"องค์กรของคุณติดตั้งผู้ออกใบรับรองในอุปกรณ์นี้ อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"องค์กรของคุณติดตั้งผู้ออกใบรับรองในโปรไฟล์งาน อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
@@ -650,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"แสดงโหมดสาธิต"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"อีเทอร์เน็ต"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"การปลุก"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"โปรไฟล์งาน"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"โหมดบนเครื่องบิน"</string>
     <string name="add_tile" msgid="6239678623873086686">"เพิ่มไทล์"</string>
@@ -896,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ปิดการตั้งค่าด่วน"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"ตั้งปลุกแล้ว"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"ลงชื่อเข้าใช้เป็น <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"เลือกผู้ใช้"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ไม่มีอินเทอร์เน็ต"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"เปิดรายละเอียด"</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"ไม่พร้อมใช้งานเนื่องจาก<xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"เปิดการตั้งค่า <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"แก้ไขลำดับการตั้งค่า"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"เมนูเปิด/ปิด"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"หน้า <xliff:g id="ID_1">%1$d</xliff:g> จาก <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"หน้าจอล็อก"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"โทรศัพท์ปิดไปเพราะร้อนมาก"</string>
@@ -1008,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ย้ายไปทางซ้าย"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"ย้ายไปทางขวา"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"เปลี่ยนโหมดการขยาย"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"ขยายทั้งหน้าจอ"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ขยายเป็นเต็มหน้าจอ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ขยายบางส่วนของหน้าจอ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"เปลี่ยน"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ปุ่มการช่วยเหลือพิเศษแทนที่ท่าทางสัมผัสการช่วยเหลือพิเศษแล้ว\n\n"<annotation id="link">"ดูการตั้งค่า"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ย้ายปุ่มไปที่ขอบเพื่อซ่อนชั่วคราว"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ระบบควบคุมอุปกรณ์"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"เพิ่มตัวควบคุมของอุปกรณ์ที่เชื่อมต่อ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ตั้งค่าระบบควบคุมอุปกรณ์"</string>
@@ -1078,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"จับคู่อุปกรณ์ใหม่"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"หมายเลขบิลด์"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"คัดลอกหมายเลขบิลด์ไปยังคลิปบอร์ดแล้ว"</string>
+    <string name="basic_status" msgid="2315371112182658176">"เปิดการสนทนา"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"วิดเจ็ตการสนทนา"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"แตะการสนทนาเพื่อเพิ่มไปยังหน้าจอหลัก"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>ที่ผ่านมา"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"ไม่ถึง <xliff:g id="DURATION">%1$s</xliff:g>ที่ผ่านมา"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"นานกว่า <xliff:g id="DURATION">%1$s</xliff:g>ที่ผ่านมา"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"วันเกิด"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"ใกล้ถึงวันเกิดแล้ว"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"วันครบรอบ"</string>
+    <string name="location_status" msgid="1294990572202541812">"กำลังแชร์ตำแหน่ง"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"เรื่องราวใหม่"</string>
+    <string name="video_status" msgid="4548544654316843225">"กำลังดูวิดีโอ"</string>
+    <string name="audio_status" msgid="4237055636967709208">"กำลังฟัง"</string>
+    <string name="game_status" msgid="1340694320630973259">"กำลังเล่น"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"เพื่อน"</string>
+    <string name="empty_status" msgid="5938893404951307749">"คืนนี้มาแชทกัน"</string>
+    <string name="missed_call" msgid="4228016077700161689">"สายที่ไม่ได้รับ"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"ดูข้อความล่าสุด สายที่ไม่ได้รับ และการอัปเดตสถานะ"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"การสนทนา"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"พบปัญหาในการอ่านเครื่องวัดแบตเตอรี่"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"แตะดูข้อมูลเพิ่มเติม"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ไม่มีการตั้งปลุก"</string>
 </resources>

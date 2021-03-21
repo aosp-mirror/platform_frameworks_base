@@ -359,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Új felhasználó"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Repülőgépen használható"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Használhatók hálózatok"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nem használhatók hálózatok"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Nincs kapcsolat"</string>
@@ -516,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Az eszközt a szülőd felügyeli"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Az eszköz az Ön szervezetének tulajdonában van, és lehetséges, hogy a hálózati forgalmat is figyelik"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Az eszköz a(z) <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tulajdonában van, és lehetséges, hogy a hálózati forgalmat is figyelik"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Ezt az eszközt a(z) <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> szervezet biztosítja"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Ez az eszköz az Ön szervezetének tulajdonában van, és össze van kapcsolva a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazással"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Ez az eszköz a(z) <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tulajdonában van, és össze van kapcsolva a(z) <xliff:g id="VPN_APP">%2$s</xliff:g> alkalmazással"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Ez az eszköz az Ön szervezetének tulajdonában van"</string>
@@ -529,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Munkaprofilja össze van kapcsolva a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazással"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Személyes profilja össze van kapcsolva a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazással"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Ez az eszköz össze van kapcsolva a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazással"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Ezt az eszközt a(z) <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> szervezet biztosítja"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Eszközkezelés"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Profilfelügyelet"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Hálózatfigyelés"</string>
@@ -540,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Házirendek megtekintése"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Vezérlők megtekintése"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Ez az eszköz a(z) <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tulajdonában van.\n\nA rendszergazda figyelheti és kezelheti az eszköz beállításait, vállalati hozzáférését, alkalmazásait, adatait és helyadatait.\n\nHa további információra van szüksége, vegye fel a kapcsolatot a rendszergazdával."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"A(z) <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> hozzáférhet az ehhez az eszközhöz tartozó adatokhoz, és módosíthatja az eszköz beállításait.\n\nHa kérdései vannak, forduljon a következőhöz: <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Ez az eszköz az Ön szervezetének tulajdonában van.\n\nA rendszergazda figyelheti és kezelheti az eszköz beállításait, vállalati hozzáférését, alkalmazásait, adatait és helyadatait.\n\nHa további információra van szüksége, vegye fel a kapcsolatot a rendszergazdával."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Szervezete tanúsítványkibocsátót telepített az eszközre. Ezáltal figyelhetik és befolyásolhatják az Ön biztonságos hálózati forgalmát."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Szervezete tanúsítványkibocsátót telepített a munkaprofilba. Ezáltal figyelhetik és befolyásolhatják az Ön biztonságos hálózati forgalmát."</string>
@@ -650,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Demó mód megjelenítése"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Ébresztés"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Munkahelyi profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Repülős üzemmód"</string>
     <string name="add_tile" msgid="6239678623873086686">"Mozaik hozzáadása"</string>
@@ -896,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Gyorsbeállítások bezárása"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Ébresztő beállítva"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Bejelentkezve mint <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"felhasználó kiválasztása"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Nincs internetkapcsolat"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"A részletek megnyitása."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Nem áll rendelkezésre a következő ok miatt: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"A(z) <xliff:g id="ID_1">%s</xliff:g> beállításainak megnyitása."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Beállítások sorrendjének szerkesztése."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Bekapcsológombhoz tartozó menü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. oldal, összesen: <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lezárási képernyő"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"A meleg miatt kikapcsolt"</string>
@@ -1008,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Mozgatás balra"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Mozgatás jobbra"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Nagyításváltó"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Teljes képernyő nagyítása"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"A teljes képernyő felnagyítása"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Képernyő bizonyos részének nagyítása"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Váltás"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"A kisegítő kézmozdulat helyébe a Kisegítő lehetőségek gomb lépett\n\n"<annotation id="link">"Beállítások megtekintése"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"A gombot a szélre áthelyezve ideiglenesen elrejtheti"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Eszközvezérlők"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Vezérlők hozzáadása a csatlakoztatott eszközökhöz"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Eszközvezérlők beállítása"</string>
@@ -1078,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Új eszköz párosítása"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildszám"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildszám a vágólapra másolva."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Beszélgetés megnyitása"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Beszélgetési modulok"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Koppintson a kívánt beszélgetésre a kezdőképernyőre való felvételhez"</string>
+    <string name="timestamp" msgid="6577851592534538533">"Ennyi ideje: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"Kevesebb, mint ennyi ideje: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"Több, mint ennyi ideje: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Születésnap"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Közelgő születésnap"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Évforduló"</string>
+    <string name="location_status" msgid="1294990572202541812">"Hely megosztása"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Új történet"</string>
+    <string name="video_status" msgid="4548544654316843225">"Lejátszás"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Figyelés"</string>
+    <string name="game_status" msgid="1340694320630973259">"Játékban"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Ismerősök"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Beszélgessünk egyet!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Nem fogadott hívás"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Megtekintheti a legutóbbi üzeneteket, a nem fogadott hívásokat és az állapotfrissítéseket."</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Beszélgetés"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Probléma merült fel az akkumulátor-töltésmérő olvasásakor"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Koppintással további információkat érhet el."</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nincs ébresztés"</string>
 </resources>

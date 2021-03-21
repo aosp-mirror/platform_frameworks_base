@@ -359,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"新用户"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"WLAN"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"互联网"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"可在飞机上安全使用"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"有可用的网络"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"没有可用的网络"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"未连接"</string>
@@ -516,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"此设备由您的家长管理"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"贵单位拥有此设备，且可能会监控网络流量"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>拥有此设备，且可能会监控网络流量"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"此设备由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>提供"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"此设备归贵单位所有，且已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有，且已连接到“<xliff:g id="VPN_APP">%2$s</xliff:g>”"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"此设备归贵单位所有"</string>
@@ -529,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"您的工作资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"您的个人资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"此设备已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"此设备由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>提供"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"设备管理"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"资料监控"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"网络监控"</string>
@@ -540,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"查看政策"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"查看家长控制功能相关信息"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有。\n\n您的 IT 管理员能够监控和管理与您的设备相关的设置、企业权限、应用、数据，以及您设备的位置信息。\n\n如需了解详情，请与您的 IT 管理员联系。"</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>或许能够访问与此设备相关的数据、管理应用以及更改此设备的设置。\n\n如果您有疑问，请与<xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>联系。"</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"此设备归贵单位所有。\n\n您的 IT 管理员能够监控和管理与您的设备相关的设置、企业权限、应用、数据，以及您设备的位置信息。\n\n如需了解详情，请与您的 IT 管理员联系。"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"您所在的单位已在此设备上安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"您所在的单位已为您的工作资料安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
@@ -650,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"显示演示模式"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"以太网"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"闹钟"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"工作资料"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"飞行模式"</string>
     <string name="add_tile" msgid="6239678623873086686">"添加图块"</string>
@@ -896,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"关闭快捷设置。"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"已设置闹钟。"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"目前登录的用户名为<xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"选择用户"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"未连接到互联网"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"打开详情页面。"</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g>，因此目前无法使用"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"打开<xliff:g id="ID_1">%s</xliff:g>设置。"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"修改设置顺序。"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"电源菜单"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"第 <xliff:g id="ID_1">%1$d</xliff:g> 页，共 <xliff:g id="ID_2">%2$d</xliff:g> 页"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"锁定屏幕"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"手机因严重发热而自动关机"</string>
@@ -1008,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"左移"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"右移"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"切换放大模式"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"放大整个屏幕"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"放大整个屏幕"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"放大部分屏幕"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"切换"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"“无障碍”按钮已取代无障碍手势\n\n"<annotation id="link">"查看设置"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"将按钮移到边缘，即可暂时将其隐藏"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"设备控制器"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"为您所连接的设备添加控件"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"设置设备控件"</string>
@@ -1078,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"与新设备配对"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已将版本号复制到剪贴板。"</string>
+    <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"对话微件"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"点按对话即可将其添加到主屏幕"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>前"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"最近 <xliff:g id="DURATION">%1$s</xliff:g>内"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"超过 <xliff:g id="DURATION">%1$s</xliff:g>前"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"生日"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"生日快到了"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"周年纪念日"</string>
+    <string name="location_status" msgid="1294990572202541812">"正在分享位置信息"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"新故事"</string>
+    <string name="video_status" msgid="4548544654316843225">"正在观看"</string>
+    <string name="audio_status" msgid="4237055636967709208">"正在收听"</string>
+    <string name="game_status" msgid="1340694320630973259">"正在玩游戏"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"好友"</string>
+    <string name="empty_status" msgid="5938893404951307749">"今晚来聊聊吧！"</string>
+    <string name="missed_call" msgid="4228016077700161689">"未接电话"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"查看最近的信息、未接电话和状态更新"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"对话"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"读取电池计量器时出现问题"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"点按即可了解详情"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"未设置闹钟"</string>
 </resources>

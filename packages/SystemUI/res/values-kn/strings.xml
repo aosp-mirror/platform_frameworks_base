@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ರದ್ದುಮಾಡಿ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಅನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಉಳಿಸಲಾಗಿದೆ"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಅಳಿಸುವಾಗ ದೋಷ ಕಂಡುಬಂದಿದೆ"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ಅನುಮತಿಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲವಾಗಿದೆ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸುವಾಗ ದೋಷ ಕಂಡುಬಂದಿದೆ"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"ಹೊಸ ಬಳಕೆದಾರರು"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"ವೈ-ಫೈ"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"ಇಂಟರ್ನೆಟ್"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್‌ನಲ್ಲಿ ಬಳಸಲು ಸುರಕ್ಷಿತವಾಗಿದೆ"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ"</string>
@@ -476,7 +473,7 @@
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ಮತ್ತೆ ಸುಸ್ವಾಗತ, ಅತಿಥಿ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ನಿಮ್ಮ ಸೆಷನ್‌ ಮುಂದುವರಿಸಲು ಇಚ್ಚಿಸುವಿರಾ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ಪ್ರಾರಂಭಿಸಿ"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ಹೌದು, ಮುಂದುವರಿ"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ಹೌದು, ಮುಂದುವರಿಸಿ"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"ಅತಿಥಿ ಬಳಕೆದಾರ"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾ ಅಳಿಸಲು, ಅತಿಥಿ ಬಳಕೆದಾರರನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
@@ -518,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ಈ ಸಾಧನವನ್ನು ನಿಮ್ಮ ಪೋಷಕರು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಈ ಸಾಧನದ ಮಾಲೀಕತ್ವವನ್ನು ಹೊಂದಿದೆ ಮತ್ತು ಅದು ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್‌ನ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ಈ ಸಾಧನದ ಮಾಲೀಕತ್ವವನ್ನು ಹೊಂದಿದೆ ಮತ್ತು ಅದು ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್‌ನ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ಈ ಸಾಧನವನ್ನು <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ಒದಗಿಸಿದ್ದಾರೆ"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ ಮತ್ತು <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ಈ ಸಾಧನವು <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ಗೆ ಸೇರಿದೆ ಮತ್ತು <xliff:g id="VPN_APP">%2$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ"</string>
@@ -531,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"ನಿಮ್ಮ ಉದ್ಯೋಗದ ಪ್ರೊಫೈಲ್ <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಪ್ರೊಫೈಲ್ <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ಈ ಸಾಧನವು <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ಈ ಸಾಧನವನ್ನು <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ಒದಗಿಸಿದ್ದಾರೆ"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ಸಾಧನ ನಿರ್ವಹಣೆ"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"ಪ್ರೊಫೈಲ್ ಮೇಲ್ವಿಚಾರಣೆ"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"ನೆಟ್‌ವರ್ಕ್‌ ಪರಿವೀಕ್ಷಣೆ"</string>
@@ -542,6 +541,8 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ಕಾರ್ಯನೀತಿಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"ನಿಯಂತ್ರಣಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"ಈ ಸಾಧನವು <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ಗೆ ಸೇರಿದೆ.\n\nಸೆಟ್ಟಿಂಗ್‌ಗಳು, ಕಾರ್ಪೊರೇಟ್ ಪ್ರವೇಶ, ಆ್ಯಪ್‌ಗಳು, ನಿಮ್ಮ ಸಾಧನಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಡೇಟಾ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳದ ಮಾಹಿತಿಯನ್ನು ನಿಮ್ಮ IT ನಿರ್ವಾಹಕರು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು ಮತ್ತು ನಿರ್ವಹಿಸಬಹುದು.\n\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ನಿಮ್ಮ IT ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
+    <!-- no translation found for monitoring_financed_description_named_management (6108439201399938668) -->
+    <skip />
     <string name="monitoring_description_management" msgid="4308879039175729014">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ.\n\nಸೆಟ್ಟಿಂಗ್‌ಗಳು, ಕಾರ್ಪೊರೇಟ್ ಪ್ರವೇಶ, ಆ್ಯಪ್‌ಗಳು, ನಿಮ್ಮ ಸಾಧನಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಡೇಟಾ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳದ ಮಾಹಿತಿಯನ್ನು ನಿಮ್ಮ IT ನಿರ್ವಾಹಕರು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು ಮತ್ತು ನಿರ್ವಹಿಸಬಹುದು.\n\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ನಿಮ್ಮ IT ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಈ ಸಾಧನದಲ್ಲಿ ಪ್ರಮಾಣಪತ್ರ ಅಂಗೀಕಾರವನ್ನು ಸ್ಥಾಪಿಸಿದೆ. ನಿಮ್ಮ ಸುರಕ್ಷಿತ ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಅನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು ಅಥವಾ ಮಾರ್ಪಡಿಸಬಹುದು."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಪ್ರಮಾಣಪತ್ರ ಅಂಗೀಕಾರವನ್ನು ಸ್ಥಾಪಿಸಿದೆ. ನಿಮ್ಮ ಸುರಕ್ಷಿತ ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಅನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು ಅಥವಾ ಮಾರ್ಪಡಿಸಬಹುದು."</string>
@@ -652,6 +653,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ಡೆಮೊ ಮೋಡ್ ತೋರಿಸು"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ಇಥರ್ನೆಟ್"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ಅಲಾರಮ್"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್"</string>
     <string name="add_tile" msgid="6239678623873086686">"ಟೈಲ್ ಸೇರಿಸಿ"</string>
@@ -898,11 +903,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮುಚ್ಚಿ."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"ಅಲಾರಾಂ ಹೊಂದಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> ಅವರಂತೆ ಸೈನ್ ಇನ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ಬಳಕೆದಾರರನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ಇಂಟರ್ನೆಟ್ ಇಲ್ಲ"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"ವಿವರಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g> ಕಾರಣದಿಂದಾಗಿ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಎಡಿಟ್ ಮಾಡಿ."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ಪವರ್ ಮೆನು"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="ID_1">%1$d</xliff:g> ಪುಟ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ಲಾಕ್ ಪರದೆ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ಫೋನ್ ಬಿಸಿಯಾಗಿದ್ದರಿಂದ ಆಫ್ ಆಗಿದೆ"</string>
@@ -1010,9 +1017,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ಎಡಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"ಬಲಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ಝೂಮ್ ಮಾಡುವ ಸ್ವಿಚ್"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"ಸ್ಕ್ರೀನ್‌ನ ಸಂಪೂರ್ಣ ಭಾಗವನ್ನು ಝೂಮ್ ಮಾಡಿ"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಹಿಗ್ಗಿಸಿ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ಸ್ಕ್ರೀನ್‌ನ ಅರ್ಧಭಾಗವನ್ನು ಝೂಮ್ ಮಾಡಿ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ಸ್ವಿಚ್"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ಪ್ರವೇಶಿಸುವಿಕೆ ಬಟನ್ ಅಕ್ಸೆಸಿಬಿಲಿಟಿ ಗೆಸ್ಚರ್ ಅನ್ನು ಬದಲಾಯಿಸಿದೆ\n\n"<annotation id="link">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ಅದನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ಮರೆಮಾಡಲು ಅಂಚಿಗೆ ಬಟನ್ ಸರಿಸಿ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ನಿಮ್ಮ ಸಂಪರ್ಕಿತ ಸಾಧನಗಳಿಗೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
@@ -1080,6 +1089,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ಹೊಸ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ಬಿಲ್ಡ್ ಸಂಖ್ಯೆ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ಬಿಲ್ಡ್ ಸಂಖ್ಯೆಯನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿ ನಕಲಿಸಲಾಗಿದೆ."</string>
+    <string name="basic_status" msgid="2315371112182658176">"ಸಂಭಾಷಣೆಯನ್ನು ತೆರೆಯಿರಿ"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"ಸಂಭಾಷಣೆ ವಿಜೆಟ್‌ಗಳು"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"ಸಂಭಾಷಣೆಯನ್ನು ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಸೇರಿಸಲು ಅದನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> ಸಮಯದ ಹಿಂದೆ"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> ಗಿಂತ ಕಡಿಮೆ ಅವಧಿಯ ಹಿಂದೆ"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> ಗಿಂತ ಹೆಚ್ಚಿನ ಅವಧಿಯ ಹಿಂದೆ"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"ಜನ್ಮದಿನ"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"ಶೀಘ್ರದಲ್ಲಿ ಜನ್ಮದಿನವಿದೆ"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"ವಾರ್ಷಿಕೋತ್ಸವ"</string>
+    <string name="location_status" msgid="1294990572202541812">"ಸ್ಥಳ ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"ಹೊಸ ಸುದ್ದಿ"</string>
+    <string name="video_status" msgid="4548544654316843225">"ವೀಕ್ಷಿಸುತ್ತಿರುವವರು"</string>
+    <string name="audio_status" msgid="4237055636967709208">"ಆಲಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="game_status" msgid="1340694320630973259">"ಪ್ಲೇ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"ಸ್ನೇಹಿತರು"</string>
+    <string name="empty_status" msgid="5938893404951307749">"ಈ ರಾತ್ರಿ ಚಾಟ್ ಮಾಡೋಣ!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"ಮಿಸ್ಡ್ ಕಾಲ್"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"ಇತ್ತೀಚಿನ ಸಂದೇಶಗಳು, ಮಿಸ್ಡ್ ಕಾಲ್‌ಗಳು ಮತ್ತು ಸ್ಥಿತಿ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"ಸಂಭಾಷಣೆ"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ನಿಮ್ಮ ಬ್ಯಾಟರಿ ಮೀಟರ್ ಓದುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ಅಲಾರಾಂ ಸೆಟ್ ಆಗಿಲ್ಲ"</string>
 </resources>
