@@ -105,7 +105,11 @@ public class MobileRadioPowerCalculatorTest {
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_MOBILE_RADIO);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(1.44440);
+                .isWithin(PRECISION).of(2.2444);
+        assertThat(consumer.getConsumedPower())
+                .isWithin(PRECISION).of(2.2444);
+        assertThat(consumer.getPowerConsumedByApps())
+                .isWithin(PRECISION).of(0.8);
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
@@ -156,9 +160,11 @@ public class MobileRadioPowerCalculatorTest {
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_MOBILE_RADIO);
 
-        // 100000000 uAs * (1 mA / 1000 uA) * (1 h / 3600 s) = 2.77777 mAh
+        // 100000000 uAs * (1 mA / 1000 uA) * (1 h / 3600 s) + 1.53934 (apps)= 4.31711 mAh
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(2.77777);
+                .isWithin(PRECISION).of(4.31711);
+        assertThat(consumer.getPowerConsumedByApps())
+                .isWithin(PRECISION).of(1.53934);
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
