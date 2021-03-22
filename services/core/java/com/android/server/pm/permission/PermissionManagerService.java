@@ -79,6 +79,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
@@ -3353,15 +3354,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         //     - or it shares a common signing certificate in its lineage with the defining package,
         //       and the defining package still trusts the old certificate for permissions
         //     - or it shares the above relationships with the system package
-        final PackageParser.SigningDetails sourceSigningDetails =
+        final SigningDetails sourceSigningDetails =
                 getSourcePackageSigningDetails(bp);
         return sourceSigningDetails.hasCommonSignerWithCapability(
                         pkg.getSigningDetails(),
-                        PackageParser.SigningDetails.CertCapabilities.PERMISSION)
+                        SigningDetails.CertCapabilities.PERMISSION)
                 || pkg.getSigningDetails().hasAncestorOrSelf(systemPackage.getSigningDetails())
                 || systemPackage.getSigningDetails().checkCapability(
                         pkg.getSigningDetails(),
-                        PackageParser.SigningDetails.CertCapabilities.PERMISSION);
+                        SigningDetails.CertCapabilities.PERMISSION);
     }
 
     private boolean shouldGrantPermissionByProtectionFlags(@NonNull AndroidPackage pkg,
@@ -3519,11 +3520,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @NonNull
-    private PackageParser.SigningDetails getSourcePackageSigningDetails(
+    private SigningDetails getSourcePackageSigningDetails(
             @NonNull Permission bp) {
         final PackageSetting ps = getSourcePackageSetting(bp);
         if (ps == null) {
-            return PackageParser.SigningDetails.UNKNOWN;
+            return SigningDetails.UNKNOWN;
         }
         return ps.getSigningDetails();
     }

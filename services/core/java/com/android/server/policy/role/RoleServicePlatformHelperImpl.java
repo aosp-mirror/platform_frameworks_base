@@ -323,7 +323,7 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
                     dataOutputStream.writeUTF(disabledComponents.valueAt(i));
                 }
 
-                for (final Signature signature : pkg.getSigningDetails().signatures) {
+                for (final Signature signature : pkg.getSigningDetails().getSignatures()) {
                     dataOutputStream.write(signature.toByteArray());
                 }
             } catch (IOException e) {
