@@ -18,6 +18,7 @@ package com.android.server.location.injector;
 
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
+import static com.android.server.location.eventlog.LocationEventLog.EVENT_LOG;
 import static com.android.server.location.injector.UserInfoHelper.UserListener.CURRENT_USER_CHANGED;
 import static com.android.server.location.injector.UserInfoHelper.UserListener.USER_STARTED;
 import static com.android.server.location.injector.UserInfoHelper.UserListener.USER_STOPPED;
@@ -105,6 +106,7 @@ public abstract class UserInfoHelper {
             Log.d(TAG, "current user changed from u" + Arrays.toString(fromUserIds) + " to u"
                     + Arrays.toString(toUserIds));
         }
+        EVENT_LOG.logUserSwitched(fromUserId, toUserId);
 
         for (UserListener listener : mListeners) {
             for (int userId : fromUserIds) {

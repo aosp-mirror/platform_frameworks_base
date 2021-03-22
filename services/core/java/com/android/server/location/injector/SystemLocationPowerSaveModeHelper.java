@@ -25,7 +25,6 @@ import android.os.PowerSaveState;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.location.eventlog.LocationEventLog;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -42,8 +41,7 @@ public class SystemLocationPowerSaveModeHelper extends LocationPowerSaveModeHelp
     @LocationPowerSaveMode
     private volatile int mLocationPowerSaveMode;
 
-    public SystemLocationPowerSaveModeHelper(Context context, LocationEventLog locationEventLog) {
-        super(locationEventLog);
+    public SystemLocationPowerSaveModeHelper(Context context) {
         mContext = context;
     }
 
