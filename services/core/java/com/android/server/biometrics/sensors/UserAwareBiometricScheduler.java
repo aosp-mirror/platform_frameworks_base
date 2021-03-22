@@ -45,7 +45,7 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
 
     public interface UserSwitchCallback {
         @NonNull StopUserClient<?> getStopUserClient(int userId);
-        @NonNull StartUserClient<?> getStartUserClient(int newUserId);
+        @NonNull StartUserClient<?, ?> getStartUserClient(int newUserId);
     }
 
     @NonNull private final CurrentUserRetriever mCurrentUserRetriever;

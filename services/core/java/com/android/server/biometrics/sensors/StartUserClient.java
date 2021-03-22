@@ -25,18 +25,27 @@ import android.os.IBinder;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.BiometricsProto;
 
-public abstract class StartUserClient<T>  extends HalClientMonitor<T> {
+/**
+ * Abstract class for starting a new user.
+ * @param <T> Interface to request a new user.
+ * @param <U> Newly created user object.
+ */
+public abstract class StartUserClient<T, U>  extends HalClientMonitor<T> {
 
-    public interface UserStartedCallback {
-        void onUserStarted(int newUserId);
+    /**
+     * Invoked when the new user is started.
+     * @param <U> New user object.
+     */
+    public interface UserStartedCallback<U> {
+        void onUserStarted(int newUserId, U newUser);
     }
 
     @NonNull @VisibleForTesting
-    protected final UserStartedCallback mUserStartedCallback;
+    protected final UserStartedCallback<U> mUserStartedCallback;
 
     public StartUserClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @Nullable IBinder token, int userId, int sensorId,
-            @NonNull UserStartedCallback callback) {
+            @NonNull UserStartedCallback<U> callback) {
         super(context, lazyDaemon, token, null /* listener */, userId, context.getOpPackageName(),
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
                 BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
