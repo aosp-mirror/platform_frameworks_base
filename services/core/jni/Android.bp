@@ -188,7 +188,6 @@ cc_defaults {
             shared_libs: [
                 "libarcbridge",
                 "libarcbridgeservice",
-                "libarctimer",
                 "libbase",
                 "libcap",
                 "libchrome",
