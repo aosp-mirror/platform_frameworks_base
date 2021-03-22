@@ -38,7 +38,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserManager;
-import android.stats.camera.nano.CameraStreamProto;
+import android.stats.camera.nano.CameraProtos.CameraStreamProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
