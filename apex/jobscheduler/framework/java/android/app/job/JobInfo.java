@@ -1021,6 +1021,41 @@ public class JobInfo implements Parcelable {
             mJobId = jobId;
         }
 
+        /**
+         * Creates a new Builder of JobInfo from an existing instance.
+         * @hide
+         */
+        public Builder(@NonNull JobInfo job) {
+            mJobId = job.getId();
+            mJobService = job.getService();
+            mExtras = job.getExtras();
+            mTransientExtras = job.getTransientExtras();
+            mClipData = job.getClipData();
+            mClipGrantFlags = job.getClipGrantFlags();
+            mPriority = job.getPriority();
+            mFlags = job.getFlags();
+            mConstraintFlags = job.getConstraintFlags();
+            mNetworkRequest = job.getRequiredNetwork();
+            mNetworkDownloadBytes = job.getEstimatedNetworkDownloadBytes();
+            mNetworkUploadBytes = job.getEstimatedNetworkUploadBytes();
+            mTriggerContentUris = job.getTriggerContentUris() != null
+                    ? new ArrayList<>(Arrays.asList(job.getTriggerContentUris())) : null;
+            mTriggerContentUpdateDelay = job.getTriggerContentUpdateDelay();
+            mTriggerContentMaxDelay = job.getTriggerContentMaxDelay();
+            mIsPersisted = job.isPersisted();
+            mMinLatencyMillis = job.getMinLatencyMillis();
+            mMaxExecutionDelayMillis = job.getMaxExecutionDelayMillis();
+            mIsPeriodic = job.isPeriodic();
+            mHasEarlyConstraint = job.hasEarlyConstraint();
+            mHasLateConstraint = job.hasLateConstraint();
+            mIntervalMillis = job.getIntervalMillis();
+            mFlexMillis = job.getFlexMillis();
+            mInitialBackoffMillis = job.getInitialBackoffMillis();
+            // mBackoffPolicySet isn't set but it's fine since this is copying from an already valid
+            // job.
+            mBackoffPolicy = job.getBackoffPolicy();
+        }
+
         /** @hide */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Builder setPriority(int priority) {
