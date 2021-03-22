@@ -16,8 +16,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:layout_gravity="center"
-    style="@style/BrightnessDialogContainer">
+    android:layout_gravity="center">
 
     <com.android.systemui.settings.brightness.BrightnessSliderView
         android:id="@+id/brightness_slider"
@@ -35,6 +34,8 @@
             android:minHeight="48dp"
             android:thumb="@null"
             android:background="@null"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:progressDrawable="@drawable/brightness_progress_drawable_thick"
             android:splitTrack="false"
         />

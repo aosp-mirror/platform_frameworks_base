@@ -34,6 +34,10 @@ open class SideLabelTileLayout(
         return mRecords.size >= maxTiles()
     }
 
+    override fun useSidePadding(): Boolean {
+        return false
+    }
+
     /**
      * Return the position from the top of the layout of the tile with this index.
      *
