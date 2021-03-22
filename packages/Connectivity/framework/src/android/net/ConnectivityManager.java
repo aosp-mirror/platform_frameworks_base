@@ -4252,7 +4252,7 @@ public class ConnectivityManager {
      * @throws RuntimeException if the app already has too many callbacks registered.
      * @hide
      */
-    // TODO: @SystemApi(client=MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @SuppressLint({"ExecutorRegistration", "PairedRegistration"})
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
