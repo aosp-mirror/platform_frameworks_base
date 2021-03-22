@@ -341,11 +341,11 @@ public final class DomainVerificationManager {
     }
 
     /**
-     * Retrieve the user selection data for the given {@param packageName} and the current user.
+     * Retrieve the user state for the given package and the {@link Context}'s user.
      *
      * @param packageName The app to query state for.
-     * @return the user selection verification data for the given package for the current user, or
-     * null if the package does not declare any HTTP/HTTPS domains.
+     * @return The user selection verification data for the given package for the user, or null if
+     * the package does not declare any HTTP/HTTPS domains.
      */
     @Nullable
     public DomainVerificationUserState getDomainVerificationUserState(
