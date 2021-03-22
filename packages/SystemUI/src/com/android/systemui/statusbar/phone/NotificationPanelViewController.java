@@ -1325,6 +1325,9 @@ public class NotificationPanelViewController extends PanelViewController {
         traceQsJank(true /* startTracing */, false /* wasCancelled */);
         flingSettings(0 /* velocity */, FLING_EXPAND);
         mQSDetailDisplayer.showDetailAdapter(qsDetailAdapter, 0, 0);
+        if (mAccessibilityManager.isEnabled()) {
+            mView.setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
+        }
     }
 
     public void expandWithoutQs() {
