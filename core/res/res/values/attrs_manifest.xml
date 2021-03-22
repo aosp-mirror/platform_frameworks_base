@@ -1853,6 +1853,25 @@
              -->
         <attr name="preserveLegacyExternalStorage" format="boolean" />
 
+        <!-- If {@code true} this app would like optimized external storage access.
+
+        <p> This flag can only be used by apps holding
+        <ul>
+        <li>{@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} permission or
+        <li>{@link android.app.role}#SYSTEM_GALLERY role.
+        </ul>
+        When the flag is set, bulk file path operations will be optimized.
+
+        The default value is {@code true} if
+        <ul>
+        <li>app has {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} permission and
+        targets targetSDK<=30.
+        <li>app has {@link android.app.role}#SYSTEM_GALLERY role and targetSDK<=29
+        </ul>
+        {@code false} otherwise.
+        -->
+        <attr name="requestOptimizedExternalStorageAccess" format="boolean" />
+
         <!-- If {@code true} this app declares that it should be visible to all other apps on
              device, regardless of what they declare via the {@code queries} tags in their
              manifest.

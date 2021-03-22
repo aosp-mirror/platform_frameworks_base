@@ -2012,6 +2012,12 @@ public class ParsingPackageUtils {
                 pkg.setNativeHeapZeroInit(sa.getBoolean(
                         R.styleable.AndroidManifestApplication_nativeHeapZeroInit, false));
             }
+            if (sa.hasValue(
+                    R.styleable.AndroidManifestApplication_requestOptimizedExternalStorageAccess)) {
+                pkg.setRequestOptimizedExternalStorageAccess(sa.getBoolean(R.styleable
+                                .AndroidManifestApplication_requestOptimizedExternalStorageAccess,
+                        false));
+            }
         } finally {
             sa.recycle();
         }

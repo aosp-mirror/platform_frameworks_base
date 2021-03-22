@@ -1411,6 +1411,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     private Boolean nativeHeapZeroInit;
 
     /**
+     * If {@code true} this app requests optimized external storage access.
+     * The request may not be honored due to policy or other reasons.
+     */
+    @Nullable
+    private Boolean requestOptimizedExternalStorageAccess;
+
+    /**
      * Represents the default policy. The actual policy used will depend on other properties of
      * the application, e.g. the target SDK version.
      * @hide
@@ -1565,6 +1572,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
             if (nativeHeapZeroInit != null) {
                 pw.println(prefix + "nativeHeapZeroInit=" + nativeHeapZeroInit);
+            }
+            if (requestOptimizedExternalStorageAccess != null) {
+                pw.println(prefix + "requestOptimizedExternalStorageAccess="
+                        + requestOptimizedExternalStorageAccess);
             }
         }
         super.dumpBack(pw, prefix);
@@ -1792,6 +1803,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         gwpAsanMode = orig.gwpAsanMode;
         memtagMode = orig.memtagMode;
         nativeHeapZeroInit = orig.nativeHeapZeroInit;
+        requestOptimizedExternalStorageAccess = orig.requestOptimizedExternalStorageAccess;
     }
 
     public String toString() {
@@ -1880,6 +1892,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(gwpAsanMode);
         dest.writeInt(memtagMode);
         sForBoolean.parcel(nativeHeapZeroInit, dest, parcelableFlags);
+        sForBoolean.parcel(requestOptimizedExternalStorageAccess, dest, parcelableFlags);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1965,6 +1978,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         gwpAsanMode = source.readInt();
         memtagMode = source.readInt();
         nativeHeapZeroInit = sForBoolean.unparcel(source);
+        requestOptimizedExternalStorageAccess = sForBoolean.unparcel(source);
     }
 
     /**
@@ -2076,6 +2090,24 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean hasRequestedLegacyExternalStorage() {
         return (privateFlags & PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE) != 0;
+    }
+
+    /**
+     * @return
+     * <ul>
+     * <li>{@code true} if this app requested optimized external storage access
+     * <li>{@code false} if this app requests to disable optimized external storage access.
+     * <li>{@code null} if the app didn't specify
+     * {@link android.R.styleable#AndroidManifestApplication_requestOptimizedExternalStorageAccess}
+     * in its manifest file.
+     * </ul>
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public Boolean hasRequestOptimizedExternalStorageAccess() {
+        return requestOptimizedExternalStorageAccess;
     }
 
     /**
@@ -2351,6 +2383,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** {@hide} */ public void setGwpAsanMode(@GwpAsanMode int value) { gwpAsanMode = value; }
     /** {@hide} */ public void setMemtagMode(@MemtagMode int value) { memtagMode = value; }
     /** {@hide} */ public void setNativeHeapZeroInit(@Nullable Boolean value) { nativeHeapZeroInit = value; }
+    /** {@hide} */
+    public void setRequestOptimizedExternalStorageAccess(@Nullable Boolean value) {
+        requestOptimizedExternalStorageAccess = value;
+    }
 
     /** {@hide} */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
