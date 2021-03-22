@@ -1248,8 +1248,9 @@ public class Vpn {
         mLegacyState = LegacyVpnInfo.STATE_CONNECTING;
         updateState(DetailedState.CONNECTING, "agentConnect");
 
-        NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig.Builder().build();
-        networkAgentConfig.allowBypass = mConfig.allowBypass && !mLockdown;
+        final NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig.Builder()
+                .setBypassableVpn(mConfig.allowBypass && !mLockdown)
+                .build();
 
         capsBuilder.setOwnerUid(mOwnerUID);
         capsBuilder.setAdministratorUids(new int[] {mOwnerUID});
