@@ -71,7 +71,7 @@ class DomainVerificationUserStateOverrideTest {
         }, mockThrowOnUnmocked {
             whenever(linkedApps) { ArraySet<String>() }
         }, mockThrowOnUnmocked {
-            whenever(isChangeEnabled(anyLong(), any())) { true }
+            whenever(isChangeEnabledInternalNoLogging(anyLong(), any())) { true }
         }).apply {
             setConnection(mockThrowOnUnmocked {
                 whenever(filterAppAccess(anyString(), anyInt(), anyInt())) { false }
