@@ -20,7 +20,6 @@ import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESU
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
 
 import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.debugLog;
-import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.infoLog;
 import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.warnLog;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
@@ -83,18 +82,6 @@ abstract class LocationTimeZoneProvider implements Dumpable {
          * Indicated that a provider changed states. The {@code providerState} indicates which one
          */
         void onProviderStateChange(@NonNull ProviderState providerState);
-    }
-
-    /**
-     * Used by {@link LocationTimeZoneProvider} to check if time zone IDs are understood
-     * by the platform.
-     */
-    interface TimeZoneIdValidator {
-
-        /**
-         * Returns whether {@code timeZoneId} is supported by the platform or not.
-         */
-        boolean isValid(@NonNull String timeZoneId);
     }
 
     /**
@@ -386,19 +373,20 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     // Non-null and effectively final after initialize() is called.
     ProviderListener mProviderListener;
 
-    @NonNull private TimeZoneIdValidator mTimeZoneIdValidator;
+    @NonNull private final TimeZoneProviderEventPreProcessor mTimeZoneProviderEventPreProcessor;
 
     /** Creates the instance. */
     LocationTimeZoneProvider(@NonNull ProviderMetricsLogger providerMetricsLogger,
             @NonNull ThreadingDomain threadingDomain,
             @NonNull String providerName,
-            @NonNull TimeZoneIdValidator timeZoneIdValidator) {
+            @NonNull TimeZoneProviderEventPreProcessor timeZoneProviderEventPreProcessor) {
         mThreadingDomain = Objects.requireNonNull(threadingDomain);
         mProviderMetricsLogger = Objects.requireNonNull(providerMetricsLogger);
         mInitializationTimeoutQueue = threadingDomain.createSingleRunnableQueue();
         mSharedLock = threadingDomain.getLockObject();
         mProviderName = Objects.requireNonNull(providerName);
-        mTimeZoneIdValidator = Objects.requireNonNull(timeZoneIdValidator);
+        mTimeZoneProviderEventPreProcessor =
+                Objects.requireNonNull(timeZoneProviderEventPreProcessor);
     }
 
     /**
@@ -639,24 +627,8 @@ abstract class LocationTimeZoneProvider implements Dumpable {
         mThreadingDomain.assertCurrentThread();
         Objects.requireNonNull(timeZoneProviderEvent);
 
-        // If the provider has made a suggestion with unknown time zone IDs it cannot be used to set
-        // the device's time zone. This logic prevents bad time zone IDs entering the time zone
-        // detection logic from third party code.
-        //
-        // An event containing an unknown time zone ID could occur if the provider is using a
-        // different TZDB version than the device. Provider developers are expected to take steps to
-        // avoid version skew problem, e.g. by ensuring atomic updates with the platform time zone
-        // rules, or providing IDs based on the device's TZDB version, so this is not considered a
-        // common case.
-        //
-        // Treating a suggestion containing unknown time zone IDs as "uncertain" in the primary
-        // enables immediate failover to a secondary provider, one that might provide valid IDs for
-        // the same location, which should provide better behavior than just ignoring the event.
-        if (hasInvalidTimeZones(timeZoneProviderEvent)) {
-            infoLog("event=" + timeZoneProviderEvent + " has unsupported time zones. "
-                    + "Replacing it with uncertain event.");
-            timeZoneProviderEvent = TimeZoneProviderEvent.createUncertainEvent();
-        }
+        timeZoneProviderEvent =
+                mTimeZoneProviderEventPreProcessor.preProcess(timeZoneProviderEvent);
 
         synchronized (mSharedLock) {
             debugLog("handleTimeZoneProviderEvent: mProviderName=" + mProviderName
@@ -753,20 +725,6 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                 }
             }
         }
-    }
-
-    private boolean hasInvalidTimeZones(@NonNull TimeZoneProviderEvent event) {
-        if (event.getSuggestion() == null) {
-            return false;
-        }
-
-        for (String timeZone : event.getSuggestion().getTimeZoneIds()) {
-            if (!mTimeZoneIdValidator.isValid(timeZone)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @GuardedBy("mSharedLock")
