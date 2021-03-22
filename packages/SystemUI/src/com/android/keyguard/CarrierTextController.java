@@ -16,20 +16,15 @@
 
 package com.android.keyguard;
 
-import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
-import static android.telephony.PhoneStateListener.LISTEN_NONE;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.wifi.WifiManager;
-import android.os.Handler;
-import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -40,11 +35,14 @@ import androidx.annotation.VisibleForTesting;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.telephony.TelephonyListenerManager;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -59,8 +57,6 @@ public class CarrierTextController {
     private static final String TAG = "CarrierTextController";
 
     private final boolean mIsEmergencyCallCapable;
-    private final Handler mMainHandler;
-    private final Handler mBgHandler;
     private boolean mTelephonyCapable;
     private boolean mShowMissingSim;
     private boolean mShowAirplaneMode;
@@ -73,6 +69,10 @@ public class CarrierTextController {
     @Nullable // Check for nullability before dispatching
     private CarrierTextCallback mCarrierTextCallback;
     private Context mContext;
+    private final TelephonyManager mTelephonyManager;
+    private final TelephonyListenerManager mTelephonyListenerManager;
+    private final Executor mMainExecutor;
+    private final Executor mBgExecutor;
     private CharSequence mSeparator;
     private WakefulnessLifecycle mWakefulnessLifecycle;
     private final WakefulnessLifecycle.Observer mWakefulnessObserver =
@@ -129,14 +129,13 @@ public class CarrierTextController {
         }
     };
 
-    private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+    private final ActiveDataSubscriptionIdListener mPhoneStateListener =
+            new ActiveDataSubscriptionIdListener() {
         @Override
         public void onActiveDataSubscriptionIdChanged(int subId) {
-            mActiveMobileDataSubscription = subId;
-            if (mNetworkSupported.get() && mCarrierTextCallback != null) {
-                updateCarrierText();
-            }
+                if (mNetworkSupported.get() && mCarrierTextCallback != null) {
+                    updateCarrierText();
+                }
         }
     };
 
@@ -163,9 +162,15 @@ public class CarrierTextController {
      * @param separator Separator between different parts of the text
      */
     public CarrierTextController(Context context, CharSequence separator, boolean showAirplaneMode,
-            boolean showMissingSim) {
+            boolean showMissingSim, TelephonyManager telephonyManager,
+            TelephonyListenerManager telephonyListenerManager,
+            @Main Executor mainExecutor, @Background Executor bgExecutor) {
         mContext = context;
-        mIsEmergencyCallCapable = getTelephonyManager().isVoiceCapable();
+        mTelephonyManager = telephonyManager;
+        mTelephonyListenerManager = telephonyListenerManager;
+        mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
+        mIsEmergencyCallCapable = mTelephonyManager.isVoiceCapable();
 
         mShowAirplaneMode = showAirplaneMode;
         mShowMissingSim = showMissingSim;
@@ -173,12 +178,10 @@ public class CarrierTextController {
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mSeparator = separator;
         mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
-        mSimSlotsNumber = getTelephonyManager().getSupportedModemCount();
+        mSimSlotsNumber = mTelephonyManager.getSupportedModemCount();
         mSimErrorState = new boolean[mSimSlotsNumber];
-        mMainHandler = Dependency.get(Dependency.MAIN_HANDLER);
-        mBgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
-        mBgHandler.post(() -> {
+        mBgExecutor.execute(() -> {
             boolean supported =
                     mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
             if (supported && mNetworkSupported.compareAndSet(false, supported)) {
@@ -208,7 +211,7 @@ public class CarrierTextController {
         CharSequence carrierTextForSimIOError = getCarrierTextForSimState(
                 TelephonyManager.SIM_STATE_CARD_IO_ERROR, carrier);
         // mSimErrorState has the state of each sim indexed by slotID.
-        for (int index = 0; index < getTelephonyManager().getActiveModemCount(); index++) {
+        for (int index = 0; index < mTelephonyManager.getActiveModemCount(); index++) {
             if (!mSimErrorState[index]) {
                 continue;
             }
@@ -247,26 +250,24 @@ public class CarrierTextController {
      * This call will always be processed in a background thread.
      */
     private void handleSetListening(CarrierTextCallback callback) {
-        TelephonyManager telephonyManager = getTelephonyManager();
         if (callback != null) {
             mCarrierTextCallback = callback;
             if (mNetworkSupported.get()) {
                 // Keyguard update monitor expects callbacks from main thread
-                mMainHandler.post(() -> mKeyguardUpdateMonitor.registerCallback(mCallback));
+                mMainExecutor.execute(() -> mKeyguardUpdateMonitor.registerCallback(mCallback));
                 mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
-                telephonyManager.listen(mPhoneStateListener,
-                        LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
+                mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
             } else {
                 // Don't listen and clear out the text when the device isn't a phone.
-                mMainHandler.post(() -> callback.updateCarrierInfo(
+                mMainExecutor.execute(() -> callback.updateCarrierInfo(
                         new CarrierTextCallbackInfo("", null, false, null)
                 ));
             }
         } else {
             mCarrierTextCallback = null;
-            mMainHandler.post(() -> mKeyguardUpdateMonitor.removeCallback(mCallback));
+            mMainExecutor.execute(() -> mKeyguardUpdateMonitor.removeCallback(mCallback));
             mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
-            telephonyManager.listen(mPhoneStateListener, LISTEN_NONE);
+            mTelephonyListenerManager.removeActiveDataSubscriptionIdListener(mPhoneStateListener);
         }
     }
 
@@ -277,7 +278,7 @@ public class CarrierTextController {
      * @param callback Callback to provide text updates
      */
     public void setListening(CarrierTextCallback callback) {
-        mBgHandler.post(() -> handleSetListening(callback));
+        mBgExecutor.execute(() -> handleSetListening(callback));
     }
 
     protected List<SubscriptionInfo> getSubscriptionInfo() {
@@ -400,7 +401,7 @@ public class CarrierTextController {
     protected void postToCallback(CarrierTextCallbackInfo info) {
         final CarrierTextCallback callback = mCarrierTextCallback;
         if (callback != null) {
-            mMainHandler.post(() -> callback.updateCarrierInfo(info));
+            mMainExecutor.execute(() -> callback.updateCarrierInfo(info));
         }
     }
 
@@ -620,14 +621,25 @@ public class CarrierTextController {
     public static class Builder {
         private final Context mContext;
         private final String mSeparator;
+        private final TelephonyManager mTelephonyManager;
+        private final TelephonyListenerManager mTelephonyListenerManager;
+        private final Executor mMainExecutor;
+        private final Executor mBgExecutor;
         private boolean mShowAirplaneMode;
         private boolean mShowMissingSim;
 
         @Inject
-        public Builder(Context context, @Main Resources resources) {
+        public Builder(Context context, @Main Resources resources,
+                TelephonyManager telephonyManager,
+                TelephonyListenerManager telephonyListenerManager, @Main Executor mainExecutor,
+                @Background Executor bgExecutor) {
             mContext = context;
             mSeparator = resources.getString(
                     com.android.internal.R.string.kg_text_message_separator);
+            mTelephonyManager = telephonyManager;
+            mTelephonyListenerManager = telephonyListenerManager;
+            mMainExecutor = mainExecutor;
+            mBgExecutor = bgExecutor;
         }
 
 
@@ -643,7 +655,8 @@ public class CarrierTextController {
 
         public CarrierTextController build() {
             return new CarrierTextController(
-                    mContext, mSeparator, mShowAirplaneMode, mShowMissingSim);
+                    mContext, mSeparator, mShowAirplaneMode, mShowMissingSim, mTelephonyManager,
+                    mTelephonyListenerManager, mMainExecutor, mBgExecutor);
         }
     }
     /**

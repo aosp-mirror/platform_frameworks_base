@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.method.SingleLineTransformationMethod;
 import android.util.AttributeSet;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.telephony.TelephonyListenerManager;
 
 import java.util.Locale;
 
@@ -85,7 +87,10 @@ public class CarrierText extends TextView {
         mSeparator = getResources().getString(
                 com.android.internal.R.string.kg_text_message_separator);
         mCarrierTextController = new CarrierTextController(mContext, mSeparator, mShowAirplaneMode,
-                mShowMissingSim);
+                mShowMissingSim, mContext.getSystemService(TelephonyManager.class),
+                Dependency.get(TelephonyListenerManager.class),
+                Dependency.get(Dependency.MAIN_EXECUTOR),
+                Dependency.get(Dependency.BACKGROUND_EXECUTOR));
         mShouldMarquee = Dependency.get(KeyguardUpdateMonitor.class).isDeviceInteractive();
         setSelected(mShouldMarquee); // Allow marquee to work.
     }
