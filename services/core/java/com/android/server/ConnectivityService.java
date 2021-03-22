@@ -87,7 +87,6 @@ import static android.system.OsConstants.IPPROTO_UDP;
 import static java.util.Map.Entry;
 
 import android.Manifest;
-import android.annotation.BoolRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -1389,7 +1388,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mHandler.sendEmptyMessage(EVENT_PRIVATE_DNS_SETTINGS_CHANGED);
     }
 
-    private void handleAlwaysOnNetworkRequest(NetworkRequest networkRequest, @BoolRes int id) {
+    private void handleAlwaysOnNetworkRequest(NetworkRequest networkRequest, int id) {
         final boolean enable = mContext.getResources().getBoolean(id);
         handleAlwaysOnNetworkRequest(networkRequest, enable);
     }
@@ -8415,7 +8414,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private @VpnManager.VpnType int getVpnType(@Nullable NetworkAgentInfo vpn) {
+    private int getVpnType(@Nullable NetworkAgentInfo vpn) {
         if (vpn == null) return VpnManager.TYPE_VPN_NONE;
         final TransportInfo ti = vpn.networkCapabilities.getTransportInfo();
         if (!(ti instanceof VpnTransportInfo)) return VpnManager.TYPE_VPN_NONE;
