@@ -58,7 +58,9 @@ import static android.net.NetworkIdentity.OEM_NONE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
+import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_FOREGROUND;
 import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_MASK;
+import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_SYSTEM;
 import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_USER_EXEMPTED;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_FOREGROUND;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
@@ -4624,8 +4626,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         newBlockedReasons |= (mRestrictBackground ? BLOCKED_METERED_REASON_DATA_SAVER : 0);
         newBlockedReasons |= (isDenied ? BLOCKED_METERED_REASON_USER_RESTRICTED : 0);
 
-        newAllowedReasons |= (isSystem(uid) ? ALLOWED_REASON_SYSTEM : 0);
-        newAllowedReasons |= (isForeground ? ALLOWED_REASON_FOREGROUND : 0);
+        newAllowedReasons |= (isSystem(uid) ? ALLOWED_METERED_REASON_SYSTEM : 0);
+        newAllowedReasons |= (isForeground ? ALLOWED_METERED_REASON_FOREGROUND : 0);
         newAllowedReasons |= (isAllowed ? ALLOWED_METERED_REASON_USER_EXEMPTED : 0);
 
         if (LOGV) {
@@ -4699,18 +4701,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             // Dispatch changed rule to existing listeners.
             mHandler.obtainMessage(MSG_RULES_CHANGED, uid, newUidRules).sendToTarget();
+        }
 
-            final int oldEffectiveBlockedReasons = uidBlockedState.effectiveBlockedReasons;
-            uidBlockedState.blockedReasons = (uidBlockedState.blockedReasons
-                    & ~BLOCKED_METERED_REASON_MASK) | newBlockedReasons;
-            uidBlockedState.allowedReasons = (uidBlockedState.allowedReasons
-                    & ~ALLOWED_METERED_REASON_MASK) | newAllowedReasons;
-            uidBlockedState.updateEffectiveBlockedReasons();
-            if (oldEffectiveBlockedReasons != uidBlockedState.effectiveBlockedReasons) {
-                mHandler.obtainMessage(MSG_BLOCKED_REASON_CHANGED, uid,
-                        uidBlockedState.effectiveBlockedReasons, oldEffectiveBlockedReasons)
-                        .sendToTarget();
-            }
+        final int oldEffectiveBlockedReasons = uidBlockedState.effectiveBlockedReasons;
+        uidBlockedState.blockedReasons = (uidBlockedState.blockedReasons
+                & ~BLOCKED_METERED_REASON_MASK) | newBlockedReasons;
+        uidBlockedState.allowedReasons = (uidBlockedState.allowedReasons
+                & ~ALLOWED_METERED_REASON_MASK) | newAllowedReasons;
+        uidBlockedState.updateEffectiveBlockedReasons();
+        if (oldEffectiveBlockedReasons != uidBlockedState.effectiveBlockedReasons) {
+            mHandler.obtainMessage(MSG_BLOCKED_REASON_CHANGED, uid,
+                    uidBlockedState.effectiveBlockedReasons, oldEffectiveBlockedReasons)
+                    .sendToTarget();
         }
     }
 
@@ -5858,12 +5860,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 return;
             }
             if ((allowedReasons & ALLOWED_REASON_SYSTEM) != 0) {
-                effectiveBlockedReasons = BLOCKED_REASON_NONE;
+                effectiveBlockedReasons = (blockedReasons & ALLOWED_METERED_REASON_MASK);
+            }
+            if ((allowedReasons & ALLOWED_METERED_REASON_SYSTEM) != 0) {
+                effectiveBlockedReasons = (blockedReasons & ~ALLOWED_METERED_REASON_MASK);
             }
             if ((allowedReasons & ALLOWED_REASON_FOREGROUND) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_REASON_BATTERY_SAVER;
                 effectiveBlockedReasons &= ~BLOCKED_REASON_DOZE;
                 effectiveBlockedReasons &= ~BLOCKED_REASON_APP_STANDBY;
+            }
+            if ((allowedReasons & ALLOWED_METERED_REASON_FOREGROUND) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_DATA_SAVER;
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_USER_RESTRICTED;
             }
