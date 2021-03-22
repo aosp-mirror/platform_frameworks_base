@@ -474,6 +474,7 @@ public final class ViewRootImpl implements ViewParent,
         FrameInfo frameInfo = mChoreographer.mFrameInfo;
         mViewFrameInfo.populateFrameInfo(frameInfo);
         mViewFrameInfo.reset();
+        mInputEventAssigner.notifyFrameProcessed();
         return frameInfo;
     }
 
@@ -8502,11 +8503,6 @@ public final class ViewRootImpl implements ViewParent,
             consumedBatches = false;
         }
         doProcessInputEvents();
-        if (consumedBatches) {
-            // Must be done after we processed the input events, to mark the completion of the frame
-            // from the input point of view
-            mInputEventAssigner.onChoreographerCallback();
-        }
         return consumedBatches;
     }
 
