@@ -655,7 +655,7 @@ public final class DeviceConfig {
      * @param name      The name of the property to look up.
      * @param defaultValue The value to return if the property does not exist or has no non-null
      *                     value.
-     * @return the corresponding value, or defaultValue if none exists.
+     * @return the correspondfing value, or defaultValue if none exists.
      * @hide
      */
     @SystemApi
