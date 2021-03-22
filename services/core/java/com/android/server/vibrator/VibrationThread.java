@@ -280,7 +280,6 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     vibratorOffTimeout);
         }
         if (segment instanceof RampSegment) {
-            // TODO(b/167947076): check capabilities to play steps with PWLE once APIs introduced
             return new ComposePwleStep(latestStartTime, controller, effect, segmentIndex,
                     vibratorOffTimeout);
         }
@@ -828,14 +827,14 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 }
 
                 if (DEBUG) {
-                    Slog.d(TAG, "Compose " + primitives.size() + " primitives on vibrator "
+                    Slog.d(TAG, "Compose " + primitives + " primitives on vibrator "
                             + controller.getVibratorInfo().getId());
                 }
                 mVibratorOnResult = controller.on(
                         primitives.toArray(new PrimitiveSegment[primitives.size()]),
                         mVibration.id);
 
-                return nextSteps(/* segmntsPlayed= */ primitives.size());
+                return nextSteps(/* segmentsPlayed= */ primitives.size());
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
@@ -865,11 +864,6 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     VibrationEffectSegment segment = effect.getSegments().get(i);
                     if (segment instanceof RampSegment) {
                         pwles.add((RampSegment) segment);
-                    } else if (segment instanceof StepSegment) {
-                        StepSegment stepSegment = (StepSegment) segment;
-                        pwles.add(new RampSegment(stepSegment.getAmplitude(),
-                                stepSegment.getAmplitude(), stepSegment.getFrequency(),
-                                stepSegment.getFrequency(), (int) stepSegment.getDuration()));
                     } else {
                         break;
                     }
@@ -882,7 +876,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 }
 
                 if (DEBUG) {
-                    Slog.d(TAG, "Compose " + pwles.size() + " PWLEs on vibrator "
+                    Slog.d(TAG, "Compose " + pwles + " PWLEs on vibrator "
                             + controller.getVibratorInfo().getId());
                 }
                 mVibratorOnResult = controller.on(pwles.toArray(new RampSegment[pwles.size()]),
