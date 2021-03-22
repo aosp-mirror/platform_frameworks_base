@@ -244,6 +244,8 @@ interface IActivityTaskManager {
     boolean requestAutofillData(in IAssistDataReceiver receiver, in Bundle receiverExtras,
             in IBinder activityToken, int flags);
     boolean isAssistDataAllowedOnCurrentActivity();
+    boolean requestAssistDataForTask(in IAssistDataReceiver receiver, int taskId,
+            in String callingPackageName);
 
     /**
      * Notify the system that the keyguard is going away.
