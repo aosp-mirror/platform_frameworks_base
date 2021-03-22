@@ -411,8 +411,13 @@ public final class NativeTombstoneManager {
                             processName = stream.readString(Tombstone.PROCESS_NAME);
                             break;
 
-                        case (int) Tombstone.CAUSE:
-                            long token = stream.start(Tombstone.CAUSE);
+                        case (int) Tombstone.CAUSES:
+                            if (!crashReason.equals("")) {
+                                // Causes appear in decreasing order of likelihood. For now we only
+                                // want the most likely crash reason here, so ignore all others.
+                                break;
+                            }
+                            long token = stream.start(Tombstone.CAUSES);
                         cause:
                             while (stream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
                                 switch (stream.getFieldNumber()) {
