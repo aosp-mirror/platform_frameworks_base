@@ -149,7 +149,8 @@ public class RemoteBugreportManager {
                         .setLocalOnly(true)
                         .setContentIntent(pendingDialogIntent)
                         .setColor(mContext.getColor(
-                                com.android.internal.R.color.system_notification_accent_color));
+                                com.android.internal.R.color.system_notification_accent_color))
+                        .extend(new Notification.TvExtender());
 
         if (type == NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED) {
             builder.setContentTitle(mContext.getString(
