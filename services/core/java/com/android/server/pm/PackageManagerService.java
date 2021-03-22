@@ -27324,30 +27324,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManagerService.this.getPackageStartability(
                     packageName, callingUid, userId) == PACKAGE_STARTABILITY_FROZEN;
         }
-
-        @Override
-        public boolean isPackageUsesPermissionNeverForLocation(@NonNull String packageName,
-                @NonNull String permissionName) {
-            Objects.requireNonNull(packageName);
-            Objects.requireNonNull(permissionName);
-            final AndroidPackage pkg;
-            synchronized (mLock) {
-                pkg = mPackages.get(packageName);
-            }
-            if (pkg == null) return false;
-            final List<ParsedUsesPermission> usesPermissions = pkg.getUsesPermissions();
-            final int size = usesPermissions.size();
-            for (int i = 0; i < size; i++) {
-                final ParsedUsesPermission usesPermission = usesPermissions.get(i);
-                if (Objects.equals(usesPermission.name, permissionName)) {
-                    return (usesPermission.usesPermissionFlags
-                            & ParsedUsesPermission.FLAG_NEVER_FOR_LOCATION) != 0;
-                }
-            }
-            return false;
-        }
     }
-
 
     @GuardedBy("mLock")
     private SparseArray<String> getAppsWithSharedUserIdsLocked() {

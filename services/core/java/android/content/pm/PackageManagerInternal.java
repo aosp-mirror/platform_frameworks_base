@@ -1141,12 +1141,4 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean isPackageFrozen(
             @NonNull String packageName, int callingUid, int userId);
-
-    /**
-     * Returns true if the given {@code packageName} has declared the
-     * {@code neverForLocation} flag in the {@code uses-permission} manifest tag
-     * where they request the given {@code permissionName}.
-     */
-    public abstract boolean isPackageUsesPermissionNeverForLocation(@NonNull String packageName,
-            @NonNull String permissionName);
 }

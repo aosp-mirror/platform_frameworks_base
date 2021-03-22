@@ -52,6 +52,7 @@ import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.os.Environment;
 import android.os.UserHandle;
 
@@ -61,6 +62,7 @@ import libcore.util.EmptyArray;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /** @hide **/
@@ -264,17 +266,26 @@ public class PackageInfoWithoutStateUtils {
                             flags);
                 }
             }
-            size = pkg.getRequestedPermissions().size();
+            final List<ParsedUsesPermission> usesPermissions = pkg.getUsesPermissions();
+            size = usesPermissions.size();
             if (size > 0) {
                 pi.requestedPermissions = new String[size];
                 pi.requestedPermissionsFlags = new int[size];
                 for (int i = 0; i < size; i++) {
-                    final String perm = pkg.getRequestedPermissions().get(i);
-                    pi.requestedPermissions[i] = perm;
+                    final ParsedUsesPermission usesPermission = usesPermissions.get(i);
+                    pi.requestedPermissions[i] = usesPermission.name;
                     // The notion of required permissions is deprecated but for compatibility.
-                    pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_REQUIRED;
-                    if (grantedPermissions != null && grantedPermissions.contains(perm)) {
-                        pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_GRANTED;
+                    pi.requestedPermissionsFlags[i] |=
+                            PackageInfo.REQUESTED_PERMISSION_REQUIRED;
+                    if (grantedPermissions != null
+                            && grantedPermissions.contains(usesPermission.name)) {
+                        pi.requestedPermissionsFlags[i] |=
+                                PackageInfo.REQUESTED_PERMISSION_GRANTED;
+                    }
+                    if ((usesPermission.usesPermissionFlags
+                            & ParsedUsesPermission.FLAG_NEVER_FOR_LOCATION) != 0) {
+                        pi.requestedPermissionsFlags[i] |=
+                                PackageInfo.REQUESTED_PERMISSION_NEVER_FOR_LOCATION;
                     }
                 }
             }
