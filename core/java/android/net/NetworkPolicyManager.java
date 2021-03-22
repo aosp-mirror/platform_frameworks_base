@@ -326,6 +326,20 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int ALLOWED_METERED_REASON_USER_EXEMPTED = 1 << 16;
+    /**
+     * Flag to indicate that app is exempt from certain metered network restrictions because of it
+     * being a system component.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_METERED_REASON_SYSTEM = 1 << 17;
+    /**
+     * Flag to indicate that app is exempt from certain metered network restrictions because of it
+     * being in the foreground.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_METERED_REASON_FOREGROUND = 1 << 18;
 
     /** @hide */
     public static final int ALLOWED_METERED_REASON_MASK = 0xffff0000;
