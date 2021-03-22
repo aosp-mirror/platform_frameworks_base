@@ -20,6 +20,7 @@ import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.content.pm.PackageInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -44,7 +45,8 @@ public class ParsedUsesPermission implements Parcelable {
      * to derive the physical location of the device, regardless of
      * ACCESS_FINE_LOCATION and/or ACCESS_COARSE_LOCATION being granted.
      */
-    public static final int FLAG_NEVER_FOR_LOCATION = 0x1;
+    public static final int FLAG_NEVER_FOR_LOCATION =
+            PackageInfo.REQUESTED_PERMISSION_NEVER_FOR_LOCATION;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
