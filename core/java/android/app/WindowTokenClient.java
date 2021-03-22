@@ -61,7 +61,7 @@ public class WindowTokenClient extends IWindowToken.Stub {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
-        final Context context = mContextRef.get();
+        final WindowContext context = mContextRef.get();
         if (context == null) {
             return;
         }
@@ -72,6 +72,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
         if (displayChanged || configChanged) {
             // TODO(ag/9789103): update resource manager logic to track non-activity tokens
             mResourcesManager.updateResourcesForActivity(this, newConfig, newDisplayId);
+            ActivityThread.currentActivityThread().getHandler().post(
+                    () -> context.dispatchConfigurationChanged(newConfig));
         }
         if (displayChanged) {
             context.updateDisplay(newDisplayId);
