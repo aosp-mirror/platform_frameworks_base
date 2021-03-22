@@ -6121,10 +6121,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private NetworkCapabilities copyDefaultNetworkCapabilitiesForUid(
             @NonNull final NetworkCapabilities netCapToCopy, @NonNull final int requestorUid,
             @NonNull final String requestorPackageName) {
+        // These capabilities are for a TRACK_DEFAULT callback, so:
+        // 1. Remove NET_CAPABILITY_VPN, because it's (currently!) the only difference between
+        //    mDefaultRequest and a per-UID default request.
+        //    TODO: stop depending on the fact that these two unrelated things happen to be the same
+        // 2. Always set the UIDs to mAsUid. restrictRequestUidsForCallerAndSetRequestorInfo will
+        //    not do this in the case of a privileged application.
         final NetworkCapabilities netCap = new NetworkCapabilities(netCapToCopy);
         netCap.removeCapability(NET_CAPABILITY_NOT_VPN);
         netCap.setSingleUid(requestorUid);
-        netCap.setUids(new ArraySet<>());
         restrictRequestUidsForCallerAndSetRequestorInfo(
                 netCap, requestorUid, requestorPackageName);
         return netCap;
