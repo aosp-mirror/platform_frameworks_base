@@ -132,8 +132,8 @@ public class SizeCompatTests extends WindowTestsBase {
         mTask.setBounds(bounds);
         prepareUnresizable(mActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(bounds, mActivity.getBounds());
-        // Activity is not yet in size compat mode; it is filling the freeform window.
-        assertMaxBoundsInheritDisplayAreaBounds();
+        // Activity is not yet in size compat mode; it is filling the freeform task window.
+        assertActivityMaxBoundsSandboxed();
 
         // The activity should be able to accept negative x position [-150, 100 - 150, 600].
         final int dx = bounds.left + bounds.width() / 2;
@@ -1388,7 +1388,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSupportsNonResizableInSplitScreen() {
+    public void testSupportsNonResizableInSplitScreen_letterboxForDifferentOrientation() {
         // Support non resizable in multi window
         mAtm.mSupportsNonResizableMultiWindow = true;
         setUpDisplaySizeWithApp(1000, 2800);
@@ -1399,16 +1399,18 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
         final Rect originalBounds = new Rect(mActivity.getBounds());
 
-        // Move activity to split screen
+        // Move activity to split screen which takes half of the screen.
         mTask.reparent(organizer.mPrimary, POSITION_TOP,
                 false /*moveParents*/, "test");
+        organizer.mPrimary.setBounds(0, 0, 1000, 1400);
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, mTask.getWindowingMode());
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, mActivity.getWindowingMode());
 
         // Non-resizable activity in size compat mode
         assertScaled();
-        assertEquals(originalBounds,
-                mActivity.getConfiguration().windowConfiguration.getBounds());
+        final Rect newBounds = new Rect(mActivity.getWindowConfiguration().getBounds());
+        assertEquals(originalBounds.width(), newBounds.width());
+        assertEquals(originalBounds.height(), newBounds.height());
         assertActivityMaxBoundsSandboxed();
 
         // Recompute the natural configuration of the non-resizable activity and the split screen.
@@ -1438,6 +1440,54 @@ public class SizeCompatTests extends WindowTestsBase {
                 primarySplitBounds.right - letterboxedBounds.right,
                 primarySplitBounds.bottom - letterboxedBounds.bottom),
                 mActivity.getLetterboxInsets());
+    }
+
+    @Test
+    public void testSupportsNonResizableInSplitScreen_fillTaskForSameOrientation() {
+        // Support non resizable in multi window
+        mAtm.mSupportsNonResizableMultiWindow = true;
+        setUpDisplaySizeWithApp(1000, 2800);
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
+
+        // Non-resizable portrait activity
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        final Rect originalBounds = new Rect(mActivity.getBounds());
+
+        // Move activity to split screen which takes half of the screen.
+        mTask.reparent(organizer.mPrimary, POSITION_TOP,
+                false /*moveParents*/, "test");
+        organizer.mPrimary.setBounds(0, 0, 1000, 1400);
+        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, mTask.getWindowingMode());
+        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, mActivity.getWindowingMode());
+
+        // Non-resizable activity in size compat mode
+        assertScaled();
+        final Rect newBounds = new Rect(mActivity.getWindowConfiguration().getBounds());
+        assertEquals(originalBounds.width(), newBounds.width());
+        assertEquals(originalBounds.height(), newBounds.height());
+        assertActivityMaxBoundsSandboxed();
+
+        // Recompute the natural configuration of the non-resizable activity and the split screen.
+        mActivity.clearSizeCompatMode();
+        mActivity.setVisible(false);
+        mActivity.mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_OPEN);
+        mActivity.mDisplayContent.mOpeningApps.add(mActivity);
+        addWindowToActivity(mActivity);
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        // Split screen is also in portrait [1000,1400], which meets the activity request. It should
+        // sandbox to the activity bounds for non-resizable.
+        assertEquals(ORIENTATION_PORTRAIT, mTask.getConfiguration().orientation);
+        assertEquals(ORIENTATION_PORTRAIT, mActivity.getConfiguration().orientation);
+        assertFitted();
+        assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertActivityMaxBoundsSandboxed();
+
+        // Activity bounds fill split screen.
+        final Rect primarySplitBounds = new Rect(organizer.mPrimary.getBounds());
+        final Rect letterboxedBounds = new Rect(mActivity.getBounds());
+        assertEquals(primarySplitBounds, letterboxedBounds);
     }
 
     private static WindowState addWindowToActivity(ActivityRecord activity) {
