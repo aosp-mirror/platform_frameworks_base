@@ -33987,8 +33987,8 @@ package android.provider {
 
   public static final class SimPhonebookContract.SimRecords {
     method @NonNull public static android.net.Uri getContentUri(int, int);
-    method @WorkerThread public static int getEncodedNameLength(@NonNull android.content.ContentResolver, @NonNull String);
-    method @NonNull public static android.net.Uri getItemUri(int, int, int);
+    method @IntRange(from=0) @WorkerThread public static int getEncodedNameLength(@NonNull android.content.ContentResolver, @NonNull String);
+    method @NonNull public static android.net.Uri getItemUri(int, int, @IntRange(from=1) int);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sim-contact_v2";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/sim-contact_v2";
     field public static final String ELEMENTARY_FILE_TYPE = "elementary_file_type";

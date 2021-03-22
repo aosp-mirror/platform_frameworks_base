@@ -17,13 +17,14 @@
 package android.provider;
 
 import static android.provider.SimPhonebookContract.ElementaryFiles.EF_ADN;
-import static android.provider.SimPhonebookContract.ElementaryFiles.EF_ADN_PATH_SEGMENT;
 import static android.provider.SimPhonebookContract.ElementaryFiles.EF_FDN;
-import static android.provider.SimPhonebookContract.ElementaryFiles.EF_FDN_PATH_SEGMENT;
 import static android.provider.SimPhonebookContract.ElementaryFiles.EF_SDN;
-import static android.provider.SimPhonebookContract.ElementaryFiles.EF_SDN_PATH_SEGMENT;
+import static android.provider.SimPhonebookContract.ElementaryFiles.PATH_SEGMENT_EF_ADN;
+import static android.provider.SimPhonebookContract.ElementaryFiles.PATH_SEGMENT_EF_FDN;
+import static android.provider.SimPhonebookContract.ElementaryFiles.PATH_SEGMENT_EF_SDN;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.WorkerThread;
@@ -78,11 +79,11 @@ public final class SimPhonebookContract {
     public static String getEfUriPath(@ElementaryFiles.EfType int efType) {
         switch (efType) {
             case EF_ADN:
-                return EF_ADN_PATH_SEGMENT;
+                return PATH_SEGMENT_EF_ADN;
             case EF_FDN:
-                return EF_FDN_PATH_SEGMENT;
+                return PATH_SEGMENT_EF_FDN;
             case EF_SDN:
-                return EF_SDN_PATH_SEGMENT;
+                return PATH_SEGMENT_EF_SDN;
             default:
                 throw new IllegalArgumentException("Unsupported EfType " + efType);
         }
@@ -109,9 +110,9 @@ public final class SimPhonebookContract {
      * the phone number can contain at most {@link ElementaryFiles#PHONE_NUMBER_MAX_LENGTH}
      * characters. The {@link SimRecords#NAME} column can contain at most
      * {@link ElementaryFiles#NAME_MAX_LENGTH} bytes when it is encoded for storage on the SIM.
-     * Encoding is done internally and so the name should be provided unencoded but the number of
-     * bytes required to encode it will vary depending on the characters it contains. This length
-     * can be determined by calling
+     * Encoding is done internally and so the name should be provided to these provider APIs as a
+     * Java String but the number of bytes required to encode it for storage will vary depending on
+     * the characters it contains. This length can be determined by calling
      * {@link SimRecords#getEncodedNameLength(ContentResolver, String)}.
      * </p>
      * <h3>Operations </h3>
@@ -308,7 +309,8 @@ public final class SimPhonebookContract {
          */
         @NonNull
         public static Uri getItemUri(
-                int subscriptionId, @ElementaryFiles.EfType int efType, int recordNumber) {
+                int subscriptionId, @ElementaryFiles.EfType int efType,
+                @IntRange(from = 1) int recordNumber) {
             // Elementary file record indices are 1-based.
             Preconditions.checkArgument(recordNumber > 0, "Invalid recordNumber");
 
@@ -332,6 +334,7 @@ public final class SimPhonebookContract {
          * @see ElementaryFiles#NAME_MAX_LENGTH
          */
         @WorkerThread
+        @IntRange(from = 0)
         public static int getEncodedNameLength(
                 @NonNull ContentResolver resolver, @NonNull String name) {
             Objects.requireNonNull(name);
@@ -442,12 +445,27 @@ public final class SimPhonebookContract {
          * methods operating on this Uri will throw UnsupportedOperationException
          */
         public static final int EF_SDN = 3;
-        /** @hide */
-        public static final String EF_ADN_PATH_SEGMENT = "adn";
-        /** @hide */
-        public static final String EF_FDN_PATH_SEGMENT = "fdn";
-        /** @hide */
-        public static final String EF_SDN_PATH_SEGMENT = "sdn";
+        /**
+         * The Uri path segment used to target the ADN elementary file for SimPhonebookProvider
+         * content operations.
+         *
+         * @hide
+         */
+        public static final String PATH_SEGMENT_EF_ADN = "adn";
+        /**
+         * The Uri path segment used to target the FDN elementary file for SimPhonebookProvider
+         * content operations.
+         *
+         * @hide
+         */
+        public static final String PATH_SEGMENT_EF_FDN = "fdn";
+        /**
+         * The Uri path segment used to target the SDN elementary file for SimPhonebookProvider
+         * content operations.
+         *
+         * @hide
+         */
+        public static final String PATH_SEGMENT_EF_SDN = "sdn";
         /** The MIME type of CONTENT_URI providing a directory of ADN-like elementary files. */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/sim-elementary-file";
         /** The MIME type of a CONTENT_URI subdirectory of a single ADN-like elementary file. */
