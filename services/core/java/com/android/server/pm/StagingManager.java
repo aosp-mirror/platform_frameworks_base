@@ -36,8 +36,8 @@ import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageParser.SigningDetails;
-import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
+import android.content.pm.SigningDetails;
+import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
@@ -229,7 +229,7 @@ public class StagingManager {
         final SigningDetails existingSigningDetails;
         try {
             existingSigningDetails = ApkSignatureVerifier.verify(
-                existingApexPkg.applicationInfo.sourceDir, SignatureSchemeVersion.JAR);
+                    existingApexPkg.applicationInfo.sourceDir, SignatureSchemeVersion.JAR);
         } catch (PackageParserException e) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "Failed to parse APEX package " + existingApexPkg.applicationInfo.sourceDir, e);

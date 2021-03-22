@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.SigningDetails;
 import android.content.pm.VerifierInfo;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
@@ -301,16 +302,15 @@ public class ApkLiteParseUtils {
 
             parser = apkAssets.openXml(ParsingPackageUtils.ANDROID_MANIFEST_FILENAME);
 
-            final PackageParser.SigningDetails signingDetails;
+            final SigningDetails signingDetails;
             if ((flags & ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES) != 0) {
                 final boolean skipVerify = (flags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0;
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
                 try {
-                    ParseResult<PackageParser.SigningDetails> result =
-                            ParsingPackageUtils.getSigningDetails(input,
-                                    apkFile.getAbsolutePath(), skipVerify, false,
-                                    PackageParser.SigningDetails.UNKNOWN,
-                                    DEFAULT_TARGET_SDK_VERSION);
+                    final ParseResult<SigningDetails> result =
+                            ParsingPackageUtils.getSigningDetails(input, apkFile.getAbsolutePath(),
+                                    skipVerify, /* isStaticSharedLibrary */ false,
+                                    SigningDetails.UNKNOWN, DEFAULT_TARGET_SDK_VERSION);
                     if (result.isError()) {
                         return input.error(result);
                     }
@@ -319,7 +319,7 @@ public class ApkLiteParseUtils {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
             } else {
-                signingDetails = PackageParser.SigningDetails.UNKNOWN;
+                signingDetails = SigningDetails.UNKNOWN;
             }
 
             final AttributeSet attrs = parser;
@@ -341,7 +341,7 @@ public class ApkLiteParseUtils {
     }
 
     private static ParseResult<ApkLite> parseApkLite(ParseInput input, String codePath,
-            XmlPullParser parser, AttributeSet attrs, PackageParser.SigningDetails signingDetails)
+            XmlPullParser parser, AttributeSet attrs, SigningDetails signingDetails)
             throws IOException, XmlPullParserException {
         ParseResult<Pair<String, String>> result = parsePackageSplitNames(input, parser, attrs);
         if (result.isError()) {

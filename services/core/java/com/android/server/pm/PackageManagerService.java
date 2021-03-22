@@ -95,7 +95,7 @@ import static android.content.pm.PackageManager.TYPE_SERVICE;
 import static android.content.pm.PackageManager.TYPE_UNKNOWN;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManagerInternal.LAST_KNOWN_PACKAGE;
-import static android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
+import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.content.pm.parsing.ApkLiteParseUtils.isApkFile;
 import static android.os.PowerWhitelistManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerWhitelistManager.REASON_PACKAGE_REPLACED;
@@ -212,8 +212,6 @@ import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageParser.SigningDetails;
-import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.PackagePartitions;
 import android.content.pm.PackagePartitions.SystemPartition;
 import android.content.pm.PackageStats;
@@ -228,6 +226,8 @@ import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
+import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.SigningInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.TestUtilityService;
@@ -9070,7 +9070,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (p2SigningDetails == null) {
             return PackageManager.SIGNATURE_SECOND_NOT_SIGNED;
         }
-        int result = compareSignatures(p1SigningDetails.signatures, p2SigningDetails.signatures);
+        int result = compareSignatures(p1SigningDetails.getSignatures(),
+                p2SigningDetails.getSignatures());
         if (result == PackageManager.SIGNATURE_MATCH) {
             return result;
         }
@@ -9080,11 +9081,11 @@ public class PackageManagerService extends IPackageManager.Stub
         if (p1SigningDetails.hasPastSigningCertificates()
                 || p2SigningDetails.hasPastSigningCertificates()) {
             Signature[] p1Signatures = p1SigningDetails.hasPastSigningCertificates()
-                    ? new Signature[]{p1SigningDetails.pastSigningCertificates[0]}
-                    : p1SigningDetails.signatures;
+                    ? new Signature[]{p1SigningDetails.getPastSigningCertificates()[0]}
+                    : p1SigningDetails.getSignatures();
             Signature[] p2Signatures = p2SigningDetails.hasPastSigningCertificates()
-                    ? new Signature[]{p2SigningDetails.pastSigningCertificates[0]}
-                    : p2SigningDetails.signatures;
+                    ? new Signature[]{p2SigningDetails.getPastSigningCertificates()[0]}
+                    : p2SigningDetails.getSignatures();
             result = compareSignatures(p1Signatures, p2Signatures);
         }
         return result;
@@ -9128,7 +9129,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int appId = UserHandle.getAppId(uid);
         // reader
         synchronized (mLock) {
-            final PackageParser.SigningDetails signingDetails;
+            final SigningDetails signingDetails;
             final Object obj = mSettings.getSettingLPr(appId);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
@@ -11289,14 +11290,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 && ps.timeStamp == lastModifiedTime
                 && !isCompatSignatureUpdateNeeded(settingsVersionForPackage)
                 && !isRecoverSignatureUpdateNeeded(settingsVersionForPackage)) {
-            if (ps.signatures.mSigningDetails.signatures != null
-                    && ps.signatures.mSigningDetails.signatures.length != 0
-                    && ps.signatures.mSigningDetails.signatureSchemeVersion
+            if (ps.signatures.mSigningDetails.getSignatures() != null
+                    && ps.signatures.mSigningDetails.getSignatures().length != 0
+                    && ps.signatures.mSigningDetails.getSignatureSchemeVersion()
                             != SignatureSchemeVersion.UNKNOWN) {
                 // Optimization: reuse the existing cached signing data
                 // if the package appears to be unchanged.
                 parsedPackage.setSigningDetails(
-                        new PackageParser.SigningDetails(ps.signatures.mSigningDetails));
+                        new SigningDetails(ps.signatures.mSigningDetails));
                 return;
             }
 
@@ -11600,10 +11601,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (!parsedPackage.getSigningDetails()
                     .checkCapability(pkgSetting.signatures.mSigningDetails,
-                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                    SigningDetails.CertCapabilities.INSTALLED_DATA)
                             && !pkgSetting.signatures.mSigningDetails.checkCapability(
                                     parsedPackage.getSigningDetails(),
-                                    PackageParser.SigningDetails.CertCapabilities.ROLLBACK)) {
+                                    SigningDetails.CertCapabilities.ROLLBACK)) {
                 logCriticalInfo(Log.WARN,
                         "System package signature mismatch;"
                         + " name: " + pkgSetting.name);
@@ -12917,9 +12918,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         // For apps targeting O MR1 we require explicit enumeration of all certs.
                         final String[] libCertDigests = (targetSdk >= Build.VERSION_CODES.O_MR1)
                                 ? PackageUtils.computeSignaturesSha256Digests(
-                                libPkg.signatures)
+                                libPkg.getSignatures())
                                 : PackageUtils.computeSignaturesSha256Digests(
-                                        new Signature[]{libPkg.signatures[0]});
+                                        new Signature[]{libPkg.getSignatures()[0]});
 
                         // Take a shortcut if sizes don't match. Note that if an app doesn't
                         // target O we don't parse the "additional-certificate" tags similarly
@@ -13260,8 +13261,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // priv-apps.
                 synchronized (mLock) {
                     PackageSetting platformPkgSetting = mSettings.getPackageLPr("android");
-                    if ((compareSignatures(platformPkgSetting.signatures.mSigningDetails.signatures,
-                            pkg.getSigningDetails().signatures)
+                    if ((compareSignatures(
+                            platformPkgSetting.signatures.mSigningDetails.getSignatures(),
+                            pkg.getSigningDetails().getSignatures())
                             != PackageManager.SIGNATURE_MATCH)) {
                         scanFlags |= SCAN_AS_PRIVILEGED;
                     }
@@ -14100,8 +14102,8 @@ public class PackageManagerService extends IPackageManager.Stub
         parsedPackage.setSignedWithPlatformKey(
                 (PLATFORM_PACKAGE_NAME.equals(parsedPackage.getPackageName())
                         || (platformPkg != null && compareSignatures(
-                        platformPkg.getSigningDetails().signatures,
-                        parsedPackage.getSigningDetails().signatures
+                        platformPkg.getSigningDetails().getSignatures(),
+                        parsedPackage.getSigningDetails().getSignatures()
                 ) == PackageManager.SIGNATURE_MATCH))
         );
 
@@ -14397,7 +14399,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // Exempt SharedUsers signed with the platform key.
                     PackageSetting platformPkgSetting = mSettings.getPackageLPr("android");
                     if (!comparePackageSignatures(platformPkgSetting,
-                            pkg.getSigningDetails().signatures)) {
+                            pkg.getSigningDetails().getSignatures())) {
                         throw new PackageManagerException("Apps that share a user with a " +
                                 "privileged app must themselves be marked as privileged. " +
                                 pkg.getPackageName() + " shares privileged user " +
@@ -14445,7 +14447,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         final PackageSetting platformPkgSetting =
                                 mSettings.getPackageLPr("android");
                         if (!comparePackageSignatures(platformPkgSetting,
-                                pkg.getSigningDetails().signatures)) {
+                                pkg.getSigningDetails().getSignatures())) {
                             throw new PackageManagerException("Overlay "
                                     + pkg.getPackageName()
                                     + " must target Q or later, "
@@ -14465,7 +14467,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 mSettings.getPackageLPr(pkg.getOverlayTarget());
                         if (targetPkgSetting != null) {
                             if (!comparePackageSignatures(targetPkgSetting,
-                                    pkg.getSigningDetails().signatures)) {
+                                    pkg.getSigningDetails().getSignatures())) {
                                 // check reference signature
                                 if (mOverlayConfigSignaturePackage == null) {
                                     throw new PackageManagerException("Overlay "
@@ -14477,7 +14479,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 final PackageSetting refPkgSetting =
                                         mSettings.getPackageLPr(mOverlayConfigSignaturePackage);
                                 if (!comparePackageSignatures(refPkgSetting,
-                                        pkg.getSigningDetails().signatures)) {
+                                        pkg.getSigningDetails().getSignatures())) {
                                     throw new PackageManagerException("Overlay "
                                             + pkg.getPackageName() + " signed with a different "
                                             + "certificate than both the reference package and "
@@ -14496,7 +14498,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 int minSignatureSchemeVersion =
                         ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
                                 pkg.getTargetSdkVersion());
-                if (pkg.getSigningDetails().signatureSchemeVersion < minSignatureSchemeVersion) {
+                if (pkg.getSigningDetails().getSignatureSchemeVersion()
+                        < minSignatureSchemeVersion) {
                     throw new PackageManagerException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                             "No signature found in package of version " + minSignatureSchemeVersion
                                     + " or newer for package " + pkg.getPackageName());
@@ -16264,7 +16267,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final AndroidPackage pkg = mPackages.get(verifierInfo.packageName);
             if (pkg == null) {
                 return -1;
-            } else if (pkg.getSigningDetails().signatures.length != 1) {
+            } else if (pkg.getSigningDetails().getSignatures().length != 1) {
                 Slog.i(TAG, "Verifier package " + verifierInfo.packageName
                         + " has more than one signature; ignoring");
                 return -1;
@@ -16278,7 +16281,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final byte[] expectedPublicKey;
             try {
-                final Signature verifierSig = pkg.getSigningDetails().signatures[0];
+                final Signature verifierSig = pkg.getSigningDetails().getSignatures()[0];
                 final PublicKey publicKey = verifierSig.getPublicKey();
                 expectedPublicKey = publicKey.getEncoded();
             } catch (CertificateException e) {
@@ -16533,9 +16536,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     callerSignature =
-                            ((SharedUserSetting)obj).signatures.mSigningDetails.signatures;
+                            ((SharedUserSetting) obj).signatures.mSigningDetails.getSignatures();
                 } else if (obj instanceof PackageSetting) {
-                    callerSignature = ((PackageSetting)obj).signatures.mSigningDetails.signatures;
+                    callerSignature =
+                            ((PackageSetting) obj).signatures.mSigningDetails.getSignatures();
                 } else {
                     throw new SecurityException("Bad object " + obj + " for uid " + callingUid);
                 }
@@ -16547,7 +16551,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // not signed with the same cert as the caller.
             if (installerPackageSetting != null) {
                 if (compareSignatures(callerSignature,
-                        installerPackageSetting.signatures.mSigningDetails.signatures)
+                        installerPackageSetting.signatures.mSigningDetails.getSignatures())
                         != PackageManager.SIGNATURE_MATCH) {
                     throw new SecurityException(
                             "Caller does not have same cert as new installer package "
@@ -16564,7 +16568,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (targetInstallerPkgSetting != null) {
                 if (compareSignatures(callerSignature,
-                        targetInstallerPkgSetting.signatures.mSigningDetails.signatures)
+                        targetInstallerPkgSetting.signatures.mSigningDetails.getSignatures())
                         != PackageManager.SIGNATURE_MATCH) {
                     throw new SecurityException(
                             "Caller does not have same cert as old installer package "
@@ -17063,7 +17067,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final String[] grantedRuntimePermissions;
         final List<String> whitelistedRestrictedPermissions;
         final int autoRevokePermissionsMode;
-        final PackageParser.SigningDetails signingDetails;
+        final SigningDetails signingDetails;
         final int installReason;
         final int mInstallScenario;
         @Nullable MultiPackageInstallParams mParentInstallParams;
@@ -17087,7 +17091,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.grantedRuntimePermissions = null;
             this.whitelistedRestrictedPermissions = null;
             this.autoRevokePermissionsMode = MODE_DEFAULT;
-            this.signingDetails = PackageParser.SigningDetails.UNKNOWN;
+            this.signingDetails = SigningDetails.UNKNOWN;
             this.installReason = PackageManager.INSTALL_REASON_UNKNOWN;
             this.mInstallScenario = PackageManager.INSTALL_SCENARIO_DEFAULT;
             this.forceQueryableOverride = false;
@@ -17375,7 +17379,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @NonNull final InstallSource installSource;
         final String packageAbiOverride;
         final VerificationInfo verificationInfo;
-        final PackageParser.SigningDetails signingDetails;
+        final SigningDetails signingDetails;
         @Nullable MultiPackageVerificationParams mParentVerificationParams;
         final long requiredInstalledVersionCode;
         final int mDataLoaderType;
@@ -17597,7 +17601,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean isVerificationEnabled = isVerificationEnabled(
                     pkgLite, verifierUser.getIdentifier(), installFlags, installerUid);
             final boolean isV4Signed =
-                    (signingDetails.signatureSchemeVersion == SIGNING_BLOCK_V4);
+                    (signingDetails.getSignatureSchemeVersion() == SIGNING_BLOCK_V4);
             final boolean isIncrementalInstall =
                     (mDataLoaderType == DataLoaderType.INCREMENTAL);
             // NOTE: We purposefully skip verification for only incremental installs when there's
@@ -17828,7 +17832,7 @@ public class PackageManagerService extends IPackageManager.Stub
         /** If non-null, drop an async trace when the install completes */
         final String traceMethod;
         final int traceCookie;
-        final PackageParser.SigningDetails signingDetails;
+        final SigningDetails signingDetails;
         final int installReason;
         final int mInstallScenario;
         final boolean forceQueryableOverride;
@@ -17966,7 +17970,7 @@ public class PackageManagerService extends IPackageManager.Stub
         FileInstallArgs(String codePath, String[] instructionSets) {
             super(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
                     null, null, instructionSets, null, null, null, MODE_DEFAULT, null, 0,
-                    PackageParser.SigningDetails.UNKNOWN,
+                    SigningDetails.UNKNOWN,
                     PackageManager.INSTALL_REASON_UNKNOWN, PackageManager.INSTALL_SCENARIO_DEFAULT,
                     false, DataLoaderType.NONE);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
@@ -18841,11 +18845,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     // the signatures on the first package scanned for the shared user (i.e. if the
                     // signaturesChanged state hasn't been initialized yet in SharedUserSetting).
                     if (signatureCheckPs.sharedUser != null) {
-                        final Signature[] sharedUserSignatures =
-                                signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures;
+                        final Signature[] sharedUserSignatures = signatureCheckPs.sharedUser
+                                .signatures.mSigningDetails.getSignatures();
                         if (signatureCheckPs.sharedUser.signaturesChanged != null
                                 && compareSignatures(sharedUserSignatures,
-                                parsedPackage.getSigningDetails().signatures)
+                                parsedPackage.getSigningDetails().getSignatures())
                                         != PackageManager.SIGNATURE_MATCH) {
                             if (SystemProperties.getInt("ro.product.first_api_level", 0) <= 29) {
                                 // Mismatched signatures is an error and silently skipping system
@@ -19249,7 +19253,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (args.mDataLoaderType != DataLoaderType.INCREMENTAL) {
                         continue;
                     }
-                    if (args.signingDetails.signatureSchemeVersion != SIGNING_BLOCK_V4) {
+                    if (args.signingDetails.getSignatureSchemeVersion() != SIGNING_BLOCK_V4) {
                         continue;
                     }
                     // For incremental installs, we bypass the verifier prior to install. Now
@@ -19731,11 +19735,11 @@ public class PackageManagerService extends IPackageManager.Stub
             // older certificate with which the current is ok with sharing permissions
             if (sourceSigningDetails.checkCapability(
                     parsedPackage.getSigningDetails(),
-                    PackageParser.SigningDetails.CertCapabilities.PERMISSION)) {
+                    SigningDetails.CertCapabilities.PERMISSION)) {
                 return true;
             } else if (parsedPackage.getSigningDetails().checkCapability(
                     sourceSigningDetails,
-                    PackageParser.SigningDetails.CertCapabilities.PERMISSION)) {
+                    SigningDetails.CertCapabilities.PERMISSION)) {
                 // the scanned package checks out, has signing certificate rotation
                 // history, and is newer; bring it over
                 synchronized (mLock) {
@@ -19850,7 +19854,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         try {
             // either use what we've been given or parse directly from the APK
-            if (args.signingDetails != PackageParser.SigningDetails.UNKNOWN) {
+            if (args.signingDetails != SigningDetails.UNKNOWN) {
                 parsedPackage.setSigningDetails(args.signingDetails);
             } else {
                 parsedPackage.setSigningDetails(ParsingPackageUtils.getSigningDetails(
@@ -19860,7 +19864,7 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new PrepareFailure("Failed collect during installPackageLI", e);
         }
 
-        if (instantApp && parsedPackage.getSigningDetails().signatureSchemeVersion
+        if (instantApp && parsedPackage.getSigningDetails().getSignatureSchemeVersion()
                 < SignatureSchemeVersion.SIGNING_BLOCK_V2) {
             Slog.w(TAG, "Instant app package " + parsedPackage.getPackageName()
                     + " is not signed with at least APK Signature Scheme v2");
@@ -22964,10 +22968,10 @@ public class PackageManagerService extends IPackageManager.Stub
         final AndroidPackage androidPkg = mPackages.get(predefinedPkgName);
         if (androidPkg != null) {
             final SigningDetails signingDetail = androidPkg.getSigningDetails();
-            if (signingDetail != null && signingDetail.signatures != null) {
+            if (signingDetail != null && signingDetail.getSignatures() != null) {
                 try {
                     final MessageDigest msgDigest = MessageDigest.getInstance("SHA-256");
-                    for (Signature signature : signingDetail.signatures) {
+                    for (Signature signature : signingDetail.getSignatures()) {
                         if (TextUtils.equals(predefinedSignature,
                                 HexEncoding.encodeToString(msgDigest.digest(
                                         signature.toByteArray()), false))) {
@@ -26247,7 +26251,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             return pkg.getSigningDetails().hasAncestorOrSelf(mPlatformPackage.getSigningDetails())
                     || mPlatformPackage.getSigningDetails().checkCapability(pkg.getSigningDetails(),
-                    PackageParser.SigningDetails.CertCapabilities.PERMISSION);
+                    SigningDetails.CertCapabilities.PERMISSION);
         }
 
         @Override

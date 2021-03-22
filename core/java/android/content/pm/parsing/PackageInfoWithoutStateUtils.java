@@ -32,7 +32,6 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -40,6 +39,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.component.ComponentParseUtils;
@@ -309,26 +309,26 @@ public class PackageInfoWithoutStateUtils {
             pi.isApex = true;
         }
 
-        PackageParser.SigningDetails signingDetails = pkg.getSigningDetails();
+        final SigningDetails signingDetails = pkg.getSigningDetails();
         // deprecated method of getting signing certificates
         if ((flags & PackageManager.GET_SIGNATURES) != 0) {
             if (signingDetails.hasPastSigningCertificates()) {
                 // Package has included signing certificate rotation information.  Return the oldest
                 // cert so that programmatic checks keep working even if unaware of key rotation.
                 pi.signatures = new Signature[1];
-                pi.signatures[0] = signingDetails.pastSigningCertificates[0];
+                pi.signatures[0] = signingDetails.getPastSigningCertificates()[0];
             } else if (signingDetails.hasSignatures()) {
                 // otherwise keep old behavior
-                int numberOfSigs = signingDetails.signatures.length;
+                int numberOfSigs = signingDetails.getSignatures().length;
                 pi.signatures = new Signature[numberOfSigs];
-                System.arraycopy(signingDetails.signatures, 0, pi.signatures, 0,
+                System.arraycopy(signingDetails.getSignatures(), 0, pi.signatures, 0,
                         numberOfSigs);
             }
         }
 
         // replacement for GET_SIGNATURES
         if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
-            if (signingDetails != PackageParser.SigningDetails.UNKNOWN) {
+            if (signingDetails != SigningDetails.UNKNOWN) {
                 // only return a valid SigningInfo if there is signing information to report
                 pi.signingInfo = new SigningInfo(signingDetails);
             } else {

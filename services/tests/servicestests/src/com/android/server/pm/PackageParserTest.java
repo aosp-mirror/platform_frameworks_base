@@ -35,10 +35,10 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.Property;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedComponent;
@@ -644,7 +644,8 @@ public class PackageParserTest {
         assertBundleApproximateEquals(a.getMetaData(), b.getMetaData());
         assertEquals(a.getVersionName(), b.getVersionName());
         assertEquals(a.getSharedUserId(), b.getSharedUserId());
-        assertArrayEquals(a.getSigningDetails().signatures, b.getSigningDetails().signatures);
+        assertArrayEquals(a.getSigningDetails().getSignatures(),
+                b.getSigningDetails().getSignatures());
         assertEquals(a.getRestrictedAccountType(), b.getRestrictedAccountType());
         assertEquals(a.getRequiredAccountType(), b.getRequiredAccountType());
         assertEquals(a.getOverlayTarget(), b.getOverlayTarget());
@@ -652,7 +653,7 @@ public class PackageParserTest {
         assertEquals(a.getOverlayCategory(), b.getOverlayCategory());
         assertEquals(a.getOverlayPriority(), b.getOverlayPriority());
         assertEquals(a.isOverlayIsStatic(), b.isOverlayIsStatic());
-        assertEquals(a.getSigningDetails().publicKeys, b.getSigningDetails().publicKeys);
+        assertEquals(a.getSigningDetails().getPublicKeys(), b.getSigningDetails().getPublicKeys());
         assertEquals(a.getUpgradeKeySets(), b.getUpgradeKeySets());
         assertEquals(a.getKeySetMapping(), b.getKeySetMapping());
         assertArrayEquals(a.getRestrictUpdateHash(), b.getRestrictUpdateHash());
@@ -872,9 +873,9 @@ public class PackageParserTest {
                 .setVersionName("foo17")
                 .setSharedUserId("foo18")
                 .setSigningDetails(
-                        new PackageParser.SigningDetails(
+                        new SigningDetails(
                                 new Signature[]{new Signature(new byte[16])},
-                                2,
+                                SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2,
                                 new ArraySet<>(),
                                 null)
                 )

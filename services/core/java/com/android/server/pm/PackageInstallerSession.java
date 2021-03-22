@@ -80,8 +80,8 @@ import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.SigningDetails;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLite;
 import android.content.pm.parsing.ApkLiteParseUtils;
@@ -360,7 +360,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private long mVersionCode;
     @GuardedBy("mLock")
-    private PackageParser.SigningDetails mSigningDetails;
+    private SigningDetails mSigningDetails;
     @GuardedBy("mLock")
     private SparseArray<PackageInstallerSession> mChildSessions = new SparseArray<>();
     @GuardedBy("mLock")
@@ -2715,7 +2715,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mPackageLite = null;
         mPackageName = null;
         mVersionCode = -1;
-        mSigningDetails = PackageParser.SigningDetails.UNKNOWN;
+        mSigningDetails = SigningDetails.UNKNOWN;
 
         mResolvedBaseFile = null;
         mResolvedStagedFiles.clear();
@@ -2777,7 +2777,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mPackageName = apk.getPackageName();
                 mVersionCode = apk.getLongVersionCode();
             }
-            if (mSigningDetails == PackageParser.SigningDetails.UNKNOWN) {
+            if (mSigningDetails == SigningDetails.UNKNOWN) {
                 mSigningDetails = apk.getSigningDetails();
             }
 
@@ -2832,7 +2832,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mPackageName = pkgInfo.packageName;
                 mVersionCode = pkgInfo.getLongVersionCode();
             }
-            if (mSigningDetails == PackageParser.SigningDetails.UNKNOWN) {
+            if (mSigningDetails == SigningDetails.UNKNOWN) {
                 mSigningDetails = unsafeGetCertsWithoutVerification(
                         pkgInfo.applicationInfo.sourceDir);
             }
@@ -2892,7 +2892,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             packageLite = existing;
             assertPackageConsistentLocked("Existing", existing.getPackageName(),
                     existing.getLongVersionCode());
-            final PackageParser.SigningDetails signingDetails =
+            final SigningDetails signingDetails =
                     unsafeGetCertsWithoutVerification(existing.getBaseApkPath());
             if (!mSigningDetails.signaturesMatchExactly(signingDetails)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
@@ -3231,11 +3231,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private PackageParser.SigningDetails unsafeGetCertsWithoutVerification(String path)
+    private SigningDetails unsafeGetCertsWithoutVerification(String path)
             throws PackageManagerException {
         try {
             return ApkSignatureVerifier.unsafeGetCertsWithoutVerification(path,
-                    PackageParser.SigningDetails.SignatureSchemeVersion.JAR);
+                    SigningDetails.SignatureSchemeVersion.JAR);
         } catch (PackageParserException e) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Couldn't obtain signatures from APK : " + path);

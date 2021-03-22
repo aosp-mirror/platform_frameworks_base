@@ -22,11 +22,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
-import android.content.pm.PackageParser;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.util.TypedXmlPullParser;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
@@ -39,7 +37,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParser;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,10 +104,10 @@ public class PackageSignaturesTest {
     }
 
     private static final int[] CAPABILITIES =
-            {PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA,
-                    PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID,
-                    PackageParser.SigningDetails.CertCapabilities.PERMISSION,
-                    PackageParser.SigningDetails.CertCapabilities.ROLLBACK};
+            {SigningDetails.CertCapabilities.INSTALLED_DATA,
+                    SigningDetails.CertCapabilities.SHARED_USER_ID,
+                    SigningDetails.CertCapabilities.PERMISSION,
+                    SigningDetails.CertCapabilities.ROLLBACK};
 
     @Before
     public void setUp() throws Exception {
@@ -173,7 +170,7 @@ public class PackageSignaturesTest {
         assertEquals(
                 "The signing details was not UNKNOWN after parsing an invalid public key cert key"
                         + " attribute",
-                PackageParser.SigningDetails.UNKNOWN, mPackageSetting.signatures.mSigningDetails);
+                SigningDetails.UNKNOWN, mPackageSetting.signatures.mSigningDetails);
     }
 
     @Test
@@ -181,14 +178,14 @@ public class PackageSignaturesTest {
         // Verifies if the sigs count attribute is missing then the signature cannot be read but the
         // method does not throw an exception.
         verifyReadXmlReturnsExpectedSignatures("xml/one-signer-missing-sigs-count.xml",
-                PackageParser.SigningDetails.SignatureSchemeVersion.UNKNOWN);
+                SigningDetails.SignatureSchemeVersion.UNKNOWN);
     }
 
     @Test
     public void testReadXmlWithMissingSchemeVersion() throws Exception {
         // Verifies if the schemeVersion is an invalid value the signature can still be obtained.
         verifyReadXmlReturnsExpectedSignatures("xml/one-signer-missing-scheme-version.xml",
-                PackageParser.SigningDetails.SignatureSchemeVersion.UNKNOWN,
+                SigningDetails.SignatureSchemeVersion.UNKNOWN,
                 FIRST_EXPECTED_SIGNATURE);
     }
 
@@ -198,7 +195,7 @@ public class PackageSignaturesTest {
         // obtained.
         verifyReadXmlReturnsExpectedSignaturesAndLineage(
                 "xml/three-signers-in-lineage-missing-scheme-version.xml",
-                PackageParser.SigningDetails.SignatureSchemeVersion.UNKNOWN,
+                SigningDetails.SignatureSchemeVersion.UNKNOWN,
                 FIRST_EXPECTED_SIGNATURE, SECOND_EXPECTED_SIGNATURE, THIRD_EXPECTED_SIGNATURE);
     }
 
@@ -386,7 +383,7 @@ public class PackageSignaturesTest {
         verifySignaturesContainExpectedValues(signatures, expectedSignatures);
         assertEquals("The returned signature scheme is not the expected value",
                 expectedSchemeVersion,
-                mPackageSetting.signatures.mSigningDetails.signatureSchemeVersion);
+                mPackageSetting.signatures.mSigningDetails.getSignatureSchemeVersion());
     }
 
     /**
@@ -402,7 +399,7 @@ public class PackageSignaturesTest {
         Set<String> expectedSignatures = createSetOfSignatures(expectedSignatureValues);
         verifySignaturesContainExpectedValues(signatures, expectedSignatures);
         assertEquals("The returned signature scheme is not the expected value", schemeVersion,
-                mPackageSetting.signatures.mSigningDetails.signatureSchemeVersion);
+                mPackageSetting.signatures.mSigningDetails.getSignatureSchemeVersion());
         for (Signature signature : signatures) {
             String signatureValue = HexDump.toHexString(signature.toByteArray(), false);
             int expectedCapabilities = SIGNATURE_TO_CAPABILITY_MAP.get(signatureValue);

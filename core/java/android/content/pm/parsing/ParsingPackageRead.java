@@ -26,8 +26,8 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.Property;
-import android.content.pm.PackageParser;
 import android.content.pm.ServiceInfo;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedInstrumentation;
@@ -756,7 +756,7 @@ public interface ParsingPackageRead extends Parcelable {
      * The signature data of all APKs in this package, which must be exactly the same across the
      * base and splits.
      */
-    PackageParser.SigningDetails getSigningDetails();
+    SigningDetails getSigningDetails();
 
     /**
      * @see ApplicationInfo#splitClassLoaderNames

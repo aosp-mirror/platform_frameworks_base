@@ -23,8 +23,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
+import android.content.pm.SigningDetails;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -405,14 +405,14 @@ class InstantAppRegistry implements Watchable, Snappable {
             // into account but also allow the value from the old computation to avoid
             // data loss.
             if (pkg.getSigningDetails().checkCapability(currentCookieSha256,
-                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
+                    SigningDetails.CertCapabilities.INSTALLED_DATA)) {
                 return;
             }
 
             // For backwards compatibility we accept match based on any signature, since we may have
             // recorded only the first for multiply-signed packages
-            final String[] signaturesSha256Digests =
-                    PackageUtils.computeSignaturesSha256Digests(pkg.getSigningDetails().signatures);
+            final String[] signaturesSha256Digests = PackageUtils.computeSignaturesSha256Digests(
+                    pkg.getSigningDetails().getSignatures());
             for (String s : signaturesSha256Digests) {
                 if (s.equals(currentCookieSha256)) {
                     return;
@@ -1298,8 +1298,8 @@ class InstantAppRegistry implements Watchable, Snappable {
             // We prefer the modern computation procedure where all certs are taken
             // into account and delete the file derived via the legacy hash computation.
             File newCookieFile = computeInstantCookieFile(pkg.getPackageName(),
-                    PackageUtils.computeSignaturesSha256Digest(pkg.getSigningDetails().signatures),
-                    userId);
+                    PackageUtils.computeSignaturesSha256Digest(
+                            pkg.getSigningDetails().getSignatures()), userId);
             if (!pkg.getSigningDetails().hasSignatures()) {
                 Slog.wtf(LOG_TAG, "Parsed Instant App contains no valid signatures!");
             }

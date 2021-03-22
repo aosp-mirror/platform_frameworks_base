@@ -118,10 +118,10 @@ public class DomainVerificationDebug {
 
         if (!reusedMap.isEmpty()) {
             if (!wasHeaderPrinted) {
-                Signature[] signatures = pkg.getSigningDetails().signatures;
+                Signature[] signatures = pkg.getSigningDetails().getSignatures();
                 String signaturesDigest = signatures == null ? null : Arrays.toString(
                         PackageUtils.computeSignaturesSha256Digests(
-                                pkg.getSigningDetails().signatures));
+                                pkg.getSigningDetails().getSignatures()));
 
                 writer.println(pkgState.getPackageName() + ":");
                 writer.increaseIndent();

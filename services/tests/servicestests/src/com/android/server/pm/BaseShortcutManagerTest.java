@@ -70,12 +70,12 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -1242,9 +1242,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         pi.applicationInfo.setVersionCode(version);
         pi.signatures = null;
         pi.signingInfo = new SigningInfo(
-                new PackageParser.SigningDetails(
+                new SigningDetails(
                         genSignatures(signatures),
-                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         return pi;

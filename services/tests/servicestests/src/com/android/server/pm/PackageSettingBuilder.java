@@ -16,8 +16,8 @@
 
 package com.android.server.pm;
 
-import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
+import android.content.pm.SigningDetails;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -47,7 +47,7 @@ public class PackageSettingBuilder {
     private String[] mUsesStaticLibraries;
     private long[] mUsesStaticLibrariesVersions;
     private Map<String, ArraySet<String>> mMimeGroups;
-    private PackageParser.SigningDetails mSigningDetails;
+    private SigningDetails mSigningDetails;
     private UUID mDomainSetId = UUID.randomUUID();
 
     public PackageSettingBuilder setPackage(AndroidPackage pkg) {
@@ -159,7 +159,7 @@ public class PackageSettingBuilder {
     }
 
     public PackageSettingBuilder setSigningDetails(
-            PackageParser.SigningDetails signingDetails) {
+            SigningDetails signingDetails) {
         mSigningDetails = signingDetails;
         return this;
     }

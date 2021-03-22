@@ -37,6 +37,7 @@ import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -461,8 +462,8 @@ public class ApkChecksums {
                 }
 
                 // Obtaining array of certificates used for signing the installer package.
-                certs = installer.getSigningDetails().signatures;
-                pastCerts = installer.getSigningDetails().pastSigningCertificates;
+                certs = installer.getSigningDetails().getSignatures();
+                pastCerts = installer.getSigningDetails().getPastSigningCertificates();
             }
             if (certs == null || certs.length == 0 || certs[0] == null) {
                 Slog.e(TAG, "Can't obtain certificates.");
@@ -664,8 +665,7 @@ public class ApkChecksums {
         Map<Integer, byte[]> contentDigests = null;
         try {
             contentDigests = ApkSignatureVerifier.verifySignaturesInternal(filePath,
-                    PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2,
-                    false).contentDigests;
+                    SignatureSchemeVersion.SIGNING_BLOCK_V2, /* verifyFull */ false).contentDigests;
         } catch (PackageParser.PackageParserException e) {
             if (!(e.getCause() instanceof SignatureNotFoundException)) {
                 Slog.e(TAG, "Signature verification error", e);

@@ -45,8 +45,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityUtils;
@@ -3003,7 +3003,8 @@ public class ParsingPackageUtils {
         if (existingSigningDetails == SigningDetails.UNKNOWN) {
             return input.success(verified);
         } else {
-            if (!Signature.areExactMatch(existingSigningDetails.signatures, verified.signatures)) {
+            if (!Signature.areExactMatch(existingSigningDetails.getSignatures(),
+                    verified.getSignatures())) {
                 return input.error(INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                         baseCodePath + " has mismatched certificates");
             }

@@ -1129,12 +1129,13 @@ public final class Settings implements Watchable, Snappable {
     // by that time.
     void insertPackageSettingLPw(PackageSetting p, AndroidPackage pkg) {
         // Update signatures if needed.
-        if (p.signatures.mSigningDetails.signatures == null) {
+        if (p.signatures.mSigningDetails.getSignatures() == null) {
             p.signatures.mSigningDetails = pkg.getSigningDetails();
         }
         // If this app defines a shared user id initialize
         // the shared user signatures as well.
-        if (p.sharedUser != null && p.sharedUser.signatures.mSigningDetails.signatures == null) {
+        if (p.sharedUser != null
+                && p.sharedUser.signatures.mSigningDetails.getSignatures() == null) {
             p.sharedUser.signatures.mSigningDetails = pkg.getSigningDetails();
         }
         addPackageSettingLPw(p, p.sharedUser);
@@ -4435,7 +4436,7 @@ public final class Settings implements Watchable, Snappable {
             pw.print(prefix); pw.print("  versionName="); pw.println(pkg.getVersionName());
             pw.print(prefix); pw.print("  usesNonSdkApi="); pw.println(pkg.isUsesNonSdkApi());
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, pkg); pw.println();
-            final int apkSigningVersion = pkg.getSigningDetails().signatureSchemeVersion;
+            final int apkSigningVersion = pkg.getSigningDetails().getSignatureSchemeVersion();
             pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
             pw.print(prefix); pw.print("  applicationInfo=");
             pw.println(pkg.toAppInfoToString());

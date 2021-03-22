@@ -30,9 +30,8 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
@@ -252,8 +251,8 @@ public class AppsFilterTest {
         final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
         watcher.register();
         final Signature frameworkSignature = Mockito.mock(Signature.class);
-        final PackageParser.SigningDetails frameworkSigningDetails =
-                new PackageParser.SigningDetails(new Signature[]{frameworkSignature}, 1);
+        final SigningDetails frameworkSigningDetails =
+                new SigningDetails(new Signature[]{frameworkSignature}, 1);
         final ParsingPackage android = pkg("android");
         watcher.verifyNoChangeReported("prepare");
         android.addProtectedBroadcast("TEST_ACTION");
@@ -592,12 +591,12 @@ public class AppsFilterTest {
         appsFilter.onSystemReady();
 
         final Signature frameworkSignature = Mockito.mock(Signature.class);
-        final PackageParser.SigningDetails frameworkSigningDetails =
-                new PackageParser.SigningDetails(new Signature[]{frameworkSignature}, 1);
+        final SigningDetails frameworkSigningDetails =
+                new SigningDetails(new Signature[]{frameworkSignature}, 1);
 
         final Signature otherSignature = Mockito.mock(Signature.class);
-        final PackageParser.SigningDetails otherSigningDetails =
-                new PackageParser.SigningDetails(new Signature[]{otherSignature}, 1);
+        final SigningDetails otherSigningDetails =
+                new SigningDetails(new Signature[]{otherSignature}, 1);
 
         simulateAddPackage(appsFilter, pkg("android"), 1000,
                 b -> b.setSigningDetails(frameworkSigningDetails));
@@ -1185,8 +1184,8 @@ public class AppsFilterTest {
 
     private void simulateAddBasicAndroid(AppsFilter appsFilter) throws Exception {
         final Signature frameworkSignature = Mockito.mock(Signature.class);
-        final PackageParser.SigningDetails frameworkSigningDetails =
-                new PackageParser.SigningDetails(new Signature[]{frameworkSignature}, 1);
+        final SigningDetails frameworkSigningDetails =
+                new SigningDetails(new Signature[]{frameworkSignature}, 1);
         final ParsingPackage android = pkg("android");
         simulateAddPackage(appsFilter, android, 1000,
                 b -> b.setSigningDetails(frameworkSigningDetails));

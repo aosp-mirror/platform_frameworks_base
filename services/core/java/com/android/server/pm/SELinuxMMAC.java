@@ -19,8 +19,8 @@ package com.android.server.pm;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.os.Environment;
 import android.util.Slog;
 import android.util.Xml;
@@ -577,7 +577,7 @@ final class Policy {
         // Check for exact signature matches across all certs.
         Signature[] certs = mCerts.toArray(new Signature[0]);
         if (pkg.getSigningDetails() != SigningDetails.UNKNOWN
-                && !Signature.areExactMatch(certs, pkg.getSigningDetails().signatures)) {
+                && !Signature.areExactMatch(certs, pkg.getSigningDetails().getSignatures())) {
 
             // certs aren't exact match, but the package may have rotated from the known system cert
             if (certs.length > 1 || !pkg.getSigningDetails().hasCertificate(certs[0])) {

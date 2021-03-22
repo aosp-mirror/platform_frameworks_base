@@ -22,7 +22,7 @@ import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageParser;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageImpl;
 import android.content.pm.parsing.component.ParsedActivity;
@@ -250,7 +250,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     }
 
     @Override
-    public PackageImpl setSigningDetails(@Nullable PackageParser.SigningDetails value) {
+    public PackageImpl setSigningDetails(@Nullable SigningDetails value) {
         super.setSigningDetails(value);
         return this;
     }

@@ -24,7 +24,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager.Property;
-import android.content.pm.PackageParser;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedInstrumentation;
@@ -312,7 +312,7 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setSharedUserLabel(int sharedUserLabel);
 
-    ParsingPackage setSigningDetails(PackageParser.SigningDetails signingDetails);
+    ParsingPackage setSigningDetails(SigningDetails signingDetails);
 
     ParsingPackage setSplitClassLoaderName(int splitIndex, String classLoaderName);
 
