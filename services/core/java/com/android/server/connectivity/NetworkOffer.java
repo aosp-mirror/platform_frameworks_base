@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.net.INetworkOfferCallback;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.os.Messenger;
 
 import java.util.Objects;
 
@@ -44,7 +43,7 @@ public class NetworkOffer {
     @NonNull public final FullScore score;
     @NonNull public final NetworkCapabilities caps;
     @NonNull public final INetworkOfferCallback callback;
-    @NonNull public final Messenger provider;
+    @NonNull public final int providerId;
 
     private static NetworkCapabilities emptyCaps() {
         final NetworkCapabilities nc = new NetworkCapabilities();
@@ -56,11 +55,11 @@ public class NetworkOffer {
     public NetworkOffer(@NonNull final FullScore score,
             @Nullable final NetworkCapabilities caps,
             @NonNull final INetworkOfferCallback callback,
-            @NonNull final Messenger provider) {
+            @NonNull final int providerId) {
         this.score = Objects.requireNonNull(score);
         this.caps = null != caps ? caps : emptyCaps();
         this.callback = Objects.requireNonNull(callback);
-        this.provider = Objects.requireNonNull(provider);
+        this.providerId = providerId;
     }
 
     /**

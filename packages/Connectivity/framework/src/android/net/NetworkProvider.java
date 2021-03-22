@@ -272,6 +272,9 @@ public class NetworkProvider {
     public void offerNetwork(@NonNull final NetworkScore score,
             @NonNull final NetworkCapabilities caps, @NonNull final Executor executor,
             @NonNull final NetworkOfferCallback callback) {
+        // Can't offer a network with a provider that is not yet registered or already unregistered.
+        final int providerId = mProviderId;
+        if (providerId == ID_NONE) return;
         NetworkOfferCallbackProxy proxy = null;
         synchronized (mProxies) {
             for (final NetworkOfferCallbackProxy existingProxy : mProxies) {
@@ -285,7 +288,8 @@ public class NetworkProvider {
                 mProxies.add(proxy);
             }
         }
-        mContext.getSystemService(ConnectivityManager.class).offerNetwork(this, score, caps, proxy);
+        mContext.getSystemService(ConnectivityManager.class)
+                .offerNetwork(providerId, score, caps, proxy);
     }
 
     /**

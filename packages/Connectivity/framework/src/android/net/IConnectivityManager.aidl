@@ -223,7 +223,7 @@ interface IConnectivityManager
 
     int getRestrictBackgroundStatusByCaller();
 
-    void offerNetwork(in Messenger messenger, in NetworkScore score,
+    void offerNetwork(int providerId, in NetworkScore score,
             in NetworkCapabilities caps, in INetworkOfferCallback callback);
     void unofferNetwork(in INetworkOfferCallback callback);
 }

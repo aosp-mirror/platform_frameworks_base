@@ -3261,11 +3261,11 @@ public class ConnectivityManager {
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_FACTORY})
-    public void offerNetwork(@NonNull final NetworkProvider provider,
+    public void offerNetwork(@NonNull final int providerId,
             @NonNull final NetworkScore score, @NonNull final NetworkCapabilities caps,
             @NonNull final INetworkOfferCallback callback) {
         try {
-            mService.offerNetwork(Objects.requireNonNull(provider.getMessenger(), "null messenger"),
+            mService.offerNetwork(providerId,
                     Objects.requireNonNull(score, "null score"),
                     Objects.requireNonNull(caps, "null caps"),
                     Objects.requireNonNull(callback, "null callback"));
