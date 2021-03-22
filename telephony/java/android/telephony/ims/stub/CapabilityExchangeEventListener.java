@@ -26,7 +26,7 @@ import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.RcsFeature;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * The interface that is used by the framework to listen to events from the vendor RCS stack
@@ -98,7 +98,8 @@ public interface CapabilityExchangeEventListener {
      * {@link OptionsRequestCallback#onRespondToCapabilityRequestWithError}.
      * @param contactUri The URI associated with the remote contact that is
      * requesting capabilities.
-     * @param remoteCapabilities The remote contact's capability information.
+     * @param remoteCapabilities The remote contact's capability information. The capability
+     * information is in the format defined in RCC.07 section 2.6.1.3.
      * @param callback The callback of this request which is sent from the remote user.
      * @throws ImsException If this {@link RcsCapabilityExchangeImplBase} instance is not
      * currently connected to the framework. This can happen if the {@link RcsFeature} is not
@@ -107,6 +108,6 @@ public interface CapabilityExchangeEventListener {
      * cases when the Telephony stack has crashed.
      */
     void onRemoteCapabilityRequest(@NonNull Uri contactUri,
-            @NonNull List<String> remoteCapabilities,
+            @NonNull Set<String> remoteCapabilities,
             @NonNull OptionsRequestCallback callback) throws ImsException;
 }
